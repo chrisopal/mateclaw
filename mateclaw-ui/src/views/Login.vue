@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <component :is="isEnterpriseUi ? EnterpriseLoginLayout : 'div'" class="login-page">
     <div class="login-center">
       <div class="login-logo">
         <img src="/logo/mateclaw_logo_s.png" alt="MateClaw" class="logo-image" />
@@ -8,7 +8,11 @@
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="input-wrap">
+          <label v-if="isEnterpriseUi" class="enterprise-login-label" for="login-username">
+            {{ t('login.fields.username') }}
+          </label>
           <input
+            id="login-username"
             v-model="form.username"
             type="text"
             class="form-input"
@@ -20,7 +24,11 @@
         </div>
 
         <div class="input-wrap">
+          <label v-if="isEnterpriseUi" class="enterprise-login-label" for="login-password">
+            {{ t('login.fields.password') }}
+          </label>
           <input
+            id="login-password"
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
             class="form-input form-input--has-eye"
@@ -29,7 +37,12 @@
             autocomplete="current-password"
             required
           />
-          <button type="button" class="eye-btn" @click="showPassword = !showPassword">
+          <button
+            type="button"
+            class="eye-btn"
+            :aria-label="showPassword ? '隐藏密码 / Hide password' : '显示密码 / Show password'"
+            @click="showPassword = !showPassword"
+          >
             <svg v-if="!showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
               <circle cx="12" cy="12" r="3"/>
@@ -73,8 +86,10 @@
         <div class="bind-dialog-content">
           <h3 class="bind-title">首次使用 {{ bindDialog.provider }} 登录</h3>
           <p class="bind-desc">请绑定你的 MateClaw 账号</p>
-          <input v-model="bindDialog.username" type="text" class="form-input" placeholder="MateClaw 用户名" autocomplete="username" />
-          <input v-model="bindDialog.password" type="password" class="form-input" placeholder="MateClaw 密码" autocomplete="current-password" />
+          <label v-if="isEnterpriseUi" class="enterprise-login-label" for="bind-username">MateClaw 用户名</label>
+          <input id="bind-username" v-model="bindDialog.username" type="text" class="form-input" placeholder="MateClaw 用户名" autocomplete="username" />
+          <label v-if="isEnterpriseUi" class="enterprise-login-label" for="bind-password">MateClaw 密码</label>
+          <input id="bind-password" v-model="bindDialog.password" type="password" class="form-input" placeholder="MateClaw 密码" autocomplete="current-password" />
           <div v-if="bindDialog.error" class="error-msg">{{ bindDialog.error }}</div>
           <button class="login-btn" :disabled="loading" @click="handleBind">绑定</button>
           <button class="bind-cancel" @click="cancelBind">取消</button>
@@ -86,7 +101,7 @@
         <template #password><code>{{ defaultCredentials.password }}</code></template>
       </i18n-t>
     </div>
-  </div>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -96,6 +111,8 @@ import { useI18n } from 'vue-i18n'
 import { authApi, ssoApi } from '@/api/index'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { useSystemSettingsStore } from '@/stores/useSystemSettingsStore'
+import EnterpriseLoginLayout from '@/components/enterprise/EnterpriseLoginLayout.vue'
+import { isEnterpriseUi } from '@/styles/enterprise/profile'
 
 interface SsoProvider { id: string; displayName: string }
 

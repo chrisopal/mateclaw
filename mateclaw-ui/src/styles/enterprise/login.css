@@ -1,0 +1,319 @@
+/* Login is the first enterprise pilot surface. Keep every selector profile-scoped. */
+html[data-ui-profile="enterprise"] .login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-layout {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 58%);
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 52px;
+  color: #ffffff;
+  background: #0b1220;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand-copy {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand-name {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand-name span {
+  color: var(--mc-primary-light);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-kicker {
+  margin: 0 0 14px;
+  color: rgb(255 255 255 / 68%);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-brand h1 {
+  max-width: 500px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-subtitle {
+  max-width: 420px;
+  margin: 18px 0 0;
+  color: rgb(255 255 255 / 68%);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-features {
+  display: grid;
+  gap: 10px;
+  margin: 48px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  color: rgb(255 255 255 / 76%);
+  font-size: 12px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-feature-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--mc-primary-light);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 48px 32px;
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-content {
+  width: 100%;
+  max-width: 360px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-content > h2 {
+  margin: 0;
+  color: var(--mc-text-primary);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-content > p {
+  margin: 8px 0 24px;
+  color: var(--mc-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-content > .login-center {
+  width: 100%;
+  align-items: stretch;
+  gap: 22px;
+  animation: none;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-logo {
+  display: none;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-form {
+  gap: 10px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-label {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--mc-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .input-wrap {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .form-input {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--mc-border);
+  border-radius: 4px;
+  color: var(--mc-text-primary);
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .form-input--has-eye {
+  padding-right: 44px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .form-input:focus {
+  border-color: var(--mc-primary);
+  background: var(--mc-bg-elevated);
+  box-shadow: 0 0 0 3px rgb(22 119 255 / 14%);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .eye-btn {
+  right: 8px;
+  bottom: 6px;
+  color: var(--mc-text-tertiary);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .eye-btn:focus-visible,
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-btn:focus-visible,
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .sso-btn:focus-visible,
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .bind-cancel:focus-visible {
+  outline: 2px solid var(--mc-primary);
+  outline-offset: 2px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-btn {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border-radius: 4px;
+  background: var(--mc-primary);
+  font-size: 14px;
+  box-shadow: none;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-btn:hover:not(:disabled) {
+  transform: none;
+  background: var(--mc-primary-hover);
+  box-shadow: none;
+}
+
+html.dark[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-btn {
+  color: #ffffff;
+  background: var(--mc-user-bubble-bg);
+}
+
+html.dark[data-ui-profile="enterprise"] .enterprise-login-form-panel .login-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--mc-user-bubble-bg) 88%, #000000);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .error-msg {
+  border-radius: 4px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .sso-buttons {
+  gap: 8px;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .sso-btn {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--mc-border);
+  border-radius: 4px;
+  color: var(--mc-text-primary);
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .sso-btn:hover:not(:disabled) {
+  border-color: var(--mc-primary);
+  color: var(--mc-primary);
+  background: var(--mc-bg-elevated);
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .bind-dialog-content .form-input {
+  margin-top: 0;
+}
+
+html[data-ui-profile="enterprise"] .enterprise-login-form-panel .bind-cancel {
+  min-height: 40px;
+  border-radius: 4px;
+}
+
+@media (max-width: 760px) {
+  html[data-ui-profile="enterprise"] .enterprise-login-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-brand {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    padding: 24px 24px 20px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-brand-mark {
+    margin-bottom: 18px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-brand h1 {
+    max-width: 620px;
+    font-size: 22px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-subtitle {
+    margin-top: 8px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-form-panel {
+    flex: 1 1 auto;
+    align-items: flex-start;
+    justify-content: stretch;
+    padding: 32px 24px 40px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-form-content > .login-center {
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-ui-profile="enterprise"] .enterprise-login-brand {
+    padding: 20px 18px 18px;
+  }
+
+  html[data-ui-profile="enterprise"] .enterprise-login-form-panel {
+    padding: 24px 18px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-profile="enterprise"] .enterprise-login-form-panel * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

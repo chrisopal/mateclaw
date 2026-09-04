@@ -1,0 +1,117 @@
+/* Only app-owned semantic classes are normalized. Canvas, markdown and media
+   internals deliberately retain their own geometry and semantic colors. */
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-secondary, .btn-danger, .btn-save, .btn-cancel) {
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  box-shadow: none;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-save) {
+  background: var(--mc-user-bubble-bg);
+  color: var(--mc-user-bubble-color);
+  border: 1px solid transparent;
+}
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-secondary, .btn-save):hover:not(:disabled) { transform: none; box-shadow: none; }
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-save):hover:not(:disabled) { background: color-mix(in srgb, var(--mc-user-bubble-bg) 90%, black); color: #ffffff; }
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-save):disabled { opacity: 0.5; cursor: not-allowed; }
+html[data-ui-profile="enterprise"] :is(.btn-secondary, .btn-cancel) { background: var(--mc-bg-elevated); border: 1px solid var(--mc-border); color: var(--mc-text-secondary); }
+html[data-ui-profile="enterprise"] :is(.btn-secondary, .btn-cancel):hover:not(:disabled) { background: var(--mc-bg-hover); }
+
+html[data-ui-profile="enterprise"] :is(.form-input, .form-select, .config-select, .search-box, .tag-filter-search) {
+  border-radius: 4px;
+  border-color: var(--mc-border);
+  color: var(--mc-text-primary);
+  background: var(--mc-bg-elevated);
+  font-size: 14px;
+}
+html[data-ui-profile="enterprise"] .search-box { padding: 6px 10px; min-height: 34px; }
+html[data-ui-profile="enterprise"] :is(.btn-primary, .btn-secondary, .btn-save, .btn-cancel, .nav-item, .collapse-btn, .action-btn, .filter-tab, .theme-btn, .language-btn, .footer-icon-btn):focus-visible {
+  outline: 2px solid var(--mc-primary);
+  outline-offset: 2px;
+}
+html[data-ui-profile="enterprise"] .search-box:focus-within { border-color: var(--mc-primary); box-shadow: 0 0 0 2px var(--mc-primary-bg); }
+html[data-ui-profile="enterprise"] :is(.library-search, .library-sort-select, .memory-nav, .memory-nav-btn, .dream-trigger-btn, .agent-pill, .agent-picker) { border-radius: 4px; }
+html[data-ui-profile="enterprise"] .memory-nav-btn.active { color: var(--mc-primary); background: var(--mc-primary-bg); box-shadow: none; }
+html[data-ui-profile="enterprise"] :is(.modal-overlay, .mc-drawer-overlay) { background: rgb(11 18 32 / 48%); backdrop-filter: none; }
+html[data-ui-profile="enterprise"] :is(.modal, .mc-drawer-panel) { background: var(--mc-bg-elevated); border: 1px solid var(--mc-border); border-radius: 6px; box-shadow: var(--mc-shadow-strong); }
+html[data-ui-profile="enterprise"] .mc-drawer-overlay .mc-drawer-panel { border-radius: 0; }
+html[data-ui-profile="enterprise"] :is(.mc-drawer-header, .mc-drawer-footer) { background: var(--mc-bg-elevated); }
+html[data-ui-profile="enterprise"] .mc-drawer-title { font-size: 18px; font-weight: 600; }
+html[data-ui-profile="enterprise"] .mc-drawer-icon-shell { border-radius: 4px; background: var(--mc-primary-bg); color: var(--mc-primary); box-shadow: none; }
+html[data-ui-profile="enterprise"] :is(.filter-tab, .tag-filter-chip, .view-switch, .view-seg, .agent-card__tag, .provider-chip, .db-chip, .agent-runtime-badge) { border-radius: 4px; }
+html[data-ui-profile="enterprise"] :is(.view-seg.is-active, .filter-tab.active) { background: var(--mc-primary-bg); color: var(--mc-primary); box-shadow: none; }
+
+html[data-ui-profile="enterprise"] :is(.config-card, .provider-card, .skill-card, .channel-card, .team-card, .workflow-card, .mcp-card) {
+  background: var(--mc-bg-elevated);
+  border-color: var(--mc-border-light);
+  border-radius: 6px;
+  box-shadow: none;
+}
+html[data-ui-profile="enterprise"] :is(.agent-card, .template-card, .provider-card, .skill-card, .channel-card, .team-card, .workflow-card, .mcp-card):hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--mc-border-strong);
+}
+html[data-ui-profile="enterprise"] .agents-toolbar { padding: 12px 16px; margin-bottom: 16px; }
+html[data-ui-profile="enterprise"] .agents-page .agent-card { padding: 18px; }
+html[data-ui-profile="enterprise"] .agent-card__avatar { border-radius: 6px; background: var(--mc-primary-bg); box-shadow: none; }
+html[data-ui-profile="enterprise"] .agent-card__primary { background: var(--mc-primary-bg); color: var(--mc-primary); border-radius: 4px; box-shadow: none; }
+html[data-ui-profile="enterprise"] :is(.section-title, .section-header h2) { font-size: 18px; font-weight: 600; letter-spacing: 0; }
+
+/* Dashboard: compact operational panels rather than large decorative tiles. */
+html[data-ui-profile="enterprise"] .dashboard-shell .header-actions { display: none; }
+html[data-ui-profile="enterprise"] .dashboard-shell .stats-grid { gap: 12px; margin-bottom: 20px; }
+html[data-ui-profile="enterprise"] .dashboard-shell .stat-card { padding: 16px 20px; gap: 14px; }
+html[data-ui-profile="enterprise"] .dashboard-shell .stat-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 4px;
+  background: var(--mc-primary-bg);
+  color: var(--mc-primary);
+  font-size: 18px;
+}
+html[data-ui-profile="enterprise"] .dashboard-shell .stat-value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+html[data-ui-profile="enterprise"] .dashboard-shell .stat-label { font-size: 12px; letter-spacing: 0; text-transform: none; color: var(--mc-text-secondary); }
+html[data-ui-profile="enterprise"] .dashboard-shell .stat-card--secondary { opacity: 1; }
+html[data-ui-profile="enterprise"] .dashboard-shell .section-title { font-size: 16px; margin-bottom: 4px; }
+html[data-ui-profile="enterprise"] .dashboard-shell .section-subtitle { font-size: 12px; }
+html[data-ui-profile="enterprise"] .dashboard-shell .comparison-title { letter-spacing: 0; color: var(--mc-text-secondary); }
+html[data-ui-profile="enterprise"] .dashboard-shell .provider-chip:hover { transform: none; }
+html[data-ui-profile="enterprise"] .dashboard-shell .models-manage:hover { background: var(--mc-bg-hover); }
+html[data-ui-profile="enterprise"] .dashboard-shell .models-empty__btn { background: var(--mc-user-bubble-bg); color: #ffffff; border-radius: 4px; }
+html[data-ui-profile="enterprise"] :is(.runs-table, .rules-table, .data-table) { font-size: 14px; }
+html[data-ui-profile="enterprise"] :is(.runs-table, .rules-table, .data-table) th { color: var(--mc-text-secondary); background: var(--mc-bg-muted); font-size: 12px; letter-spacing: 0; }
+html[data-ui-profile="enterprise"] .runs-table tbody tr:hover { background: var(--mc-bg-hover); }
+html[data-ui-profile="enterprise"] .type-badge.builtin { color: var(--mc-primary); background: var(--mc-primary-bg); }
+
+/* Conversation controls retain layout and streaming behavior. */
+html[data-ui-profile="enterprise"] .conversation-panel { background: var(--mc-bg-muted); }
+html[data-ui-profile="enterprise"] .chat-input-wrapper .input-area {
+  border: 1px solid var(--mc-border);
+  border-radius: 8px;
+  box-shadow: none;
+}
+html[data-ui-profile="enterprise"] .chat-input-wrapper.is-focused .input-area { border-color: var(--mc-primary); box-shadow: 0 0 0 2px var(--mc-primary-bg); }
+html[data-ui-profile="enterprise"] .chat-input-wrapper .approval-bar { border: 1px solid var(--mc-warning); border-radius: 6px; box-shadow: none; }
+html[data-ui-profile="enterprise"] :is(.model-prompt, .provider-empty) { border-radius: 6px; box-shadow: none; }
+html[data-ui-profile="enterprise"] .settings-nav .nav-collapse-btn { border-radius: 4px; border-color: var(--mc-border); box-shadow: none; background: var(--mc-bg-elevated); color: var(--mc-text-secondary); }
+html[data-ui-profile="enterprise"] .settings-nav .nav-collapse-btn:hover,
+html[data-ui-profile="enterprise"] .settings-nav .nav-collapse-btn:active { transform: none; box-shadow: none; background: var(--mc-bg-hover); color: var(--mc-primary); }
+html[data-ui-profile="enterprise"] .chat-header { background: var(--mc-bg-elevated); box-shadow: none; }
+html[data-ui-profile="enterprise"] .chat-stage-kicker { letter-spacing: 0.03em; }
+html[data-ui-profile="enterprise"] .chat-console-shell .status-dot { box-shadow: none; }
+html[data-ui-profile="enterprise"] .chat-console-shell :is(.agent-badge, .agent-runtime-badge, .header-btn) { border-radius: 4px; }
+
+@media (max-width: 1100px) {
+  html[data-ui-profile="enterprise"] .dashboard-shell .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  html[data-ui-profile="enterprise"] .dashboard-shell .stat-card { padding: 12px; gap: 8px; }
+  html[data-ui-profile="enterprise"] .dashboard-shell .stat-value { font-size: 22px; }
+  html[data-ui-profile="enterprise"] .dashboard-shell .stat-icon { width: 28px; height: 28px; flex-basis: 28px; font-size: 16px; }
+}

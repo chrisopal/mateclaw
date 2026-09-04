@@ -11,12 +11,17 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
+import './styles/enterprise/index.css'
+import { applyUiProfile, uiProfile } from './styles/enterprise/profile'
 import { i18n, initializeLocale } from './i18n'
 
 // Note: the heavy <model-viewer> Web Component is no longer imported here. It is
 // lazy-registered on demand (see src/utils/lazyModelViewer.ts) the first time a
 // chat bubble renders a 3D (.glb) asset, keeping it out of the initial bundle.
 // Vue's compiler still treats <model-viewer> as a custom element via vite.config.ts.
+
+// Set before the first mount; the existing theme store still owns light/dark.
+applyUiProfile(document.documentElement, uiProfile)
 
 async function bootstrap() {
   await initializeLocale()

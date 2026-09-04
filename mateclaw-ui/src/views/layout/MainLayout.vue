@@ -6,11 +6,11 @@
     </Transition>
 
     <!-- 左侧导航栏 -->
-    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed && !isMobile, 'mobile-open': mobileMenuOpen }">
+    <aside id="main-sidebar" class="sidebar" :inert="isEnterpriseUi && isMobile && !mobileMenuOpen" :class="{ collapsed: sidebarCollapsed && !isMobile, 'mobile-open': mobileMenuOpen }">
       <!-- Logo -->
       <div class="sidebar-logo">
         <div class="logo-icon">
-          <img src="/logo/mateclaw_logo_s.png" alt="MateClaw" class="logo-img" />
+          <img :src="isEnterpriseUi ? '/logo/mateclaw-enterprise-3d-v1.png' : '/logo/mateclaw_logo_s.png'" alt="MateClaw" class="logo-img" />
         </div>
         <transition name="fade">
           <div v-if="!effectiveCollapsed" class="logo-text">
@@ -187,9 +187,21 @@
 
     <!-- 主内容区 -->
     <main class="main-content">
+      <header v-if="isEnterpriseUi && !isMobile" class="enterprise-topbar">
+        <div class="enterprise-breadcrumb">
+          <span>MateClaw</span>
+          <span aria-hidden="true">/</span>
+          <strong>{{ currentNavigationLabel }}</strong>
+        </div>
+        <div class="enterprise-topbar-context">
+          <span class="enterprise-workspace-name">{{ workspaceStore.currentWorkspace?.name }}</span>
+          <span class="enterprise-topbar-role">{{ roleLabel }}</span>
+          <span class="enterprise-topbar-user">{{ username }}</span>
+        </div>
+      </header>
       <!-- 移动端顶部栏 -->
       <div v-if="isMobile" class="mobile-topbar">
-        <button class="mobile-menu-btn" @click="mobileMenuOpen = true" :title="t('common.expandSidebar')">
+        <button class="mobile-menu-btn" @click="mobileMenuOpen = true" :title="t('common.expandSidebar')" aria-controls="main-sidebar" :aria-expanded="mobileMenuOpen">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <line x1="3" y1="12" x2="21" y2="12"/>
@@ -204,12 +216,14 @@
            routes leaves both component trees mounted because Vue sees identical
            keys and patches in place. The comment must live OUTSIDE <keep-alive>
            — KeepAlive treats comments as children and rejects "more than one". -->
+      <div class="route-viewport">
       <router-view v-slot="{ Component, route }">
         <keep-alive>
           <component :is="Component" :key="`${workspaceRouteKey}:${route.path}`" v-if="route.meta?.keepAlive" />
         </keep-alive>
         <component :is="Component" :key="`${workspaceRouteKey}:${route.path}`" v-if="!route.meta?.keepAlive" />
       </router-view>
+      </div>
     </main>
 
     <OnboardingWizard v-if="showOnboarding" @close="showOnboarding = false" />
@@ -240,6 +254,7 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { applyLocale, currentLocale, type AppLocale } from '@/i18n'
 import { SwitchButton, Lock, Unlock } from '@element-plus/icons-vue'
 import ChangePasswordDialog from '@/components/ChangePasswordDialog.vue'
+import { isEnterpriseUi } from '@/styles/enterprise/profile'
 
 const router = useRouter()
 const route = useRoute()
@@ -592,6 +607,11 @@ function isNavItemActive(item: { path: string; label: string }) {
 
 const showChangePassword = ref(false)
 
+const currentNavigationLabel = computed(() =>
+  navGroups.value.flatMap(group => group.items).find(isNavItemActive)?.label
+    ?? String(route.meta.title || 'MateClaw'),
+)
+
 function logout() {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
@@ -626,6 +646,8 @@ watch(() => workspaceStore.currentWorkspaceId, () => {
 </script>
 
 <style scoped>
+.route-viewport { display: contents; }
+
 .app-layout {
   display: flex;
   height: 100vh;
