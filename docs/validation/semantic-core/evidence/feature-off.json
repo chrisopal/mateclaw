@@ -1,0 +1,23 @@
+{
+  "status": {
+    "enabled": false
+  },
+  "wiki": {
+    "id": "2096945981489991682",
+    "name": "M2 验收知识库",
+    "description": "验证本体版本绑定管理界面",
+    "agentId": null,
+    "configContent": "# Wiki Processing Rules\n\n## Quality First\n- Create high-quality pages — prefer fewer complete pages over many shallow ones\n- Each page focuses on one concept, entity, or process\n- A page must have at least 3 sentences of substantive content\n- Target 3-5 pages per source material (not 10-15)\n- If a concept already exists in the wiki, update it instead of duplicating\n\n## Format\n- Use clear Markdown headers (## and ###)\n- Include a one-paragraph summary at the top of each page\n- Use [[Page Title]] syntax for bidirectional links between pages\n\n## Updates\n- Merge new information into existing pages, do not replace\n- Preserve manually edited content (last_updated_by = 'manual')\n- Mark contradictions clearly with a \"Note:\" annotation\n\n## Language\n- Write wiki pages in the same language as the source material\n- Keep technical terms consistent across pages\n",
+    "sourceDirectory": null,
+    "watcherEnabled": 0,
+    "status": "active",
+    "pageCount": 5,
+    "rawCount": 1,
+    "workspaceId": "1",
+    "embeddingModelId": null,
+    "createTime": "2026-09-07T20:57:36.016526",
+    "updateTime": "2026-09-07T21:28:02.787774",
+    "deleted": 0
+  },
+  "graphHttpStatus": 404
+}

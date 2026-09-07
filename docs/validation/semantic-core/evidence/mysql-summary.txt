@@ -1,0 +1,18 @@
+21:49:27.320 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:49:27.714 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:49:27.759 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.131s)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.755 s -- in vip.mate.semantic.SemanticEndToEndIntegrationTest
+21:49:29.435 INFO  o.f.core.internal.command.DbMigrate - Current version of schema `semantic_m3`: 194
+21:49:30.240 INFO  o.f.core.internal.command.DbMigrate - Current version of schema `semantic_m3_upgrade`: << Empty Schema >>
+21:49:33.992 INFO  o.f.core.internal.command.DbMigrate - Migrating schema `semantic_m3_upgrade` to version "162 - wiki raw material error code"
+21:49:34.675 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 184 migrations to schema `semantic_m3_upgrade`, now at version v190 (execution time 00:02.868s)
+21:49:34.727 INFO  o.f.core.internal.command.DbMigrate - Current version of schema `semantic_m3_upgrade`: 190
+21:49:34.871 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 4 migrations to schema `semantic_m3_upgrade`, now at version v194 (execution time 00:00.112s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.046 s -- in vip.mate.semantic.SemanticMySqlIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO] MateClaw ........................................... SUCCESS [  0.089 s]
+[INFO] MateClaw Plugin API ................................ SUCCESS [  0.244 s]
+[INFO] MateClaw Semantic Core ............................. SUCCESS [  0.040 s]
+[INFO] MateClaw Server .................................... SUCCESS [ 10.060 s]
+[INFO] BUILD SUCCESS

@@ -55,6 +55,7 @@ import java.util.*;
 @AutoConfigureMockMvc
 public abstract class SemanticHttpFixture {
     @Configuration
+    @Profile("semantic-test")
     @EnableWebSecurity
     @ImportAutoConfiguration({
         DataSourceAutoConfiguration.class,

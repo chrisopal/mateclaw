@@ -27,4 +27,5 @@ public final class GraphDtos {
             String id, String graphId, String typeKey, String displayName, String status,
             @JsonFormat(shape = JsonFormat.Shape.STRING) Instant createdAt) {}
     public record EntityPage(List<EntityView> items) {}
+    public record GraphDetail(Binding binding, OntologyDtos.Definition definition) {}
 }

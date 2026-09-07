@@ -1,0 +1,122 @@
+{
+  "detail": {
+    "binding": {
+      "graphId": "2096946072925818882",
+      "workspaceId": "1",
+      "knowledgeBaseId": "2096945981489991682",
+      "ontologyRevisionId": "2096869358018138113",
+      "ontologyVersion": 2,
+      "enabled": true,
+      "graphVersion": 14,
+      "empty": false,
+      "updatedAt": "2026-09-07T13:50:30.162555Z"
+    },
+    "definition": {
+      "types": [
+        {
+          "key": "Equipment",
+          "label": "生产设备",
+          "description": "用于生产现场的设备主类型"
+        },
+        {
+          "key": "Component",
+          "label": "部件",
+          "description": "设备组成部件"
+        }
+      ],
+      "properties": [
+        {
+          "key": "ratedVoltage",
+          "label": "额定电压",
+          "description": "设备额定供电电压",
+          "ownerTypeKey": "Equipment",
+          "valueType": "DECIMAL",
+          "multiplicity": "SINGLE",
+          "fixedUnit": "V"
+        }
+      ],
+      "relations": [
+        {
+          "key": "hasPart",
+          "label": "安装部件",
+          "description": "设备可以安装多个部件",
+          "sourceTypeKey": "Equipment",
+          "targetTypeKey": "Component",
+          "multiplicity": "MULTI"
+        }
+      ]
+    }
+  },
+  "trusted": {
+    "items": [],
+    "total": "0",
+    "page": 1,
+    "pageSize": 20
+  },
+  "history": {
+    "statementId": "2096955716628983809",
+    "revisions": [
+      {
+        "id": "2096955716628983809",
+        "graphId": "2096946072925818882",
+        "revision": 1,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "ratedVoltage",
+        "valueType": "DECIMAL",
+        "value": "380",
+        "unit": "V",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2096955716557680641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:36:17.055712Z"
+      },
+      {
+        "id": "2096955716628983809",
+        "graphId": "2096946072925818882",
+        "revision": 2,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "ratedVoltage",
+        "valueType": "DECIMAL",
+        "value": "380",
+        "unit": "V",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORT_LOST",
+        "evidenceIds": [
+          "2096955716557680641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:38:05.651410Z"
+      }
+    ]
+  },
+  "sources": {
+    "items": [
+      {
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2096953594332147713",
+        "title": "M3 设备核验记录",
+        "state": "WITHDRAWN",
+        "snapshotCount": "1"
+      }
+    ]
+  },
+  "evidenceStatus": 404,
+  "module": {
+    "enabled": true
+  }
+}

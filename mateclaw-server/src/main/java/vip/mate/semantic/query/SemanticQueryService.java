@@ -22,10 +22,17 @@ public class SemanticQueryService {
     public SemanticQueryService(JdbcTemplate jdbc,GraphApplicationService graphs,SemanticAccessService access,StatementApplicationService statements,SupportEvaluator support){this.jdbc=jdbc;this.graphs=graphs;this.access=access;this.statements=statements;this.support=support;}
 
     public SearchResult search(String scope,String graphId,SearchRequest request){
-        access.require(scope,"viewer");GraphRow graph=graphs.requireGraph(scope,graphId,false);
+        return searchFacts(graphId, request, statements.trusted(scope, graphId));
+    }
+
+    public SearchResult searchAsActor(String scope,String actorId,String graphId,SearchRequest request){
+        return searchFacts(graphId, request, statements.trustedAsActor(scope, actorId, graphId));
+    }
+
+    private SearchResult searchFacts(String graphId,SearchRequest request,List<StatementView> facts){
         if(request==null||request.query()==null||request.query().length()>256)throw bad("Query required");int limit=request.limit()==null?20:request.limit();if(limit<1||limit>100)throw bad("Limit must be 1..100");
         String needle=request.query().toLowerCase(Locale.ROOT);List<StatementView> matches=new ArrayList<>();
-        for(StatementView fact:statements.statements(scope,graphId,"trusted",null,1,100).items()){
+        for(StatementView fact:facts){
             if(request.atTime()!=null&&("UNKNOWN".equals(fact.validityKind())||(fact.validFrom()!=null&&request.atTime().isBefore(fact.validFrom()))))continue;
             if(request.atTime()!=null&&fact.validTo()!=null&&!request.atTime().isBefore(fact.validTo()))continue;
             String label=entityLabel(graphId,fact.subjectId());
@@ -38,12 +45,18 @@ public class SemanticQueryService {
         access.require(scope,"viewer");graphs.requireGraph(scope,graphId,false);
         if(depth<1||depth>2)throw bad("Depth must be 1 or 2");if(nodeLimit<1||nodeLimit>100||edgeLimit<1||edgeLimit>200)throw bad("Graph limits exceed 100 nodes or 200 edges");
         Integer seed=jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_entity WHERE id=? AND graph_id=?",Integer.class,entityId,graphId);if(seed==null||seed==0)throw new SemanticApiException(404,"NOT_FOUND","Entity not found in graph");
-        List<StatementView> trusted=statements.statements(scope,graphId,"trusted",null,1,100).items();Set<String> frontier=new LinkedHashSet<>(List.of(entityId));Set<String> ids=new LinkedHashSet<>(frontier);List<Edge> edges=new ArrayList<>();boolean truncated=false;
+        List<StatementView> trusted=statements.trusted(scope,graphId);Set<String> frontier=new LinkedHashSet<>(List.of(entityId));Set<String> ids=new LinkedHashSet<>(frontier);List<Edge> edges=new ArrayList<>();Set<String> edgeIds=new HashSet<>();boolean truncated=false;
         boolean visible=trusted.stream().anyMatch(f->entityId.equals(f.subjectId())||entityId.equals(f.targetEntityId()));
         if(!visible)return new GraphResult(List.of(),List.of(),UUID.randomUUID().toString(),false);
         for(int hop=0;hop<depth;hop++){
             Set<String> next=new LinkedHashSet<>();for(StatementView fact:trusted){if(!"RELATION".equals(fact.predicateKind())||fact.targetEntityId()==null)continue;if(frontier.contains(fact.subjectId())||frontier.contains(fact.targetEntityId())){
-                if(edges.size()>=edgeLimit){truncated=true;break;}edges.add(new Edge(fact.id(),fact.subjectId(),fact.targetEntityId(),fact.predicateKey()));next.add(fact.subjectId());next.add(fact.targetEntityId());
+                if(edgeIds.contains(fact.id()))continue;
+                if(edges.size()>=edgeLimit){truncated=true;break;}
+                int added=(ids.contains(fact.subjectId())?0:1)+(ids.contains(fact.targetEntityId())||fact.subjectId().equals(fact.targetEntityId())?0:1);
+                if(ids.size()+added>nodeLimit){truncated=true;continue;}
+                edgeIds.add(fact.id());edges.add(new Edge(fact.id(),fact.subjectId(),fact.targetEntityId(),fact.predicateKey(),fact.revision()));
+                if(ids.add(fact.subjectId()))next.add(fact.subjectId());
+                if(ids.add(fact.targetEntityId()))next.add(fact.targetEntityId());
             }}
             for(String id:next){if(ids.size()>=nodeLimit&&!ids.contains(id)){truncated=true;continue;}ids.add(id);}frontier=next;if(truncated&&edges.size()>=edgeLimit)break;
         }

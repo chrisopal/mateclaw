@@ -29,6 +29,14 @@ public class GraphApplicationService {
         this.wire = wire;
     }
 
+    public GraphDetail detail(String scope, String graphId) {
+        access.require(scope, "viewer");
+        GraphRow graph = requireGraph(scope, graphId, false);
+        requireKb(graph.getWorkspaceId(), graph.getKbId());
+        GraphOntologyRevisionRow revision = requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
+        return new GraphDetail(view(graph, revision), wire.decode(revision.getDefinitionJson(), Definition.class));
+    }
+
     public Binding get(String scope, String kbId) {
         access.require(scope, "viewer");
         long workspace = workspace(scope), kb = positive(kbId, "knowledgeBaseId");

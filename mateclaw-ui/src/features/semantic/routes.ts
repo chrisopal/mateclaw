@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 export const semanticRoutes: RouteRecordRaw[] = [
+  { path: 'semantic/graphs/:graphId', name: 'SemanticWorkbench', component: () => import('./graph/SemanticWorkbench.vue'), meta: { requiredCapability: 'view:ontology', semantic: true } },
   {
     path: 'semantic/ontologies',
     name: 'OntologyList',

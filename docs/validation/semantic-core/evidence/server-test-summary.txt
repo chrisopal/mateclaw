@@ -1,0 +1,979 @@
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.semantic.core.ConflictDetectorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in vip.mate.semantic.core.ontology.OntologyValidatorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.semantic.core.StatementValidatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in vip.mate.semantic.core.EvidenceVerifierTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.965 s -- in vip.mate.datasource.service.DatasourceServicePasswordPersistenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.286 s -- in vip.mate.llm.oauth.OpenAIOAuthServiceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.llm.oauth.OpenAIOAuthServiceFlowModeTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.175 s -- in vip.mate.llm.oauth.OpenAIDeviceCodeServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.llm.gemini.GeminiSchemaSanitizerTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.069 s -- in vip.mate.llm.gemini.GeminiNativeClientTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.llm.cache.CacheUsageExtractorTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.llm.cache.PromptCacheStrategyTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.chatmodel.AnthropicChatModelBuilderClaude48Test
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in vip.mate.llm.chatmodel.ClaudeCodeIdentityChatModelDecoratorTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.llm.chatmodel.OpenAiModelsPathTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.llm.chatmodel.ReasoningContentCacheTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.llm.chatmodel.ReasoningEffortSanitizerTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.llm.chatmodel.AssistantThinkingRelayTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.llm.chatmodel.DeepSeekV4ThinkingDecoratorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 s -- in vip.mate.llm.chatmodel.ClaudeCodeChatModelBuilderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.chatmodel.AnthropicChatModelBuilderClaude47Test
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.llm.chatmodel.HttpTimeoutsTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in vip.mate.llm.chatmodel.OpenAiCompatibleChatModelBuilderTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.llm.chatmodel.ProviderGenerateKwargsTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in vip.mate.llm.chatmodel.PatchReasoningContentTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in vip.mate.llm.chatmodel.OpenAiToolSchemaNumberPreservationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.chatmodel.AnthropicChatModelBuilderFableTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.llm.embedding.EmbeddingModelFactoryRoutingTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.model.ModelFamilyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.llm.model.ModelProtocolTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeVersionDetectorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeApiHeadersTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeTokenRefresherTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeOAuthServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeCredentialsWriterTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeCredentialsReaderTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.llm.anthropic.oauth.ClaudeCodeCredentialsTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.routing.MediaCaptionServiceBuildPromptTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in vip.mate.llm.routing.ProviderRouterSelectPrimaryTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in vip.mate.llm.routing.MultimodalRouterTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.service.ModelDiscoveryEmbeddingDetectionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.llm.service.ModelProviderServiceLivenessTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in vip.mate.llm.service.ModelDiscoveryServiceChatGPTOAuthTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vip.mate.llm.service.ModelCapabilityServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in vip.mate.llm.service.ModelProviderServiceOptionsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.service.ModelDiscoveryServiceTestPromptTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in vip.mate.llm.service.ModelConfigServiceResolveModelTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.llm.service.ModelConfigServiceContextWindowTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.llm.service.ModelProviderServiceEnableTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.llm.service.ModelConfigServiceDefaultModelTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.llm.service.ModelProviderServiceCustomProviderTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in vip.mate.llm.service.ModelProviderServiceConfiguredTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.failover.ProviderRequirementsTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.711 s -- in vip.mate.llm.failover.AvailableProviderPoolTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.llm.failover.ProviderInitProbeTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.132 s -- in vip.mate.llm.failover.ProviderHealthTrackerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.probe.OllamaContextProbeParseTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.llm.probe.ModelContextWindowResolverTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.probe.OpenAiCompatibleContextProbeParseTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.llm.probe.ModelContextWindowCatalogTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.llm.probe.ContextLimitErrorParserTest
+21:32:50.461 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:32:51.114 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:32:51.174 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.223s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.710 s -- in vip.mate.trigger.ChannelMessageTriggerTest
+21:32:56.377 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:32:56.585 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:32:56.621 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.022s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.532 s -- in vip.mate.trigger.AgentLifecycleTriggerTest
+21:32:57.871 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:32:58.013 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:32:58.046 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.004s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.426 s -- in vip.mate.trigger.TriggerEventIngestServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.trigger.ingest.TriggerPatternMatcherTest
+21:32:59.314 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:32:59.434 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:32:59.459 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.004s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.324 s -- in vip.mate.trigger.WorkflowCompletionTriggerTest
+21:33:00.632 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:33:00.748 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:33:00.779 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.004s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.288 s -- in vip.mate.trigger.TriggerDispatcherWorkflowTest
+21:33:01.907 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:33:02.047 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:33:02.073 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.011s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.291 s -- in vip.mate.trigger.TriggerServiceLifecycleTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in vip.mate.memory.archive.MemoryArchiveServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.memory.MemoryManagerPluginPrefetchTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in vip.mate.memory.lifecycle.MemoryLifecycleMediatorTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.memory.lifecycle.LifecycleFlagGuardTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.229 s -- in vip.mate.memory.controller.HilEditValidationTest
+21:33:03.689 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:33:03.856 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:33:03.890 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.011s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.539 s -- in vip.mate.memory.search.SessionSearchIsolationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.memory.search.SessionSearchToolIdSchemaTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.memory.fact.FactProjectionInvariantTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.111 s -- in vip.mate.memory.fact.FactMemoryProviderOwnerSafetyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.081 s -- in vip.mate.memory.fact.FactProjectionOwnerScopeTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in vip.mate.memory.fact.tool.FactQueryToolIdSchemaTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.138 s -- in vip.mate.memory.service.MemorySummarizationStructuredRoutingTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in truncateFilename — write-side cap
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in sanitizeSectionKey — slug-side cap
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.memory.service.MemoryRecallFilenameTruncationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.memory.service.MemoryHilServiceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in vip.mate.memory.service.StructuredMemoryPrefetchTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.memory.service.MemorySummarizationGateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.memory.service.AlwaysOnFileBudgetTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in vip.mate.memory.service.DreamFlagGuardTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.063 s -- in vip.mate.memory.service.StructuredMemoryConsolidationServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in vip.mate.memory.service.SoulSummarizerServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.memory.service.StructuredMemoryCandidateTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.memory.MemoryManagerBudgetTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in vip.mate.memory.tool.UniversalMemoryToolIdSchemaTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.memory.tool.StructuredMemoryToolIdSerializationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.157 s -- in vip.mate.skill.routine.SkillRoutineMinerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in vip.mate.skill.routine.SkillRoutineServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.083 s -- in vip.mate.skill.workspace.SkillFileSyncerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.487 s -- in vip.mate.skill.workspace.BundledSkillSyncerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.skill.workspace.SkillWorkspaceManagerApplyBundleTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.skill.workspace.bundle.SkillBundleMaterializerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.skill.workspace.SkillWorkspaceManagerPathTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.skill.manifest.SkillManifestParserScriptsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.skill.manifest.SkillManifestParserTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.manifest.SkillManifestConstraintsParsingTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.181 s -- in vip.mate.skill.runtime.SkillRuntimeServiceLoadedPinTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.skill.runtime.SkillRuntimeServiceWorkspaceExecutionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.runtime.SkillCatalogSorterTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.skill.runtime.ScriptSkillWrapperToolFactoryTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in vip.mate.skill.runtime.SkillScriptExecutionServicePipMirrorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.runtime.SkillRuntimeServiceRecencyBoostTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.skill.runtime.SkillRuntimeServicePromptBudgetTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.runtime.model.ResolvedSkillEffectiveToolsTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in vip.mate.skill.runtime.SkillDependencyCheckerEndpointTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.skill.runtime.SkillFileAccessPolicyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.runtime.SkillFrontmatterParserTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vip.mate.skill.runtime.SkillSecurityServiceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.280 s -- in vip.mate.skill.runtime.SkillScriptExecutionServiceCodeTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.skill.runtime.SkillRuntimeServiceConstraintsAndToolsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.skill.runtime.SkillContentReconcilerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in vip.mate.skill.template.SkillTemplateRegistryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in vip.mate.skill.lifecycle.SkillCuratorReportStoreWorkspaceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in vip.mate.skill.lifecycle.CuratorRunNotifierTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.152 s -- in vip.mate.skill.lifecycle.SkillConsolidationServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.152 s -- in vip.mate.skill.lifecycle.SkillCuratorJobTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.skill.lifecycle.SkillCuratorReportTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in vip.mate.skill.lifecycle.SkillSnapshotServiceTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.skill.lifecycle.SkillLifecycleServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.usage.SkillUsageMigrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in vip.mate.skill.usage.SkillUsageServiceActivityBubbleTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in vip.mate.skill.mcp.McpSkillBridgeContentTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.skill.mcp.McpSkillBridgeManifestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.skill.controller.SkillControllerBundleFilesTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.skill.controller.SkillControllerVirtualMergeTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.skill.controller.SkillControllerVirtualGuardTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in vip.mate.skill.controller.SkillControllerLifecycleTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.skill.controller.SkillControllerListEnabledTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s -- in vip.mate.skill.knowledge.WikiSkillWrapperToolFactoryTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in vip.mate.skill.knowledge.AcpSkillWrapperToolFactoryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.model.SkillOriginTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in vip.mate.skill.lessons.SkillLessonsServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.skill.lessons.SkillLessonsToolIdSchemaTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.050 s -- in vip.mate.skill.secret.SkillSecretServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.skill.service.SkillFileServiceTest
+21:33:08.179 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:33:08.311 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:33:08.344 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.011s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.287 s -- in vip.mate.skill.service.SkillServiceWorkspaceScopeTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in vip.mate.skill.service.SkillServiceUpdatePartialTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.skill.service.SkillServiceRemovalEventTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.skill.installer.BuiltinSkillSeedServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.skill.installer.SkillHubClientTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in vip.mate.skill.installer.ZipSkillFetcherTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.skill.acp.AcpSkillBridgeContentTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in vip.mate.skill.reflection.SkillReflectionServiceTest
+21:33:10.167 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.285 s -- in vip.mate.config.OpenApiLockedDownAccessTest
+21:33:12.127 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.361 s -- in vip.mate.config.SecurityAsyncDispatchTest
+21:33:13.456 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.655 s -- in vip.mate.config.OpenApiExposedAccessTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.config.DatabaseBootstrapRunnerLabelTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.115 s -- in vip.mate.auth.sso.SsoStateServiceTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in vip.mate.auth.pat.PersonalAccessTokenServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.150 s -- in vip.mate.interop.a2a.A2aJsonRpcControllerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.interop.a2a.SseFramesTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.interop.a2a.A2aTaskStoreTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in vip.mate.interop.a2a.A2aPeerAdapterTest
+21:33:16.363 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.963 s -- in vip.mate.ApplicationContextSmokeTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.workspace.core.config.WorkspaceSchemaMigrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in vip.mate.workspace.core.controller.WorkspaceControllerMembersAuthTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.workspace.core.service.WorkspaceServiceRoleValidationTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in vip.mate.workspace.core.service.ChatUploadLocationResolverTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.090 s -- in vip.mate.workspace.document.WorkspaceMemoryArchiveServiceTest
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in vip.mate.workspace.document.WorkspaceMemorySearchTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in vip.mate.workspace.conversation.ConversationServiceWebchatVisibilityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.workspace.conversation.vo.ConversationVOConversationKindTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.workspace.conversation.MessageMetadataJsonTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in vip.mate.workspace.conversation.ConversationServiceExternalViewTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in vip.mate.workspace.conversation.ConversationServiceCleanAttachmentFilesTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.139 s -- in vip.mate.workspace.conversation.ConversationServiceOwnershipWorkspaceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.workspace.conversation.ConversationServiceModelSeedTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.workspace.conversation.ConversationServiceRenderMessageContentTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.workspace.conversation.TrajectoryRendererTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.136 s -- in vip.mate.workspace.conversation.controller.ConversationControllerTeamWorkerTranscriptTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.workspace.conversation.controller.ConversationControllerBatchDeleteTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.workspace.conversation.ConversationServiceRewindAndRegenerateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.workspace.conversation.ConversationServiceUserWriteGuardTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.workspace.conversation.ConversationServiceMarkPendingApprovalsResolvedTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.plugin.bridge.PluginMemoryBridgeTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.plugin.bridge.PluginSearchBridgeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in vip.mate.plugin.PluginContextImplSearchTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.090 s -- in vip.mate.plugin.PluginManagerUpdateConfigTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.plugin.PluginManagerSearchLookupTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.content.service.ContentItemServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.wiki.metrics.WikiMetricsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in vip.mate.wiki.pipeline.WikiPipelineTriggerListenerTest
+21:33:18.421 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.941 s -- in vip.mate.wiki.pipeline.WikiPipelineTriggerServiceE2ETest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.wiki.pipeline.WikiPipelineServiceE2ETest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in vip.mate.wiki.pipeline.WikiLlmStepExecutorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.wiki.pipeline.WikiPipelineDefinitionServiceE2ETest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.pipeline.WikiSkillStepExecutorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in vip.mate.wiki.repository.WikiPageTypeProfileMapperE2ETest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.wiki.repository.WikiPipelineRunMapperE2ETest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.wiki.repository.WikiPageDependencyMapperE2ETest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.wiki.repository.WikiRawMaterialFailuresMapperE2ETest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in vip.mate.wiki.controller.WikiEntityControllerIdorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.125 s -- in vip.mate.wiki.controller.WikiTransformationControllerTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.299 s -- in vip.mate.wiki.controller.WikiRelationControllerIdorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in vip.mate.wiki.controller.WikiHotCacheControllerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.profile.WikiMetadataValidatorTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in vip.mate.wiki.profile.WikiPageTypeProfileServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in vip.mate.wiki.profile.WikiPageTypeProfileServiceE2ETest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.profile.WikiPageTypeDefStageInstructionsTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in vip.mate.wiki.WikiDomainIntegrationE2ETest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.support.WikiTestSupportTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.model.WikiPageCitationEntityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.job.model.WikiProcessingJobEntityTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.job.strategy.KbModelStrategyConfigTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.job.strategy.WikiLightModelStrategyTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.171 s -- in vip.mate.wiki.hotcache.WikiHotCacheUpdaterTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.hotcache.WikiHotCacheProviderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.wiki.hotcache.HotCacheUpdateSchedulerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.08 s -- in vip.mate.wiki.hotcache.WikiHotCacheProviderE2ETest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.wiki.hotcache.HotCacheRebuildPromptBuilderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.wiki.hotcache.WikiHotCacheServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.hotcache.HotCacheEventListenerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.193 s -- in vip.mate.wiki.service.WikiEntityExtractionServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.service.WikiLinkServiceCrossKbTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.169 s -- in vip.mate.wiki.service.WikiRawMaterialRecoveryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in vip.mate.wiki.service.WikiLogServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.service.WikiPageServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.090 s -- in vip.mate.wiki.service.WikiProcessingServiceErrorCodeTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.wiki.service.WikiRawMaterialDeleteCascadeTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.wiki.service.WikiStalePropagationListenerTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vip.mate.wiki.service.WikiRawMaterialDedupTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiEmbeddingInputBuilderTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.wiki.service.WikiRawMaterialCancelTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.wiki.service.WikiImageCaptionCacheServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiBatchCreateParserTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.service.WikiRawMaterialFailureStateTest
+21:33:51.202 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.921 s -- in vip.mate.wiki.service.WikiSourceWatcherServiceE2ETest
+21:33:52.079 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.97 s -- in vip.mate.wiki.service.WikiCascadeRegressionE2ETest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.wiki.service.WikiProcessingServiceLazyTest
+21:34:23.074 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.871 s -- in vip.mate.wiki.service.WikiScanSizeGuardE2ETest
+21:34:23.894 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.847 s -- in vip.mate.wiki.service.WikiTransformationStarterPackGlobalE2ETest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.158 s -- in vip.mate.wiki.service.WikiContentNormalizerSecurityTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.wiki.service.WikiPageMetadataE2ETest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.wiki.service.WikiDependencyServiceE2ETest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiLinkEnrichmentIndexAnnotateTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.wiki.service.WikiProcessingFallbackTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.service.WikiLinkServiceBrokenLinkTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.121 s -- in vip.mate.wiki.service.WikiEmbeddingCircuitBreakerTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.service.WikiLinkServiceCascadeTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in vip.mate.wiki.service.WikiKnowledgeBaseServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in vip.mate.wiki.service.WikiPageTypePermissionServiceTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.wiki.service.WikiContextServiceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.service.WikiEnrichmentApplierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.083 s -- in vip.mate.wiki.service.WikiResearchServiceFallbackTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiEnrichmentBatchParseTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.wiki.service.WikiSourcePathValidatorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.service.WikiEmbeddingVersionCompareTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.wiki.service.WikiEnrichmentApplierPhase5Test
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.wiki.service.DocumentPreprocessServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiOverviewSpliceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiContentNormalizerImageRefsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.service.WikiChunkServiceDraftTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.04 s -- in vip.mate.wiki.service.WikiMergeDuplicateTitlesE2ETest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.wiki.service.WikiContextServiceBudgetTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.152 s -- in vip.mate.wiki.service.PdfImageExtractorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in vip.mate.wiki.service.WikiGlobSymlinkBaseE2ETest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.wiki.tool.WikiToolLayerFilterTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.wiki.tool.WikiToolPermissionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in vip.mate.wiki.tool.WikiToolSpringBindingTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.wiki.tool.WikiToolIdSchemaTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.wiki.tool.WikiToolKbNameRoutingTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.BaseAgentCronIsolationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.BaseAgentMultimodalSkipNoticeTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.BaseAgentApprovalSanitizationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.context.ConversationWindowManagerToolPruningTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.context.ConversationWindowManagerSpillMarkerPreservationTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.ToolPairSanitizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.ConversationWindowManagerAnchorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.context.RuntimeContextInjectorModelTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in vip.mate.agent.context.ContextCompressionLedgerSurvivalTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.agent.context.ConversationWindowManagerPtlTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.context.ChatOriginSenderFieldsTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.context.ChatOriginTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in vip.mate.agent.context.ConversationWindowManagerExemptAndSpillTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.RuntimeContextInjectorSenderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.context.InformativeClearedPlaceholderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in vip.mate.agent.context.LoopMessageBudgeterTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.CompactAgedToolResponsesTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.ConversationWindowManagerPairSafeBoundaryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.context.ConversationWindowManagerSummaryBudgetTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.StructuredTruncatorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in vip.mate.agent.context.CompactionSurvivalComparisonTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.context.PrefixBudgetPlannerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in vip.mate.agent.context.TokenEstimatorToolsTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.AgentGraphBuilderPreferenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.progress.ProgressLedgerStaleReminderTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.064 s -- in vip.mate.agent.progress.ProgressLedgerPrefixGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.progress.ProgressLedgerClearAutoRecordedTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.progress.ProgressLedgerSnapshotTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.agent.progress.ProgressLedgerServiceConcurrencyTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.progress.ProgressStatusTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.GraphEventPublisherIterationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.BaseAgentDirectToolHistoryScrubTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in D-3: broadcastProgress method
+21:34:55.593 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/2, type=RATE_LIMIT): 429 Too Many Requests: rate limit
+21:34:55.596 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 1/2, type=RATE_LIMIT): 429 Too Many Requests: rate limit
+21:34:55.598 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-d2a: LLM 调用失败: Rate limit exceeded, please retry later (type=RATE_LIMIT)
+21:34:55.599 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.600 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 1/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.602 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 2/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.604 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 3/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.606 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 4/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.608 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 5/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.609 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 6/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.611 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 7/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.613 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 8/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.614 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 9/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.616 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-d2b: LLM 调用失败: 500 Internal Server Error (type=SERVER_ERROR)
+21:34:55.617 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-d2c: 认证失败: 401 Unauthorized (type=AUTH_ERROR)
+21:34:55.617 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.671 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 1/10, type=SERVER_ERROR): 500 Internal Server Error
+21:34:55.671 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building error result for conversation conv-d2d: LLM 调用失败，已达最大重试次数
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.088 s -- in D-2: RATE_LIMIT/SERVER_ERROR retries capped at 2
+21:34:55.672 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/2, type=RATE_LIMIT): 429 Too Many Requests
+21:34:55.783 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/2, type=RATE_LIMIT): 429 Too Many Requests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.463 s -- in D-1: Backoff sleep responds to Stop signal
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.553 s -- in vip.mate.agent.graph.LaneDPerformanceFixesTest
+21:35:00.135 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-failopen: 认证失败: 401 Unauthorized (type=AUTH_ERROR)
+21:35:00.138 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-h3c: LLM 调用失败: Model name not available on this provider — verify the model exists and is supported (Settings → Models) (type=MODEL_NOT_FOUND)
+21:35:00.139 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-h3a: 认证失败: 401 Unauthorized: bad key (type=AUTH_ERROR)
+21:35:00.946 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-h3b: LLM 调用失败: 402 Payment Required: insufficient_quota (type=BILLING)
+21:35:00.947 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-h3e: 认证失败: 401 Unauthorized: openai key (type=AUTH_ERROR)
+21:35:00.947 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning_fallback_1] Building typed error result for conversation conv-h3e: 认证失败: 401 Unauthorized: anthropic key (type=AUTH_ERROR)
+21:35:00.948 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-h2: 认证失败: 401 Unauthorized (type=AUTH_ERROR)
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.814 s -- in vip.mate.agent.graph.NodeStreamingChatHelperPoolTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.agent.graph.NodeStreamingChatHelperThinkingCapTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.MessageNormalizerTest
+21:35:01.972 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/10, type=SERVER_ERROR): LLM stream idle timeout after 1s with no delta — provider half-open or stalled
+21:35:02.984 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 1/10, type=SERVER_ERROR): LLM stream idle timeout after 1s with no delta — provider half-open or stalled
+21:35:03.992 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 2/10, type=SERVER_ERROR): LLM stream idle timeout after 1s with no delta — provider half-open or stalled
+21:35:05.005 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 3/10, type=SERVER_ERROR): LLM stream idle timeout after 1s with no delta — provider half-open or stalled
+21:35:06.015 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 4/10, type=SERVER_ERROR): LLM stream idle timeout after 1s with no delta — provider half-open or stalled
+21:35:06.016 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building error result for conversation conv-stall: LLM 调用失败，已达最大重试次数
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.060 s -- in vip.mate.agent.graph.NodeStreamingChatHelperStreamIdleTimeoutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.plan.edge.StepProgressDispatcherTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.plan.state.PlanStateAccessorUsageTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.plan.node.StepExecutionSkillCatalogTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in PlanGeneration displayGoal scrubber
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.092 s -- in vip.mate.agent.graph.plan.node.PlanSummaryEmptyResultTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.plan.node.PlanGenerationStepDepsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.plan.node.StepProgressTrackerTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in PlanGeneration triage evidence gate
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.plan.node.StepExecutionReplanContextTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in vip.mate.agent.graph.plan.node.PlanGenerationAutoGoalTest
+21:35:06.163 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-c1: 认证失败: 401 Unauthorized: Invalid API Key (type=AUTH_ERROR)
+21:35:06.164 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 0/2, type=RATE_LIMIT): 429 Too Many Requests
+21:35:09.929 WARN  v.m.a.graph.NodeStreamingChatHelper - [reasoning] Retryable error (attempt 1/2, type=RATE_LIMIT): 429 Too Many Requests
+21:35:19.000 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-c5: LLM 调用失败: Rate limit exceeded, please retry later (type=RATE_LIMIT)
+21:35:19.002 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-c2: 认证失败: 401 Unauthorized (type=AUTH_ERROR)
+21:35:19.002 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning_fallback_1] Building typed error result for conversation conv-c2: 认证失败: 401 Unauthorized: bad key (type=AUTH_ERROR)
+21:35:19.002 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-c4: LLM 调用失败: 402 Payment Required: insufficient_quota (type=BILLING)
+21:35:19.003 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning] Building typed error result for conversation conv-c3: 认证失败: 401 Unauthorized — kimi (type=AUTH_ERROR)
+21:35:19.003 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning_fallback_1] Building typed error result for conversation conv-c3: 认证失败: 401 Unauthorized — openai (type=AUTH_ERROR)
+21:35:19.003 ERROR v.m.a.graph.NodeStreamingChatHelper - [reasoning_fallback_2] Building typed error result for conversation conv-c3: 认证失败: 401 Unauthorized — dashscope (type=AUTH_ERROR)
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.84 s -- in vip.mate.agent.graph.NodeStreamingChatHelperFailoverTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.NodeStreamingChatHelperToolCallArgsTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.ErrorTypePolicyTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.edge.ObservationDispatcherTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in vip.mate.agent.graph.edge.GoalEvaluationDispatcherTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in 用户停止路由语义
+[INFO] Running Fatal error 路由语义
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in Fatal error 路由语义
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in LLM 调用计数限制
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.graph.edge.ReasoningDispatcherLlmCallCountTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.edge.ReasoningDispatcherTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.state.MateClawStateAccessorTerminalAnswerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.state.ActionExecutionLedgerTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.graph.state.SourceEvidenceLedgerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.NodeStreamingChatHelperNormalizerWiringTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.agent.graph.RetryAfterExtractionTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.ContentRepetitionGuardTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.StateGraphReActAgentStreamedContentDeltaTest
+[INFO] Tests run: 35, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.ErrorClassificationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in Tool result aggregate budget
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in ToolExecutionExecutor.spillRawOrTruncate: raw body reaches disk before the inline cap
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in ToolResultProperties defaults
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in D-4: ToolExecutionExecutor virtual thread pool
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.agent.graph.executor.LaneDExecutorAndConfigTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorNameNormalizationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorSkillAutoRedirectTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorReturnDirectTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorNonInteractiveApprovalTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.agent.graph.executor.ToolResultStorageRetentionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorSkillHintTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorCancellationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorWorkspaceGuardContextTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorProductCardDirectiveTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.executor.ToolExecutionExecutorCapToolCallsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.graph.ReturnDirectEndToEndTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.NodeStreamingChatHelperFallbackChainTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.node.ReasoningNodeEmptyCompletionTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.160 s -- in vip.mate.agent.graph.node.GoalEvaluationNodeContinuationTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in vip.mate.agent.graph.node.ReasoningNodeOutputTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.node.ReasoningNodeOutputClampTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.node.ReasoningNodeContinuationIntentTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in vip.mate.agent.graph.node.LimitExceededNodeFallbackTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.node.EnvironmentNotificationRenderingTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.node.ObservationNodeDuplicateTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in vip.mate.agent.graph.node.ReasoningNodePtlPromptTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.node.ReasoningNodeLoadedSkillsHintTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.node.ReasoningNodePromptLanguageTest
+21:35:19.459 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 2 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.459 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 3 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.459 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 4 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.460 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 2 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.460 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 2 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.460 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 3 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.460 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 4 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+21:35:19.461 INFO  v.m.agent.graph.node.ObservationNode - [ObservationNode] Loop-guard warning injected: [🔁 循环警告] 工具 web_search 已连续 2 次以相同参数失败。请勿原样重试：分析上面的错误信息并改变策略（调整参数或改用其他工具），或向用户说明具体阻塞点。
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.graph.node.ObservationNodeLoopGuardTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.node.ActionNodeLoadSkillTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.graph.node.ReasoningNodeProgressPromptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.node.ObservationNodeRefundTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.agent.graph.node.FinalAnswerNodeTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.node.ActionNodeAutoRecordSkipTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.guard.ToolLoopGuardTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.guard.ActionCompletionPolicyTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.graph.ThinkTagStreamExtractorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.graph.StripThinkingBoundaryTest
+[WARNING] Tests run: 10, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.002 s -- in vip.mate.agent.AgentGraphBuilderBasePathResolutionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.runtime.contract.RuntimeSessionFactoryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.contract.RuntimeContractInvariantTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.contract.RuntimeProviderRegistryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.076 s -- in vip.mate.agent.runtime.contract.AgentRuntimeCoordinatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.contract.RuntimeEventLogTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.agent.runtime.RuntimeEventStreamAdapterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.ConversationTurnGateTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.dsh.DshToolDispatcherTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.runtime.dsh.DshBridgeProtocolTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.dsh.DshToolCatalogTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.dsh.DshBridgeEventsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.dsh.management.DshRuntimeConfigResolverTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.dsh.management.DshManagementStateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.dsh.DshBridgeRequestsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.runtime.dsh.DshProcessManagerTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.095 s -- in vip.mate.agent.runtime.dsh.DshRuntimeServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.dsh.DshToolPolicyEvaluatorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.runtime.RuntimeEventProjectorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.118 s -- in vip.mate.agent.runtime.AgentRuntimeControllerTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.runtime.RunningConversationRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.runtime.AgentRuntimeAggregatorTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.158 s -- in vip.mate.agent.binding.AgentBindingServiceValidationTest
+21:35:20.322 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:20.480 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:20.505 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.015s)
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.809 s -- in vip.mate.agent.binding.AgentBindingServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.binding.AgentBindingSkillRemovalListenerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.binding.AgentSkillAutoBindListenerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.binding.service.AgentBindingMcpRemovalListenerTest
+21:35:22.123 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.826 s -- in vip.mate.agent.binding.service.AgentBindingMcpRemovalE2ETest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.binding.service.AgentBindingServiceCuratorTest
+21:35:22.927 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:23.026 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:23.049 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.002s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.020 s -- in vip.mate.agent.binding.AgentBindingServiceWikiDisabledTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.agent.AgentServiceTurnAdmissionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.delegation.SubagentRunContextTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.agent.delegation.SubagentRegistryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.delegation.SubagentHeartbeatTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.agent.delegation.SubagentControllerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in vip.mate.agent.controller.AgentControllerOriginTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.agent.AgentToolSetTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.AgentGraphBuilderStreamIdleTimeoutTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.agent.BaseAgentToolCallReplayTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.agent.AgentGraphBuilderIdentityBlockTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in vip.mate.agent.service.TemplateServiceBindingTest
+21:35:24.130 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:24.241 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:24.265 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.003s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.048 s -- in vip.mate.agent.AgentAuthoringToolTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.agent.BaseAgentCarryRecentImageTest
+21:35:25.159 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:25.246 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:25.265 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.951 s -- in vip.mate.agent.AgentServiceUniquenessTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.agent.BaseAgentHeadOrphanRepairTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in vip.mate.agent.BaseAgentImageCaptionPersistTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.349 s -- in vip.mate.channel.ChannelMagicCommandTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.ChannelMessageRouterDebounceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in vip.mate.channel.InboundMessageDeduplicatorTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.channel.feishu.FeishuCardFormatterTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.channel.feishu.FeishuInboundResourceTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.107 s -- in vip.mate.channel.feishu.FeishuStreamingCardManagerTest
+21:35:26.451 WARN  v.m.c.f.FeishuStreamingCardManager - [feishu-stream] flush failed: sessionKey=298fea63-48d1-40d1-b4bb-a95453790242, seq=2, err=simulated error update failure
+21:35:26.451 WARN  v.m.c.f.FeishuStreamingCardManager - [feishu-stream] flush failed: sessionKey=298fea63-48d1-40d1-b4bb-a95453790242, seq=3, err=simulated error update failure
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in vip.mate.channel.feishu.FeishuProcessStreamTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in vip.mate.channel.feishu.FeishuAudioSttTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in vip.mate.channel.feishu.cards.FeishuCardDispatcherTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.feishu.cards.tool_guard.ToolGuardButtonValueTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.feishu.cards.tool_guard.ToolGuardCardRendererTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in vip.mate.channel.feishu.FeishuScrubOnFinishTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.channel.feishu.FeishuRecentFileCacheTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.feishu.FeishuConversationIdAlignmentTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.feishu.FeishuTextSplitTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.channel.feishu.FeishuMentionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.feishu.FeishuOnAgentCompletedTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.feishu.FeishuSizePolicyTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.feishu.FeishuSessionIdTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.feishu.tool.FeishuToolCatalogTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.13 s -- in vip.mate.channel.ChannelMessageRouterInboundDedupTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in vip.mate.channel.web.ChatStreamTrackerDetachSemanticsTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in vip.mate.channel.web.ChatControllerDurableQueueTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.Utf8SseEmitterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.AgentStreamAccumulatorReturnDirectTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.web.ChatControllerPersistStatusTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.web.SegmentSupersedeDetectorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vip.mate.channel.web.ChatControllerPreviewRouteTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.web.ChatStreamTrackerCloseSubscribersTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in vip.mate.channel.web.ChatStreamTrackerEventIdTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.channel.web.ChatStreamTrackerOrphanPolicyTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.channel.web.ChatControllerWorkerReadOnlyTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.219 s -- in vip.mate.channel.web.ChatStreamTrackerBatchedRelayTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.ChatStreamTrackerCleanupTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.channel.web.ChatStreamTrackerChunkedBroadcastTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.web.TalkModeWebSocketHandlerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.AgentStreamAccumulatorThinkingOrderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.AgentStreamAccumulatorKindTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.channel.web.ConversationInputQueueStoreTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.web.ChatControllerUploadPathTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.web.ChatStreamTrackerQueueDrainTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in vip.mate.channel.wecom.GroupReplyReqIdCacheTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in S-6 release ordering: accepting flips first
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in S-5 lifecycle gate: enqueue before markReady fails fast
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in S-4 release window: enqueues fail fast, no orphans
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.800 s -- in S-3 worker idle-close vs late enqueue: no orphans across N iterations
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in S-2 sendFrame sync throw → future fails fast
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.303 s -- in S-1 same reqId serial dispatch
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.127 s -- in vip.mate.channel.wecom.ReplyQueueStressTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.wecom.WeComUploadLimitsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.wecom.WeComInboundConversationIdTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.wecom.cards.tool_guard.ToolGuardCardRendererTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.066 s -- in vip.mate.channel.wecom.cards.tool_guard.ToolGuardCardHandlerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.wecom.cards.tool_guard.ToolGuardButtonKeyTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.wecom.AppmsgContentTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.wecom.WeComKeepaliveSchedulerTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.227 s -- in vip.mate.channel.wecom.WeComProcessStreamTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.wecom.WeComProgressRendererTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.445 s -- in vip.mate.channel.wecom.ReplyStreamDedupTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.channel.wecom.QuoteContextTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in vip.mate.channel.MediaPathGuardTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.ChannelErrorClassifierTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.channel.leader.SingleLeaderHookTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.leader.ChannelLeaderElectionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.ExponentialBackoffTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.282 s -- in vip.mate.channel.ChannelManagerReconcileTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.ChannelMessageRouterGroupAttributionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.ChannelSessionStoreTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in vip.mate.channel.weixin.ILinkClientUploadUrlTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.weixin.error.WeixinClientErrorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.channel.ChannelMessageRouterExecutionMetadataTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.ChannelAdapterStalenessTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.telegram.TelegramCaptionSanitizeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.verifier.ChannelVerifierTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.ChannelMessageRouterApprovalDenyTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.channel.ChannelMessageRouterNarrationTest
+21:35:49.874 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:49.967 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:49.986 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.027 s -- in vip.mate.channel.webchat.WebChatSkillListTest
+21:35:50.846 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:50.936 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:50.956 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.993 s -- in vip.mate.channel.webchat.WebChatApprovalInteractionTest
+21:35:51.902 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:52.006 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:52.030 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.002s)
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.221 s -- in vip.mate.channel.webchat.WebChatStreamE2ETest
+21:35:53.053 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:53.140 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:53.160 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.940 s -- in vip.mate.channel.webchat.WebChatCreateSessionTest
+21:35:54.004 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:54.108 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:54.132 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.003s)
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.979 s -- in vip.mate.channel.webchat.WebChatTokenRevocationTest
+21:35:55.025 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:55.107 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:55.127 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.148 s -- in vip.mate.channel.webchat.WebChatAttachmentE2ETest
+21:35:56.140 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:56.225 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:56.246 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.943 s -- in vip.mate.channel.webchat.WebChatSchemaFieldsTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.webchat.WebChatVisitorTokenTest
+21:35:57.074 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:35:57.157 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:35:57.176 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.10 s -- in vip.mate.channel.webchat.WebChatRegenerateTest
+21:36:08.198 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:08.287 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:08.307 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.965 s -- in vip.mate.channel.webchat.WebChatAuditTrailTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.channel.webchat.WebChatFileServiceTest
+21:36:09.151 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:09.248 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:09.271 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.016 s -- in vip.mate.channel.webchat.WebChatArchivePinTest
+21:36:10.171 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:10.255 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:10.274 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.956 s -- in vip.mate.channel.webchat.WebChatStopStreamTest
+21:36:11.138 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:11.228 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:11.247 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.023 s -- in vip.mate.channel.webchat.WebChatSessionManagementTest
+21:36:12.134 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:12.214 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:12.233 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.024 s -- in vip.mate.channel.webchat.WebChatWikiPageListTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.ChannelOutboundFilterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.tool.AvailableToolChannelSourceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.tool.ChannelToolCallbackTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.tool.ChannelToolDescriptorTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.ProvisionalContentTrackerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.media.GeneratedFileScrubberTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.458 s -- in vip.mate.channel.media.ImageCompressorTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.204 s -- in vip.mate.channel.media.InboundMediaDownloaderTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.channel.media.MediaTypeSnifferTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.channel.media.MediaSourceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.dashboard.service.DashboardServiceToolCallCountTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.system.featureflag.FeatureFlagServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in vip.mate.system.service.SystemSettingServiceCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.system.service.SystemSettingWorkspaceStorageRootTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.system.service.SystemSettingBoolApiTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.system.service.SettingCryptoTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.common.result.RHttpStatusAdviceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.common.net.SsrfAllowlistTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.common.security.SecretEqualsTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.common.text.ShinglesTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.common.text.MarkdownNormalizerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.common.text.SecretRedactorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.architecture.SkillStateKeyDoubleRegistrationTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.architecture.AutoIncrementFreePrimaryKeyTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.architecture.GoalStateKeyDoubleRegistrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.architecture.StateKeyRegistrationCoverageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.412 s -- in vip.mate.architecture.ToolCallbackToolContextForwardArchTest
+21:36:20.425 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:20.534 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:20.553 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.017s)
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.06 s -- in vip.mate.team.MigrationSmokeTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.105 s -- in vip.mate.team.controller.TeamRunControllerTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.253 s -- in vip.mate.team.controller.TeamControllerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.team.service.TeamContextBuilderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.077 s -- in vip.mate.team.service.TeamRunCommittedIntentEventTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.team.service.TeamRunStateMachineTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.team.service.SpringTeamRunEventPublisherTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.830 s -- in vip.mate.team.service.TeamAnnounceServiceTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in vip.mate.team.service.TeamRunServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in vip.mate.team.service.TeamRunApplicationServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.208 s -- in vip.mate.team.service.TeamDispatchServiceEventTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.team.service.TeamRunViewFactoryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 s -- in vip.mate.team.service.TeamRunProjectionSchedulerTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.team.service.TeamRunProjectorTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in vip.mate.team.service.TeamDispatchServiceTest
+[INFO] Tests run: 38, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in vip.mate.team.service.TeamTaskServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.team.service.TeamEventChannelTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.team.service.TeamRunProjectionExecutorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.team.service.TeamPlanBridgeTest
+21:36:57.147 ERROR o.s.s.s.TaskUtils$LoggingErrorHandler - Unexpected error occurred in scheduled task
+### The error may exist in vip/mate/team/repository/AgentTeamMapper.java (best guess)
+### The error may involve vip.mate.team.repository.AgentTeamMapper.selectList
+### The error occurred while executing a query
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 s -- in vip.mate.team.service.TeamServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.team.service.TeamWorkerConversationGovernanceServiceTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.team.tool.TeamTasksToolTest
+21:36:57.507 ERROR o.s.s.s.TaskUtils$LoggingErrorHandler - Unexpected error occurred in scheduled task
+### The error may exist in vip/mate/team/repository/AgentTeamMapper.java (best guess)
+### The error may involve vip.mate.team.repository.AgentTeamMapper.selectList
+### The error occurred while executing a query
+21:36:57.951 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:36:58.056 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:36:58.081 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.004s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.66 s -- in vip.mate.workflow.runtime.AwaitApprovalRuntimeTest
+21:37:29.529 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:37:29.637 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:37:29.664 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.003s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.45 s -- in vip.mate.workflow.runtime.WorkflowRunnerIntegrationTest
+21:38:00.963 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:38:01.086 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:38:01.115 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.006s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.61 s -- in vip.mate.workflow.runtime.WriteMemoryRuntimeTest
+21:38:32.641 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:38:32.760 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:38:32.791 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.009s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.61 s -- in vip.mate.workflow.runtime.PayloadStoreFsTest
+21:39:04.155 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:39:04.235 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:39:04.255 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.35 s -- in vip.mate.workflow.runtime.DispatchChannelRuntimeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.workflow.runtime.MergeStrategiesTest
+21:39:35.499 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:39:35.579 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:39:35.597 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.31 s -- in vip.mate.workflow.runtime.AwaitApprovalNotifyTest
+21:40:06.799 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:40:06.883 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:40:06.902 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.31 s -- in vip.mate.workflow.WorkflowSchemaSmokeTest
+21:40:38.182 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:40:38.285 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:40:38.304 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.43 s -- in vip.mate.workflow.api.WorkflowControllerTest
+21:41:09.542 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:41:09.625 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:41:09.644 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.32 s -- in vip.mate.workflow.api.WorkflowResumeControllerTest
+21:41:40.867 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:41:40.947 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:41:40.966 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.002s)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.32 s -- in vip.mate.workflow.service.WorkflowServicePublishTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.workflow.compiler.WorkflowAclValidatorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.workflow.compiler.WorkflowSchemaValidatorTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.workflow.compiler.PebbleSubsetEvaluatorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.workflow.compiler.WorkflowCompilerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.workflow.compiler.OutputContentTypeCheckerTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.workflow.compiler.WorkflowParserTest
+21:42:12.204 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:42:12.285 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:42:12.304 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.30 s -- in vip.mate.workflow.E2EWorkflowFlowTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tts.TtsResponseDiagnosticsTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s -- in vip.mate.task.AsyncTaskServiceOneShotTest
+21:42:43.071 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:42:43.150 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:42:43.169 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.46 s -- in vip.mate.semantic.SemanticGraphBindingTest
+21:43:13.506 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:43:13.586 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:43:13.604 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.28 s -- in vip.mate.semantic.SemanticDisabledTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in vip.mate.semantic.SemanticEndToEndIntegrationTest
+21:43:43.899 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.54 s -- in vip.mate.semantic.SemanticOntologyIntegrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.semantic.SemanticToolTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0 s -- in vip.mate.semantic.SemanticMySqlIntegrationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.174 s -- in vip.mate.semantic.SemanticM2IntegrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.272 s -- in vip.mate.semantic.SemanticQueryWindowTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.150 s -- in vip.mate.semantic.SemanticCoreArchitectureTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.111 s -- in vip.mate.semantic.SemanticAuthorizationTest
+21:44:15.123 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:44:15.211 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:44:15.230 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+21:44:15.251 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:44:15.341 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:44:15.357 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 184 migrations to schema "public", now at version v190 (execution time 00:00.000s)
+21:44:15.379 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 190
+21:44:15.382 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 4 migrations to schema "public", now at version v194 (execution time 00:00.000s)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.293 s -- in vip.mate.semantic.SemanticMigrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vip.mate.semantic.SemanticConfigurationTest
+21:44:15.488 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 194
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.26 s -- in vip.mate.semantic.SemanticFeatureFlagTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.kbopen.research.KbResearchSessionRegistryTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.109 s -- in vip.mate.kbopen.auth.KbApiKeyServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.kbopen.auth.KbApiKeyRateLimiterTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 s -- in vip.mate.kbopen.auth.KbOpenApiAuthFilterTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in vip.mate.kbopen.controller.KbOpenApiControllerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.i18n.I18nAutoConfigTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.i18n.LocaleAwareToolCallbackToolContextTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.exception.GlobalExceptionHandlerTypeMismatchTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.exception.GlobalExceptionHandlerConfirmTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.exception.GlobalExceptionHandlerMethodNotSupportedTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.106 s -- in vip.mate.exception.GlobalExceptionHandlerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.acp.service.AcpDelegationServiceTimeoutTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in vip.mate.acp.client.AcpStdioClientTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.006 s -- in vip.mate.hook.HookDispatcherTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.hook.action.HttpActionHmacTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.hook.action.HttpActionSsrfAllowlistTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in vip.mate.tool.disclosure.ToolDisclosureServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.video.provider.MiniMaxVideoProviderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.video.provider.DashScopeVideoProviderRoutingTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.runtime.McpClientManagerSplitHttpUrlTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.mcp.runtime.McpProgressRelayTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.mcp.runtime.PrefixedNameToolCallbackTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.runtime.ReturnDirectMcpToolCallbackTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.mcp.runtime.McpToolCallbackProviderReturnDirectTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.runtime.McpToolNameResolverTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in classify: identity typing per channel
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.697 s -- in vip.mate.tool.mcp.runtime.McpIdentityForwardServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.tool.mcp.runtime.McpClientManagerSnapshotTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.runtime.McpClientManagerProgressWrapTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.tool.mcp.runtime.McpClientManagerWrapTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.mcp.runtime.McpProgressContextTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.mcp.runtime.ProgressAwareMcpToolCallbackTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.tool.mcp.runtime.McpHashCollisionDetectorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.runtime.IdentityForwardingToolCallbackTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.104 s -- in vip.mate.tool.mcp.service.McpServerServiceListToolsTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.mcp.service.McpServerSanitizeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in vip.mate.tool.document.WorkspaceArtifactSurfacerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.088 s -- in vip.mate.tool.document.GeneratedFileCachePersistenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.document.GeneratedFileCacheScrubTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.382 s -- in vip.mate.tool.document.pdf.FlyingSaucerPdfCjkTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.290 s -- in vip.mate.tool.document.MarkdownDocxRendererTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.document.GeneratedFileUrlTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.tool.document.preview.OfficePreviewServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.document.GeneratedFileControllerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.document.GeneratedFileCacheLinkifyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.document.GeneratedFileCacheFindByFilenameTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.image.provider.OpenAiImageProviderGptImage2Test
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.image.provider.MiniMaxImageProviderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.image.provider.DashScopeImageProviderRoutingTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.image.provider.ChatGPTOAuthImageProviderTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.image.provider.DashScopeImageModelsTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.image.ImageFileDownloaderTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in vip.mate.tool.image.vision.ImageVisionServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.image.vision.provider.VisionProviderIdentityTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.image.ImageProviderCapabilitiesTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.image.PayloadBuilderTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.image.ImageReferenceLoaderTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.search.SearchProviderRegistryPluginTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.tool.browser.PageSnapshotScriptResultTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.tool.browser.BrowserPropertiesTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in Private-network-allow mode (allowPrivateNetwork=true)
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.browser.UrlSafetyCheckerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.browser.BrowserNavigationGuardTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s -- in vip.mate.tool.browser.BrowserSessionGateTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.browser.BrowserRefStateTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.browser.BrowserWaitConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.browser.BrowserPrivacyGuardTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.service.ToolServiceRuntimeNamesTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.tool.service.AvailableToolServiceTest
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.guard.WorkspacePathGuardShellTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in Deleting the workspace root itself is refused
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in A registered tool-result spill root is readable outside the workspace boundary
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in Escape hatch: no default root registered → legacy no-op
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in Fail-closed fallback to the global sandbox root
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.tool.guard.WorkspacePathGuardSandboxTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.guard.DefaultToolGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in vip.mate.tool.guard.guardian.DbRuleGuardianTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.tool.guard.guardian.WorkspaceBoundaryGuardianTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.guard.guardian.ShellCommandGuardianCodeTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.tool.guard.service.ToolGuardRuleServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in vip.mate.tool.builtin.ReadFileToolLargeLineTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.tool.builtin.DelegateAgentToolDenyListTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.tool.builtin.XhsPackageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.BrowserUseToolContractTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.CodeExecuteToolArgsTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in vip.mate.tool.builtin.SkillManageToolWriteFileTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.08 s -- in vip.mate.tool.builtin.DelegateAgentToolTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in vip.mate.tool.builtin.GzhPackageCoverHealingTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.tool.builtin.ProgressLedgerToolTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in vip.mate.tool.builtin.DocumentExtractToolTrustedPathTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.tool.builtin.ChatUploadResolverDateFolderTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.builtin.SessionListToolTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in vip.mate.tool.builtin.ProgressiveToolBridgeToolTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.DelegateAgentToolContextInheritanceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.174 s -- in vip.mate.tool.builtin.GzhPublishImageInlineTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.108 s -- in vip.mate.tool.builtin.SkillLoadToolTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.builtin.DelegateAsyncTaskOutputAttributionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.tool.builtin.MateClawDocServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in vip.mate.tool.builtin.EnableExtensionToolTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.builtin.ImageAnalyzeToolTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in vip.mate.tool.builtin.DatasourceToolIdPrecisionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vip.mate.tool.builtin.ShellExecuteToolShellSelectionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.tool.builtin.DelegateEventSequenceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in vip.mate.tool.builtin.DocumentExtractToolReadableRatioTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.tool.builtin.WorkspaceMemoryToolIdSerializationTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.249 s -- in vip.mate.tool.builtin.OfficeCliToolTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.020 s -- in vip.mate.tool.builtin.DelegateAsyncToolTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.120 s -- in vip.mate.tool.builtin.TikaExtractorTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.SkillScriptToolArgsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.tool.builtin.DocxRenderToolReturnDirectTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in vip.mate.tool.builtin.SkillFileToolTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.227 s -- in vip.mate.tool.builtin.DatasourceToolPostgresqlViewDiscoveryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in vip.mate.tool.builtin.CronJobToolIdPrecisionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.builtin.ContentItemToolTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.tool.builtin.CodeExecuteToolArtifactTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.tool.builtin.SessionSendToolTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.tool.builtin.GoalManagementToolTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.ComplianceScannerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vip.mate.tool.builtin.FileMutationToolContextTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.tool.builtin.DelegationContextTest
+21:45:05.685 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:45:05.774 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:45:05.794 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.002s)
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.34 s -- in vip.mate.goal.GoalPersistenceIntegrationTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.goal.controller.GoalControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in vip.mate.goal.controller.GoalExecutionControllerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.goal.model.GoalCriteriaCodecTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in vip.mate.goal.service.GoalEvaluationServiceTest
+[INFO] Tests run: 47, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.124 s -- in vip.mate.goal.service.GoalServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in vip.mate.goal.service.GoalRunCoordinatorTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.134 s -- in vip.mate.goal.service.GoalContinuationStoreTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in vip.mate.goal.service.GoalContinuationSupervisorTest
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.goal.service.GoalFollowupServiceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in vip.mate.goal.service.GoalSegmentRunnerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.goal.service.GoalRecoveryServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vip.mate.goal.service.GoalAttemptStoreTest
+21:45:37.466 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:45:37.549 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:45:37.568 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.15 s -- in vip.mate.cron.config.ShedLockIntegrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.cron.CronChatOriginFactoryTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.cron.model.DeliveryConfigTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in vip.mate.cron.delivery.ChannelCronResultDeliveryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.cron.delivery.CronRunStaleCleanupTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.cron.delivery.AbstractCronResultDeliveryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in vip.mate.cron.service.CronRunHeartbeatServiceTest
+21:46:08.951 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+21:46:09.038 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+21:46:09.056 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 188 migrations to schema "public", now at version v194 (execution time 00:00.001s)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.47 s -- in vip.mate.cron.service.CronJobDeliveryPersistenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.cron.service.CronJobRunnerPromptTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.cron.service.CronJobLifecycleFenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.331 s -- in vip.mate.cron.service.CronJobOriginPropagationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.approval.WorkflowApprovalResumeBridgeTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.approval.ApprovalReplayContinuityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.approval.ApprovalWorkflowServiceGcTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.approval.ApprovalWorkflowServiceResolveTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vip.mate.approval.ApprovalWorkflowServiceRecoveryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.107 s -- in vip.mate.approval.grant.listener.ConversationLifecycleListenerTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in vip.mate.approval.grant.listener.ApprovalResolutionLogListenerTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in vip.mate.approval.grant.ApprovalGrantResolverTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.approval.grant.controller.ApprovalGrantControllerTest$Resolutions
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.approval.grant.controller.ApprovalGrantControllerTest$ListRevoke
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.approval.grant.controller.ApprovalGrantControllerTest$CreateAuthorizationMatrix
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.approval.grant.controller.ApprovalGrantControllerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.approval.grant.AutoGrantSafetyFloorTest$EdgeCases
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.approval.grant.AutoGrantSafetyFloorTest$Normalization
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.approval.grant.AutoGrantSafetyFloorTest$ForceHuman
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.approval.grant.AutoGrantSafetyFloorTest$HardBlock
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in vip.mate.approval.grant.AutoGrantSafetyFloorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.approval.grant.WorkspaceLookupCacheTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.stt.transport.OpenAiCompatibleSttTransportTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.stt.SttResponseDiagnosticsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.stt.provider.DashScopeSttProviderTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in vip.mate.stt.provider.OpenAiSttProviderTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.stt.WavPcmExtractorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vip.mate.stt.AudioMimeTypesTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vip.mate.stt.SttServiceTest
+[INFO] Tests run: 5030, Failures: 0, Errors: 0, Skipped: 3
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO] MateClaw ........................................... SUCCESS [  0.186 s]
+[INFO] MateClaw Plugin API ................................ SUCCESS [  0.387 s]
+[INFO] MateClaw Semantic Core ............................. SUCCESS [  0.546 s]
+[INFO] MateClaw Server .................................... SUCCESS [14:28 min]
+[INFO] BUILD SUCCESS

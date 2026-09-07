@@ -1,0 +1,45 @@
+   611:9  warning  'blobUrls' is assigned a value but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   829:7  warning  'showLoadingIndicator' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  1519:7  warning  'approvalSeverityClass' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  198:7  warning  'emit' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  11:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  222:33  warning  'LiveSnapshot' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    12:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1812:39  warning  'data' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+  2006:29  warning  'agentId' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  2006:38  warning  'attachments' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  74:7  warning  'lastScrollTop' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+    5:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  216:47  warning  'autoStart' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  185:5  error  'shared' is never reassigned. Use 'const' instead  prefer-const
+  69:10  warning  'mergeContentParts' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  236:36  warning  'watch' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  65:10  warning  'http' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  342:3  warning  'Delete' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  1:20  warning  'Ref' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  172:31  warning  Unexpected mutation of "modelForm" prop  vue/no-mutating-props
+  176:31  warning  Unexpected mutation of "modelForm" prop  vue/no-mutating-props
+   13:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   21:29  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   26:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   36:49  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   81:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   91:29  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   96:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  114:49  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  121:32  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  146:33  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  157:34  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  1249:10  warning  'parseTags' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  1722:10  warning  'toggleFindings' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1767:10  warning  'getRuntimeLabel' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  1783:10  warning  'getRuntimeBadgeClass' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  1853:10  warning  'getSecurityBadge' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  1864:10  warning  'getDependencyBadge' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  1882:10  warning  'getFeaturesBadge' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  1911:10  warning  'getSecurityFindingsSummary' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  1926:10  warning  'getSourceBadge' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1999:10  warning  'getSkillTypeBadge' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  2003:10  warning  'getSkillTypeLabel' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  181:3  warning  Unexpected mutation of "stepModels" prop  vue/no-mutating-props
+✖ 44 problems (1 error, 43 warnings)

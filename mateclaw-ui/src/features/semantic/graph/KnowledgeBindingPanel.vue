@@ -51,7 +51,7 @@ async function submit(action: 'ENABLE' | 'DISABLE' | 'REBIND') {
   busy.value = true
   error.value = null
   try {
-    binding.value = await graphApi.bind(
+    const result = await graphApi.bind(
       request.id,
       props.knowledgeBaseId,
       {
@@ -61,6 +61,7 @@ async function submit(action: 'ENABLE' | 'DISABLE' | 'REBIND') {
       },
       request.signal,
     )
+    if (request.current()) binding.value = result
   } catch (e) {
     if (request.current()) error.value = semanticError(e)
   } finally {
@@ -68,7 +69,7 @@ async function submit(action: 'ENABLE' | 'DISABLE' | 'REBIND') {
   }
 }
 
-watch(() => props.knowledgeBaseId, load)
+watch(() => [props.knowledgeBaseId, workspace.currentWorkspaceId], () => { binding.value = null; choices.value = []; void load() })
 onMounted(load)
 </script>
 
@@ -112,6 +113,7 @@ onMounted(load)
         </el-button>
       </template>
     </div>
+    <router-link v-if="binding?.enabled" :to="`/semantic/graphs/${binding.graphId}`">{{ t('semantic.w.openWorkbench') }}</router-link>
     <p v-if="binding" class="semantic-binding-meta">
       {{ t('semantic.pinnedVersion', { version: binding.ontologyVersion }) }} ·
       {{ binding.empty ? t('semantic.graphEmpty') : t('semantic.graphNotEmpty') }}

@@ -1,0 +1,2 @@
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 22.37s

@@ -68,7 +68,7 @@ public class StatementReviewService {
             resultRevision=next;status="APPROVED";
         }else if("REJECT".equals(action)){status="REJECTED";}else throw StatementApplicationService.bad("Unsupported change review action");
         jdbc.update("UPDATE mate_semantic_change_proposal SET status=?,result_revision=? WHERE id=? AND status='PENDING'",status,resultRevision,proposalId);
-        statements.touch(graph);ChangeView result=new ChangeView(proposalId,graphId,proposal.statementId(),proposal.expectedRevision(),status,resultRevision,proposal.proposedBy(),proposal.createdAt().toInstant(ZoneOffset.UTC));
+        statements.touch(graph);ChangeView result=new ChangeView(proposalId,graphId,proposal.statementId(),proposal.expectedRevision(),status,resultRevision,proposal.proposedBy(),proposal.createdAt().toInstant(ZoneOffset.UTC),statements.decode(proposal.payload()));
         statements.command(graphId,request.operationId(),"REVIEW_CHANGE",request,result);return result;
     }
 

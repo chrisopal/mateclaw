@@ -1,0 +1,213 @@
+{
+  "detail": {
+    "binding": {
+      "graphId": "2096946072925818882",
+      "workspaceId": "1",
+      "knowledgeBaseId": "2096945981489991682",
+      "ontologyRevisionId": "2096869358018138113",
+      "ontologyVersion": 2,
+      "enabled": true,
+      "graphVersion": 13,
+      "empty": false,
+      "updatedAt": "2026-09-07T13:41:26.729547Z"
+    },
+    "definition": {
+      "types": [
+        {
+          "key": "Equipment",
+          "label": "生产设备",
+          "description": "用于生产现场的设备主类型"
+        },
+        {
+          "key": "Component",
+          "label": "部件",
+          "description": "设备组成部件"
+        }
+      ],
+      "properties": [
+        {
+          "key": "ratedVoltage",
+          "label": "额定电压",
+          "description": "设备额定供电电压",
+          "ownerTypeKey": "Equipment",
+          "valueType": "DECIMAL",
+          "multiplicity": "SINGLE",
+          "fixedUnit": "V"
+        }
+      ],
+      "relations": [
+        {
+          "key": "hasPart",
+          "label": "安装部件",
+          "description": "设备可以安装多个部件",
+          "sourceTypeKey": "Equipment",
+          "targetTypeKey": "Component",
+          "multiplicity": "MULTI"
+        }
+      ]
+    }
+  },
+  "trusted": {
+    "items": [
+      {
+        "id": "2096955716628983809",
+        "graphId": "2096946072925818882",
+        "revision": 2,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "ratedVoltage",
+        "valueType": "DECIMAL",
+        "value": "380",
+        "unit": "V",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2096955716557680641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:38:05.651410Z"
+      },
+      {
+        "id": "2096956702420447234",
+        "graphId": "2096946072925818882",
+        "revision": 2,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "RELATION",
+        "predicateKey": "hasPart",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2096956569771388929",
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2096956702391087106"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:40:57.145785Z"
+      },
+      {
+        "id": "2096956978057523202",
+        "graphId": "2096946072925818882",
+        "revision": 2,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "RELATION",
+        "predicateKey": "hasPart",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2096956596476522497",
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2096956978032357378"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:41:26.729292Z"
+      }
+    ],
+    "total": "3",
+    "page": 1,
+    "pageSize": 20
+  },
+  "history": {
+    "statementId": "2096955716628983809",
+    "revisions": [
+      {
+        "id": "2096955716628983809",
+        "graphId": "2096946072925818882",
+        "revision": 1,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "ratedVoltage",
+        "valueType": "DECIMAL",
+        "value": "380",
+        "unit": "V",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2096955716557680641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:36:17.055712Z"
+      },
+      {
+        "id": "2096955716628983809",
+        "graphId": "2096946072925818882",
+        "revision": 2,
+        "ontologyRevisionId": "2096869358018138113",
+        "subjectId": "2096955236150489089",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "ratedVoltage",
+        "valueType": "DECIMAL",
+        "value": "380",
+        "unit": "V",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2096955716557680641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T13:38:05.651410Z"
+      }
+    ]
+  },
+  "evidence": {
+    "id": "2096955716557680641",
+    "snapshotId": "2096955338835439617",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2096953594332147713",
+    "sourceTitle": "M3 设备核验记录",
+    "exactQuote": "设备😀 P-101 额定电压380V。电机M-01与部件M-02安装于P-101。另一份待核实记录称P-101额定电压400V。",
+    "startCodePoint": 0,
+    "endCodePoint": 64,
+    "textDigest": "73a4c58e4b6b44f040d6ae6fdbd47690af06748797c773ffc23006e591adbea8"
+  },
+  "sources": {
+    "items": [
+      {
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2096953594332147713",
+        "title": "M3 设备核验记录",
+        "state": "ACTIVE",
+        "snapshotCount": "1"
+      }
+    ]
+  },
+  "snapshots": {
+    "items": [
+      {
+        "id": "2096955338835439617",
+        "graphId": "2096946072925818882",
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2096953594332147713",
+        "sourceTitle": "M3 设备核验记录",
+        "captureVersion": "1",
+        "textDigest": "73a4c58e4b6b44f040d6ae6fdbd47690af06748797c773ffc23006e591adbea8",
+        "createdAt": "2026-09-07T13:34:46.981031Z"
+      }
+    ]
+  }
+}

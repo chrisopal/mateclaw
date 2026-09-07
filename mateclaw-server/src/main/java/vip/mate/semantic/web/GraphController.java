@@ -17,6 +17,12 @@ public class GraphController {
     private final GraphApplicationService service;
     public GraphController(GraphApplicationService service) { this.service = service; }
 
+    @GetMapping("/graphs/{graphId}")
+    @RequireWorkspaceRole("viewer")
+    public R<GraphDetail> detail(@RequestHeader(value="X-Workspace-Id", required=false) String scope, @PathVariable String graphId) {
+        return R.ok(service.detail(scope, graphId));
+    }
+
     @GetMapping("/knowledge-bases/{kbId}/binding")
     @RequireWorkspaceRole("viewer")
     public R<Binding> get(@RequestHeader(value="X-Workspace-Id", required=false) String scope, @PathVariable String kbId) {

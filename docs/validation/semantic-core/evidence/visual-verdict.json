@@ -1,0 +1,1 @@
+{"score":91,"verdict":"pass","category_match":true,"differences":["Technical predicate keys remain visible in graph labels"],"suggestions":[],"reasoning":"Circular layout separates nodes and labels. At width 390 the document scrollWidth equals viewport width; header wraps and table remains contained. Desktop graph preserves existing dark enterprise styling.","next_actions":[]}

@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     ElAlert: typeof import('element-plus/es/components/alert/index')['ElAlert']
     ElButton: typeof import('element-plus/es/components/button/index')['ElButton']
+    ElCard: typeof import('element-plus/es/components/card/index')['ElCard']
     ElConfigProvider: typeof import('element-plus/es/components/config-provider/index')['ElConfigProvider']
     ElDatePicker: typeof import('element-plus/es/components/date-picker/index')['ElDatePicker']
     ElDialog: typeof import('element-plus/es/components/dialog/index')['ElDialog']

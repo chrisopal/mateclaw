@@ -494,4 +494,4 @@ Scope-risk: narrow
 
 ## 2026-09-07 执行状态
 
-M1（SEM-01～03）已完成，用户追加的名称/描述上下两行也已实现。M2（SEM-04～08）已实现主数据链并通过H2、核心、授权、迁移和UI自动化验证；最终运行态回读及未覆盖数据库见[M2验收记录](../../validation/ontology-m2/acceptance.md)。SEM-09～11尚未实施，未将整个企业图谱产品标记为完成。
+M1（SEM-01～03）已完成，用户追加的名称/描述上下两行也已实现。M2（SEM-04～08）已实现主数据链，历史阶段记录见[M2验收记录](../../validation/ontology-m2/acceptance.md)。M3 的 SEM-09 工作台与 SEM-10 Agent取证已实现；SEM-11 已完成后端全量、UI、真实H2/MySQL、模型、开关与重启回读。Kingbase及完整浏览器组合矩阵仍未验证，具体门禁以[M3验收矩阵](../../validation/semantic-core/acceptance-matrix.md)为准。下方/前文原始计划复选框保留编写时状态，不作为当前完成状态；自动抽取未纳入本阶段。

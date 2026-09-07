@@ -75,7 +75,7 @@ public class StatementApplicationService {
         StatementContent content=domain.content(graph,request.content());domain.validate(graph,content);requireEvidence(graphId,content);
         String proposal=id();LocalDateTime now=now();
         jdbc.update("INSERT INTO mate_semantic_change_proposal(id,graph_id,target_statement_id,expected_revision,operation_id,payload_json,status,proposed_by,created_at) VALUES(?,?,?,?,?,?,?,?,?)",proposal,graphId,statementId,request.expectedRevision(),request.operationId(),wire.encode(request.content()),"PENDING",actor.getId().toString(),now);
-        touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC));
+        touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC),request.content());
     }
 
     public Page<StatementView> statements(String scope,String graphId,String view,String status,int page,int pageSize){
@@ -88,6 +88,22 @@ public class StatementApplicationService {
         if(status!=null&&!status.isBlank())rows=rows.stream().filter(r->status.equalsIgnoreCase(r.status())).toList();
         int from=Math.min((page-1)*pageSize,rows.size()),to=Math.min(from+pageSize,rows.size());
         return new Page<>(rows.subList(from,to).stream().map(r->view(graph,r)).toList(),rows.size(),page,pageSize);
+    }
+
+    public List<StatementView> trustedAsActor(String scope, String actorId, String graphId) {
+        access.requireActor(scope, actorId, "viewer");
+        return trustedRows(graphs.requireGraph(scope, graphId, false));
+    }
+
+    public List<StatementView> trusted(String scope, String graphId) {
+        access.require(scope, "viewer");
+        return trustedRows(graphs.requireGraph(scope, graphId, false));
+    }
+
+    private List<StatementView> trustedRows(GraphRow graph) {
+        return current(graph.getId(), List.of("ACCEPTED")).stream()
+                .filter(row -> support.supported(graph, row.statementId(), row.revision()))
+                .map(row -> view(graph, row)).toList();
     }
 
     public Page<ChangeView> changes(String scope,String graphId,String status,int page,int pageSize){
@@ -142,7 +158,7 @@ public class StatementApplicationService {
     }
     void command(String graph,String operation,String kind,Object payload,Object result){jdbc.update("INSERT INTO mate_semantic_mutation_command(id,graph_id,operation_id,kind,payload_hash,result_json,created_at) VALUES(?,?,?,?,?,?,?)",id(),graph,operation,kind,hash(wire.encode(payload)),wire.encode(result),now());}
     private static StoredRevision stored(ResultSet rs)throws SQLException{return new StoredRevision(rs.getString("statement_id"),rs.getInt("revision"),rs.getString("ontology_revision_id"),rs.getString("review_status"),rs.getString("content_json"),rs.getString("actor_id"),rs.getTimestamp("created_at").toLocalDateTime());}
-    private static ChangeView change(ResultSet rs)throws SQLException{Integer result=(Integer)rs.getObject("result_revision");return new ChangeView(rs.getString("id"),rs.getString("graph_id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("status"),result,rs.getString("proposed_by"),rs.getTimestamp("created_at").toLocalDateTime().toInstant(ZoneOffset.UTC));}
+    private ChangeView change(ResultSet rs)throws SQLException{Integer result=(Integer)rs.getObject("result_revision");return new ChangeView(rs.getString("id"),rs.getString("graph_id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("status"),result,rs.getString("proposed_by"),rs.getTimestamp("created_at").toLocalDateTime().toInstant(ZoneOffset.UTC),decode(rs.getString("payload_json")));}
     private static ConflictView conflictView(ResultSet rs)throws SQLException{return new ConflictView(rs.getString("id"),rs.getString("graph_id"),rs.getString("kind"),rs.getString("status"),new ConflictMember(rs.getString("left_statement_id"),rs.getInt("left_revision")),new ConflictMember(rs.getString("right_statement_id"),rs.getInt("right_revision")),rs.getString("resolution_json"));}
     static String id(){return com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr();}
     public static LocalDateTime now(){return LocalDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);}

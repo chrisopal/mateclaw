@@ -1,0 +1,7 @@
+graph_id            | state
+2096946072925818882 | WITHDRAWN
+(1 row, 4 ms)
+statement_id        | revision | review_status
+2096955716628983809 | 1        | PROPOSED
+2096955716628983809 | 2        | ACCEPTED
+(2 rows, 0 ms)
