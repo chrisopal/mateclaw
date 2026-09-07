@@ -46,17 +46,33 @@ public class SemanticDomainMapper {
     public StatementContent content(GraphRow graph,ProposeRequest request){
         if(request==null) throw bad("Statement content required");
         try{
-            PredicateRef predicate="RELATION".equals(request.predicateKind())?PredicateRef.relation(request.predicateKey()):PredicateRef.property(request.predicateKey());
+            if("ENTITY".equals(request.valueType())){
+                if(request.value()!=null||request.unit()!=null)throw bad("ENTITY values use targetEntityId only");
+            }else if(request.targetEntityId()!=null)throw bad("Scalar values cannot have targetEntityId");
+            if(!"DECIMAL".equals(request.valueType())&&request.unit()!=null)throw bad("Only DECIMAL values can specify a unit");
+            if(request.evidenceIds()!=null&&new HashSet<>(request.evidenceIds()).size()!=request.evidenceIds().size())throw bad("Evidence references must be unique");
+            PredicateRef predicate=switch(require(request.predicateKind(),"predicateKind")){
+                case "RELATION" -> PredicateRef.relation(request.predicateKey());
+                case "PROPERTY" -> PredicateRef.property(request.predicateKey());
+                default -> throw bad("Unsupported predicateKind");
+            };
             StatementValue value=switch(require(request.valueType(),"valueType")){
                 case "TEXT"->new StatementValue.TextValue(Objects.requireNonNull(request.value(),"value"));
                 case "DECIMAL"->new StatementValue.DecimalValue(Objects.requireNonNull(request.value(),"value"),request.unit());
-                case "BOOLEAN"->new StatementValue.BooleanValue(Boolean.parseBoolean(Objects.requireNonNull(request.value(),"value")));
+                case "BOOLEAN"->new StatementValue.BooleanValue(booleanValue(request.value()));
                 case "DATE"->new StatementValue.DateValue(Objects.requireNonNull(request.value(),"value"));
                 case "INSTANT"->new StatementValue.InstantValue(Objects.requireNonNull(request.value(),"value"));
                 case "ENTITY"->new StatementValue.EntityValue(new EntityId(require(request.targetEntityId(),"targetEntityId")));
                 default->throw bad("Unsupported valueType");
             };
-            Validity validity="UNKNOWN".equals(request.validityKind())?Validity.unknown():Validity.interval(request.validFrom(),request.validTo());
+            Validity validity=switch(require(request.validityKind(),"validityKind")){
+                case "UNKNOWN" -> {
+                    if(request.validFrom()!=null||request.validTo()!=null)throw bad("UNKNOWN validity cannot have interval bounds");
+                    yield Validity.unknown();
+                }
+                case "INTERVAL" -> Validity.interval(request.validFrom(),request.validTo());
+                default -> throw bad("Unsupported validityKind");
+            };
             Set<EvidenceId> evidence=new LinkedHashSet<>();
             if(request.evidenceIds()!=null) request.evidenceIds().forEach(id->evidence.add(new EvidenceId(id)));
             return new StatementContent(scope(graph),new OntologyRevisionId(graph.getOntologyRevisionId()),new EntityId(require(request.subjectId(),"subjectId")),predicate,value,validity,evidence);
@@ -68,5 +84,10 @@ public class SemanticDomainMapper {
         if(!report.valid()) throw new SemanticApiException(422,report.violations().getFirst().code(),"Statement does not conform to pinned ontology");
     }
     private static String require(String value,String field){if(value==null||value.isBlank())throw bad(field+" required");return value;}
+    private static boolean booleanValue(String value){
+        if("true".equals(value))return true;
+        if("false".equals(value))return false;
+        throw bad("BOOLEAN value must be true or false");
+    }
     private static SemanticApiException bad(String message){return new SemanticApiException(400,"INVALID_REQUEST",message);}
 }

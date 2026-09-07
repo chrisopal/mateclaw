@@ -2,7 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, vLoading } from 'element-plus'
 import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { Ontology, Revision, Diff } from '../api/types'

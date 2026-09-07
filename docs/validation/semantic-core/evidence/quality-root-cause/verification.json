@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-08",
+  "baseline": "129a48cd9982c1e0dcefe48f3008083202ac3e0d",
+  "checks": {
+    "core": [
+      "[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "server": [
+      "[INFO] Tests run: 57, Failures: 0, Errors: 0, Skipped: 3",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "mysql": [
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "ui": [
+      "Test Files  16 passed (16)",
+      "Tests  39 passed (39)"
+    ],
+    "enterprise": [
+      "Snowflake numeric-conversion check passed",
+      "✓ built in 21.73s"
+    ],
+    "classic": [
+      "Snowflake numeric-conversion check passed",
+      "✓ built in 22.32s"
+    ]
+  },
+  "mysqlReports": [
+    {
+      "name": "vip.mate.semantic.SemanticMySqlIntegrationTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vip.mate.semantic.SemanticMySqlQualityIntegrationTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "runtimeJarSha256": "88b908b9c30417dfc9ef581ed4b4b32a3e1f4f82c3a8cbf93a2a0c45a24be851",
+  "commands": {
+    "core": "JAVA_HOME=<21> mvn -pl mateclaw-semantic-core -am test",
+    "server": "JAVA_HOME=<21> mvn -pl mateclaw-server -am -Dmaven.compiler.proc=full -Dtest=Semantic*Test -Dsurefire.failIfNoSpecifiedTests=false test",
+    "mysql": "Same reactor, -Dtest=SemanticMySqlIntegrationTest,SemanticMySqlQualityIntegrationTest with disposable database environment",
+    "ui": "npm test -- src/features/semantic; vue-tsc --noEmit; eslint changed semantic files",
+    "build": "VITE_UI_PROFILE=enterprise|classic npm run build -- --outDir <temporary output>"
+  },
+  "notExecuted": [
+    "Kingbase integration",
+    "whole MateClaw test suite",
+    "production deployment"
+  ]
+}

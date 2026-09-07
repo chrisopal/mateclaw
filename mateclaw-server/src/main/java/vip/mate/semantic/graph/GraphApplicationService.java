@@ -113,6 +113,8 @@ public class GraphApplicationService {
             throw new SemanticApiException(422, "INVALID_ENTITY", "displayName exceeds 256 characters");
         GraphRow graph = requireGraph(scope, graphId, true);
         if (!graph.getEnabled()) throw conflict("GRAPH_DISABLED", "Graph is disabled");
+        if (mapper.entityCount(graph.getId()) >= 1000)
+            throw new SemanticApiException(422, "GRAPH_ENTITY_LIMIT", "Graph supports at most 1000 entities");
         GraphOntologyRevisionRow revision = requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
         Definition definition = wire.decode(revision.getDefinitionJson(), Definition.class);
         if (definition.types().stream().noneMatch(t -> t.key().equals(request.typeKey())))
@@ -131,6 +133,7 @@ public class GraphApplicationService {
         long workspace = workspace(scope);
         GraphRow row = lock ? mapper.lock(graphId, workspace) : mapper.find(graphId, workspace);
         if (row == null) throw notFound();
+        requireKb(workspace, row.getKbId());
         return row;
     }
 

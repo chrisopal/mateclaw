@@ -1,0 +1,207 @@
+{
+  "trusted": {
+    "items": [
+      {
+        "id": "2097091016445427714",
+        "graphId": "2097084463260663810",
+        "revision": 2,
+        "ontologyRevisionId": "2097083062535094273",
+        "subjectId": "2097089661806870530",
+        "predicateKind": "RELATION",
+        "predicateKey": "producedOn",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097090030704295938",
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097091016390901761"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T22:33:55.049801Z"
+      },
+      {
+        "id": "2097091016478982145",
+        "graphId": "2097084463260663810",
+        "revision": 2,
+        "ontologyRevisionId": "2097083062535094273",
+        "subjectId": "2097089661806870530",
+        "predicateKind": "RELATION",
+        "predicateKey": "hasIssue",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097090032730144769",
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097091016390901761"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T22:33:55.055234Z"
+      },
+      {
+        "id": "2097091016499953666",
+        "graphId": "2097084463260663810",
+        "revision": 2,
+        "ontologyRevisionId": "2097083062535094273",
+        "subjectId": "2097090032730144769",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "deviation",
+        "valueType": "DECIMAL",
+        "value": "0.08",
+        "unit": "mm",
+        "targetEntityId": null,
+        "validityKind": "INTERVAL",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097091016390901761"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T22:33:55.060747Z"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "pageSize": 20
+  },
+  "history": {
+    "statementId": "2097092829827596289",
+    "revisions": [
+      {
+        "id": "2097092829827596289",
+        "graphId": "2097084463260663810",
+        "revision": 1,
+        "ontologyRevisionId": "2097083062535094273",
+        "subjectId": "2097090032730144769",
+        "predicateKind": "RELATION",
+        "predicateKey": "rootCause",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097090034806325249",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2097092829777264641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T22:41:07.388962Z"
+      },
+      {
+        "id": "2097092829827596289",
+        "graphId": "2097084463260663810",
+        "revision": 2,
+        "ontologyRevisionId": "2097083062535094273",
+        "subjectId": "2097090032730144769",
+        "predicateKind": "RELATION",
+        "predicateKey": "rootCause",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097090034806325249",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORT_LOST",
+        "evidenceIds": [
+          "2097092829777264641"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-07T23:03:28.924779Z"
+      }
+    ]
+  },
+  "sources": {
+    "items": [
+      {
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2097083062648340482",
+        "title": "初步调查",
+        "state": "ACTIVE",
+        "snapshotCount": 1
+      },
+      {
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2097083062639951874",
+        "title": "根因复核报告",
+        "state": "WITHDRAWN",
+        "snapshotCount": 1
+      },
+      {
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2097083062610591745",
+        "title": "终检记录",
+        "state": "ACTIVE",
+        "snapshotCount": 1
+      }
+    ]
+  },
+  "governance": {
+    "items": [
+      {
+        "id": "2097099679990099970",
+        "workspaceId": "1",
+        "graphId": "2097084463260663810",
+        "resourceKind": "SOURCE",
+        "resourceId": "2097083062639951874",
+        "resourceVersion": 1,
+        "action": "SOURCE_WITHDRAW",
+        "operationId": "4f3ab66a-33d8-447b-848e-b703866d00ca",
+        "actorId": "1",
+        "reason": "验收演练：复核报告撤回，确认系统停止引用该根因并保留其他检验事实与修订历史。",
+        "resultJson": "{\"resourceKind\":\"WIKI_RAW\",\"resourceRef\":\"2097083062639951874\",\"state\":\"WITHDRAWN\"}",
+        "createdAt": "2026-09-07T23:08:20.594983"
+      },
+      {
+        "id": "2097098456645799937",
+        "workspaceId": "1",
+        "graphId": "2097084463260663810",
+        "resourceKind": "CONFLICT",
+        "resourceId": "2097093298465570817",
+        "resourceVersion": 2,
+        "action": "RESOLVE_CONFLICT",
+        "operationId": "98e1f63c-d4ae-4d75-b09e-4583903a917b",
+        "actorId": "1",
+        "reason": "质量复核确认：更换刀具后尺寸恢复，采纳复核报告，拒绝尚未证实的夹具偏移假设。",
+        "resultJson": "{\"id\":\"2097093298465570817\",\"graphId\":\"2097084463260663810\",\"kind\":\"TEMPORAL_UNCERTAINTY\",\"status\":\"RESOLVED\",\"left\":{\"kind\":\"STATEMENT\",\"statementId\":\"2097093298461376513\",\"revision\":1},\"right\":{\"kind\":\"STATEMENT\",\"statementId\":\"2097092829827596289\",\"revision\":1},\"resolution\":\"{\\\"winnerKind\\\":\\\"STATEMENT\\\",\\\"winnerStatementId\\\":\\\"2097092829827596289\\\",\\\"reason\\\":\\\"质量复核确认：更换刀具后尺寸恢复，采纳复核报告，拒绝尚未证实的夹具偏移假设。\\\"}\"}",
+        "createdAt": "2026-09-07T23:03:28.926853"
+      }
+    ],
+    "total": "2",
+    "page": 1,
+    "pageSize": 50
+  },
+  "inspectionEvidence": {
+    "id": "2097091016390901761",
+    "snapshotId": "2097091016382513154",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2097083062610591745",
+    "sourceTitle": "终检记录",
+    "exactQuote": "检验🔎：LOT-QA-0908由CNC-07加工，发现孔径超差，偏差0.08mm。",
+    "startCodePoint": 0,
+    "endCodePoint": 41,
+    "textDigest": "42864ea83e6f43538f1d50bb80717970ba9494f2e7bff408d63cf5bcff03f820"
+  },
+  "rootSearch": {
+    "facts": [],
+    "traceId": "873c5a1c-2b8e-432b-8da8-ccb214bf8f9a",
+    "truncated": false,
+    "entityLabels": {},
+    "predicateLabels": {}
+  }
+}

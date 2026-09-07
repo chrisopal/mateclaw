@@ -1,0 +1,10 @@
+{
+  "phase": "accepted",
+  "graphId": "2097084463260663810",
+  "agentId": "2096956318532579329",
+  "conversationId": "quality-review-accepted-931cffd73c794a15ba5df143d0ece6b5",
+  "answer": "根据 semantic_search 工具返回的可信事实，回答如下：\n\n**孔径超差的确认根因是：刀具磨损。**\n\n依据事实明细：\n- **事实 ID**：2097092829827596289\n- **版本（revision）**：2\n- **证据 ID**：2097092829777264641\n- **关系**：rootCause（确认根因）\n- **主体**：孔径超差（subjectId 2097090032730144769）\n- **目标**：刀具磨损（targetEntityId 2097090034806325249）\n- **有效性**：UNKNOWN（未标注业务生效时间区间）\n- **审核状态**：ACCEPTED（已接受）\n- **支持状态**：SUPPORTED（有证据支持）\n- **traceId**：e09bcf90-7292-4abc-a46c-4e59b6f5e574\n\n结论：孔径超差的确认根因为「刀具磨损」，该事实为已接受且有证据支持的当前修订版本（revision 2）。",
+  "trustedRootCount": 1,
+  "statementCitationPresent": true,
+  "evidenceCitationPresent": true
+}

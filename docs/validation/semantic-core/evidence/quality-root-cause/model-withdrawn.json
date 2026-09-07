@@ -1,0 +1,8 @@
+{
+  "phase": "withdrawn",
+  "graphId": "2097084463260663810",
+  "agentId": "2096956318532579329",
+  "conversationId": "quality-review-withdrawn-5dacb9df28534569bd95ec5cb041cb2b",
+  "answer": "根据 semantic_search 的返回结果，未检索到任何可信事实（facts 为空数组）。\n\n因此，**无法确认孔径超差的根因**。工具未返回任何事实ID、版本或证据ID可供引用，我也不会依据知识库背景或先验知识进行猜测。\n\n- 检索图谱：2097084463260663810\n- 查询：确认根因\n- 返回：无任何事实（facts: []）\n- traceId：027c9ed2-356a-4bfe-880b-e8fd3362c371\n\n结论：根据现有检索结果，无法确认孔径超差的根因。",
+  "trustedRootCount": 0
+}

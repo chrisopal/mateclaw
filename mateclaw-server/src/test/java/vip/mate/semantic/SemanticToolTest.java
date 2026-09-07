@@ -43,7 +43,9 @@ class SemanticToolTest extends SemanticHttpFixture {
         JsonNode evidence=call("POST", "/graphs/"+f.graph+"/snapshots/"+f.snapshot+"/evidence", "member", workspace,
                 Map.of("operationId", "ev", "startCodePoint",5,"endCodePoint",9,"exactQuote","380V"),200);
         JsonNode statement=propose(f,"380",evidence.path("id").asText(),"propose",200);
-        ToolContext ctx=context();
+        Long agentId = agentWithKnowledgeBase(f.kb);
+        ToolContext ctx = ChatOrigin.from(context()).withAgent(agentId).toToolContext();
+        assertEquals(401, assertThrows(SemanticApiException.class, () -> tool.semantic_search(f.graph, "P-101", 5, context())).status());
         SecurityContextHolder.clearContext();
         assertTrue(tool.semantic_search(f.graph,"P-101",5,ctx).facts().isEmpty());
         call("POST","/graphs/"+f.graph+"/statements/"+statement.path("id").asText()+"/review","owner",workspace,
@@ -61,6 +63,16 @@ class SemanticToolTest extends SemanticHttpFixture {
         assertEquals(statement.path("id").asText(),rawResult.path("facts").get(0).path("id").asText());
         assertEquals(evidence.path("id").asText(),rawResult.path("facts").get(0).path("evidenceIds").get(0).asText());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
+        Long otherAgent = agentWithKnowledgeBase(kb());
+        assertEquals(404, assertThrows(SemanticApiException.class, () -> tool.semantic_search(f.graph, "P-101", 5,
+                ChatOrigin.from(ctx).withAgent(otherAgent).toToolContext())).status());
+        org.mockito.Mockito.when(wikiKnowledgeBases.findVisibleById(agentId, Long.valueOf(f.kb))).thenReturn(null);
+        assertEquals(404, assertThrows(SemanticApiException.class, () -> tool.semantic_search(f.graph, "P-101", 5, ctx)).status());
+        var restoredKb = new vip.mate.wiki.model.WikiKnowledgeBaseEntity(); restoredKb.setId(Long.valueOf(f.kb));
+        org.mockito.Mockito.when(wikiKnowledgeBases.findVisibleById(agentId, Long.valueOf(f.kb))).thenReturn(restoredKb);
+        jdbc.update("UPDATE mate_agent SET enabled=FALSE WHERE id=?", agentId);
+        assertEquals(403, assertThrows(SemanticApiException.class, () -> tool.semantic_search(f.graph, "P-101", 5, ctx)).status());
+        jdbc.update("UPDATE mate_agent SET enabled=TRUE WHERE id=?", agentId);
         // A global admin still cannot use a graph under the wrong explicit scope.
         Long owner=jdbc.queryForObject("SELECT user_id FROM mate_workspace_member WHERE workspace_id=? AND role='owner' AND deleted=0",Long.class,Long.valueOf(workspace));
         assertThrows(SemanticApiException.class,()->tool.semantic_search(f.graph,"P-101",5,

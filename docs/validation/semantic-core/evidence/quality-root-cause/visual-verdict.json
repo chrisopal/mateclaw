@@ -1,0 +1,9 @@
+{
+  "score": 91,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "Enterprise layout remains flat and top aligned; headings, audit cards and evidence text are readable. Desktop dark mode and settled narrow viewport retain navigation and graph/table access.",
+  "next_actions": []
+}

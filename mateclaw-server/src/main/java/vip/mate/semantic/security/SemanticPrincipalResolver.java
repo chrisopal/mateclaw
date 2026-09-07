@@ -42,9 +42,9 @@ public class SemanticPrincipalResolver {
         if (user == null || !Boolean.TRUE.equals(user.getEnabled())
                 || (user.getDeleted() != null && user.getDeleted() != 0))
             throw new SemanticApiException(401, "UNAUTHENTICATED", "Active user required");
-        return new ToolPrincipal(origin.workspaceId().toString(), user.getId().toString());
+        return new ToolPrincipal(origin.workspaceId().toString(), user.getId().toString(), origin.agentId());
     }
 
-    public record ToolPrincipal(String workspaceId, String userId) {}
+    public record ToolPrincipal(String workspaceId, String userId, Long agentId) {}
 
 }

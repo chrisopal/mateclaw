@@ -11,7 +11,7 @@ export interface Statement extends Omit<Proposal, 'operationId'> {
   reviewStatus: string; supportStatus: string; proposedBy: string; createdAt: string
 }
 export interface Change { id: string; graphId: string; targetStatementId: string; expectedRevision: number; status: string; resultRevision: number | null; content: Proposal }
-export interface ConflictMember { statementId: string; revision: number }
+export interface ConflictMember { kind?: 'STATEMENT' | 'CHANGE_PROPOSAL'; statementId: string; revision: number }
 export interface Conflict { id: string; kind: string; status: string; left: ConflictMember; right: ConflictMember; resolution: string }
 export interface Snapshot { id: string; sourceKind: string; sourceRef: string; sourceTitle: string; captureVersion: number; textDigest: string; createdAt: string }
 export interface SnapshotText { id: string; textDigest: string; text: string }

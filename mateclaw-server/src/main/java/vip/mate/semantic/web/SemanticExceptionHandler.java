@@ -51,6 +51,11 @@ public class SemanticExceptionHandler {
         return error(500, "INTERNAL_ERROR", "Semantic operation failed", List.of());
     }
 
+    @ExceptionHandler({org.springframework.dao.QueryTimeoutException.class, org.springframework.transaction.TransactionTimedOutException.class})
+    public ResponseEntity<R<Object>> timeout(Exception e) {
+        return error(504, "QUERY_TIMEOUT", "Semantic query exceeded its deadline; narrow the query and retry", List.of());
+    }
+
     private ResponseEntity<R<Object>> error(
             int status, String code, String message, Object fields) {
         R<Object> body = R.fail(status, message);

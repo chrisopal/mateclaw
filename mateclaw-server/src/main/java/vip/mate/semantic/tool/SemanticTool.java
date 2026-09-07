@@ -22,12 +22,12 @@ public class SemanticTool {
         this.queries = queries;
     }
 
-    @Tool(description = "Search accepted, supported semantic facts in a graph. Returns fact IDs, revisions, evidence IDs and a trace ID. Cite these references in answers.")
+    @Tool(description = "Search accepted, supported current revisions of semantic facts in an agent-visible graph, across all business-time intervals. Check each fact's validityKind, validFrom and validTo before making time-specific claims; UNKNOWN does not establish a valid time. Returns fact IDs, revisions, evidence IDs and a trace ID. Cite these references in answers.")
     public SearchResult semantic_search(String graphId, String query,
             @ToolParam(required = false, description = "Maximum results, 1 to 100; defaults to 20") Integer limit,
             ToolContext context) {
         var principal = principals.requireTool(context);
-        return queries.searchAsActor(principal.workspaceId(), principal.userId(), graphId,
+        return queries.searchAsAgent(principal.workspaceId(), principal.userId(), principal.agentId(), graphId,
                 new SearchRequest(query, limit, null));
     }
 }

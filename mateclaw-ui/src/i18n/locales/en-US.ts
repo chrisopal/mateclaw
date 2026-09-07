@@ -1,6 +1,25 @@
 export default {
   semantic: {
     w: {
+      keepProposal: "Accept this change proposal",
+      proposalMember: "Change proposal",
+      statementMember: "Statement",
+      inspectProposals: "Open every change proposal to inspect its content and evidence before resolving.",
+      conflictStale: "Proposal revision changed. Refresh the conflict list.",
+
+      allTime: "All business time",
+      untilTime: "Until {time}",
+      fromTime: "From {time}",
+      businessTimeHelp: "Current revisions across all business time are shown, including past and future validity. They are not necessarily valid now.",
+      conflictMember: "Conflicting fact {number}",
+
+      viewEvidence: "View evidence",
+      noFacts: "No trusted facts. Cite source evidence in a candidate and submit it for review.",
+      noCandidates: "No candidates. Register entities, capture source snapshots, then propose a candidate.",
+      graphLabel: "Trusted relationship graph",
+      graphEmpty: "No trusted relationships for this entity. Property facts are listed below.",
+      graphExplore: "Explore entities and relationships (keyboard accessible)",
+      states: {"ACTIVE": "Active", "WITHDRAWN": "Withdrawn", "OPEN": "Open", "RESOLVED": "Resolved", "SINGLE_VALUE_DISAGREEMENT": "Single-value disagreement", "TEMPORAL_UNCERTAINTY": "Temporal uncertainty", "PROPOSED": "Candidate · unverified", "ACCEPTED": "Accepted", "UNREVIEWED": "Unreviewed", "SUPPORT_LOST": "Support lost", "SUPPORTED": "Supported", "UNSUPPORTED": "Support withdrawn", "PENDING": "Pending review", "CONFIRMED": "Confirmed", "REJECTED": "Rejected", "RETRACTED": "Retracted", "CONFLICTED": "Conflicted"},
       "title": "Knowledge workbench",
       "openWorkbench": "Open knowledge workbench",
       "type": "Entity type",

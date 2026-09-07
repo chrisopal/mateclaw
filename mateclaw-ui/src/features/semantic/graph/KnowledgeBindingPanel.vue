@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { vLoading } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { graphApi } from '../api/graphApi'
 import { ontologyApi } from '../api/ontologyApi'
@@ -26,6 +27,12 @@ async function load() {
       throw e
     })
     const ontologies = await ontologyApi.list(request.id, '', 1, request.signal)
+    for (let page = 2; ontologies.items.length < ontologies.total; page++) {
+      if (!request.current()) return
+      const next = await ontologyApi.list(request.id, '', page, request.signal)
+      if (next.items.length === 0) break
+      ontologies.items.push(...next.items)
+    }
     const revisions = await Promise.all(
       ontologies.items.map(async (ontology) =>
         (await ontologyApi.revisions(request.id, ontology.id, request.signal)).map((revision) => ({

@@ -3,11 +3,13 @@ package vip.mate.semantic.query;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import vip.mate.semantic.graph.*;
 import vip.mate.semantic.security.SemanticAccessService;
 import vip.mate.semantic.statement.*;
 import vip.mate.semantic.web.SemanticApiException;
+import vip.mate.semantic.web.OntologyDtos.Definition;
 import vip.mate.semantic.web.StatementDtos.*;
 import vip.mate.semantic.query.SemanticQueryDtos.*;
 
@@ -16,29 +18,60 @@ import java.time.*;
 import java.util.*;
 
 @Service
+@Transactional(readOnly=true,timeout=5)
 @ConditionalOnProperty(name="mateclaw.semantic.enabled",havingValue="true")
 public class SemanticQueryService {
     private final JdbcTemplate jdbc;private final GraphApplicationService graphs;private final SemanticAccessService access;private final StatementApplicationService statements;private final SupportEvaluator support;
-    public SemanticQueryService(JdbcTemplate jdbc,GraphApplicationService graphs,SemanticAccessService access,StatementApplicationService statements,SupportEvaluator support){this.jdbc=jdbc;this.graphs=graphs;this.access=access;this.statements=statements;this.support=support;}
+    private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+    private final vip.mate.agent.repository.AgentMapper agents;
+    private final vip.mate.wiki.service.WikiKnowledgeBaseService knowledgeBases;
+    public SemanticQueryService(JdbcTemplate jdbc,GraphApplicationService graphs,SemanticAccessService access,StatementApplicationService statements,SupportEvaluator support,
+            vip.mate.agent.repository.AgentMapper agents, vip.mate.wiki.service.WikiKnowledgeBaseService knowledgeBases){this.jdbc=jdbc;this.graphs=graphs;this.access=access;this.statements=statements;this.support=support;this.agents=agents;this.knowledgeBases=knowledgeBases;}
 
     public SearchResult search(String scope,String graphId,SearchRequest request){
+        validateSearch(request);
         return searchFacts(graphId, request, statements.trusted(scope, graphId));
     }
 
-    public SearchResult searchAsActor(String scope,String actorId,String graphId,SearchRequest request){
+    public SearchResult searchAsAgent(String scope,String actorId,Long agentId,String graphId,SearchRequest request){
+        access.requireActor(scope, actorId, "viewer");
+        if (agentId == null || agentId <= 0) throw new SemanticApiException(401, "UNAUTHENTICATED", "Authenticated agent origin required");
+        var agent = agents.selectById(agentId);
+        if (agent == null || !Boolean.TRUE.equals(agent.getEnabled()) || !Objects.equals(agent.getWorkspaceId(), Long.valueOf(scope)))
+            throw new SemanticApiException(403, "FORBIDDEN", "Agent is not active in this workspace");
+        GraphRow graph = graphs.requireGraph(scope, graphId, false);
+        if (knowledgeBases.findVisibleById(agentId, graph.getKbId()) == null)
+            throw new SemanticApiException(404, "NOT_FOUND", "Knowledge base is not visible to this agent");
+        validateSearch(request);
         return searchFacts(graphId, request, statements.trustedAsActor(scope, actorId, graphId));
     }
 
     private SearchResult searchFacts(String graphId,SearchRequest request,List<StatementView> facts){
-        if(request==null||request.query()==null||request.query().length()>256)throw bad("Query required");int limit=request.limit()==null?20:request.limit();if(limit<1||limit>100)throw bad("Limit must be 1..100");
+        int limit=request.limit()==null?20:request.limit();
         String needle=request.query().toLowerCase(Locale.ROOT);List<StatementView> matches=new ArrayList<>();
+        Map<String,String> labels = new HashMap<>();
+        jdbc.query("SELECT id,display_name FROM mate_semantic_entity WHERE graph_id=?", rs -> {
+            labels.put(rs.getString("id"), rs.getString("display_name"));
+        }, graphId);
+        Map<String,String> predicates = predicateLabels(graphId);
         for(StatementView fact:facts){
             if(request.atTime()!=null&&("UNKNOWN".equals(fact.validityKind())||(fact.validFrom()!=null&&request.atTime().isBefore(fact.validFrom()))))continue;
             if(request.atTime()!=null&&fact.validTo()!=null&&!request.atTime().isBefore(fact.validTo()))continue;
-            String label=entityLabel(graphId,fact.subjectId());
-            if((label+" "+fact.predicateKey()+" "+Objects.toString(fact.value(),"")).toLowerCase(Locale.ROOT).contains(needle))matches.add(fact);
+            String text = String.join(" ", labels.getOrDefault(fact.subjectId(), ""), fact.predicateKey(),
+                    predicates.getOrDefault(fact.predicateKind()+":"+fact.predicateKey(), ""),
+                    labels.getOrDefault(fact.targetEntityId(), ""), Objects.toString(fact.value(), ""));
+            if(text.toLowerCase(Locale.ROOT).contains(needle))matches.add(fact);
         }
-        boolean truncated=matches.size()>limit;return new SearchResult(List.copyOf(matches.subList(0,Math.min(limit,matches.size()))),UUID.randomUUID().toString(),truncated);
+        boolean truncated=matches.size()>limit;
+        List<StatementView> selected=List.copyOf(matches.subList(0,Math.min(limit,matches.size())));
+        Map<String,String> selectedEntities=new LinkedHashMap<>(), selectedPredicates=new LinkedHashMap<>();
+        for(StatementView fact:selected){
+            if(labels.containsKey(fact.subjectId())) selectedEntities.put(fact.subjectId(),labels.get(fact.subjectId()));
+            if(labels.containsKey(fact.targetEntityId())) selectedEntities.put(fact.targetEntityId(),labels.get(fact.targetEntityId()));
+            String key=fact.predicateKind()+":"+fact.predicateKey();
+            if(predicates.containsKey(key)) selectedPredicates.put(key,predicates.get(key));
+        }
+        return new SearchResult(selected,UUID.randomUUID().toString(),truncated,Map.copyOf(selectedEntities),Map.copyOf(selectedPredicates));
     }
 
     public GraphResult neighbors(String scope,String graphId,String entityId,int depth,int nodeLimit,int edgeLimit){
@@ -78,8 +111,24 @@ public class SemanticQueryService {
         if(rows.isEmpty())throw new SemanticApiException(404,"NOT_FOUND","Statement not found in graph");List<StatementView> history=new ArrayList<>();for(RawRevision row:rows){ProposeRequest r=decode(row.content());List<String> ev=jdbc.query("SELECT evidence_id FROM mate_semantic_revision_evidence WHERE statement_id=? AND revision=? ORDER BY evidence_id",(rs,n)->rs.getString(1),row.id(),row.revision());history.add(new StatementView(row.id(),graphId,row.revision(),row.ontology(),r.subjectId(),r.predicateKind(),r.predicateKey(),r.valueType(),r.value(),r.unit(),r.targetEntityId(),r.validityKind(),r.validFrom(),r.validTo(),row.status(),"ACCEPTED".equals(row.status())?(support.supported(graph,row.id(),row.revision())?"SUPPORTED":"SUPPORT_LOST"):"UNREVIEWED",ev,row.actor(),row.created().toInstant(ZoneOffset.UTC)));}return new HistoryResult(statementId,List.copyOf(history));
     }
 
-    private ProposeRequest decode(String json){try{return new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().readValue(json,ProposeRequest.class);}catch(Exception e){throw new IllegalStateException(e);}}
-    private String entityLabel(String graph,String entity){List<String> rows=jdbc.query("SELECT display_name FROM mate_semantic_entity WHERE graph_id=? AND id=?",(rs,n)->rs.getString(1),graph,entity);return rows.isEmpty()?"":rows.getFirst();}
+    private Map<String,String> predicateLabels(String graphId) {
+        List<String> definitions = jdbc.query("SELECT r.definition_json FROM mate_semantic_graph g JOIN mate_semantic_ontology_revision r ON r.id=g.ontology_revision_id WHERE g.id=?", (rs,n)->rs.getString(1), graphId);
+        Map<String,String> labels = new HashMap<>();
+        if (definitions.isEmpty()) return labels;
+        try {
+            Definition definition = json.readValue(definitions.getFirst(), Definition.class);
+            definition.properties().forEach(p -> labels.put("PROPERTY:"+p.key(), p.label()));
+            definition.relations().forEach(r -> labels.put("RELATION:"+r.key(), r.label()));
+            return labels;
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalStateException("Cannot read pinned ontology definition", e);
+        }
+    }
+    private ProposeRequest decode(String content){try{return json.readValue(content,ProposeRequest.class);}catch(Exception e){throw new IllegalStateException(e);}}
+    private static void validateSearch(SearchRequest request){
+        if(request==null||request.query()==null||request.query().length()>256)throw bad("Query required and must not exceed 256 characters");
+        if(request.limit()!=null&&(request.limit()<1||request.limit()>100))throw bad("Limit must be 1..100");
+    }
     private boolean sourceExists(GraphRow graph,String kind,String source){if(!"WIKI_RAW".equals(kind))return false;try{Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_wiki_raw_material WHERE id=? AND kb_id=? AND deleted=0",Integer.class,Long.valueOf(source),graph.getKbId());return count!=null&&count>0;}catch(NumberFormatException e){return false;}}
     private static EvidenceRow evidenceRow(ResultSet rs)throws java.sql.SQLException{return new EvidenceRow(rs.getString("id"),rs.getString("snapshot_id"),rs.getString("source_kind"),rs.getString("source_id"),rs.getString("source_title"),rs.getString("exact_quote"),rs.getInt("start_codepoint"),rs.getInt("end_codepoint"),rs.getString("text_digest"));}
     private static SemanticApiException bad(String message){return new SemanticApiException(400,"INVALID_REQUEST",message);}

@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessageBox, ElMessage } from 'element-plus'
+import { ElMessageBox, ElMessage, vLoading } from 'element-plus'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { ontologyApi } from '../api/ontologyApi'
 import type { EntityType, Property, Relation, Definition, Diff } from '../api/types'

@@ -1,0 +1,8 @@
+{
+  "phase": "scope",
+  "graphId": "2096946072925818882",
+  "agentId": "2096956318532579329",
+  "conversationId": "quality-review-scope-22371f4eca1f4073a939ef0efb1dec8c",
+  "answer": "工具调用返回失败：**\"Knowledge base is not visible to this agent\"**（该知识图谱对当前 Agent 不可见/无权访问）。\n\n根据规则，没有返回可信事实或无权访问时，我明确说明：**无法确认孔径超差的确认根因**。\n\n- 未获得任何事实 ID、版本（revision）或证据 ID（evidenceIds）。\n- 我不会依据知识库背景或先验知识猜测原因。\n\n如需核验，请确认当前 Agent 对该图谱（graphId=2096946072925818882）具备访问权限后重试。",
+  "trustedRootCount": 1
+}

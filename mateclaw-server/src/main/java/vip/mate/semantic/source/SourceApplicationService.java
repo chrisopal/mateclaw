@@ -60,11 +60,13 @@ public class SourceApplicationService {
     }
 
     public ImportJob retryImport(String scope, String graphId, String jobId, RetryRequest request) {
-        var actor = access.require(scope, "member"); graphs.requireGraph(scope, graphId, false);
+        var actor = access.require(scope, "member"); GraphRow graph=graphs.requireGraph(scope, graphId, false);
+        if (!Boolean.TRUE.equals(graph.getEnabled())) throw conflict("GRAPH_DISABLED", "Graph is disabled");
         validateOperation(request == null ? null : request.operationId());
         ImportJob previous = findJobById(graphId, jobId);
         if (previous == null) throw notFound();
         if (!"FAILED".equals(previous.status())) throw conflict("IMPORT_NOT_RETRYABLE", "Only failed imports can be retried");
+        if (previous.attempts() >= 4) throw conflict("IMPORT_RETRY_LIMIT", "Import reached the maximum of three retries");
         String hash = sha256(previous.sourceKind() + ":" + previous.sourceRef());
         return enqueueAndRun(scope, graphId, previous.sourceKind(), previous.sourceRef(), request.operationId(), hash,
                 actor.getId().toString(), previous.id(), previous.attempts());
@@ -94,6 +96,7 @@ public class SourceApplicationService {
     public EvidenceView createEvidence(String scope, String graphId, String snapshotId, EvidenceRequest request) {
         var actor = access.require(scope, "member");
         GraphRow graph = graphs.requireGraph(scope, graphId, true);
+        if (!Boolean.TRUE.equals(graph.getEnabled())) throw conflict("GRAPH_DISABLED", "Graph is disabled");
         validateOperation(request == null ? null : request.operationId());
         EvidenceView replay = findEvidence(graphId, request.operationId());
         if (replay != null) {
@@ -130,6 +133,14 @@ public class SourceApplicationService {
     public SnapshotText text(String scope, String graphId, String snapshotId) {
         access.require(scope, "member"); GraphRow graph = graphs.requireGraph(scope, graphId, false);
         return snapshotText(graph, snapshotId, true);
+    }
+
+    public SnapshotText text(String scope,String graphId,String snapshotId,Integer startCodePoint,Integer endCodePoint){
+        SnapshotText full=text(scope,graphId,snapshotId);
+        int start=startCodePoint==null?0:startCodePoint,end=endCodePoint==null?full.totalCodePoints():endCodePoint;
+        if(start<0||end<start||end>full.totalCodePoints())throw new SemanticApiException(400,"INVALID_TEXT_RANGE","Code-point range is outside the snapshot");
+        String range=full.text().substring(full.text().offsetByCodePoints(0,start),full.text().offsetByCodePoints(0,end));
+        return new SnapshotText(full.id(),full.textDigest(),range,start,end,full.totalCodePoints());
     }
 
     public SnapshotText snapshotTextForEvidence(String scope, String graphId, String snapshotId) {

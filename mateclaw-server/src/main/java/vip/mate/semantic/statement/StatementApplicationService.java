@@ -42,16 +42,19 @@ public class StatementApplicationService {
         requireEnabled(graph); requireOperation(request==null?null:request.operationId());
         StatementView replay=replay(graphId,request.operationId(),request);
         if(replay!=null)return replay;
+        Long count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_statement WHERE graph_id=?",Long.class,graphId);
+        if(count!=null&&count>=10000)throw new SemanticApiException(422,"GRAPH_STATEMENT_LIMIT","Graph supports at most 10000 statements");
         StatementContent content=domain.content(graph,request); domain.validate(graph,content);
         requireEvidence(graphId,content);
         String statementId=id(); LocalDateTime now=now();
         jdbc.update("INSERT INTO mate_semantic_statement(id,graph_id,current_revision,created_by,created_at) VALUES(?,?,?,?,?)",statementId,graphId,1,actor.getId().toString(),now);
         insertRevision(graph,statementId,1,request,"PROPOSED",actor.getId().toString(),null,now);
+        var ontology=domain.ontology(graph);
         for(StoredRevision other:current(graphId,List.of("PROPOSED","ACCEPTED"))){
-            conflicts.compare(domain.ontology(graph),content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->{
-                jdbc.update("INSERT INTO mate_semantic_conflict(id,graph_id,kind,status,left_statement_id,left_revision,right_statement_id,right_revision,created_at) VALUES(?,?,?,?,?,?,?,?,?)",id(),graphId,kind.name(),"OPEN",statementId,1,other.statementId(),other.revision(),now);
-            });
+            if(statementId.equals(other.statementId()))continue;
+            conflicts.compare(ontology,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"STATEMENT",other.statementId(),other.revision(),now));
         }
+        for(PendingChange other:pendingChanges(graphId))conflicts.compare(ontology,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
         touch(graph);
         StatementView result=view(graph,row(graphId,statementId));
         command(graphId,request.operationId(),"PROPOSE_STATEMENT",request,result);
@@ -66,7 +69,9 @@ public class StatementApplicationService {
         List<ChangeView> replay=jdbc.query("SELECT * FROM mate_semantic_change_proposal WHERE graph_id=? AND operation_id=?",(rs,n)->change(rs),graphId,request.operationId());
         if(!replay.isEmpty()){
             String payload=jdbc.queryForObject("SELECT payload_json FROM mate_semantic_change_proposal WHERE id=?",String.class,replay.getFirst().id());
-            if(!wire.encode(request.content()).equals(payload))throw conflict("OPERATION_CONFLICT","Operation id has different change payload");
+            if(!statementId.equals(replay.getFirst().targetStatementId())
+                    || request.expectedRevision()!=replay.getFirst().expectedRevision()
+                    || !wire.encode(request.content()).equals(payload))throw conflict("OPERATION_CONFLICT","Operation id has different change target, base revision, or payload");
             return replay.getFirst();
         }
         StoredRevision current=row(graphId,statementId);
@@ -75,19 +80,30 @@ public class StatementApplicationService {
         StatementContent content=domain.content(graph,request.content());domain.validate(graph,content);requireEvidence(graphId,content);
         String proposal=id();LocalDateTime now=now();
         jdbc.update("INSERT INTO mate_semantic_change_proposal(id,graph_id,target_statement_id,expected_revision,operation_id,payload_json,status,proposed_by,created_at) VALUES(?,?,?,?,?,?,?,?,?)",proposal,graphId,statementId,request.expectedRevision(),request.operationId(),wire.encode(request.content()),"PENDING",actor.getId().toString(),now);
+        var ontology=domain.ontology(graph);
+        for(StoredRevision other:current(graphId,List.of("PROPOSED","ACCEPTED"))){
+            if(statementId.equals(other.statementId()))continue;
+            conflicts.compare(ontology,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"STATEMENT",other.statementId(),other.revision(),now));
+        }
+        for(PendingChange other:pendingChanges(graphId)){
+            if(proposal.equals(other.id()))continue;
+            conflicts.compare(ontology,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
+        }
         touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC),request.content());
     }
 
     public Page<StatementView> statements(String scope,String graphId,String view,String status,int page,int pageSize){
         var actor=access.require(scope,"viewer");GraphRow graph=graphs.requireGraph(scope,graphId,false);page(page,pageSize);
         String mode=view==null?"trusted":view;
+        if(!Set.of("trusted","review","mine").contains(mode))throw bad("Unsupported statement view");
         if("review".equals(mode))access.require(scope,"admin");
         List<StoredRevision> rows=current(graphId,"review".equals(mode)?List.of("PROPOSED","ACCEPTED","REJECTED","RETRACTED"):"mine".equals(mode)?List.of("PROPOSED"):List.of("ACCEPTED"));
         if("mine".equals(mode))rows=rows.stream().filter(r->r.actorId().equals(actor.getId().toString())).toList();
-        if("trusted".equals(mode))rows=rows.stream().filter(r->support.supported(graph,r.statementId(),r.revision())).toList();
+        Set<String> supported=support.supportedCurrentStatements(graph);
+        if("trusted".equals(mode))rows=rows.stream().filter(r->supported.contains(r.statementId())).toList();
         if(status!=null&&!status.isBlank())rows=rows.stream().filter(r->status.equalsIgnoreCase(r.status())).toList();
         int from=Math.min((page-1)*pageSize,rows.size()),to=Math.min(from+pageSize,rows.size());
-        return new Page<>(rows.subList(from,to).stream().map(r->view(graph,r)).toList(),rows.size(),page,pageSize);
+        return new Page<>(rows.subList(from,to).stream().map(r->viewWithSupport(graph,r,"ACCEPTED".equals(r.status())?(supported.contains(r.statementId())?"SUPPORTED":"SUPPORT_LOST"):"UNREVIEWED")).toList(),rows.size(),page,pageSize);
     }
 
     public List<StatementView> trustedAsActor(String scope, String actorId, String graphId) {
@@ -101,9 +117,10 @@ public class StatementApplicationService {
     }
 
     private List<StatementView> trustedRows(GraphRow graph) {
+        Set<String> supported=support.supportedCurrentStatements(graph);
         return current(graph.getId(), List.of("ACCEPTED")).stream()
-                .filter(row -> support.supported(graph, row.statementId(), row.revision()))
-                .map(row -> view(graph, row)).toList();
+                .filter(row -> supported.contains(row.statementId()))
+                .map(row -> viewWithSupport(graph, row, "SUPPORTED")).toList();
     }
 
     public Page<ChangeView> changes(String scope,String graphId,String status,int page,int pageSize){
@@ -139,9 +156,12 @@ public class StatementApplicationService {
         if(request.evidenceIds()!=null)for(String evidence:request.evidenceIds())jdbc.update("INSERT INTO mate_semantic_revision_evidence(statement_id,revision,evidence_id) VALUES(?,?,?)",statementId,revision,evidence);
     }
     StatementView view(GraphRow graph,StoredRevision row){
-        ProposeRequest request=decode(row.contentJson());
-        List<String> evidence=jdbc.query("SELECT evidence_id FROM mate_semantic_revision_evidence WHERE statement_id=? AND revision=? ORDER BY evidence_id",(rs,n)->rs.getString(1),row.statementId(),row.revision());
         String supportStatus="ACCEPTED".equals(row.status())?(support.supported(graph,row.statementId(),row.revision())?"SUPPORTED":"SUPPORT_LOST"):"UNREVIEWED";
+        return viewWithSupport(graph,row,supportStatus);
+    }
+    private StatementView viewWithSupport(GraphRow graph,StoredRevision row,String supportStatus){
+        ProposeRequest request=decode(row.contentJson());
+        List<String> evidence=request.evidenceIds()==null?List.of():request.evidenceIds().stream().sorted().toList();
         return new StatementView(row.statementId(),graph.getId(),row.revision(),row.ontologyRevisionId(),request.subjectId(),request.predicateKind(),request.predicateKey(),request.valueType(),request.value(),request.unit(),request.targetEntityId(),request.validityKind(),request.validFrom(),request.validTo(),row.status(),supportStatus,evidence,row.actorId(),row.createdAt().toInstant(ZoneOffset.UTC));
     }
     ProposeRequest decode(String json){return wire.decode(json,ProposeRequest.class);}
@@ -159,7 +179,9 @@ public class StatementApplicationService {
     void command(String graph,String operation,String kind,Object payload,Object result){jdbc.update("INSERT INTO mate_semantic_mutation_command(id,graph_id,operation_id,kind,payload_hash,result_json,created_at) VALUES(?,?,?,?,?,?,?)",id(),graph,operation,kind,hash(wire.encode(payload)),wire.encode(result),now());}
     private static StoredRevision stored(ResultSet rs)throws SQLException{return new StoredRevision(rs.getString("statement_id"),rs.getInt("revision"),rs.getString("ontology_revision_id"),rs.getString("review_status"),rs.getString("content_json"),rs.getString("actor_id"),rs.getTimestamp("created_at").toLocalDateTime());}
     private ChangeView change(ResultSet rs)throws SQLException{Integer result=(Integer)rs.getObject("result_revision");return new ChangeView(rs.getString("id"),rs.getString("graph_id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("status"),result,rs.getString("proposed_by"),rs.getTimestamp("created_at").toLocalDateTime().toInstant(ZoneOffset.UTC),decode(rs.getString("payload_json")));}
-    private static ConflictView conflictView(ResultSet rs)throws SQLException{return new ConflictView(rs.getString("id"),rs.getString("graph_id"),rs.getString("kind"),rs.getString("status"),new ConflictMember(rs.getString("left_statement_id"),rs.getInt("left_revision")),new ConflictMember(rs.getString("right_statement_id"),rs.getInt("right_revision")),rs.getString("resolution_json"));}
+    private List<PendingChange> pendingChanges(String graphId){return jdbc.query("SELECT cp.id,cp.target_statement_id,cp.expected_revision,cp.payload_json FROM mate_semantic_change_proposal cp JOIN mate_semantic_statement s ON s.id=cp.target_statement_id AND s.graph_id=cp.graph_id AND s.current_revision=cp.expected_revision WHERE cp.graph_id=? AND cp.status='PENDING'",(rs,n)->new PendingChange(rs.getString("id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("payload_json")),graphId);}
+    private void insertConflict(String graphId,String kind,String leftKind,String leftId,int leftRevision,String rightKind,String rightId,int rightRevision,LocalDateTime created){jdbc.update("INSERT INTO mate_semantic_conflict(id,graph_id,kind,status,left_member_kind,left_statement_id,left_revision,right_member_kind,right_statement_id,right_revision,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",id(),graphId,kind,"OPEN",leftKind,leftId,leftRevision,rightKind,rightId,rightRevision,created);}
+    private static ConflictView conflictView(ResultSet rs)throws SQLException{return new ConflictView(rs.getString("id"),rs.getString("graph_id"),rs.getString("kind"),rs.getString("status"),new ConflictMember(rs.getString("left_member_kind"),rs.getString("left_statement_id"),rs.getInt("left_revision")),new ConflictMember(rs.getString("right_member_kind"),rs.getString("right_statement_id"),rs.getInt("right_revision")),rs.getString("resolution_json"));}
     static String id(){return com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr();}
     public static LocalDateTime now(){return LocalDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);}
     static Timestamp timestamp(Instant value){return value==null?null:Timestamp.from(value);}
@@ -171,5 +193,6 @@ public class StatementApplicationService {
     static SemanticApiException conflict(String code,String message){return new SemanticApiException(409,code,message);}
     static SemanticApiException notFound(){return new SemanticApiException(404,"NOT_FOUND","Statement not found in graph");}
     record StoredRevision(String statementId,int revision,String ontologyRevisionId,String status,String contentJson,String actorId,LocalDateTime createdAt){}
+    private record PendingChange(String id,String targetStatementId,int expectedRevision,String payload){}
     private record CommandRow(String hash,String result){}
 }

@@ -25,7 +25,7 @@ public class SourceController {
     @GetMapping("/snapshots") @RequireWorkspaceRole("viewer")
     public R<Page<Snapshot>> snapshots(@RequestHeader(value="X-Workspace-Id",required=false) String scope,@PathVariable String graphId){ return R.ok(service.snapshots(scope,graphId)); }
     @GetMapping("/snapshots/{snapshotId}/text") @RequireWorkspaceRole("member")
-    public R<SnapshotText> text(@RequestHeader(value="X-Workspace-Id",required=false) String scope,@PathVariable String graphId,@PathVariable String snapshotId){ return R.ok(service.text(scope,graphId,snapshotId)); }
+    public R<SnapshotText> text(@RequestHeader(value="X-Workspace-Id",required=false) String scope,@PathVariable String graphId,@PathVariable String snapshotId,@RequestParam(required=false) Integer startCodePoint,@RequestParam(required=false) Integer endCodePoint){ return R.ok(service.text(scope,graphId,snapshotId,startCodePoint,endCodePoint)); }
     @PostMapping("/snapshots/{snapshotId}/evidence") @RequireWorkspaceRole("member")
     public R<EvidenceView> evidence(@RequestHeader(value="X-Workspace-Id",required=false) String scope,@PathVariable String graphId,@PathVariable String snapshotId,@RequestBody EvidenceRequest request){ return R.ok(service.createEvidence(scope,graphId,snapshotId,request)); }
 }

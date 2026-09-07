@@ -29,6 +29,27 @@ beforeEach(() => {
 
 afterEach(() => { app?.unmount(); host?.remove() })
 
+it('loads published choices beyond the first ontology page', async () => {
+  const ontology = { id: '11', workspaceId: '1', name: 'Equipment', description: '', latestVersion: 1, latestRevisionId: '12', hasDraft: false, updatedAt: '' }
+  vi.mocked(ontologyApi.list)
+    .mockResolvedValueOnce({ items: Array.from({ length: 20 }, (_, i) => ({ ...ontology, id: String(i + 100) })), total: 21, page: 1, pageSize: 20 })
+    .mockResolvedValueOnce({ items: [{ ...ontology, id: '999' }], total: 21, page: 2, pageSize: 20 })
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  const workspace = useWorkspaceStore()
+  workspace.currentWorkspaceId = '1'
+  workspace.accessLoaded = true
+  workspace.currentCapabilities = new Set(['publish:ontology'])
+  host = document.createElement('div')
+  document.body.append(host)
+  app = createApp(KnowledgeBindingPanel, { knowledgeBaseId: '42' })
+  app.use(pinia).use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': en, 'zh-CN': zh } }))
+  app.mount(host)
+  await flush()
+  expect(ontologyApi.list).toHaveBeenCalledWith('1', '', 2, expect.any(AbortSignal))
+  expect(ontologyApi.revisions).toHaveBeenCalledWith('1', '999', expect.any(AbortSignal))
+})
+
 it('creates a scoped binding and preserves the knowledge-base id as a string', async () => {
   const pinia = createPinia()
   setActivePinia(pinia)

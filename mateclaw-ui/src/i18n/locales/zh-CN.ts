@@ -1,6 +1,25 @@
 export default {
   semantic: {
     w: {
+      keepProposal: "采纳此修改提案",
+      proposalMember: "修改提案",
+      statementMember: "事实",
+      inspectProposals: "请先点击展开所有修改提案，查看内容及证据后再处理冲突。",
+      conflictStale: "提案版本已变化，请刷新冲突列表。",
+
+      allTime: "不限时间",
+      untilTime: "截至 {time}",
+      fromTime: "自 {time} 起",
+      businessTimeHelp: "默认展示全部业务时间的当前版本，包括过去及未来有效的事实；不代表这些事实此刻有效。",
+      conflictMember: "冲突事实 {number}",
+
+      viewEvidence: "查看证据",
+      noFacts: "暂无可信事实。请在“提出候选”中引用来源证据，经审核后展示。",
+      noCandidates: "暂无候选。可先登记实体、固化来源快照，再提出候选。",
+      graphLabel: "可信关系图",
+      graphEmpty: "此实体暂无可信关系，可在下方查看属性事实。",
+      graphExplore: "探索实体和关系（支持键盘操作）",
+      states: {"ACTIVE": "有效来源", "WITHDRAWN": "已撤回", "OPEN": "待处理", "RESOLVED": "已解决", "SINGLE_VALUE_DISAGREEMENT": "单值事实不一致", "TEMPORAL_UNCERTAINTY": "有效时间不确定", "PROPOSED": "候选 · 未经确认", "ACCEPTED": "已确认", "UNREVIEWED": "尚未审核", "SUPPORT_LOST": "证据支持已撤回", "SUPPORTED": "有证据支持", "UNSUPPORTED": "证据支持已撤回", "PENDING": "待审核", "CONFIRMED": "已确认", "REJECTED": "已拒绝", "RETRACTED": "已撤回", "CONFLICTED": "存在冲突"},
       "title": "知识构建工作台",
       "openWorkbench": "打开知识工作台",
       "type": "实体类型",

@@ -142,8 +142,21 @@ public abstract class SemanticHttpFixture {
     @Autowired protected AuthService auth;
     @Autowired protected WorkspaceService workspaces;
     @Autowired protected org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Autowired protected WikiKnowledgeBaseService wikiKnowledgeBases;
     protected String workspace, otherWorkspace;
     protected Map<String, String> tokens;
+
+    /** The semantic fixture mocks Wiki; production visibility semantics are tested by the Wiki suite. */
+    protected Long agentWithKnowledgeBase(String kbId) {
+        Long id = com.baomidou.mybatisplus.core.toolkit.IdWorker.getId();
+        var now = java.time.LocalDateTime.now();
+        jdbc.update("INSERT INTO mate_agent(id,name,workspace_id,create_time,update_time,enabled,deleted) VALUES(?,?,?,?,?,TRUE,0)",
+                id, "semantic-test-agent-" + id, Long.valueOf(workspace), now, now);
+        var kb = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
+        kb.setId(Long.valueOf(kbId)); kb.setWorkspaceId(Long.valueOf(workspace));
+        org.mockito.Mockito.when(wikiKnowledgeBases.findVisibleById(id, Long.valueOf(kbId))).thenReturn(kb);
+        return id;
+    }
 
     @BeforeEach
     void initializeFixture() throws Exception {

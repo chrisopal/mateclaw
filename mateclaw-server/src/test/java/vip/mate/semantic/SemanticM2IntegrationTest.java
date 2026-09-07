@@ -26,6 +26,11 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         call("POST", "/graphs/" + f.graph + "/imports/" + f.importJob + "/retry", "member", workspace,
                 Map.of("operationId", "retry-succeeded"), 409);
         assertEquals("设备😀额定380V", call("GET", "/graphs/" + f.graph + "/snapshots/" + f.snapshot + "/text", "member", workspace, null, 200).path("text").asText());
+        JsonNode range=call("GET", "/graphs/"+f.graph+"/snapshots/"+f.snapshot+"/text?startCodePoint=2&endCodePoint=3", "member", workspace, null, 200);
+        assertEquals("😀",range.path("text").asText());
+        assertEquals(9,range.path("totalCodePoints").asInt());
+        assertEquals(2,range.path("startCodePoint").asInt());
+        call("GET", "/graphs/"+f.graph+"/snapshots/"+f.snapshot+"/text?startCodePoint=-1", "member", workspace, null, 400);
         call("POST", "/graphs/" + f.graph + "/snapshots/" + f.snapshot + "/evidence", "member", workspace,
                 Map.of("operationId", "evidence-bad", "startCodePoint", 5, "endCodePoint", 9, "exactQuote", "400V"), 422);
         JsonNode evidence = call("POST", "/graphs/" + f.graph + "/snapshots/" + f.snapshot + "/evidence", "member", workspace,
@@ -102,6 +107,19 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         assertFalse(retried.path("snapshotId").asText().isBlank());
         assertEquals(retried, call("POST", "/graphs/" + f.graph + "/imports/" + f.importJob + "/retry", "member", workspace,
                 Map.of("operationId", "retry-import"), 200));
+        jdbc.update("UPDATE mate_semantic_import_job SET status='FAILED',attempts=4 WHERE id=?",retried.path("id").asText());
+        call("POST","/graphs/"+f.graph+"/imports/"+retried.path("id").asText()+"/retry","member",workspace,Map.of("operationId","retry-exhausted"),409);
+    }
+
+    @Test
+    void disabledGraphRejectsEvidenceAndRetryBeforeCreatingRecords() throws Exception {
+        Fixture f=graph("设备😀额定380V");
+        jdbc.update("UPDATE mate_semantic_import_job SET status='FAILED' WHERE id=?",f.importJob);
+        jdbc.update("UPDATE mate_semantic_graph SET enabled=FALSE WHERE id=?",f.graph);
+        call("POST","/graphs/"+f.graph+"/snapshots/"+f.snapshot+"/evidence","member",workspace,Map.of("operationId","disabled-evidence","startCodePoint",0,"endCodePoint",2,"exactQuote","设备"),409);
+        call("POST","/graphs/"+f.graph+"/imports/"+f.importJob+"/retry","member",workspace,Map.of("operationId","disabled-retry"),409);
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_evidence WHERE graph_id=?",Integer.class,f.graph));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_import_job WHERE graph_id=?",Integer.class,f.graph));
     }
 
     @Test
@@ -129,6 +147,24 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         return call("POST", "/graphs/" + f.graph + "/statements", "member", workspace,
                 Map.of("operationId", operation, "subjectId", f.entity, "predicateKind", "PROPERTY", "predicateKey", "voltage",
                         "valueType", "DECIMAL", "value", value, "unit", "V", "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), status);
+    }
+
+    @Test
+    void graphCapacityRejectsWritesWithoutTruncatingExistingContent() throws Exception {
+        Fixture f=graph("设备😀额定380V");
+        List<Object[]> entities=new ArrayList<>(),facts=new ArrayList<>();
+        LocalDateTime now=LocalDateTime.now();
+        for(int i=0;i<999;i++)entities.add(new Object[]{com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr(),f.graph,"Equipment","Capacity "+i,"ACTIVE","1",now});
+        jdbc.batchUpdate("INSERT INTO mate_semantic_entity(id,graph_id,type_key,display_name,status,created_by,created_at) VALUES(?,?,?,?,?,?,?)",entities);
+        JsonNode entityError=call("POST","/graphs/"+f.graph+"/entities","member",workspace,Map.of("typeKey","Equipment","displayName","Over limit"),422);
+        assertEquals("GRAPH_ENTITY_LIMIT",entityError.path("code").asText());
+        // Identity rows are sufficient to exercise admission control; no query is
+        // allowed to treat a capped prefix as the graph's complete fact set.
+        for(int i=0;i<10000;i++)facts.add(new Object[]{com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr(),f.graph,1,"1",now});
+        jdbc.batchUpdate("INSERT INTO mate_semantic_statement(id,graph_id,current_revision,created_by,created_at) VALUES(?,?,?,?,?)",facts);
+        JsonNode factError=propose(f,"380","1","over-limit",422);
+        assertEquals("GRAPH_STATEMENT_LIMIT",factError.path("code").asText());
+        assertEquals(10000,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_statement WHERE graph_id=?",Integer.class,f.graph));
     }
 
     private Fixture graph(String text) throws Exception {
