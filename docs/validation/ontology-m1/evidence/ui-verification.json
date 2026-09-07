@@ -1,0 +1,55 @@
+{
+  "ontologyId": "2096866697969569794",
+  "v1": "2096866698036678657",
+  "v1Definition": {
+    "types": [
+      {
+        "key": "Equipment",
+        "label": "设备",
+        "description": "企业生产设备"
+      },
+      {
+        "key": "Component",
+        "label": "部件",
+        "description": "设备组成部件"
+      }
+    ],
+    "properties": [
+      {
+        "key": "ratedVoltage",
+        "label": "额定电压",
+        "description": "设备额定供电电压",
+        "ownerTypeKey": "Equipment",
+        "valueType": "DECIMAL",
+        "multiplicity": "SINGLE",
+        "fixedUnit": "V"
+      }
+    ],
+    "relations": [
+      {
+        "key": "hasPart",
+        "label": "安装部件",
+        "description": "设备可以安装多个部件",
+        "sourceTypeKey": "Equipment",
+        "targetTypeKey": "Component",
+        "multiplicity": "MULTI"
+      }
+    ]
+  },
+  "checks": {
+    "uiCreate": true,
+    "uiTypePropertyRelationEditing": true,
+    "emptyOntologyPublishBlocked": true,
+    "workspaceSwitchCancellationPreservedInput": true,
+    "uiPublishV1": true,
+    "apiReadbackMatchesUI": true,
+    "uiPublishV2": true,
+    "uiDiffBeforeAfter": true,
+    "v1UnchangedAfterV2": true,
+    "viewerNoCreateEditPublish": true,
+    "metadataStackedEqualWidth": true,
+    "mobile390NoPageOverflow": true,
+    "lightAndDarkObserved": true
+  },
+  "v2": "2096869358018138113"
+}

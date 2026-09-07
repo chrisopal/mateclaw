@@ -1,6 +1,6 @@
 # MateClaw 企业语义核心与本体管理总体设计
 
-日期：2026-09-05。状态：Proposed，待实施。代码基线：`codex/enterprise-ui@04dde691`。本文统一此前讨论；对象字段见[领域模型](../../architecture/2026-09-05-semantic-domain-model.md)，交互细节见[本体管理规格](../../architecture/2026-09-05-ontology-management-ui-spec.md)，执行顺序见[实施计划](../plans/2026-09-05-enterprise-semantic-core.md)。
+日期：2026-09-05。状态：M1已实施并验证，M2/M3保留设计。M1证据见 [验收记录](../../validation/ontology-m1/acceptance.md)。代码基线：`codex/enterprise-ui@04dde691`。本文统一此前讨论；对象字段见[领域模型](../../architecture/2026-09-05-semantic-domain-model.md)，交互细节见[本体管理规格](../../architecture/2026-09-05-ontology-management-ui-spec.md)，执行顺序见[实施计划](../plans/2026-09-05-enterprise-semantic-core.md)。
 
 ## 1. 目标与范围
 

@@ -1,0 +1,14 @@
+id                  | name             | latest_version | draft_id
+2096862216729018369 | API-M1-e48ac0 v2 | 2              | null
+(1 row, 4 ms)
+version | name             | revision_state | available_for_new_bindings
+1       | API-M1-e48ac0    | PUBLISHED      | FALSE
+2       | API-M1-e48ac0 v2 | PUBLISHED      | TRUE
+(2 rows, 0 ms)
+action                    | count
+PUBLISH_ONTOLOGY          | 2
+SET_REVISION_AVAILABILITY | 1
+(2 rows, 0 ms)
+successful_migration
+1
+(1 row, 1 ms)

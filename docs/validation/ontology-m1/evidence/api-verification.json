@@ -1,0 +1,148 @@
+{
+  "status": "PASS",
+  "ontologyId": "2096862216729018369",
+  "v1": "2096862216783544321",
+  "v2": "2096862217093922818",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/semantic/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/ontologies",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/ontologies/2096862216729018369",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/validate",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/publish",
+      "status": 422
+    },
+    {
+      "method": "PUT",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/validate",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/publish",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/publish",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/publish",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/operations/fe513747563b45c7a66ed45e7963e423",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/semantic/ontologies/2096862216729018369/draft",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/ontologies/2096862216729018369/diff?from=2096862216783544321&to=2096862217093922818",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/semantic/ontologies/2096862216729018369/draft/publish",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/ontologies/2096862216729018369/revisions/2096862216783544321",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/semantic/ontologies/2096862216729018369/revisions",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/semantic/ontologies/2096862216729018369/revisions/2096862216783544321/availability",
+      "status": 200
+    }
+  ],
+  "immutableV1": true,
+  "idempotency": true,
+  "diff": {
+    "fromRevisionId": "2096862216783544321",
+    "toRevisionId": "2096862217093922818",
+    "changes": [
+      {
+        "kind": "MODIFIED",
+        "category": "types",
+        "key": "Equipment",
+        "before": {
+          "key": "Equipment",
+          "label": "设备",
+          "description": ""
+        },
+        "after": {
+          "key": "Equipment",
+          "label": "生产设备",
+          "description": ""
+        }
+      },
+      {
+        "kind": "MODIFIED",
+        "category": "metadata",
+        "key": "name",
+        "before": "API-M1-e48ac0",
+        "after": "API-M1-e48ac0 v2"
+      }
+    ]
+  }
+}

@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- 本轮用户只要求设计和计划，本文全部任务尚未执行；不能把复选框或样例代码当完成证据。
+- 2026-09-07已按用户授权完成M1（SEM-01～03），其余SEM-04～11尚未实施。M1验收见 ../../validation/ontology-m1/acceptance.md；复选框不能替代证据。
 - 代码基线为 `codex/enterprise-ui@04dde691`；实施前刷新 git 状态和迁移编号。
 - 只新增一个 Maven 模块；不在外部 Semantica4j 工作区实施，不导入其 BOM/实验 records。
 - core 生产依赖为 JDK-only；不新增生产库，测试复用仓库已有 JUnit/ArchUnit。
@@ -100,8 +100,8 @@ pnpm exec vite build --mode enterprise --outDir dist/enterprise
 
 **Interfaces**：输出总体设计 §4.2 的 validate 方法与类型。OntologyDefinition 由 types/properties/relations 三个不可变 List 构成。EntityTypeDefinition 参数为 key,label,description；RelationDefinition 为 key,label,description,sourceTypeKey,targetTypeKey,multiplicity；PropertyDefinition 为 key,label,description,ownerTypeKey,valueType,multiplicity,fixedUnit（Optional<String>）。
 
-- [ ] 建立上述 record/enum 的最小可编译契约和测试模块；测试只引入已有 JUnit，Server 复用已有 ArchUnit。
-- [ ] 写真实无效定义测试，再运行 core 测试确认失败：
+- [x] 建立上述 record/enum 的最小可编译契约和测试模块；测试只引入已有 JUnit，Server 复用已有 ArchUnit。
+- [x] 写真实无效定义测试，再运行 core 测试确认失败：
 
 ```java
 var definition = new OntologyDefinition(
@@ -111,10 +111,10 @@ var definition = new OntologyDefinition(
 assertFalse(new OntologyValidator().validate(definition).valid());
 ```
 
-- [ ] 实现重复 key、缺失起终点/所属类型、非法单位组合、空集合/长度上限、标识符校验；Violation 返回精确字段路径，如 `relations[0].targetTypeKey`。
-- [ ] 添加合法 Equipment/Component 本体、中文标签、不可变集合、相同 key 类型边界测试；ID 使用明确 record，拒绝空/负/带路径分隔符。
-- [ ] 架构测试扫描实际 core 类，先断言发现非零生产类，再禁止 Spring/MyBatis/Jackson/Spring AI/宿主包依赖；用 test fixture 的非法依赖证明规则可失败。
-- [ ] 运行 core 全测及 `SemanticCoreArchitectureTest`，记录测试数/报告；检查 root/server POM diff 仅是装配。提交意图：`Keep enterprise ontology rules independent of the host framework`。
+- [x] 实现重复 key、缺失起终点/所属类型、非法单位组合、空集合/长度上限、标识符校验；Violation 返回精确字段路径，如 `relations[0].targetTypeKey`。
+- [x] 添加合法 Equipment/Component 本体、中文标签、不可变集合、相同 key 类型边界测试；ID 使用明确 record，拒绝空/负/带路径分隔符。
+- [x] 架构测试扫描实际 core 类，先断言发现非零生产类，再禁止 Spring/MyBatis/Jackson/Spring AI/宿主包依赖；用 test fixture 的非法依赖证明规则可失败。
+- [x] 运行 core 全测及 `SemanticCoreArchitectureTest`，记录测试数/报告；检查 root/server POM diff 仅是装配。提交意图：`Keep enterprise ontology rules independent of the host framework`。
 
 ## SEM-02：本体草稿、发布、版本与权限 API
 
@@ -134,10 +134,10 @@ assertFalse(new OntologyValidator().validate(definition).valid());
 
 **Interfaces**：实现设计 §8 ontology/draft/validate/publish/revisions/diff/availability/operations 全部端点。SemanticHttpFixture 用现有用户/工作区服务建立 owner/member/viewer 和两个工作区，再通过真实 `/api/v1/auth/login` 取得 `bearer(role)`；测试密码只在测试内随机生成，不读取用户数据库。
 
-- [ ] 创建 HTTP 集成反例：viewer 保存被拒、缺 Scope 被拒、跨 workspace revision 404、同草稿并发保存仅一个成功、旧校验报告不能发布新内容。
-- [ ] 运行上述三个测试，确认失败理由是语义入口/规则缺失，不是测试数据库或认证准备失败。
-- [ ] 追加三方言 ontology/revision/command_record/governance_record 表；父行锁维护唯一活动草稿；编写空库和从 V190 升级的隔离数据库测试。保留旧迁移 SHA 清单作前后比较。
-- [ ] 实现草稿 CAS、基于稳定 key 的差异、发布时重验、精确版本只读、availability 治理；发布请求同 operationId 同 payload 回读原结果、异 payload 返回 409。
+- [x] 创建 HTTP 集成反例：viewer 保存被拒、缺 Scope 被拒、跨 workspace revision 404、同草稿并发保存仅一个成功、旧校验报告不能发布新内容。
+- [x] 运行上述三个测试，确认失败理由是语义入口/规则缺失，不是测试数据库或认证准备失败。
+- [x] 追加三方言 ontology/revision/command_record/governance_record 表；父行锁维护唯一活动草稿；编写空库和从 V190 升级的隔离数据库测试。保留旧迁移 SHA 清单作前后比较。
+- [x] 实现草稿 CAS、基于稳定 key 的差异、发布时重验、精确版本只读、availability 治理；发布请求同 operationId 同 payload 回读原结果、异 payload 返回 409。
 
 ```java
 // 发布事务的必要顺序（调用均在 OntologyApplicationService 内实现）
@@ -147,9 +147,9 @@ requireValid(validator.validate(loadDraftDefinition(ontologyId)));
 // 发布版本、operationId 结果和治理记录同事务持久化；任一步失败全部回滚。
 ```
 
-- [ ] 增加 capability 映射；每 Controller 方法有角色注解，应用服务再次依据真实 principal/Scope 验证；模块默认关闭。SemanticExceptionHandler 限定语义 Controller，保留 HTTP 状态和 R envelope，422.data 带字段错误，409 带稳定冲突码。
-- [ ] 实现常驻status端点和业务端点条件装配；SemanticAuthorizationTest验证模块关闭时status仍能供登录用户读取，而ontology业务端点不可访问。UI不能只根据静态capabilities展示被关闭的入口。
-- [ ] 通过以下发布不可变性测试与故障注入：
+- [x] 增加 capability 映射；每 Controller 方法有角色注解，应用服务再次依据真实 principal/Scope 验证；模块默认关闭。SemanticExceptionHandler 限定语义 Controller，保留 HTTP 状态和 R envelope，422.data 带字段错误，409 带稳定冲突码。
+- [x] 实现常驻status端点和业务端点条件装配；SemanticAuthorizationTest验证模块关闭时status仍能供登录用户读取，而ontology业务端点不可访问。UI不能只根据静态capabilities展示被关闭的入口。
+- [x] 通过以下发布不可变性测试与故障注入：
 
 ```java
 var v1 = fixture.createAndPublishVoltageOntology();
@@ -162,7 +162,7 @@ assertEquals(1, fixture.publishedRevisionCount(v1.ontologyId()));
 
 测试 fixture 上述方法分别通过已定义 HTTP 端点创建/读取数据，failNextGovernanceInsert 仅替换测试 Bean 使插入抛错；其余 Mapper 和事务用真实 H2。另用 JDBC 回读，不只验证 HTTP 响应。
 
-- [ ] 三个测试绿灯且版本/治理记录原子回读；记录 MySQL 方言待 SEM-11 真环境验证；提交意图：`Make ontology publication durable and scoped to its workspace`。
+- [x] 三个测试绿灯且版本/治理记录原子回读；记录 MySQL 方言待 SEM-11 真环境验证；提交意图：`Make ontology publication durable and scoped to its workspace`。
 
 ## SEM-03：本体管理界面完整闭环
 
@@ -180,8 +180,8 @@ assertEquals(1, fixture.publishedRevisionCount(v1.ontologyId()));
 
 feature状态由 `mateclaw-ui/src/features/semantic/shared/useSemanticAvailability.ts`（新建）读取受认证status端点；菜单及新路由同时要求 enabled 与相应capability，失败时不默认开启。它不复制角色到capability映射。
 
-- [ ] 用 Vitest 写并发409后表单仍保留、校验报告过期、超大字符串ID不变、工作区切换取消旧结果四个测试；Element Plus 交互测试用 Vue createApp+happy-dom，不新增测试框架。
-- [ ] 跑这三类测试得到真实红灯，再实现 feature API 解包 R.data、结构化错误和草稿 composable。
+- [x] 用 Vitest 写并发409后表单仍保留、校验报告过期、超大字符串ID不变、工作区切换取消旧结果四个测试；Element Plus 交互测试用 Vue createApp+happy-dom，不新增测试框架。
+- [x] 跑这三类测试得到真实红灯，再实现 feature API 解包 R.data、结构化错误和草稿 composable。
 
 ```ts
 // ontologyDraft 测试中的已有接口 mock 与真正 composable 状态交互。
@@ -194,10 +194,10 @@ expect(draft.saveError.value?.code).toBe('DRAFT_VERSION_CONFLICT')
 
 测试建立的 api mock 提供与 ontologyApi 相同的方法；draft 由 useOntologyDraft 注入 api 测试依赖创建，所有测试运行真实状态管理逻辑。
 
-- [ ] 实现列表、表单/Drawer 类型维护、字段错误定位、版本差异和发布面板；已发布页面只读，主操作为建立新草稿；无引用的草稿删除可操作，有引用的定义先提示并阻止非法删除。
-- [ ] 挂接路线、三个 ontology capabilities 和双语文案；MainLayout 的局部 capability union 如仍重复需同步加入新值，勿改造整个导航。复用企业 tokens，不添加主题字面量或第二个 Axios 实例。
-- [ ] 运行定向 Vitest、vue-tsc、feature ESLint；启动隔离后端，用真实登录手工/浏览器自动化创建发布 v1、从 v1 建草稿发布 v2、刷新回读及历史差异。保存认证截图和 API 回读证据。
-- [ ] 记录本体可管理、图绑定未交付的阶段边界；提交意图：`Let administrators maintain ontology versions without editing code`。
+- [x] 实现列表、表单/Drawer 类型维护、字段错误定位、版本差异和发布面板；已发布页面只读，主操作为建立新草稿；无引用的草稿删除可操作，有引用的定义先提示并阻止非法删除。
+- [x] 挂接路线、三个 ontology capabilities 和双语文案；MainLayout 的局部 capability union 如仍重复需同步加入新值，勿改造整个导航。复用企业 tokens，不添加主题字面量或第二个 Axios 实例。
+- [x] 运行定向 Vitest、vue-tsc、feature ESLint；启动隔离后端，用真实登录手工/浏览器自动化创建发布 v1、从 v1 建草稿发布 v2、刷新回读及历史差异。保存认证截图和 API 回读证据。
+- [x] 记录本体可管理、图绑定未交付的阶段边界；提交意图：`Let administrators maintain ontology versions without editing code`。
 
 ## SEM-04：知识库图绑定、实体身份与 UI 入口
 
@@ -491,3 +491,7 @@ Scope-risk: narrow
 - 计划的路径/接口/验收为待实现契约；现有文件与新建文件已区分。编号V191～V194是当前V190基线下的提案，实施时必须重新分配未占用编号。
 - 编写阶段只检查文档引用、一致性和需求覆盖，不运行应用测试，不称上述任务已完成。
 - 已完成一次独立审查与限定范围复核，修正证据创建入口、审核队列回读、共享Entity依赖、候选间冲突及并发resolve语义；复核未发现这些范围内的剩余重大矛盾。文档链接和11项任务编号检查通过，实施复选框均保持未完成。
+
+## 2026-09-07 执行状态
+
+M1（SEM-01～03）已完成，用户追加的名称/描述上下两行也已实现。前述“编写阶段”说明是初始计划记录；当前状态以本节及[验收记录](../../validation/ontology-m1/acceptance.md)为准。SEM-04～11未实施，未将整个企业图谱目标标记为完成。
