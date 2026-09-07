@@ -1,4 +1,7 @@
 .semantic-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   padding: 24px;
   max-width: 1440px;
   margin: 0 auto;
@@ -40,7 +43,7 @@
 }
 .semantic-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 .semantic-page .el-table {
@@ -67,9 +70,6 @@
 @media (max-width: 720px) {
   .semantic-page {
     padding: 16px;
-  }
-  .semantic-grid {
-    grid-template-columns: 1fr;
   }
   .semantic-header {
     align-items: flex-start;
