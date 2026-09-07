@@ -35,6 +35,7 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es/components/table/index')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es/components/tabs/index')['ElTabPane']
     ElTabs: typeof import('element-plus/es/components/tabs/index')['ElTabs']
+    ElTag: typeof import('element-plus/es/components/tag/index')['ElTag']
     ElTooltip: typeof import('element-plus/es/components/tooltip/index')['ElTooltip']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

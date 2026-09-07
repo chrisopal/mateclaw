@@ -74,6 +74,7 @@ public abstract class SemanticHttpFixture {
         "vip.mate.workspace.conversation.repository",
         "vip.mate.agent.repository",
         "vip.mate.semantic.ontology.repository",
+        "vip.mate.semantic.graph.repository",
         "vip.mate.semantic.statement.repository"
     })
     @Import({

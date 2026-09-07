@@ -20,6 +20,10 @@
           v-else
           :kb="store.currentKB"
         />
+        <KnowledgeBindingPanel
+          v-if="store.currentKB && store.workspaceMode === 'manage'"
+          :knowledge-base-id="String(store.currentKB.id)"
+        />
       </div>
     </div>
 
@@ -55,6 +59,7 @@ import { mcToast } from '@/composables/useMcToast'
 import WikiLibrary from './components/WikiLibrary.vue'
 import WikiWorkspace from './components/WikiWorkspace.vue'
 import WikiFailureCenter from './components/WikiFailureCenter.vue'
+import KnowledgeBindingPanel from '@/features/semantic/graph/KnowledgeBindingPanel.vue'
 import { openWikiFailureItem } from './utils/failureOpen'
 
 const route = useRoute()

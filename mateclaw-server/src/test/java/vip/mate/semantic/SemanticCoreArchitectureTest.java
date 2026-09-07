@@ -50,7 +50,11 @@ class SemanticCoreArchitectureTest {
             @Override
             public void check(JavaClass javaClass, ConditionEvents events) {
                 for (Dependency dependency : javaClass.getDirectDependenciesFromSelf()) {
-                    String target = dependency.getTargetClass().getBaseComponentType().getName();
+                    JavaClass targetClass = dependency.getTargetClass().getBaseComponentType();
+                    if (targetClass.isPrimitive()) {
+                        continue;
+                    }
+                    String target = targetClass.getName();
                     if (isAllowed(target)) {
                         continue;
                     }

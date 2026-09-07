@@ -15,6 +15,7 @@ import java.util.*;
         basePackageClasses = {OntologyController.class, SemanticStatusController.class})
 @Order(-100)
 public class SemanticExceptionHandler {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SemanticExceptionHandler.class);
     @ExceptionHandler(SemanticApiException.class)
     public ResponseEntity<R<Object>> semantic(SemanticApiException e) {
         return error(e.status(), e.code(), e.getMessage(), e.fieldErrors());
@@ -46,6 +47,7 @@ public class SemanticExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<R<Object>> unexpected(Exception e) {
+        log.error("Semantic operation failed", e);
         return error(500, "INTERNAL_ERROR", "Semantic operation failed", List.of());
     }
 

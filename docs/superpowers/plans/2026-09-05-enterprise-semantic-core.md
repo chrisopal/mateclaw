@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- 2026-09-07已按用户授权完成M1（SEM-01～03），其余SEM-04～11尚未实施。M1验收见 ../../validation/ontology-m1/acceptance.md；复选框不能替代证据。
+- 2026-09-07已完成M1（SEM-01～03）并推进M2（SEM-04～08）的代码、H2集成和双UI profile验证。M1/M2验收分别见 ../../validation/ontology-m1/acceptance.md 与 ../../validation/ontology-m2/acceptance.md；MySQL/Kingbase、完整浏览器业务链和M3仍按验收记录边界处理，复选框不能替代证据。
 - 代码基线为 `codex/enterprise-ui@04dde691`；实施前刷新 git 状态和迁移编号。
 - 只新增一个 Maven 模块；不在外部 Semantica4j 工作区实施，不导入其 BOM/实验 records。
 - core 生产依赖为 JDK-only；不新增生产库，测试复用仓库已有 JUnit/ArchUnit。
@@ -494,4 +494,4 @@ Scope-risk: narrow
 
 ## 2026-09-07 执行状态
 
-M1（SEM-01～03）已完成，用户追加的名称/描述上下两行也已实现。前述“编写阶段”说明是初始计划记录；当前状态以本节及[验收记录](../../validation/ontology-m1/acceptance.md)为准。SEM-04～11未实施，未将整个企业图谱目标标记为完成。
+M1（SEM-01～03）已完成，用户追加的名称/描述上下两行也已实现。M2（SEM-04～08）已实现主数据链并通过H2、核心、授权、迁移和UI自动化验证；最终运行态回读及未覆盖数据库见[M2验收记录](../../validation/ontology-m2/acceptance.md)。SEM-09～11尚未实施，未将整个企业图谱产品标记为完成。

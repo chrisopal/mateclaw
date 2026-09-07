@@ -83,3 +83,29 @@ export interface PublishDraft {
   operationId: string
   note: string
 }
+
+export interface Binding {
+  graphId: string
+  workspaceId: string
+  knowledgeBaseId: string
+  ontologyRevisionId: string
+  ontologyVersion: number
+  enabled: boolean
+  graphVersion: number
+  empty: boolean
+  updatedAt: string
+}
+export interface BindRequest {
+  action: 'ENABLE' | 'DISABLE' | 'REBIND'
+  revisionId?: string
+  expectedGraphVersion?: number
+}
+export interface SemanticEntity {
+  id: string
+  graphId: string
+  typeKey: string
+  displayName: string
+  status: string
+  createdAt: string
+}
+export interface EntityPage { items: SemanticEntity[] }

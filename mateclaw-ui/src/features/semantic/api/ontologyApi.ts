@@ -24,7 +24,7 @@ export function scopedConfig(workspaceId: string, signal?: AbortSignal): AxiosRe
   }
   return { signal, transformRequest: [pinWorkspace, ...transforms] }
 }
-async function request<T>(workspaceId: string, config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
+export async function semanticRequest<T>(workspaceId: string, config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
   try {
     const envelope = await http.request<unknown, { data: T }>({
       ...config,
@@ -41,36 +41,36 @@ export const ontologyApi = {
     return result.data
   },
   list: (ws: string, q = '', page = 1, signal?: AbortSignal) =>
-    request<Page>(ws, { url: '/semantic/ontologies', params: { q, page, pageSize: 20 } }, signal),
+    semanticRequest<Page>(ws, { url: '/semantic/ontologies', params: { q, page, pageSize: 20 } }, signal),
   create: (ws: string, body: Metadata, signal?: AbortSignal) =>
-    request<Ontology>(ws, { url: '/semantic/ontologies', method: 'POST', data: body }, signal),
-  get: (ws: string, id: string, signal?: AbortSignal) => request<Ontology>(ws, { url: path(id) }, signal),
+    semanticRequest<Ontology>(ws, { url: '/semantic/ontologies', method: 'POST', data: body }, signal),
+  get: (ws: string, id: string, signal?: AbortSignal) => semanticRequest<Ontology>(ws, { url: path(id) }, signal),
   createDraft: (ws: string, id: string, baseRevisionId: string | null = null, signal?: AbortSignal) =>
-    request<Draft>(ws, { url: `${path(id)}/draft`, method: 'POST', data: { baseRevisionId } }, signal),
+    semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'POST', data: { baseRevisionId } }, signal),
   getDraft: (ws: string, id: string, signal?: AbortSignal) =>
-    request<Draft>(ws, { url: `${path(id)}/draft` }, signal),
+    semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>
-    request<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
+    semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
   discard: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
-    request<void>(
+    semanticRequest<void>(
       ws,
       { url: `${path(id)}/draft`, method: 'DELETE', params: { expectedDraftVersion } },
       signal,
     ),
   validate: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
-    request<ValidationReport>(
+    semanticRequest<ValidationReport>(
       ws,
       { url: `${path(id)}/draft/validate`, method: 'POST', data: { expectedDraftVersion } },
       signal,
     ),
   publish: (ws: string, id: string, body: PublishDraft, signal?: AbortSignal) =>
-    request<Revision>(ws, { url: `${path(id)}/draft/publish`, method: 'POST', data: body }, signal),
+    semanticRequest<Revision>(ws, { url: `${path(id)}/draft/publish`, method: 'POST', data: body }, signal),
   revisions: (ws: string, id: string, signal?: AbortSignal) =>
-    request<Revision[]>(ws, { url: `${path(id)}/revisions` }, signal),
+    semanticRequest<Revision[]>(ws, { url: `${path(id)}/revisions` }, signal),
   revision: (ws: string, id: string, revisionId: string, signal?: AbortSignal) =>
-    request<Revision>(ws, { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}` }, signal),
+    semanticRequest<Revision>(ws, { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}` }, signal),
   diff: (ws: string, id: string, from: string | null, to: string, signal?: AbortSignal) =>
-    request<Diff>(ws, { url: `${path(id)}/diff`, params: { from: from || undefined, to } }, signal),
+    semanticRequest<Diff>(ws, { url: `${path(id)}/diff`, params: { from: from || undefined, to } }, signal),
   availability: (
     ws: string,
     id: string,
@@ -78,7 +78,7 @@ export const ontologyApi = {
     availableForNewBindings: boolean,
     signal?: AbortSignal,
   ) =>
-    request<Revision>(
+    semanticRequest<Revision>(
       ws,
       {
         url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}/availability`,
@@ -88,7 +88,7 @@ export const ontologyApi = {
       signal,
     ),
   operation: (ws: string, operationId: string, signal?: AbortSignal) =>
-    request<{ operationId: string; kind: string; resourceId: string; result: Revision }>(
+    semanticRequest<{ operationId: string; kind: string; resourceId: string; result: Revision }>(
       ws,
       { url: `/semantic/operations/${encodeURIComponent(operationId)}` },
       signal,
