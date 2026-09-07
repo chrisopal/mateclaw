@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/semantic")
-@ConditionalOnProperty(name = "semantic.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "mateclaw.semantic.enabled", havingValue = "true")
 public class OntologyController {
     private final OntologyApplicationService service;
 

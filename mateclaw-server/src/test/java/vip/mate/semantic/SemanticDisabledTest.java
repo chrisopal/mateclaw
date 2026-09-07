@@ -9,7 +9,7 @@ import vip.mate.semantic.support.SemanticHttpFixture;
 
 @TestPropertySource(
         properties = {
-            "semantic.enabled=false",
+            "mateclaw.semantic.enabled=false",
             "spring.datasource.url=jdbc:h2:mem:semantic_disabled;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1"
         })
 class SemanticDisabledTest extends SemanticHttpFixture {

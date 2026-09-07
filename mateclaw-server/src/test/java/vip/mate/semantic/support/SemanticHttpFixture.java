@@ -46,7 +46,7 @@ import java.util.*;
             "spring.datasource.url=jdbc:h2:mem:semantic_http;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000",
             "spring.datasource.username=sa",
             "spring.datasource.password=",
-            "semantic.enabled=true",
+            "mateclaw.semantic.enabled=true",
             "spring.profiles.active=semantic-test",
             "spring.flyway.locations=classpath:db/migration/h2",
             "spring.flyway.placeholder-replacement=false",

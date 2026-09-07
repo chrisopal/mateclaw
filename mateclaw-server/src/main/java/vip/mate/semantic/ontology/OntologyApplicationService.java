@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
-@ConditionalOnProperty(name = "semantic.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "mateclaw.semantic.enabled", havingValue = "true")
 public class OntologyApplicationService {
     private final OntologyMapper mapper;
     private final CommandRecordMapper commands;

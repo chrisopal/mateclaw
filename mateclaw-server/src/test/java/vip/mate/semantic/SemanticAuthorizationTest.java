@@ -10,6 +10,12 @@ import java.util.Map;
 
 class SemanticAuthorizationTest extends SemanticHttpFixture {
     @Test
+    void approvedFeaturePropertyEnablesStatusAndBusinessRoutes() throws Exception {
+        assertTrue(call("GET", "/status", "viewer", null, null, 200).path("enabled").asBoolean());
+        call("GET", "/ontologies", "viewer", workspace, null, 200);
+    }
+
+    @Test
     void activePrincipalAndCurrentPermissionRequiredForReplayAndOperations() throws Exception {
         String id = create();
         draft(id);
