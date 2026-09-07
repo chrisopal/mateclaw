@@ -1,0 +1,77 @@
+.semantic-page {
+  padding: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  color: var(--mc-text-primary);
+}
+.semantic-header,
+.semantic-toolbar,
+.semantic-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.semantic-header {
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.semantic-header h1 {
+  font-size: 20px;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.semantic-muted {
+  color: var(--mc-text-secondary);
+  font-size: 13px;
+}
+.semantic-panel {
+  background: var(--mc-bg-elevated);
+  border: 1px solid var(--mc-border);
+  border-radius: var(--el-border-radius-base);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.semantic-toolbar {
+  margin-bottom: 16px;
+}
+.semantic-toolbar .el-input {
+  max-width: 320px;
+}
+.semantic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.semantic-page .el-table {
+  width: 100%;
+}
+.semantic-page .el-alert {
+  margin-bottom: 16px;
+}
+.semantic-page pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.semantic-drawer {
+  width: min(560px, 100vw) !important;
+}
+.semantic-drawer .el-select {
+  width: 100%;
+}
+.semantic-field-error {
+  color: var(--el-color-danger);
+  font-size: 12px;
+}
+@media (max-width: 720px) {
+  .semantic-page {
+    padding: 16px;
+  }
+  .semantic-grid {
+    grid-template-columns: 1fr;
+  }
+  .semantic-header {
+    align-items: flex-start;
+  }
+}

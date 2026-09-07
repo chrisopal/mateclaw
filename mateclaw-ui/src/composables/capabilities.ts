@@ -9,6 +9,9 @@
  */
 
 export type Capability =
+  | 'view:ontology'
+  | 'manage:ontology'
+  | 'publish:ontology'
   | 'chat'
   | 'view:wiki'
   | 'view:memory'

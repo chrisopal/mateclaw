@@ -39,7 +39,17 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   // half-initialized store.
   const currentCapabilities = ref<Set<Capability>>(new Set())
   const accessLoaded = ref(false)
-  let accessInFlight: Promise<void> | null = null
+  let accessInFlight: { id: string; promise: Promise<void> } | null = null
+  let accessGeneration = 0
+  let switchGeneration = 0
+  const beforeSwitch = new Set<(id: string) => boolean | Promise<boolean>>()
+
+  function registerBeforeSwitch(guard: (id: string) => boolean | Promise<boolean>) {
+    beforeSwitch.add(guard)
+    return () => {
+      beforeSwitch.delete(guard)
+    }
+  }
 
   const currentWorkspace = computed(() =>
     workspaces.value.find((ws) => ws.id === currentWorkspaceId.value) || workspaces.value[0] || null
@@ -68,21 +78,29 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       accessLoaded.value = true
       return
     }
-    if (accessInFlight) return accessInFlight
-    accessInFlight = (async () => {
+    if (accessInFlight?.id === id) return accessInFlight.promise
+    const generation = ++accessGeneration
+    const promise = (async () => {
       try {
         const res: any = await workspaceTeamApi.getAccess(id)
         const caps: string[] = res?.data?.capabilities || []
-        currentCapabilities.value = new Set(caps as Capability[])
+        if (generation === accessGeneration && id === currentWorkspaceId.value) {
+          currentCapabilities.value = new Set(caps as Capability[])
+        }
       } catch (e) {
         console.warn('Failed to fetch workspace access:', e)
-        currentCapabilities.value = new Set()
+        if (generation === accessGeneration && id === currentWorkspaceId.value) {
+          currentCapabilities.value = new Set()
+        }
       } finally {
-        accessLoaded.value = true
-        accessInFlight = null
+        if (generation === accessGeneration && id === currentWorkspaceId.value) {
+          accessLoaded.value = true
+          accessInFlight = null
+        }
       }
     })()
-    return accessInFlight
+    accessInFlight = { id, promise }
+    return promise
   }
 
   async function fetchWorkspaces() {
@@ -108,6 +126,17 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   }
 
   async function switchWorkspace(id: string) {
+    const generation = ++switchGeneration
+    if (id !== currentWorkspaceId.value) {
+      for (const guard of beforeSwitch) {
+        try {
+          if (!await guard(id)) return
+        } catch {
+          return
+        }
+        if (generation !== switchGeneration) return
+      }
+    }
     currentWorkspaceId.value = id
     localStorage.setItem('mc-workspace-id', id)
     accessLoaded.value = false
@@ -129,6 +158,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     fetchWorkspaces,
     switchWorkspace,
     refreshAccess,
+    registerBeforeSwitch,
   }
 })
 

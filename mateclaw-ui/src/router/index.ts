@@ -3,10 +3,13 @@ import { ElMessage } from 'element-plus'
 import type { Capability } from '@/composables/capabilities'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { i18n } from '@/i18n'
+import { semanticRoutes } from '@/features/semantic/routes'
+import { useSemanticAvailability } from '@/features/semantic/shared/useSemanticAvailability'
 
 // Augment vue-router's RouteMeta so each route can declare its capability gate.
 declare module 'vue-router' {
   interface RouteMeta {
+    semantic?: boolean
     title?: string
     keepAlive?: boolean
     requireAdmin?: boolean
@@ -22,6 +25,7 @@ const router = createRouter({
       component: () => import('@/views/layout/MainLayout.vue'),
       redirect: '/chat',
       children: [
+        ...semanticRoutes,
         // ==================== Core ====================
         {
           path: 'chat',
@@ -377,7 +381,7 @@ const router = createRouter({
 // to a protected route (the store enforces default-deny while accessLoaded is
 // false; we await refreshAccess so the decision is made on real data).
 router.beforeEach(async (to) => {
-  if (import.meta.env.VITE_SKIP_AUTH === 'true') return true
+  if (import.meta.env.VITE_SKIP_AUTH === 'true' && !to.meta.semantic) return true
   const token = localStorage.getItem('token')
 
   if (to.name === 'Login' && token) return { path: '/' }
@@ -392,6 +396,8 @@ router.beforeEach(async (to) => {
       await store.refreshAccess()
     }
   }
+
+  if (to.meta.semantic && !await useSemanticAvailability().refresh()) return { path: '/forbidden' }
 
   const requireAdmin = to.meta.requireAdmin === true
   if (requireAdmin && !store.isGlobalAdmin) {

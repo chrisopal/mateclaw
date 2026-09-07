@@ -246,6 +246,7 @@ import { http, settingsApi, setupApi, approvalApi } from '@/api/index'
 import type { ActiveGrantsSummary } from '@/types'
 import OnboardingWizard from '@/views/Onboarding/OnboardingWizard.vue'
 import DoctorDrawer from '@/views/Doctor/DoctorDrawer.vue'
+import { useSemanticAvailability } from '@/features/semantic/shared/useSemanticAvailability'
 import WorkspaceSwitcher from '@/components/workspace/WorkspaceSwitcher.vue'
 import NavBadge from '@/components/common/NavBadge.vue'
 import McTooltip from '@/components/common/McTooltip.vue'
@@ -261,6 +262,8 @@ const route = useRoute()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const workspaceStore = useWorkspaceStore()
+const semanticAvailability = useSemanticAvailability()
+void semanticAvailability.refresh()
 const sidebarCollapsed = ref(localStorage.getItem('mc-sidebar-collapsed') === 'true')
 const footerPanelOpen = ref(false)
 
@@ -447,6 +450,9 @@ type NavItem = {
   icon: string
   tooltip?: string
   requiredCapability?:
+    | 'view:ontology'
+    | 'manage:ontology'
+    | 'publish:ontology'
     | 'chat'
     | 'view:wiki'
     | 'view:memory'
@@ -466,6 +472,7 @@ function filterNav(items: NavItem[]): NavItem[] {
   // than flashing the full menu before refreshAccess() returns.
   if (!workspaceStore.accessLoaded) return []
   return items.filter((item) => {
+    if (item.path.startsWith('/semantic') && !semanticAvailability.enabled.value) return false
     if (item.globalAdmin) return workspaceStore.isGlobalAdmin
     if (item.requiredCapability && !workspaceStore.can(item.requiredCapability as never)) return false
     return true
@@ -506,6 +513,12 @@ const navGroups = computed(() => [
         label: t('nav.wiki'),
         icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
         requiredCapability: 'view:wiki',
+      },
+      {
+        path: '/semantic/ontologies',
+        label: t('semantic.title'),
+        requiredCapability: 'view:ontology',
+        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="6"/><path d="M12 8v5M5 13h14M5 13v3M19 13v3"/><rect x="2" y="16" width="6" height="6"/><rect x="16" y="16" width="6" height="6"/></svg>',
       },
       {
         path: '/memory',
@@ -593,6 +606,9 @@ function toggleSidebar() {
 }
 
 function isNavItemActive(item: { path: string; label: string }) {
+  if (item.path === '/semantic/ontologies') {
+    return route.path.startsWith('/semantic/ontologies')
+  }
   if (item.path.startsWith('/settings')) {
     return route.path.startsWith('/settings')
   }
