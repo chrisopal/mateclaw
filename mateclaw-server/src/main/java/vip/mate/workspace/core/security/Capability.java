@@ -15,6 +15,10 @@ public final class Capability {
 
     private Capability() {}
 
+    public static final String VIEW_ONTOLOGY = "view:ontology";
+    public static final String MANAGE_ONTOLOGY = "manage:ontology";
+    public static final String PUBLISH_ONTOLOGY = "publish:ontology";
+
     /** Conversation runtime: send/stream/execute + own conversation read/write. */
     public static final String CHAT = "chat";
 

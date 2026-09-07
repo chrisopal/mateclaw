@@ -26,16 +26,19 @@ public final class RoleCapabilities {
     static {
         Set<String> viewer = new LinkedHashSet<>();
         viewer.add(Capability.CHAT);
+        viewer.add(Capability.VIEW_ONTOLOGY);
         viewer.add(Capability.VIEW_WIKI);
 
         Set<String> member = new LinkedHashSet<>(viewer);
         member.add(Capability.VIEW_MEMORY);
+        member.add(Capability.MANAGE_ONTOLOGY);
         member.add(Capability.VIEW_DASHBOARD);
         member.add(Capability.MANAGE_WIKI);
         member.add(Capability.MANAGE_AGENTS);
 
         Set<String> admin = new LinkedHashSet<>(member);
         admin.add(Capability.MANAGE_SKILLS);
+        admin.add(Capability.PUBLISH_ONTOLOGY);
         admin.add(Capability.MANAGE_CHANNELS);
         admin.add(Capability.MANAGE_MODELS);
         admin.add(Capability.MANAGE_SECURITY);
