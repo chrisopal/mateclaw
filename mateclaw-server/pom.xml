@@ -18,6 +18,11 @@
     <description>MateClaw - Java+Vue Personal AI Assistant powered by Spring AI Alibaba</description>
 
     <dependencies>
+        <dependency>
+            <groupId>vip.mate</groupId>
+            <artifactId>mateclaw-semantic-core</artifactId>
+        </dependency>
+
         <!-- ===== MateClaw Plugin API ===== -->
         <dependency>
             <groupId>vip.mate</groupId>

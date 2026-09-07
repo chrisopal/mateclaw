@@ -15,6 +15,7 @@
     <!-- Reactor modules. Keep plugin-api before consumers for predictable local builds. -->
     <modules>
         <module>mateclaw-plugin-api</module>
+        <module>mateclaw-semantic-core</module>
         <module>mateclaw-server</module>
         <module>mateclaw-plugin-sample</module>
         <module>mateclaw-plugin-search-sample</module>
@@ -108,6 +109,11 @@
             <dependency>
                 <groupId>vip.mate</groupId>
                 <artifactId>mateclaw-plugin-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>vip.mate</groupId>
+                <artifactId>mateclaw-semantic-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
