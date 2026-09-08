@@ -1,0 +1,86 @@
+[
+  {
+    "line": "30px",
+    "size": "20px",
+    "text": "M5 质量知识生成验收",
+    "weight": "600"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "版本 v1 · M5 质量知识生成验收",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "对象关系图",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "生产批次",
+    "weight": "600"
+  },
+  {
+    "line": "15px",
+    "size": "10px",
+    "text": "Batch",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "加工设备",
+    "weight": "600"
+  },
+  {
+    "line": "15px",
+    "size": "10px",
+    "text": "Equipment",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "质量问题",
+    "weight": "600"
+  },
+  {
+    "line": "15px",
+    "size": "10px",
+    "text": "QualityIssue",
+    "weight": "400"
+  },
+  {
+    "line": "18px",
+    "size": "12px",
+    "text": "尺寸偏差: 数值",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "根因",
+    "weight": "600"
+  },
+  {
+    "line": "15px",
+    "size": "10px",
+    "text": "Cause",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "比较版本",
+    "weight": "400"
+  },
+  {
+    "line": "21px",
+    "size": "14px",
+    "text": "使用情况",
+    "weight": "400"
+  }
+]

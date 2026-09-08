@@ -88,3 +88,6 @@
 
 .semantic-impact-report { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--mc-border); }
 .semantic-impact-counts { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 12px 0; font-size: 13px; }
+
+.ontology-draft-graph { margin: 16px 0; }
+.ontology-draft-graph > summary { cursor: pointer; color: var(--mc-text-primary); padding: 10px 0; font-weight: 600; }

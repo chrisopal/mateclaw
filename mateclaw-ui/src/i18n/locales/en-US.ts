@@ -1,5 +1,19 @@
 export default {
   semantic: {
+    structure: {
+      "title": "Object relationship map",
+      "help": "Cards show types and property summaries; arrows show relationships. Select a type for full details. Drag to pan and use the zoom controls. This is the model, not business records.",
+      "empty": "No object types yet. Add a type to get started.",
+      "selectType": "Inspect object type",
+      "selectPrompt": "Select type",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "reset": "Fit to view",
+      "noProperties": "This type has no properties yet.",
+      "noRelations": "This type has no relationships yet.",
+      "invalidReferences": "{count} references point to missing types. Correct them to show the complete map.",
+      "draftPreview": "Object relationship map · draft preview"
+},
     termKinds: { TYPE: 'Type', PROPERTY: 'Property', RELATION: 'Relation' },
     changeReasons: {
       ALIASES_CHANGED: 'Aliases changed',

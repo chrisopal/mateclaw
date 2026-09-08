@@ -7,6 +7,7 @@ import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { Ontology, Revision, Diff } from '../api/types'
 import OntologyImpactPanel from './components/OntologyImpactPanel.vue'
+import OntologyStructureGraph from './components/OntologyStructureGraph.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import './semantic.css'
 const { t, locale } = useI18n(),
@@ -154,7 +155,6 @@ onMounted(load)
     <header class="semantic-header">
       <div>
         <h1>{{ ontology?.name || t('semantic.history') }}</h1>
-        <span class="semantic-muted">{{ t('semantic.historyHelp') }}</span>
       </div>
       <div class="semantic-actions">
         <el-button @click="router.push({ name: 'OntologyList' })">{{ t('semantic.back') }}</el-button
@@ -218,6 +218,7 @@ onMounted(load)
         {{ t('semantic.publishedBy') }} {{ selected.publishedBy }} ·
         <span :title="selected.publishedAt">{{ displayTime(selected.publishedAt) }}</span>
       </p>
+      <OntologyStructureGraph :key="selected.id" :definition="selected.definition" />
       <el-tabs
         ><el-tab-pane
           v-for="category in ['types', 'properties', 'relations'] as const"

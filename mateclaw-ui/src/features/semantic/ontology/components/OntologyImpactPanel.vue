@@ -126,7 +126,6 @@ onMounted(load)
     <div class="semantic-header">
       <div>
         <h3>{{ t('semantic.usage') }}</h3>
-        <p class="semantic-muted">{{ t('semantic.usageHelp') }}</p>
       </div>
       <el-tag v-if="targetReady" type="info">{{ targetLabel }}</el-tag>
     </div>

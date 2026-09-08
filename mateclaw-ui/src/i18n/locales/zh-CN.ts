@@ -1,5 +1,19 @@
 export default {
   semantic: {
+    structure: {
+      "title": "对象关系图",
+      "help": "卡片展示对象类型与属性摘要，箭头表示类型之间的关系。选择类型可查看全部属性；可拖动画布和缩放。这里展示模型定义，不是实际业务数据。",
+      "empty": "还没有对象类型，请先添加类型。",
+      "selectType": "查看对象类型",
+      "selectPrompt": "选择类型",
+      "zoomOut": "缩小",
+      "zoomIn": "放大",
+      "reset": "适应画布",
+      "noProperties": "这个类型还没有属性。",
+      "noRelations": "这个类型还没有关联关系。",
+      "invalidReferences": "有 {count} 项引用的类型不存在，修正后才能完整显示。",
+      "draftPreview": "对象关系图 · 草稿预览"
+},
     termKinds: { TYPE: '类型', PROPERTY: '属性', RELATION: '关系' },
     changeReasons: {
       ALIASES_CHANGED: '别名调整',

@@ -13,6 +13,7 @@ import RelationEditor from './components/RelationEditor.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
 import PublishDialog from './components/PublishDialog.vue'
 import OntologyImpactPanel from './components/OntologyImpactPanel.vue'
+import OntologyStructureGraph from './components/OntologyStructureGraph.vue'
 import './semantic.css'
 const { t } = useI18n(),
   route = useRoute(),
@@ -312,6 +313,10 @@ onMounted(draft.load)
               ><el-input id="ontology-description" v-model="description" type="textarea" :rows="2"
             /></el-form-item></div
         ></el-form>
+        <details class="ontology-draft-graph">
+          <summary>{{ t('semantic.structure.draftPreview') }}</summary>
+          <OntologyStructureGraph :definition="form" />
+        </details>
         <el-tabs v-model="tab"
           ><el-tab-pane
             v-for="category in ['types', 'properties', 'relations'] as const"
