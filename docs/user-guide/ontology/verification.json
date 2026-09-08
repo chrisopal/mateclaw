@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-08",
+  "baseline": "34a5f7d2",
+  "scope": "User manual and real screenshot case guide only",
+  "checks": {
+    "markdownLinks": "passed",
+    "jsonAttachments": "passed",
+    "actualV1TemplatePreview": "passed",
+    "htmlHeadingAnchors": 23,
+    "mainImagesDecoded": 22,
+    "missingMainImages": 0,
+    "desktop1440Overflow": false,
+    "mobile390Overflow": false,
+    "lightboxOpenClose": "passed",
+    "mobileMenuAndCaseNavigation": "passed",
+    "consoleErrorsAfterReload": 0
+  },
+  "visualVerdict": {
+    "score": 94,
+    "verdict": "pass",
+    "differences": [
+      "Long data tables scroll inside their container on mobile."
+    ],
+    "suggestions": []
+  },
+  "runtimeChanges": "No published ontology, fact, source, Agent or tool configuration changed. Candidate screenshot form was discarded without submission."
+}

@@ -27,6 +27,7 @@ vi.mock('../../api/ontologyApi', () => ({
     publish: vi.fn(),
     operation: vi.fn(),
     diff: vi.fn(),
+    ensureBuilder: vi.fn(),
   },
 }))
 const data = () => ({
@@ -134,6 +135,30 @@ it('renders the real list and submits a scoped search with page reset', async ()
   input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }))
   await flush()
   expect(ontologyApi.list).toHaveBeenLastCalledWith('1', 'Plant', 1, expect.any(AbortSignal))
+})
+it('launches the ontology builder from the list for members', async () => {
+  vi.mocked(ontologyApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
+  vi.mocked(ontologyApi.ensureBuilder).mockResolvedValue({ agentId: '9223372036854775807' })
+  await mount(['view:ontology', 'manage:ontology'], OntologyList)
+  const launch = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Generate from source'))!
+  launch.click()
+  await flush()
+  expect(ontologyApi.ensureBuilder).toHaveBeenCalledWith('1', expect.any(AbortSignal))
+})
+it('clears an in-flight builder launch when the workspace changes', async () => {
+  vi.mocked(ontologyApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
+  let resolveEnsure!: (value: { agentId: string }) => void
+  vi.mocked(ontologyApi.ensureBuilder).mockImplementation(() => new Promise((resolve) => { resolveEnsure = resolve }))
+  const store = await mount(['view:ontology', 'manage:ontology'], OntologyList)
+  const launch = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Generate from source'))!
+  launch.click()
+  await nextTick()
+  expect(launch.className).toContain('is-loading')
+  store.currentWorkspaceId = '2'
+  await nextTick()
+  expect(launch.className).not.toContain('is-loading')
+  resolveEnsure({ agentId: '9223372036854775807' })
+  await flush()
 })
 it('renders immutable version detail and compares saved revisions for viewers', async () => {
   const revision = {

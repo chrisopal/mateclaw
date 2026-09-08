@@ -1,0 +1,88 @@
+{
+  "id": "2097306729475047426",
+  "ontologyId": "2097306729470853121",
+  "baseRevisionId": null,
+  "version": 1,
+  "draftVersion": 2,
+  "name": "M6 本体建模验收 0908",
+  "description": "业务范围：批次、加工设备、质量问题及其调查原因。建模目标：描述哪个批次在哪台设备加工、发生什么问题、测量偏差及调查原因。来源：M5 质量知识生成验收 知识库中的 \"M5 synthetic quality report\"（sourceRef 2097201635608707074）。不把具体批次/设备编号（如 LOT-QA-0908、CNC-07）建模为类型；不猜测测量阈值；不创建实例知识。",
+  "definition": {
+    "types": [
+      {
+        "key": "Batch",
+        "label": "批次",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“批次 LOT-QA-0908 在设备 CNC-07 加工”；理由：资料将批次作为可识别加工对象，具体编号 LOT-QA-0908 是实例而非类型。",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "Equipment",
+        "label": "加工设备",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“批次 LOT-QA-0908 在设备 CNC-07 加工”；理由：资料将设备作为加工主体，具体编号 CNC-07 是实例而非类型。",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "QualityIssue",
+        "label": "质量问题",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“终检发现孔径超差”；理由：资料描述终检发现的质量偏差（孔径超差）作为待处理对象。",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "Cause",
+        "label": "调查原因",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“调查报告确认根因为刀具磨损”；理由：资料给出质量问题的根因（刀具磨损），作为调查原因维度建模。",
+        "aliases": [],
+        "deprecated": false
+      }
+    ],
+    "properties": [
+      {
+        "key": "dimensionDeviation",
+        "label": "尺寸偏差",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“尺寸偏差为 0.08 mm”；理由：资料给出质量问题的测量偏差数值，单位 mm 明确；具体值 0.08 是实例，未给出通用阈值故不设约束。",
+        "ownerTypeKey": "QualityIssue",
+        "valueType": "DECIMAL",
+        "multiplicity": "SINGLE",
+        "fixedUnit": "mm",
+        "aliases": [],
+        "deprecated": false,
+        "constraints": null
+      }
+    ],
+    "relations": [
+      {
+        "key": "processedOn",
+        "label": "在…上加工",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“批次 LOT-QA-0908 在设备 CNC-07 加工”；理由：连接批次与加工设备，描述批次在哪台设备加工。",
+        "sourceTypeKey": "Batch",
+        "targetTypeKey": "Equipment",
+        "multiplicity": "SINGLE",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "experiencedIssue",
+        "label": "发生质量问题",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“终检发现孔径超差”；理由：连接批次与质量问题，描述该批次发生的问题。",
+        "sourceTypeKey": "Batch",
+        "targetTypeKey": "QualityIssue",
+        "multiplicity": "MULTI",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "causedBy",
+        "label": "由原因导致",
+        "description": "来源：WIKI_RAW/2097201635608707074；摘要：sha256:223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282；原文：“调查报告确认根因为刀具磨损”；理由：连接质量问题与调查原因，描述问题由何种原因导致。",
+        "sourceTypeKey": "QualityIssue",
+        "targetTypeKey": "Cause",
+        "multiplicity": "MULTI",
+        "aliases": [],
+        "deprecated": false
+      }
+    ],
+    "definitionFormatVersion": 2
+  }
+}

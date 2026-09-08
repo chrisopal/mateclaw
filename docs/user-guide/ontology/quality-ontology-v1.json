@@ -1,0 +1,88 @@
+{
+  "packageFormatVersion": 1,
+  "name": "质量根因分析 · 尺寸超差",
+  "description": "批次—设备—质量问题—有证据的根因",
+  "source": {
+    "ontologyName": "质量根因分析 · 尺寸超差",
+    "version": 1
+  },
+  "definition": {
+    "types": [
+      {
+        "key": "Batch",
+        "label": "生产批次",
+        "description": "",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "Equipment",
+        "label": "加工设备",
+        "description": "",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "QualityIssue",
+        "label": "质量问题",
+        "description": "",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "Cause",
+        "label": "根因",
+        "description": "",
+        "aliases": [],
+        "deprecated": false
+      }
+    ],
+    "properties": [
+      {
+        "key": "deviation",
+        "label": "尺寸偏差",
+        "description": "实测相对名义尺寸偏差",
+        "ownerTypeKey": "QualityIssue",
+        "valueType": "DECIMAL",
+        "multiplicity": "SINGLE",
+        "fixedUnit": "mm",
+        "aliases": [],
+        "deprecated": false,
+        "constraints": null
+      }
+    ],
+    "relations": [
+      {
+        "key": "producedOn",
+        "label": "加工设备",
+        "description": "",
+        "sourceTypeKey": "Batch",
+        "targetTypeKey": "Equipment",
+        "multiplicity": "SINGLE",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "hasIssue",
+        "label": "发现问题",
+        "description": "",
+        "sourceTypeKey": "Batch",
+        "targetTypeKey": "QualityIssue",
+        "multiplicity": "MULTI",
+        "aliases": [],
+        "deprecated": false
+      },
+      {
+        "key": "rootCause",
+        "label": "确认根因",
+        "description": "",
+        "sourceTypeKey": "QualityIssue",
+        "targetTypeKey": "Cause",
+        "multiplicity": "SINGLE",
+        "aliases": [],
+        "deprecated": false
+      }
+    ],
+    "definitionFormatVersion": 1
+  }
+}

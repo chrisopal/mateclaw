@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { vLoading } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { Ontology, PackageImportResult } from '../api/types'
+import OntologyWorkbenchDialog from './components/OntologyWorkbenchDialog.vue'
 import OntologyPackageDialog from './components/OntologyPackageDialog.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import './semantic.css'
 const { t } = useI18n(),
   router = useRouter(),
   { workspace, begin } = useSemanticScope()
+const workbenchOntology = ref<Ontology | null>(null)
 const items = ref<Ontology[]>([]),
   total = ref(0),
   page = ref(1),
@@ -20,9 +22,22 @@ const items = ref<Ontology[]>([]),
   error = ref<SemanticError | null>(null)
 const creating = ref(false),
   importing = ref(false),
+  launching = ref(false),
   name = ref(''),
   description = ref(''),
   createdId = ref<string | null>(null)
+let launchGeneration = 0
+watch(
+  () => workspace.currentWorkspaceId,
+  () => {
+    workbenchOntology.value = null
+    launchGeneration++
+    launching.value = false
+    busy.value = false
+    error.value = null
+  },
+  { flush: 'sync' },
+)
 async function load() {
   const c = begin()
   busy.value = true
@@ -76,6 +91,26 @@ function openCreate() {
 function openImport() {
   importing.value = true
 }
+async function launchBuilder() {
+  if (launching.value || !workspace.can('manage:ontology')) return
+  const c = begin()
+  const requestGeneration = ++launchGeneration
+  // begin() cancels a prior list/create request; clear its indicator because
+  // the canceled request's stale finally block must not own this component's UI.
+  busy.value = false
+  launching.value = true
+  error.value = null
+  try {
+    const result = await ontologyApi.ensureBuilder(c.id, c.signal)
+    if (c.current()) {
+      await router.push({ path: '/chat', query: { agentId: String(result.agentId) } })
+    }
+  } catch (e) {
+    if (c.current()) error.value = semanticError(e)
+  } finally {
+    if (requestGeneration === launchGeneration) launching.value = false
+  }
+}
 function imported(result: PackageImportResult) {
   void router.push({ name: 'OntologyEditor', params: { id: result.ontologyId } })
 }
@@ -83,12 +118,14 @@ onMounted(load)
 </script>
 <template>
   <section class="semantic-page">
+    <OntologyWorkbenchDialog v-if="workbenchOntology" :ontology="workbenchOntology" @close="workbenchOntology = null" />
     <header class="semantic-header">
       <div>
         <h1>{{ t('semantic.title') }}</h1>
         <div class="semantic-muted">{{ t('semantic.boundary') }}</div>
       </div>
       <div class="semantic-actions">
+        <el-button v-if="workspace.can('manage:ontology')" :loading="launching" @click="launchBuilder">{{ t('semantic.generateFromSource') }}</el-button>
         <el-button v-if="workspace.can('manage:ontology')" @click="openImport">{{ t('semantic.importTemplate') }}</el-button>
         <el-button v-if="workspace.can('manage:ontology')" type="primary" @click="openCreate">{{ t('semantic.create') }}</el-button>
       </div>
@@ -133,7 +170,7 @@ onMounted(load)
             )
           }}</template></el-table-column
         >
-        <el-table-column :label="t('semantic.actions')" width="200"
+        <el-table-column :label="t('semantic.actions')" width="310"
           ><template #default="{ row }"
             ><el-button
               v-if="row.hasDraft"
@@ -146,7 +183,7 @@ onMounted(load)
               type="primary"
               @click="router.push({ name: 'OntologyVersions', params: { id: row.id } })"
               >{{ t('semantic.history') }}</el-button
-            ></template
+            ><el-button type="primary" plain @click="workbenchOntology = row">{{ t('semantic.w.workbench') }}</el-button></template
           ></el-table-column
         >
       </el-table>

@@ -47,6 +47,7 @@ import java.util.*;
             "spring.datasource.username=sa",
             "spring.datasource.password=",
             "mateclaw.semantic.enabled=true",
+            "mateclaw.semantic.extraction.scheduler-enabled=false",
             "spring.profiles.active=semantic-test",
             "spring.flyway.locations=classpath:db/migration/h2",
             "spring.flyway.placeholder-replacement=false",

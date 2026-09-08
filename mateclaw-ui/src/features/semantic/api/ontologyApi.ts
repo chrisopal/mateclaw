@@ -134,5 +134,7 @@ export const ontologyApi = {
     body: { graphId: string; targetRevisionId?: string; expectedDraftVersion?: number },
     signal?: AbortSignal,
   ) => semanticRequest<ImpactReport>(ws, { url: `${path(id)}/impact`, method: 'POST', data: body }, signal),
+  ensureBuilder: (ws: string, signal?: AbortSignal) =>
+    semanticRequest<{ agentId: string }>(ws, { url: '/semantic/ontology-builder/ensure', method: 'POST' }, signal),
 }
 export type OntologyApi = typeof ontologyApi

@@ -1,0 +1,4 @@
+-- Register the ontology authoring tool used by the workspace employee preset.
+INSERT INTO mate_tool (id, name, display_name, description, tool_type, bean_name, icon, enabled, builtin, create_time, update_time, deleted)
+VALUES (1000000198, 'OntologyAuthoringTool', 'Ontology authoring', 'Create, validate and save ontology drafts from authorized workspace sources; publication always remains a human UI action.', 'builtin', 'ontologyAuthoringTool', '🧭', TRUE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, display_name = EXCLUDED.display_name, description = EXCLUDED.description, tool_type = EXCLUDED.tool_type, bean_name = EXCLUDED.bean_name, icon = EXCLUDED.icon, enabled = EXCLUDED.enabled, builtin = EXCLUDED.builtin, deleted = 0, update_time = CURRENT_TIMESTAMP;

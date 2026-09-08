@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="465" viewBox="0 0 1120 465" role="img" aria-label="本体与 MateClaw 联动：知识库固化快照，按绑定本体建立候选，审核后进入可信图，Agent 只读查询">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#416385" stroke-width="1.5"/></marker></defs>
+<rect width="1120" height="465" rx="12" fill="#f5f8fc"/>
+<g font-family="PingFang SC,Microsoft YaHei,sans-serif" fill="#172b45">
+<text x="32" y="42" font-size="22" font-weight="600">一条事实如何进入 MateClaw 的可信回答</text>
+<g fill="white" stroke="#cbd7e5" stroke-width="1.5"><rect x="32" y="82" width="230" height="94" rx="6"/><rect x="306" y="82" width="230" height="94" rx="6"/><rect x="585" y="82" width="230" height="94" rx="6"/><rect x="585" y="253" width="230" height="94" rx="6"/><rect x="855" y="253" width="230" height="94" rx="6"/><rect x="306" y="253" width="230" height="94" rx="6"/></g>
+<g font-size="19" font-weight="600"><text x="50" y="115">① 知识库资料</text><text x="324" y="115">② 固定快照与证据</text><text x="603" y="115">③ 人工提出候选</text><text x="324" y="286">已发布本体 · 固定版本</text><text x="603" y="286">④ 可信事实与图谱</text><text x="873" y="286">⑤ Agent 只读查询</text></g>
+<g font-size="15" fill="#526680"><text x="50" y="148">原始文本 / 文件及访问权限</text><text x="324" y="148">固化内容，选取精确原文片段</text><text x="603" y="148">主体 + 属性值 / 关系 + 时间</text><text x="324" y="319">类型、属性、关系和允许值</text><text x="603" y="319">已审核 + 当前仍有证据支持</text><text x="873" y="319">答案带事实修订和证据引用</text></g>
+<g fill="none" stroke="#416385" stroke-width="2" marker-end="url(#a)"><path d="M262 129H300"/><path d="M536 129H579"/><path d="M700 176V247"/><path d="M815 300H849"/><path d="M536 299H579"/><path d="M421 253V210H627V182"/></g>
+<g font-size="14" fill="#416385"><text x="714" y="210">审核 / 冲突裁决</text><text x="467" y="202">录入校验</text><text x="539" y="286">绑定</text></g>
+<rect x="32" y="380" width="1053" height="55" rx="6" fill="#eaf1fb"/><text x="50" y="414" font-size="16">发布 v2 不改变旧图 v1 绑定；来源撤回后，失去证据支持的事实退出可信查询，历史仍保留。</text>
+</g></svg>

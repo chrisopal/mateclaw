@@ -1,0 +1,38 @@
+{
+  "baseline": "34a5f7d23c7eefc095e92c3f89f62bb20d24421b",
+  "capturedDate": "2026-09-08",
+  "profile": "enterprise",
+  "liveCaptures": [
+    "01-ontology-list.png",
+    "02-kb-binding.png",
+    "03-trusted-current.png",
+    "04-entities.png",
+    "05-source-snapshots.png",
+    "06-candidate-evidence.png",
+    "07-version-constraints.png",
+    "08-impact-analysis.png",
+    "09-agent-tool-catalog.png"
+  ],
+  "historicalAcceptanceCaptures": {
+    "10-range-editor.png": "docs/validation/ontology-m4/images/editor-range-390.png",
+    "11-template-preview.png": "docs/validation/ontology-m4/images/package-preview.png",
+    "12-conflict-review.png": "docs/validation/semantic-core/evidence/quality-root-cause/02-conflict-layout.png",
+    "13-root-cause-evidence.png": "docs/validation/semantic-core/evidence/quality-root-cause/03-root-cause-evidence.png",
+    "14-source-withdrawal.png": "docs/validation/semantic-core/evidence/quality-root-cause/07-source-withdrawn.png",
+    "15-fact-revision.png": "docs/validation/ontology-m4/images/located-fact.png"
+  },
+  "notes": [
+    "所有截图来自真实本地界面，资料为合成演示数据。",
+    "冲突裁决前及撤回操作过程使用同日既有验收截图，明确标注历史状态。",
+    "新候选页面仅准备表单并选取证据用于截图，未重复提交事实。",
+    "截图时 semantic_search 工具全局关闭，未改动 Agent 或工具配置。"
+  ],
+  "workingTreeUiUpdate": {
+    "date": "2026-09-08",
+    "description": "Business wording and ontology structure map; uncommitted UI changes over baseline",
+    "captures": {
+      "16-ontology-structure.png": "output/playwright/ontology-ux/ontology-graph-light.png",
+      "17-workbench-labels.png": "output/playwright/ontology-ux/workbench-light.png"
+    }
+  }
+}
