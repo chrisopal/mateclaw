@@ -57,6 +57,19 @@ describe('ontology draft', () => {
     expect(draft.canPublish.value).toBe(false)
     scope.stop()
   })
+  it('keeps publishing enabled when validation only reports warnings', async () => {
+    const { draft, api, scope } = setup()
+    await draft.load()
+    vi.mocked(api.validate).mockResolvedValue({
+      draftVersion: 17,
+      valid: true,
+      violations: [{ severity: 'WARNING', code: 'LEGACY_ALIAS', path: 'types[0]', message: 'legacy alias' }],
+    })
+    await draft.validate()
+    expect(draft.validationReport.value?.violations[0]?.severity).toBe('WARNING')
+    expect(draft.canPublish.value).toBe(true)
+    scope.stop()
+  })
   it('cancels and ignores stale results after workspace switch', async () => {
     const { draft, api, ws, scope } = setup()
     let resolve!: (value: ReturnType<typeof source>) => void
@@ -163,6 +176,7 @@ it('keeps edits made while save is pending and adopts the returned concurrency c
   draft.name.value = 'More recent local input'
   resolve({ ...source(), name: 'Submitted', draftVersion: 44 })
   expect(await pending).toBe(true)
+  expect(vi.mocked(api.saveDraft).mock.calls[0][2].definition.definitionFormatVersion).toBe(2)
   expect(draft.name.value).toBe('More recent local input')
   expect(draft.draftVersion.value).toBe(44)
   expect(draft.dirty.value).toBe(true)

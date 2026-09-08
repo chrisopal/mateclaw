@@ -11,6 +11,11 @@ import type {
   PublishDraft,
   ValidationReport,
   Diff,
+  OntologyPackage,
+  PackagePreview,
+  PackageImportResult,
+  OntologyUsagePage,
+  ImpactReport,
 } from './types'
 const path = (id: string) => `/semantic/ontologies/${encodeURIComponent(id)}`
 export function scopedConfig(workspaceId: string, signal?: AbortSignal): AxiosRequestConfig {
@@ -93,5 +98,41 @@ export const ontologyApi = {
       { url: `/semantic/operations/${encodeURIComponent(operationId)}` },
       signal,
     ),
+  packageForRevision: (ws: string, id: string, revisionId: string, signal?: AbortSignal) =>
+    semanticRequest<OntologyPackage>(
+      ws,
+      { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}/package` },
+      signal,
+    ),
+  previewPackage: (ws: string, body: OntologyPackage | string, signal?: AbortSignal) =>
+    semanticRequest<PackagePreview>(ws, { url: '/semantic/ontology-packages/preview', method: 'POST', data: body, headers: { 'Content-Type': 'application/json' } }, signal),
+  importPackage: (
+    ws: string,
+    body: { package: OntologyPackage; expectedDigest: string; operationId: string; name: string },
+    signal?: AbortSignal,
+  ) =>
+    semanticRequest<PackageImportResult>(
+      ws,
+      { url: '/semantic/ontology-packages/import', method: 'POST', data: body },
+      signal,
+    ),
+  packageImport: (ws: string, operationId: string, signal?: AbortSignal) =>
+    semanticRequest<PackageImportResult>(
+      ws,
+      { url: `/semantic/ontology-package-imports/${encodeURIComponent(operationId)}` },
+      signal,
+    ),
+  usage: (ws: string, id: string, page = 1, pageSize = 20, signal?: AbortSignal) =>
+    semanticRequest<OntologyUsagePage>(
+      ws,
+      { url: `${path(id)}/usage`, params: { page, pageSize } },
+      signal,
+    ),
+  impact: (
+    ws: string,
+    id: string,
+    body: { graphId: string; targetRevisionId?: string; expectedDraftVersion?: number },
+    signal?: AbortSignal,
+  ) => semanticRequest<ImpactReport>(ws, { url: `${path(id)}/impact`, method: 'POST', data: body }, signal),
 }
 export type OntologyApi = typeof ontologyApi

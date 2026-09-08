@@ -6,6 +6,7 @@ import { ElMessageBox, vLoading } from 'element-plus'
 import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { Ontology, Revision, Diff } from '../api/types'
+import OntologyImpactPanel from './components/OntologyImpactPanel.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import './semantic.css'
 const { t, locale } = useI18n(),
@@ -35,6 +36,15 @@ function displayTime(iso: string) {
         second: '2-digit',
         timeZoneName: 'short',
       })
+}
+function changeClassLabel(value?: string) {
+  const key = {
+    ANNOTATION: 'annotation',
+    ADDITIVE_OR_WIDENING: 'additiveOrWidening',
+    POTENTIALLY_BREAKING: 'potentiallyBreaking',
+    BREAKING: 'breaking',
+  }[value ?? '']
+  return key ? t('semantic.' + key) : value ?? ''
 }
 async function load() {
   const c = begin()
@@ -116,6 +126,27 @@ async function changeAvailability() {
     if (c.current()) busy.value = false
   }
 }
+async function exportTemplate() {
+  if (!selected.value) return
+  const c = begin()
+  busy.value = true
+  error.value = null
+  try {
+    const pkg = await ontologyApi.packageForRevision(c.id, ontologyId(), selected.value.id, c.signal)
+    if (!c.current()) return
+    const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${pkg.name || ontology.value?.name || 'ontology'}-v${selected.value.version}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    if (c.current()) error.value = semanticError(e)
+  } finally {
+    if (c.current()) busy.value = false
+  }
+}
 onMounted(load)
 </script>
 <template>
@@ -180,6 +211,7 @@ onMounted(load)
         <el-button v-if="workspace.can('publish:ontology')" :disabled="busy" @click="changeAvailability">{{
           t(selected.availableForNewBindings ? 'semantic.disableAvailability' : 'semantic.enableAvailability')
         }}</el-button>
+        <el-button :disabled="busy" @click="exportTemplate">{{ t('semantic.exportTemplate') }}</el-button>
       </div>
       <p>{{ selected.description }}</p>
       <p class="semantic-muted">
@@ -200,7 +232,11 @@ onMounted(load)
               prop="description"
               :label="t('semantic.description')"
               min-width="160"
-            /><el-table-column
+            /><el-table-column :label="t('semantic.aliases')" min-width="160"
+              ><template #default="{ row }">{{ (row.aliases ?? []).join(', ') }}</template></el-table-column
+            ><el-table-column :label="t('semantic.deprecated')" width="120"
+              ><template #default="{ row }">{{ row.deprecated ? t('semantic.deprecated') : '—' }}</template></el-table-column
+            ><el-table-column
               v-if="category === 'properties'"
               prop="ownerTypeKey"
               :label="t('semantic.ownerTypeKey')"
@@ -210,8 +246,10 @@ onMounted(load)
               :label="t('semantic.valueType')"
               min-width="110"
               ><template #default="{ row }">{{
-                t('semantic.values.' + row.valueType)
+                row.valueType ? t('semantic.values.' + row.valueType) : '—'
               }}</template></el-table-column
+            ><el-table-column v-if="category === 'properties'" :label="t('semantic.constraints')" min-width="180"
+              ><template #default="{ row }">{{ row.constraints ? JSON.stringify(row.constraints) : '—' }}</template></el-table-column
             ><el-table-column
               v-if="category === 'properties'"
               prop="fixedUnit"
@@ -229,7 +267,7 @@ onMounted(load)
               min-width="130"
             /><el-table-column v-if="category !== 'types'" :label="t('semantic.multiplicity')" min-width="100"
               ><template #default="{ row }">{{
-                t('semantic.values.' + row.multiplicity)
+                row.multiplicity ? t('semantic.values.' + row.multiplicity) : '—'
               }}</template></el-table-column
             ></el-table
           ></el-tab-pane
@@ -256,11 +294,12 @@ onMounted(load)
           t('semantic.compare')
         }}</el-button>
       </div>
+      <el-alert v-if="diff?.definitionChangeClass" type="info" :title="t('semantic.definitionChangeClass') + ': ' + changeClassLabel(diff.definitionChangeClass)" :closable="false" />
       <el-table v-if="diff" :data="diff.changes" :empty-text="t('semantic.noChanges')"
         ><el-table-column :label="t('semantic.change')" width="100"
-          ><template #default="{ row }">{{ t('semantic.changes.' + row.kind) }}</template></el-table-column
+          ><template #default="{ row }">{{ row.kind ? t('semantic.changes.' + row.kind) : '—' }}</template></el-table-column
         ><el-table-column :label="t('semantic.category')" width="110"
-          ><template #default="{ row }">{{ t('semantic.' + row.category) }}</template></el-table-column
+          ><template #default="{ row }">{{ row.category ? t('semantic.' + row.category) : '—' }}</template></el-table-column
         ><el-table-column prop="key" :label="t('semantic.key')" min-width="120" /><el-table-column
           :label="t('semantic.before')"
           min-width="220"
@@ -273,6 +312,18 @@ onMounted(load)
           </template></el-table-column
         ></el-table
       >
+      <el-table v-if="diff?.termChanges?.length" :data="diff.termChanges" class="semantic-term-change-table">
+        <el-table-column :label="t('semantic.category')" width="130"><template #default="{ row }">{{ row.kind ? t('semantic.termKinds.' + row.kind, row.kind) : '—' }}</template></el-table-column>
+        <el-table-column prop="key" :label="t('semantic.key')" min-width="140" />
+        <el-table-column :label="t('semantic.definitionChangeClass')" min-width="180"><template #default="{ row }">{{ changeClassLabel(row.definitionChangeClass) }}</template></el-table-column>
+        <el-table-column :label="t('semantic.reasons')" min-width="220"><template #default="{ row }">{{ row.reasons.map((reason: string) => t('semantic.changeReasons.' + reason, reason)).join('；') }}</template></el-table-column>
+      </el-table>
     </div>
+    <OntologyImpactPanel
+      v-if="selected"
+      :ontology-id="ontologyId()"
+      :target-revision-id="selected.id"
+      :enabled="true"
+    />
   </section>
 </template>

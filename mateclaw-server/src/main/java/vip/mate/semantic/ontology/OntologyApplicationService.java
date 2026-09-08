@@ -122,6 +122,9 @@ public class OntologyApplicationService {
         var row = draft(parent);
         cas(row, request.expectedDraftVersion());
         wire.metadata(request.name(), request.description());
+        var stored = wire.decode(row.getDefinitionJson(), Definition.class);
+        if(stored.definitionFormatVersion()==2 && (request.definition()==null || request.definition().definitionFormatVersion()!=2))
+            throw conflict("DEFINITION_FORMAT_DOWNGRADE","Reload the draft with a client supporting definition format 2");
         wire.structural(request.definition());
         row.setName(request.name());
         row.setDescription(request.description());
@@ -152,7 +155,7 @@ public class OntologyApplicationService {
         var row = draft(parent(scope, id, true));
         cas(row, request.expectedDraftVersion());
         var violations = wire.violations(wire.decode(row.getDefinitionJson(), Definition.class));
-        return new ValidationView(row.getDraftVersion(), violations.isEmpty(), violations);
+        return new ValidationView(row.getDraftVersion(), violations.stream().noneMatch(v->"ERROR".equals(v.severity())), violations);
     }
 
     @Transactional
@@ -299,7 +302,9 @@ public class OntologyApplicationService {
                 before == null ? null : before.getDescription(),
                 after.getDescription(),
                 changes);
-        return new Diff(from, to, List.copyOf(changes));
+        var classified=new vip.mate.semantic.core.ontology.OntologyChangeClassifier().classify(wire.core(beforeDefinition),wire.core(afterDefinition));
+        return new Diff(from, to, List.copyOf(changes),classified.definitionChangeClass().name(),
+                classified.termChanges().stream().map(c->new TermChange(c.kind().name(),c.key(),c.definitionChangeClass().name(),c.reasons())).toList());
     }
 
     private <T> void compare(

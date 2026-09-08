@@ -1,0 +1,420 @@
+{
+  "v2": {
+    "id": "2097119581715070978",
+    "ontologyId": "2097083062522511362",
+    "version": 2,
+    "name": "质量根因分析 · 尺寸超差",
+    "description": "批次—设备—质量问题—有证据的根因",
+    "definition": {
+      "types": [
+        {
+          "key": "Batch",
+          "label": "生产批次",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Equipment",
+          "label": "加工设备",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "QualityIssue",
+          "label": "质量问题",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Cause",
+          "label": "根因",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "properties": [
+        {
+          "key": "deviation",
+          "label": "尺寸偏差",
+          "description": "实测相对名义尺寸偏差",
+          "ownerTypeKey": "QualityIssue",
+          "valueType": "DECIMAL",
+          "multiplicity": "SINGLE",
+          "fixedUnit": "mm",
+          "aliases": [
+            "测量偏差"
+          ],
+          "deprecated": false,
+          "constraints": {
+            "allowedValues": null,
+            "minimum": "-0.05",
+            "maximum": "0.05"
+          }
+        },
+        {
+          "key": "investigationStatus",
+          "label": "调查状态",
+          "description": "",
+          "ownerTypeKey": "QualityIssue",
+          "valueType": "TEXT",
+          "multiplicity": "SINGLE",
+          "fixedUnit": null,
+          "aliases": [],
+          "deprecated": false,
+          "constraints": {
+            "allowedValues": [
+              "待复核",
+              "已确认"
+            ],
+            "minimum": null,
+            "maximum": null
+          }
+        }
+      ],
+      "relations": [
+        {
+          "key": "producedOn",
+          "label": "加工设备",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "Equipment",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "hasIssue",
+          "label": "发现问题",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "QualityIssue",
+          "multiplicity": "MULTI",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "rootCause",
+          "label": "确认根因",
+          "description": "",
+          "sourceTypeKey": "QualityIssue",
+          "targetTypeKey": "Cause",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "definitionFormatVersion": 2
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-08T00:36:20.731036Z",
+    "publishedBy": "1",
+    "publicationNote": "M4 验收：新增调查状态枚举与尺寸偏差闭区间；旧图继续绑定 v1。",
+    "baseRevisionId": "2097083062535094273"
+  },
+  "report": {
+    "graphId": "2097084463260663810",
+    "sourceRevisionId": "2097083062535094273",
+    "targetRevisionId": "2097119581715070978",
+    "targetDraftVersion": null,
+    "definitionDigest": "3a41d7af3cfba1a5b9f1c638a11bed452fada72502240497272ee26237c7d847",
+    "graphVersion": 20,
+    "scannedAt": "2026-09-08T00:36:22.183964Z",
+    "definitionChangeClass": "POTENTIALLY_BREAKING",
+    "dataConformance": "VIOLATIONS",
+    "scannedEntities": 5,
+    "scannedStatements": 4,
+    "scannedProposals": 0,
+    "affectedEntities": 0,
+    "affectedStatements": 1,
+    "affectedProposals": 0,
+    "detailsTruncated": false,
+    "diagnostics": [
+      {
+        "kind": "STATEMENT",
+        "id": "2097091016499953666",
+        "revision": 2,
+        "code": "VALUE_ABOVE_MAXIMUM",
+        "message": "decimal value is above the declared maximum",
+        "termKey": "deviation"
+      }
+    ]
+  },
+  "oldGraph": {
+    "binding": {
+      "graphId": "2097084463260663810",
+      "workspaceId": "1",
+      "knowledgeBaseId": "2097083062568648706",
+      "ontologyRevisionId": "2097083062535094273",
+      "ontologyVersion": 1,
+      "enabled": true,
+      "graphVersion": 20,
+      "empty": false,
+      "updatedAt": "2026-09-07T23:08:20.593724Z"
+    },
+    "definition": {
+      "types": [
+        {
+          "key": "Batch",
+          "label": "生产批次",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Equipment",
+          "label": "加工设备",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "QualityIssue",
+          "label": "质量问题",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Cause",
+          "label": "根因",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "properties": [
+        {
+          "key": "deviation",
+          "label": "尺寸偏差",
+          "description": "实测相对名义尺寸偏差",
+          "ownerTypeKey": "QualityIssue",
+          "valueType": "DECIMAL",
+          "multiplicity": "SINGLE",
+          "fixedUnit": "mm",
+          "aliases": [],
+          "deprecated": false,
+          "constraints": null
+        }
+      ],
+      "relations": [
+        {
+          "key": "producedOn",
+          "label": "加工设备",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "Equipment",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "hasIssue",
+          "label": "发现问题",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "QualityIssue",
+          "multiplicity": "MULTI",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "rootCause",
+          "label": "确认根因",
+          "description": "",
+          "sourceTypeKey": "QualityIssue",
+          "targetTypeKey": "Cause",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "definitionFormatVersion": 1
+    }
+  },
+  "package": {
+    "packageFormatVersion": 1,
+    "name": "质量根因分析 · 尺寸超差",
+    "description": "批次—设备—质量问题—有证据的根因",
+    "source": {
+      "ontologyName": "质量根因分析 · 尺寸超差",
+      "version": 2
+    },
+    "definition": {
+      "types": [
+        {
+          "key": "Batch",
+          "label": "生产批次",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Equipment",
+          "label": "加工设备",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "QualityIssue",
+          "label": "质量问题",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "Cause",
+          "label": "根因",
+          "description": "",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "properties": [
+        {
+          "key": "deviation",
+          "label": "尺寸偏差",
+          "description": "实测相对名义尺寸偏差",
+          "ownerTypeKey": "QualityIssue",
+          "valueType": "DECIMAL",
+          "multiplicity": "SINGLE",
+          "fixedUnit": "mm",
+          "aliases": [
+            "测量偏差"
+          ],
+          "deprecated": false,
+          "constraints": {
+            "allowedValues": null,
+            "minimum": "-0.05",
+            "maximum": "0.05"
+          }
+        },
+        {
+          "key": "investigationStatus",
+          "label": "调查状态",
+          "description": "",
+          "ownerTypeKey": "QualityIssue",
+          "valueType": "TEXT",
+          "multiplicity": "SINGLE",
+          "fixedUnit": null,
+          "aliases": [],
+          "deprecated": false,
+          "constraints": {
+            "allowedValues": [
+              "待复核",
+              "已确认"
+            ],
+            "minimum": null,
+            "maximum": null
+          }
+        }
+      ],
+      "relations": [
+        {
+          "key": "producedOn",
+          "label": "加工设备",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "Equipment",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "hasIssue",
+          "label": "发现问题",
+          "description": "",
+          "sourceTypeKey": "Batch",
+          "targetTypeKey": "QualityIssue",
+          "multiplicity": "MULTI",
+          "aliases": [],
+          "deprecated": false
+        },
+        {
+          "key": "rootCause",
+          "label": "确认根因",
+          "description": "",
+          "sourceTypeKey": "QualityIssue",
+          "targetTypeKey": "Cause",
+          "multiplicity": "SINGLE",
+          "aliases": [],
+          "deprecated": false
+        }
+      ],
+      "definitionFormatVersion": 2
+    }
+  },
+  "imported": {
+    "id": "2097122292376305666",
+    "workspaceId": "1",
+    "name": "M4 模板复用验收",
+    "description": "批次—设备—质量问题—有证据的根因",
+    "latestVersion": 1,
+    "latestRevisionId": "2097122292380499970",
+    "hasDraft": false,
+    "updatedAt": "2026-09-08T00:38:15.328658Z"
+  },
+  "importedUsage": {
+    "items": [],
+    "total": 0,
+    "page": 1,
+    "pageSize": 20
+  },
+  "newGraph": {
+    "graphId": "2097122581024112642",
+    "kbId": "2097122580940226562",
+    "entityId": "2097122581040889857",
+    "statementId": "2097122713954189314",
+    "evidenceId": "2097122713920634882",
+    "rangeRejected": "VALUE_ABOVE_MAXIMUM",
+    "enumRejected": "VALUE_NOT_ALLOWED",
+    "aliasSearch": {
+      "facts": [
+        {
+          "id": "2097122713954189314",
+          "graphId": "2097122581024112642",
+          "revision": 2,
+          "ontologyRevisionId": "2097119581715070978",
+          "subjectId": "2097122581040889857",
+          "predicateKind": "PROPERTY",
+          "predicateKey": "deviation",
+          "valueType": "DECIMAL",
+          "value": "0.03",
+          "unit": "mm",
+          "targetEntityId": null,
+          "validityKind": "INTERVAL",
+          "validFrom": null,
+          "validTo": null,
+          "reviewStatus": "ACCEPTED",
+          "supportStatus": "SUPPORTED",
+          "evidenceIds": [
+            "2097122713920634882"
+          ],
+          "proposedBy": "1",
+          "createdAt": "2026-09-08T00:39:52.325907Z"
+        }
+      ],
+      "traceId": "0cd8e386-41b1-41ec-afe6-a778f6748086",
+      "truncated": false,
+      "entityLabels": {
+        "2097122581040889857": "M4 复测样本"
+      },
+      "predicateLabels": {
+        "PROPERTY:deviation": "尺寸偏差"
+      }
+    }
+  },
+  "restartVerification": {
+    "at": "2026-09-08T09:07:36.939203+08:00",
+    "oldGraphVersion": 1,
+    "oldGraphRevisionId": "2097083062535094273",
+    "newGraphRevisionId": "2097119581715070978",
+    "persistedFactValue": "0.03",
+    "importedOntologyId": "2097122292376305666",
+    "importedHasDraft": false
+  }
+}

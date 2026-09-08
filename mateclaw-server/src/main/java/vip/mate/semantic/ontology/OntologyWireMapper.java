@@ -88,44 +88,64 @@ public class OntologyWireMapper {
                                     "Definition collections and entries are required",
                                     "ERROR")));
         }
-        var core =
-                new OntologyDefinition(
-                        d.types().stream()
-                                .map(
-                                        t ->
-                                                new EntityTypeDefinition(
-                                                        t.key(), t.label(), t.description()))
-                                .toList(),
-                        d.properties().stream()
-                                .map(
-                                        p ->
-                                                new PropertyDefinition(
-                                                        p.key(),
-                                                        p.label(),
-                                                        p.description(),
-                                                        p.ownerTypeKey(),
-                                                        p.valueType(),
-                                                        p.multiplicity(),
-                                                        Optional.ofNullable(p.fixedUnit())))
-                                .toList(),
-                        d.relations().stream()
-                                .map(
-                                        r ->
-                                                new RelationDefinition(
-                                                        r.key(),
-                                                        r.label(),
-                                                        r.description(),
-                                                        r.sourceTypeKey(),
-                                                        r.targetTypeKey(),
-                                                        r.multiplicity()))
-                                .toList());
+        if (d.definitionFormatVersion() != 1 && d.definitionFormatVersion() != 2)
+            throw new SemanticApiException(
+                    422, "UNSUPPORTED_DEFINITION_FORMAT", "Unsupported definition format");
+        var core = core(d);
         return validator.validate(core).violations().stream()
                 .map(v -> new Violation(v.code(), v.path(), v.message(), v.severity().name()))
                 .toList();
     }
 
+    public OntologyDefinition core(Definition d) {
+        return new OntologyDefinition(
+                d.types().stream()
+                        .map(
+                                t ->
+                                        new EntityTypeDefinition(
+                                                t.key(),
+                                                t.label(),
+                                                t.description(),
+                                                t.aliases(),
+                                                t.deprecated()))
+                        .toList(),
+                d.properties().stream()
+                        .map(
+                                p ->
+                                        new PropertyDefinition(
+                                                p.key(),
+                                                p.label(),
+                                                p.description(),
+                                                p.ownerTypeKey(),
+                                                p.valueType(),
+                                                p.multiplicity(),
+                                                Optional.ofNullable(p.fixedUnit()),
+                                                p.aliases(),
+                                                p.deprecated(),
+                                                p.constraints() == null
+                                                        ? null
+                                                        : new PropertyConstraints(
+                                                                p.constraints().allowedValues(),
+                                                                p.constraints().minimum(),
+                                                                p.constraints().maximum())))
+                        .toList(),
+                d.relations().stream()
+                        .map(
+                                r ->
+                                        new RelationDefinition(
+                                                r.key(),
+                                                r.label(),
+                                                r.description(),
+                                                r.sourceTypeKey(),
+                                                r.targetTypeKey(),
+                                                r.multiplicity(),
+                                                r.aliases(),
+                                                r.deprecated()))
+                        .toList());
+    }
+
     public void reject(List<Violation> errors) {
-        if (!errors.isEmpty())
+        if (errors.stream().anyMatch(v -> "ERROR".equals(v.severity())))
             throw new SemanticApiException(
                     422, "VALIDATION_FAILED", "Ontology validation failed", errors);
     }

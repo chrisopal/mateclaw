@@ -105,7 +105,10 @@ export function useOntologyDraft(
           expectedDraftVersion: draftVersion.value,
           name: name.value,
           description: description.value,
-          definition: clone(form.value),
+          // Legacy revisions may omit the format marker on read. Every new
+          // write is explicit so the server can reject older clients that
+          // would silently discard M4 fields.
+          definition: { ...clone(form.value), definitionFormatVersion: 2 },
         },
         c.signal,
       )

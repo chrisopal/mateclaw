@@ -1,0 +1,19 @@
+{
+  "score": 93,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [
+    "390px tables retain horizontal scrolling inside the table; page width remains bounded."
+  ],
+  "suggestions": [
+    "Keep long-table headers and fixed actions when extending diagnostics."
+  ],
+  "reasoning": "Reviewed enterprise/classic, light/dark at 390/1280/1920; labels, actions and mobile drawer remain usable. Impact counts and diagnostics are now readable; real location and package flows verified.",
+  "next_actions": [],
+  "evidence": [
+    "images/impact-after.png",
+    "images/editor-range-390.png",
+    "images/enterprise-dark-390.png",
+    "images/classic-light-390.png"
+  ]
+}

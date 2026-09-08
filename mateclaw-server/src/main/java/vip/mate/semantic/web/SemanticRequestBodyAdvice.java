@@ -15,7 +15,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /** Local JSON boundary: do not let Jackson coerce numbers into names, enums or CAS tokens. */
-@ControllerAdvice(assignableTypes = OntologyController.class)
+@ControllerAdvice(assignableTypes = {OntologyController.class,OntologyImpactController.class})
 public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
     private static final int MAX_BODY_BYTES = 16 * 1024 * 1024;
     private final ObjectMapper json;
@@ -30,7 +30,7 @@ public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
             Type targetType,
             Class<? extends HttpMessageConverter<?>> converterType) {
         return targetType instanceof Class<?> type
-                && type.getEnclosingClass() == OntologyDtos.class;
+                && (type.getEnclosingClass() == OntologyDtos.class || type.getEnclosingClass() == OntologyImpactDtos.class);
     }
 
     @Override
@@ -82,11 +82,15 @@ public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
                 throw invalid(path);
             return;
         }
-        if (type == Long.class) {
+        if (type == Integer.class || type == int.class) {
+            if (!node.isIntegralNumber() || !node.canConvertToInt()) throw invalid(path);
+            return;
+        }
+        if (type == Long.class || type == long.class) {
             if (!node.isIntegralNumber() || !node.canConvertToLong()) throw invalid(path);
             return;
         }
-        if (type == Boolean.class) {
+        if (type == Boolean.class || type == boolean.class) {
             if (!node.isBoolean()) throw invalid(path);
             return;
         }

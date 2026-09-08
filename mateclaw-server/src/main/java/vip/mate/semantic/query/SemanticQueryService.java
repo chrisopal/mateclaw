@@ -50,15 +50,20 @@ public class SemanticQueryService {
         int limit=request.limit()==null?20:request.limit();
         String needle=request.query().toLowerCase(Locale.ROOT);List<StatementView> matches=new ArrayList<>();
         Map<String,String> labels = new HashMap<>();
-        jdbc.query("SELECT id,display_name FROM mate_semantic_entity WHERE graph_id=?", rs -> {
+        Map<String,String> entityTypes = new HashMap<>();
+        jdbc.query("SELECT id,display_name,type_key FROM mate_semantic_entity WHERE graph_id=?", rs -> {
             labels.put(rs.getString("id"), rs.getString("display_name"));
+            entityTypes.put(rs.getString("id"),rs.getString("type_key"));
         }, graphId);
-        Map<String,String> predicates = predicateLabels(graphId);
+        TermLabels terms = predicateLabels(graphId);
+        Map<String,String> predicates = terms.labels();
         for(StatementView fact:facts){
             if(request.atTime()!=null&&("UNKNOWN".equals(fact.validityKind())||(fact.validFrom()!=null&&request.atTime().isBefore(fact.validFrom()))))continue;
             if(request.atTime()!=null&&fact.validTo()!=null&&!request.atTime().isBefore(fact.validTo()))continue;
             String text = String.join(" ", labels.getOrDefault(fact.subjectId(), ""), fact.predicateKey(),
-                    predicates.getOrDefault(fact.predicateKind()+":"+fact.predicateKey(), ""),
+                    terms.search().getOrDefault(fact.predicateKind()+":"+fact.predicateKey(), ""),
+                    terms.types().getOrDefault(entityTypes.get(fact.subjectId()), ""),
+                    terms.types().getOrDefault(entityTypes.get(fact.targetEntityId()), ""),
                     labels.getOrDefault(fact.targetEntityId(), ""), Objects.toString(fact.value(), ""));
             if(text.toLowerCase(Locale.ROOT).contains(needle))matches.add(fact);
         }
@@ -111,15 +116,20 @@ public class SemanticQueryService {
         if(rows.isEmpty())throw new SemanticApiException(404,"NOT_FOUND","Statement not found in graph");List<StatementView> history=new ArrayList<>();for(RawRevision row:rows){ProposeRequest r=decode(row.content());List<String> ev=jdbc.query("SELECT evidence_id FROM mate_semantic_revision_evidence WHERE statement_id=? AND revision=? ORDER BY evidence_id",(rs,n)->rs.getString(1),row.id(),row.revision());history.add(new StatementView(row.id(),graphId,row.revision(),row.ontology(),r.subjectId(),r.predicateKind(),r.predicateKey(),r.valueType(),r.value(),r.unit(),r.targetEntityId(),r.validityKind(),r.validFrom(),r.validTo(),row.status(),"ACCEPTED".equals(row.status())?(support.supported(graph,row.id(),row.revision())?"SUPPORTED":"SUPPORT_LOST"):"UNREVIEWED",ev,row.actor(),row.created().toInstant(ZoneOffset.UTC)));}return new HistoryResult(statementId,List.copyOf(history));
     }
 
-    private Map<String,String> predicateLabels(String graphId) {
+    private record TermLabels(Map<String,String> labels,Map<String,String> search,Map<String,String> types) {}
+    private TermLabels predicateLabels(String graphId) {
         List<String> definitions = jdbc.query("SELECT r.definition_json FROM mate_semantic_graph g JOIN mate_semantic_ontology_revision r ON r.id=g.ontology_revision_id WHERE g.id=?", (rs,n)->rs.getString(1), graphId);
         Map<String,String> labels = new HashMap<>();
-        if (definitions.isEmpty()) return labels;
+        Map<String,String> search = new HashMap<>(), types = new HashMap<>();
+        if (definitions.isEmpty()) return new TermLabels(labels,search,types);
         try {
             Definition definition = json.readValue(definitions.getFirst(), Definition.class);
             definition.properties().forEach(p -> labels.put("PROPERTY:"+p.key(), p.label()));
             definition.relations().forEach(r -> labels.put("RELATION:"+r.key(), r.label()));
-            return labels;
+            definition.properties().forEach(p -> search.put("PROPERTY:"+p.key(),p.label()+" "+String.join(" ",p.aliases())));
+            definition.relations().forEach(r -> search.put("RELATION:"+r.key(),r.label()+" "+String.join(" ",r.aliases())));
+            definition.types().forEach(t -> types.put(t.key(),t.label()+" "+String.join(" ",t.aliases())));
+            return new TermLabels(labels,search,types);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new IllegalStateException("Cannot read pinned ontology definition", e);
         }

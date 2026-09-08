@@ -2,6 +2,8 @@ export interface EntityType {
   key: string
   label: string
   description: string
+  aliases?: string[]
+  deprecated?: boolean
 }
 export type Multiplicity = 'SINGLE' | 'MULTI'
 export type ValueType = 'TEXT' | 'DECIMAL' | 'BOOLEAN' | 'DATE' | 'INSTANT'
@@ -10,6 +12,7 @@ export interface Property extends EntityType {
   valueType: ValueType
   multiplicity: Multiplicity
   fixedUnit: string | null
+  constraints?: PropertyConstraints
 }
 export interface Relation extends EntityType {
   sourceTypeKey: string
@@ -17,9 +20,17 @@ export interface Relation extends EntityType {
   multiplicity: Multiplicity
 }
 export interface Definition {
+  /** Missing on legacy format-1 revisions; new writes use format 2. */
+  definitionFormatVersion?: number
   types: EntityType[]
   properties: Property[]
   relations: Relation[]
+}
+export type DefinitionCategory = 'types' | 'properties' | 'relations'
+export interface PropertyConstraints {
+  allowedValues?: string[] | null
+  minimum?: string | null
+  maximum?: string | null
 }
 export interface Metadata {
   name: string
@@ -67,6 +78,8 @@ export interface Diff {
   fromRevisionId: string | null
   toRevisionId: string
   changes: { kind: string; category: string; key: string; before: unknown; after: unknown }[]
+  definitionChangeClass?: string
+  termChanges?: { kind: string; key: string; definitionChangeClass: string; reasons: string[] }[]
 }
 export interface Page {
   items: Ontology[]
@@ -94,6 +107,75 @@ export interface Binding {
   graphVersion: number
   empty: boolean
   updatedAt: string
+}
+
+export interface OntologyPackage {
+  packageFormatVersion: 1
+  name: string
+  description: string
+  source?: { ontologyName: string; version: number }
+  definition: Definition
+}
+
+export interface PackagePreview {
+  digest: string
+  name: string
+  typeCount: number
+  predicateCount: number
+  violations: Violation[]
+}
+
+export interface PackageImportResult {
+  operationId: string
+  ontologyId: string
+  draft: Draft
+}
+
+export interface OntologyUsageItem {
+  graphId: string
+  kbId: string
+  kbName: string
+  ontologyRevisionId: string
+  ontologyVersion: number
+  enabled: boolean
+  graphVersion: number
+}
+
+export interface OntologyUsagePage {
+  items: OntologyUsageItem[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export type ImpactDiagnosticKind = 'ENTITY' | 'STATEMENT' | 'CHANGE_PROPOSAL'
+export interface ImpactDiagnostic {
+  kind: ImpactDiagnosticKind
+  id: string
+  revision?: number
+  code: string
+  message: string
+  termKey?: string
+}
+
+export interface ImpactReport {
+  graphId: string
+  sourceRevisionId: string
+  targetRevisionId?: string
+  targetDraftVersion?: number
+  definitionDigest: string
+  graphVersion: number
+  scannedAt: string
+  definitionChangeClass: string
+  dataConformance: string
+  scannedEntities: number
+  scannedStatements: number
+  scannedProposals: number
+  affectedEntities: number
+  affectedStatements: number
+  affectedProposals: number
+  detailsTruncated: boolean
+  diagnostics: ImpactDiagnostic[]
 }
 export interface BindRequest {
   action: 'ENABLE' | 'DISABLE' | 'REBIND'

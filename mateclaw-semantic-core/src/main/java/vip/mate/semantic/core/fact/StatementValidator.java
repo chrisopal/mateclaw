@@ -1,5 +1,6 @@
 package vip.mate.semantic.core.fact;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,10 +8,9 @@ import java.util.Optional;
 
 import vip.mate.semantic.core.identity.GraphScope;
 import vip.mate.semantic.core.identity.SemanticIds.EntityId;
-import vip.mate.semantic.core.ontology.EntityTypeDefinition;
-import vip.mate.semantic.core.ontology.Multiplicity;
 import vip.mate.semantic.core.ontology.OntologyRevision;
 import vip.mate.semantic.core.ontology.PropertyDefinition;
+import vip.mate.semantic.core.ontology.PropertyConstraints;
 import vip.mate.semantic.core.ontology.RelationDefinition;
 import vip.mate.semantic.core.ontology.ValueType;
 import vip.mate.semantic.core.validation.ValidationReport;
@@ -84,7 +84,8 @@ public final class StatementValidator {
             if (subject != null && !property.ownerTypeKey().equals(subject.typeKey())) {
                 add(violations, "SUBJECT_TYPE_MISMATCH", "subjectId", "subject type does not own this property");
             }
-            validateLiteralValue(property.valueType(), property.fixedUnit(), candidate.value(), "value", violations);
+            validateLiteralValue(
+                    property.valueType(), property.fixedUnit(), property.constraints(), candidate.value(), "value", violations);
             return;
         }
         PredicateRef.RelationRef relationRef = (PredicateRef.RelationRef) predicate;
@@ -120,6 +121,7 @@ public final class StatementValidator {
     private static void validateLiteralValue(
             ValueType expected,
             Optional<String> fixedUnit,
+            PropertyConstraints constraints,
             StatementValue value,
             String path,
             List<Violation> violations) {
@@ -142,6 +144,48 @@ public final class StatementValidator {
                 && fixedUnit != null && fixedUnit.isPresent()
                 && !fixedUnit.orElseThrow().equals(decimal.unit())) {
             add(violations, "UNIT_MISMATCH", path + ".unit", "decimal unit does not match the fixed unit");
+        }
+        validateConstraints(expected, constraints, value, path, violations);
+    }
+
+    private static void validateConstraints(
+            ValueType expected,
+            PropertyConstraints constraints,
+            StatementValue value,
+            String path,
+            List<Violation> violations) {
+        if (constraints == null) {
+            return;
+        }
+        if (expected == ValueType.TEXT && value instanceof StatementValue.TextValue text
+                && constraints.allowedValues() != null
+                && !constraints.allowedValues().contains(text.value())) {
+            add(violations, "VALUE_NOT_ALLOWED", path,
+                    "text value is not one of the declared allowed values");
+        }
+        if (expected == ValueType.DECIMAL && value instanceof StatementValue.DecimalValue decimal) {
+            if (constraints.minimum() != null) {
+                BigDecimal minimum = parseBound(constraints.minimum());
+                if (minimum != null && decimal.value().compareTo(minimum) < 0) {
+                    add(violations, "VALUE_BELOW_MINIMUM", path,
+                            "decimal value is below the declared minimum");
+                }
+            }
+            if (constraints.maximum() != null) {
+                BigDecimal maximum = parseBound(constraints.maximum());
+                if (maximum != null && decimal.value().compareTo(maximum) > 0) {
+                    add(violations, "VALUE_ABOVE_MAXIMUM", path,
+                            "decimal value is above the declared maximum");
+                }
+            }
+        }
+    }
+
+    private static BigDecimal parseBound(String value) {
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException exception) {
+            return null;
         }
     }
 

@@ -124,6 +124,7 @@ public class StatementReviewService {
         ensureNoAcceptedConflict(graph,candidate,own,Set.of());
     }
     private void ensureNoAcceptedConflict(GraphRow graph,ProposeRequest candidate,String own,Set<String> ignored){
+        domain.validate(graph,domain.content(graph,candidate));
         var content=domain.content(graph,candidate);var ontology=domain.ontology(graph);for(var other:statements.current(graph.getId(),List.of("ACCEPTED"))){if(other.statementId().equals(own)||ignored.contains(other.statementId()))continue;detector.compare(ontology,content,domain.content(graph,statements.decode(other.contentJson()))).ifPresent(kind->{throw StatementApplicationService.conflict("FACT_CONFLICT","Accepted fact conflicts with current graph");});}
     }
     private void requireActiveEvidence(GraphRow graph,ProposeRequest request){

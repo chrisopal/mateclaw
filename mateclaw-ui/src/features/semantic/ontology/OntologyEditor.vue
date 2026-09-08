@@ -5,13 +5,14 @@ import { useI18n } from 'vue-i18n'
 import { ElMessageBox, ElMessage, vLoading } from 'element-plus'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { ontologyApi } from '../api/ontologyApi'
-import type { EntityType, Property, Relation, Definition, Diff } from '../api/types'
+import type { EntityType, Property, Relation, Definition, DefinitionCategory, Diff } from '../api/types'
 import { useOntologyDraft } from './useOntologyDraft'
 import EntityTypeEditor from './components/EntityTypeEditor.vue'
 import PropertyEditor from './components/PropertyEditor.vue'
 import RelationEditor from './components/RelationEditor.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
 import PublishDialog from './components/PublishDialog.vue'
+import OntologyImpactPanel from './components/OntologyImpactPanel.vue'
 import './semantic.css'
 const { t } = useI18n(),
   route = useRoute(),
@@ -35,6 +36,11 @@ const {
   publicationPending,
 } = draft
 const editable = computed(() => workspace.can('manage:ontology') && !publicationPending.value)
+const termSearch = ref('')
+function visibleTerms(category: DefinitionCategory) {
+  const query = termSearch.value.trim().toLocaleLowerCase()
+  return form.value[category].filter((term) => !query || [term.key, term.label, ...(term.aliases ?? [])].some((text) => text.toLocaleLowerCase().includes(query)))
+}
 const tab = ref<keyof Definition>('types'),
   drawer = ref(false),
   editingIndex = ref(-1)
@@ -78,7 +84,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', beforeUnload)
   diffController?.abort()
 })
-function openRow(category: keyof Definition, index = -1) {
+function openRow(category: DefinitionCategory, index = -1) {
   tab.value = category
   editingIndex.value = index
   editing.value =
@@ -145,7 +151,7 @@ async function closeDrawer(done: () => void) {
     /* keep input */
   }
 }
-async function removeRow(category: keyof Definition, index: number) {
+async function removeRow(category: DefinitionCategory, index: number) {
   if (!editable.value) return
   const key = form.value[category][index].key
   if (
@@ -174,7 +180,7 @@ async function locate(path: string) {
   }
   const match = path.match(/(types|properties|relations)\[(\d+)\](?:\.(\w+))?/)
   if (match) {
-    const category = match[1] as keyof Definition,
+    const category = match[1] as DefinitionCategory,
       index = Number(match[2])
     if (form.value[category][index]) {
       openRow(category, index)
@@ -316,8 +322,9 @@ onMounted(draft.load)
               <el-button v-if="editable" :disabled="busy" @click="openRow(category)">{{
                 t('semantic.add')
               }}</el-button>
+              <el-input v-model="termSearch" clearable :placeholder="t('semantic.termSearch')" :aria-label="t('semantic.termSearch')" style="max-width: 320px" />
             </div>
-            <el-table :data="form[category]" :empty-text="t('semantic.emptyDefinitions')"
+            <el-table :data="visibleTerms(category)" :empty-text="t('semantic.emptyDefinitions')"
               ><el-table-column prop="key" :label="t('semantic.key')" min-width="140" /><el-table-column
                 prop="label"
                 :label="t('semantic.label')"
@@ -332,7 +339,7 @@ onMounted(draft.load)
                 :label="t('semantic.valueType')"
                 min-width="120"
                 ><template #default="{ row }">{{
-                  t('semantic.values.' + row.valueType)
+                  row.valueType ? t('semantic.values.' + row.valueType) : '—'
                 }}</template></el-table-column
               ><el-table-column
                 v-if="category === 'relations'"
@@ -350,8 +357,8 @@ onMounted(draft.load)
                 min-width="180"
                 show-overflow-tooltip
               /><el-table-column :label="t('semantic.actions')" width="150"
-                ><template #default="{ row, $index }"
-                  ><el-button link type="primary" :disabled="busy" @click="openRow(category, $index)">{{
+                ><template #default="{ row }"
+                  ><el-button link type="primary" :disabled="busy" @click="openRow(category, form[category].indexOf(row))">{{
                     t(editable ? 'semantic.edit' : 'semantic.view')
                   }}</el-button
                   ><el-button
@@ -360,7 +367,7 @@ onMounted(draft.load)
                     type="danger"
                     :disabled="busy"
                     :aria-label="t('semantic.delete') + ' ' + row.key"
-                    @click="removeRow(category, $index)"
+                    @click="removeRow(category, form[category].indexOf(row))"
                     >{{ t('semantic.delete') }}</el-button
                   ></template
                 ></el-table-column
@@ -374,6 +381,12 @@ onMounted(draft.load)
         :errors="saveError?.fieldErrors"
         :dirty="dirty"
         @locate="locate"
+      />
+      <OntologyImpactPanel
+        v-if="workspace.can('publish:ontology')"
+        :ontology-id="ontologyId()"
+        :expected-draft-version="!dirty ? draftVersion : undefined"
+        :enabled="!dirty && !!id"
       />
     </template>
     <el-drawer
@@ -411,6 +424,8 @@ onMounted(draft.load)
       v-model="publishOpen"
       :busy="busy"
       :diff="diff"
+      :ontology-id="ontologyId()"
+      :expected-draft-version="draftVersion"
       :error="saveError ? t('semantic.errors.' + saveError.code, t('semantic.requestFailed')) : undefined"
       @publish="publish"
     />

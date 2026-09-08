@@ -5,7 +5,8 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
-import type { Ontology } from '../api/types'
+import type { Ontology, PackageImportResult } from '../api/types'
+import OntologyPackageDialog from './components/OntologyPackageDialog.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import './semantic.css'
 const { t } = useI18n(),
@@ -18,6 +19,7 @@ const items = ref<Ontology[]>([]),
   busy = ref(false),
   error = ref<SemanticError | null>(null)
 const creating = ref(false),
+  importing = ref(false),
   name = ref(''),
   description = ref(''),
   createdId = ref<string | null>(null)
@@ -71,6 +73,12 @@ function openCreate() {
   description.value = ''
   creating.value = true
 }
+function openImport() {
+  importing.value = true
+}
+function imported(result: PackageImportResult) {
+  void router.push({ name: 'OntologyEditor', params: { id: result.ontologyId } })
+}
 onMounted(load)
 </script>
 <template>
@@ -80,9 +88,10 @@ onMounted(load)
         <h1>{{ t('semantic.title') }}</h1>
         <div class="semantic-muted">{{ t('semantic.boundary') }}</div>
       </div>
-      <el-button v-if="workspace.can('manage:ontology')" type="primary" @click="openCreate">{{
-        t('semantic.create')
-      }}</el-button>
+      <div class="semantic-actions">
+        <el-button v-if="workspace.can('manage:ontology')" @click="openImport">{{ t('semantic.importTemplate') }}</el-button>
+        <el-button v-if="workspace.can('manage:ontology')" type="primary" @click="openCreate">{{ t('semantic.create') }}</el-button>
+      </div>
     </header>
     <el-alert
       v-if="error"
@@ -177,5 +186,6 @@ onMounted(load)
         }}</el-button></template
       ></el-dialog
     >
+    <OntologyPackageDialog v-model="importing" @created="imported" />
   </section>
 </template>

@@ -125,6 +125,9 @@ onMounted(load)
       {{ t('semantic.pinnedVersion', { version: binding.ontologyVersion }) }} ·
       {{ binding.empty ? t('semantic.graphEmpty') : t('semantic.graphNotEmpty') }}
     </p>
+    <p v-if="binding && !binding.empty" class="semantic-binding-meta semantic-binding-impact-note">
+      {{ t('semantic.impactHelp') }}
+    </p>
   </section>
 </template>
 
@@ -135,4 +138,5 @@ onMounted(load)
 .semantic-binding-heading p, .semantic-binding-meta { margin: 5px 0 0; color: var(--mc-text-secondary); font-size: 13px; }
 .semantic-binding-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .semantic-binding-controls .el-select { width: min(420px, 100%); }
+.semantic-binding-impact-note { max-width: 720px; }
 </style>

@@ -27,10 +27,7 @@ public class SemanticDomainMapper {
         GraphOntologyRevisionRow row=graphs.revision(graph.getOntologyRevisionId());
         if(row==null) throw new SemanticApiException(409,"ONTOLOGY_REVISION_MISSING","Pinned ontology revision no longer exists");
         Definition d=wire.decode(row.getDefinitionJson(),Definition.class);
-        OntologyDefinition definition=new OntologyDefinition(
-                d.types().stream().map(t->new EntityTypeDefinition(t.key(),t.label(),t.description())).toList(),
-                d.properties().stream().map(p->new PropertyDefinition(p.key(),p.label(),p.description(),p.ownerTypeKey(),p.valueType(),p.multiplicity(),Optional.ofNullable(p.fixedUnit()))).toList(),
-                d.relations().stream().map(r->new RelationDefinition(r.key(),r.label(),r.description(),r.sourceTypeKey(),r.targetTypeKey(),r.multiplicity())).toList());
+        OntologyDefinition definition=wire.core(d);
         return new OntologyRevision(new OntologyRevisionId(row.getId()),new OntologyId(row.getOntologyId()),row.getVersion(),definition);
     }
 
