@@ -1,0 +1,370 @@
+[
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.ontology.OntologyConstraintTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.ontology.OntologyChangeClassifierTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.StatementValidatorTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.ConflictDetectorTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.ontology.OntologyValidatorTest",
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-core",
+    "suite": "vip.mate.semantic.core.EvidenceVerifierTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-application",
+    "suite": "vip.mate.semantic.application.extraction.SourceChunkerTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-application",
+    "suite": "vip.mate.semantic.application.extraction.SuggestionSubmissionServiceTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-application",
+    "suite": "vip.mate.semantic.application.extraction.SuggestionValidatorTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-semantic-application",
+    "suite": "vip.mate.semantic.application.extraction.ExtractionCoordinatorTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticEndToEndIntegrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticOntologyImpactIntegrationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticGraphBindingTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionStartIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticQualityRootCauseIntegrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionFeatureFlagTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticQueryWindowTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticToolTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticReviewInvariantTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMySqlM4ImpactIntegrationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 6
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticChangeConflictIntegrationTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticGovernanceIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionApiIntegrationTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticOntologyPackageIntegrationTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionQualityIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticOntologyIntegrationTest",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticDisabledTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticDomainContractTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMySqlIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.channel.web.ChatStreamTrackerDetachSemanticsTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.agent.graph.RetryAfterExtractionTest",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMySqlM4PackageIntegrationTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionSubmissionIntegrationTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.extraction.SemanticExtractionModelAdapterTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMySqlQualityIntegrationTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticCoreArchitectureTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticExtractionLeaseIntegrationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticFeatureFlagTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMySqlM4FormatIntegrationTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticOntologyM4IntegrationTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticConfigurationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.wiki.service.WikiEntityExtractionServiceTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticMigrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticAuthorizationTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.config.WebMvcCorsTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "module": "mateclaw-server",
+    "suite": "vip.mate.semantic.SemanticM2IntegrationTest",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

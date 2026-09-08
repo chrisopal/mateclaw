@@ -1,0 +1,153 @@
+[
+  {
+    "taskId": "0c995457-e9d1-419b-af0f-3d5b9a83cede",
+    "number": 1,
+    "usage": {
+      "inputTokens": 551,
+      "outputTokens": 666
+    },
+    "startedAt": 1788846811.043871,
+    "finishedAt": 1788846814.421323,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "2748fc0e-9468-466e-8079-26577fc08463",
+    "number": 1,
+    "usage": {
+      "inputTokens": 535,
+      "outputTokens": 350
+    },
+    "startedAt": 1788848185.355026,
+    "finishedAt": 1788848187.912378,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "40418212-392d-4ecc-989f-bbbc5748fef0",
+    "number": 1,
+    "usage": {
+      "inputTokens": 535,
+      "outputTokens": 214
+    },
+    "startedAt": 1788848179.344401,
+    "finishedAt": 1788848181.138017,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "8d5a2611-01b1-4991-9cda-b07ac09961f1",
+    "number": 1,
+    "usage": {
+      "inputTokens": 532,
+      "outputTokens": 1213
+    },
+    "startedAt": 1788848179.341683,
+    "finishedAt": 1788848184.632406,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "92b91a9a-65d4-4bbc-9761-0dbfd58324b7",
+    "number": 1,
+    "usage": {
+      "inputTokens": 531,
+      "outputTokens": 54
+    },
+    "startedAt": 1788848176.319458,
+    "finishedAt": 1788848177.690625,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "9445e9aa-691a-4fce-a09b-5e07f60568c2",
+    "number": 1,
+    "usage": {
+      "inputTokens": 551,
+      "outputTokens": 730
+    },
+    "startedAt": 1788847505.461921,
+    "finishedAt": 1788847509.535691,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "a1976b68-5235-4683-aacd-8e8f1fe3ceb2",
+    "number": 1,
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0
+    },
+    "startedAt": 1788848182.352802,
+    "finishedAt": 1788848184.571332,
+    "failure": {
+      "category": "FORMAT",
+      "code": "MODEL_FORMAT",
+      "traceId": "2f862124-1f0e-4379-8155-50fc72522b99"
+    },
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "a1976b68-5235-4683-aacd-8e8f1fe3ceb2",
+    "number": 2,
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0
+    },
+    "startedAt": 1788848248.508877,
+    "finishedAt": 1788848250.772475,
+    "failure": {
+      "category": "FORMAT",
+      "code": "MODEL_FORMAT",
+      "traceId": "95dafd26-9664-4101-b940-c5e8324a5ea4"
+    },
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "a78d2f92-2d50-460c-85e1-771ffdf13b9f",
+    "number": 1,
+    "usage": {
+      "inputTokens": 521,
+      "outputTokens": 196
+    },
+    "startedAt": 1788848185.359493,
+    "finishedAt": 1788848187.209949,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "b1496ea5-c27f-4b8c-95fb-4922800fc11a",
+    "number": 1,
+    "usage": {
+      "inputTokens": 539,
+      "outputTokens": 34
+    },
+    "startedAt": 1788848188.367275,
+    "finishedAt": 1788848189.287899,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  },
+  {
+    "taskId": "d84ecc89-1d66-4cd2-9f2b-8bfd6287168c",
+    "number": 1,
+    "usage": {
+      "inputTokens": 530,
+      "outputTokens": 439
+    },
+    "startedAt": 1788848176.331054,
+    "finishedAt": 1788848179.112078,
+    "failure": null,
+    "modelConfigId": "1000000153",
+    "configurationHash": "c02ac4f540baa6e245f11401f77bc5647869777859b0e82a9167f4fad79b5044"
+  }
+]

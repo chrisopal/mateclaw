@@ -19,13 +19,14 @@ it('loads typed proposal content before resolution and routes evidence without s
  app.use(pinia).use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': en } }))
  const host = document.createElement('div'); document.body.append(host); app.mount(host); await flush()
  const input = document.querySelector('input')!; input.value = 'reviewed'; input.dispatchEvent(new Event('input')); await flush()
+ const resolutionLabels: string[] = [en.semantic.w.keepWinner, en.semantic.w.keepProposal]
  const buttons = () => [...document.querySelectorAll('button')]
- expect(buttons().filter(b => ['Keep this statement', 'Accept this change proposal'].includes(b.textContent?.trim() ?? ''))).toHaveLength(2)
- expect(buttons().filter(b => ['Keep this statement', 'Accept this change proposal'].includes(b.textContent?.trim() ?? '')).every(b => b.disabled)).toBe(true)
+ expect(buttons().filter(b => resolutionLabels.includes(b.textContent?.trim() ?? ''))).toHaveLength(2)
+ expect(buttons().filter(b => resolutionLabels.includes(b.textContent?.trim() ?? '')).every(b => b.disabled)).toBe(true)
  buttons().find(b => b.textContent?.includes('Change proposal'))!.click(); await flush()
  expect(statementApi.getChange).toHaveBeenCalledWith('w', 'g', 'proposal', expect.any(AbortSignal))
- expect(select).not.toHaveBeenCalled(); expect(document.body.textContent).toContain('380'); expect(document.body.textContent).toContain('Unknown')
+ expect(select).not.toHaveBeenCalled(); expect(document.body.textContent).toContain('380'); expect(document.body.textContent).toContain(en.semantic.w.unknown)
  buttons().find(b => b.textContent?.includes('View evidence'))!.click(); expect(evidence).toHaveBeenCalledWith('ev')
- expect(buttons().filter(b => ['Keep this statement', 'Accept this change proposal'].includes(b.textContent?.trim() ?? '')).every(b => !b.disabled)).toBe(true)
+ expect(buttons().filter(b => resolutionLabels.includes(b.textContent?.trim() ?? '')).every(b => !b.disabled)).toBe(true)
  buttons().find(b => b.textContent?.includes('Statement ·'))!.click(); expect(select).toHaveBeenCalledWith('s')
 })

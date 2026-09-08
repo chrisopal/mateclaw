@@ -1,0 +1,17 @@
+{
+  "jarSha256": "535c5e3978b29bb9ff91bdb61d23dfff48343a1ccb0dc15fdaf0405a218fe13f",
+  "java": "21",
+  "date": "2026-09-08",
+  "localFeatureEnabled": true,
+  "productionDefaultEnabled": false,
+  "frontendProfilesBuilt": [
+    "enterprise",
+    "classic"
+  ],
+  "manualImagesDecoded": 28,
+  "restartReadback": {
+    "taskStatus": "SUCCEEDED",
+    "trustedKnowledge": 4,
+    "featureEnabled": true
+  }
+}

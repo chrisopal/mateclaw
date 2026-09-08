@@ -22,6 +22,10 @@
             <groupId>vip.mate</groupId>
             <artifactId>mateclaw-semantic-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>vip.mate</groupId>
+            <artifactId>mateclaw-semantic-application</artifactId>
+        </dependency>
 
         <!-- ===== MateClaw Plugin API ===== -->
         <dependency>

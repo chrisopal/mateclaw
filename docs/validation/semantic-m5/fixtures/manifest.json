@@ -1,0 +1,129 @@
+[
+  {
+    "file": "01-quality-report.txt",
+    "expectedHandling": "extract",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 3,
+        "endCodePoint": 14,
+        "exactQuote": "LOT-QA-0908"
+      },
+      {
+        "startCodePoint": 19,
+        "endCodePoint": 25,
+        "exactQuote": "CNC-07"
+      },
+      {
+        "startCodePoint": 44,
+        "endCodePoint": 48,
+        "exactQuote": "0.08"
+      },
+      {
+        "startCodePoint": 61,
+        "endCodePoint": 65,
+        "exactQuote": "刀具磨损"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "02-no-knowledge.txt",
+    "expectedHandling": "empty",
+    "referenceQuotes": [],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "03-repeated-quote.txt",
+    "expectedHandling": "review",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 5,
+        "endCodePoint": 14,
+        "exactQuote": "设备 CNC-07"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "04-unicode.txt",
+    "expectedHandling": "extract",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 7,
+        "endCodePoint": 18,
+        "exactQuote": "LOT-QA-0908"
+      },
+      {
+        "startCodePoint": 23,
+        "endCodePoint": 29,
+        "exactQuote": "CNC-07"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "05-ambiguous-object.txt",
+    "expectedHandling": "review",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 6,
+        "endCodePoint": 12,
+        "exactQuote": "CNC-07"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "06-unknown-time.txt",
+    "expectedHandling": "unknown_time",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 17,
+        "endCodePoint": 21,
+        "exactQuote": "孔径超差"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "07-disagreement.txt",
+    "expectedHandling": "review",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 9,
+        "endCodePoint": 13,
+        "exactQuote": "冷却不足"
+      },
+      {
+        "startCodePoint": 23,
+        "endCodePoint": 27,
+        "exactQuote": "刀具磨损"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "08-out-of-range.txt",
+    "expectedHandling": "diagnostic",
+    "referenceQuotes": [
+      {
+        "startCodePoint": 11,
+        "endCodePoint": 14,
+        "exactQuote": "200"
+      }
+    ],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "09-untrusted-instruction.txt",
+    "expectedHandling": "empty",
+    "referenceQuotes": [],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  },
+  {
+    "file": "10-input-limit.txt",
+    "expectedHandling": "reject",
+    "referenceQuotes": [],
+    "notes": "Synthetic acceptance fixture; annotations are an oracle, not model execution results."
+  }
+]

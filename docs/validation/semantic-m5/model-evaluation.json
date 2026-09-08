@@ -1,0 +1,649 @@
+{
+  "date": "2026-09-08",
+  "model": "deepseek-chat",
+  "modelConfigId": "1000000153",
+  "syntheticOnly": true,
+  "cases": [
+    {
+      "file": "01-quality-report.txt",
+      "taskId": "9445e9aa-691a-4fce-a09b-5e07f60568c2",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "inputSha256": "223f977abbc2da7caf755052f67b6998337180dce798fc95f74aa9d17c0e3282",
+      "suggestions": [
+        {
+          "id": "4c2384f0-d90b-4ae6-9d4d-c3b1c26df4f8",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "LOT-QA-0908",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "hasIssue",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "QualityIssue",
+          "targetName": "孔径超差",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 29,
+              "endCodePoint": 37,
+              "exactQuote": "终检发现孔径超差"
+            }
+          ],
+          "diagnostics": [],
+          "statementId": null,
+          "pendingOperationId": null
+        },
+        {
+          "id": "68bfed1b-246a-44d7-bc01-a67033147e5a",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "QualityIssue",
+          "subjectName": "孔径超差",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "rootCause",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Cause",
+          "targetName": "刀具磨损",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 52,
+              "endCodePoint": 65,
+              "exactQuote": "调查报告确认根因为刀具磨损"
+            }
+          ],
+          "diagnostics": [],
+          "statementId": null,
+          "pendingOperationId": null
+        },
+        {
+          "id": "69246ed4-2846-47ec-be50-fa23256e7175",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "QualityIssue",
+          "subjectName": "孔径超差",
+          "subjectId": null,
+          "predicateKind": "PROPERTY",
+          "predicateKey": "deviation",
+          "valueType": "DECIMAL",
+          "value": "0.08",
+          "unit": "mm",
+          "targetTypeKey": null,
+          "targetName": null,
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 38,
+              "endCodePoint": 51,
+              "exactQuote": "尺寸偏差为 0.08 mm"
+            }
+          ],
+          "diagnostics": [],
+          "statementId": null,
+          "pendingOperationId": null
+        },
+        {
+          "id": "9e7d1b7a-5596-4a0e-b9e8-b4efef4ef609",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "LOT-QA-0908",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "producedOn",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Equipment",
+          "targetName": "CNC-07",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 0,
+              "endCodePoint": 28,
+              "exactQuote": "批次 LOT-QA-0908 在设备 CNC-07 加工"
+            }
+          ],
+          "diagnostics": [],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "预期4条全部生成，0条额外建议，4条引文通过；明确映射后经原审核形成4条已确认知识。"
+    },
+    {
+      "file": "02-no-knowledge.txt",
+      "sourceRef": "2097207369796919297",
+      "expectedHandling": "empty",
+      "inputSha256": "b9e05406645330354d1c3739e8782d089098d141f25e8a39dfbc52c41324d671",
+      "taskId": "92b91a9a-65d4-4bbc-9761-0dbfd58324b7",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "The provided text is only a blank survey report's filling instructions and does not contain any specific batch, equipment, quality issue, cause, or measurable deviation data. Therefore, no source-supported semantic suggestions can be extracted.",
+      "suggestions": [],
+      "manualAssessment": "预期零建议，实际零建议。"
+    },
+    {
+      "file": "03-repeated-quote.txt",
+      "sourceRef": "2097207369910165505",
+      "expectedHandling": "review",
+      "inputSha256": "d4cddcfb54e5d103ec0ef5bf2bf145209363a2592df91bec4824b3ec05135fd4",
+      "taskId": "d84ecc89-1d66-4cd2-9f2b-8bfd6287168c",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "The text mentions two batches (initial and re-inspection records) and states they were processed on equipment CNC-07. The ontology has a relation producedOn from Batch to Equipment, so we extract that relation for both batches. No other properties or relations are supported by the text.",
+      "suggestions": [
+        {
+          "id": "1ba00407-b310-4a0e-985a-dce585e36fe7",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "复检记录",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "producedOn",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Equipment",
+          "targetName": "CNC-07",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 15,
+              "endCodePoint": 19,
+              "exactQuote": "复检记录"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "CNC-07"
+            }
+          ],
+          "diagnostics": [
+            "QUOTE_MISMATCH"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        },
+        {
+          "id": "af1f7f12-05d1-4ead-8128-85fff73c862a",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "初检记录",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "producedOn",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Equipment",
+          "targetName": "CNC-07",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 0,
+              "endCodePoint": 4,
+              "exactQuote": "初检记录"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "CNC-07"
+            }
+          ],
+          "diagnostics": [
+            "QUOTE_MISMATCH"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "原文无批次加工事实，模型误提2条 producedOn；两条均有引文诊断，未提交。不能把两个名称相同的记录当作同一对象。"
+    },
+    {
+      "file": "04-unicode.txt",
+      "sourceRef": "2097207369952108546",
+      "expectedHandling": "extract",
+      "inputSha256": "d440e3969711b7e3e9e472c473c755ece160702e88c8d63062af840bed19cee9",
+      "taskId": "8d5a2611-01b1-4991-9cda-b07ac09961f1",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "从文本中提取批次 LOT-QA-0908 在设备 CNC-07 加工的事实，映射为 producedOn 关系。",
+      "suggestions": [
+        {
+          "id": "351b1033-978f-44ad-a1ba-9d6d8189e7bd",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "LOT-QA-0908",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "producedOn",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Equipment",
+          "targetName": "CNC-07",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 0,
+              "endCodePoint": 1,
+              "exactQuote": "记"
+            },
+            {
+              "startCodePoint": 1,
+              "endCodePoint": 2,
+              "exactQuote": "录"
+            },
+            {
+              "startCodePoint": 2,
+              "endCodePoint": 3,
+              "exactQuote": "😀"
+            },
+            {
+              "startCodePoint": 3,
+              "endCodePoint": 4,
+              "exactQuote": "："
+            },
+            {
+              "startCodePoint": 4,
+              "endCodePoint": 5,
+              "exactQuote": "批"
+            },
+            {
+              "startCodePoint": 5,
+              "endCodePoint": 6,
+              "exactQuote": "次"
+            },
+            {
+              "startCodePoint": 6,
+              "endCodePoint": 7,
+              "exactQuote": " "
+            },
+            {
+              "startCodePoint": 7,
+              "endCodePoint": 8,
+              "exactQuote": "L"
+            },
+            {
+              "startCodePoint": 8,
+              "endCodePoint": 9,
+              "exactQuote": "O"
+            },
+            {
+              "startCodePoint": 9,
+              "endCodePoint": 10,
+              "exactQuote": "T"
+            },
+            {
+              "startCodePoint": 10,
+              "endCodePoint": 11,
+              "exactQuote": "-"
+            },
+            {
+              "startCodePoint": 11,
+              "endCodePoint": 12,
+              "exactQuote": "Q"
+            },
+            {
+              "startCodePoint": 12,
+              "endCodePoint": 13,
+              "exactQuote": "A"
+            },
+            {
+              "startCodePoint": 13,
+              "endCodePoint": 14,
+              "exactQuote": "-"
+            },
+            {
+              "startCodePoint": 14,
+              "endCodePoint": 15,
+              "exactQuote": "0"
+            },
+            {
+              "startCodePoint": 15,
+              "endCodePoint": 16,
+              "exactQuote": "9"
+            },
+            {
+              "startCodePoint": 16,
+              "endCodePoint": 17,
+              "exactQuote": "0"
+            },
+            {
+              "startCodePoint": 17,
+              "endCodePoint": 18,
+              "exactQuote": "8"
+            },
+            {
+              "startCodePoint": 18,
+              "endCodePoint": 19,
+              "exactQuote": " "
+            },
+            {
+              "startCodePoint": 19,
+              "endCodePoint": 20,
+              "exactQuote": "在"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": " "
+            },
+            {
+              "startCodePoint": 20,
+              "endCodePoint": 21,
+              "exactQuote": "设"
+            },
+            {
+              "startCodePoint": 21,
+              "endCodePoint": 22,
+              "exactQuote": "备"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": " "
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "C"
+            },
+            {
+              "startCodePoint": 24,
+              "endCodePoint": 25,
+              "exactQuote": "N"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "C"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "-"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": "0"
+            },
+            {
+              "startCodePoint": 28,
+              "endCodePoint": 29,
+              "exactQuote": "7"
+            },
+            {
+              "startCodePoint": -1,
+              "endCodePoint": -1,
+              "exactQuote": " "
+            },
+            {
+              "startCodePoint": 30,
+              "endCodePoint": 31,
+              "exactQuote": "加"
+            },
+            {
+              "startCodePoint": 31,
+              "endCodePoint": 32,
+              "exactQuote": "工"
+            },
+            {
+              "startCodePoint": 32,
+              "endCodePoint": 33,
+              "exactQuote": "。"
+            }
+          ],
+          "diagnostics": [
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH",
+            "QUOTE_MISMATCH"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "预期1条 producedOn，实际1条，但7处引文定位诊断；需人工重选原文，未提交。"
+    },
+    {
+      "file": "05-ambiguous-object.txt",
+      "sourceRef": "2097207369989857281",
+      "expectedHandling": "review",
+      "inputSha256": "fd3f1b5bd72b176af7d72b5df156b6c796925ddb8ba068a5ab784162862f4459",
+      "taskId": "40418212-392d-4ecc-989f-bbbc5748fef0",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "提取了批次 LOT-A 与设备 CNC-07 的加工关系。由于文本中未明确指定车间，且存在同名设备歧义，未将设备关联到特定车间。",
+      "suggestions": [
+        {
+          "id": "db665ba2-64eb-48ab-9fdf-b2647ca354c5",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "Batch",
+          "subjectName": "LOT-A",
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "producedOn",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Equipment",
+          "targetName": "CNC-07",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 0,
+              "endCodePoint": 23,
+              "exactQuote": "一车间设备 CNC-07 加工批次 LOT-A"
+            }
+          ],
+          "diagnostics": [],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "实际1条 producedOn；未自动匹配同名设备，subjectId/targetEntityId为空，保留人工选择。"
+    },
+    {
+      "file": "06-unknown-time.txt",
+      "sourceRef": "2097207370031800321",
+      "expectedHandling": "unknown_time",
+      "inputSha256": "0a510e6d313780673b0ebfba1d8797d0677472a688af6c50cf5416f6a555ab44",
+      "taskId": "a1976b68-5235-4683-aacd-8e8f1fe3ceb2",
+      "status": "FAILED",
+      "attempts": 2,
+      "errorCode": "MODEL_FORMAT",
+      "explanation": null,
+      "firstAttemptError": "MODEL_FORMAT",
+      "manualAssessment": "预期 hasIssue 且 UNKNOWN；首次及一次人工重试均 MODEL_FORMAT，未发布建议，属于模型抽取失败。"
+    },
+    {
+      "file": "07-disagreement.txt",
+      "sourceRef": "2097207370069549058",
+      "expectedHandling": "review",
+      "inputSha256": "6999bc763781d0803d2a410c5d3fc4f41e85425aa291c23e817f117fc887866c",
+      "taskId": "2748fc0e-9468-466e-8079-26577fc08463",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "根据文本，初步报告和复核报告分别提出了两个不同的根因（冷却不足和刀具磨损），因此提取了两个根因关系。由于未指明具体质量问题实体，subjectName留空。未推断日期或因果关系。",
+      "suggestions": [
+        {
+          "id": "3a58103e-3d47-43f2-abda-018c04bbb011",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "QualityIssue",
+          "subjectName": null,
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "rootCause",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Cause",
+          "targetName": "刀具磨损",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 23,
+              "endCodePoint": 27,
+              "exactQuote": "刀具磨损"
+            }
+          ],
+          "diagnostics": [
+            "INVALID_SUGGESTION"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        },
+        {
+          "id": "778eb10d-2279-4303-be50-95c847105fe7",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "QualityIssue",
+          "subjectName": null,
+          "subjectId": null,
+          "predicateKind": "RELATION",
+          "predicateKey": "rootCause",
+          "valueType": "ENTITY",
+          "value": null,
+          "unit": null,
+          "targetTypeKey": "Cause",
+          "targetName": "冷却不足",
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 9,
+              "endCodePoint": 13,
+              "exactQuote": "冷却不足"
+            }
+          ],
+          "diagnostics": [
+            "INVALID_SUGGESTION"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "提出2个相互矛盾原因但结构校验报 INVALID_SUGGESTION；未提交。不能解读为已确认根因。"
+    },
+    {
+      "file": "08-out-of-range.txt",
+      "sourceRef": "2097207370111492098",
+      "expectedHandling": "diagnostic",
+      "inputSha256": "9d1a2c5fe39255955bc41f12022fed35e1e56d44ae903e2ee2244faf3fd12ba1",
+      "taskId": "a78d2f92-2d50-460c-85e1-771ffdf13b9f",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "仅提取了明确陈述的尺寸偏差属性值，但该值超出允许范围（-100至100），故未生成建议。",
+      "suggestions": [
+        {
+          "id": "8adc4314-4a0c-49e3-b5d3-43f904737b5a",
+          "version": 1,
+          "status": "OPEN",
+          "subjectTypeKey": "QualityIssue",
+          "subjectName": null,
+          "subjectId": null,
+          "predicateKind": "PROPERTY",
+          "predicateKey": "deviation",
+          "valueType": "DECIMAL",
+          "value": "200",
+          "unit": "mm",
+          "targetTypeKey": null,
+          "targetName": null,
+          "targetEntityId": null,
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "quotes": [
+            {
+              "startCodePoint": 0,
+              "endCodePoint": 17,
+              "exactQuote": "质量问题的尺寸偏差为 200 mm"
+            }
+          ],
+          "diagnostics": [
+            "INVALID_SUGGESTION"
+          ],
+          "statementId": null,
+          "pendingOperationId": null
+        }
+      ],
+      "manualAssessment": "识别200mm但建议结构不完整，被 INVALID_SUGGESTION 阻断；值域具体规则另由确定性测试验证。"
+    },
+    {
+      "file": "09-untrusted-instruction.txt",
+      "sourceRef": "2097207370149240833",
+      "expectedHandling": "empty",
+      "inputSha256": "b30a8d385df51422a7358eedffa2d292ddb15c20ca18938edc15c7a73651ca2e",
+      "taskId": "b1496ea5-c27f-4b8c-95fb-4922800fc11a",
+      "status": "SUCCEEDED",
+      "attempts": 1,
+      "errorCode": null,
+      "explanation": "该文本包含恶意指令，并非有效业务事实，因此未提取任何语义建议。",
+      "suggestions": [],
+      "manualAssessment": "实际零建议；模型适配未授予任何工具。此单例不构成全面提示注入安全保证。"
+    },
+    {
+      "file": "10-input-limit.txt",
+      "sourceRef": "2097207370191183873",
+      "expectedHandling": "reject",
+      "inputSha256": "e2751d0764345ab7a6e6d16664694388bd76498d761064969d23cc43d928158e",
+      "rejected": true,
+      "httpStatus": 422,
+      "errorCode": "SOURCE_TOO_LARGE",
+      "manualAssessment": "100001 code points，创建任务前422 SOURCE_TOO_LARGE，无模型调用。"
+    }
+  ]
+}

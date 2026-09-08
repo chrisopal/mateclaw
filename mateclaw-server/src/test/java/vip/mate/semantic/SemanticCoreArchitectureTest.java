@@ -19,12 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SemanticCoreArchitectureTest {
 
+    private static final String APPLICATION_PACKAGE = "vip.mate.semantic.application";
     private static final String CORE_PACKAGE = "vip.mate.semantic.core";
     private static final JavaClasses CORE_CLASSES = new ClassFileImporter()
             .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
             .importPackages(CORE_PACKAGE);
     private static final ArchRule JDK_ONLY_RULE = classes()
-            .should(haveOnlyCoreOrJdkDependencies())
+            .should(haveOnlyAllowedDependencies(false))
             .because("the semantic core must remain independent from frameworks and the MateClaw host");
 
     @Test
@@ -45,7 +46,24 @@ class SemanticCoreArchitectureTest {
         assertTrue(error.getMessage().contains(ApplicationContext.class.getName()));
     }
 
-    private static ArchCondition<JavaClass> haveOnlyCoreOrJdkDependencies() {
+    @Test
+    void semanticApplicationDependsOnlyOnItselfCoreAndJdk() {
+        JavaClasses application = new ClassFileImporter()
+                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                .importPackages(APPLICATION_PACKAGE);
+        assertFalse(application.isEmpty(), "architecture guard must scan application production classes");
+        classes().should(haveOnlyAllowedDependencies(true)).check(application);
+    }
+
+    @Test
+    void applicationRuleRejectsAForbiddenDependency() {
+        JavaClasses canary = new ClassFileImporter().importClasses(ForbiddenSpringDependency.class);
+        AssertionError error = assertThrows(AssertionError.class,
+                () -> classes().should(haveOnlyAllowedDependencies(true)).check(canary));
+        assertTrue(error.getMessage().contains(ApplicationContext.class.getName()));
+    }
+
+    private static ArchCondition<JavaClass> haveOnlyAllowedDependencies(boolean application) {
         return new ArchCondition<>("have only JDK or semantic core dependencies") {
             @Override
             public void check(JavaClass javaClass, ConditionEvents events) {
@@ -55,7 +73,7 @@ class SemanticCoreArchitectureTest {
                         continue;
                     }
                     String target = targetClass.getName();
-                    if (isAllowed(target)) {
+                    if (isAllowed(target) || application && target.startsWith(APPLICATION_PACKAGE + ".")) {
                         continue;
                     }
                     events.add(SimpleConditionEvent.violated(dependency,

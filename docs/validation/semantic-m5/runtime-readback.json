@@ -1,0 +1,176 @@
+{
+  "case": {
+    "ontologyId": "2097201473029095426",
+    "revisionId": "2097201473058455554",
+    "knowledgeBaseId": "2097201473175896066",
+    "graphId": "2097201635570958338",
+    "sourceRef": "2097201635608707074",
+    "entities": {
+      "Batch": "2097201635646455809",
+      "Equipment": "2097201635671621634",
+      "QualityIssue": "2097201635692593153",
+      "Cause": "2097201635713564673"
+    },
+    "taskId": "0c995457-e9d1-419b-af0f-3d5b9a83cede",
+    "finalTaskId": "9445e9aa-691a-4fce-a09b-5e07f60568c2"
+  },
+  "trusted": {
+    "items": [
+      {
+        "id": "2097205736593559553",
+        "graphId": "2097201635570958338",
+        "revision": 2,
+        "ontologyRevisionId": "2097201473058455554",
+        "subjectId": "2097201635692593153",
+        "predicateKind": "RELATION",
+        "predicateKey": "rootCause",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097201635713564673",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097205736589365249"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-08T06:10:03.856598Z"
+      },
+      {
+        "id": "2097205015596896257",
+        "graphId": "2097201635570958338",
+        "revision": 2,
+        "ontologyRevisionId": "2097201473058455554",
+        "subjectId": "2097201635646455809",
+        "predicateKind": "RELATION",
+        "predicateKey": "hasIssue",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097201635692593153",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097205015571730433"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-08T06:11:04.156109Z"
+      },
+      {
+        "id": "2097206062541312001",
+        "graphId": "2097201635570958338",
+        "revision": 2,
+        "ontologyRevisionId": "2097201473058455554",
+        "subjectId": "2097201635692593153",
+        "predicateKind": "PROPERTY",
+        "predicateKey": "deviation",
+        "valueType": "DECIMAL",
+        "value": "0.08",
+        "unit": "mm",
+        "targetEntityId": null,
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097206062537117698"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-08T06:11:04.180312Z"
+      },
+      {
+        "id": "2097206062616809473",
+        "graphId": "2097201635570958338",
+        "revision": 2,
+        "ontologyRevisionId": "2097201473058455554",
+        "subjectId": "2097201635646455809",
+        "predicateKind": "RELATION",
+        "predicateKey": "producedOn",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097201635671621634",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097206062612615169"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-08T06:11:04.198375Z"
+      }
+    ],
+    "total": 4,
+    "page": 1,
+    "pageSize": 20
+  },
+  "rootCauseSearch": {
+    "facts": [
+      {
+        "id": "2097205736593559553",
+        "graphId": "2097201635570958338",
+        "revision": 2,
+        "ontologyRevisionId": "2097201473058455554",
+        "subjectId": "2097201635692593153",
+        "predicateKind": "RELATION",
+        "predicateKey": "rootCause",
+        "valueType": "ENTITY",
+        "value": null,
+        "unit": null,
+        "targetEntityId": "2097201635713564673",
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2097205736589365249"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-08T06:10:03.856598Z"
+      }
+    ],
+    "traceId": "79888f79-cd4d-4728-a8c9-c01fb57ca879",
+    "truncated": false,
+    "entityLabels": {
+      "2097201635692593153": "孔径超差",
+      "2097201635713564673": "刀具磨损"
+    },
+    "predicateLabels": {
+      "RELATION:rootCause": "确认根因"
+    }
+  },
+  "submissionMapping": [
+    {
+      "suggestionId": "4c2384f0-d90b-4ae6-9d4d-c3b1c26df4f8",
+      "predicateKey": "hasIssue",
+      "statementId": "2097205015596896257"
+    },
+    {
+      "suggestionId": "68bfed1b-246a-44d7-bc01-a67033147e5a",
+      "predicateKey": "rootCause",
+      "statementId": "2097205736593559553"
+    },
+    {
+      "suggestionId": "69246ed4-2846-47ec-be50-fa23256e7175",
+      "predicateKey": "deviation",
+      "statementId": "2097206062541312001"
+    },
+    {
+      "suggestionId": "9e7d1b7a-5596-4a0e-b9e8-b4efef4ef609",
+      "predicateKey": "producedOn",
+      "statementId": "2097206062616809473"
+    }
+  ],
+  "databaseReadback": "id                                   | status    | attempts | completed_chunks\n9445e9aa-691a-4fce-a09b-5e07f60568c2 | SUCCEEDED | 1        | 1\n(1 row, 5 ms)\nsuggestions\n4\n(1 row, 1 ms)\nreceipts\n4\n(1 row, 0 ms)\n",
+  "mysqlMigration": "exit 0\nm5_tables\n8\ngate_rows\n1\n"
+}
