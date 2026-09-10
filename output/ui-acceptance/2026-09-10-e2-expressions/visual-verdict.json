@@ -1,0 +1,10 @@
+{
+  "score": 93,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [
+    "Expression trees use a separate full-width panel below the preserved named graph."
+  ],
+  "suggestions": [],
+  "reasoning": "Disclosure markers, subject summaries and translated roles now distinguish the structures. Stable narrow-screen captures preserve readable nested text without overlap. The ontology page now fills the available large-screen width with its original gutters."
+}

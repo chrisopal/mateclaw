@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "control": "draft-wide",
+      "check": "resize-1500-1920-2400-3840",
+      "steps": [
+        "1500 → 1920 → 2400 → 3840 → 1920 → 2400；测量页面及画布"
+      ],
+      "expected": "页面占满可用宽度；画布随容器扩展；无水平溢出",
+      "status": "PASS",
+      "actual": "[{\"viewport\":1500,\"page\":1280,\"available\":1280,\"canvas\":710,\"cy\":710,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":1130,\"cy\":1130,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":1610,\"cy\":1610,\"horizontalOverflow\":false},{\"viewport\":3840,\"page\":3620,\"available\":3620,\"canvas\":3050,\"cy\":3050,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":1130,\"cy\":1130,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":1610,\"cy\":1610,\"horizontalOverflow\":false}]",
+      "evidence": [
+        "wide-results.json",
+        "draft-wide.png"
+      ]
+    },
+    {
+      "control": "published-wide",
+      "check": "resize-1500-1920-2400-3840",
+      "steps": [
+        "1500 → 1920 → 2400 → 3840 → 1920 → 2400；测量页面及画布"
+      ],
+      "expected": "页面占满可用宽度；画布随容器扩展；无水平溢出",
+      "status": "PASS",
+      "actual": "[{\"viewport\":1500,\"page\":1280,\"available\":1280,\"canvas\":710,\"cy\":710,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":1130,\"cy\":1130,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":1610,\"cy\":1610,\"horizontalOverflow\":false},{\"viewport\":3840,\"page\":3620,\"available\":3620,\"canvas\":3050,\"cy\":3050,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":1130,\"cy\":1130,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":1610,\"cy\":1610,\"horizontalOverflow\":false}]",
+      "evidence": [
+        "wide-results.json",
+        "published-wide.png"
+      ]
+    },
+    {
+      "control": "list-wide",
+      "check": "resize-1500-1920-2400-3840",
+      "steps": [
+        "1500 → 1920 → 2400 → 3840 → 1920 → 2400；测量页面及画布"
+      ],
+      "expected": "页面占满可用宽度；画布随容器扩展；无水平溢出",
+      "status": "PASS",
+      "actual": "[{\"viewport\":1500,\"page\":1280,\"available\":1280,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false},{\"viewport\":3840,\"page\":3620,\"available\":3620,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false},{\"viewport\":1920,\"page\":1700,\"available\":1700,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false},{\"viewport\":2400,\"page\":2180,\"available\":2180,\"canvas\":null,\"cy\":null,\"horizontalOverflow\":false}]",
+      "evidence": [
+        "wide-results.json",
+        "list-wide.png"
+      ]
+    }
+  ]
+}

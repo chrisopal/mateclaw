@@ -1,0 +1,1 @@
+{"score":70,"verdict":"revise","category_match":true,"differences":["Ontology page stays at 1440px while available content width is 2180px at a 2400px viewport."],"suggestions":["Remove the ontology page maximum width; verify shared list, draft and version routes plus Cytoscape container resizing."],"reasoning":"The fixed page maximum reproduces the user's unused screen space."}

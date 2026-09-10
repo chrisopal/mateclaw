@@ -1,0 +1,300 @@
+{
+  "scope": "E2 second batch expression UI on draft and published pages; E1/E3 replay separately",
+  "environment": "Chromium enterprise :5189 / OWL :18109; isolated synthetic data",
+  "pages": [
+    {
+      "id": "draft",
+      "url": "/semantic/ontologies/:id/edit",
+      "inventoryComplete": true
+    },
+    {
+      "id": "published",
+      "url": "/semantic/ontologies/:id/versions",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "draft-tree",
+      "page": "draft",
+      "name": "嵌套表达式树",
+      "locator": "expression panel: tree",
+      "checks": [
+        "expand-collapse-reopen"
+      ]
+    },
+    {
+      "id": "draft-cardinality",
+      "page": "draft",
+      "name": "限定基数",
+      "locator": "expression panel: cardinality",
+      "checks": [
+        "inspect-values"
+      ]
+    },
+    {
+      "id": "draft-chain",
+      "page": "draft",
+      "name": "有序属性链",
+      "locator": "expression panel: chain",
+      "checks": [
+        "ordered-steps"
+      ]
+    },
+    {
+      "id": "draft-source",
+      "page": "draft",
+      "name": "表达式公理来源",
+      "locator": "expression panel: source",
+      "checks": [
+        "inspect-source"
+      ]
+    },
+    {
+      "id": "draft-language",
+      "page": "draft",
+      "name": "表达式命名引用语言",
+      "locator": "expression panel: language",
+      "checks": [
+        "switch-blur"
+      ]
+    },
+    {
+      "id": "draft-narrow",
+      "page": "draft",
+      "name": "窄屏表达式树",
+      "locator": "expression panel: narrow",
+      "checks": [
+        "390px-overflow"
+      ]
+    },
+    {
+      "id": "draft-reload",
+      "page": "draft",
+      "name": "刷新与只读回读",
+      "locator": "expression panel: reload",
+      "checks": [
+        "reload-readback"
+      ]
+    },
+    {
+      "id": "published-tree",
+      "page": "published",
+      "name": "嵌套表达式树",
+      "locator": "expression panel: tree",
+      "checks": [
+        "expand-collapse-reopen"
+      ]
+    },
+    {
+      "id": "published-cardinality",
+      "page": "published",
+      "name": "限定基数",
+      "locator": "expression panel: cardinality",
+      "checks": [
+        "inspect-values"
+      ]
+    },
+    {
+      "id": "published-chain",
+      "page": "published",
+      "name": "有序属性链",
+      "locator": "expression panel: chain",
+      "checks": [
+        "ordered-steps"
+      ]
+    },
+    {
+      "id": "published-source",
+      "page": "published",
+      "name": "表达式公理来源",
+      "locator": "expression panel: source",
+      "checks": [
+        "inspect-source"
+      ]
+    },
+    {
+      "id": "published-language",
+      "page": "published",
+      "name": "表达式命名引用语言",
+      "locator": "expression panel: language",
+      "checks": [
+        "switch-blur"
+      ]
+    },
+    {
+      "id": "published-narrow",
+      "page": "published",
+      "name": "窄屏表达式树",
+      "locator": "expression panel: narrow",
+      "checks": [
+        "390px-overflow"
+      ]
+    },
+    {
+      "id": "published-reload",
+      "page": "published",
+      "name": "刷新与只读回读",
+      "locator": "expression panel: reload",
+      "checks": [
+        "reload-readback"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "draft-tree",
+      "check": "expand-collapse-reopen",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "嵌套表达式树按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-cardinality",
+      "check": "inspect-values",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "限定基数按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-chain",
+      "check": "ordered-steps",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "有序属性链按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-source",
+      "check": "inspect-source",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "表达式公理来源按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-language",
+      "check": "switch-blur",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "表达式命名引用语言按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-narrow",
+      "check": "390px-overflow",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "窄屏表达式树按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "draft-reload",
+      "check": "reload-readback",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "刷新与只读回读按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-tree",
+      "check": "expand-collapse-reopen",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "嵌套表达式树按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-cardinality",
+      "check": "inspect-values",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "限定基数按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-chain",
+      "check": "ordered-steps",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "有序属性链按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-source",
+      "check": "inspect-source",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "表达式公理来源按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-language",
+      "check": "switch-blur",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "表达式命名引用语言按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-narrow",
+      "check": "390px-overflow",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "窄屏表达式树按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    },
+    {
+      "control": "published-reload",
+      "check": "reload-readback",
+      "steps": [
+        "待按控件执行"
+      ],
+      "expected": "刷新与只读回读按语义正确展示",
+      "status": "NOT_RUN",
+      "actual": "尚未执行",
+      "evidence": []
+    }
+  ]
+}

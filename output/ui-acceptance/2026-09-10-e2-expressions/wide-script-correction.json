@@ -1,0 +1,1 @@
+{"classification":"SCRIPT_PRECONDITION","initial":"Published-only fixture had no draft, so draft graph readiness timed out","correction":"Use existing expression fixture for draft; keep user-reported fixture for published; no product failure inferred"}

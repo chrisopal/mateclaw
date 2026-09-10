@@ -1,0 +1,1705 @@
+{
+  "ontologyId": "2097906448273219585",
+  "draft": {
+    "snapshot": {
+      "ontologyId": "2097906448273219585",
+      "revisionId": "2097906448629735425",
+      "draftVersion": 3,
+      "documentDigest": "391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876",
+      "importLockDigest": "ef9237a245f7ec2a002e5344c6195cb1add96af8b3e09230900d1b571e4dbc5a"
+    },
+    "projection": {
+      "schemaVersion": "ontology-display-v1",
+      "documentDigest": "391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876",
+      "importLockDigest": "ef9237a245f7ec2a002e5344c6195cb1add96af8b3e09230900d1b571e4dbc5a",
+      "nodes": [
+        {
+          "id": "class:urn:e2:Equipment",
+          "iri": "urn:e2:Equipment",
+          "kind": "class",
+          "labels": [],
+          "axiomIds": [
+            "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+            "2097906448629735425:b4d97d21811d0e783e1a02f60662c2ee99aba3fa44488fb47c9229e99bb77115"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "class:urn:e2:Machine",
+          "iri": "urn:e2:Machine",
+          "kind": "class",
+          "labels": [
+            {
+              "value": "Machine",
+              "language": "en",
+              "axiomId": "2097906448629735425:0ffc1ee3e37ea739eed0581aaf17956c55ff7c16e6b4bd43e7a93afe7aabd8b1"
+            },
+            {
+              "value": "机器",
+              "language": "zh",
+              "axiomId": "2097906448629735425:3bce038f6f067004c1a28f785b8ed488f0b004780f006e6d11424d09e37d31d8"
+            }
+          ],
+          "axiomIds": [
+            "2097906448629735425:0ffc1ee3e37ea739eed0581aaf17956c55ff7c16e6b4bd43e7a93afe7aabd8b1",
+            "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+            "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+            "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+            "2097906448629735425:3bce038f6f067004c1a28f785b8ed488f0b004780f006e6d11424d09e37d31d8",
+            "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+            "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+            "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+            "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+            "2097906448629735425:bb825f4c183eec2c2d0af5df25eac66868298bc8933d40f919b045e68675cf0e",
+            "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "class:urn:e2:Probe",
+          "iri": "urn:e2:Probe",
+          "kind": "class",
+          "labels": [
+            {
+              "value": "测针",
+              "language": "zh",
+              "axiomId": "2097906448629735425:f1df4a1f338123ca1999590b8f787ab15e5c7acf4e8bc0dc3c09aa7741e1b1d1"
+            }
+          ],
+          "axiomIds": [
+            "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+            "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+            "2097906448629735425:89dbc93c6cb35b6720ef8af4dee9385d162f7a202aeb6350b69907bd6f85e7a5",
+            "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+            "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+            "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+            "2097906448629735425:f1df4a1f338123ca1999590b8f787ab15e5c7acf4e8bc0dc3c09aa7741e1b1d1"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "dataProperty:urn:e2:reading",
+          "iri": "urn:e2:reading",
+          "kind": "dataProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+            "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+            "2097906448629735425:b32a5eaf78b72edb46a18b8ebfb99b857186b2c68bd2fa37ac9d14f86086a221",
+            "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+          "iri": "http://www.w3.org/2001/XMLSchema#decimal",
+          "kind": "datatype",
+          "labels": [],
+          "axiomIds": [
+            "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+            "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+            "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:contains",
+          "iri": "urn:e2:contains",
+          "kind": "objectProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+            "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+            "2097906448629735425:970447199e64692fdf8fa707521cae34d0919750c28a16ec8dd827d46591c9ba"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:related",
+          "iri": "urn:e2:related",
+          "kind": "objectProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+            "2097906448629735425:2c31fc7cc697273a65c20c9ab0b81b90fb1b99d8055784b0dde5c5c57c589228"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:uses",
+          "iri": "urn:e2:uses",
+          "kind": "objectProperty",
+          "labels": [
+            {
+              "value": "使用",
+              "language": "zh",
+              "axiomId": "2097906448629735425:f3e26ed604d7256d1334bea92b1ed48ae9d339939982306a47a71e50a0d49299"
+            }
+          ],
+          "axiomIds": [
+            "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+            "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+            "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+            "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+            "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+            "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+            "2097906448629735425:c64f8286a2dc3ab00652f0ce0afc7e866763210815a68eabfbe7cab6dfeb0f49",
+            "2097906448629735425:f3e26ed604d7256d1334bea92b1ed48ae9d339939982306a47a71e50a0d49299"
+          ],
+          "features": [],
+          "imported": false
+        }
+      ],
+      "edges": [],
+      "axiomRefs": [
+        {
+          "id": "2097906448629735425:0ffc1ee3e37ea739eed0581aaf17956c55ff7c16e6b4bd43e7a93afe7aabd8b1",
+          "artifactId": "2097906448629735425",
+          "axiomId": "0ffc1ee3e37ea739eed0581aaf17956c55ff7c16e6b4bd43e7a93afe7aabd8b1",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Machine> \"Machine\"@en)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:3bce038f6f067004c1a28f785b8ed488f0b004780f006e6d11424d09e37d31d8",
+          "artifactId": "2097906448629735425",
+          "axiomId": "3bce038f6f067004c1a28f785b8ed488f0b004780f006e6d11424d09e37d31d8",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Machine> \"机器\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:f1df4a1f338123ca1999590b8f787ab15e5c7acf4e8bc0dc3c09aa7741e1b1d1",
+          "artifactId": "2097906448629735425",
+          "axiomId": "f1df4a1f338123ca1999590b8f787ab15e5c7acf4e8bc0dc3c09aa7741e1b1d1",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Probe> \"测针\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:f3e26ed604d7256d1334bea92b1ed48ae9d339939982306a47a71e50a0d49299",
+          "artifactId": "2097906448629735425",
+          "axiomId": "f3e26ed604d7256d1334bea92b1ed48ae9d339939982306a47a71e50a0d49299",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:uses> \"使用\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:b4d97d21811d0e783e1a02f60662c2ee99aba3fa44488fb47c9229e99bb77115",
+          "artifactId": "2097906448629735425",
+          "axiomId": "b4d97d21811d0e783e1a02f60662c2ee99aba3fa44488fb47c9229e99bb77115",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Equipment>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:bb825f4c183eec2c2d0af5df25eac66868298bc8933d40f919b045e68675cf0e",
+          "artifactId": "2097906448629735425",
+          "axiomId": "bb825f4c183eec2c2d0af5df25eac66868298bc8933d40f919b045e68675cf0e",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Machine>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:89dbc93c6cb35b6720ef8af4dee9385d162f7a202aeb6350b69907bd6f85e7a5",
+          "artifactId": "2097906448629735425",
+          "axiomId": "89dbc93c6cb35b6720ef8af4dee9385d162f7a202aeb6350b69907bd6f85e7a5",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Probe>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:b32a5eaf78b72edb46a18b8ebfb99b857186b2c68bd2fa37ac9d14f86086a221",
+          "artifactId": "2097906448629735425",
+          "axiomId": "b32a5eaf78b72edb46a18b8ebfb99b857186b2c68bd2fa37ac9d14f86086a221",
+          "imported": false,
+          "rendering": "Declaration(DataProperty(<urn:e2:reading>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:970447199e64692fdf8fa707521cae34d0919750c28a16ec8dd827d46591c9ba",
+          "artifactId": "2097906448629735425",
+          "axiomId": "970447199e64692fdf8fa707521cae34d0919750c28a16ec8dd827d46591c9ba",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:contains>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:2c31fc7cc697273a65c20c9ab0b81b90fb1b99d8055784b0dde5c5c57c589228",
+          "artifactId": "2097906448629735425",
+          "axiomId": "2c31fc7cc697273a65c20c9ab0b81b90fb1b99d8055784b0dde5c5c57c589228",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:related>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:c64f8286a2dc3ab00652f0ce0afc7e866763210815a68eabfbe7cab6dfeb0f49",
+          "artifactId": "2097906448629735425",
+          "axiomId": "c64f8286a2dc3ab00652f0ce0afc7e866763210815a68eabfbe7cab6dfeb0f49",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:uses>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:dd15e2f7833098f27d0b3c50961a4af59a3ccff1862bf4dc0c61f1f8078cc479",
+          "artifactId": "2097906448629735425",
+          "axiomId": "dd15e2f7833098f27d0b3c50961a4af59a3ccff1862bf4dc0c61f1f8078cc479",
+          "imported": false,
+          "rendering": "HasKey(<urn:e2:Machine> (<urn:e2:uses>) ())",
+          "axiomType": "HasKey",
+          "status": "NOT_RENDERED",
+          "reason": "UNSUPPORTED_AXIOM_TYPE"
+        },
+        {
+          "id": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+          "artifactId": "2097906448629735425",
+          "axiomId": "953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataAllValuesFrom(<urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+          "artifactId": "2097906448629735425",
+          "axiomId": "2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataExactCardinality(1 <urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869",
+          "artifactId": "2097906448629735425",
+          "axiomId": "f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataSomeValuesFrom(<urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+          "artifactId": "2097906448629735425",
+          "axiomId": "39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectAllValuesFrom(<urn:e2:uses> ObjectSomeValuesFrom(<urn:e2:contains> <urn:e2:Probe>)))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+          "artifactId": "2097906448629735425",
+          "axiomId": "36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectExactCardinality(2 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "artifactId": "2097906448629735425",
+          "axiomId": "9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectIntersectionOf(<urn:e2:Equipment> ObjectSomeValuesFrom(<urn:e2:uses> ObjectUnionOf(<urn:e2:Probe> ObjectComplementOf(<urn:e2:Equipment>)))))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+          "artifactId": "2097906448629735425",
+          "axiomId": "9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectMaxCardinality(3 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+          "artifactId": "2097906448629735425",
+          "axiomId": "a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectMinCardinality(2 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+          "artifactId": "2097906448629735425",
+          "axiomId": "13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+          "imported": false,
+          "rendering": "SubObjectPropertyOf(ObjectPropertyChain(<urn:e2:uses> <urn:e2:contains> <urn:e2:uses>) <urn:e2:related>)",
+          "axiomType": "SubPropertyChainOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "e2-pinned-library:07e0390115c68e9068c296532fc8352e102422e30d6a3118b3337edc383cda54",
+          "artifactId": "e2-pinned-library",
+          "axiomId": "07e0390115c68e9068c296532fc8352e102422e30d6a3118b3337edc383cda54",
+          "imported": true,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Imported> \"导入定义\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "NOT_RENDERED",
+          "reason": "IMPORT_COLLAPSED"
+        },
+        {
+          "id": "e2-pinned-library:0fc74d10c7f6886c5d878be7fc914d1f4a85e2da889150867caf151c34674d41",
+          "artifactId": "e2-pinned-library",
+          "axiomId": "0fc74d10c7f6886c5d878be7fc914d1f4a85e2da889150867caf151c34674d41",
+          "imported": true,
+          "rendering": "Declaration(Class(<urn:e2:Imported>))",
+          "axiomType": "Declaration",
+          "status": "NOT_RENDERED",
+          "reason": "IMPORT_COLLAPSED"
+        }
+      ],
+      "expressions": [
+        {
+          "id": "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1:axiom",
+          "axiomId": "2097906448629735425:13b16357aebc1b86fd91012a492f3f7f8cd6a958b8a6a71369a0f0113794d4b1",
+          "path": "axiom",
+          "operator": "SubPropertyChainOf",
+          "operands": [
+            {
+              "role": "step",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "step",
+              "position": 1,
+              "targetId": "objectProperty:urn:e2:contains",
+              "value": null
+            },
+            {
+              "role": "step",
+              "position": 2,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "superProperty",
+              "position": 3,
+              "targetId": "objectProperty:urn:e2:related",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975:axiom",
+          "axiomId": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975:axiom/superClass",
+          "axiomId": "2097906448629735425:2ae02bc83b62cf4419ff15727f56dcc6a6b6b5295470d961dd1746b883b2f975",
+          "path": "axiom/superClass",
+          "operator": "DataExactCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "1"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913:axiom",
+          "axiomId": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913:axiom/superClass",
+          "axiomId": "2097906448629735425:36aa0defc355a10bb82f9fcf02e621d8fe9a248070e8079d1bcadda04056b913",
+          "path": "axiom/superClass",
+          "operator": "ObjectExactCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "2"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e:axiom",
+          "axiomId": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e:axiom/superClass",
+          "axiomId": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+          "path": "axiom/superClass",
+          "operator": "ObjectAllValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e:axiom/superClass/filler",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e:axiom/superClass/filler",
+          "axiomId": "2097906448629735425:39d0c3d5d243e5ddd77d8aa2944dab3aff543707dd89d0644bdf2f756c86bb1e",
+          "path": "axiom/superClass/filler",
+          "operator": "ObjectSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:contains",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403:axiom",
+          "axiomId": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403:axiom/superClass",
+          "axiomId": "2097906448629735425:953d164f85a569c2dcf7180d1578aa67a84ceaec7a09c824d59f07e04079f403",
+          "path": "axiom/superClass",
+          "operator": "DataAllValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom",
+          "axiomId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass",
+          "axiomId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "path": "axiom/superClass",
+          "operator": "ObjectIntersectionOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Equipment",
+              "value": null
+            },
+            {
+              "role": "operand",
+              "position": 1,
+              "targetId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]",
+          "axiomId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "path": "axiom/superClass/operand[1]",
+          "operator": "ObjectSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]/filler",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]/filler",
+          "axiomId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "path": "axiom/superClass/operand[1]/filler",
+          "operator": "ObjectUnionOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            },
+            {
+              "role": "operand",
+              "position": 1,
+              "targetId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]/filler/operand[1]",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c:axiom/superClass/operand[1]/filler/operand[1]",
+          "axiomId": "2097906448629735425:9b7be559de7e3395e023d1e1b98ba8f38da8f8db4be596cdee15a9b24210897c",
+          "path": "axiom/superClass/operand[1]/filler/operand[1]",
+          "operator": "ObjectComplementOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Equipment",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad:axiom",
+          "axiomId": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad:axiom/superClass",
+          "axiomId": "2097906448629735425:9cbcda203c41c4a452572ce3f3169efd9bfa92794ff5769cfe86191d7b2955ad",
+          "path": "axiom/superClass",
+          "operator": "ObjectMaxCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "3"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc:axiom",
+          "axiomId": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc:axiom/superClass",
+          "axiomId": "2097906448629735425:a080de055e0ebb80b1117f51094b4da4f0eedc3a5ef974fcacecf562ea178acc",
+          "path": "axiom/superClass",
+          "operator": "ObjectMinCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "2"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869:axiom",
+          "axiomId": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869:axiom/superClass",
+          "axiomId": "2097906448629735425:f1d35fee779e5a122ef1f0d413fa2b4a206e92d78171998d5af8ee5a47d28869",
+          "path": "axiom/superClass",
+          "operator": "DataSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "coverage": {
+        "total": 23,
+        "returned": 23,
+        "truncated": false,
+        "dependencyScope": "ROOT_ONLY_IMPORTS_COLLAPSED",
+        "lockedImportCount": 1
+      }
+    }
+  },
+  "published": {
+    "snapshot": {
+      "ontologyId": "2097906448273219585",
+      "revisionId": "2097906448289996801",
+      "draftVersion": null,
+      "documentDigest": "391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876",
+      "importLockDigest": "ef9237a245f7ec2a002e5344c6195cb1add96af8b3e09230900d1b571e4dbc5a"
+    },
+    "projection": {
+      "schemaVersion": "ontology-display-v1",
+      "documentDigest": "391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876",
+      "importLockDigest": "ef9237a245f7ec2a002e5344c6195cb1add96af8b3e09230900d1b571e4dbc5a",
+      "nodes": [
+        {
+          "id": "class:urn:e2:Equipment",
+          "iri": "urn:e2:Equipment",
+          "kind": "class",
+          "labels": [],
+          "axiomIds": [
+            "2097906448289996801:26410218b3ea2ff81c19a270f55ccb341c2414949d8a69ea35a42e9009f964c3",
+            "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "class:urn:e2:Machine",
+          "iri": "urn:e2:Machine",
+          "kind": "class",
+          "labels": [
+            {
+              "value": "Machine",
+              "language": "en",
+              "axiomId": "2097906448289996801:6c62bc15d2015b830c4d4779547a5b75f357a726f3d4fdae0bcde4655dde4d20"
+            },
+            {
+              "value": "机器",
+              "language": "zh",
+              "axiomId": "2097906448289996801:7255c0fbb5f76bd62aa59f2878e55b8e7df7ad341477acf66f91def1eb12487d"
+            }
+          ],
+          "axiomIds": [
+            "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+            "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+            "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+            "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+            "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8",
+            "2097906448289996801:6c62bc15d2015b830c4d4779547a5b75f357a726f3d4fdae0bcde4655dde4d20",
+            "2097906448289996801:7255c0fbb5f76bd62aa59f2878e55b8e7df7ad341477acf66f91def1eb12487d",
+            "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+            "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+            "2097906448289996801:dbf49aa6279d16422cc6ed1039b3505f35acbed55da4c54bc400105570fa1536",
+            "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "class:urn:e2:Probe",
+          "iri": "urn:e2:Probe",
+          "kind": "class",
+          "labels": [
+            {
+              "value": "测针",
+              "language": "zh",
+              "axiomId": "2097906448289996801:23dfcb822e0786e4d1faed4916e1729b680474075bfb352a3c9dbb22c7328d7b"
+            }
+          ],
+          "axiomIds": [
+            "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+            "2097906448289996801:23dfcb822e0786e4d1faed4916e1729b680474075bfb352a3c9dbb22c7328d7b",
+            "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+            "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+            "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+            "2097906448289996801:c885fc111d3dff8c17e81ba4fa74df7a9ccba3a2ac4ed8ef2d54ce7e26c514c4",
+            "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "dataProperty:urn:e2:reading",
+          "iri": "urn:e2:reading",
+          "kind": "dataProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+            "2097906448289996801:30ec562f3b614a58cd8efd35e63c61123cb5e71be6b63d1c91554bb24513c3a8",
+            "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+            "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+          "iri": "http://www.w3.org/2001/XMLSchema#decimal",
+          "kind": "datatype",
+          "labels": [],
+          "axiomIds": [
+            "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+            "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+            "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:contains",
+          "iri": "urn:e2:contains",
+          "kind": "objectProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528",
+            "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+            "2097906448289996801:f9413398f68cc798bcb6144872ba924d39e8e600f7689570d4fcd37c79b53679"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:related",
+          "iri": "urn:e2:related",
+          "kind": "objectProperty",
+          "labels": [],
+          "axiomIds": [
+            "2097906448289996801:5bd8b27d2788cc50033d4290b368383baf0bd39002a6bbace52d1fb950318dc2",
+            "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528"
+          ],
+          "features": [],
+          "imported": false
+        },
+        {
+          "id": "objectProperty:urn:e2:uses",
+          "iri": "urn:e2:uses",
+          "kind": "objectProperty",
+          "labels": [
+            {
+              "value": "使用",
+              "language": "zh",
+              "axiomId": "2097906448289996801:216d3753da6363b0e8ae251ed21db84ab4a83390333d86c3d252509a03ca30e7"
+            }
+          ],
+          "axiomIds": [
+            "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+            "2097906448289996801:216d3753da6363b0e8ae251ed21db84ab4a83390333d86c3d252509a03ca30e7",
+            "2097906448289996801:2548eb70147a085dd9029cf0e7a294a5d136e0074fa59709196da8831eb274aa",
+            "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+            "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+            "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528",
+            "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+            "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7"
+          ],
+          "features": [],
+          "imported": false
+        }
+      ],
+      "edges": [],
+      "axiomRefs": [
+        {
+          "id": "2097906448289996801:6c62bc15d2015b830c4d4779547a5b75f357a726f3d4fdae0bcde4655dde4d20",
+          "artifactId": "2097906448289996801",
+          "axiomId": "6c62bc15d2015b830c4d4779547a5b75f357a726f3d4fdae0bcde4655dde4d20",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Machine> \"Machine\"@en)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:7255c0fbb5f76bd62aa59f2878e55b8e7df7ad341477acf66f91def1eb12487d",
+          "artifactId": "2097906448289996801",
+          "axiomId": "7255c0fbb5f76bd62aa59f2878e55b8e7df7ad341477acf66f91def1eb12487d",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Machine> \"机器\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:23dfcb822e0786e4d1faed4916e1729b680474075bfb352a3c9dbb22c7328d7b",
+          "artifactId": "2097906448289996801",
+          "axiomId": "23dfcb822e0786e4d1faed4916e1729b680474075bfb352a3c9dbb22c7328d7b",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Probe> \"测针\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:216d3753da6363b0e8ae251ed21db84ab4a83390333d86c3d252509a03ca30e7",
+          "artifactId": "2097906448289996801",
+          "axiomId": "216d3753da6363b0e8ae251ed21db84ab4a83390333d86c3d252509a03ca30e7",
+          "imported": false,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:uses> \"使用\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:26410218b3ea2ff81c19a270f55ccb341c2414949d8a69ea35a42e9009f964c3",
+          "artifactId": "2097906448289996801",
+          "axiomId": "26410218b3ea2ff81c19a270f55ccb341c2414949d8a69ea35a42e9009f964c3",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Equipment>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:dbf49aa6279d16422cc6ed1039b3505f35acbed55da4c54bc400105570fa1536",
+          "artifactId": "2097906448289996801",
+          "axiomId": "dbf49aa6279d16422cc6ed1039b3505f35acbed55da4c54bc400105570fa1536",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Machine>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:c885fc111d3dff8c17e81ba4fa74df7a9ccba3a2ac4ed8ef2d54ce7e26c514c4",
+          "artifactId": "2097906448289996801",
+          "axiomId": "c885fc111d3dff8c17e81ba4fa74df7a9ccba3a2ac4ed8ef2d54ce7e26c514c4",
+          "imported": false,
+          "rendering": "Declaration(Class(<urn:e2:Probe>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:30ec562f3b614a58cd8efd35e63c61123cb5e71be6b63d1c91554bb24513c3a8",
+          "artifactId": "2097906448289996801",
+          "axiomId": "30ec562f3b614a58cd8efd35e63c61123cb5e71be6b63d1c91554bb24513c3a8",
+          "imported": false,
+          "rendering": "Declaration(DataProperty(<urn:e2:reading>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:f9413398f68cc798bcb6144872ba924d39e8e600f7689570d4fcd37c79b53679",
+          "artifactId": "2097906448289996801",
+          "axiomId": "f9413398f68cc798bcb6144872ba924d39e8e600f7689570d4fcd37c79b53679",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:contains>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:5bd8b27d2788cc50033d4290b368383baf0bd39002a6bbace52d1fb950318dc2",
+          "artifactId": "2097906448289996801",
+          "axiomId": "5bd8b27d2788cc50033d4290b368383baf0bd39002a6bbace52d1fb950318dc2",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:related>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:2548eb70147a085dd9029cf0e7a294a5d136e0074fa59709196da8831eb274aa",
+          "artifactId": "2097906448289996801",
+          "axiomId": "2548eb70147a085dd9029cf0e7a294a5d136e0074fa59709196da8831eb274aa",
+          "imported": false,
+          "rendering": "Declaration(ObjectProperty(<urn:e2:uses>))",
+          "axiomType": "Declaration",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:a8deecb9ae70f1f9b79f0c9abdef1d3e460dda7b2d71974d004cda60672f0912",
+          "artifactId": "2097906448289996801",
+          "axiomId": "a8deecb9ae70f1f9b79f0c9abdef1d3e460dda7b2d71974d004cda60672f0912",
+          "imported": false,
+          "rendering": "HasKey(<urn:e2:Machine> (<urn:e2:uses>) ())",
+          "axiomType": "HasKey",
+          "status": "NOT_RENDERED",
+          "reason": "UNSUPPORTED_AXIOM_TYPE"
+        },
+        {
+          "id": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+          "artifactId": "2097906448289996801",
+          "axiomId": "15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataAllValuesFrom(<urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+          "artifactId": "2097906448289996801",
+          "axiomId": "3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataExactCardinality(1 <urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8",
+          "artifactId": "2097906448289996801",
+          "axiomId": "6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> DataSomeValuesFrom(<urn:e2:reading> xsd:decimal))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+          "artifactId": "2097906448289996801",
+          "axiomId": "a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectAllValuesFrom(<urn:e2:uses> ObjectSomeValuesFrom(<urn:e2:contains> <urn:e2:Probe>)))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+          "artifactId": "2097906448289996801",
+          "axiomId": "5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectExactCardinality(2 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "artifactId": "2097906448289996801",
+          "axiomId": "fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectIntersectionOf(<urn:e2:Equipment> ObjectSomeValuesFrom(<urn:e2:uses> ObjectUnionOf(<urn:e2:Probe> ObjectComplementOf(<urn:e2:Equipment>)))))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+          "artifactId": "2097906448289996801",
+          "axiomId": "13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectMaxCardinality(3 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+          "artifactId": "2097906448289996801",
+          "axiomId": "86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+          "imported": false,
+          "rendering": "SubClassOf(<urn:e2:Machine> ObjectMinCardinality(2 <urn:e2:uses> <urn:e2:Probe>))",
+          "axiomType": "SubClassOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528",
+          "artifactId": "2097906448289996801",
+          "axiomId": "897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528",
+          "imported": false,
+          "rendering": "SubObjectPropertyOf(ObjectPropertyChain(<urn:e2:uses> <urn:e2:contains> <urn:e2:uses>) <urn:e2:related>)",
+          "axiomType": "SubPropertyChainOf",
+          "status": "FULL",
+          "reason": ""
+        },
+        {
+          "id": "e2-pinned-library:07e0390115c68e9068c296532fc8352e102422e30d6a3118b3337edc383cda54",
+          "artifactId": "e2-pinned-library",
+          "axiomId": "07e0390115c68e9068c296532fc8352e102422e30d6a3118b3337edc383cda54",
+          "imported": true,
+          "rendering": "AnnotationAssertion(rdfs:label <urn:e2:Imported> \"导入定义\"@zh)",
+          "axiomType": "AnnotationAssertion",
+          "status": "NOT_RENDERED",
+          "reason": "IMPORT_COLLAPSED"
+        },
+        {
+          "id": "e2-pinned-library:0fc74d10c7f6886c5d878be7fc914d1f4a85e2da889150867caf151c34674d41",
+          "artifactId": "e2-pinned-library",
+          "axiomId": "0fc74d10c7f6886c5d878be7fc914d1f4a85e2da889150867caf151c34674d41",
+          "imported": true,
+          "rendering": "Declaration(Class(<urn:e2:Imported>))",
+          "axiomType": "Declaration",
+          "status": "NOT_RENDERED",
+          "reason": "IMPORT_COLLAPSED"
+        }
+      ],
+      "expressions": [
+        {
+          "id": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9:axiom",
+          "axiomId": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9:axiom/superClass",
+          "axiomId": "2097906448289996801:13d2e51b7e5d4cb4430ba1266f2eed83deb2f02cd7877980a8e6921b3c29bbf9",
+          "path": "axiom/superClass",
+          "operator": "ObjectMaxCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "3"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93:axiom",
+          "axiomId": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93:axiom/superClass",
+          "axiomId": "2097906448289996801:15255631f8437523f4a4deb0a54743f518cc191531418f262004614f95244f93",
+          "path": "axiom/superClass",
+          "operator": "DataAllValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5:axiom",
+          "axiomId": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5:axiom/superClass",
+          "axiomId": "2097906448289996801:3f681017cf33f8515a8e0ed6216e7a3d63a922c8e3db16e526c7d4aec0e6c7d5",
+          "path": "axiom/superClass",
+          "operator": "DataExactCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "1"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a:axiom",
+          "axiomId": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a:axiom/superClass",
+          "axiomId": "2097906448289996801:5a2099206b3284404f13ea5ebe38aa69ea509546b493971465b8182bc1cb408a",
+          "path": "axiom/superClass",
+          "operator": "ObjectExactCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "2"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8:axiom",
+          "axiomId": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8:axiom/superClass",
+          "axiomId": "2097906448289996801:6963f68a4c71ca067675373ccb691a43a7a19f1a78ddc4c8c4d483f18081b2a8",
+          "path": "axiom/superClass",
+          "operator": "DataSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "dataProperty:urn:e2:reading",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "datatype:http://www.w3.org/2001/XMLSchema#decimal",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9:axiom",
+          "axiomId": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9:axiom/superClass",
+          "axiomId": "2097906448289996801:86d332d512af3c444d85e4aa800e56cb5ee4652f03facf302b66672768b5c4f9",
+          "path": "axiom/superClass",
+          "operator": "ObjectMinCardinality",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "cardinality",
+              "position": 1,
+              "targetId": null,
+              "value": "2"
+            },
+            {
+              "role": "filler",
+              "position": 2,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528:axiom",
+          "axiomId": "2097906448289996801:897b6489b5211d4366294d181891b7c7999e3da821c66986e371de18ffae6528",
+          "path": "axiom",
+          "operator": "SubPropertyChainOf",
+          "operands": [
+            {
+              "role": "step",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "step",
+              "position": 1,
+              "targetId": "objectProperty:urn:e2:contains",
+              "value": null
+            },
+            {
+              "role": "step",
+              "position": 2,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "superProperty",
+              "position": 3,
+              "targetId": "objectProperty:urn:e2:related",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29:axiom",
+          "axiomId": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29:axiom/superClass",
+          "axiomId": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+          "path": "axiom/superClass",
+          "operator": "ObjectAllValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29:axiom/superClass/filler",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29:axiom/superClass/filler",
+          "axiomId": "2097906448289996801:a702440d3788418229537a023f6f4a556713bd1c88647bae13995ffaaaacfb29",
+          "path": "axiom/superClass/filler",
+          "operator": "ObjectSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:contains",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom",
+          "axiomId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "path": "axiom",
+          "operator": "SubClassOf",
+          "operands": [
+            {
+              "role": "subClass",
+              "position": 0,
+              "targetId": "class:urn:e2:Machine",
+              "value": null
+            },
+            {
+              "role": "superClass",
+              "position": 1,
+              "targetId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass",
+          "axiomId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "path": "axiom/superClass",
+          "operator": "ObjectIntersectionOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Equipment",
+              "value": null
+            },
+            {
+              "role": "operand",
+              "position": 1,
+              "targetId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]",
+          "axiomId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "path": "axiom/superClass/operand[1]",
+          "operator": "ObjectSomeValuesFrom",
+          "operands": [
+            {
+              "role": "property",
+              "position": 0,
+              "targetId": "objectProperty:urn:e2:uses",
+              "value": null
+            },
+            {
+              "role": "filler",
+              "position": 1,
+              "targetId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]/filler",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]/filler",
+          "axiomId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "path": "axiom/superClass/operand[1]/filler",
+          "operator": "ObjectUnionOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Probe",
+              "value": null
+            },
+            {
+              "role": "operand",
+              "position": 1,
+              "targetId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]/filler/operand[1]",
+              "value": null
+            }
+          ]
+        },
+        {
+          "id": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7:axiom/superClass/operand[1]/filler/operand[1]",
+          "axiomId": "2097906448289996801:fbac98b130e60d72f97bfc2b51e2719e295c0c8bb1bbfa857af6f6c09e8931d7",
+          "path": "axiom/superClass/operand[1]/filler/operand[1]",
+          "operator": "ObjectComplementOf",
+          "operands": [
+            {
+              "role": "operand",
+              "position": 0,
+              "targetId": "class:urn:e2:Equipment",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "coverage": {
+        "total": 23,
+        "returned": 23,
+        "truncated": false,
+        "dependencyScope": "ROOT_ONLY_IMPORTS_COLLAPSED",
+        "lockedImportCount": 1
+      }
+    }
+  }
+}

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Set;
@@ -131,6 +132,111 @@ class OwlDocumentAdapterTest {
                 .filter(node -> node.id().equals("class:urn:test:A"))
                 .findFirst().orElseThrow().labels().stream()
                 .map(OntologyDisplayProjection.Label::value).toList());
+    }
+
+    @Test
+    void projectsComplexExpressionsAndOrderedPropertyChainsWithoutDanglingTargets() {
+        String source = """
+                Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+                Ontology(<urn:test:expressions>
+                  Declaration(Class(<urn:test:A>)) Declaration(Class(<urn:test:B>))
+                  Declaration(Class(<urn:test:C>)) Declaration(Class(<urn:test:D>))
+                  Declaration(ObjectProperty(<urn:test:p>)) Declaration(ObjectProperty(<urn:test:q>))
+                  Declaration(ObjectProperty(<urn:test:r>)) Declaration(DataProperty(<urn:test:d>))
+                  SubClassOf(ObjectIntersectionOf(<urn:test:A>
+                    ObjectSomeValuesFrom(<urn:test:p> ObjectUnionOf(<urn:test:B>
+                      ObjectComplementOf(<urn:test:C>)))) <urn:test:D>)
+                  SubClassOf(<urn:test:A> ObjectMinCardinality(2 <urn:test:p> <urn:test:B>))
+                  SubClassOf(<urn:test:A> DataAllValuesFrom(<urn:test:d> xsd:string))
+                  SubObjectPropertyOf(ObjectPropertyChain(<urn:test:p> <urn:test:q> <urn:test:p>) <urn:test:r>)
+                )
+                """;
+        OntologyDisplayProjection projection = adapter.project(parse(source, OntologyDocumentSyntax.FUNCTIONAL), 2000);
+
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("SubPropertyChainOf")
+                        && expression.operands().stream().filter(operand -> operand.role().equals("step"))
+                        .map(OntologyDisplayProjection.ExpressionOperand::position).toList().equals(List.of(0, 1, 2))
+                        && expression.operands().stream().filter(operand -> operand.role().equals("step"))
+                        .map(OntologyDisplayProjection.ExpressionOperand::targetId).toList().equals(List.of(
+                                "objectProperty:urn:test:p", "objectProperty:urn:test:q", "objectProperty:urn:test:p"))));
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("ObjectIntersectionOf")));
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("ObjectUnionOf")));
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("ObjectComplementOf")));
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("ObjectMinCardinality")
+                        && expression.operands().stream().anyMatch(operand -> Objects.equals(operand.value(), "2"))));
+        assertTrue(projection.expressions().stream().anyMatch(expression ->
+                expression.operator().equals("DataAllValuesFrom")));
+        assertTrue(projection.edges().stream().noneMatch(edge -> edge.kind().equals("SubPropertyChainOf")));
+
+        Set<String> targetIds = projection.nodes().stream().map(OntologyDisplayProjection.Node::id)
+                .collect(Collectors.toSet());
+        targetIds.addAll(projection.expressions().stream()
+                .map(OntologyDisplayProjection.Expression::id).collect(Collectors.toSet()));
+        assertTrue(projection.expressions().stream().flatMap(expression -> expression.operands().stream())
+                .allMatch(operand -> operand.targetId() == null || targetIds.contains(operand.targetId())));
+        OntologyDisplayProjection repeated = adapter.project(parse(source, OntologyDocumentSyntax.FUNCTIONAL), 2000);
+        assertEquals(projection.expressions().stream().map(OntologyDisplayProjection.Expression::id).toList(),
+                repeated.expressions().stream().map(OntologyDisplayProjection.Expression::id).toList());
+        assertEquals(projection.expressions().stream().map(OntologyDisplayProjection.Expression::axiomId).toList(),
+                repeated.expressions().stream().map(OntologyDisplayProjection.Expression::axiomId).toList());
+    }
+
+    @Test
+    void keepsUnsupportedExpressionsHonestAndBoundsExpressionProjection() {
+        ParsedOntologyDocument unsupported = parse("Ontology(<urn:test:unsupported> "
+                + "SubClassOf(<urn:test:A> ObjectHasSelf(<urn:test:p>)))",
+                OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection unsupportedProjection = adapter.project(unsupported, 20);
+        OntologyDisplayProjection.AxiomRef unsupportedRef = unsupportedProjection.axiomRefs().getFirst();
+        assertEquals("PARTIAL", unsupportedRef.status());
+        assertTrue(unsupportedRef.reason().contains("UNSUPPORTED_CLASS_EXPRESSION"));
+        assertFalse(unsupportedProjection.coverage().truncated());
+        assertTrue(unsupportedProjection.expressions().stream().flatMap(value -> value.operands().stream())
+                .anyMatch(operand -> "UNSUPPORTED_EXPRESSION".equals(operand.value())));
+
+        ParsedOntologyDocument nested = parse("Ontology(<urn:test:bounded> "
+                + "SubClassOf(ObjectIntersectionOf(<urn:test:A> <urn:test:B> <urn:test:C>) <urn:test:D>))",
+                OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection capped = adapter.project(nested, 1);
+        assertTrue(capped.expressions().size() <= 1);
+        assertTrue(capped.nodes().size() <= 1);
+        assertTrue(capped.coverage().truncated());
+        assertTrue(capped.axiomRefs().getFirst().reason().contains("LIMIT_REACHED"));
+        Set<String> targetIds = capped.nodes().stream().map(OntologyDisplayProjection.Node::id)
+                .collect(Collectors.toSet());
+        targetIds.addAll(capped.expressions().stream()
+                .map(OntologyDisplayProjection.Expression::id).collect(Collectors.toSet()));
+        assertTrue(capped.expressions().stream().flatMap(value -> value.operands().stream())
+                .allMatch(operand -> operand.targetId() == null || targetIds.contains(operand.targetId())));
+
+        ParsedOntologyDocument nestedTree = parse("Ontology(<urn:test:nested-limit> "
+                + "SubClassOf(ObjectSomeValuesFrom(<urn:test:p> "
+                + "ObjectIntersectionOf(<urn:test:A> <urn:test:B>)) <urn:test:D>))",
+                OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection nestedCapped = adapter.project(nestedTree, 2);
+        assertTrue(nestedCapped.expressions().size() <= 2);
+        assertTrue(nestedCapped.coverage().truncated());
+        assertTrue(nestedCapped.axiomRefs().getFirst().reason().contains("EXPRESSION_LIMIT_REACHED"));
+        assertTrue(nestedCapped.expressions().stream().flatMap(value -> value.operands().stream())
+                .allMatch(operand -> operand.targetId() == null
+                        || nestedCapped.nodes().stream().anyMatch(node -> node.id().equals(operand.targetId()))
+                        || nestedCapped.expressions().stream().anyMatch(expression -> expression.id().equals(operand.targetId()))));
+
+        StringBuilder deepSource = new StringBuilder("Ontology(<urn:test:depth> SubClassOf(<urn:test:A> ");
+        for (int depth = 0; depth < 40; depth++) {
+            deepSource.append("ObjectComplementOf(");
+        }
+        deepSource.append("<urn:test:B>");
+        deepSource.append(")".repeat(40)).append("))");
+        OntologyDisplayProjection deepCapped = adapter.project(
+                parse(deepSource.toString(), OntologyDocumentSyntax.FUNCTIONAL), 2000);
+        assertTrue(deepCapped.coverage().truncated());
+        assertTrue(deepCapped.axiomRefs().getFirst().reason().contains("EXPRESSION_LIMIT_REACHED"));
     }
 
     @Test

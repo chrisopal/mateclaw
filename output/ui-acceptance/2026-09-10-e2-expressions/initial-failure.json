@@ -1,0 +1,12 @@
+{
+  "stage": "first runtime projection smoke",
+  "status": "FAIL",
+  "classification": "PRODUCT",
+  "actual": "GET draft/projection returned 500; UnsupportedOperationException: ImmutableCollections$AbstractImmutableList.sort at OwlDocumentAdapter.project line392",
+  "impact": "Expression projection unavailable; original axiom fallback remains accessible",
+  "fix": "Pending owned adapter fix: sort a mutable copy or use sorted stream",
+  "evidence": [
+    "initial-failure.png"
+  ],
+  "resolution": "Fixed using mutable expression list; final 158 backend tests and 16 expression UI cases passed against repackaged runtime."
+}

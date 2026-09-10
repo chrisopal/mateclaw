@@ -1,0 +1,230 @@
+{
+  "ontologyId": "2097906448273219585",
+  "results": [
+    {
+      "control": "draft-tree",
+      "check": "expand-collapse-reopen",
+      "steps": [
+        "展开交集公理与嵌套运算符；折叠再展开"
+      ],
+      "expected": "交集、存在、并集、补集保留父子结构且可读",
+      "status": "PASS",
+      "actual": "\"概念限制 · SubClassOf机器 · 交集 · ObjectIntersectionOf\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n交集 · ObjectIntersectionOf\\n查看表达式路径\\n操作数 · #1\\nEquipment\\nurn:e2:Equipment\\n操作数 · #2\\n存在限制 · ObjectSomeValuesFrom\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n填充概念 · #2\\n并集 · ObjectUnionOf\\n查看表达式路径\\n操作数 · #1\\n测针\\nurn:e2:Probe\\n操作数 · #2\\n补集 · ObjectComplementOf\\n查看表达式路径\\n操作数 · #1\\nEquipment\\nurn:e2:Equipment\\n查看原公理与来源\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-cardinality",
+      "check": "inspect-values",
+      "steps": [
+        "分别展开最小、最大、精确及数据基数；核对基数和限定概念"
+      ],
+      "expected": "2、3、2、1 保留，量词语义无业务单值误导",
+      "status": "PASS",
+      "actual": "[\"概念限制 · SubClassOf机器 · 最小基数 · ObjectMinCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n最小基数 · ObjectMinCardinality\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n2\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 最大基数 · ObjectMaxCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n最大基数 · ObjectMaxCardinality\\n查看表达式路径\\n\\n最大基数不等同于业务上的 SINGLE 或单值字段。\\n\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n3\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 精确基数 · ObjectExactCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n精确基数 · ObjectExactCardinality\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n2\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 数据精确基数 · DataExactCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n数据精确基数 · DataExactCardinality\\n查看表达式路径\\n属性 · #1\\nreading\\nurn:e2:reading\\n基数 · #2\\n1\\n填充概念 · #3\\ndecimal\\nhttp://www.w3.org/2001/XMLSchema#decimal\\n查看原公理与来源\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-chain",
+      "check": "ordered-steps",
+      "steps": [
+        "展开属性链并读取步骤顺序和超属性"
+      ],
+      "expected": "uses、contains、uses 顺序与重复保留；related 单独作为超属性",
+      "status": "PASS",
+      "actual": "[\"使用\\nurn:e2:uses\",\"contains\\nurn:e2:contains\",\"使用\\nurn:e2:uses\",\"related\\nurn:e2:related\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-path",
+      "check": "expand-collapse-path",
+      "steps": [
+        "打开表达式路径明细、关闭再开"
+      ],
+      "expected": "路径明细可读且未混作命名 IRI",
+      "status": "PASS",
+      "actual": "\"查看表达式路径\\naxiom\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-source",
+      "check": "inspect-source",
+      "steps": [
+        "从存在嵌套表达式点击原公理来源并清除焦点"
+      ],
+      "expected": "命中原始完整公理，来源 ID 不串用",
+      "status": "PASS",
+      "actual": "\"聚焦公理: SubClassOf(<urn:e2:Machine> ObjectIntersectionOf(<urn:e2:Equipment> ObjectSomeValuesFrom(<urn:e2:uses> ObjectUnionOf(<urn:e2:Probe> ObjectComplementOf(<urn:e2:Equipment>)))))\\n清除公理聚焦\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-language",
+      "check": "switch-blur",
+      "steps": [
+        "选择 en 并失焦；表达式引用回显 Machine；切回中文"
+      ],
+      "expected": "引用使用多语言名称且不改变 IRI",
+      "status": "PASS",
+      "actual": "\"en -> zh-CN; named IRI retained\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-narrow",
+      "check": "390px-overflow",
+      "steps": [
+        "390px 展开最深表达式并逐层检查组件宽度；回到桌面"
+      ],
+      "expected": "页面与表达式容器无内部横向溢出",
+      "status": "PASS",
+      "actual": "{\"viewport\":390,\"document\":390,\"overflow\":[]}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-reload",
+      "check": "reload-readback",
+      "steps": [
+        "刷新并重新展开；回读版本及文档摘要；检查表达式只读"
+      ],
+      "expected": "结构保留、无表达式编辑入口或写请求、摘要不变",
+      "status": "PASS",
+      "actual": "{\"version\":3,\"digest\":\"391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876\",\"writes\":0}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-tree",
+      "check": "expand-collapse-reopen",
+      "steps": [
+        "展开交集公理与嵌套运算符；折叠再展开"
+      ],
+      "expected": "交集、存在、并集、补集保留父子结构且可读",
+      "status": "PASS",
+      "actual": "\"概念限制 · SubClassOf机器 · 交集 · ObjectIntersectionOf\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n交集 · ObjectIntersectionOf\\n查看表达式路径\\n操作数 · #1\\nEquipment\\nurn:e2:Equipment\\n操作数 · #2\\n存在限制 · ObjectSomeValuesFrom\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n填充概念 · #2\\n并集 · ObjectUnionOf\\n查看表达式路径\\n操作数 · #1\\n测针\\nurn:e2:Probe\\n操作数 · #2\\n补集 · ObjectComplementOf\\n查看表达式路径\\n操作数 · #1\\nEquipment\\nurn:e2:Equipment\\n查看原公理与来源\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-cardinality",
+      "check": "inspect-values",
+      "steps": [
+        "分别展开最小、最大、精确及数据基数；核对基数和限定概念"
+      ],
+      "expected": "2、3、2、1 保留，量词语义无业务单值误导",
+      "status": "PASS",
+      "actual": "[\"概念限制 · SubClassOf机器 · 最小基数 · ObjectMinCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n最小基数 · ObjectMinCardinality\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n2\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 最大基数 · ObjectMaxCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n最大基数 · ObjectMaxCardinality\\n查看表达式路径\\n\\n最大基数不等同于业务上的 SINGLE 或单值字段。\\n\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n3\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 精确基数 · ObjectExactCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n精确基数 · ObjectExactCardinality\\n查看表达式路径\\n属性 · #1\\n使用\\nurn:e2:uses\\n基数 · #2\\n2\\n填充概念 · #3\\n测针\\nurn:e2:Probe\\n查看原公理与来源\",\"概念限制 · SubClassOf机器 · 数据精确基数 · DataExactCardinality\\n查看表达式路径\\n子概念 · #1\\n机器\\nurn:e2:Machine\\n上位概念或限制 · #2\\n数据精确基数 · DataExactCardinality\\n查看表达式路径\\n属性 · #1\\nreading\\nurn:e2:reading\\n基数 · #2\\n1\\n填充概念 · #3\\ndecimal\\nhttp://www.w3.org/2001/XMLSchema#decimal\\n查看原公理与来源\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-chain",
+      "check": "ordered-steps",
+      "steps": [
+        "展开属性链并读取步骤顺序和超属性"
+      ],
+      "expected": "uses、contains、uses 顺序与重复保留；related 单独作为超属性",
+      "status": "PASS",
+      "actual": "[\"使用\\nurn:e2:uses\",\"contains\\nurn:e2:contains\",\"使用\\nurn:e2:uses\",\"related\\nurn:e2:related\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-path",
+      "check": "expand-collapse-path",
+      "steps": [
+        "打开表达式路径明细、关闭再开"
+      ],
+      "expected": "路径明细可读且未混作命名 IRI",
+      "status": "PASS",
+      "actual": "\"查看表达式路径\\naxiom\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-source",
+      "check": "inspect-source",
+      "steps": [
+        "从存在嵌套表达式点击原公理来源并清除焦点"
+      ],
+      "expected": "命中原始完整公理，来源 ID 不串用",
+      "status": "PASS",
+      "actual": "\"聚焦公理: SubClassOf(<urn:e2:Machine> ObjectIntersectionOf(<urn:e2:Equipment> ObjectSomeValuesFrom(<urn:e2:uses> ObjectUnionOf(<urn:e2:Probe> ObjectComplementOf(<urn:e2:Equipment>)))))\\n清除公理聚焦\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-language",
+      "check": "switch-blur",
+      "steps": [
+        "选择 en 并失焦；表达式引用回显 Machine；切回中文"
+      ],
+      "expected": "引用使用多语言名称且不改变 IRI",
+      "status": "PASS",
+      "actual": "\"en -> zh-CN; named IRI retained\"",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-narrow",
+      "check": "390px-overflow",
+      "steps": [
+        "390px 展开最深表达式并逐层检查组件宽度；回到桌面"
+      ],
+      "expected": "页面与表达式容器无内部横向溢出",
+      "status": "PASS",
+      "actual": "{\"viewport\":390,\"document\":390,\"overflow\":[]}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-reload",
+      "check": "reload-readback",
+      "steps": [
+        "刷新并重新展开；回读版本及文档摘要；检查表达式只读"
+      ],
+      "expected": "结构保留、无表达式编辑入口或写请求、摘要不变",
+      "status": "PASS",
+      "actual": "{\"version\":3,\"digest\":\"391f50156a8654d863eb91a78c77bd87cf40f1b37121d058366fbb94a9ebf876\",\"writes\":0}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    }
+  ],
+  "writes": []
+}

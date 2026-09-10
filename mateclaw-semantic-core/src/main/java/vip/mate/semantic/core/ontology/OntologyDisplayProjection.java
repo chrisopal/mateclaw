@@ -15,6 +15,7 @@ public record OntologyDisplayProjection(
         List<Node> nodes,
         List<Edge> edges,
         List<AxiomRef> axiomRefs,
+        List<Expression> expressions,
         Coverage coverage) {
 
     public static final String SCHEMA_VERSION = "ontology-display-v1";
@@ -26,7 +27,20 @@ public record OntologyDisplayProjection(
         nodes = List.copyOf(Objects.requireNonNull(nodes, "nodes"));
         edges = List.copyOf(Objects.requireNonNull(edges, "edges"));
         axiomRefs = List.copyOf(Objects.requireNonNull(axiomRefs, "axiomRefs"));
+        expressions = List.copyOf(Objects.requireNonNull(expressions, "expressions"));
         coverage = Objects.requireNonNull(coverage, "coverage");
+    }
+
+    /** Compatibility constructor for callers that only consume the first batch graph. */
+    public OntologyDisplayProjection(
+            String schemaVersion,
+            String documentDigest,
+            String importLockDigest,
+            List<Node> nodes,
+            List<Edge> edges,
+            List<AxiomRef> axiomRefs,
+            Coverage coverage) {
+        this(schemaVersion, documentDigest, importLockDigest, nodes, edges, axiomRefs, List.of(), coverage);
     }
 
     public record Node(
@@ -89,6 +103,34 @@ public record OntologyDisplayProjection(
             axiomType = requireText(axiomType, "axiomType");
             status = requireText(status, "status");
             reason = reason == null ? "" : reason;
+        }
+    }
+
+    public record Expression(
+            String id,
+            String axiomId,
+            String path,
+            String operator,
+            List<ExpressionOperand> operands) {
+        public Expression {
+            id = requireText(id, "id");
+            axiomId = requireText(axiomId, "axiomId");
+            path = requireText(path, "path");
+            operator = requireText(operator, "operator");
+            operands = List.copyOf(Objects.requireNonNull(operands, "operands"));
+        }
+    }
+
+    public record ExpressionOperand(
+            String role,
+            int position,
+            String targetId,
+            String value) {
+        public ExpressionOperand {
+            role = requireText(role, "role");
+            if (position < 0) {
+                throw new IllegalArgumentException("position must not be negative");
+            }
         }
     }
 

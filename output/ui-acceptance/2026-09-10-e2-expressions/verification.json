@@ -1,0 +1,50 @@
+{
+  "baseline": "92f89541",
+  "backend": [
+    {
+      "suite": "OwlDocumentAdapterTest",
+      "tests": 140,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "SemanticOntologyProjectionIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "SemanticOntologyIntegrationTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "frontend": {
+    "tests": 84,
+    "testFiles": 17,
+    "enterpriseBuild": "PASS (includes vue-tsc)",
+    "eslintChangedFiles": "PASS",
+    "largeScreen": "List/draft/published verified at1500/1920/2400/3840 with reverse resizing; Cytoscape width follows DOM"
+  },
+  "ui": {
+    "expression": 16,
+    "E1": 32,
+    "E2": 18,
+    "E3": 11,
+    "total": 80,
+    "failures": 0,
+    "wide": 3
+  },
+  "runtime": "Current packaged source, OWL18109 + enterprise5189; health HTTP200",
+  "limitations": [
+    "Read-only expression trees, no complex expression editing or inference",
+    "Unsupported HasKey and other unsupported constructors retain explicit reasons and original axioms",
+    "Locked imports collapsed",
+    "Build reports pre-existing large-chunk warning",
+    "Existing semantic-owl suite has one skipped test; final 158 targeted tests have none"
+  ]
+}

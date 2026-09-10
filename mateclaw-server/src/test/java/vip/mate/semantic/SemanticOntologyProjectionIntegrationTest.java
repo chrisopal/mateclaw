@@ -9,6 +9,43 @@ import vip.mate.semantic.support.SemanticHttpFixture;
 
 class SemanticOntologyProjectionIntegrationTest extends SemanticHttpFixture {
     @Test
+    void complexProjectionRoundTripsSourceReferencesWithoutChangingDraft() throws Exception {
+        String id = create();
+        JsonNode initial = draft(id);
+        JsonNode saved = call("PUT", "/ontologies/" + id + "/draft", "member", workspace,
+                saveBody(initial.path("draftVersion").asLong(), owlDocument("""
+                    Ontology(<urn:test:expressions>
+                      Declaration(Class(<urn:test:Machine>))
+                      Declaration(Class(<urn:test:Probe>))
+                      Declaration(ObjectProperty(<urn:test:uses>))
+                      SubClassOf(<urn:test:Machine>
+                        ObjectAllValuesFrom(<urn:test:uses> ObjectComplementOf(<urn:test:Probe>))))
+                    """)), 200);
+        long version = saved.path("draftVersion").asLong();
+        JsonNode view = call("GET", "/ontologies/" + id + "/draft/projection?expectedDraftVersion=" + version,
+                "viewer", workspace, null, 200).path("projection");
+        assertTrue(view.path("expressions").isArray());
+        assertTrue(view.path("expressions").size() >= 3);
+        for (JsonNode expression : view.path("expressions")) {
+            assertFalse(expression.path("path").asText().isBlank());
+            assertFalse(expression.path("operator").asText().isBlank());
+            assertTrue(expression.path("operands").isArray());
+            boolean found = false;
+            for (JsonNode ref : view.path("axiomRefs")) {
+                if (ref.path("id").asText().equals(expression.path("axiomId").asText())) {
+                    found = true;
+                    assertEquals("FULL", ref.path("status").asText());
+                    assertEquals(saved.path("id").asText(), ref.path("artifactId").asText());
+                }
+            }
+            assertTrue(found, "Expression must reference a returned source axiom");
+        }
+        JsonNode readback = call("GET", "/ontologies/" + id + "/draft", "viewer", workspace, null, 200);
+        assertEquals(version, readback.path("draftVersion").asLong());
+        assertEquals(saved.path("document").path("documentDigest"), readback.path("document").path("documentDigest"));
+    }
+
+    @Test
     void draftProjectionPinsVersionAndHonorsBoundedLimit() throws Exception {
         String id = create();
         JsonNode draft = draft(id);

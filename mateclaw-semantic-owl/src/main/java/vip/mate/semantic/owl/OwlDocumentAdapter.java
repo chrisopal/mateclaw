@@ -50,6 +50,16 @@ import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataExactCardinality;
+import org.semanticweb.owlapi.model.OWLDataCardinalityRestriction;
+import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
+import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
+import org.semanticweb.owlapi.model.OWLDataMinCardinality;
+import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLDataUnionOf;
+import org.semanticweb.owlapi.model.OWLDataComplementOf;
+import org.semanticweb.owlapi.model.OWLNaryDataRange;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -62,6 +72,16 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
+import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
+import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -89,6 +109,8 @@ import vip.mate.semantic.core.ontology.OntologyDisplayProjection;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection.AxiomRef;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection.Coverage;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection.Edge;
+import vip.mate.semantic.core.ontology.OntologyDisplayProjection.Expression;
+import vip.mate.semantic.core.ontology.OntologyDisplayProjection.ExpressionOperand;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection.Label;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection.Node;
 import vip.mate.semantic.core.ontology.OntologyValidationReport;
@@ -256,6 +278,10 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
             List<Edge> edges = new ArrayList<>();
             Set<String> graphCappedRefs = new HashSet<>();
             Set<String> unappliedLabelRefs = new HashSet<>();
+            Set<String> expressionCappedRefs = new HashSet<>();
+            List<Expression> expressions = new ArrayList<>();
+            ExpressionState expressionState = new ExpressionState(
+                    limit, 32, expressions, expressionCappedRefs, graphCappedRefs);
             for (ProjectionEntry entry : returned) {
                 if (entry.imported()) {
                     continue;
@@ -310,6 +336,7 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                     addNamedPropertyFeature(nodeMap, characteristic.getProperty(), refId,
                             axiom.getAxiomType().getName());
                 }
+                projectExpressions(axiom, refId, nodeMap, expressionState, root);
             }
 
             labelsByIri.forEach((iri, labels) -> {
@@ -347,6 +374,11 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                 });
             }
 
+            Set<String> nodeIds = nodeMap.values().stream().map(node -> node.id).collect(Collectors.toSet());
+            Set<String> expressionIds = expressions.stream().map(Expression::id).collect(Collectors.toSet());
+            expressions = new ArrayList<>(sanitizeExpressions(
+                    expressions, nodeIds, expressionIds, graphCappedRefs, expressionCappedRefs));
+
             List<Node> nodes = nodeMap.values().stream()
                     .map(MutableNode::freeze)
                     .sorted(Comparator.comparing(Node::id))
@@ -354,8 +386,10 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
             edges.sort(Comparator.comparing(Edge::id));
             List<AxiomRef> refs = returned.stream()
                     .map(entry -> entry.toRef(graphCappedRefs.contains(entry.refId()),
-                            unappliedLabelRefs.contains(entry.refId())))
+                            unappliedLabelRefs.contains(entry.refId()),
+                            expressionCappedRefs.contains(entry.refId())))
                     .toList();
+            expressions.sort(Comparator.comparing(Expression::id));
             return new OntologyDisplayProjection(
                     OntologyDisplayProjection.SCHEMA_VERSION,
                     document.document().documentDigest(),
@@ -363,7 +397,9 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                     nodes,
                     List.copyOf(edges),
                     refs,
-                    new Coverage(total, refs.size(), total > refs.size() || !graphCappedRefs.isEmpty(),
+                    expressions,
+                    new Coverage(total, refs.size(), total > refs.size()
+                            || !graphCappedRefs.isEmpty() || !expressionCappedRefs.isEmpty(),
                             "ROOT_ONLY_IMPORTS_COLLAPSED", document.lockedImports().size()));
         } catch (OntologyDocumentException exception) {
             throw exception;
@@ -395,6 +431,425 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                         .thenComparing(ProjectionEntry::artifactId)
                         .thenComparing(ProjectionEntry::rendering))
                 .toList();
+    }
+
+    private static void projectExpressions(
+            OWLAxiom axiom,
+            String refId,
+            Map<String, MutableNode> nodes,
+            ExpressionState state,
+            OWLOntology ontology) {
+        if (!(axiom instanceof OWLSubClassOfAxiom
+                || axiom instanceof OWLEquivalentClassesAxiom
+                || axiom instanceof OWLDisjointClassesAxiom
+                || axiom instanceof OWLSubPropertyChainOfAxiom
+                || axiom instanceof OWLObjectPropertyDomainAxiom
+                || axiom instanceof OWLObjectPropertyRangeAxiom
+                || axiom instanceof OWLDataPropertyDomainAxiom
+                || axiom instanceof OWLDataPropertyRangeAxiom)) {
+            return;
+        }
+        if (!state.beginRoot(refId)) {
+            return;
+        }
+        List<ExpressionOperand> operands = new ArrayList<>();
+        if (axiom instanceof OWLSubClassOfAxiom subclass) {
+            operands.add(expressionOperand("subClass", 0, subclass.getSubClass(), "axiom/subClass", refId, nodes, state, ontology, 1));
+            operands.add(expressionOperand("superClass", 1, subclass.getSuperClass(), "axiom/superClass", refId, nodes, state, ontology, 1));
+            addExpression(refId, "axiom", "SubClassOf", operands, state);
+        } else if (axiom instanceof OWLEquivalentClassesAxiom equivalent) {
+            List<OWLClassExpression> members = equivalent.getClassExpressions().stream()
+                    .sorted(Comparator.comparing(value -> renderObject(ontology, value)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < members.size(); position++) {
+                operands.add(expressionOperand("member", position, members.get(position),
+                        "axiom/member[" + position + "]", refId, nodes, state, ontology, 1));
+            }
+            addExpression(refId, "axiom", "EquivalentClasses", operands, state);
+        } else if (axiom instanceof OWLDisjointClassesAxiom disjoint) {
+            List<OWLClassExpression> members = disjoint.getClassExpressions().stream()
+                    .sorted(Comparator.comparing(value -> renderObject(ontology, value)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < members.size(); position++) {
+                operands.add(expressionOperand("member", position, members.get(position),
+                        "axiom/member[" + position + "]", refId, nodes, state, ontology, 1));
+            }
+            addExpression(refId, "axiom", "DisjointClasses", operands, state);
+        } else if (axiom instanceof OWLSubPropertyChainOfAxiom chain) {
+            int position = 0;
+            for (var property : chain.getPropertyChain()) {
+                if (position >= state.maxExpressions) {
+                    state.expressionCappedRefs.add(refId);
+                    break;
+                }
+                operands.add(propertyOperand("step", position, property,
+                        "axiom/step[" + position + "]", refId, nodes, state));
+                position++;
+            }
+            operands.add(propertyOperand("superProperty", position, chain.getSuperProperty(),
+                    "axiom/superProperty", refId, nodes, state));
+            addExpression(refId, "axiom", "SubPropertyChainOf", operands, state);
+        } else if (axiom instanceof OWLObjectPropertyDomainAxiom domain) {
+            operands.add(propertyOperand("property", 0, domain.getProperty(),
+                    "axiom/property", refId, nodes, state));
+            operands.add(expressionOperand("domain", 1, domain.getDomain(),
+                    "axiom/domain", refId, nodes, state, ontology, 1));
+            addExpression(refId, "axiom", "ObjectPropertyDomain", operands, state);
+        } else if (axiom instanceof OWLObjectPropertyRangeAxiom range) {
+            operands.add(propertyOperand("property", 0, range.getProperty(),
+                    "axiom/property", refId, nodes, state));
+            operands.add(expressionOperand("range", 1, range.getRange(),
+                    "axiom/range", refId, nodes, state, ontology, 1));
+            addExpression(refId, "axiom", "ObjectPropertyRange", operands, state);
+        } else if (axiom instanceof OWLDataPropertyDomainAxiom domain) {
+            operands.add(propertyOperand("property", 0, domain.getProperty(),
+                    "axiom/property", refId, nodes, state));
+            operands.add(expressionOperand("domain", 1, domain.getDomain(),
+                    "axiom/domain", refId, nodes, state, ontology, 1));
+            addExpression(refId, "axiom", "DataPropertyDomain", operands, state);
+        } else if (axiom instanceof OWLDataPropertyRangeAxiom range) {
+            operands.add(propertyOperand("property", 0, range.getProperty(),
+                    "axiom/property", refId, nodes, state));
+            operands.add(dataOperand("range", 1, range.getRange(),
+                    "axiom/range", refId, nodes, state, ontology, 1));
+            addExpression(refId, "axiom", "DataPropertyRange", operands, state);
+        }
+    }
+
+    private static ExpressionOperand expressionOperand(
+            String role, int position, OWLClassExpression value, String path, String axiomId,
+            Map<String, MutableNode> nodes, ExpressionState state, OWLOntology ontology, int depth) {
+        String target = classExpressionTarget(value, path, axiomId, nodes, state, ontology, depth);
+        return new ExpressionOperand(role, position, target,
+                target == null ? (state.isCapped(axiomId)
+                        ? state.reasonForMissingTarget(axiomId) : "UNSUPPORTED_EXPRESSION") : null);
+    }
+
+    private static ExpressionOperand dataOperand(
+            String role, int position, OWLDataRange value, String path, String axiomId,
+            Map<String, MutableNode> nodes, ExpressionState state, OWLOntology ontology, int depth) {
+        String target = dataRangeTarget(value, path, axiomId, nodes, state, ontology, depth);
+        return new ExpressionOperand(role, position, target,
+                target == null ? (state.isCapped(axiomId)
+                        ? state.reasonForMissingTarget(axiomId) : "UNSUPPORTED_EXPRESSION") : null);
+    }
+
+    private static ExpressionOperand propertyOperand(
+            String role, int position, OWLPropertyExpression value, String path, String axiomId,
+            Map<String, MutableNode> nodes, ExpressionState state) {
+        if (isNamedProperty(value)) {
+            String target = addExpressionEntity(nodes, namedProperty(value), axiomId, state);
+            return new ExpressionOperand(role, position, target,
+                    target == null ? state.reasonForMissingTarget(axiomId) : null);
+        }
+        return new ExpressionOperand(role, position, null, "UNSUPPORTED_PROPERTY_EXPRESSION");
+    }
+
+    private static String classExpressionTarget(
+            OWLClassExpression value, String path, String axiomId, Map<String, MutableNode> nodes,
+            ExpressionState state, OWLOntology ontology, int depth) {
+        if (value.isOWLClass()) {
+            return addExpressionEntity(nodes, value.asOWLClass(), axiomId, state);
+        }
+        if (!state.beginNestedExpression(axiomId)) {
+            return null;
+        }
+        if (!state.withinDepth(depth, axiomId)) {
+            return null;
+        }
+        List<ExpressionOperand> operands = new ArrayList<>();
+        String operator;
+        if (value instanceof OWLObjectIntersectionOf intersection) {
+            operator = "ObjectIntersectionOf";
+            if (intersection.getOperands().size() > state.maxExpressions) {
+                state.expressionCappedRefs.add(axiomId);
+            }
+            List<OWLClassExpression> children = intersection.getOperands().stream()
+                    .sorted(Comparator.comparing(child -> renderObject(ontology, child)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < children.size(); position++) {
+                operands.add(expressionOperand("operand", position, children.get(position),
+                        path + "/operand[" + position + "]", axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else if (value instanceof OWLObjectUnionOf union) {
+            operator = "ObjectUnionOf";
+            if (union.getOperands().size() > state.maxExpressions) {
+                state.expressionCappedRefs.add(axiomId);
+            }
+            List<OWLClassExpression> children = union.getOperands().stream()
+                    .sorted(Comparator.comparing(child -> renderObject(ontology, child)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < children.size(); position++) {
+                operands.add(expressionOperand("operand", position, children.get(position),
+                        path + "/operand[" + position + "]", axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else if (value instanceof OWLObjectComplementOf complement) {
+            operator = "ObjectComplementOf";
+            operands.add(expressionOperand("operand", 0, complement.getOperand(),
+                    path + "/operand", axiomId, nodes, state, ontology, depth + 1));
+        } else if (value instanceof OWLObjectSomeValuesFrom some) {
+            operator = "ObjectSomeValuesFrom";
+            operands.add(propertyOperand("property", 0, some.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(expressionOperand("filler", 1, some.getFiller(), path + "/filler",
+                    axiomId, nodes, state, ontology, depth + 1));
+        } else if (value instanceof OWLObjectAllValuesFrom all) {
+            operator = "ObjectAllValuesFrom";
+            operands.add(propertyOperand("property", 0, all.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(expressionOperand("filler", 1, all.getFiller(), path + "/filler",
+                    axiomId, nodes, state, ontology, depth + 1));
+        } else if (value instanceof OWLObjectCardinalityRestriction cardinality) {
+            operator = value instanceof OWLObjectMinCardinality ? "ObjectMinCardinality"
+                    : value instanceof OWLObjectMaxCardinality ? "ObjectMaxCardinality" : "ObjectExactCardinality";
+            operands.add(propertyOperand("property", 0, cardinality.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(new ExpressionOperand("cardinality", 1, null, Integer.toString(cardinality.getCardinality())));
+            if (cardinality.isQualified()) {
+                operands.add(expressionOperand("filler", 2, cardinality.getFiller(), path + "/filler",
+                        axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else if (value instanceof OWLDataSomeValuesFrom some) {
+            operator = "DataSomeValuesFrom";
+            operands.add(propertyOperand("property", 0, some.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(dataOperand("filler", 1, some.getFiller(), path + "/filler",
+                    axiomId, nodes, state, ontology, depth + 1));
+        } else if (value instanceof OWLDataAllValuesFrom all) {
+            operator = "DataAllValuesFrom";
+            operands.add(propertyOperand("property", 0, all.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(dataOperand("filler", 1, all.getFiller(), path + "/filler",
+                    axiomId, nodes, state, ontology, depth + 1));
+        } else if (value instanceof OWLDataCardinalityRestriction cardinality) {
+            operator = value instanceof OWLDataMinCardinality ? "DataMinCardinality"
+                    : value instanceof OWLDataMaxCardinality ? "DataMaxCardinality" : "DataExactCardinality";
+            operands.add(propertyOperand("property", 0, cardinality.getProperty(), path + "/property", axiomId, nodes, state));
+            operands.add(new ExpressionOperand("cardinality", 1, null, Integer.toString(cardinality.getCardinality())));
+            if (cardinality.isQualified()) {
+                operands.add(dataOperand("filler", 2, cardinality.getFiller(), path + "/filler",
+                        axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else {
+            return null;
+        }
+        return addExpression(axiomId, path, operator, operands, state);
+    }
+
+    private static String dataRangeTarget(
+            OWLDataRange value, String path, String axiomId, Map<String, MutableNode> nodes,
+            ExpressionState state, OWLOntology ontology, int depth) {
+        if (value.isOWLDatatype()) {
+            return addExpressionEntity(nodes, value.asOWLDatatype(), axiomId, state);
+        }
+        if (!state.beginNestedExpression(axiomId)) {
+            return null;
+        }
+        if (!state.withinDepth(depth, axiomId)) {
+            return null;
+        }
+        String operator;
+        List<ExpressionOperand> operands = new ArrayList<>();
+        if (value instanceof OWLDataIntersectionOf intersection) {
+            operator = "DataIntersectionOf";
+            if (intersection.getOperands().size() > state.maxExpressions) {
+                state.expressionCappedRefs.add(axiomId);
+            }
+            List<OWLDataRange> children = intersection.getOperands().stream()
+                    .sorted(Comparator.comparing(child -> renderObject(ontology, child)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < children.size(); position++) {
+                operands.add(dataOperand("operand", position, children.get(position),
+                        path + "/operand[" + position + "]", axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else if (value instanceof OWLDataUnionOf union) {
+            operator = "DataUnionOf";
+            if (union.getOperands().size() > state.maxExpressions) {
+                state.expressionCappedRefs.add(axiomId);
+            }
+            List<OWLDataRange> children = union.getOperands().stream()
+                    .sorted(Comparator.comparing(child -> renderObject(ontology, child)))
+                    .limit(state.maxExpressions).toList();
+            for (int position = 0; position < children.size(); position++) {
+                operands.add(dataOperand("operand", position, children.get(position),
+                        path + "/operand[" + position + "]", axiomId, nodes, state, ontology, depth + 1));
+            }
+        } else if (value instanceof OWLDataComplementOf complement) {
+            operator = "DataComplementOf";
+            operands.add(dataOperand("operand", 0, complement.getDataRange(), path + "/operand",
+                    axiomId, nodes, state, ontology, depth + 1));
+        } else {
+            return null;
+        }
+        return addExpression(axiomId, path, operator, operands, state);
+    }
+
+    private static String addExpression(
+            String axiomId, String path, String operator, List<ExpressionOperand> operands, ExpressionState state) {
+        boolean root = path.equals("axiom");
+        if ((!root && state.expressions.size() >= state.maxExpressions - state.rootReservation)
+                || (root && state.expressions.size() >= state.maxExpressions)) {
+            state.expressionCappedRefs.add(axiomId);
+            return null;
+        }
+        String id = axiomId + ":" + path;
+        state.expressions.add(new Expression(id, axiomId, path, operator, operands));
+        if (root) {
+            state.rootReservation = 0;
+        }
+        return id;
+    }
+
+    private static String addExpressionEntity(
+            Map<String, MutableNode> nodes, OWLEntity entity, String axiomId, ExpressionState state) {
+        String id = entityId(entity);
+        if (!nodes.containsKey(id) && nodes.size() >= state.maxNodes) {
+            state.graphCappedRefs.add(axiomId);
+            return null;
+        }
+        return addEntity(nodes, entity, axiomId);
+    }
+
+    private static List<Expression> sanitizeExpressions(
+            List<Expression> source,
+            Set<String> nodeIds,
+            Set<String> expressionIds,
+            Set<String> graphCappedRefs,
+            Set<String> expressionCappedRefs) {
+        return source.stream().map(expression -> {
+            boolean changed = false;
+            List<ExpressionOperand> operands = new ArrayList<>(expression.operands().size());
+            for (ExpressionOperand operand : expression.operands()) {
+                String target = operand.targetId();
+                if (target != null && !nodeIds.contains(target) && !expressionIds.contains(target)) {
+                    changed = true;
+                    if (target.startsWith("class:") || target.startsWith("objectProperty:")
+                            || target.startsWith("dataProperty:") || target.startsWith("datatype:")
+                            || target.startsWith("individual:") || target.startsWith("annotationProperty:")) {
+                        graphCappedRefs.add(expression.axiomId());
+                    } else {
+                        expressionCappedRefs.add(expression.axiomId());
+                    }
+                    operands.add(new ExpressionOperand(
+                            operand.role(), operand.position(), null,
+                            operand.value() == null ? "TARGET_NOT_PROJECTED" : operand.value()));
+                } else {
+                    operands.add(operand);
+                }
+            }
+            return changed
+                    ? new Expression(expression.id(), expression.axiomId(), expression.path(),
+                            expression.operator(), operands)
+                    : expression;
+        }).toList();
+    }
+
+    private static String renderObject(OWLOntology ontology, OWLObject value) {
+        StringWriter writer = new StringWriter();
+        FunctionalSyntaxObjectRenderer renderer = new FunctionalSyntaxObjectRenderer(
+                ontology, new OWLFunctionalSyntaxOntologyFormat(), writer);
+        value.accept(renderer);
+        return writer.toString().trim();
+    }
+
+    private static boolean supportsClassExpression(OWLClassExpression value) {
+        return supportsClassExpression(value, 0, 32);
+    }
+
+    private static boolean supportsClassExpression(OWLClassExpression value, int depth, int maxDepth) {
+        if (value.isOWLClass()) return true;
+        if (depth >= maxDepth) return false;
+        if (value instanceof OWLObjectIntersectionOf valueSet) return valueSet.getOperands().size() <= 2000 && valueSet.getOperands().stream()
+                .allMatch(child -> supportsClassExpression(child, depth + 1, maxDepth));
+        if (value instanceof OWLObjectUnionOf valueSet) return valueSet.getOperands().size() <= 2000 && valueSet.getOperands().stream()
+                .allMatch(child -> supportsClassExpression(child, depth + 1, maxDepth));
+        if (value instanceof OWLObjectComplementOf complement) return supportsClassExpression(complement.getOperand(), depth + 1, maxDepth);
+        if (value instanceof OWLObjectSomeValuesFrom some) return isNamedProperty(some.getProperty())
+                && supportsClassExpression(some.getFiller(), depth + 1, maxDepth);
+        if (value instanceof OWLObjectAllValuesFrom all) return isNamedProperty(all.getProperty())
+                && supportsClassExpression(all.getFiller(), depth + 1, maxDepth);
+        if (value instanceof OWLObjectCardinalityRestriction cardinality) {
+            return isNamedProperty(cardinality.getProperty()) && (!cardinality.isQualified()
+                    || supportsClassExpression(cardinality.getFiller(), depth + 1, maxDepth));
+        }
+        if (value instanceof OWLDataSomeValuesFrom some) return isNamedProperty(some.getProperty())
+                && supportsDataRange(some.getFiller(), depth + 1, maxDepth);
+        if (value instanceof OWLDataAllValuesFrom all) return isNamedProperty(all.getProperty())
+                && supportsDataRange(all.getFiller(), depth + 1, maxDepth);
+        if (value instanceof OWLDataCardinalityRestriction cardinality) {
+            return isNamedProperty(cardinality.getProperty()) && (!cardinality.isQualified()
+                    || supportsDataRange(cardinality.getFiller(), depth + 1, maxDepth));
+        }
+        return false;
+    }
+
+    private static boolean supportsDataRange(OWLDataRange value) {
+        return supportsDataRange(value, 0, 32);
+    }
+
+    private static boolean supportsDataRange(OWLDataRange value, int depth, int maxDepth) {
+        if (value.isOWLDatatype()) return true;
+        if (depth >= maxDepth) return false;
+        if (value instanceof OWLNaryDataRange range) return range.getOperands().size() <= 2000 && range.getOperands().stream()
+                .allMatch(child -> supportsDataRange(child, depth + 1, maxDepth));
+        if (value instanceof OWLDataComplementOf complement) return supportsDataRange(complement.getDataRange(), depth + 1, maxDepth);
+        return false;
+    }
+
+    private static final class ExpressionState {
+        private final int maxExpressions;
+        private final int maxNodes;
+        private final int maxDepth;
+        private final List<Expression> expressions;
+        private final Set<String> expressionCappedRefs;
+        private final Set<String> graphCappedRefs;
+        private int rootReservation;
+        private int visitBudget;
+
+        private ExpressionState(
+                int maxExpressions,
+                int maxDepth,
+                List<Expression> expressions,
+                Set<String> expressionCappedRefs,
+                Set<String> graphCappedRefs) {
+            this.maxExpressions = maxExpressions;
+            this.maxNodes = maxExpressions;
+            this.maxDepth = maxDepth;
+            this.expressions = expressions;
+            this.expressionCappedRefs = expressionCappedRefs;
+            this.graphCappedRefs = graphCappedRefs;
+            this.visitBudget = maxExpressions;
+        }
+
+        private boolean beginRoot(String axiomId) {
+            if (expressions.size() >= maxExpressions || visitBudget <= 0) {
+                expressionCappedRefs.add(axiomId);
+                return false;
+            }
+            rootReservation = 1;
+            visitBudget--;
+            return true;
+        }
+
+        private boolean beginNestedExpression(String axiomId) {
+            if (visitBudget <= 0) {
+                expressionCappedRefs.add(axiomId);
+                return false;
+            }
+            visitBudget--;
+            return true;
+        }
+
+        private boolean withinDepth(int depth, String axiomId) {
+            if (depth >= maxDepth) {
+                expressionCappedRefs.add(axiomId);
+                return false;
+            }
+            return true;
+        }
+
+        private boolean isCapped(String axiomId) {
+            return expressionCappedRefs.contains(axiomId) || graphCappedRefs.contains(axiomId);
+        }
+
+        private String reasonForMissingTarget(String axiomId) {
+            return graphCappedRefs.contains(axiomId) ? "GRAPH_LIMIT_REACHED" : "EXPRESSION_LIMIT_REACHED";
+        }
     }
 
     private static void addProjectionEntries(
@@ -430,32 +885,38 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                 return unsupportedStatus(axiom, "LABEL_SUBJECT_OR_VALUE_NOT_NAMED_LITERAL");
             }
         } else if (axiom instanceof OWLSubClassOfAxiom subclass) {
-            partial = !(subclass.getSubClass().isOWLClass() && subclass.getSuperClass().isOWLClass());
-            reason = partial ? "ANONYMOUS_CLASS_EXPRESSION_NOT_RENDERED" : "";
+            partial = !(supportsClassExpression(subclass.getSubClass())
+                    && supportsClassExpression(subclass.getSuperClass()));
+            reason = partial ? "UNSUPPORTED_CLASS_EXPRESSION" : "";
+        } else if (axiom instanceof OWLSubPropertyChainOfAxiom chain) {
+            partial = chain.getPropertyChain().isEmpty()
+                    || chain.getPropertyChain().stream().anyMatch(property -> !isNamedProperty(property))
+                    || !isNamedProperty(chain.getSuperProperty());
+            reason = partial ? "ANONYMOUS_PROPERTY_EXPRESSION_NOT_RENDERED" : "";
         } else if (axiom instanceof OWLObjectPropertyDomainAxiom domain) {
-            partial = !(isNamedProperty(domain.getProperty()) && domain.getDomain().isOWLClass());
-            reason = partial ? "ANONYMOUS_PROPERTY_OR_CLASS_EXPRESSION_NOT_RENDERED" : "";
+            partial = !(isNamedProperty(domain.getProperty()) && supportsClassExpression(domain.getDomain()));
+            reason = partial ? "UNSUPPORTED_PROPERTY_OR_CLASS_EXPRESSION" : "";
         } else if (axiom instanceof OWLDataPropertyDomainAxiom domain) {
-            partial = !(isNamedProperty(domain.getProperty()) && domain.getDomain().isOWLClass());
-            reason = partial ? "ANONYMOUS_PROPERTY_OR_CLASS_EXPRESSION_NOT_RENDERED" : "";
+            partial = !(isNamedProperty(domain.getProperty()) && supportsClassExpression(domain.getDomain()));
+            reason = partial ? "UNSUPPORTED_PROPERTY_OR_CLASS_EXPRESSION" : "";
         } else if (axiom instanceof OWLObjectPropertyRangeAxiom range) {
-            partial = !(isNamedProperty(range.getProperty()) && range.getRange().isOWLClass());
-            reason = partial ? "ANONYMOUS_PROPERTY_OR_CLASS_EXPRESSION_NOT_RENDERED" : "";
+            partial = !(isNamedProperty(range.getProperty()) && supportsClassExpression(range.getRange()));
+            reason = partial ? "UNSUPPORTED_PROPERTY_OR_CLASS_EXPRESSION" : "";
         } else if (axiom instanceof OWLDataPropertyRangeAxiom range) {
-            partial = !(isNamedProperty(range.getProperty()) && range.getRange().isOWLDatatype());
-            reason = partial ? "ANONYMOUS_PROPERTY_OR_DATATYPE_EXPRESSION_NOT_RENDERED" : "";
+            partial = !(isNamedProperty(range.getProperty()) && supportsDataRange(range.getRange()));
+            reason = partial ? "UNSUPPORTED_PROPERTY_OR_DATATYPE_EXPRESSION" : "";
         } else if (axiom instanceof OWLEquivalentClassesAxiom equivalent) {
             partial = equivalent.getClassExpressions().size() < 2
-                    || equivalent.getClassExpressions().stream().anyMatch(expression -> !expression.isOWLClass());
-            reason = partial ? "ANONYMOUS_CLASS_EXPRESSION_NOT_RENDERED" : "";
+                    || equivalent.getClassExpressions().stream().anyMatch(expression -> !supportsClassExpression(expression));
+            reason = partial ? "UNSUPPORTED_CLASS_EXPRESSION" : "";
             if (!partial && equivalent.getClassExpressions().size() > 2) {
                 partial = true;
                 reason = "PAIRWISE_RELATIONS_COLLAPSED";
             }
         } else if (axiom instanceof OWLDisjointClassesAxiom disjoint) {
             partial = disjoint.getClassExpressions().size() < 2
-                    || disjoint.getClassExpressions().stream().anyMatch(expression -> !expression.isOWLClass());
-            reason = partial ? "ANONYMOUS_CLASS_EXPRESSION_NOT_RENDERED" : "";
+                    || disjoint.getClassExpressions().stream().anyMatch(expression -> !supportsClassExpression(expression));
+            reason = partial ? "UNSUPPORTED_CLASS_EXPRESSION" : "";
             if (!partial && disjoint.getClassExpressions().size() > 2) {
                 partial = true;
                 reason = "PAIRWISE_RELATIONS_COLLAPSED";
@@ -670,10 +1131,10 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
             String status,
             String reason) {
         AxiomRef toRef() {
-            return toRef(false, false);
+            return toRef(false, false, false);
         }
 
-        AxiomRef toRef(boolean graphCapped, boolean labelNotProjected) {
+        AxiomRef toRef(boolean graphCapped, boolean labelNotProjected, boolean expressionCapped) {
             String actualStatus = status;
             String actualReason = reason;
             if (graphCapped && !imported) {
@@ -684,6 +1145,11 @@ public final class OwlDocumentAdapter implements OntologyDocumentPort {
                 actualStatus = "NOT_RENDERED";
                 actualReason = actualReason.isBlank()
                         ? "LABEL_SUBJECT_NOT_PROJECTED" : actualReason + ";LABEL_SUBJECT_NOT_PROJECTED";
+            }
+            if (expressionCapped && !imported) {
+                actualStatus = "PARTIAL";
+                actualReason = actualReason.isBlank()
+                        ? "EXPRESSION_LIMIT_REACHED" : actualReason + ";EXPRESSION_LIMIT_REACHED";
             }
             return new AxiomRef(refId, artifactId, axiomId, imported, rendering,
                     axiom.getAxiomType().getName(), actualStatus, actualReason);

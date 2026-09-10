@@ -1,0 +1,8 @@
+{
+  "score": 78,
+  "verdict": "revise",
+  "category_match": true,
+  "differences": ["Expression summaries lack visible expand affordance and distinct subject labels", "Repeated raw identifiers and cardinality values add noise", "Mobile capture contains an overlapping sidebar and deep indentation leaves narrow text columns"],
+  "suggestions": ["Restore native disclosure markers and identify root subject/operator", "Translate operand roles and remove repeated values", "Capture stable closed navigation and reduce nested mobile indentation"],
+  "reasoning": "The existing enterprise styling is preserved, but readability and stable mobile evidence need another pass."
+}
