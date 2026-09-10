@@ -1,0 +1,20 @@
+{
+  "mobile": {
+    "viewport": 390,
+    "documentWidth": 390,
+    "drawerOpenCloseReopen": true
+  },
+  "theme": {
+    "light": "rgb(255,255,255)",
+    "darkNodeAndEdgeBackground": "rgb(24,34,48)",
+    "restored": "system"
+  },
+  "workspace": {
+    "otherWorkspace": "NOT_FOUND",
+    "staleGraphs": 0,
+    "staleFocus": 0,
+    "returnNodes": 7,
+    "returnFocus": 0
+  },
+  "selectionMilliseconds": 41
+}

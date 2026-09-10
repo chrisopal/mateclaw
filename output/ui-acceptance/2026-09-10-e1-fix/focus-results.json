@@ -1,0 +1,22 @@
+[
+  {
+    "scope": "draft",
+    "nodeClose": true,
+    "sourceFocus": {
+      "active": "SECTION",
+      "tabindex": "-1",
+      "drawerHidden": true
+    },
+    "clear": true
+  },
+  {
+    "scope": "published",
+    "nodeClose": true,
+    "sourceFocus": {
+      "active": "SECTION",
+      "tabindex": "-1",
+      "drawerHidden": true
+    },
+    "clear": true
+  }
+]

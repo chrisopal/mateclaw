@@ -1,0 +1,276 @@
+vite v7.3.1 building client environment for enterprise...
+transforming...
+✓ 6429 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/enterprise/index.html                                                        0.99 kB │ gzip:   0.49 kB
+dist/enterprise/assets/KaTeX_Size3-Regular-CTq5MqoE.woff                          4.42 kB
+dist/enterprise/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2                         4.93 kB
+dist/enterprise/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2                         5.21 kB
+dist/enterprise/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2                         5.47 kB
+dist/enterprise/assets/KaTeX_Size4-Regular-BF-4gkZK.woff                          5.98 kB
+dist/enterprise/assets/KaTeX_Size2-Regular-oD1tc_U0.woff                          6.19 kB
+dist/enterprise/assets/KaTeX_Size1-Regular-C195tn64.woff                          6.50 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2                   6.91 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2                      6.91 kB
+dist/enterprise/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf                           7.59 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff                    7.66 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff                       7.72 kB
+dist/enterprise/assets/KaTeX_Script-Regular-D3wIWfF6.woff2                        9.64 kB
+dist/enterprise/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2                    10.34 kB
+dist/enterprise/assets/KaTeX_Size4-Regular-DWFBv043.ttf                          10.36 kB
+dist/enterprise/assets/KaTeX_Script-Regular-D5yQViql.woff                        10.59 kB
+dist/enterprise/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2                      11.32 kB
+dist/enterprise/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2                         11.35 kB
+dist/enterprise/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf                          11.51 kB
+dist/enterprise/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2                     12.03 kB
+dist/enterprise/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2                       12.22 kB
+dist/enterprise/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf                          12.23 kB
+dist/enterprise/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff                     12.32 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf                    12.34 kB
+dist/enterprise/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf                       12.37 kB
+dist/enterprise/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff                       13.21 kB
+dist/enterprise/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff                          13.30 kB
+dist/enterprise/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2                   13.57 kB
+dist/enterprise/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff                      14.11 kB
+dist/enterprise/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff                        14.41 kB
+dist/enterprise/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff                    16.03 kB
+dist/enterprise/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2                      16.40 kB
+dist/enterprise/assets/KaTeX_Math-Italic-t53AETM-.woff2                          16.44 kB
+dist/enterprise/assets/KaTeX_Script-Regular-C5JkGWo-.ttf                         16.65 kB
+dist/enterprise/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2                      16.78 kB
+dist/enterprise/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2                          16.99 kB
+dist/enterprise/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff                       18.67 kB
+dist/enterprise/assets/KaTeX_Math-Italic-DA0__PXp.woff                           18.75 kB
+dist/enterprise/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff                       19.41 kB
+dist/enterprise/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf                      19.44 kB
+dist/enterprise/assets/KaTeX_Fraktur-Regular-CB_wures.ttf                        19.57 kB
+dist/enterprise/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf                           19.58 kB
+dist/enterprise/assets/KaTeX_Main-Italic-BMLOBm91.woff                           19.68 kB
+dist/enterprise/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf                       22.36 kB
+dist/enterprise/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf                         24.50 kB
+dist/enterprise/assets/KaTeX_Main-Bold-Cx986IdX.woff2                            25.32 kB
+dist/enterprise/assets/KaTeX_Main-Regular-B22Nviop.woff2                         26.27 kB
+dist/enterprise/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf                     27.56 kB
+dist/enterprise/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2                          28.08 kB
+dist/enterprise/assets/KaTeX_Main-Bold-Jm3AIy58.woff                             29.91 kB
+dist/enterprise/assets/KaTeX_Main-Regular-Dr94JaBh.woff                          30.77 kB
+dist/enterprise/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf                        31.20 kB
+dist/enterprise/assets/KaTeX_Math-Italic-flOr_0UB.ttf                            31.31 kB
+dist/enterprise/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf                        32.97 kB
+dist/enterprise/assets/KaTeX_AMS-Regular-DMm9YOAa.woff                           33.52 kB
+dist/enterprise/assets/KaTeX_Main-Italic-3WenGoN9.ttf                            33.58 kB
+dist/enterprise/assets/KaTeX_Main-Bold-waoOVXN0.ttf                              51.34 kB
+dist/enterprise/assets/KaTeX_Main-Regular-ypZvNtVU.ttf                           53.58 kB
+dist/enterprise/assets/KaTeX_AMS-Regular-DRggAlZN.ttf                            63.63 kB
+dist/enterprise/assets/codicon-ngg6Pgfi.ttf                                     121.97 kB
+dist/enterprise/assets/editor.worker-CdQrwHl8.js                                251.81 kB
+dist/enterprise/assets/json.worker-BoL8UZqY.js                                  383.07 kB
+dist/enterprise/assets/pdf.worker.min-DEtVeC4l.mjs                            1,255.07 kB
+dist/enterprise/assets/WorkflowJsonEditor-Diu0Rkyx.css                            0.28 kB │ gzip:   0.21 kB
+dist/enterprise/assets/OntologyEditor-Sm8QF0Kk.css                                0.39 kB │ gzip:   0.22 kB
+dist/enterprise/assets/HtmlPreview-BaOJmnbs.css                                   0.46 kB │ gzip:   0.28 kB
+dist/enterprise/assets/McTooltip-1g00X_DI.css                                     0.51 kB │ gzip:   0.30 kB
+dist/enterprise/assets/PdfPreview-B-hJeMud.css                                    0.51 kB │ gzip:   0.31 kB
+dist/enterprise/assets/DocxPreview-D58-1ls-.css                                   0.59 kB │ gzip:   0.32 kB
+dist/enterprise/assets/TeamRunRuntime-Ch1syqo5.css                                0.66 kB │ gzip:   0.35 kB
+dist/enterprise/assets/TextPreview-CDuQzkkc.css                                   0.74 kB │ gzip:   0.39 kB
+dist/enterprise/assets/SkillIcon-BbGNgeyA.css                                     0.90 kB │ gzip:   0.34 kB
+dist/enterprise/assets/TeamRunStatus-BejM3jUt.css                                 1.27 kB │ gzip:   0.49 kB
+dist/enterprise/assets/SheetPreview-B4g46vRV.css                                  1.30 kB │ gzip:   0.54 kB
+dist/enterprise/assets/Forbidden-CckvGaBk.css                                     1.33 kB │ gzip:   0.50 kB
+dist/enterprise/assets/semantic-Cd7M1a8F.css                                      1.73 kB │ gzip:   0.69 kB
+dist/enterprise/assets/DeviceCodeDialog-Cxjnkd5b.css                              2.18 kB │ gzip:   0.70 kB
+dist/enterprise/assets/index-CK8L7Wu7.css                                         2.20 kB │ gzip:   0.60 kB
+dist/enterprise/assets/ChannelTypePicker-Bx5piPKp.css                             2.26 kB │ gzip:   0.78 kB
+dist/enterprise/assets/AgentGuideEditor-yw5yjd6q.css                              2.78 kB │ gzip:   0.76 kB
+dist/enterprise/assets/MemorySection-CNFE35Rw.css                                 2.79 kB │ gzip:   0.82 kB
+dist/enterprise/assets/Layout-CJDGUsvV.css                                        2.83 kB │ gzip:   0.82 kB
+dist/enterprise/assets/index-CfxXrenU.css                                         2.94 kB │ gzip:   0.86 kB
+dist/enterprise/assets/McPagination-MCFzXSM-.css                                  3.04 kB │ gzip:   0.85 kB
+dist/enterprise/assets/index-t38H5zdd.css                                         3.13 kB │ gzip:   0.87 kB
+dist/enterprise/assets/index-CEhbMpWz.css                                         3.13 kB │ gzip:   0.88 kB
+dist/enterprise/assets/index-C5vipQLI.css                                         3.13 kB │ gzip:   0.88 kB
+dist/enterprise/assets/index-B4Na4BZG.css                                         3.27 kB │ gzip:   0.98 kB
+dist/enterprise/assets/MateDrawer-BAbvDVY8.css                                    3.52 kB │ gzip:   1.10 kB
+dist/enterprise/assets/Layout-BnuSI_jt.css                                        3.76 kB │ gzip:   1.11 kB
+dist/enterprise/assets/index-lguPZxsO.css                                         3.79 kB │ gzip:   1.02 kB
+dist/enterprise/assets/index-DRUpgxcn.css                                         3.79 kB │ gzip:   1.02 kB
+dist/enterprise/assets/index-BbFtVxwk.css                                         3.80 kB │ gzip:   1.04 kB
+dist/enterprise/assets/index-CUB2TliW.css                                         3.83 kB │ gzip:   1.04 kB
+dist/enterprise/assets/index-CQe568CL.css                                         3.86 kB │ gzip:   1.02 kB
+dist/enterprise/assets/index-BZLCozU5.css                                         4.13 kB │ gzip:   1.13 kB
+dist/enterprise/assets/TeamRunAttention-BO7hCrxY.css                              4.23 kB │ gzip:   1.10 kB
+dist/enterprise/assets/index-B7yd_DTX.css                                         4.23 kB │ gzip:   1.13 kB
+dist/enterprise/assets/SemanticWorkbench-CO8n_Ug7.css                             4.50 kB │ gzip:   1.23 kB
+dist/enterprise/assets/ProviderConfigModal-Bn4IihPi.css                           4.66 kB │ gzip:   1.26 kB
+dist/enterprise/assets/Login-DmD3gxXd.css                                         4.77 kB │ gzip:   1.36 kB
+dist/enterprise/assets/ModelSelector-BfQyCDOD.css                                 4.86 kB │ gzip:   1.38 kB
+dist/enterprise/assets/TokenUsage-Bbxwhz6z.css                                    4.91 kB │ gzip:   1.39 kB
+dist/enterprise/assets/ContentCalendar-DtefmrxT.css                               5.18 kB │ gzip:   1.43 kB
+dist/enterprise/assets/SkillTemplates-BB7Ne-GN.css                                5.27 kB │ gzip:   1.33 kB
+dist/enterprise/assets/AgentPickerDialog-DPb3PcUY.css                             5.62 kB │ gzip:   1.31 kB
+dist/enterprise/assets/Channels-loIeBo7L.css                                      5.69 kB │ gzip:   1.46 kB
+dist/enterprise/assets/WorkflowCanvas-QtvUkiPh.css                                6.13 kB │ gzip:   1.69 kB
+dist/enterprise/assets/AddProviderDrawer-CxxZo1Ei.css                             6.13 kB │ gzip:   1.63 kB
+dist/enterprise/assets/index-nE3XzIzC.css                                         6.45 kB │ gzip:   1.38 kB
+dist/enterprise/assets/Tools-D_YNkm-F.css                                         6.74 kB │ gzip:   1.61 kB
+dist/enterprise/assets/vendor-vue-flow-BPc1C3PT.css                               6.77 kB │ gzip:   1.49 kB
+dist/enterprise/assets/OntologyModelWorkbench-Cq0keLbH.css                        6.99 kB │ gzip:   1.55 kB
+dist/enterprise/assets/index-BK4pcKm9.css                                         7.01 kB │ gzip:   1.72 kB
+dist/enterprise/assets/ManageModelsModal-0SwKfr1K.css                             7.47 kB │ gzip:   1.84 kB
+dist/enterprise/assets/SkillIconPicker-CXM9mr_W.css                               7.49 kB │ gzip:   1.85 kB
+dist/enterprise/assets/Plugins-CvrvCqHH.css                                       7.51 kB │ gzip:   1.80 kB
+dist/enterprise/assets/index-DYt5Man6.css                                         7.60 kB │ gzip:   1.85 kB
+dist/enterprise/assets/index-DjfkpjJC.css                                         7.70 kB │ gzip:   1.83 kB
+dist/enterprise/assets/index-uPKC7orc.css                                         7.92 kB │ gzip:   1.89 kB
+dist/enterprise/assets/Sessions-SAsHiyRP.css                                      8.70 kB │ gzip:   2.03 kB
+dist/enterprise/assets/AcpEndpoints-Ci8gxUdc.css                                  9.68 kB │ gzip:   2.13 kB
+dist/enterprise/assets/index-W5YqSjv7.css                                        10.69 kB │ gzip:   2.27 kB
+dist/enterprise/assets/AgentCreateWizard-MSwJy7Ue.css                            10.79 kB │ gzip:   2.03 kB
+dist/enterprise/assets/Datasources-DRsu_dkP.css                                  10.94 kB │ gzip:   2.32 kB
+dist/enterprise/assets/ChannelOnboardingWizard-Cz2R4JSX.css                      11.59 kB │ gzip:   2.45 kB
+dist/enterprise/assets/Dashboard-CiysGJ5D.css                                    11.94 kB │ gzip:   2.50 kB
+dist/enterprise/assets/index-tQjAah8l.css                                        12.76 kB │ gzip:   2.57 kB
+dist/enterprise/assets/index-CVVuG-fc.css                                        14.04 kB │ gzip:   2.75 kB
+dist/enterprise/assets/index-Dl3ZhU3g.css                                        14.52 kB │ gzip:   2.92 kB
+dist/enterprise/assets/McpServers-CLXWQgrr.css                                   15.12 kB │ gzip:   3.07 kB
+dist/enterprise/assets/PlanBoard-Weue-hhd.css                                    15.73 kB │ gzip:   3.00 kB
+dist/enterprise/assets/AgentContext-BusqlNS6.css                                 17.48 kB │ gzip:   3.44 kB
+dist/enterprise/assets/ChannelEditModal-DKbDaJKp.css                             18.14 kB │ gzip:   2.96 kB
+dist/enterprise/assets/index-qdjeGbX9.css                                        21.15 kB │ gzip:   3.83 kB
+dist/enterprise/assets/Agents-CT2feNPF.css                                       25.36 kB │ gzip:   4.36 kB
+dist/enterprise/assets/Workflows-C6sXoo6W.css                                    26.25 kB │ gzip:   4.35 kB
+dist/enterprise/assets/katex-CfVKi3_s.css                                        29.27 kB │ gzip:   8.06 kB
+dist/enterprise/assets/Teams-o7L4P06x.css                                        29.50 kB │ gzip:   5.20 kB
+dist/enterprise/assets/index-FdpgM6rh.css                                        29.80 kB │ gzip:   5.02 kB
+dist/enterprise/assets/LivePanel-Bvm-UcuT.css                                    34.15 kB │ gzip:   6.11 kB
+dist/enterprise/assets/MainLayout-Cxfp1tKP.css                                   35.16 kB │ gzip:   6.07 kB
+dist/enterprise/assets/index-D5UaT-Hg.css                                        38.00 kB │ gzip:   5.45 kB
+dist/enterprise/assets/SkillMarket-CPO2KmH1.css                                  52.10 kB │ gzip:   7.73 kB
+dist/enterprise/assets/index-BHOuwNdM.css                                        72.35 kB │ gzip:  14.60 kB
+dist/enterprise/assets/index-Co9eWJhc.css                                       112.22 kB │ gzip:  16.36 kB
+dist/enterprise/assets/ChatConsole-BIk1PgfI.css                                 114.49 kB │ gzip:  18.84 kB
+dist/enterprise/assets/vendor-monaco-WGlpN-0L.css                               146.36 kB │ gzip:  23.05 kB
+dist/enterprise/assets/vendor-element-BgqME4ST.css                              352.20 kB │ gzip:  47.23 kB
+dist/enterprise/assets/package-BjnPZBu0.js                                        0.04 kB │ gzip:   0.06 kB
+dist/enterprise/assets/mateclaw_logo_s-CVAfpjIT.js                                0.05 kB │ gzip:   0.07 kB
+dist/enterprise/assets/useFileDrop-DNUyYWyu.js                                    0.31 kB │ gzip:   0.24 kB
+dist/enterprise/assets/helpers-jPJU9Cmk.js                                        0.33 kB │ gzip:   0.19 kB
+dist/enterprise/assets/useSkillName-Di5zg9NA.js                                   0.34 kB │ gzip:   0.24 kB
+dist/enterprise/assets/clipboard-BGju8G_r.js                                      0.36 kB │ gzip:   0.24 kB
+dist/enterprise/assets/useSemanticScope-QDqBIFMp.js                               0.42 kB │ gzip:   0.29 kB
+dist/enterprise/assets/useBreakpoint-o2RzacRb.js                                  0.42 kB │ gzip:   0.29 kB
+dist/enterprise/assets/channelSource-CFqyIyIx.js                                  0.43 kB │ gzip:   0.31 kB
+dist/enterprise/assets/graphApi-D-KsVzHM.js                                       0.50 kB │ gzip:   0.27 kB
+dist/enterprise/assets/useStreamingMarkdown-RQj3CfaJ.js                           0.53 kB │ gzip:   0.36 kB
+dist/enterprise/assets/McTooltip.vue_vue_type_style_index_0_lang-0XL0onD7.js      0.58 kB │ gzip:   0.39 kB
+dist/enterprise/assets/useAgentStore-C2QVjSfX.js                                  0.68 kB │ gzip:   0.40 kB
+dist/enterprise/assets/HtmlPreview-D2xs1iJF.js                                    0.74 kB │ gzip:   0.48 kB
+dist/enterprise/assets/agentIconColor-DXtUysva.js                                 0.77 kB │ gzip:   0.35 kB
+dist/enterprise/assets/TeamRunRuntime-DVvfrhgW.js                                 0.81 kB │ gzip:   0.50 kB
+dist/enterprise/assets/Forbidden-h_pudNcO.js                                      1.06 kB │ gzip:   0.58 kB
+dist/enterprise/assets/TextPreview-CkjDAEHv.js                                    1.17 kB │ gzip:   0.65 kB
+dist/enterprise/assets/DocxPreview-CPJtOY6_.js                                    1.26 kB │ gzip:   0.70 kB
+dist/enterprise/assets/providerIcons-BehflOXU.js                                  1.80 kB │ gzip:   0.48 kB
+dist/enterprise/assets/MateDrawer-DmiT3dRN.js                                     1.90 kB │ gzip:   0.89 kB
+dist/enterprise/assets/PdfPreview-DOxbYAIi.js                                     1.95 kB │ gzip:   1.11 kB
+dist/enterprise/assets/ChannelTypePicker-BGpy_Ff1.js                              1.95 kB │ gzip:   0.99 kB
+dist/enterprise/assets/vendor-runtime-qtZzU5C-.js                                 2.09 kB │ gzip:   1.09 kB
+dist/enterprise/assets/DeviceCodeDialog-C8mpUAJf.js                               2.10 kB │ gzip:   1.02 kB
+dist/enterprise/assets/index-DkPaKo-2.js                                          2.16 kB │ gzip:   0.97 kB
+dist/enterprise/assets/index-gUFus203.js                                          2.42 kB │ gzip:   1.13 kB
+dist/enterprise/assets/index-CeUMJYUt.js                                          2.80 kB │ gzip:   1.39 kB
+dist/enterprise/assets/SheetPreview-CS6dpPtW.js                                   2.92 kB │ gzip:   1.45 kB
+dist/enterprise/assets/index-KFiUATGf.js                                          3.59 kB │ gzip:   1.51 kB
+dist/enterprise/assets/index-3mOzesSX.js                                          3.60 kB │ gzip:   1.24 kB
+dist/enterprise/assets/Layout-eyuU0Pp3.js                                         3.65 kB │ gzip:   1.48 kB
+dist/enterprise/assets/AgentGuideEditor-OtRSXLWo.js                               3.72 kB │ gzip:   1.60 kB
+dist/enterprise/assets/McPagination-ddMR3iuD.js                                   3.75 kB │ gzip:   1.56 kB
+dist/enterprise/assets/WorkflowJsonEditor-5_XBqqXs.js                             3.93 kB │ gzip:   1.88 kB
+dist/enterprise/assets/index-DcDEbIBU.js                                          4.02 kB │ gzip:   1.37 kB
+dist/enterprise/assets/index-jFBKKcXj.js                                          4.05 kB │ gzip:   1.52 kB
+dist/enterprise/assets/index-CFZ46mTr.js                                          4.16 kB │ gzip:   1.59 kB
+dist/enterprise/assets/ContentCalendar-By3xWe8L.js                                4.68 kB │ gzip:   2.02 kB
+dist/enterprise/assets/AddProviderDrawer-CFDokoNW.js                              5.33 kB │ gzip:   1.97 kB
+dist/enterprise/assets/MemorySection-CgHse9WZ.js                                  5.46 kB │ gzip:   2.34 kB
+dist/enterprise/assets/TeamRunStatus-CbBm8gvi.js                                  5.81 kB │ gzip:   2.56 kB
+dist/enterprise/assets/index-Cndq0T7M.js                                          5.91 kB │ gzip:   1.87 kB
+dist/enterprise/assets/TokenUsage-BJAdWkbF.js                                     5.96 kB │ gzip:   1.97 kB
+dist/enterprise/assets/AgentPickerDialog-DscYKwBQ.js                              5.99 kB │ gzip:   2.15 kB
+dist/enterprise/assets/index-B687X5mv.js                                          6.04 kB │ gzip:   1.84 kB
+dist/enterprise/assets/SkillIconPicker-BoqNYGz-.js                                6.13 kB │ gzip:   2.21 kB
+dist/enterprise/assets/ModelSelector-zCc7Lk0c.js                                  6.16 kB │ gzip:   2.45 kB
+dist/enterprise/assets/index-CYudAP_f.js                                          6.70 kB │ gzip:   2.34 kB
+dist/enterprise/assets/wardley-RL74JXVD-BxvcbWiy.js                               7.35 kB │ gzip:   2.86 kB
+dist/enterprise/assets/index-Broxg8Ud.js                                          7.37 kB │ gzip:   3.07 kB
+dist/enterprise/assets/index-BM8LP7x7.js                                          7.78 kB │ gzip:   2.14 kB
+dist/enterprise/assets/SkillTemplates-C-iLaZz1.js                                 7.88 kB │ gzip:   2.83 kB
+dist/enterprise/assets/index-CpbQ4fFr.js                                          7.89 kB │ gzip:   2.50 kB
+dist/enterprise/assets/ProviderConfigModal-C6nhQt8h.js                            7.95 kB │ gzip:   2.28 kB
+dist/enterprise/assets/Plugins-CEz2rL21.js                                        8.05 kB │ gzip:   2.69 kB
+dist/enterprise/assets/Tools-CfqwunGi.js                                          8.16 kB │ gzip:   2.82 kB
+dist/enterprise/assets/TeamRunAttention-BkhteKya.js                               8.35 kB │ gzip:   3.48 kB
+dist/enterprise/assets/OntologyVersions-CX2mjqmD.js                               8.35 kB │ gzip:   2.96 kB
+dist/enterprise/assets/index-DzJwIhue.js                                          8.79 kB │ gzip:   3.07 kB
+dist/enterprise/assets/Login-g7KLMPTE.js                                          8.79 kB │ gzip:   3.50 kB
+dist/enterprise/assets/ManageModelsModal-DMkZjx0s.js                              8.99 kB │ gzip:   3.02 kB
+dist/enterprise/assets/Sessions-DHeKjBxF.js                                      10.18 kB │ gzip:   3.66 kB
+dist/enterprise/assets/useMarkdownRenderer-Dm7daDnn.js                           10.51 kB │ gzip:   4.25 kB
+dist/enterprise/assets/index-DU-QQVfP.js                                         10.66 kB │ gzip:   2.66 kB
+dist/enterprise/assets/Layout-mDCUYHJQ.js                                        10.94 kB │ gzip:   3.08 kB
+dist/enterprise/assets/Channels-or10WA9X.js                                      11.03 kB │ gzip:   3.93 kB
+dist/enterprise/assets/index-BcfUDkey.js                                         11.50 kB │ gzip:   4.06 kB
+dist/enterprise/assets/AcpEndpoints-C4wGYAHV.js                                  12.04 kB │ gzip:   4.07 kB
+dist/enterprise/assets/OntologyList-CulnK0UU.js                                  13.68 kB │ gzip:   4.61 kB
+dist/enterprise/assets/WorkflowCanvas-B0HoE9W6.js                                13.71 kB │ gzip:   4.65 kB
+dist/enterprise/assets/index-trdyaMgn.js                                         13.83 kB │ gzip:   4.19 kB
+dist/enterprise/assets/index-NhBK-NrK.js                                         13.91 kB │ gzip:   4.54 kB
+dist/enterprise/assets/Datasources-CQXWxCrg.js                                   14.04 kB │ gzip:   3.90 kB
+dist/enterprise/assets/index-9_hKxuAC.js                                         14.76 kB │ gzip:   3.78 kB
+dist/enterprise/assets/PlanBoard-BbvaWtI3.js                                     16.37 kB │ gzip:   5.49 kB
+dist/enterprise/assets/Dashboard-HeW_EYsi.js                                     16.41 kB │ gzip:   5.74 kB
+dist/enterprise/assets/AgentCreateWizard-Ccq5R0oW.js                             16.59 kB │ gzip:   4.89 kB
+dist/enterprise/assets/index-DyAlOVZC.js                                         17.26 kB │ gzip:   5.79 kB
+dist/enterprise/assets/useQqAppRegister-CUBf1LLb.js                              17.79 kB │ gzip:   5.66 kB
+dist/enterprise/assets/index-r8nE0jJu.js                                         18.16 kB │ gzip:   4.16 kB
+dist/enterprise/assets/ChannelOnboardingWizard-SRVLAoyb.js                       19.04 kB │ gzip:   5.55 kB
+dist/enterprise/assets/AgentContext-gAbYh3rg.js                                  20.44 kB │ gzip:   6.19 kB
+dist/enterprise/assets/OntologyEditor-DKvEdm_p.js                                27.30 kB │ gzip:   8.80 kB
+dist/enterprise/assets/ChannelEditModal-RSIKxQZN.js                              31.55 kB │ gzip:   7.64 kB
+dist/enterprise/assets/LivePanel-DIR4femk.js                                     32.29 kB │ gzip:  10.51 kB
+dist/enterprise/assets/OntologyModelWorkbench-mMl5FN3c.js                        36.75 kB │ gzip:  12.93 kB
+dist/enterprise/assets/index-BqPtvA2H.js                                         37.41 kB │ gzip:  11.58 kB
+dist/enterprise/assets/MainLayout-VmMRDKJw.js                                    40.49 kB │ gzip:  12.37 kB
+dist/enterprise/assets/Workflows-Cc-clo9A.js                                     41.30 kB │ gzip:  11.14 kB
+dist/enterprise/assets/McpServers-D2hd6Oxa.js                                    46.97 kB │ gzip:  15.88 kB
+dist/enterprise/assets/Agents-CleYLKwS.js                                        47.88 kB │ gzip:  13.44 kB
+dist/enterprise/assets/index-BLBTPeiZ.js                                         48.67 kB │ gzip:  13.58 kB
+dist/enterprise/assets/Teams-DE9MsiSA.js                                         51.28 kB │ gzip:  15.02 kB
+dist/enterprise/assets/SemanticWorkbench-CUSYwaBm.js                             57.34 kB │ gzip:  15.56 kB
+dist/enterprise/assets/index-Bgdqga0Z.js                                         58.14 kB │ gzip:  15.60 kB
+dist/enterprise/assets/SkillMarket-BN5EQzHX.js                                   66.51 kB │ gzip:  17.90 kB
+dist/enterprise/assets/index-B9YrD9S9.js                                         90.61 kB │ gzip:  31.67 kB
+dist/enterprise/assets/SkillIcon-Cw4icUtX.js                                    167.37 kB │ gzip:  24.65 kB
+dist/enterprise/assets/docx-preview-DbtOKkag.js                                 172.76 kB │ gzip:  50.44 kB
+dist/enterprise/assets/zh-CN-BNSznMGU.js                                        189.81 kB │ gzip:  71.83 kB
+dist/enterprise/assets/en-US-DQ-1FphK.js                                        193.43 kB │ gzip:  66.59 kB
+dist/enterprise/assets/index-DGTdDzrb.js                                        199.36 kB │ gzip:  55.61 kB
+dist/enterprise/assets/index-MHpQnkhK.js                                        203.78 kB │ gzip:  67.51 kB
+dist/enterprise/assets/vendor-vue-flow-DkU7dorM.js                              217.37 kB │ gzip:  70.98 kB
+dist/enterprise/assets/ChatConsole-DPdtSJms.js                                  218.93 kB │ gzip:  67.69 kB
+dist/enterprise/assets/katex-DHMw6HUq.js                                        259.05 kB │ gzip:  76.68 kB
+dist/enterprise/assets/pdf-BjAALUVx.js                                          431.65 kB │ gzip: 128.29 kB
+dist/enterprise/assets/exceljs.min-0rOosXhE.js                                  936.77 kB │ gzip: 269.25 kB
+dist/enterprise/assets/vendor-element-BWfOtdk2.js                               999.18 kB │ gzip: 327.81 kB
+dist/enterprise/assets/model-viewer-DVafQNgm.js                               1,012.87 kB │ gzip: 288.69 kB
+dist/enterprise/assets/vendor-markdown-DYqAqsOZ.js                            1,070.84 kB │ gzip: 341.61 kB
+dist/enterprise/assets/vendor-echarts-BQ1JvBUn.js                             1,134.55 kB │ gzip: 380.54 kB
+dist/enterprise/assets/vendor-mermaid-BYXFV7oo.js                             2,619.34 kB │ gzip: 697.50 kB
+dist/enterprise/assets/vendor-monaco-BtwdREo6.js                              3,727.55 kB │ gzip: 963.27 kB
+
+(!) Some chunks are larger than 1024 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 24.03s

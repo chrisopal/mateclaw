@@ -28,6 +28,8 @@ vi.mock('../../api/ontologyApi', () => ({
     operation: vi.fn(),
     diff: vi.fn(),
     ensureBuilder: vi.fn(),
+    axiomSources: vi.fn().mockResolvedValue([]),
+    sourceReviews: vi.fn().mockResolvedValue([]),
   },
 }))
 const ontologyDocument = () => ({ source: { modelSchema: 'owl-document-v1' as const, syntax: 'FUNCTIONAL' as const, documentText: 'Ontology(<https://example.test/factory>)', imports: [], policy: { version: '1', rules: [] } }, ontologyIri: 'https://example.test/factory', versionIri: null, documentDigest: 'sha256:factory', importLockDigest: 'sha256:imports', axioms: [] })

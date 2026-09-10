@@ -1,0 +1,15 @@
+{
+  "viewport": "390x844",
+  "page": "published",
+  "beforeTab": {
+    "tag": "BUTTON",
+    "text": "关闭详情",
+    "insideInspector": true,
+    "inspectorDisplay": "none"
+  },
+  "afterTab": {
+    "tag": "SUMMARY",
+    "text": "高级 OWL 文档"
+  },
+  "expected": "Focus returns to 查看定义详情"
+}

@@ -1,0 +1,425 @@
+{
+  "scope": "E1 graph browsing controls only; existing ontology mutation controls excluded",
+  "environment": "Local authenticated enterprise UI 127.0.0.1:5189; Chromium; synthetic persisted fixtures",
+  "pages": [
+    {
+      "id": "draft",
+      "inventoryComplete": true
+    },
+    {
+      "id": "published",
+      "inventoryComplete": true
+    },
+    {
+      "id": "responsive",
+      "inventoryComplete": true
+    },
+    {
+      "id": "harness",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "initial-canvas",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "directory-and-search",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "explicit-match-filter",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "node-keyboard-selection",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "one-hop-neighborhood",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "link-kind-filter",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "node-kind-filter",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "individual-view",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "layout-choice",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "zoom-and-fit",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "pan-keyboard",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "drag-node",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "locate-without-relayout",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "edge-keyboard-inspection",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "source-link",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "read-only-browsing",
+      "page": "draft",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "published-source-focus",
+      "page": "published",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "responsive-theme-scope",
+      "page": "responsive",
+      "checks": [
+        "behavior"
+      ]
+    },
+    {
+      "id": "bounded-graph-lifecycle",
+      "page": "harness",
+      "checks": [
+        "behavior"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "initial-canvas",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"nodes\": [{\"id\": \"dataProperty:urn:cmm:temperature\", \"label\": \"环境温度\", \"position\": {\"x\": 113, \"y\": 388}, \"rendered\": {\"x\": 266.29129129129126, \"y\": 335.015015015015}, \"matched\": false}, {\"id\": \"class:urn:cmm:Environment\", \"label\": \"测量环境\", \"position\": {\"x\": 113, \"y\": 275}, \"rendered\": {\"x\": 266.29129129129126, \"y\": 240}, \"matched\": false}, {\"id\": \"datatype:http://www.w3.org/2001/XMLSchema#decimal\", \"label\": \"decimal\", \"position\": {\"x\": 113, \"y\": 501}, \"rendered\": {\"x\": 266.29129129129126, \"y\": 430.03003003003005}, \"matched\": false}, {\"id\": \"class:urn:cmm:Machine\", \"label\": \"三坐标测量机\", \"position\": {\"x\": 218.5, \"y\": 49}, \"rendered\": {\"x\": 355, \"y\": 49.96996996996995}, \"matched\": false}, {\"id\": \"class:urn:cmm:Probe\", \"label\": \"测针\", \"position\": {\"x\": 324, \"y\": 275}, \"rendered\": {\"x\": 443.70870870870874, \"y\": 240}, \"matched\": false}, {\"id\": \"objectProperty:urn:cmm:inEnvironment\", \"label\": \"处于环境\", \"position\": {\"x\": 113, \"y\": 162}, \"rendered\": {\"x\": 266.29129129129126, \"y\": 144.98498498498498}, \"matched\": false}, {\"id\": \"objectProperty:urn:cmm:usesProbe\", \"label\": \"使用测针\", \"position\": {\"x\": 324, \"y\": 162}, \"rendered\": {\"x\": 443.70870870870874, \"y\": 144.98498498498498}, \"matched\": false}], \"edges\": 6, \"zoom\": 0.8408408408408409, \"pan\": {\"x\": 171.27627627627626, \"y\": 8.768768768768751}}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "directory-and-search",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"nodes\": 7, \"matches\": [\"测针\", \"使用测针\"]}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "explicit-match-filter",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"filtered\": 2, \"restored\": 7}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "node-keyboard-selection",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"label\": \"三坐标测量机\"}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "one-hop-neighborhood",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"nodes\": [\"三坐标测量机\", \"处于环境\", \"使用测针\"], \"edges\": 2}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "link-kind-filter",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"range/domain/all restored\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "node-kind-filter",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"objectProperty/class/all restored\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "individual-view",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"empty individuals separated from schema\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "layout-choice",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"relationships/hierarchy/manual arrange passed\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "zoom-and-fit",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"before\": 0.8408408408408409, \"afterZoom\": 1.0510510510510511, \"fit\": 0.8408408408408409}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "pan-keyboard",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"before\": {\"x\": 171.27627627627626, \"y\": 8.768768768768751}, \"after\": {\"x\": 131.27627627627626, \"y\": 8.768768768768751}}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "drag-node",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"before\": {\"x\": 218.5, \"y\": 49}, \"after\": {\"x\": 266.07142857142856, \"y\": 78.73214285714286}}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "locate-without-relayout",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"selection retained dragged positions\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "edge-keyboard-inspection",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"rule\": \"DataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Environment>)\"}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "source-link",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "\"公理来源\\n\\n将精确来源证据绑定到 OWL 公理；已发布快照保持不可变。\\n\\n扫描来源变化\\n聚焦公理: DataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Environment>)\\n清除公理聚焦\\n来源: 0\\n待复核: 0\\n公理\\nDataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Environment>)\\n知识库 ID\\n来源 ID\\n来源摘要\\n精确引文\\nStart\\nEnd\\n来源类型\\nEXPERT\\n绑定来源\\n公理\\n\\t\\n来源 ID\\n\\t\\n精确引文\\n\\t\\n来源状态\\n\\t\\n复核状态\\n所选公理暂无来源绑定\\n来源复核\\nBinding\\n\\t\\n来源状态\\n\\t\\n来源摘要\\n\\t\\n暂无待处理来源复核\"",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "read-only-browsing",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Run the corresponding named check in browse.js using actual UI interactions"
+      ],
+      "expected": "Check assertions pass without changing ontology data",
+      "actual": "{\"before\": {\"version\": 7, \"digest\": \"9f071e6328c873555262d1e619ab9b2f91b0e180b5e6d3d7d438b47a9b43a8c6\", \"imports\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"after\": {\"version\": 7, \"digest\": \"9f071e6328c873555262d1e619ab9b2f91b0e180b5e6d3d7d438b47a9b43a8c6\", \"imports\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"writes\": []}",
+      "evidence": [
+        "browse.js",
+        "browse-results.json"
+      ]
+    },
+    {
+      "control": "published-source-focus",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Operate relevant UI controls and read rendered state as recorded in evidence"
+      ],
+      "expected": "Correct scoped view, accessible controls and explicit limits",
+      "actual": "Declaration source count 1 with exact historical quote; clear restores 2; no bind form; refresh clears focus",
+      "evidence": [
+        "published-results.json"
+      ]
+    },
+    {
+      "control": "responsive-theme-scope",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Operate relevant UI controls and read rendered state as recorded in evidence"
+      ],
+      "expected": "Correct scoped view, accessible controls and explicit limits",
+      "actual": "{\"mobile\": {\"viewport\": 390, \"documentWidth\": 390, \"drawerOpenCloseReopen\": true}, \"theme\": {\"light\": \"rgb(255,255,255)\", \"darkNodeAndEdgeBackground\": \"rgb(24,34,48)\", \"restored\": \"system\"}, \"workspace\": {\"otherWorkspace\": \"NOT_FOUND\", \"staleGraphs\": 0, \"staleFocus\": 0, \"returnNodes\": 7, \"returnFocus\": 0}, \"selectionMilliseconds\": 41}",
+      "evidence": [
+        "additional-results.json",
+        "mobile.png",
+        "dark.png",
+        "desktop.png"
+      ]
+    },
+    {
+      "control": "bounded-graph-lifecycle",
+      "check": "behavior",
+      "status": "PASS",
+      "steps": [
+        "Operate relevant UI controls and read rendered state as recorded in evidence"
+      ],
+      "expected": "Correct scoped view, accessible controls and explicit limits",
+      "actual": "200 nodes 159ms; 500 nodes 465ms; 550 truncated visibly; independent selection and destroyed instance verified",
+      "evidence": [
+        "benchmark-results.json"
+      ]
+    }
+  ]
+}

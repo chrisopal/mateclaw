@@ -1,0 +1,806 @@
+{
+  "scope": "E1 草稿与已发布版本的图形浏览、检查器、来源聚焦集成；不含原有创建/发布/绑定来源写表单",
+  "environment": "localhost:5189 Chromium admin enterprise; semantic-m1 codex/enterprise-semantic-core current uncommitted E1",
+  "pages": [
+    {
+      "id": "draft",
+      "inventoryComplete": true
+    },
+    {
+      "id": "published",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "draft-search",
+      "page": "draft",
+      "name": "search",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-only-matches",
+      "page": "draft",
+      "name": "only-matches",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-node-kind",
+      "page": "draft",
+      "name": "node-kind",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-edge-kind",
+      "page": "draft",
+      "name": "edge-kind",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-layout",
+      "page": "draft",
+      "name": "layout",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-mode",
+      "page": "draft",
+      "name": "mode",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-directory",
+      "page": "draft",
+      "name": "directory",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-neighborhood",
+      "page": "draft",
+      "name": "neighborhood",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-zoom-in",
+      "page": "draft",
+      "name": "zoom-in",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-zoom-out",
+      "page": "draft",
+      "name": "zoom-out",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-fit-arrange-locate",
+      "page": "draft",
+      "name": "fit-arrange-locate",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-canvas",
+      "page": "draft",
+      "name": "canvas",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-links-source",
+      "page": "draft",
+      "name": "links-source",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-advanced",
+      "page": "draft",
+      "name": "advanced",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-mobile-drawer",
+      "page": "draft",
+      "name": "mobile-drawer",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "draft-refresh",
+      "page": "draft",
+      "name": "refresh",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-search",
+      "page": "published",
+      "name": "search",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-only-matches",
+      "page": "published",
+      "name": "only-matches",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-node-kind",
+      "page": "published",
+      "name": "node-kind",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-edge-kind",
+      "page": "published",
+      "name": "edge-kind",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-layout",
+      "page": "published",
+      "name": "layout",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-mode",
+      "page": "published",
+      "name": "mode",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-directory",
+      "page": "published",
+      "name": "directory",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-neighborhood",
+      "page": "published",
+      "name": "neighborhood",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-zoom-in",
+      "page": "published",
+      "name": "zoom-in",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-zoom-out",
+      "page": "published",
+      "name": "zoom-out",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-fit-arrange-locate",
+      "page": "published",
+      "name": "fit-arrange-locate",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-canvas",
+      "page": "published",
+      "name": "canvas",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-links-source",
+      "page": "published",
+      "name": "links-source",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-advanced",
+      "page": "published",
+      "name": "advanced",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-mobile-drawer",
+      "page": "published",
+      "name": "mobile-drawer",
+      "checks": [
+        "interaction-chain"
+      ]
+    },
+    {
+      "id": "published-refresh",
+      "page": "published",
+      "name": "refresh",
+      "checks": [
+        "interaction-chain"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "draft-search",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "输入已有名称",
+        "Tab 失焦",
+        "改为无匹配值",
+        "清空"
+      ],
+      "expected": "搜索保留图形上下文，清空恢复目录",
+      "actual": "\"名称/空结果/清空正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-only-matches",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "输入名称",
+        "空格勾选仅看匹配项",
+        "Tab 失焦",
+        "取消并清空"
+      ],
+      "expected": "只在明确勾选时隐藏节点，提示数量",
+      "actual": "\"当前显示 1 / 7 · 已隐藏 6\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-node-kind",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"class\", \"label\": \"概念\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"objectProperty\", \"label\": \"关系\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"\", \"label\": \"全部\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-edge-kind",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"range\", \"label\": \"值域\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"subClassOf\", \"label\": \"继承\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"\", \"label\": \"全部\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-layout",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"relations\", \"label\": \"关系探索\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"hierarchy\", \"label\": \"层级\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-mode",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "切换本体个体",
+        "Tab",
+        "返回概念结构"
+      ],
+      "expected": "个体视图不混入概念，返回恢复",
+      "actual": "\"切换正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-directory",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "键盘选中目录节点",
+        "展开 IRI",
+        "关闭并重开"
+      ],
+      "expected": "详情及 IRI 与节点一致",
+      "actual": "\"urn:cmm:Environment\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-neighborhood",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择节点",
+        "勾选一跳",
+        "Tab",
+        "取消"
+      ],
+      "expected": "一跳包含所选节点且可恢复",
+      "actual": "{\"nodes\": 3, \"edges\": 2}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-zoom-in",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击缩放",
+        "再次点击"
+      ],
+      "expected": "缩放比例按方向变化",
+      "actual": "{\"before\": 0.6726726726726727, \"after\": 0.8408408408408409}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-zoom-out",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击缩放",
+        "再次点击"
+      ],
+      "expected": "缩放比例按方向变化",
+      "actual": "{\"before\": 0.8408408408408409, \"after\": 0.6726726726726727}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-fit-arrange-locate",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "重新布局",
+        "适应",
+        "定位所选",
+        "再次适应"
+      ],
+      "expected": "所有节点坐标有效，定位不改变布局",
+      "actual": "\"有效布局，定位不重排\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-canvas",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "鼠标点击节点",
+        "拖动节点",
+        "键盘平移",
+        "滚轮缩放",
+        "点击连线"
+      ],
+      "expected": "画布命中、拖动、平移和缩放可用",
+      "actual": "\"真实鼠标节点/连线命中，拖动、键盘、滚轮正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-links-source",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "展开关系列表",
+        "键盘选择代表边",
+        "展开公理",
+        "定位来源",
+        "清除聚焦"
+      ],
+      "expected": "精确公理来源聚焦可清除",
+      "actual": "\"DataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Environment>)\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-advanced",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击高级查看入口",
+        "核对高级文档",
+        "返回结构或关闭折叠"
+      ],
+      "expected": "高级入口可打开完整文档",
+      "actual": "\"高级文档可达\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "draft-mobile-drawer",
+      "check": "interaction-chain",
+      "status": "FAIL",
+      "steps": [
+        "缩至 390px",
+        "选择节点",
+        "关闭详情",
+        "重开详情",
+        "检查关闭后的焦点"
+      ],
+      "expected": "抽屉可操作且关闭后焦点返回入口",
+      "actual": "\"关闭抽屉后焦点未返回入口，仍停留在已隐藏关闭按钮\"",
+      "evidence": [
+        "run.js",
+        "results.json",
+        "draft-mobile-drawer.png"
+      ]
+    },
+    {
+      "control": "draft-refresh",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "刷新页面"
+      ],
+      "expected": "临时搜索、筛选和来源聚焦重置",
+      "actual": "\"刷新正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-search",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "输入已有名称",
+        "Tab 失焦",
+        "改为无匹配值",
+        "清空"
+      ],
+      "expected": "搜索保留图形上下文，清空恢复目录",
+      "actual": "\"名称/空结果/清空正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-only-matches",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "输入名称",
+        "空格勾选仅看匹配项",
+        "Tab 失焦",
+        "取消并清空"
+      ],
+      "expected": "只在明确勾选时隐藏节点，提示数量",
+      "actual": "\"当前显示 1 / 2 · 已隐藏 1\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-node-kind",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"class\", \"label\": \"概念\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"objectProperty\", \"label\": \"关系\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"\", \"label\": \"全部\", \"width\": 82, \"height\": 27.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-edge-kind",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"range\", \"label\": \"值域\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"subClassOf\", \"label\": \"继承\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"\", \"label\": \"全部\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-layout",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择非首项",
+        "Tab 失焦检查可见标签",
+        "重新点击并换项",
+        "恢复"
+      ],
+      "expected": "选中标签失焦后可见且控件可再次操作",
+      "actual": "[{\"value\": \"relations\", \"label\": \"关系探索\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}, {\"value\": \"hierarchy\", \"label\": \"层级\", \"width\": 78, \"height\": 26.5, \"color\": \"rgb(11, 18, 32)\", \"background\": \"rgb(255, 255, 255)\", \"visible\": true}]",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-mode",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "切换本体个体",
+        "Tab",
+        "返回概念结构"
+      ],
+      "expected": "个体视图不混入概念，返回恢复",
+      "actual": "\"切换正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-directory",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "键盘选中目录节点",
+        "展开 IRI",
+        "关闭并重开"
+      ],
+      "expected": "详情及 IRI 与节点一致",
+      "actual": "\"urn:qa:Equipment\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-neighborhood",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "选择节点",
+        "勾选一跳",
+        "Tab",
+        "取消"
+      ],
+      "expected": "一跳包含所选节点且可恢复",
+      "actual": "{\"nodes\": 2, \"edges\": 1}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-zoom-in",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击缩放",
+        "再次点击"
+      ],
+      "expected": "缩放比例按方向变化",
+      "actual": "{\"before\": 2.0837209302325586, \"after\": 2.6046511627906983}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-zoom-out",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击缩放",
+        "再次点击"
+      ],
+      "expected": "缩放比例按方向变化",
+      "actual": "{\"before\": 2.604651162790698, \"after\": 2.0837209302325586}",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-fit-arrange-locate",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "重新布局",
+        "适应",
+        "定位所选",
+        "再次适应"
+      ],
+      "expected": "所有节点坐标有效，定位不改变布局",
+      "actual": "\"有效布局，定位不重排\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-canvas",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "鼠标点击节点",
+        "拖动节点",
+        "键盘平移",
+        "滚轮缩放",
+        "点击连线"
+      ],
+      "expected": "画布命中、拖动、平移和缩放可用",
+      "actual": "\"真实鼠标节点/连线命中，拖动、键盘、滚轮正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-links-source",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "展开关系列表",
+        "键盘选择代表边",
+        "展开公理",
+        "定位来源",
+        "清除聚焦"
+      ],
+      "expected": "精确公理来源聚焦可清除",
+      "actual": "\"SubClassOf(<urn:qa:Probe> <urn:qa:Equipment>)\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-advanced",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "点击高级查看入口",
+        "核对高级文档",
+        "返回结构或关闭折叠"
+      ],
+      "expected": "高级入口可打开完整文档",
+      "actual": "\"高级文档可达\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    },
+    {
+      "control": "published-mobile-drawer",
+      "check": "interaction-chain",
+      "status": "FAIL",
+      "steps": [
+        "缩至 390px",
+        "选择节点",
+        "关闭详情",
+        "重开详情",
+        "检查关闭后的焦点"
+      ],
+      "expected": "抽屉可操作且关闭后焦点返回入口",
+      "actual": "\"关闭抽屉后焦点未返回入口，仍停留在已隐藏关闭按钮\"",
+      "evidence": [
+        "run.js",
+        "results.json",
+        "published-mobile-drawer.png"
+      ]
+    },
+    {
+      "control": "published-refresh",
+      "check": "interaction-chain",
+      "status": "PASS",
+      "steps": [
+        "刷新页面"
+      ],
+      "expected": "临时搜索、筛选和来源聚焦重置",
+      "actual": "\"刷新正常\"",
+      "evidence": [
+        "run.js",
+        "results.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+
+ RUN  v4.1.7 /Users/guojiexie/Development/mateclaw/.worktrees/semantic-m1/mateclaw-ui
+
+
+ Test Files  14 passed (14)
+      Tests  60 passed (60)
+   Start at  10:29:31
+   Duration  2.54s (transform 1.82s, setup 0ms, import 9.00s, tests 1.15s, environment 5.55s)

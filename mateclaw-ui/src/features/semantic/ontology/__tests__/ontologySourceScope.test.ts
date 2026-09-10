@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { createApp, nextTick, type App } from 'vue'
+import { createApp, h, nextTick, reactive, type App } from 'vue'
 import ElementPlus from 'element-plus'
 import OntologySourcePanel from '../components/OntologySourcePanel.vue'
 import { ontologyApi } from '../../api/ontologyApi'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string, fallback: string) => fallback ?? key }) }))
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string, fallback: string) => fallback ?? key, locale: { value: 'en-US' } }) }))
 vi.mock('@/api/index', () => ({ workspaceTeamApi: { getAccess: vi.fn() } }))
 vi.mock('../../api/ontologyApi', () => ({ ontologyApi: { axiomSources: vi.fn(), sourceReviews: vi.fn(), decideSourceReview: vi.fn() } }))
 let app: App
@@ -55,4 +55,52 @@ it('refreshes source binding state after a review decision is persisted', async 
   expect(ontologyApi.decideSourceReview).toHaveBeenCalledTimes(1)
   expect(wrapper.text()).toContain('KEEP_HISTORICAL')
   expect(wrapper.text()).not.toContain('PENDING')
+})
+
+it('filters bindings and pending reviews to the inspected axiom and allows clearing focus', async () => {
+  const axioms = [
+    { axiomId: 'a1', axiomType: 'Declaration', rendering: 'Declaration(Class(<urn:A>))', signatureIris: [], annotations: [], logical: true },
+    { axiomId: 'a2', axiomType: 'Declaration', rendering: 'Declaration(Class(<urn:B>))', signatureIris: [], annotations: [], logical: true },
+  ]
+  vi.mocked(ontologyApi.axiomSources).mockResolvedValue([
+    { id: 'b1', axiomId: 'a1', sourceRef: 'source-a', exactQuote: 'A source', revisionId: 'revision', sourceSnapshotId: 's1', knowledgeBaseId: 'kb', sourceDigest: 'd1', startCodePoint: 0, endCodePoint: 1, origin: 'EXPERT', currentSourceState: 'CURRENT', reviewState: 'PENDING' },
+    { id: 'b2', axiomId: 'a2', sourceRef: 'source-b', exactQuote: 'B source', revisionId: 'revision', sourceSnapshotId: 's2', knowledgeBaseId: 'kb', sourceDigest: 'd2', startCodePoint: 0, endCodePoint: 1, origin: 'EXPERT', currentSourceState: 'CURRENT', reviewState: 'PENDING' },
+  ] as never)
+  vi.mocked(ontologyApi.sourceReviews).mockResolvedValue([
+    { id: 'r1', bindingId: 'b1', observedDigest: 'd1', sourceState: 'CURRENT', reviewState: 'PENDING', decision: null, reason: null },
+    { id: 'r2', bindingId: 'b2', observedDigest: 'd2', sourceState: 'CURRENT', reviewState: 'PENDING', decision: null, reason: null },
+  ] as never)
+  const clearFocus = vi.fn()
+  const host = document.createElement('div'); document.body.append(host)
+  const focusProps = reactive({ ...props, axioms, canReview: true, focusedAxiomId: 'a1' })
+  app = createApp({ render: () => h(OntologySourcePanel, { ...focusProps, onClearFocus: clearFocus }) })
+  app.use(createPinia()).use(ElementPlus); useWorkspaceStore().currentWorkspaceId = 'old'; app.mount(host)
+  await flushPromises()
+  expect(host.textContent).toContain('source-a')
+  expect(host.textContent).not.toContain('source-b')
+  expect(host.querySelector('[data-testid="selected-axiom-source-count"]')?.textContent).toContain('1')
+  expect(host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).toContain('1')
+  ;[...host.querySelectorAll('button')].find(button => button.textContent?.includes('Clear axiom focus'))?.click()
+  expect(clearFocus).toHaveBeenCalledTimes(1)
+})
+
+it('distinguishes source binding loading and failure from an empty result', async () => {
+  let reject!: (error: Error) => void
+  vi.mocked(ontologyApi.axiomSources).mockImplementationOnce(() => new Promise((_, fail) => { reject = fail }))
+  const wrapper = panel()
+  await nextTick()
+  expect(wrapper.host.querySelector('[data-testid="source-bindings-status"]')?.textContent).toContain('Loading')
+  expect(wrapper.host.querySelector('[data-testid="source-bindings-status"]')?.textContent).not.toContain('0')
+  reject(new Error('source API offline')); await flushPromises()
+  expect(wrapper.host.querySelector('[data-testid="source-bindings-status"]')?.textContent).toContain('Error')
+  expect(wrapper.host.querySelector('[data-testid="source-bindings-status"]')?.textContent).not.toContain('0')
+})
+
+it('keeps pending review count unknown when the viewer cannot access reviews', async () => {
+  vi.mocked(ontologyApi.axiomSources).mockResolvedValueOnce([])
+  const wrapper = panel()
+  await flushPromises()
+  expect(wrapper.host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).toContain('Unknown')
+  expect(wrapper.host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).not.toContain('0')
+  expect(ontologyApi.sourceReviews).not.toHaveBeenCalled()
 })
