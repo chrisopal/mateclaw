@@ -1,0 +1,79 @@
+{
+  "results": [
+    {
+      "emulatedWidth": 1500,
+      "simulatedFailure": false,
+      "actual": {
+        "innerWidth": 1920,
+        "innerHeight": 882,
+        "outerWidth": 1920,
+        "outerHeight": 969,
+        "devicePixelRatio": 2
+      }
+    },
+    {
+      "emulatedWidth": 2400,
+      "simulatedFailure": false,
+      "actual": {
+        "innerWidth": 1920,
+        "innerHeight": 882,
+        "outerWidth": 1920,
+        "outerHeight": 969,
+        "devicePixelRatio": 2
+      }
+    },
+    {
+      "emulatedWidth": 3840,
+      "simulatedFailure": true,
+      "actual": {
+        "innerWidth": 1920,
+        "innerHeight": 882,
+        "outerWidth": 1920,
+        "outerHeight": 969,
+        "devicePixelRatio": 2
+      }
+    }
+  ],
+  "layout": {
+    "width": 1920,
+    "outerWidth": 1920,
+    "documentWidth": 1920,
+    "panels": [
+      {
+        "class": "semantic-page",
+        "left": 220,
+        "right": 1920
+      },
+      {
+        "class": "semantic-actions",
+        "left": 1690,
+        "right": 1890
+      },
+      {
+        "class": "semantic-actions",
+        "left": 1323.078125,
+        "right": 1873
+      },
+      {
+        "class": "model-inspector",
+        "left": 1612,
+        "right": 1872
+      }
+    ],
+    "buttons": [
+      {
+        "text": "建立草稿",
+        "right": 1890
+      },
+      {
+        "text": "导出 RDF/XML",
+        "right": 1607
+      },
+      {
+        "text": "禁止新绑定使用",
+        "right": 1873
+      }
+    ]
+  },
+  "viewport": null
+}

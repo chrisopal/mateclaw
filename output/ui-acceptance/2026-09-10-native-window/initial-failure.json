@@ -1,0 +1,11 @@
+{
+  "classification": "TEST_ENVIRONMENT_CONTAMINATION",
+  "initial": {
+    "innerWidth": 2400,
+    "outerWidth": 1920,
+    "dpr": 1
+  },
+  "rejected": "Temporary CDP metrics clearing/window refresh appeared fixed but navigation restored stale dimensions; not a durable solution",
+  "solution": "Replace contaminated read-only tab with a native viewport tab in same authenticated context. Run all future responsive checks in disposable tabs and close them in finally.",
+  "verification": "New user tab viewport=null; native1920px DPR2 persists after reload and after1500/2400/3840 disposable tests, including simulated failure."
+}

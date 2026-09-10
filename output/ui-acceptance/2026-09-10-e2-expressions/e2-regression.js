@@ -1,4 +1,8 @@
 async(page)=>{
+ // Responsive emulation runs in a disposable tab, never the user's native window.
+ const userPage=page;page=await userPage.context().newPage();
+ try{await page.goto(userPage.url());
+
  const id=page.url().split('/')[5],results=[],writes=[];
  const assert=(v,m)=>{if(!v)throw Error(m)};
  const apiRead=()=>page.evaluate(async id=>{const {ontologyApi:a}=await import('/src/features/semantic/api/ontologyApi.ts');const {useWorkspaceStore:w}=await import('/src/stores/useWorkspaceStore.ts');const ws=w().currentWorkspaceId;return {draft:await a.getDraft(ws,id),revisions:await a.revisions(ws,id)}},id);
@@ -19,4 +23,6 @@ async(page)=>{
   await check(scope+'-readonly','snapshot-readback',['回读版本及文档摘要；检查发布版本无编辑入口'],'只读浏览不产生写入或变更摘要',async()=>{const after=await apiRead();assert(after.draft.draftVersion===before.draft.draftVersion&&after.draft.document.documentDigest===before.draft.document.documentDigest,'read changed document');if(scope==='published'){await page.locator('.model-term').first().click();assert(await page.getByRole('button',{name:'编辑此定义',exact:true}).count()===0,'published editing')}assert(writes.length===0,'unexpected writes');return {draftVersion:after.draft.draftVersion,documentDigest:after.draft.document.documentDigest,writes:writes.length}});
  }}finally{page.off('request',listener);await page.unroute(routePattern)}
  return {ontologyId:id,results,writes};
+
+ }finally{await page.close();await userPage.bringToFront();}
 }

@@ -1,4 +1,8 @@
 async(page)=>{
+ // Responsive emulation runs in a disposable tab, never the user's native window.
+ const userPage=page;page=await userPage.context().newPage();
+ try{await page.goto(userPage.url());
+
  const id=page.url().split('/')[5],results=[],writes=[];
  const assert=(v,m)=>{if(!v)throw Error(m)};
  const read=()=>page.evaluate(async id=>{const {ontologyApi:a}=await import('/src/features/semantic/api/ontologyApi.ts');const {useWorkspaceStore:w}=await import('/src/stores/useWorkspaceStore.ts');const d=await a.getDraft(w().currentWorkspaceId,id);return {version:d.draftVersion,digest:d.document.documentDigest}},id);
@@ -19,4 +23,6 @@ async(page)=>{
   await check(scope+'-reload','reload-readback',['刷新并重新展开；回读版本及文档摘要；检查表达式只读'],'结构保留、无表达式编辑入口或写请求、摘要不变',async()=>{await page.reload();await ready();const root=rootFor('SubPropertyChainOf');await expand(root);assert(await root.getByRole('button',{name:/编辑/}).count()===0,'expression edit exposed');const after=await read();assert(JSON.stringify(after)===JSON.stringify(before),'document mutated');assert(writes.length===0,'unexpected writes');await root.scrollIntoViewIfNeeded();await page.screenshot({path:`/Users/guojiexie/Development/mateclaw/.worktrees/semantic-m1/output/ui-acceptance/2026-09-10-e2-expressions/${scope}-desktop.png`});return {...after,writes:writes.length}});
  }}finally{page.off('request',listener)}
  return {ontologyId:id,results,writes};
+
+ }finally{await page.close();await userPage.bringToFront();}
 }

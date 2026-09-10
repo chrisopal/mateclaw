@@ -1,4 +1,8 @@
 async(page)=>{
+ // Responsive emulation runs in a disposable tab, never the user's native window.
+ const userPage=page;page=await userPage.context().newPage();
+ try{await page.goto(userPage.url());
+
  const results=[];
  for(const scope of ['draft','published','list']){
   const url=scope==='list'?'http://127.0.0.1:5189/semantic/ontologies':`http://127.0.0.1:5189/semantic/ontologies/${scope==='draft'?'2097906448273219585':'2097611586143510530'}/${scope==='draft'?'edit':'versions'}`;
@@ -15,4 +19,6 @@ async(page)=>{
   results.push({control:scope+'-wide',check:'resize-1500-1920-2400-3840',steps:['1500 → 1920 → 2400 → 3840 → 1920 → 2400；测量页面及画布'],expected:'页面占满可用宽度；画布随容器扩展；无水平溢出',status:'PASS',actual:JSON.stringify(samples),evidence:['wide-results.json',`${scope}-wide.png`]});
  }
  return {results};
+
+ }finally{await page.close();await userPage.bringToFront();}
 }
