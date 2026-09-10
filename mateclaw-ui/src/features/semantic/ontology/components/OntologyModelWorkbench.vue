@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, shallowRef, useId, watch } from 'vue'
 import OntologyGraphCanvas from './OntologyGraphCanvas.vue'
 import OntologyDefinitionForm from './OntologyDefinitionForm.vue'
+import OntologyRestrictionForm from './OntologyRestrictionForm.vue'
 import { graphView } from '../ontologyGraphView'
 import { useI18n } from 'vue-i18n'
 import type { AxiomDescriptor, AxiomEdit } from '../../api/types'
@@ -15,8 +16,11 @@ const searchId = `ontology-term-search-${useId()}`
 const canvas = ref<InstanceType<typeof OntologyGraphCanvas>>()
 const inspectorOpen = ref(false)
 const editingDefinition = ref(false)
+const editingRestriction = ref(false)
+const restrictionProjection = shallowRef<DisplayProjection | null>(null)
 const editingNode = shallowRef<OntologyProjectionNode>()
-function startDefinition(){ editingNode.value=selected.value; editingDefinition.value=true }
+function startDefinition(){ editingRestriction.value=false; editingNode.value=selected.value; editingDefinition.value=true }
+function startRestriction(){ if(!props.projection || selected.value?.kind!=='class')return; editingDefinition.value=false; editingNode.value=selected.value; restrictionProjection.value=props.projection; editingRestriction.value=true }
 const inspectorToggle = ref<{ $el: HTMLButtonElement }>()
 async function closeInspector() {
   inspectorOpen.value = false
@@ -107,6 +111,7 @@ async function submit() {
         <el-button class="model-mobile-details" @click="closeInspector">{{ tr('关闭详情','Close details') }}</el-button>
         <h3>{{ selected?.label || (selectedEdge ? tr('关联定义','Link definition') : tr('定义详情','Definition details')) }}</h3>
         <el-button v-if="selected && !selectedDefinition?.imported && editable && apply" :disabled="disabled" @click="startDefinition">{{ tr('编辑此定义','Edit this definition') }}</el-button>
+        <el-button v-if="selected?.kind==='class' && !selectedDefinition?.imported && editable && apply" :disabled="disabled || projectionLoading || !projection" @click="startRestriction">{{ tr('编辑概念规则','Edit concept rules') }}</el-button>
         <template v-if="selected"><el-tag size="small">{{ kindLabel(selected.kind) }}</el-tag><details class="model-identifier"><summary>{{ tr('查看标识 IRI','Identifier IRI') }}</summary><code>{{ selected.iri }}</code></details></template>
         <p v-else-if="!selectedEdge" class="model-note">{{ tr('选择左侧定义或图中的节点、连线，查看关联规则。','Select a definition, node or edge to inspect its rules.') }}</p>
         <p v-if="selectedDefinition?.features.length" class="model-features"><el-tag v-for="feature in selectedDefinition.features" :key="feature">{{featureLabel(feature)}}</el-tag></p><p v-if="selectedDefinition?.features.some(f=>f.includes('Functional'))" class="model-note">{{tr('OWL 函数语义不等于业务单值或必填规则。','OWL functionality is not a business single-value or required-field rule.')}}</p>
@@ -126,6 +131,7 @@ async function submit() {
     <p v-if="projection" class="model-note model-footnote">{{tr('标准投影覆盖','Standard projection coverage')}} {{projection.coverage.returned}} / {{projection.coverage.total}} · {{tr('未完整图示','Not fully rendered')}} {{model.unprojectedAxiomIds.length}}<span v-if="projection.coverage.truncated"> · {{tr('投影已截断，请在高级视图查看完整文档。','Projection truncated. View the complete document in the advanced view.')}}</span><span v-if="projection.coverage.lockedImportCount"> · {{projection.coverage.lockedImportCount}} {{tr('项固定导入，默认折叠并保留来源。','pinned imports, collapsed with provenance.')}}</span></p>
     <details v-if="projection" class="model-coverage"><summary>{{tr('逐公理覆盖与来源','Axiom coverage and provenance')}}</summary><div v-for="item in projection.axiomRefs" :key="item.id"><strong>{{item.status}} · {{item.axiomType}}</strong><small>{{item.imported?tr('固定导入','Pinned import'):tr('当前文档','Root document')}} · {{item.artifactId}} · {{item.axiomId}}</small><p v-if="item.reason">{{item.reason}}</p><pre>{{item.rendering}}</pre><el-button v-if="!item.imported" link @click="emit('inspect-axiom',item.axiomId)">{{tr('查看公理与来源','Inspect axiom and sources')}}</el-button></div></details>
     <OntologyDefinitionForm v-if="editingDefinition && editingNode && editable && apply" :node="editingNode" :nodes="model.nodes" :axioms="axioms" :disabled="!!disabled" :failure-message="failureMessage" :pending="editPending" :retry="retryEdit" :reload="reloadDraft" :apply="apply" @close="editingDefinition=false" />
+    <OntologyRestrictionForm v-if="editingRestriction && editingNode && editable && apply && restrictionProjection" :node="editingNode" :nodes="model.nodes" :axioms="axioms" :projection="projection || restrictionProjection" :disabled="!!disabled || !!projectionLoading || !projection" :failure-message="failureMessage" :pending="editPending" :retry="retryEdit" :reload="reloadDraft" :apply="apply" @close="editingRestriction=false" />
     <el-dialog v-model="formOpen" :title="tr('新增定义','Add definition')" width="min(540px, 94vw)" :close-on-click-modal="!saving" :show-close="!saving">
       <el-form label-position="top" :disabled="disabled || saving" @submit.prevent="submit">
         <el-form-item :label="tr('名称','Name')" required><el-input v-model="form.label" /></el-form-item>

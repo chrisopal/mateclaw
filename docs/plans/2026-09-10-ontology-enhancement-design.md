@@ -1,6 +1,6 @@
 # MateClaw 本体工作台增强方案
 
-日期：2026-09-10。状态：E1a/E1b、E3a 简单编辑及 E2 两批标准投影与复杂表达式已实施并完成本地验收；E3 复杂编辑与 E4 待实施。详见 [E1 验收记录](../validation/semantic-ontology-e1/acceptance.md)。下文现状分析仍以实施前基线为准。
+日期：2026-09-10。状态：E1a/E1b、E3a 简单编辑及 E2 两批标准投影与复杂表达式已实施并完成本地验收；E3b 直接对象限制规则编辑已完成本地验收（见 [本批记录](../../output/ui-acceptance/2026-09-10-e3-restrictions/report.md)）；嵌套表达式编辑与 E4 待实施。详见 [E1 验收记录](../validation/semantic-ontology-e1/acceptance.md)。下文现状分析仍以实施前基线为准。
 
 代码基线：`codex/enterprise-semantic-core`，`d45d4abb64b46f248550e713ff77633f7c362bd6`（2026-09-10 09:22 +0800）。实际工作区：`/Users/guojiexie/Development/mateclaw/.worktrees/semantic-m1`。核查时相关业务代码无未提交差异；工作树存在既有未跟踪的验证输出，未覆盖。
 

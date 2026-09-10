@@ -1,0 +1,35 @@
+{
+  "fixture": {
+    "ontologyId": "2097924016782405634",
+    "revisionId": "2097924016803377153",
+    "draftId": "2097924017403162626",
+    "draftVersion": 3,
+    "documentDigest": "fdc7cd327dd75f51fe7788bcb14791ff6e3b6426ce4cc8b4b9602b6eb3984c72",
+    "importLockDigest": "dc033c14c88c3ae3b8fd674f03102deadfc75a135dd76027fb43f22229fa95b4"
+  },
+  "results": [
+    {
+      "id": "dark-manual-iri",
+      "status": "PASS",
+      "actual": {
+        "color": "rgb(237, 242, 249)",
+        "background": "rgb(24, 34, 48)"
+      }
+    },
+    {
+      "id": "mobile-operator-save",
+      "status": "PASS",
+      "actual": {
+        "before": 4,
+        "after": 5,
+        "box": {
+          "x": 25.703125,
+          "y": 745.046875,
+          "width": 116,
+          "height": 32
+        },
+        "digest": "706bc5f4ffff1d00c76f89af92f797c75670f6043f1a6f6ea30d078287102bce"
+      }
+    }
+  ]
+}

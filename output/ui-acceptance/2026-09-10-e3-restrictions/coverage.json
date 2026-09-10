@@ -1,0 +1,484 @@
+{
+  "scope": "E3b 草稿概念限制规则表单及已发布只读边界",
+  "environment": "HEAD e2ccc56a + E3b changes; Chromium; 127.0.0.1:5189 / backend18109; authenticated admin; synthetic fixtures; disposable tabs; 1500x1000 light/dark,390x844,2400x1100; final build complete before browser replay",
+  "pages": [
+    {
+      "id": "edit",
+      "url": "/semantic/ontologies/:id/edit",
+      "inventoryComplete": true
+    },
+    {
+      "id": "versions",
+      "url": "/semantic/ontologies/:id/versions",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "entry",
+      "name": "概念规则入口",
+      "page": "edit",
+      "locator": "编辑概念规则",
+      "checks": [
+        "open"
+      ]
+    },
+    {
+      "id": "rule",
+      "name": "原规则选择",
+      "page": "edit",
+      "locator": "编辑规则",
+      "checks": [
+        "replace-five",
+        "no-op-duplicate",
+        "restricted-axioms"
+      ]
+    },
+    {
+      "id": "operator",
+      "name": "限制类型",
+      "page": "edit",
+      "locator": "限制类型",
+      "checks": [
+        "add-five",
+        "switch-blur"
+      ]
+    },
+    {
+      "id": "property",
+      "name": "关系输入及选择",
+      "page": "edit",
+      "locator": "关系 IRI / 选择已有关系",
+      "checks": [
+        "type-select-blur-invalid"
+      ]
+    },
+    {
+      "id": "filler",
+      "name": "限定概念输入及选择",
+      "page": "edit",
+      "locator": "限定概念 IRI / 选择已有概念",
+      "checks": [
+        "type-select-blur-invalid"
+      ]
+    },
+    {
+      "id": "cardinality",
+      "name": "基数输入",
+      "page": "edit",
+      "locator": "基数",
+      "checks": [
+        "zero-negative-fraction"
+      ]
+    },
+    {
+      "id": "preview",
+      "name": "预览",
+      "page": "edit",
+      "locator": "预览规则变更",
+      "checks": [
+        "preview-before-save"
+      ]
+    },
+    {
+      "id": "save",
+      "name": "确认保存",
+      "page": "edit",
+      "locator": "确认保存规则",
+      "checks": [
+        "readback-refresh",
+        "cas",
+        "lost-response"
+      ]
+    },
+    {
+      "id": "reset",
+      "name": "重置",
+      "page": "edit",
+      "locator": "重置输入",
+      "checks": [
+        "reset"
+      ]
+    },
+    {
+      "id": "cancel",
+      "name": "取消及关闭",
+      "page": "edit",
+      "locator": "取消 / Close this dialog",
+      "checks": [
+        "cancel-reopen-focus",
+        "mobile"
+      ]
+    },
+    {
+      "id": "reload",
+      "name": "明确重载",
+      "page": "edit",
+      "locator": "载入最新本体并核对",
+      "checks": [
+        "preserve-input"
+      ]
+    },
+    {
+      "id": "recover",
+      "name": "恢复原请求",
+      "page": "edit",
+      "locator": "恢复本次保存",
+      "checks": [
+        "frozen-idempotent"
+      ]
+    },
+    {
+      "id": "layout",
+      "name": "页面布局",
+      "page": "edit",
+      "locator": "dialog / main",
+      "checks": [
+        "wide",
+        "native-window-preserved"
+      ]
+    },
+    {
+      "id": "subject",
+      "page": "edit",
+      "name": "主体IRI",
+      "locator": "主体概念 IRI",
+      "checks": [
+        "readonly"
+      ]
+    },
+    {
+      "id": "extra",
+      "page": "edit",
+      "name": "附加环境回归",
+      "locator": "限制类型 / 主题 / 选择已有关系",
+      "checks": [
+        "dark-manual-iri",
+        "mobile-operator-save"
+      ]
+    },
+    {
+      "id": "published-entry",
+      "page": "versions",
+      "name": "已发布版本的规则入口边界",
+      "locator": "编辑概念规则（应不存在）",
+      "checks": [
+        "readonly"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "entry",
+      "check": "open",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"命名概念入口可用；嵌套、带注释规则未进入编辑列表\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "published-entry",
+      "check": "readonly",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"同一本体的已发布版本没有规则写入口\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "rule",
+      "check": "replace-five",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "[{\"op\": \"ObjectSomeValuesFrom\", \"removed\": \"cbbadeccf4aa62161f172375b20c2a361379826c6e6b3da85616507cd4d83449\", \"version\": 9}, {\"op\": \"ObjectAllValuesFrom\", \"removed\": \"23f2f1e4689c6b8218e571707cdde1bebb03ee6663f9211b7ab6404c8db7d872\", \"version\": 10}, {\"op\": \"ObjectMinCardinality\", \"removed\": \"dfacfd25b0311eb5f74ce33d978753a03be9ee4d61266c3c3bda5d45d3085e58\", \"version\": 11}, {\"op\": \"ObjectMaxCardinality\", \"removed\": \"176ed9d535368e6a17ded9df0948a03c3b92e8f071b84404f607c889cf2ed10e\", \"version\": 12}, {\"op\": \"ObjectExactCardinality\", \"removed\": \"5f3b5e7606fed042948f9027d9a6c73e1340a94a166d9828e793665faab753f3\", \"version\": 13}]",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "rule",
+      "check": "no-op-duplicate",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"无变化与重复规则阻止保存；重置恢复原基数\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "rule",
+      "check": "restricted-axioms",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"命名概念入口可用；嵌套、带注释规则未进入编辑列表\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "operator",
+      "check": "add-five",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "[{\"op\": \"ObjectSomeValuesFrom\", \"version\": 4}, {\"op\": \"ObjectAllValuesFrom\", \"version\": 5}, {\"op\": \"ObjectMinCardinality\", \"version\": 6}, {\"op\": \"ObjectMaxCardinality\", \"version\": 7}, {\"op\": \"ObjectExactCardinality\", \"version\": 8}]",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "operator",
+      "check": "switch-blur",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"负数、小数被拦截，零值有效；基数切回存在限制不残留隐藏值\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "property",
+      "check": "type-select-blur-invalid",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"已有值选择、完整IRI输入、失焦联动及无效输入拦截正确\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "filler",
+      "check": "type-select-blur-invalid",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"已有值选择、完整IRI输入、失焦联动及无效输入拦截正确\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "cardinality",
+      "check": "zero-negative-fraction",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"负数、小数被拦截，零值有效；基数切回存在限制不残留隐藏值\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "preview",
+      "check": "preview-before-save",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "[{\"op\": \"ObjectSomeValuesFrom\", \"version\": 4}, {\"op\": \"ObjectAllValuesFrom\", \"version\": 5}, {\"op\": \"ObjectMinCardinality\", \"version\": 6}, {\"op\": \"ObjectMaxCardinality\", \"version\": 7}, {\"op\": \"ObjectExactCardinality\", \"version\": 8}]",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "save",
+      "check": "readback-refresh",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"version\": 16, \"preserved\": 19, \"digest\": \"b6fe067873b825d221b5bd2bef864ec5054d592e6d77a05778831a6ae7bb2ba6\", \"axioms\": [\"AnnotationAssertion(rdfs:comment <urn:e3b:Probe> \\\"parallel e3b\\\")\", \"AnnotationAssertion(rdfs:label <urn:e3b:Machine> \\\"Machine\\\"@en)\", \"AnnotationAssertion(rdfs:label <urn:e3b:Machine> \\\"机器\\\"@zh)\", \"AnnotationAssertion(rdfs:label <urn:e3b:Probe> \\\"测针\\\"@zh)\", \"AnnotationAssertion(rdfs:label <urn:e3b:uses> \\\"使用\\\"@zh)\", \"Declaration(Class(<urn:e3b:Equipment>))\", \"Declaration(Class(<urn:e3b:Machine>))\", \"Declaration(Class(<urn:e3b:Probe>))\", \"Declaration(DataProperty(<urn:e3b:reading>))\", \"Declaration(ObjectProperty(<urn:e3b:contains>))\", \"Declaration(ObjectProperty(<urn:e3b:related>))\", \"Declaration(ObjectProperty(<urn:e3b:uses>))\", \"HasKey(<urn:e3b:Machine> (<urn:e3b:uses>) ())\", \"SubClassOf(<urn:e3b:Machine> DataAllValuesFrom(<urn:e3b:reading> xsd:decimal))\", \"SubClassOf(<urn:e3b:Machine> DataExactCardinality(1 <urn:e3b:reading> xsd:decimal))\", \"SubClassOf(<urn:e3b:Machine> DataSomeValuesFrom(<urn:e3b:reading> xsd:decimal))\", \"SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))\", \"SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:uses> ObjectSomeValuesFrom(<urn:e3b:contains> <urn:e3b:Probe>)))\", \"SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(5 <urn:e3b:related> <urn:e3b:Probe>))\", \"SubClassOf(<urn:e3b:Machine> ObjectIntersectionOf(<urn:e3b:Equipment> ObjectSomeValuesFrom(<urn:e3b:uses> ObjectUnionOf(<urn:e3b:Probe> ObjectComplementOf(<urn:e3b:Equipment>)))))\", \"SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(7 <urn:e3b:related> <urn:e3b:Probe>))\", \"SubClassOf(<urn:e3b:Machine> ObjectMinCardinality(1 <urn:e3b:related> <urn:e3b:Probe>))\", \"SubClassOf(<urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))\", \"SubClassOf(Annotation(rdfs:comment \\\"keep annotated\\\") <urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:contains> <urn:e3b:Probe>))\", \"SubObjectPropertyOf(ObjectPropertyChain(<urn:e3b:uses> <urn:e3b:contains> <urn:e3b:uses>) <urn:e3b:related>)\"]}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "save",
+      "check": "cas",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"真实另一客户端写入触发409；保留输入，明确重载核对后成功\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "save",
+      "check": "lost-response",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"simulated\": \"response loss after actual server commit\", \"sameRequest\": true, \"before\": 15, \"after\": 16}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "reset",
+      "check": "reset",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"无变化与重复规则阻止保存；重置恢复原基数\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "cancel",
+      "check": "cancel-reopen-focus",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"box\": {\"x\": 0, \"y\": 0, \"width\": 390, \"height\": 844}, \"focus\": {\"text\": \"编辑概念规则\", \"visible\": true}}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "cancel",
+      "check": "mobile",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"box\": {\"x\": 0, \"y\": 0, \"width\": 390, \"height\": 844}, \"focus\": {\"text\": \"编辑概念规则\", \"visible\": true}}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "reload",
+      "check": "preserve-input",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "\"真实另一客户端写入触发409；保留输入，明确重载核对后成功\"",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "recover",
+      "check": "frozen-idempotent",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"simulated\": \"response loss after actual server commit\", \"sameRequest\": true, \"before\": 15, \"after\": 16}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "layout",
+      "check": "wide",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "{\"viewport\": 2400, \"document\": 2400, \"dialog\": {\"x\": 877, \"width\": 640, \"right\": 1517}}",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "layout",
+      "check": "native-window-preserved",
+      "status": "PASS",
+      "steps": [
+        "在合成草稿中操作真实控件，核对失焦、保存与回读"
+      ],
+      "expected": "行为符合 E3b 计划与控件契约",
+      "actual": "用户原生窗口前后均为 viewport=null，innerWidth=outerWidth=1920。",
+      "evidence": [
+        "result.json"
+      ]
+    },
+    {
+      "control": "subject",
+      "check": "readonly",
+      "status": "PASS",
+      "steps": [
+        "真实控件操作及回读"
+      ],
+      "expected": "主题可读，主体只读，移动端修改操作符可持久化",
+      "actual": "{\"before\": 4, \"after\": 5, \"box\": {\"x\": 25.703125, \"y\": 745.046875, \"width\": 116, \"height\": 32}, \"digest\": \"706bc5f4ffff1d00c76f89af92f797c75670f6043f1a6f6ea30d078287102bce\"}",
+      "evidence": [
+        "extra-result.json"
+      ]
+    },
+    {
+      "control": "extra",
+      "check": "dark-manual-iri",
+      "status": "PASS",
+      "steps": [
+        "真实控件操作及回读"
+      ],
+      "expected": "主题可读，主体只读，移动端修改操作符可持久化",
+      "actual": "{\"color\": \"rgb(237, 242, 249)\", \"background\": \"rgb(24, 34, 48)\"}",
+      "evidence": [
+        "extra-result.json"
+      ]
+    },
+    {
+      "control": "extra",
+      "check": "mobile-operator-save",
+      "status": "PASS",
+      "steps": [
+        "真实控件操作及回读"
+      ],
+      "expected": "主题可读，主体只读，移动端修改操作符可持久化",
+      "actual": "{\"before\": 4, \"after\": 5, \"box\": {\"x\": 25.703125, \"y\": 745.046875, \"width\": 116, \"height\": 32}, \"digest\": \"706bc5f4ffff1d00c76f89af92f797c75670f6043f1a6f6ea30d078287102bce\"}",
+      "evidence": [
+        "extra-result.json"
+      ]
+    }
+  ]
+}

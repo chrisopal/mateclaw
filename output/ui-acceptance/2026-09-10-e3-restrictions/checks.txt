@@ -1,0 +1,16 @@
+Frontend ontology suite:
+ Test Files  19 passed (19)
+      Tests  99 passed (99)
+   Duration  2.63s (transform 3.49s, setup 0ms, import 11.16s, tests 1.37s, environment 6.34s)
+
+Backend H2 integration:
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.178 s -- in vip.mate.semantic.SemanticOntologyIntegrationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.532 s -- in vip.mate.semantic.SemanticOntologyProjectionIntegrationTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+Enterprise build (includes precision and vue-tsc):
+(!) Some chunks are larger than 1024 kB after minification. Consider:
+✓ built in 24.74s
+
+Targeted ESLint: PASS, no output

@@ -1,0 +1,14 @@
+{
+  "score": 94,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "新表单沿用企业主题与控件样式。390px 下预览内容可滚动，确认按钮可见可点击；2400px 主内容无横向溢出；暗色文字与输入背景可读。",
+  "screenshots": [
+    "mobile.png",
+    "mobile-preview.png",
+    "wide.png",
+    "dark.png"
+  ]
+}

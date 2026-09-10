@@ -1,0 +1,376 @@
+{
+  "fixture": {
+    "ontologyId": "2097924099615715329",
+    "revisionId": "2097924099628298241",
+    "draftId": "2097924100249055233",
+    "draftVersion": 3,
+    "documentDigest": "fdc7cd327dd75f51fe7788bcb14791ff6e3b6426ce4cc8b4b9602b6eb3984c72",
+    "importLockDigest": "dc033c14c88c3ae3b8fd674f03102deadfc75a135dd76027fb43f22229fa95b4"
+  },
+  "results": [
+    {
+      "id": "entry",
+      "status": "PASS",
+      "actual": "命名概念入口可用；嵌套、带注释规则未进入编辑列表"
+    },
+    {
+      "id": "fields",
+      "status": "PASS",
+      "actual": "已有值选择、完整IRI输入、失焦联动及无效输入拦截正确"
+    },
+    {
+      "id": "cardinality",
+      "status": "PASS",
+      "actual": "负数、小数被拦截，零值有效；基数切回存在限制不残留隐藏值"
+    },
+    {
+      "id": "add-five",
+      "status": "PASS",
+      "actual": [
+        {
+          "op": "ObjectSomeValuesFrom",
+          "version": 4
+        },
+        {
+          "op": "ObjectAllValuesFrom",
+          "version": 5
+        },
+        {
+          "op": "ObjectMinCardinality",
+          "version": 6
+        },
+        {
+          "op": "ObjectMaxCardinality",
+          "version": 7
+        },
+        {
+          "op": "ObjectExactCardinality",
+          "version": 8
+        }
+      ]
+    },
+    {
+      "id": "replace-five",
+      "status": "PASS",
+      "actual": [
+        {
+          "op": "ObjectSomeValuesFrom",
+          "removed": "cbbadeccf4aa62161f172375b20c2a361379826c6e6b3da85616507cd4d83449",
+          "version": 9
+        },
+        {
+          "op": "ObjectAllValuesFrom",
+          "removed": "23f2f1e4689c6b8218e571707cdde1bebb03ee6663f9211b7ab6404c8db7d872",
+          "version": 10
+        },
+        {
+          "op": "ObjectMinCardinality",
+          "removed": "dfacfd25b0311eb5f74ce33d978753a03be9ee4d61266c3c3bda5d45d3085e58",
+          "version": 11
+        },
+        {
+          "op": "ObjectMaxCardinality",
+          "removed": "176ed9d535368e6a17ded9df0948a03c3b92e8f071b84404f607c889cf2ed10e",
+          "version": 12
+        },
+        {
+          "op": "ObjectExactCardinality",
+          "removed": "5f3b5e7606fed042948f9027d9a6c73e1340a94a166d9828e793665faab753f3",
+          "version": 13
+        }
+      ]
+    },
+    {
+      "id": "no-op-duplicate-reset",
+      "status": "PASS",
+      "actual": "无变化与重复规则阻止保存；重置恢复原基数"
+    },
+    {
+      "id": "cas",
+      "status": "PASS",
+      "actual": "真实另一客户端写入触发409；保留输入，明确重载核对后成功"
+    },
+    {
+      "id": "lost-response",
+      "status": "PASS",
+      "actual": {
+        "simulated": "response loss after actual server commit",
+        "sameRequest": true,
+        "before": 15,
+        "after": 16
+      }
+    },
+    {
+      "id": "refresh-preservation",
+      "status": "PASS",
+      "actual": {
+        "version": 16,
+        "preserved": 19,
+        "digest": "b6fe067873b825d221b5bd2bef864ec5054d592e6d77a05778831a6ae7bb2ba6",
+        "axioms": [
+          "AnnotationAssertion(rdfs:comment <urn:e3b:Probe> \"parallel e3b\")",
+          "AnnotationAssertion(rdfs:label <urn:e3b:Machine> \"Machine\"@en)",
+          "AnnotationAssertion(rdfs:label <urn:e3b:Machine> \"机器\"@zh)",
+          "AnnotationAssertion(rdfs:label <urn:e3b:Probe> \"测针\"@zh)",
+          "AnnotationAssertion(rdfs:label <urn:e3b:uses> \"使用\"@zh)",
+          "Declaration(Class(<urn:e3b:Equipment>))",
+          "Declaration(Class(<urn:e3b:Machine>))",
+          "Declaration(Class(<urn:e3b:Probe>))",
+          "Declaration(DataProperty(<urn:e3b:reading>))",
+          "Declaration(ObjectProperty(<urn:e3b:contains>))",
+          "Declaration(ObjectProperty(<urn:e3b:related>))",
+          "Declaration(ObjectProperty(<urn:e3b:uses>))",
+          "HasKey(<urn:e3b:Machine> (<urn:e3b:uses>) ())",
+          "SubClassOf(<urn:e3b:Machine> DataAllValuesFrom(<urn:e3b:reading> xsd:decimal))",
+          "SubClassOf(<urn:e3b:Machine> DataExactCardinality(1 <urn:e3b:reading> xsd:decimal))",
+          "SubClassOf(<urn:e3b:Machine> DataSomeValuesFrom(<urn:e3b:reading> xsd:decimal))",
+          "SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))",
+          "SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:uses> ObjectSomeValuesFrom(<urn:e3b:contains> <urn:e3b:Probe>)))",
+          "SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(5 <urn:e3b:related> <urn:e3b:Probe>))",
+          "SubClassOf(<urn:e3b:Machine> ObjectIntersectionOf(<urn:e3b:Equipment> ObjectSomeValuesFrom(<urn:e3b:uses> ObjectUnionOf(<urn:e3b:Probe> ObjectComplementOf(<urn:e3b:Equipment>)))))",
+          "SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(7 <urn:e3b:related> <urn:e3b:Probe>))",
+          "SubClassOf(<urn:e3b:Machine> ObjectMinCardinality(1 <urn:e3b:related> <urn:e3b:Probe>))",
+          "SubClassOf(<urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))",
+          "SubClassOf(Annotation(rdfs:comment \"keep annotated\") <urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:contains> <urn:e3b:Probe>))",
+          "SubObjectPropertyOf(ObjectPropertyChain(<urn:e3b:uses> <urn:e3b:contains> <urn:e3b:uses>) <urn:e3b:related>)"
+        ]
+      }
+    },
+    {
+      "id": "mobile-cancel-focus",
+      "status": "PASS",
+      "actual": {
+        "box": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "focus": {
+          "text": "编辑概念规则",
+          "visible": true
+        }
+      }
+    },
+    {
+      "id": "wide",
+      "status": "PASS",
+      "actual": {
+        "viewport": 2400,
+        "document": 2400,
+        "dialog": {
+          "x": 877,
+          "width": 640,
+          "right": 1517
+        }
+      }
+    },
+    {
+      "id": "readonly",
+      "status": "PASS",
+      "actual": "同一本体的已发布版本没有规则写入口"
+    }
+  ],
+  "writes": [
+    {
+      "expectedDraftVersion": 3,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:uses> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "243e33b6-9c7f-4a36-b4e7-149af83676af"
+    },
+    {
+      "expectedDraftVersion": 4,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:uses> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "43266bdb-372d-4379-a9f5-4b08160b4d32"
+    },
+    {
+      "expectedDraftVersion": 5,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMinCardinality(0 <urn:e3b:uses> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "7dd56d95-47e3-4a04-bb53-5477e6667c67"
+    },
+    {
+      "expectedDraftVersion": 6,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(3 <urn:e3b:uses> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "7d1596b4-d6f7-43d2-b8fe-c0289dfbfc75"
+    },
+    {
+      "expectedDraftVersion": 7,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(1 <urn:e3b:uses> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "2e23ce5f-9a7a-4613-877e-90f3c068dcae"
+    },
+    {
+      "expectedDraftVersion": 8,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "cbbadeccf4aa62161f172375b20c2a361379826c6e6b3da85616507cd4d83449"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectSomeValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "708ec870-e4ec-43b7-9d15-ca68466ea3c9"
+    },
+    {
+      "expectedDraftVersion": 9,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "23f2f1e4689c6b8218e571707cdde1bebb03ee6663f9211b7ab6404c8db7d872"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectAllValuesFrom(<urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "156e64e8-87a4-44e5-b077-cffdc09ee538"
+    },
+    {
+      "expectedDraftVersion": 10,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "dfacfd25b0311eb5f74ce33d978753a03be9ee4d61266c3c3bda5d45d3085e58"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMinCardinality(1 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "ce76fb8a-e8b1-41c5-b7fa-02029131d459"
+    },
+    {
+      "expectedDraftVersion": 11,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "176ed9d535368e6a17ded9df0948a03c3b92e8f071b84404f607c889cf2ed10e"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(4 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "4d6a685a-1b1d-457c-a4e2-e2d261e7503c"
+    },
+    {
+      "expectedDraftVersion": 12,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "5f3b5e7606fed042948f9027d9a6c73e1340a94a166d9828e793665faab753f3"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(2 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "8b29c803-c5cd-4eea-a72b-9088b5f15c64"
+    },
+    {
+      "expectedDraftVersion": 13,
+      "operationId": "74ec8bdf-002b-4ce5-9a5b-6cb136e26213",
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(rdfs:comment <urn:e3b:Probe> \"parallel e3b\")"
+        }
+      ]
+    },
+    {
+      "expectedDraftVersion": 13,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "cb1b0d10cf302702cfc9a48549c0ed545baca96b182c95077f52338070f5791d"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(7 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "a3ad2561-9c8c-445d-b627-5a3599463a33"
+    },
+    {
+      "expectedDraftVersion": 14,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "cb1b0d10cf302702cfc9a48549c0ed545baca96b182c95077f52338070f5791d"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectMaxCardinality(7 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "870f328e-4c62-420d-903f-68d56464ca2f"
+    },
+    {
+      "expectedDraftVersion": 15,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "badce4d58606f30780ec61a2d01fc88efb70b5a5adf8aa7c2b47c0a5f2f8838b"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(5 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "157d6f4b-6336-44c3-9964-2364c60fd04f"
+    },
+    {
+      "expectedDraftVersion": 15,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "badce4d58606f30780ec61a2d01fc88efb70b5a5adf8aa7c2b47c0a5f2f8838b"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:e3b:Machine> ObjectExactCardinality(5 <urn:e3b:related> <urn:e3b:Probe>))"
+        }
+      ],
+      "operationId": "157d6f4b-6336-44c3-9964-2364c60fd04f"
+    }
+  ],
+  "nativeBefore": {
+    "viewport": null,
+    "window": {
+      "inner": 1920,
+      "outer": 1920
+    }
+  },
+  "nativeAfter": {
+    "viewport": null,
+    "window": {
+      "inner": 1920,
+      "outer": 1920
+    }
+  }
+}

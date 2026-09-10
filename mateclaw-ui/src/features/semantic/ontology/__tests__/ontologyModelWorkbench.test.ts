@@ -74,3 +74,13 @@ it('renders every expression root recursively and links its source without edit 
  expect(host.querySelector('.model-actions')).toBeNull()
  expect(apply).not.toHaveBeenCalled()
 })
+
+it('keeps restriction inputs through projection refresh and exposes rules only for editable classes',async()=>{
+ const {props}=mount();await flush();host.querySelector<HTMLButtonElement>('.model-term')!.click();await flush()
+ const entry=[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('编辑概念规则'))!;expect(entry).toBeDefined();entry.click();await flush()
+ const field=document.body.querySelector<HTMLInputElement>('input[aria-label="关系 IRI"]')!;field.value='urn:test:preserved';field.dispatchEvent(new Event('input',{bubbles:true}));await flush()
+ props.projection=null;await flush();expect(document.body.querySelector<HTMLInputElement>('input[aria-label="关系 IRI"]')?.value).toBe('urn:test:preserved');expect(document.body.querySelector<HTMLInputElement>('input[aria-label="关系 IRI"]')?.disabled).toBe(true)
+ props.projection=projection;await flush();expect(document.body.querySelector<HTMLInputElement>('input[aria-label="关系 IRI"]')?.value).toBe('urn:test:preserved')
+ props.editable=false;await flush();expect(document.body.querySelector('input[aria-label="关系 IRI"]')).toBeNull()
+ expect([...host.querySelectorAll('button')].some(b=>b.textContent?.includes('编辑概念规则'))).toBe(false)
+})

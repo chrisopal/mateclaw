@@ -46,6 +46,50 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
     }
 
     @Test
+    void restrictionReplacementIsAtomicAndPreservesUnrelatedAxioms() throws Exception {
+        String id = create(); var initial = draft(id);
+        String original = "SubClassOf(<urn:test:Equipment> ObjectMinCardinality(0 <urn:test:uses> <urn:test:Probe>))";
+        var document = owlDocument("Ontology(<urn:test:rules> "
+                + "Declaration(Class(<urn:test:Equipment>)) Declaration(Class(<urn:test:Probe>)) "
+                + "Declaration(ObjectProperty(<urn:test:uses>)) Declaration(AnnotationProperty(<urn:test:note>)) " + original
+                + " SubClassOf(Annotation(<urn:test:note> \"keep\") <urn:test:Equipment> ObjectAllValuesFrom(<urn:test:uses> <urn:test:Probe>))"
+                + " SubClassOf(<urn:test:Equipment> ObjectSomeValuesFrom(<urn:test:uses> ObjectComplementOf(<urn:test:Probe>))))");
+        var saved = call("PUT", "/ontologies/" + id + "/draft", "member", workspace,
+                saveBody(initial.path("draftVersion").asLong(), document), 200);
+        String axiomId = null;
+        for (var axiom : saved.path("document").path("axioms")) {
+            if (axiom.path("rendering").asText().equals(original)) axiomId = axiom.path("axiomId").asText();
+        }
+        assertNotNull(axiomId);
+        var changes = List.of(Map.of("kind", "REMOVE", "axiomId", axiomId),
+                Map.of("kind", "ADD", "functionalSyntax", "SubClassOf(<urn:test:Equipment> ObjectMinCardinality(2 <urn:test:uses> <urn:test:Probe>))"));
+        var edit = Map.of("expectedDraftVersion", saved.path("draftVersion").asLong(),
+                "operationId", UUID.randomUUID().toString(), "changes", changes);
+        call("PATCH", "/ontologies/" + id + "/draft/axioms", "viewer", workspace, edit, 403);
+        var invalid = Map.of("expectedDraftVersion", saved.path("draftVersion").asLong(),
+                "operationId", UUID.randomUUID().toString(), "changes", List.of(changes.get(0),
+                        Map.of("kind", "ADD", "functionalSyntax", "SubClassOf(")));
+        call("PATCH", "/ontologies/" + id + "/draft/axioms", "member", workspace, invalid, 422);
+        assertEquals(saved, call("GET", "/ontologies/" + id + "/draft", "member", workspace, null, 200));
+        var changed = call("PATCH", "/ontologies/" + id + "/draft/axioms", "member", workspace, edit, 200);
+        assertEquals(changed, call("PATCH", "/ontologies/" + id + "/draft/axioms", "member", workspace, edit, 200));
+        var stale = new HashMap<>(edit); stale.put("operationId", UUID.randomUUID().toString());
+        call("PATCH", "/ontologies/" + id + "/draft/axioms", "member", workspace, stale, 409);
+        var readback = call("GET", "/ontologies/" + id + "/draft", "member", workspace, null, 200);
+        assertEquals(changed, readback);
+        Set<String> actualIds = new HashSet<>();
+        for (var axiom : readback.path("document").path("axioms")) actualIds.add(axiom.path("axiomId").asText());
+        assertFalse(actualIds.contains(axiomId));
+        for (var axiom : saved.path("document").path("axioms")) {
+            if (!axiom.path("axiomId").asText().equals(axiomId)) assertTrue(actualIds.contains(axiom.path("axiomId").asText()));
+        }
+        assertEquals(saved.path("document").path("axioms").size(), actualIds.size(), readback.path("document").path("axioms").toString());
+        assertEquals(saved.path("document").path("source").path("policy"), readback.path("document").path("source").path("policy"));
+        var stored = jdbc.query("SELECT axiom_id FROM mate_semantic_ontology_axiom WHERE revision_id=?", (rs, n) -> rs.getString(1), initial.path("id").asText());
+        assertEquals(actualIds, new HashSet<>(stored));
+    }
+
+    @Test
     void discardedDraftTokenCannotOverwriteReplacementDraft() throws Exception {
         String id = create();
         var original = draft(id);
