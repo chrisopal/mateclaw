@@ -16,4 +16,6 @@ public final class OntologySourceDtos {
     public record Review(String id,String bindingId,String observedDigest,String sourceState,String reviewState,String decision,String reason,String observedSnapshotId) {}
     public record DecideRequest(String operationId,String expectedObservedDigest,String decision,String reason) {}
     public record Snapshot(String id,String knowledgeBaseId,String sourceRef,String sourceTitle,String sourceText,String sourceDigest,Instant capturedAt) {}
+    /** Material returned to the business-facing source picker; ids stay internal to the binding request. */
+    public record MaterialView(String knowledgeBaseId,String sourceRef,String sourceTitle,String sourceText,String sourceDigest) {}
 }

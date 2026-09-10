@@ -37,6 +37,26 @@ public final class OntologyDtos {
     public record AxiomEdit(String kind, String axiomId, String functionalSyntax) {}
     public record EditDraft(Long expectedDraftVersion, List<AxiomEdit> changes, String operationId) {}
 
+    /** Business authoring commands translated to standard OWL by the server. */
+    public record ModelEditRequest(
+            Long expectedDraftVersion, String operationId, List<ModelEdit> changes) {}
+
+    public record ModelEdit(
+            String kind,
+            String termKind,
+            String targetId,
+            String name,
+            String domainId,
+            String rangeId,
+            String field,
+            String value,
+            String language,
+            String operator,
+            String propertyId,
+            String fillerId,
+            Integer cardinality,
+            String originalAxiomId) {}
+
     public record ValidateDraft(Long expectedDraftVersion) {}
 
     public record PublishDraft(Long expectedDraftVersion, String operationId, String note) {}

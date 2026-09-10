@@ -1,3 +1,4 @@
+import type { ModelEdit } from '../ontology/businessModel'
 import type { ProjectionView } from '../ontology/standardProjection'
 import { http } from '@/api'
 import type { AxiosRequestConfig, AxiosRequestTransformer } from 'axios'
@@ -67,6 +68,7 @@ export const ontologyApi = {
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
+  modelEdit: (ws: string, id: string, body: ModelEdit, signal?: AbortSignal) => semanticRequest<Draft>(ws, {url: `${path(id)}/draft/model-edits`, method: 'POST', data: body}, signal),
   editDraft: editDraftRequest,
   // An ambiguous edit response must be retried with the exact original command.
   retryEdit: editDraftRequest,

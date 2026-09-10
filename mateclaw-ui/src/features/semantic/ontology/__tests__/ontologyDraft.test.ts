@@ -14,7 +14,7 @@ const source = (): Draft => ({
 })
 function setup() {
   const ws = ref('9223372036854775700')
-  const api = { getDraft: vi.fn().mockResolvedValue(source()), saveDraft: vi.fn(), validate: vi.fn(), publish: vi.fn(), operation: vi.fn(), discard: vi.fn(), editDraft: vi.fn(), retryEdit: vi.fn() } as unknown as OntologyApi
+  const api = { getDraft: vi.fn().mockResolvedValue(source()), saveDraft: vi.fn(), validate: vi.fn(), publish: vi.fn(), operation: vi.fn(), discard: vi.fn(), editDraft: vi.fn(), retryEdit: vi.fn(), modelEdit: vi.fn() } as unknown as OntologyApi
   const scope = effectScope()
   const draft = scope.run(() => useOntologyDraft(() => source().ontologyId, () => ws.value, api))!
   return { ws, api, scope, draft }
@@ -128,4 +128,17 @@ describe('simple edit write boundary', () => {
     const pending = draft.edit(changes); draft.name.value = 'Keep this input'; reject({ status: 409, code: 'DRAFT_CONFLICT' })
     expect(await pending).toBe(false); expect(draft.name.value).toBe('Keep this input'); expect(draft.saveError.value?.code).toBe('DRAFT_CONFLICT'); expect(draft.editPending.value).toBe(false); expect(api.getDraft).toHaveBeenCalledTimes(1); scope.stop()
   })
+})
+
+it('sends business commands to backend mapping and retains the exact request after lost response',async()=>{
+ const {draft,api,scope}=setup();await draft.load()
+ const command={kind:'CREATE_TERM' as const,termKind:'OBJECT' as const,name:'设备'}
+ vi.mocked(api.modelEdit).mockRejectedValueOnce({status:0,code:'REQUEST_FAILED'})
+ expect(await draft.modelEdit([command])).toBe(false);expect(draft.editPending.value).toBe(true)
+ expect(api.editDraft).not.toHaveBeenCalled()
+ const sent=vi.mocked(api.modelEdit).mock.calls[0]![2];expect(sent.changes).toEqual([command]);expect(JSON.stringify(sent)).not.toContain('functionalSyntax')
+ expect(await draft.modelEdit([command])).toBe(false)
+ vi.mocked(api.modelEdit).mockResolvedValue({...source(),draftVersion:18})
+ expect(await draft.retryEdit()).toBe(true);expect(vi.mocked(api.modelEdit).mock.calls[1]![2]).toEqual(sent)
+ draft.name.value='unsaved';expect(await draft.modelEdit([command])).toBe(false);scope.stop()
 })

@@ -1,0 +1,35 @@
+{
+  "backend": [
+    {
+      "name": "vip.mate.semantic.SemanticOntologyIntegrationTest",
+      "tests": "15",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "4.363"
+    },
+    {
+      "name": "vip.mate.semantic.OntologySourceReviewIntegrationTest",
+      "tests": "7",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "3.837"
+    }
+  ],
+  "frontend": {
+    "files": 20,
+    "tests": 106,
+    "failed": 0
+  },
+  "checks": [
+    "vue-tsc",
+    "scoped ESLint",
+    "snowflake precision",
+    "production build",
+    "git diff --check"
+  ],
+  "runtime": "18109 rebuilt and health UP",
+  "baseline": "27bb7b18",
+  "scope": "business model editor"
+}

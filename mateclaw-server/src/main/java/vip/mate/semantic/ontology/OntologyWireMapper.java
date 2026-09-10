@@ -3,9 +3,17 @@ package vip.mate.semantic.ontology;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.function.Predicate;
 import org.springframework.stereotype.Component;
 import vip.mate.semantic.core.ontology.*;
 import vip.mate.semantic.core.policy.BusinessPolicySet;
@@ -16,6 +24,9 @@ import vip.mate.semantic.web.SemanticApiException;
 @Component
 public class OntologyWireMapper {
     public static final int MAX_DOCUMENT_BYTES = 1_048_576;
+    private static final String RDFS = "http://www.w3.org/2000/01/rdf-schema#";
+    private static final Pattern IRI_SCHEME = Pattern.compile("[A-Za-z][A-Za-z0-9+.-]*");
+    private static final Pattern LANGUAGE = Pattern.compile("[A-Za-z]{1,8}(?:-[A-Za-z0-9]{1,8})*");
     private final ObjectMapper json;
     private final OntologyDocumentPort documents;
     private final OwlRevisionDocumentMapper stored;
@@ -93,6 +104,295 @@ public class OntologyWireMapper {
         } catch (OntologyDocumentException | IllegalArgumentException | NullPointerException exception) {
             throw new SemanticApiException(422, "INVALID_AXIOM_EDIT", exception.getMessage());
         }
+    }
+
+    /**
+     * Converts the bounded business editor vocabulary into ordinary OWL axiom edits.
+     * All identifiers are treated as opaque complete IRIs; functional syntax is built here
+     * only after validating and escaping every user supplied value.
+     */
+    public List<AxiomEdit> modelEdits(OntologyRevisionRow row, String operationId, List<ModelEdit> edits) {
+        if (edits == null || edits.isEmpty() || edits.size() > 1000)
+            throw new SemanticApiException(422, "INVALID_MODEL_EDIT", "One to 1000 model edits required");
+        if (operationId == null || operationId.isBlank() || operationId.length() > 128)
+            throw new SemanticApiException(422, "INVALID_MODEL_EDIT", "operationId required, maximum 128 characters");
+
+        ParsedOntologyDocument parsed = stored.read(row);
+        Map<String, List<String>> termKinds = documents.termKinds(parsed);
+        List<OntologyAxiomDescriptor> axioms = parsed.axioms();
+        Map<String, String> generatedKinds = new HashMap<>();
+        List<AxiomEdit> result = new ArrayList<>();
+        for (int index = 0; index < edits.size(); index++) {
+            ModelEdit edit = edits.get(index);
+            if (edit == null || edit.kind() == null)
+                throw invalidModel("Edit kind required");
+            switch (edit.kind()) {
+                case "CREATE_TERM" -> createTerm(row, operationId, index, edit, result, termKinds, generatedKinds);
+                case "REPLACE_DEFINITION" -> replaceDefinition(edit, termKinds, generatedKinds, axioms, result);
+                case "REPLACE_RESTRICTION" -> replaceRestriction(edit, termKinds, generatedKinds, axioms, result);
+                default -> throw invalidModel("Unsupported model edit kind");
+            }
+        }
+        return List.copyOf(result);
+    }
+
+    private void createTerm(
+            OntologyRevisionRow row,
+            String operationId,
+            int index,
+            ModelEdit edit,
+            List<AxiomEdit> result,
+            Map<String, List<String>> termKinds,
+            Map<String, String> generatedKinds) {
+        String kind = requiredChoice(edit.termKind(), Set.of("OBJECT", "RELATION", "ATTRIBUTE"), "termKind");
+        String name = required(edit.name(), "name");
+        String iri = generatedTermIri(row, operationId, index);
+        generatedKinds.put(iri, kind);
+        String declaration = switch (kind) {
+            case "OBJECT" -> "Declaration(Class(" + iri(iri) + "))";
+            case "RELATION" -> "Declaration(ObjectProperty(" + iri(iri) + "))";
+            case "ATTRIBUTE" -> "Declaration(DataProperty(" + iri(iri) + "))";
+            default -> throw invalidModel("Unsupported termKind");
+        };
+        result.add(new AxiomEdit("ADD", null, declaration));
+        result.add(new AxiomEdit("ADD", null,
+                "AnnotationAssertion(" + iri(RDFS + "label") + " " + iri(iri) + " "
+                        + literal(name, edit.language()) + ")"));
+        if (kind.equals("RELATION") || kind.equals("ATTRIBUTE")) {
+            String domain = validIri(edit.domainId(), "domainId");
+            String range = validIri(edit.rangeId(), "rangeId");
+            if (kind.equals("RELATION")) {
+                requireClass(domain, termKinds, generatedKinds, "domainId");
+                requireClass(range, termKinds, generatedKinds, "rangeId");
+            } else {
+                requireClass(domain, termKinds, generatedKinds, "domainId");
+            }
+            String property = iri(iri);
+            result.add(new AxiomEdit("ADD", null,
+                    (kind.equals("RELATION") ? "ObjectPropertyDomain(" : "DataPropertyDomain(")
+                            + property + " " + iri(domain) + ")"));
+            result.add(new AxiomEdit("ADD", null,
+                    (kind.equals("RELATION") ? "ObjectPropertyRange(" : "DataPropertyRange(")
+                            + property + " " + iri(range) + ")"));
+        }
+    }
+
+    private void replaceDefinition(
+            ModelEdit edit,
+            Map<String, List<String>> termKinds,
+            Map<String, String> generatedKinds,
+            List<OntologyAxiomDescriptor> axioms,
+            List<AxiomEdit> result) {
+        String target = validIri(edit.targetId(), "targetId");
+        String field = requiredChoice(edit.field(), Set.of("NAME", "DESCRIPTION", "PARENT", "DOMAIN", "RANGE"), "field");
+        String syntax;
+        switch (field) {
+            case "NAME" -> syntax = "AnnotationAssertion(" + iri(RDFS + "label") + " " + iri(target) + " "
+                    + literal(required(edit.value(), "value"), edit.language()) + ")";
+            case "DESCRIPTION" -> syntax = "AnnotationAssertion(" + iri(RDFS + "comment") + " " + iri(target) + " "
+                    + literal(required(edit.value(), "value"), edit.language()) + ")";
+            case "PARENT" -> {
+                requireClass(target, termKinds, generatedKinds, "targetId");
+                String parent = validIri(edit.value(), "value");
+                requireClass(parent, termKinds, generatedKinds, "value");
+                syntax = "SubClassOf(" + iri(target) + " " + iri(parent) + ")";
+            }
+            case "DOMAIN", "RANGE" -> {
+                String propertyKind = propertyKind(target, edit.termKind(), termKinds, generatedKinds);
+                String value = validIri(
+                        field.equals("DOMAIN") && (edit.value() == null || edit.value().isBlank())
+                                ? edit.domainId() : field.equals("RANGE") && (edit.value() == null || edit.value().isBlank())
+                                ? edit.rangeId() : edit.value(),
+                        "value");
+                boolean object = propertyKind.equals("RELATION");
+                syntax = field.equals("DOMAIN")
+                        ? (object ? "ObjectPropertyDomain(" : "DataPropertyDomain(") + iri(target) + " " + iri(value) + ")"
+                        : (object ? "ObjectPropertyRange(" : "DataPropertyRange(") + iri(target) + " " + iri(value) + ")";
+            }
+            default -> throw invalidModel("Unsupported definition field");
+        }
+        Predicate<String> originalMatches = switch (field) {
+            case "NAME" -> rendering -> annotationRendering(rendering, RDFS + "label", target);
+            case "DESCRIPTION" -> rendering -> annotationRendering(rendering, RDFS + "comment", target);
+            case "PARENT" -> rendering -> rendering.matches("SubClassOf\\(" + Pattern.quote(iri(target)) + " <[^>]+>\\)");
+            case "DOMAIN" -> rendering -> namedPropertyAxiomRendering(rendering,
+                    "RELATION".equalsIgnoreCase(edit.termKind()) ? "ObjectPropertyDomain" : "DataPropertyDomain", target);
+            case "RANGE" -> rendering -> namedPropertyAxiomRendering(rendering,
+                    "RELATION".equalsIgnoreCase(edit.termKind()) ? "ObjectPropertyRange" : "DataPropertyRange", target);
+            default -> throw invalidModel("Unsupported definition field");
+        };
+        addReplacement(result, edit.originalAxiomId(), axioms, originalMatches, syntax);
+    }
+
+    private void replaceRestriction(
+            ModelEdit edit,
+            Map<String, List<String>> termKinds,
+            Map<String, String> generatedKinds,
+            List<OntologyAxiomDescriptor> axioms,
+            List<AxiomEdit> result) {
+        String subject = validIri(edit.targetId(), "targetId");
+        String property = validIri(edit.propertyId(), "propertyId");
+        String filler = validIri(edit.fillerId(), "fillerId");
+        requireClass(subject, termKinds, generatedKinds, "targetId");
+        if (!termKinds.getOrDefault(property, List.of()).contains("ObjectProperty")
+                && !generatedKinds.getOrDefault(property, "").equals("RELATION"))
+            throw invalidModel("propertyId is not an object property");
+        requireClass(filler, termKinds, generatedKinds, "fillerId");
+        String operator = requiredChoice(edit.operator(), Set.of("SOME", "ALL", "MIN", "MAX", "EXACT"), "operator");
+        String restriction = switch (operator) {
+            case "SOME" -> "ObjectSomeValuesFrom(" + iri(property) + " " + iri(filler) + ")";
+            case "ALL" -> "ObjectAllValuesFrom(" + iri(property) + " " + iri(filler) + ")";
+            case "MIN", "MAX", "EXACT" -> {
+                Integer cardinality = edit.cardinality();
+                if (cardinality == null || cardinality < 0)
+                    throw invalidModel("Non-negative cardinality required for " + operator);
+                String name = switch (operator) {
+                    case "MIN" -> "ObjectMinCardinality";
+                    case "MAX" -> "ObjectMaxCardinality";
+                    default -> "ObjectExactCardinality";
+                };
+                yield name + "(" + cardinality + " " + iri(property) + " " + iri(filler) + ")";
+            }
+            default -> throw invalidModel("Unsupported restriction operator");
+        };
+        String syntax = "SubClassOf(" + iri(subject) + " " + restriction + ")";
+        addReplacement(result, edit.originalAxiomId(), axioms,
+                restrictionRendering(subject), syntax);
+    }
+
+    private static Predicate<String> restrictionRendering(String subject) {
+        String named = "<[^>]+>";
+        String direct = "(?:ObjectSomeValuesFrom\\(" + named + " " + named + "\\)"
+                + "|ObjectAllValuesFrom\\(" + named + " " + named + "\\)"
+                + "|ObjectMinCardinality\\([0-9]+ " + named + " " + named + "\\)"
+                + "|ObjectMaxCardinality\\([0-9]+ " + named + " " + named + "\\)"
+                + "|ObjectExactCardinality\\([0-9]+ " + named + " " + named + "\\))";
+        return rendering -> rendering.matches(Pattern.quote("SubClassOf(" + iri(subject) + " ")
+                + direct + "\\)");
+    }
+
+    private static boolean namedPropertyAxiomRendering(String rendering, String axiomType, String target) {
+        return rendering.matches(Pattern.quote(axiomType + "(" + iri(target) + " ") + "<[^>]+>\\)");
+    }
+
+    private static void addReplacement(
+            List<AxiomEdit> result,
+            String originalAxiomId,
+            List<OntologyAxiomDescriptor> axioms,
+            Predicate<String> originalMatches,
+            String syntax) {
+        if (originalAxiomId != null) {
+            String id = validAxiomId(originalAxiomId);
+            OntologyAxiomDescriptor original = axioms.stream()
+                    .filter(axiom -> axiom.axiomId().equals(id))
+                    .findFirst()
+                    .orElseThrow(() -> invalidModel("originalAxiomId is not in this draft"));
+            if (!originalMatches.test(original.rendering()))
+                throw invalidModel("originalAxiomId does not match the requested replacement");
+            result.add(new AxiomEdit("REMOVE", id, null));
+        }
+        result.add(new AxiomEdit("ADD", null, syntax));
+    }
+
+    private static String propertyKind(
+            String iri, String requestedKind, Map<String, List<String>> termKinds, Map<String, String> generatedKinds) {
+        String requested = requiredChoice(requestedKind, Set.of("RELATION", "ATTRIBUTE"), "termKind");
+        String generated = generatedKinds.get(iri);
+        if (generated != null) {
+            if (generated.equals(requested)) return generated;
+            throw invalidModel("targetId is not a property");
+        }
+        List<String> kinds = termKinds.getOrDefault(iri, List.of());
+        if (requested.equals("RELATION") && kinds.contains("ObjectProperty")) return requested;
+        if (requested.equals("ATTRIBUTE") && kinds.contains("DataProperty")) return requested;
+        throw invalidModel("targetId is not a declared property");
+    }
+
+    private static void requireClass(
+            String iri, Map<String, List<String>> termKinds, Map<String, String> generatedKinds, String field) {
+        if (!termKinds.getOrDefault(iri, List.of()).contains("Class")
+                && !generatedKinds.getOrDefault(iri, "").equals("OBJECT"))
+            throw invalidModel(field + " is not a declared class");
+    }
+
+    private static boolean annotationRendering(String rendering, String property, String target) {
+        return rendering.startsWith("AnnotationAssertion(" + iri(property) + " " + iri(target) + " ")
+                || (property.equals(RDFS + "label")
+                        && rendering.startsWith("AnnotationAssertion(rdfs:label " + iri(target) + " "))
+                || (property.equals(RDFS + "comment")
+                        && rendering.startsWith("AnnotationAssertion(rdfs:comment " + iri(target) + " "));
+    }
+
+    private static String generatedTermIri(OntologyRevisionRow row, String operationId, int index) {
+        String digest = OntologyDocument.sha256(row.getOntologyIri() + "\u0000" + operationId + "\u0000" + index);
+        return row.getOntologyIri() + "/model-term/" + digest;
+    }
+
+    private static String requiredChoice(String value, Set<String> choices, String field) {
+        String normalized = required(value, field).toUpperCase(Locale.ROOT);
+        if (!choices.contains(normalized)) throw invalidModel("Unsupported " + field);
+        return normalized;
+    }
+
+    private static String required(String value, String field) {
+        if (value == null || value.isBlank()) throw invalidModel(field + " required");
+        return value;
+    }
+
+    private static String validIri(String value, String field) {
+        String candidate = required(value, field);
+        if (candidate.length() > 2048 || candidate.chars().anyMatch(Character::isWhitespace)
+                || candidate.chars().anyMatch(ch -> ch < 0x20)
+                || candidate.indexOf('<') >= 0 || candidate.indexOf('>') >= 0
+                || candidate.indexOf('"') >= 0 || candidate.indexOf('{') >= 0
+                || candidate.indexOf('}') >= 0 || candidate.indexOf('|') >= 0
+                || candidate.indexOf('^') >= 0 || candidate.indexOf('`') >= 0
+                || candidate.indexOf('\\') >= 0)
+            throw invalidModel("Malformed " + field);
+        int colon = candidate.indexOf(':');
+        if (colon <= 0 || !IRI_SCHEME.matcher(candidate.substring(0, colon)).matches())
+            throw invalidModel("Malformed " + field);
+        try {
+            URI parsed = new URI(candidate);
+            if (parsed.getScheme() == null) throw new URISyntaxException(candidate, "missing scheme");
+        } catch (URISyntaxException exception) {
+            throw invalidModel("Malformed " + field);
+        }
+        return candidate;
+    }
+
+    private static String validAxiomId(String value) {
+        if (!value.matches("[0-9a-fA-F]{64}")) throw invalidModel("Malformed originalAxiomId");
+        return value;
+    }
+
+    private static String iri(String value) {
+        return "<" + value + ">";
+    }
+
+    private static String literal(String value, String language) {
+        StringBuilder escaped = new StringBuilder(value.length() + 2);
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            switch (ch) {
+                case '\\' -> escaped.append("\\\\");
+                case '"' -> escaped.append("\\\"");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (ch < 0x20) throw invalidModel("value contains an unsupported control character");
+                    escaped.append(ch);
+                }
+            }
+        }
+        if (language == null || language.isBlank()) return "\"" + escaped + "\"";
+        if (!LANGUAGE.matcher(language).matches()) throw invalidModel("Malformed language");
+        return "\"" + escaped + "\"@" + language;
+    }
+
+    private static SemanticApiException invalidModel(String message) {
+        return new SemanticApiException(422, "INVALID_MODEL_EDIT", message);
     }
 
     public java.util.Set<String> classIris(ParsedOntologyDocument parsed) { return documents.classIris(parsed); }

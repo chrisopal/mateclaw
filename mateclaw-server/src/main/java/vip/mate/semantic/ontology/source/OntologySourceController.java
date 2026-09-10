@@ -17,6 +17,11 @@ public class OntologySourceController {
     public R<Bound> bind(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,@RequestBody BindRequest request){return R.ok(service.bind(scope,ontologyId,request));}
     @GetMapping("/revisions/{revisionId}/axiom-sources") @RequireWorkspaceRole("viewer")
     public R<List<Binding>> bindings(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,@PathVariable String revisionId){return R.ok(service.bindings(scope,ontologyId,revisionId));}
+    @GetMapping("/source-material") @RequireWorkspaceRole("viewer")
+    public R<MaterialView> material(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,
+                                    @RequestParam String knowledgeBaseId,@RequestParam String sourceRef){
+        return R.ok(service.materialView(scope,ontologyId,knowledgeBaseId,sourceRef));
+    }
     @PostMapping("/source-reviews/scan") @RequireWorkspaceRole("member")
     public R<List<Review>> scan(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,@RequestBody ScanRequest request){return R.ok(service.scan(scope,ontologyId,request));}
     @GetMapping("/source-reviews") @RequireWorkspaceRole("viewer")

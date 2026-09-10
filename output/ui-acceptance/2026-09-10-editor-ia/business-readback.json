@@ -1,0 +1,23 @@
+{
+  "ontologyId": "2097935363607769090",
+  "draftVersion": 7,
+  "checks": [
+    "object",
+    "relation",
+    "attribute",
+    "rule",
+    "rename",
+    "form"
+  ],
+  "commands": [
+    "CREATE_TERM OBJECT twice",
+    "CREATE_TERM RELATION with domainId/rangeId",
+    "CREATE_TERM ATTRIBUTE decimal",
+    "REPLACE_RESTRICTION MIN 0",
+    "REPLACE_DEFINITION NAME with originalAxiomId"
+  ],
+  "frontendFunctionalSyntax": false,
+  "axiomCount": 13,
+  "documentDigest": "3a4aa61846c664ec608167e5cc2252f98aa44d8021f1367ecf2fb9b654fc25e3",
+  "nativeViewport": null
+}

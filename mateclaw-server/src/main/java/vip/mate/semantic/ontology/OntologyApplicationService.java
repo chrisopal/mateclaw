@@ -179,24 +179,44 @@ public class OntologyApplicationService {
     @Transactional
     public DraftView editDraft(String scope, String id, EditDraft request) {
         access.require(scope, "member");
+        return editDraft(scope, id, request, "EDIT_ONTOLOGY_AXIOMS", row -> request.changes());
+    }
+
+    @Transactional
+    public DraftView editModelDraft(String scope, String id, ModelEditRequest request) {
+        access.require(scope, "member");
+        return editDraft(scope, id, request, "EDIT_ONTOLOGY_MODEL",
+                row -> wire.modelEdits(row, request.operationId(), request.changes()));
+    }
+
+    private DraftView editDraft(
+            String scope,
+            String id,
+            Object request,
+            String operationKind,
+            Function<OntologyRevisionRow, List<AxiomEdit>> changes) {
         var parent = parent(scope, id, true);
-        validateOperation(request.operationId());
+        String operationId = request instanceof EditDraft edit ? edit.operationId()
+                : ((ModelEditRequest) request).operationId();
+        Long expectedDraftVersion = request instanceof EditDraft edit ? edit.expectedDraftVersion()
+                : ((ModelEditRequest) request).expectedDraftVersion();
+        validateOperation(operationId);
         String requestHash = hash(wire.encode(request));
-        var previous = commands.find(parent.getWorkspaceId(), request.operationId());
+        var previous = commands.find(parent.getWorkspaceId(), operationId);
         if (previous != null) {
-            if (!"EDIT_ONTOLOGY_AXIOMS".equals(previous.getKind()) || !id.equals(previous.getResourceId()) || !requestHash.equals(previous.getPayloadHash()))
+            if (!operationKind.equals(previous.getKind()) || !id.equals(previous.getResourceId()) || !requestHash.equals(previous.getPayloadHash()))
                 throw conflict("OPERATION_CONFLICT", "Operation id already used with different payload");
             return wire.decode(previous.getResultJson(), DraftView.class);
         }
         var row = draft(parent);
-        cas(row, request.expectedDraftVersion());
-        wire.edit(row, request.changes());
-        if (mapper.saveDraft(row, request.expectedDraftVersion()) != 1) throw conflict("DRAFT_CONFLICT", "Draft has changed");
+        cas(row, expectedDraftVersion);
+        wire.edit(row, changes.apply(row));
+        if (mapper.saveDraft(row, expectedDraftVersion) != 1) throw conflict("DRAFT_CONFLICT", "Draft has changed");
         axiomIndex.synchronize(row);
         row.setDraftVersion(Math.incrementExact(row.getDraftVersion()));
         parent.setDraftCounter(row.getDraftVersion()); touch(parent);
         var result = wire.draft(row);
-        recordDraftCommand(parent, request.operationId(), "EDIT_ONTOLOGY_AXIOMS", requestHash, result);
+        recordDraftCommand(parent, operationId, operationKind, requestHash, result);
         return result;
     }
 

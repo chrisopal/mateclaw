@@ -1,0 +1,9 @@
+{
+  "score": 94,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "默认入口使用业务语言，三区导航和单一主操作清晰；宽屏使用可用宽度，窄屏纵向排列且无横向溢出。深色主题在过渡结束后文字可读，键盘关闭回返入口。",
+  "next_actions": []
+}

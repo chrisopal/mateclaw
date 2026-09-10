@@ -1,0 +1,337 @@
+{
+  "scope": "本体业务模型编辑新增与重组交互，既有高级OWL编辑/复杂表达式/来源复核详细控件沿用既有回归；本轮单独验证新增业务表单、资料选择及布局。",
+  "environment": "semantic-m1 / Chromium / 5189 + 18109 / admin synthetic fixtures / disposable tabs",
+  "pages": [
+    {
+      "id": "edit",
+      "url": "/semantic/ontologies/:id/edit",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "object",
+      "name": "新增业务对象",
+      "page": "edit",
+      "locator": "新增业务对象",
+      "checks": [
+        "名称预览保存刷新"
+      ]
+    },
+    {
+      "id": "relation",
+      "name": "新增对象关系",
+      "page": "edit",
+      "locator": "新增对象关系",
+      "checks": [
+        "两端对象选择失焦保存"
+      ]
+    },
+    {
+      "id": "attribute",
+      "name": "新增业务属性",
+      "page": "edit",
+      "locator": "新增业务属性",
+      "checks": [
+        "内容类型选择保存"
+      ]
+    },
+    {
+      "id": "rename",
+      "name": "编辑信息",
+      "page": "edit",
+      "locator": "编辑信息",
+      "checks": [
+        "名称修改保存"
+      ]
+    },
+    {
+      "id": "rule",
+      "name": "业务规则",
+      "page": "edit",
+      "locator": "业务规则",
+      "checks": [
+        "数量零值保存刷新"
+      ]
+    },
+    {
+      "id": "form",
+      "name": "业务表单",
+      "page": "edit",
+      "locator": "业务表单",
+      "checks": [
+        "取消重开和重置"
+      ]
+    },
+    {
+      "id": "navigation",
+      "name": "业务区域导航",
+      "page": "edit",
+      "locator": "业务区域导航",
+      "checks": [
+        "切换资料检查再返回"
+      ]
+    },
+    {
+      "id": "metadata",
+      "name": "更多基本信息",
+      "page": "edit",
+      "locator": "更多基本信息",
+      "checks": [
+        "编辑保存刷新"
+      ]
+    },
+    {
+      "id": "exchange",
+      "name": "OWL文件交换",
+      "page": "edit",
+      "locator": "OWL文件交换",
+      "checks": [
+        "导出两格式导入owl扩展名保存"
+      ]
+    },
+    {
+      "id": "release",
+      "name": "检查发布",
+      "page": "edit",
+      "locator": "检查发布",
+      "checks": [
+        "校验发布历史回读"
+      ]
+    },
+    {
+      "id": "source",
+      "name": "参考资料",
+      "page": "edit",
+      "locator": "参考资料",
+      "checks": [
+        "选文档摘录保存刷新"
+      ]
+    },
+    {
+      "id": "responsive",
+      "name": "布局",
+      "page": "edit",
+      "locator": "布局",
+      "checks": [
+        "1366-1440-1920-390"
+      ]
+    },
+    {
+      "id": "theme",
+      "name": "主题",
+      "page": "edit",
+      "locator": "主题",
+      "checks": [
+        "真实暗色切换"
+      ]
+    },
+    {
+      "id": "keyboard",
+      "name": "键盘操作",
+      "page": "edit",
+      "locator": "键盘操作",
+      "checks": [
+        "焦点与关闭回返"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "object",
+      "check": "名称预览保存刷新",
+      "status": "PASS",
+      "steps": [
+        "名称预览保存刷新",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "名称预览保存刷新正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "relation",
+      "check": "两端对象选择失焦保存",
+      "status": "PASS",
+      "steps": [
+        "两端对象选择失焦保存",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "两端对象选择失焦保存正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "attribute",
+      "check": "内容类型选择保存",
+      "status": "PASS",
+      "steps": [
+        "内容类型选择保存",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "内容类型选择保存正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "rename",
+      "check": "名称修改保存",
+      "status": "PASS",
+      "steps": [
+        "名称修改保存",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "名称修改保存正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "rule",
+      "check": "数量零值保存刷新",
+      "status": "PASS",
+      "steps": [
+        "数量零值保存刷新",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "数量零值保存刷新正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "form",
+      "check": "取消重开和重置",
+      "status": "PASS",
+      "steps": [
+        "取消重开和重置",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "取消重开和重置正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "business-readback.json"
+      ]
+    },
+    {
+      "control": "navigation",
+      "check": "切换资料检查再返回",
+      "status": "PASS",
+      "steps": [
+        "切换资料检查再返回",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "切换资料检查再返回正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "layout-readback.json"
+      ]
+    },
+    {
+      "control": "metadata",
+      "check": "编辑保存刷新",
+      "status": "PASS",
+      "steps": [
+        "编辑保存刷新",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "编辑保存刷新正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "exchange-readback.json"
+      ]
+    },
+    {
+      "control": "exchange",
+      "check": "导出两格式导入owl扩展名保存",
+      "status": "PASS",
+      "steps": [
+        "导出两格式导入owl扩展名保存",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "导出两格式导入owl扩展名保存正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "exchange-readback.json"
+      ]
+    },
+    {
+      "control": "release",
+      "check": "校验发布历史回读",
+      "status": "PASS",
+      "steps": [
+        "校验发布历史回读",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "校验发布历史回读正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "exchange-readback.json"
+      ]
+    },
+    {
+      "control": "source",
+      "check": "选文档摘录保存刷新",
+      "status": "PASS",
+      "steps": [
+        "选文档摘录保存刷新",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "选文档摘录保存刷新正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "source-readback.json"
+      ]
+    },
+    {
+      "control": "responsive",
+      "check": "1366-1440-1920-390",
+      "status": "PASS",
+      "steps": [
+        "1366-1440-1920-390",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "1366-1440-1920-390正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "layout-readback.json"
+      ]
+    },
+    {
+      "control": "theme",
+      "check": "真实暗色切换",
+      "status": "PASS",
+      "steps": [
+        "真实暗色切换",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "真实暗色切换正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "layout-readback.json"
+      ]
+    },
+    {
+      "control": "keyboard",
+      "check": "焦点与关闭回返",
+      "status": "PASS",
+      "steps": [
+        "焦点与关闭回返",
+        "核对可见状态；写操作保存后刷新并独立回读"
+      ],
+      "expected": "焦点与关闭回返正常且持久化一致",
+      "actual": "已执行通过，详见对应脚本及结果文件",
+      "evidence": [
+        "layout-readback.json"
+      ]
+    }
+  ]
+}

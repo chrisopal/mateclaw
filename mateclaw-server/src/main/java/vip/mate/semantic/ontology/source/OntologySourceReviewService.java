@@ -62,6 +62,19 @@ public class OntologySourceReviewService {
         return jdbc.query("SELECT id FROM mate_semantic_axiom_source WHERE revision_id=? ORDER BY id",(rs,n)->rs.getString(1),revisionId)
             .stream().map(id->stored(scope,ontologyId,id).binding()).toList();
     }
+    /**
+     * Read one accessible Wiki material for the business-facing source picker.
+     * The ontology parent check keeps the request in the current workspace and
+     * the shared material lookup applies the same text and permission checks
+     * used by source binding and review.
+     */
+    @Transactional(readOnly=true)
+    public MaterialView materialView(String scope,String ontologyId,String knowledgeBaseId,String sourceRef) {
+        access.require(scope,"viewer");parent(scope,ontologyId,false);
+        var material=material(scope,knowledgeBaseId,sourceRef,false);
+        if(material==null)throw missing();
+        return new MaterialView(knowledgeBaseId,sourceRef,material.title(),material.text(),material.digest());
+    }
     /** Lock source rows through the migration commit, including a current read under MySQL RR. */
     @Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY)
     public List<Binding> bindingsForMigration(String scope,String ontologyId,String revisionId) {

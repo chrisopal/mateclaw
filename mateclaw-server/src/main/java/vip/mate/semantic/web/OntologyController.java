@@ -99,6 +99,15 @@ public class OntologyController {
         return R.ok(service.editDraft(scope, id, body));
     }
 
+    @PostMapping("/ontologies/{id}/draft/model-edits")
+    @RequireWorkspaceRole("member")
+    public R<DraftView> modelEdits(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @RequestBody ModelEditRequest body) {
+        return R.ok(service.editModelDraft(scope, id, body));
+    }
+
     @GetMapping("/ontologies/{id}/draft/document")
     @RequireWorkspaceRole("viewer")
     public org.springframework.http.ResponseEntity<byte[]> draftDocument(

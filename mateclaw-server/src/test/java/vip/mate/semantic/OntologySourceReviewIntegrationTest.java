@@ -148,6 +148,15 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         when(wikiKnowledgeBases.findVisibleById(agent,Long.valueOf(f.kb()))).thenReturn(null);
         assertThrows(SemanticApiException.class,()->contexts.source(workspace,actor,agent,graph,binding));
     }
+    @Test void materialPickerReturnsAccessibleTextAndRejectsAnotherWorkspace() throws Exception {
+        var f=fixture();
+        var material=call("GET","/ontologies/"+f.ontology()+"/source-material?knowledgeBaseId="+f.kb()+"&sourceRef="+f.raw(),"viewer",workspace,null,200);
+        assertEquals("Expert definitions",material.path("sourceTitle").asText());
+        assertEquals(f.text(),material.path("sourceText").asText());
+        assertEquals(OntologyDocument.sha256(f.text()),material.path("sourceDigest").asText());
+        call("GET","/ontologies/"+f.ontology()+"/source-material?knowledgeBaseId="+f.kb()+"&sourceRef="+f.raw(),"owner",otherWorkspace,null,404);
+        call("GET","/ontologies/"+f.ontology()+"/source-material?knowledgeBaseId="+f.kb()+"&sourceRef=999999999999","viewer",workspace,null,404);
+    }
     @Test void authoringToolBindsOnlyAgentVisibleSourcesAndRestoresIdentity() throws Exception {
         var f=fixture(); Long agent=agentWithKnowledgeBase(f.kb());
         Long actor=jdbc.queryForObject("SELECT user_id FROM mate_workspace_member WHERE workspace_id=? AND role='member' AND deleted=0",Long.class,Long.valueOf(workspace));

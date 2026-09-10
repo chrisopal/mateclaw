@@ -1,10 +1,11 @@
+import type { ModelChange, ModelEdit } from './businessModel'
 import { computed, onScopeDispose, ref, watch } from 'vue'
 import { ontologyApi, type OntologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { AxiomDescriptor, DocumentInput, Draft, EditDraft, PublishDraft, Revision, SaveDraft, ValidationReport } from '../api/types'
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
-type PendingEdit = { scope: string; ontology: string; body: EditDraft }
+type PendingEdit = { scope: string; ontology: string; body: EditDraft | ModelEdit; model?: boolean }
 export function useOntologyDraft(ontologyId: () => string, workspaceId: () => string, api: OntologyApi = ontologyApi, canEdit: () => boolean = () => true) {
   const document = ref<DocumentInput | null>(null)
   const axioms = ref<AxiomDescriptor[]>([])
@@ -48,7 +49,9 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
   async function runEdit(pending: PendingEdit, retry: boolean) {
     const c = context()
     try {
-      const value = await (retry ? api.retryEdit : api.editDraft)(c.ws, c.ontology, pending.body, c.signal)
+      const value = pending.model
+        ? await api.modelEdit(c.ws, c.ontology, pending.body as ModelEdit, c.signal)
+        : await (retry ? api.retryEdit : api.editDraft)(c.ws, c.ontology, pending.body as EditDraft, c.signal)
       if (current(c)) { pendingEdit.value = null; apply(value); return true }
     } catch (error) {
       if (current(c)) {
@@ -62,6 +65,12 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
   async function edit(changes: EditDraft['changes']) {
     if (!id.value || dirty.value || busy.value || publicationPending.value || editPending.value || !canEdit() || !changes.length) return false
     const pending: PendingEdit = { scope: workspaceId(), ontology: ontologyId(), body: { expectedDraftVersion: draftVersion.value, changes: clone(changes), operationId: crypto.randomUUID() } }
+    pendingEdit.value = pending
+    return runEdit(pending, false)
+  }
+  async function modelEdit(changes: ModelChange[]) {
+    if (!id.value || dirty.value || busy.value || publicationPending.value || editPending.value || !canEdit() || !changes.length) return false
+    const pending: PendingEdit = { scope: workspaceId(), ontology: ontologyId(), model: true, body: {expectedDraftVersion: draftVersion.value, changes: clone(changes), operationId: crypto.randomUUID()} }
     pendingEdit.value = pending
     return runEdit(pending, false)
   }
@@ -83,5 +92,5 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
   watch([name, description, document], () => { validationReport.value = null }, { deep: true, flush: 'sync' })
   watch(() => [workspaceId(), ontologyId()], () => { cancel(); id.value = null; document.value = null; name.value = ''; description.value = ''; saved.value = ''; validationReport.value = null; saveError.value = null; pendingPublication.value = null; pendingEdit.value = null }, { flush: 'sync' })
   onScopeDispose(cancel)
-  return { document, axioms, name, description, id, baseRevisionId, draftVersion, version, dirty, busy, validationReport, saveError, canPublish, publicationPending, editPending, load, save, edit, retryEdit, validate, publish, discard, cancel }
+  return { document, axioms, name, description, id, baseRevisionId, draftVersion, version, dirty, busy, validationReport, saveError, canPublish, publicationPending, editPending, load, save, edit, modelEdit, retryEdit, validate, publish, discard, cancel }
 }

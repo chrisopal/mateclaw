@@ -4,15 +4,18 @@ import { createApp, h, nextTick, reactive, type App } from 'vue'
 import ElementPlus from 'element-plus'
 import OntologySourcePanel from '../components/OntologySourcePanel.vue'
 import { ontologyApi } from '../../api/ontologyApi'
+import { exactQuoteRange, sourceSelectionApi } from '../../api/sourceSelectionApi'
+import type { AxiomDescriptor } from '../../api/types'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string, fallback: string) => fallback ?? key, locale: { value: 'en-US' } }) }))
 vi.mock('@/api/index', () => ({ workspaceTeamApi: { getAccess: vi.fn() } }))
-vi.mock('../../api/ontologyApi', () => ({ ontologyApi: { axiomSources: vi.fn(), sourceReviews: vi.fn(), decideSourceReview: vi.fn() } }))
+vi.mock('../../api/ontologyApi', () => ({ ontologyApi: { axiomSources: vi.fn(), sourceReviews: vi.fn(), decideSourceReview: vi.fn(), bindAxiomSource: vi.fn(), sourceReviewSnapshots: vi.fn(), scanSourceReviews: vi.fn() } }))
+vi.mock('../../api/sourceSelectionApi', () => ({ sourceSelectionApi: { knowledgeBases: vi.fn().mockResolvedValue([]), materials: vi.fn().mockResolvedValue([]), material: vi.fn() }, exactQuoteRange: (text: string, quote: string) => { const value = quote.trim(); const start = text.indexOf(value); if (!value || start < 0) return null; const begin = [...text.slice(0, start)].length; return { startCodePoint: begin, endCodePoint: begin + [...value].length, exactQuote: value } } }))
 let app: App
 const flushPromises = async () => { await new Promise(resolve => setTimeout(resolve, 0)); await nextTick() }
 afterEach(() => { app?.unmount(); document.body.innerHTML = '' })
-const props = { ontologyId: 'ontology', revisionId: 'revision', axioms: [], canManage: false, canReview: false }
+const props: { ontologyId: string; revisionId: string; axioms: AxiomDescriptor[]; canManage: boolean; canReview: boolean; draftVersion?: number; focusedAxiomId?: string } = { ontologyId: 'ontology', revisionId: 'revision', axioms: [], canManage: false, canReview: false }
 beforeEach(() => { localStorage.clear(); localStorage.setItem('mc-workspace-id', 'old'); setActivePinia(createPinia()); vi.resetAllMocks() })
 function panel(overrides: Partial<typeof props> = {}) {
   const host = document.createElement('div'); document.body.append(host)
@@ -48,12 +51,13 @@ it('refreshes source binding state after a review decision is persisted', async 
   vi.mocked(ontologyApi.sourceReviews).mockResolvedValue([review] as never)
   vi.mocked(ontologyApi.decideSourceReview).mockResolvedValue({ ...review, reviewState: 'REVIEWED', decision: 'KEEP_HISTORICAL' } as never)
   const wrapper = panel({ canReview: true }); await flushPromises()
-  const input = wrapper.host.querySelector<HTMLInputElement>('input[placeholder="Decision reason"]')!
+  wrapper.host.querySelector<HTMLButtonElement>('[data-testid="toggle-pending-reviews"]')!.click(); await flushPromises()
+  const input = wrapper.host.querySelector<HTMLInputElement>('input[placeholder="Reason for this decision"]')!
   input.value = 'Preserve original evidence'; input.dispatchEvent(new Event('input', { bubbles: true })); await nextTick()
-  const button = [...wrapper.host.querySelectorAll('button')].find(b => b.textContent?.includes('Keep historical'))!
+  const button = [...wrapper.host.querySelectorAll('button')].find(b => b.textContent?.includes('Keep history'))!
   button.click(); await flushPromises()
   expect(ontologyApi.decideSourceReview).toHaveBeenCalledTimes(1)
-  expect(wrapper.text()).toContain('KEEP_HISTORICAL')
+  expect(wrapper.text()).toContain('Historical evidence kept')
   expect(wrapper.text()).not.toContain('PENDING')
 })
 
@@ -76,11 +80,11 @@ it('filters bindings and pending reviews to the inspected axiom and allows clear
   app = createApp({ render: () => h(OntologySourcePanel, { ...focusProps, onClearFocus: clearFocus }) })
   app.use(createPinia()).use(ElementPlus); useWorkspaceStore().currentWorkspaceId = 'old'; app.mount(host)
   await flushPromises()
-  expect(host.textContent).toContain('source-a')
-  expect(host.textContent).not.toContain('source-b')
+  expect(host.textContent).toContain('Linked material')
+  expect(host.textContent).not.toContain('B source')
   expect(host.querySelector('[data-testid="selected-axiom-source-count"]')?.textContent).toContain('1')
   expect(host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).toContain('1')
-  ;[...host.querySelectorAll('button')].find(button => button.textContent?.includes('Clear axiom focus'))?.click()
+  ;[...host.querySelectorAll('button')].find(button => button.textContent?.includes('Clear rule focus'))?.click()
   expect(clearFocus).toHaveBeenCalledTimes(1)
 })
 
@@ -103,4 +107,58 @@ it('keeps pending review count unknown when the viewer cannot access reviews', a
   expect(wrapper.host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).toContain('Unknown')
   expect(wrapper.host.querySelector('[data-testid="selected-axiom-pending-count"]')?.textContent).not.toContain('0')
   expect(ontologyApi.sourceReviews).not.toHaveBeenCalled()
+})
+
+it('ignores a late document list after the user changes knowledge base', async () => {
+  const axioms = [{ axiomId: 'a1', axiomType: 'SubClassOf', rendering: 'technical rule', signatureIris: [], annotations: [], logical: true }]
+  vi.mocked(ontologyApi.axiomSources).mockResolvedValue([])
+  vi.mocked(ontologyApi.sourceReviews).mockResolvedValue([])
+  let resolveFirst!: (items: never[]) => void
+  vi.mocked(sourceSelectionApi.knowledgeBases).mockResolvedValue([
+    { id: 'kb-old', name: '旧知识库' }, { id: 'kb-new', name: '新知识库' },
+  ])
+  vi.mocked(sourceSelectionApi.materials).mockImplementation((_ws, kb) => kb === 'kb-old'
+    ? new Promise(resolve => { resolveFirst = resolve })
+    : Promise.resolve([{ id: 'new-doc', title: '新资料' }]))
+  const wrapper = panel({ axioms, canManage: true, draftVersion: 2 })
+  await flushPromises()
+  wrapper.host.querySelector<HTMLButtonElement>('[data-testid="add-reference"]')!.click(); await flushPromises()
+  const choose = async (testid: string, label: string) => {
+    wrapper.host.querySelector<HTMLElement>(`[data-testid="${testid}"]`)!.click(); await nextTick()
+    ;[...document.body.querySelectorAll<HTMLElement>('.el-select-dropdown__item')].find(item => item.textContent?.includes(label))!.click(); await flushPromises()
+  }
+  await choose('reference-kb-select', '旧知识库')
+  await choose('reference-kb-select', '新知识库')
+  resolveFirst([{ id: 'old-doc', title: '旧资料' }] as never); await flushPromises()
+  expect(vi.mocked(sourceSelectionApi.materials).mock.calls.map(call => call[1])).toEqual(['kb-old', 'kb-new'])
+  expect(document.body.textContent).toContain('新资料')
+  expect(document.body.textContent).not.toContain('旧资料')
+})
+
+it('shows the selected source text beside the exact excerpt field', async () => {
+  const axioms = [{ axiomId: 'a1', axiomType: 'SubClassOf', rendering: 'technical rule', signatureIris: [], annotations: [], logical: true }]
+  vi.mocked(ontologyApi.axiomSources).mockResolvedValue([])
+  vi.mocked(ontologyApi.sourceReviews).mockResolvedValue([])
+  vi.mocked(sourceSelectionApi.knowledgeBases).mockResolvedValue([{ id: 'kb', name: '设备知识库' }])
+  vi.mocked(sourceSelectionApi.materials).mockResolvedValue([{ id: 'doc', title: '测量规范' }])
+  vi.mocked(sourceSelectionApi.material).mockResolvedValue({
+    knowledgeBaseId: 'kb', sourceRef: 'doc', sourceTitle: '测量规范',
+    sourceText: '第一行\n设备😀用于测量。', sourceDigest: 'digest',
+  })
+  const wrapper = panel({ axioms, canManage: true, draftVersion: 2 })
+  await flushPromises()
+  wrapper.host.querySelector<HTMLButtonElement>('[data-testid="add-reference"]')!.click(); await flushPromises()
+  const choose = async (testid: string, label: string) => {
+    wrapper.host.querySelector<HTMLElement>(`[data-testid="${testid}"]`)!.click(); await nextTick()
+    ;[...document.body.querySelectorAll<HTMLElement>('.el-select-dropdown__item')].find(item => item.textContent?.includes(label))!.click(); await flushPromises()
+  }
+  await choose('reference-kb-select', '设备知识库')
+  await choose('reference-document-select', '测量规范')
+  expect(document.body.querySelector('[data-testid="reference-source-preview"]')?.textContent).toContain('设备😀用于测量。')
+  expect(document.body.querySelector('[data-testid="reference-excerpt"]')).toBeTruthy()
+})
+
+it('rejects a missing excerpt and counts Unicode code points for a valid excerpt', () => {
+  expect(exactQuoteRange('设备😀用于测量。', '不存在')).toBeNull()
+  expect(exactQuoteRange('设备😀用于测量。', '😀')).toEqual({ startCodePoint: 2, endCodePoint: 3, exactQuote: '😀' })
 })

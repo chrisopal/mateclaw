@@ -1,0 +1,1 @@
+{"type":"SCRIPT_LOCATOR","actual":"Element Plus forwards data-testid to textarea itself; nested textarea locator timed out","fix":"Target reference-excerpt directly"}

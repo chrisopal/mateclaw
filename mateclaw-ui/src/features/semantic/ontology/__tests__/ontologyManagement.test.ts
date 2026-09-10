@@ -78,16 +78,20 @@ afterEach(() => {
   host?.remove()
   document.body.innerHTML = ''
 })
+async function openMetadata(){
+ ;[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('More'))!.click();await flush()
+ ;[...document.querySelectorAll<HTMLElement>('.el-dropdown-menu__item')].find(b=>b.textContent?.includes('Basic information'))!.click();await flush()
+}
 it('renders viewer read-only and preserves large ID in real request', async () => {
-  await mount(['view:ontology'])
-  expect((host.querySelector('#ontology-name') as HTMLInputElement).disabled).toBe(true)
+  await mount(['view:ontology']);await openMetadata()
+  expect((document.querySelector('#ontology-name') as HTMLInputElement).disabled).toBe(true)
   expect(host.textContent).toContain('viewing only')
   expect(host.textContent).not.toContain('Save draft')
   expect(ontologyApi.getDraft).toHaveBeenCalledWith('1', '9223372036854775800', expect.any(AbortSignal))
 })
 it('edits real draft state through an Element Plus input and keeps it after a 409', async () => {
-  await mount(['view:ontology', 'manage:ontology'])
-  const input = host.querySelector('#ontology-name') as HTMLInputElement
+  await mount(['view:ontology', 'manage:ontology']);await openMetadata()
+  const input = document.querySelector('#ontology-name') as HTMLInputElement
   input.value = 'Updated factory'
   input.dispatchEvent(new Event('input', { bubbles: true }))
   await nextTick()
@@ -97,13 +101,13 @@ it('edits real draft state through an Element Plus input and keeps it after a 40
   await flush()
   expect(input.value).toBe('Updated factory')
   expect(host.textContent).toContain('Another editor changed')
-  expect(host.textContent).toContain('Unsaved changes')
+  expect(host.textContent).toContain('Unsaved')
   expect(vi.mocked(ontologyApi.saveDraft).mock.calls[0][2].expectedDraftVersion).toBe(25)
 })
 it('locks editor and exposes recovery after uncertain publication', async () => {
   await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
   vi.mocked(ontologyApi.validate).mockResolvedValue({ draftVersion: 25, valid: true, violations: [] })
-  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Validate draft'))!.click()
+  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Check model'))!.click()
   await flush()
   vi.mocked(ontologyApi.diff).mockResolvedValue({
     fromRevisionId: null,
@@ -122,7 +126,8 @@ it('locks editor and exposes recovery after uncertain publication', async () => 
     .find((b) => b.textContent?.includes('Confirm publication'))!
     .click()
   await flush()
-  expect((host.querySelector('#ontology-name') as HTMLInputElement).disabled).toBe(true)
+  await openMetadata()
+  expect((document.querySelector('#ontology-name') as HTMLInputElement).disabled).toBe(true)
   expect(host.textContent).toContain('Recover publication')
   expect(host.textContent).not.toContain('Save draft')
 })
@@ -204,8 +209,8 @@ it('renders immutable version detail and compares saved revisions for viewers', 
 })
 it('registers the real dirty editor guard and preserves input on rejected workspace switch', async () => {
   const store = await mount(['view:ontology', 'manage:ontology'])
-  localStorage.setItem('mc-workspace-id', '1')
-  const input = host.querySelector('#ontology-name') as HTMLInputElement
+  localStorage.setItem('mc-workspace-id', '1');await openMetadata()
+  const input = document.querySelector('#ontology-name') as HTMLInputElement
   input.value = 'Keep my draft'
   input.dispatchEvent(new Event('input', { bubbles: true }))
   await nextTick()

@@ -90,6 +90,132 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
     }
 
     @Test
+    void businessModelEditsMapToOwlWithStableGeneratedTermsAndReplay() throws Exception {
+        String id = create();
+        var initial = draft(id);
+        String originalRestriction = "SubClassOf(<urn:test:Equipment> ObjectMinCardinality(1 <urn:test:uses> <urn:test:Probe>))";
+        String originalSomeRestriction = "SubClassOf(<urn:test:Equipment> ObjectSomeValuesFrom(<urn:test:uses> <urn:test:Probe>))";
+        String document = "Ontology(<urn:test:model-editor> "
+                + "Declaration(Class(<urn:test:Equipment>)) Declaration(Class(<urn:test:Probe>)) Declaration(Class(<urn:test:Valve>)) "
+                + "Declaration(ObjectProperty(<urn:test:uses>)) Declaration(ObjectProperty(<urn:test:monitors>)) Declaration(DataProperty(<urn:test:voltage>)) "
+                + "Declaration(AnnotationProperty(<urn:test:note>)) "
+                + "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:test:Equipment> \"Equipment\") "
+                + "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:test:Equipment> \"keep description\") "
+                + "AnnotationAssertion(<urn:test:note> <urn:test:Equipment> \"keep unrelated\") "
+                + "ObjectPropertyDomain(<urn:test:uses> ObjectIntersectionOf(<urn:test:Equipment> <urn:test:Probe>)) "
+                + originalRestriction + " " + originalSomeRestriction
+                + " SubClassOf(<urn:test:Equipment> ObjectSomeValuesFrom(<urn:test:uses> ObjectComplementOf(<urn:test:Probe>))))";
+        var saved = call("PUT", "/ontologies/" + id + "/draft", "member", workspace,
+                saveBody(initial.path("draftVersion").asLong(), owlDocument(document)), 200);
+        String labelAxiomId = null;
+        String restrictionAxiomId = null;
+        String someRestrictionAxiomId = null;
+        String complexDomainAxiomId = null;
+        for (var axiom : saved.path("document").path("axioms")) {
+            if (axiom.path("rendering").asText().equals(
+                    "AnnotationAssertion(rdfs:label <urn:test:Equipment> \"Equipment\")"))
+                labelAxiomId = axiom.path("axiomId").asText();
+            if (axiom.path("rendering").asText().equals(originalRestriction))
+                restrictionAxiomId = axiom.path("axiomId").asText();
+            if (axiom.path("rendering").asText().equals(originalSomeRestriction))
+                someRestrictionAxiomId = axiom.path("axiomId").asText();
+            if (axiom.path("rendering").asText().contains("ObjectPropertyDomain(<urn:test:uses> ObjectIntersectionOf"))
+                complexDomainAxiomId = axiom.path("axiomId").asText();
+        }
+        assertNotNull(labelAxiomId);
+        assertNotNull(restrictionAxiomId);
+        assertNotNull(someRestrictionAxiomId);
+        assertNotNull(complexDomainAxiomId);
+        String operationId = "model-" + UUID.randomUUID();
+        Map<String, Object> createObject = new HashMap<>();
+        createObject.put("kind", "CREATE_TERM"); createObject.put("termKind", "OBJECT"); createObject.put("name", "Pump");
+        Map<String, Object> createRelation = new HashMap<>();
+        createRelation.put("kind", "CREATE_TERM"); createRelation.put("termKind", "RELATION"); createRelation.put("name", "uses part");
+        createRelation.put("domainId", "urn:test:Equipment"); createRelation.put("rangeId", "urn:test:Probe");
+        Map<String, Object> rename = new HashMap<>();
+        rename.put("kind", "REPLACE_DEFINITION"); rename.put("targetId", "urn:test:Equipment"); rename.put("field", "NAME");
+        rename.put("value", "设备"); rename.put("language", "zh"); rename.put("originalAxiomId", labelAxiomId);
+        Map<String, Object> restriction = new HashMap<>();
+        restriction.put("kind", "REPLACE_RESTRICTION"); restriction.put("targetId", "urn:test:Equipment");
+        restriction.put("operator", "MIN"); restriction.put("propertyId", "urn:test:uses"); restriction.put("fillerId", "urn:test:Probe");
+        restriction.put("cardinality", 2); restriction.put("originalAxiomId", restrictionAxiomId);
+        Map<String, Object> edit = new HashMap<>();
+        edit.put("expectedDraftVersion", saved.path("draftVersion").asLong()); edit.put("operationId", operationId);
+        edit.put("changes", List.of(createObject, createRelation, rename, restriction));
+        var changed = call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace, edit, 200);
+        assertEquals(changed, call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace, edit, 200));
+        String changedText = changed.path("document").path("source").path("documentText").asText();
+        assertTrue(changedText.contains("ObjectMinCardinality(2 <urn:test:uses> <urn:test:Probe>)"));
+        assertTrue(changedText.contains("\"设备\"@zh"));
+        assertFalse(changedText.contains("\"Equipment\""));
+        assertTrue(changedText.contains("\"keep description\""));
+        assertTrue(changedText.contains("\"keep unrelated\""));
+        assertTrue(changedText.contains("ObjectIntersectionOf(<urn:test:Equipment> <urn:test:Probe>)"));
+        assertTrue(changed.path("document").path("axioms").toString().contains("/model-term/"));
+        assertEquals(3, changed.path("draftVersion").asLong());
+        String unrelatedAxiomId = null;
+        String nestedRestrictionAxiomId = null;
+        for (var axiom : changed.path("document").path("axioms")) {
+            if (axiom.path("rendering").asText().contains("<urn:test:note> <urn:test:Equipment>"))
+                unrelatedAxiomId = axiom.path("axiomId").asText();
+            if (axiom.path("rendering").asText().contains("ObjectSomeValuesFrom(<urn:test:uses> ObjectComplementOf"))
+                nestedRestrictionAxiomId = axiom.path("axiomId").asText();
+        }
+        assertNotNull(unrelatedAxiomId);
+        assertNotNull(nestedRestrictionAxiomId);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:Equipment",
+                                "field", "NAME", "value", "wrong original", "originalAxiomId", unrelatedAxiomId))), 422);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_RESTRICTION", "targetId", "urn:test:Equipment",
+                                "operator", "SOME", "propertyId", "urn:test:uses", "fillerId", "urn:test:Probe",
+                                "originalAxiomId", nestedRestrictionAxiomId))), 422);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:voltage",
+                                "termKind", "RELATION", "field", "DOMAIN", "value", "urn:test:Equipment"))), 422);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:uses",
+                                "termKind", "RELATION", "field", "DOMAIN", "value", "urn:test:Equipment",
+                                "originalAxiomId", complexDomainAxiomId))), 422);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:Equipment",
+                                "field", "PARENT", "value", "urn:test:voltage"))), 422);
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "CREATE_TERM", "termKind", "RELATION", "name", "bad relation",
+                                "domainId", "urn:test:voltage", "rangeId", "urn:test:Probe"))), 422);
+        Map<String, Object> changedRestriction = new HashMap<>();
+        changedRestriction.put("kind", "REPLACE_RESTRICTION");
+        changedRestriction.put("targetId", "urn:test:Equipment");
+        changedRestriction.put("operator", "MAX");
+        changedRestriction.put("propertyId", "urn:test:monitors");
+        changedRestriction.put("fillerId", "urn:test:Valve");
+        changedRestriction.put("cardinality", 3);
+        changedRestriction.put("originalAxiomId", someRestrictionAxiomId);
+        String secondOperationId = UUID.randomUUID().toString();
+        var finalChanged = call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", secondOperationId,
+                        "changes", List.of(changedRestriction)), 200);
+        assertTrue(finalChanged.path("document").path("source").path("documentText").asText()
+                .contains("ObjectMaxCardinality(3 <urn:test:monitors> <urn:test:Valve>)"));
+        assertEquals(finalChanged, call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", changed.path("draftVersion").asLong(), "operationId", secondOperationId,
+                        "changes", List.of(changedRestriction)), 200));
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", finalChanged.path("draftVersion").asLong(), "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:Equipment\"><", "field", "NAME", "value", "bad"))), 422);
+        assertEquals(finalChanged, call("GET", "/ontologies/" + id + "/draft", "member", workspace, null, 200));
+        call("POST", "/ontologies/" + id + "/draft/model-edits", "member", workspace,
+                Map.of("expectedDraftVersion", finalChanged.path("draftVersion").asLong() - 1, "operationId", UUID.randomUUID().toString(),
+                        "changes", List.of(Map.of("kind", "REPLACE_DEFINITION", "targetId", "urn:test:Equipment", "field", "NAME", "value", "stale"))), 409);
+    }
+
+    @Test
     void discardedDraftTokenCannotOverwriteReplacementDraft() throws Exception {
         String id = create();
         var original = draft(id);
