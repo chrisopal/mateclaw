@@ -1,0 +1,1 @@
+{"score":94,"verdict":"pass","category_match":true,"differences":[],"suggestions":[],"reasoning":"Existing enterprise workbench layout and controls are preserved. The final desktop overview and 390px coverage panel are readable; long tokens wrap and the coverage panel clientWidth/scrollWidth are both 312px."}

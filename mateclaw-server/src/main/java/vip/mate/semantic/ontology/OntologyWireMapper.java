@@ -102,6 +102,9 @@ public class OntologyWireMapper {
     public java.util.Map<String,java.util.List<String>> termKinds(OntologyRevisionRow row) { return documents.termKinds(stored.read(row)); }
 
     public ParsedOntologyDocument parsed(OntologyRevisionRow row) { return stored.read(row); }
+    public OntologyDisplayProjection project(OntologyRevisionRow row, int limit) {
+        return documents.project(stored.read(row), limit);
+    }
     public BusinessPolicySet policy(OntologyRevisionRow row) { return stored.policy(row); }
 
     public DocumentView document(OntologyRevisionRow row) {

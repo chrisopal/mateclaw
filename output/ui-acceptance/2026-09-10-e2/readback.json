@@ -1,0 +1,70 @@
+{
+  "snapshot": {
+    "ontologyId": "2097898929953845250",
+    "revisionId": "2097898930427801601",
+    "draftVersion": 3,
+    "documentDigest": "4ff91e51c3e49454a1d6aa851acf43c67a0848c5eb8f4d6ba82820d049749420",
+    "importLockDigest": "ef9237a245f7ec2a002e5344c6195cb1add96af8b3e09230900d1b571e4dbc5a"
+  },
+  "coverage": {
+    "total": 23,
+    "returned": 23,
+    "truncated": false,
+    "dependencyScope": "ROOT_ONLY_IMPORTS_COLLAPSED",
+    "lockedImportCount": 1
+  },
+  "rootRefs": 21,
+  "importedRefs": [
+    {
+      "artifactId": "e2-pinned-library",
+      "axiomId": "07e0390115c68e9068c296532fc8352e102422e30d6a3118b3337edc383cda54",
+      "status": "NOT_RENDERED"
+    },
+    {
+      "artifactId": "e2-pinned-library",
+      "axiomId": "0fc74d10c7f6886c5d878be7fc914d1f4a85e2da889150867caf151c34674d41",
+      "status": "NOT_RENDERED"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "class:urn:e2:Equipment",
+      "features": []
+    },
+    {
+      "id": "class:urn:e2:Machine",
+      "features": []
+    },
+    {
+      "id": "class:urn:e2:Probe",
+      "features": []
+    },
+    {
+      "id": "individual:urn:e2:Equipment",
+      "features": []
+    },
+    {
+      "id": "objectProperty:urn:e2:contains",
+      "features": [
+        "TransitiveObjectProperty"
+      ]
+    },
+    {
+      "id": "objectProperty:urn:e2:usedBy",
+      "features": []
+    },
+    {
+      "id": "objectProperty:urn:e2:uses",
+      "features": [
+        "FunctionalObjectProperty"
+      ]
+    }
+  ],
+  "edgeKinds": [
+    "disjointClasses",
+    "domain",
+    "equivalentClasses",
+    "inverseOf",
+    "range"
+  ]
+}

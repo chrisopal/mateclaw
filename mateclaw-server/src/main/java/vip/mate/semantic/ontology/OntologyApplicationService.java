@@ -119,6 +119,34 @@ public class OntologyApplicationService {
         return wire.draft(draft(parent(scope, id, false)));
     }
 
+    public ProjectionView draftProjection(String scope, String id, Long expectedDraftVersion, int limit) {
+        access.require(scope, "viewer");
+        requireProjectionLimit(limit);
+        var parent = parent(scope, id, false);
+        var row = draft(parent);
+        cas(row, expectedDraftVersion);
+        return projection(row, limit);
+    }
+
+    public ProjectionView revisionProjection(String scope, String id, String revisionId, int limit) {
+        access.require(scope, "viewer");
+        requireProjectionLimit(limit);
+        var parent = parent(scope, id, false);
+        return projection(published(parent, revisionId), limit);
+    }
+
+    private ProjectionView projection(OntologyRevisionRow row, int limit) {
+        return new ProjectionView(
+                new Snapshot(row.getOntologyId(), row.getId(), "DRAFT".equals(row.getRevisionState()) ? row.getDraftVersion() : null,
+                        row.getDocumentDigest(), row.getImportLockDigest()),
+                wire.project(row, limit));
+    }
+
+    private void requireProjectionLimit(int limit) {
+        if (limit < 1 || limit > 2000)
+            throw new SemanticApiException(400, "INVALID_REQUEST", "Projection limit must be between 1 and 2000");
+    }
+
     @Transactional
     public DraftView saveDraft(String scope, String id, SaveDraft request) {
         access.require(scope, "member");

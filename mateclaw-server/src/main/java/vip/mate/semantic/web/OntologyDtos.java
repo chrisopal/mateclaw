@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Instant;
 import java.util.List;
+import vip.mate.semantic.core.ontology.OntologyDisplayProjection;
 
 /** Public HTTP shapes, deliberately independent of core Optional/identity types. */
 public final class OntologyDtos {
@@ -89,6 +90,15 @@ public final class OntologyDtos {
             List<Violation> violations,
             String profile,
             String reasoningStatus) {}
+
+    public record Snapshot(
+            String ontologyId,
+            String revisionId,
+            @JsonSerialize(using = SemanticCounterSerializer.class) Long draftVersion,
+            String documentDigest,
+            String importLockDigest) {}
+
+    public record ProjectionView(Snapshot snapshot, OntologyDisplayProjection projection) {}
 
     public record Change(String kind, String category, String key, Object before, Object after) {}
 

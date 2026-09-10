@@ -63,6 +63,26 @@ public class OntologyController {
         return R.ok(service.getDraft(scope, id));
     }
 
+    @GetMapping("/ontologies/{id}/draft/projection")
+    @RequireWorkspaceRole("viewer")
+    public R<ProjectionView> draftProjection(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @RequestParam Long expectedDraftVersion,
+            @RequestParam(defaultValue = "500") int limit) {
+        return R.ok(service.draftProjection(scope, id, expectedDraftVersion, limit));
+    }
+
+    @GetMapping("/ontologies/{id}/revisions/{revisionId}/projection")
+    @RequireWorkspaceRole("viewer")
+    public R<ProjectionView> revisionProjection(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @PathVariable String revisionId,
+            @RequestParam(defaultValue = "500") int limit) {
+        return R.ok(service.revisionProjection(scope, id, revisionId, limit));
+    }
+
     @PutMapping("/ontologies/{id}/draft")
     @RequireWorkspaceRole("member")
     public R<DraftView> saveDraft(

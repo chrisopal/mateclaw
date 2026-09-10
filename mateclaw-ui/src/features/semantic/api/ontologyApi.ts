@@ -1,3 +1,4 @@
+import type { ProjectionView } from '../ontology/standardProjection'
 import { http } from '@/api'
 import type { AxiosRequestConfig, AxiosRequestTransformer } from 'axios'
 import { semanticError } from './semanticErrors'
@@ -58,6 +59,10 @@ export const ontologyApi = {
   get: (ws: string, id: string, signal?: AbortSignal) => semanticRequest<Ontology>(ws, { url: path(id) }, signal),
   createDraft: (ws: string, id: string, baseRevisionId: string | null = null, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'POST', data: { baseRevisionId } }, signal),
+  draftProjection: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
+    semanticRequest<ProjectionView>(ws, { url: `${path(id)}/draft/projection`, params: { expectedDraftVersion, limit: 500 } }, signal),
+  revisionProjection: (ws: string, id: string, revisionId: string, signal?: AbortSignal) =>
+    semanticRequest<ProjectionView>(ws, { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}/projection`, params: { limit: 500 } }, signal),
   getDraft: (ws: string, id: string, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>

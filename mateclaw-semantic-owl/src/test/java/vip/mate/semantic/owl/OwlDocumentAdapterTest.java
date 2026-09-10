@@ -29,6 +29,7 @@ import vip.mate.semantic.core.ontology.OntologyAxiomDescriptor;
 import vip.mate.semantic.core.ontology.OntologyDocument;
 import vip.mate.semantic.core.ontology.OntologyDocumentException;
 import vip.mate.semantic.core.ontology.OntologyDocumentSyntax;
+import vip.mate.semantic.core.ontology.OntologyDisplayProjection;
 import vip.mate.semantic.core.ontology.OntologyValidationReport;
 import vip.mate.semantic.core.ontology.ParsedOntologyDocument;
 
@@ -41,6 +42,124 @@ class OwlDocumentAdapterTest {
     private static final Pattern ANONYMOUS_NODE = Pattern.compile("_:[A-Za-z0-9_.-]+");
     private final OwlDocumentAdapter adapter = new OwlDocumentAdapter();
     private final Path fixtures = Path.of("..", "docs", "validation", "semantic-owl-01", "fixtures").normalize();
+
+    @Test
+    void projectsNamedFirstBatchAxiomsWithTypedPunningAndLanguageLabels() {
+        String source = """
+                Prefix(:=<urn:test:>)
+                Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+                Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+                Ontology(<urn:test:projection>
+                  Declaration(Class(:A)) Declaration(Class(:B)) Declaration(Class(:C))
+                  Declaration(ObjectProperty(:p)) Declaration(ObjectProperty(:q)) Declaration(DataProperty(:d))
+                  Declaration(NamedIndividual(:A)) Declaration(AnnotationProperty(:note))
+                  AnnotationAssertion(rdfs:label :A "设备"@zh)
+                  AnnotationAssertion(rdfs:label :A "Equipment"@en)
+                  SubClassOf(:A :B)
+                  ObjectPropertyDomain(:p :A) ObjectPropertyRange(:p :B)
+                  DataPropertyRange(:d xsd:string)
+                  EquivalentClasses(:A :B :C) DisjointClasses(:A :B)
+                  InverseObjectProperties(:p :q)
+                  FunctionalObjectProperty(:p)
+                  AnnotationAssertion(:note :A "metadata")
+                )
+                """;
+        ParsedOntologyDocument parsed = parse(source, OntologyDocumentSyntax.FUNCTIONAL);
+
+        OntologyDisplayProjection projection = adapter.project(parsed, 2000);
+        assertEquals(OntologyDisplayProjection.SCHEMA_VERSION, projection.schemaVersion());
+        assertEquals(parsed.document().documentDigest(), projection.documentDigest());
+        assertTrue(projection.nodes().stream().anyMatch(node ->
+                node.id().equals("class:urn:test:A") && node.labels().stream().anyMatch(label ->
+                        label.value().equals("设备") && label.language().equals("zh"))));
+        assertTrue(projection.nodes().stream().anyMatch(node ->
+                node.id().equals("individual:urn:test:A")), "punning keeps class and individual nodes separate");
+        assertTrue(projection.nodes().stream().anyMatch(node ->
+                node.id().equals("objectProperty:urn:test:p")
+                        && node.features().contains("FunctionalObjectProperty")));
+        assertTrue(projection.edges().stream().anyMatch(edge -> edge.kind().equals("equivalentClasses")));
+        assertTrue(projection.edges().stream().anyMatch(edge -> edge.kind().equals("disjointClasses")));
+        assertTrue(projection.edges().stream().anyMatch(edge -> edge.kind().equals("inverseOf")));
+        assertTrue(projection.edges().stream().anyMatch(edge -> edge.kind().equals("domain")));
+        assertTrue(projection.edges().stream().anyMatch(edge -> edge.kind().equals("range")));
+        assertTrue(projection.axiomRefs().stream().anyMatch(ref ->
+                ref.axiomType().equals("AnnotationAssertion") && ref.status().equals("NOT_RENDERED")));
+        assertTrue(projection.axiomRefs().stream().anyMatch(ref ->
+                ref.axiomType().equals("EquivalentClasses") && ref.status().equals("PARTIAL")
+                        && ref.reason().contains("PAIRWISE_RELATIONS_COLLAPSED")));
+    }
+
+    @Test
+    void boundsProjectionAxiomReferencesAndMarksImportsCollapsed() {
+        String importedText = "Ontology(<urn:test:import> Declaration(Class(<urn:test:Imported>)) SubClassOf(<urn:test:Imported> <urn:test:Other>))";
+        LockedImport lock = LockedImport.fromText(
+                "urn:test:import", "urn:test:import", Optional.empty(),
+                OntologyDocumentSyntax.FUNCTIONAL, importedText, "import-artifact");
+        String rootText = "Ontology(<urn:test:root> Import(<urn:test:import>) Declaration(Class(<urn:test:Root>)) "
+                + "Declaration(Class(<urn:test:Other>)) SubClassOf(<urn:test:Root> <urn:test:Other>))";
+        OntologyDocument document = OntologyDocument.fromText(
+                "ontology-1", "revision-1", "urn:test:root", Optional.empty(), OntologyDocumentSyntax.FUNCTIONAL,
+                rootText, LockedImport.digest(List.of(lock)));
+        ParsedOntologyDocument parsed = adapter.parse(document, OntologyDocumentSyntax.FUNCTIONAL, List.of(lock));
+
+        OntologyDisplayProjection projection = adapter.project(parsed, 1);
+        assertEquals(1, projection.axiomRefs().size());
+        assertTrue(projection.coverage().truncated());
+        assertEquals("ROOT_ONLY_IMPORTS_COLLAPSED", projection.coverage().dependencyScope());
+        assertEquals(1, projection.coverage().lockedImportCount());
+        assertTrue(projection.axiomRefs().stream().allMatch(ref -> !ref.imported()));
+        OntologyDisplayProjection full = adapter.project(parsed, 2000);
+        assertEquals(parsed.axioms().size() + 2, full.coverage().total());
+        assertEquals(2, full.axiomRefs().stream().filter(OntologyDisplayProjection.AxiomRef::imported).count());
+        assertTrue(full.axiomRefs().stream().anyMatch(ref -> ref.imported()
+                && ref.artifactId().equals("import-artifact")
+                && ref.status().equals("NOT_RENDERED")
+                && ref.reason().equals("IMPORT_COLLAPSED")));
+        assertThrows(IllegalArgumentException.class, () -> adapter.project(parsed, 0));
+        assertThrows(IllegalArgumentException.class, () -> adapter.project(parsed, 2001));
+    }
+
+    @Test
+    void preservesEmptyLabelLiteralForProjectionFallback() {
+        ParsedOntologyDocument parsed = parse("Ontology(<urn:test:empty-label> "
+                + "Declaration(Class(<urn:test:A>)) "
+                + "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> "
+                + "<urn:test:A> \"\"))", OntologyDocumentSyntax.FUNCTIONAL);
+
+        OntologyDisplayProjection projection = adapter.project(parsed, 20);
+        assertEquals(List.of(""), projection.nodes().stream()
+                .filter(node -> node.id().equals("class:urn:test:A"))
+                .findFirst().orElseThrow().labels().stream()
+                .map(OntologyDisplayProjection.Label::value).toList());
+    }
+
+    @Test
+    void marksGraphCappingAndUnprojectedLabelsExplicitly() {
+        ParsedOntologyDocument largeGroup = parse("Ontology(<urn:test:large-group> "
+                + "EquivalentClasses(<urn:test:A> <urn:test:B> <urn:test:C> <urn:test:D>))",
+                OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection capped = adapter.project(largeGroup, 1);
+        assertTrue(capped.coverage().truncated());
+        assertTrue(capped.nodes().size() <= 1);
+        assertTrue(capped.edges().size() <= 1);
+        assertEquals("PARTIAL", capped.axiomRefs().getFirst().status());
+        assertTrue(capped.axiomRefs().getFirst().reason().contains("GRAPH_LIMIT_REACHED"));
+
+        ParsedOntologyDocument declarations = parse("Ontology(<urn:test:node-cap> "
+                + "SubClassOf(<urn:test:A> <urn:test:B>))",
+                OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection nodeCapped = adapter.project(declarations, 1);
+        assertTrue(nodeCapped.coverage().truncated());
+        assertTrue(nodeCapped.axiomRefs().stream().anyMatch(ref ->
+                ref.rendering().contains("SubClassOf") && ref.reason().contains("GRAPH_LIMIT_REACHED")));
+
+        ParsedOntologyDocument labelOnly = parse("Ontology(<urn:test:label-only> "
+                + "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> "
+                + "<urn:test:missing> \"orphan\"))", OntologyDocumentSyntax.FUNCTIONAL);
+        OntologyDisplayProjection labelProjection = adapter.project(labelOnly, 10);
+        assertEquals("NOT_RENDERED", labelProjection.axiomRefs().getFirst().status());
+        assertTrue(labelProjection.axiomRefs().getFirst().reason().contains("LABEL_SUBJECT_NOT_PROJECTED"));
+    }
 
     @Test
     void distinctAnonymousIndividualsAndLiteralNodeTextNeverShareAxiomIds() {

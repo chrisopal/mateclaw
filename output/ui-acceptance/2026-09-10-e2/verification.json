@@ -1,0 +1,42 @@
+{
+  "backend": [
+    {
+      "name": "vip.mate.semantic.owl.OwlDocumentAdapterTest",
+      "tests": "138",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vip.mate.semantic.SemanticOntologyProjectionIntegrationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vip.mate.semantic.SemanticOntologyIntegrationTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "frontend": {
+    "files": 17,
+    "tests": 82,
+    "failures": 0
+  },
+  "checks": [
+    "changed-file ESLint passed",
+    "Snowflake precision check passed",
+    "vue-tsc --noEmit passed",
+    "enterprise pnpm build passed",
+    "JDK21 mvn -pl mateclaw-server -am package -DskipTests passed"
+  ],
+  "backendTestCommand": "mvn -pl mateclaw-server -am -Dtest=OwlDocumentAdapterTest,SemanticOntologyProjectionIntegrationTest,SemanticOntologyIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false test",
+  "frontendTestCommand": "pnpm --dir mateclaw-ui exec vitest run src/features/semantic/ontology/__tests__",
+  "buildWarnings": [
+    "existing large chunk warning"
+  ]
+}

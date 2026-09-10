@@ -27,6 +27,7 @@ function styles(): StylesheetJson {
     { selector: 'node[kind = "individual"]', style: { shape: 'ellipse' } },
     { selector: 'edge', style: { label: 'data(label)', 'curve-style': 'bezier', width: 1.5, 'line-color': color('--mc-text-secondary', '#64748b'), 'target-arrow-color': color('--mc-text-secondary', '#64748b'), 'target-arrow-shape': 'triangle', 'font-size': 10, color: color('--mc-text-secondary', '#64748b'), 'text-background-color': color('--mc-bg-elevated', '#ffffff'), 'text-background-opacity': 1, 'text-background-padding': '3px', 'text-rotation': 'autorotate' } },
     { selector: 'edge[kind = "someValuesFrom"], edge[kind = "allValuesFrom"]', style: { 'line-style': 'dashed' } },
+    { selector: 'edge[kind = "equivalentClasses"], edge[kind = "disjointClasses"], edge[kind = "inverseOf"]', style: { 'target-arrow-shape': 'none', 'source-arrow-shape': 'none' } },
     { selector: '.matched', style: { 'border-color': primary, 'border-width': 3 } },
     { selector: 'node.chosen', style: { 'background-color': color('--el-color-primary-light-9', '#eff6ff'), 'border-color': primary, 'border-width': 3 } },
     { selector: 'edge.chosen', style: { 'line-color': primary, 'target-arrow-color': primary, width: 3, color: primary } },

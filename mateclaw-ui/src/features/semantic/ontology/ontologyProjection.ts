@@ -2,7 +2,7 @@ import type { AxiomDescriptor } from '../api/types'
 
 export type OntologyNodeKind = 'class' | 'objectProperty' | 'dataProperty' | 'individual' | 'datatype' | 'annotationProperty'
 export interface OntologyProjectionNode { id: string; iri: string; label: string; kind: OntologyNodeKind; axiomIds: string[] }
-export interface OntologyProjectionEdge { id: string; source: string; target: string; label: string; axiomId: string; kind: 'subClassOf' | 'domain' | 'range' | 'someValuesFrom' | 'allValuesFrom' }
+export interface OntologyProjectionEdge { id: string; source: string; target: string; label: string; axiomId: string; kind: 'subClassOf' | 'domain' | 'range' | 'someValuesFrom' | 'allValuesFrom' | 'equivalentClasses' | 'disjointClasses' | 'inverseOf' }
 export interface OntologyProjection { nodes: OntologyProjectionNode[]; edges: OntologyProjectionEdge[]; unprojectedAxiomIds: string[] }
 type Term = string | { name: string; args: Term[] }
 const kinds: Record<string, OntologyNodeKind> = { Class: 'class', ObjectProperty: 'objectProperty', DataProperty: 'dataProperty', NamedIndividual: 'individual', Datatype: 'datatype', AnnotationProperty: 'annotationProperty' }

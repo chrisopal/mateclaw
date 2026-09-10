@@ -1,0 +1,434 @@
+{
+  "scope": "E2 first batch projection UI; existing E1/E3 controls replayed separately",
+  "environment": "Chromium enterprise localhost:5189 / OWL:18109, synthetic fixtures, desktop and 390px",
+  "pages": [
+    {
+      "id": "draft",
+      "url": "/semantic/ontologies/:id/edit",
+      "inventoryComplete": true
+    },
+    {
+      "id": "published",
+      "url": "/semantic/ontologies/:id/versions",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "draft-edge-filter",
+      "page": "draft",
+      "name": "关联类型下拉",
+      "locator": "edge-filter",
+      "checks": [
+        "select-blur-reopen"
+      ]
+    },
+    {
+      "id": "draft-links",
+      "page": "draft",
+      "name": "对称关联列表及来源",
+      "locator": "links",
+      "checks": [
+        "select-inspect"
+      ]
+    },
+    {
+      "id": "draft-features",
+      "page": "draft",
+      "name": "属性特征检查器",
+      "locator": "features",
+      "checks": [
+        "select-reopen"
+      ]
+    },
+    {
+      "id": "draft-language",
+      "page": "draft",
+      "name": "显示语言",
+      "locator": "language",
+      "checks": [
+        "select-blur-reopen"
+      ]
+    },
+    {
+      "id": "draft-coverage",
+      "page": "draft",
+      "name": "逐公理覆盖与来源",
+      "locator": "coverage",
+      "checks": [
+        "expand-source-reopen"
+      ]
+    },
+    {
+      "id": "draft-failure",
+      "page": "draft",
+      "name": "投影失败和重试",
+      "locator": "failure",
+      "checks": [
+        "simulated-failure-retry"
+      ]
+    },
+    {
+      "id": "draft-truncation",
+      "page": "draft",
+      "name": "有界投影提示",
+      "locator": "truncation",
+      "checks": [
+        "reduced-limit"
+      ]
+    },
+    {
+      "id": "draft-narrow",
+      "page": "draft",
+      "name": "窄屏覆盖与筛选",
+      "locator": "narrow",
+      "checks": [
+        "390px"
+      ]
+    },
+    {
+      "id": "draft-readonly",
+      "page": "draft",
+      "name": "浏览不写入",
+      "locator": "readonly",
+      "checks": [
+        "snapshot-readback"
+      ]
+    },
+    {
+      "id": "published-edge-filter",
+      "page": "published",
+      "name": "关联类型下拉",
+      "locator": "edge-filter",
+      "checks": [
+        "select-blur-reopen"
+      ]
+    },
+    {
+      "id": "published-links",
+      "page": "published",
+      "name": "对称关联列表及来源",
+      "locator": "links",
+      "checks": [
+        "select-inspect"
+      ]
+    },
+    {
+      "id": "published-features",
+      "page": "published",
+      "name": "属性特征检查器",
+      "locator": "features",
+      "checks": [
+        "select-reopen"
+      ]
+    },
+    {
+      "id": "published-language",
+      "page": "published",
+      "name": "显示语言",
+      "locator": "language",
+      "checks": [
+        "select-blur-reopen"
+      ]
+    },
+    {
+      "id": "published-coverage",
+      "page": "published",
+      "name": "逐公理覆盖与来源",
+      "locator": "coverage",
+      "checks": [
+        "expand-source-reopen"
+      ]
+    },
+    {
+      "id": "published-failure",
+      "page": "published",
+      "name": "投影失败和重试",
+      "locator": "failure",
+      "checks": [
+        "simulated-failure-retry"
+      ]
+    },
+    {
+      "id": "published-truncation",
+      "page": "published",
+      "name": "有界投影提示",
+      "locator": "truncation",
+      "checks": [
+        "reduced-limit"
+      ]
+    },
+    {
+      "id": "published-narrow",
+      "page": "published",
+      "name": "窄屏覆盖与筛选",
+      "locator": "narrow",
+      "checks": [
+        "390px"
+      ]
+    },
+    {
+      "id": "published-readonly",
+      "page": "published",
+      "name": "浏览不写入",
+      "locator": "readonly",
+      "checks": [
+        "snapshot-readback"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "draft-edge-filter",
+      "check": "select-blur-reopen",
+      "steps": [
+        "依次选择等价、互斥、逆属性；Tab；重开；恢复全部"
+      ],
+      "expected": "选项可见且每类恰有代表边",
+      "status": "PASS",
+      "actual": "[\"等价\", \"互斥\", \"逆属性\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-links",
+      "check": "select-inspect",
+      "steps": [
+        "展开关联列表；键盘选择等价边；展开原公理；查看来源并清除"
+      ],
+      "expected": "对称关系显示，无虚构推导，来源精确命中",
+      "status": "PASS",
+      "actual": "EquivalentClasses(<urn:e2:Equipment> <urn:e2:Machine>)",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-features",
+      "check": "select-reopen",
+      "steps": [
+        "选择使用属性；查看函数特征；选其他节点再选回"
+      ],
+      "expected": "特征可见且解释不等于业务单值",
+      "status": "PASS",
+      "actual": "函数属性（OWL）",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-language",
+      "check": "select-blur-reopen",
+      "steps": [
+        "选择 en、Tab、再选 zh、Tab、恢复 zh-CN"
+      ],
+      "expected": "语言回显且类/个体分别显示",
+      "status": "PASS",
+      "actual": "same IRI in separate class/individual modes; language shared",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-coverage",
+      "check": "expand-source-reopen",
+      "steps": [
+        "展开覆盖、核对复杂规则与导入、展开后定位根公理来源、关闭重开"
+      ],
+      "expected": "部分覆盖与固定导入来源显式可见",
+      "status": "PASS",
+      "actual": "root references focus precisely; pinned references read-only; PARTIAL original available",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-failure",
+      "check": "simulated-failure-retry",
+      "steps": [
+        "模拟 GET 断网、刷新、查看原公理和高级文档、解除故障、点重试"
+      ],
+      "expected": "无旧图，错误可恢复；原文可达",
+      "status": "PASS",
+      "actual": "SIMULATED network abort; real endpoint retry passed",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-truncation",
+      "check": "reduced-limit",
+      "steps": [
+        "将读取预算降至 2、刷新、检查截断提示、恢复正常读取"
+      ],
+      "expected": "真实有界响应不会显示为完整本体",
+      "status": "PASS",
+      "actual": "SIMULATED request budget change; real server limit=2 response",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-narrow",
+      "check": "390px",
+      "steps": [
+        "390px 下选择逆属性、失焦、展开覆盖、返回桌面"
+      ],
+      "expected": "选项、来源及长 IRI 可见，无横向溢出",
+      "status": "PASS",
+      "actual": "{\"viewport\": 390, \"document\": 390}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "draft-readonly",
+      "check": "snapshot-readback",
+      "steps": [
+        "回读版本及文档摘要；检查发布版本无编辑入口"
+      ],
+      "expected": "只读浏览不产生写入或变更摘要",
+      "status": "PASS",
+      "actual": "{\"draftVersion\": 3, \"documentDigest\": \"4ff91e51c3e49454a1d6aa851acf43c67a0848c5eb8f4d6ba82820d049749420\", \"writes\": 0}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-edge-filter",
+      "check": "select-blur-reopen",
+      "steps": [
+        "依次选择等价、互斥、逆属性；Tab；重开；恢复全部"
+      ],
+      "expected": "选项可见且每类恰有代表边",
+      "status": "PASS",
+      "actual": "[\"等价\", \"互斥\", \"逆属性\"]",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-links",
+      "check": "select-inspect",
+      "steps": [
+        "展开关联列表；键盘选择等价边；展开原公理；查看来源并清除"
+      ],
+      "expected": "对称关系显示，无虚构推导，来源精确命中",
+      "status": "PASS",
+      "actual": "EquivalentClasses(<urn:e2:Equipment> <urn:e2:Machine>)",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-features",
+      "check": "select-reopen",
+      "steps": [
+        "选择使用属性；查看函数特征；选其他节点再选回"
+      ],
+      "expected": "特征可见且解释不等于业务单值",
+      "status": "PASS",
+      "actual": "函数属性（OWL）",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-language",
+      "check": "select-blur-reopen",
+      "steps": [
+        "选择 en、Tab、再选 zh、Tab、恢复 zh-CN"
+      ],
+      "expected": "语言回显且类/个体分别显示",
+      "status": "PASS",
+      "actual": "same IRI in separate class/individual modes; language shared",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-coverage",
+      "check": "expand-source-reopen",
+      "steps": [
+        "展开覆盖、核对复杂规则与导入、展开后定位根公理来源、关闭重开"
+      ],
+      "expected": "部分覆盖与固定导入来源显式可见",
+      "status": "PASS",
+      "actual": "root references focus precisely; pinned references read-only; PARTIAL original available",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-failure",
+      "check": "simulated-failure-retry",
+      "steps": [
+        "模拟 GET 断网、刷新、查看原公理和高级文档、解除故障、点重试"
+      ],
+      "expected": "无旧图，错误可恢复；原文可达",
+      "status": "PASS",
+      "actual": "SIMULATED network abort; real endpoint retry passed",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-truncation",
+      "check": "reduced-limit",
+      "steps": [
+        "将读取预算降至 2、刷新、检查截断提示、恢复正常读取"
+      ],
+      "expected": "真实有界响应不会显示为完整本体",
+      "status": "PASS",
+      "actual": "SIMULATED request budget change; real server limit=2 response",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-narrow",
+      "check": "390px",
+      "steps": [
+        "390px 下选择逆属性、失焦、展开覆盖、返回桌面"
+      ],
+      "expected": "选项、来源及长 IRI 可见，无横向溢出",
+      "status": "PASS",
+      "actual": "{\"viewport\": 390, \"document\": 390}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    },
+    {
+      "control": "published-readonly",
+      "check": "snapshot-readback",
+      "steps": [
+        "回读版本及文档摘要；检查发布版本无编辑入口"
+      ],
+      "expected": "只读浏览不产生写入或变更摘要",
+      "status": "PASS",
+      "actual": "{\"draftVersion\": 3, \"documentDigest\": \"4ff91e51c3e49454a1d6aa851acf43c67a0848c5eb8f4d6ba82820d049749420\", \"writes\": 0}",
+      "evidence": [
+        "results-final.json",
+        "readback.json"
+      ]
+    }
+  ]
+}

@@ -35,6 +35,9 @@ public interface OntologyDocumentPort {
 
     Map<String, List<String>> termKinds(ParsedOntologyDocument document);
 
+    /** Returns a bounded standard-OWL display projection of the document. */
+    OntologyDisplayProjection project(ParsedOntologyDocument document, int limit);
+
     ParsedOntologyDocument applyAxiomChanges(
             ParsedOntologyDocument document,
             List<OntologyAxiomChange> commands);
