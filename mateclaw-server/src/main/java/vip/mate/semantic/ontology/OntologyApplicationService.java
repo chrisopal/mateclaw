@@ -189,6 +189,36 @@ public class OntologyApplicationService {
                 row -> wire.modelEdits(row, request.operationId(), request.changes()));
     }
 
+    /** Applies a complete business batch and retains the exact item mapping on retry. */
+    @Transactional
+    public ModelCommandResult applyModelCommands(String scope, String id, ModelEditRequest request) {
+        access.require(scope, "member");
+        var parent = parent(scope, id, true);
+        validateOperation(request.operationId());
+        String requestHash = hash(wire.encode(request));
+        String kind = "APPLY_ONTOLOGY_MODEL_COMMANDS";
+        var previous = commands.find(parent.getWorkspaceId(), request.operationId());
+        if (previous != null) {
+            if (!kind.equals(previous.getKind()) || !id.equals(previous.getResourceId())
+                    || !requestHash.equals(previous.getPayloadHash()))
+                throw conflict("OPERATION_CONFLICT", "Operation id already used with different payload");
+            return wire.decode(previous.getResultJson(), ModelCommandResult.class);
+        }
+        var row = draft(parent);
+        cas(row, request.expectedDraftVersion());
+        var batch = wire.compileModelCommands(row, request.operationId(), request.changes());
+        wire.edit(row, batch.changes());
+        if (mapper.saveDraft(row, request.expectedDraftVersion()) != 1)
+            throw conflict("DRAFT_CONFLICT", "Draft has changed");
+        axiomIndex.synchronize(row);
+        row.setDraftVersion(Math.incrementExact(row.getDraftVersion()));
+        parent.setDraftCounter(row.getDraftVersion());
+        touch(parent);
+        var result = new ModelCommandResult(wire.draft(row), batch.items());
+        recordDraftCommand(parent, request.operationId(), kind, requestHash, result);
+        return result;
+    }
+
     private DraftView editDraft(
             String scope,
             String id,
@@ -238,7 +268,7 @@ public class OntologyApplicationService {
         wire.text(operationId, "operationId", 128, true, errors); wire.reject(errors);
     }
 
-    private void recordDraftCommand(OntologyRow parent, String operationId, String kind, String requestHash, DraftView result) {
+    private void recordDraftCommand(OntologyRow parent, String operationId, String kind, String requestHash, Object result) {
         var command = new CommandRecordRow();
         command.setId(id()); command.setWorkspaceId(parent.getWorkspaceId());
         command.setOperationId(operationId); command.setKind(kind); command.setResourceId(parent.getId());

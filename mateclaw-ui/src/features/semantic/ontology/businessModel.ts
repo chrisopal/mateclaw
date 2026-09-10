@@ -1,6 +1,8 @@
 import type { DisplayProjection } from './standardProjection'
 import { displayModel } from './standardProjection'
+/** References to CREATE_TERM client IDs use $clientId; IDs may point forward in the batch. */
 export interface ModelChange {
+  clientId?: string
   kind: 'CREATE_TERM' | 'REPLACE_DEFINITION' | 'REPLACE_RESTRICTION'
   termKind?: 'OBJECT' | 'RELATION' | 'ATTRIBUTE'
   targetId?: string
@@ -17,6 +19,8 @@ export interface ModelChange {
   originalAxiomId?: string
 }
 export interface ModelEdit { expectedDraftVersion: number; operationId: string; changes: ModelChange[] }
+export interface ModelItemResult { clientId: string | null; targetId: string; axiomIds: string[] }
+export interface ModelCommandResult<TDraft> { draft: TDraft; items: ModelItemResult[] }
 export function businessRuleLabel(projection: DisplayProjection | null | undefined, axiomId: string, language = 'zh-CN'): string {
   const zh = language.startsWith('zh')
   const model = displayModel(projection, language)

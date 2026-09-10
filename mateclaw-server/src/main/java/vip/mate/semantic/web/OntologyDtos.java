@@ -55,7 +55,19 @@ public final class OntologyDtos {
             String propertyId,
             String fillerId,
             Integer cardinality,
-            String originalAxiomId) {}
+            String originalAxiomId,
+            @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+            String clientId) {
+        public ModelEdit(String kind, String termKind, String targetId, String name, String domainId,
+                String rangeId, String field, String value, String language, String operator,
+                String propertyId, String fillerId, Integer cardinality, String originalAxiomId) {
+            this(kind, termKind, targetId, name, domainId, rangeId, field, value, language, operator,
+                    propertyId, fillerId, cardinality, originalAxiomId, null);
+        }
+    }
+
+    public record ModelItemResult(String clientId, String targetId, List<String> axiomIds) {}
+    public record ModelCommandResult(DraftView draft, List<ModelItemResult> items) {}
 
     public record ValidateDraft(Long expectedDraftVersion) {}
 

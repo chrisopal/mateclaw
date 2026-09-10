@@ -13,6 +13,7 @@ import java.util.*;
 
 @RestControllerAdvice(
         basePackageClasses = {OntologyController.class, SemanticStatusController.class,
+                vip.mate.semantic.authoring.OntologyModelingController.class,
                 vip.mate.semantic.ontology.source.OntologySourceController.class,
                 vip.mate.semantic.sourcechanges.SourceChangeController.class,
                 vip.mate.semantic.graph.migration.GraphMigrationController.class,

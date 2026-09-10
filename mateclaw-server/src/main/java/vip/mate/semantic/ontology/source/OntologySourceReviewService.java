@@ -75,6 +75,44 @@ public class OntologySourceReviewService {
         if(material==null)throw missing();
         return new MaterialView(knowledgeBaseId,sourceRef,material.title(),material.text(),material.digest());
     }
+    /** Null means a selected material was deleted; callers can persist a stale proposal without rollback. */
+    @Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public MaterialView materialViewForModeling(String scope,String ontologyId,String knowledgeBaseId,String sourceRef) {
+        access.require(scope,"viewer");parent(scope,ontologyId,false);
+        Material current;
+        try { current=material(scope,knowledgeBaseId,sourceRef,true); }
+        catch(SemanticApiException exception) {
+            if(exception.status()==422)return null;
+            throw exception;
+        }
+        if(current==null)return null;
+        return new MaterialView(knowledgeBaseId,sourceRef,current.title(),current.text(),current.digest());
+    }
+    /** Resolve against the current authorized source; acceptance must resolve again in its transaction. */
+    @Transactional
+    public ResolvedEvidence resolveEvidence(String scope,String ontologyId,String knowledgeBaseId,String sourceRef,
+            String expectedSourceDigest,String exactQuote,Integer occurrence) {
+        access.require(scope,"viewer");parent(scope,ontologyId,false);
+        var current=material(scope,knowledgeBaseId,sourceRef,true);
+        if(current==null)throw missing();
+        if(!current.digest().equals(expectedSourceDigest))throw conflict("SOURCE_CHANGED");
+        if(exactQuote==null||exactQuote.isBlank()||exactQuote.length()>100000)throw bad("Nonempty exact quote required");
+        List<Integer> matches=new ArrayList<>();
+        for(int offset=0;offset<current.text().length();) {
+            int found=current.text().indexOf(exactQuote,offset);
+            if(found<0)break;
+            matches.add(found);
+            offset=found+Character.charCount(current.text().codePointAt(found));
+        }
+        if(matches.isEmpty())throw bad("Exact quote is absent from the selected source version");
+        if(occurrence==null&&matches.size()!=1)
+            throw new SemanticApiException(422,"AMBIGUOUS_EVIDENCE","Quote occurs more than once; select an explicit occurrence");
+        int selected=occurrence==null?1:occurrence;
+        if(selected<1||selected>matches.size())throw bad("Quote occurrence is out of range");
+        int start=current.text().codePointCount(0,matches.get(selected-1));
+        return new ResolvedEvidence(knowledgeBaseId,sourceRef,current.digest(),exactQuote,start,
+                start+exactQuote.codePointCount(0,exactQuote.length()),selected,matches.size());
+    }
     /** Lock source rows through the migration commit, including a current read under MySQL RR. */
     @Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY)
     public List<Binding> bindingsForMigration(String scope,String ontologyId,String revisionId) {

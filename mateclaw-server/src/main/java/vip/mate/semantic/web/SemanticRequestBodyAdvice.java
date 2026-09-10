@@ -16,6 +16,7 @@ import java.util.*;
 
 /** Local JSON boundary: do not let Jackson coerce numbers into names, enums or CAS tokens. */
 @ControllerAdvice(assignableTypes = {OntologyController.class,OntologyImpactController.class,
+        vip.mate.semantic.authoring.OntologyModelingController.class,
         vip.mate.semantic.ontology.source.OntologySourceController.class,
         vip.mate.semantic.sourcechanges.SourceChangeController.class,
         vip.mate.semantic.graph.migration.GraphMigrationController.class})
@@ -35,6 +36,7 @@ public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
             Class<? extends HttpMessageConverter<?>> converterType) {
         return targetType instanceof Class<?> type
                 && (type.getEnclosingClass() == OntologyDtos.class || type.getEnclosingClass() == OntologyImpactDtos.class
+                || type.getEnclosingClass()==vip.mate.semantic.authoring.OntologyModelingDtos.class
                 || type.getEnclosingClass()==vip.mate.semantic.ontology.source.OntologySourceDtos.class
                 || type.getEnclosingClass()==vip.mate.semantic.sourcechanges.SourceChangeDtos.class
                 || type.getEnclosingClass()==vip.mate.semantic.graph.migration.GraphMigrationDtos.class);
@@ -71,6 +73,17 @@ public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     private void verify(JsonNode node, Type expected, String path) {
         if (node == null || node.isNull()) return;
+        if (expected == JsonNode.class) return; // Isolated example payloads are intentionally untyped JSON.
+        if (expected instanceof ParameterizedType map && map.getRawType() == Map.class
+                && map.getActualTypeArguments()[0] == String.class) {
+            if (!node.isObject()) throw invalid(path);
+            var fields=node.fields();
+            while(fields.hasNext()) {
+                var field=fields.next();
+                verify(field.getValue(),map.getActualTypeArguments()[1],path+"."+field.getKey());
+            }
+            return;
+        }
         if (expected instanceof ParameterizedType optional && optional.getRawType() == Optional.class) {
             verify(node,optional.getActualTypeArguments()[0],path); return;
         }

@@ -18,4 +18,9 @@ public final class OntologySourceDtos {
     public record Snapshot(String id,String knowledgeBaseId,String sourceRef,String sourceTitle,String sourceText,String sourceDigest,Instant capturedAt) {}
     /** Material returned to the business-facing source picker; ids stay internal to the binding request. */
     public record MaterialView(String knowledgeBaseId,String sourceRef,String sourceTitle,String sourceText,String sourceDigest) {}
+    /** occurrence is one-based and required when the quote appears more than once. */
+    public record ResolveEvidenceRequest(String knowledgeBaseId,String sourceRef,String expectedSourceDigest,
+        String exactQuote,Integer occurrence) {}
+    public record ResolvedEvidence(String knowledgeBaseId,String sourceRef,String sourceDigest,
+        String exactQuote,int startCodePoint,int endCodePoint,int occurrence,int occurrences) {}
 }

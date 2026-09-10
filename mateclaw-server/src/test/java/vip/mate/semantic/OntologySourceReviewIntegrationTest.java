@@ -29,6 +29,30 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         return Map.of("expectedDraftVersion",version,"operationId",operation,"axiomId",axiom,"knowledgeBaseId",f.kb(),"sourceRef",f.raw(),
             "expectedSourceDigest",OntologyDocument.sha256(f.text()),"startCodePoint",2,"endCodePoint",3,"exactQuote","😀","origin","EXTRACTED");
     }
+    @Test void resolvesEvidenceOnServerAndRequiresExplicitRepeatedOccurrence() throws Exception {
+        var f=fixture();String text="😀设备定义。😀设备定义。";
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",text,Long.valueOf(f.raw()));
+        var body=new HashMap<String,Object>();
+        body.put("knowledgeBaseId",f.kb());body.put("sourceRef",f.raw());
+        body.put("expectedSourceDigest",OntologyDocument.sha256(text));body.put("exactQuote","😀设备");
+        String path="/ontologies/"+f.ontology()+"/source-evidence/resolve";
+        call("POST",path,"member",workspace,body,422);
+        body.put("occurrence",2);
+        var resolved=call("POST",path,"member",workspace,body,200);
+        assertEquals(6,resolved.path("startCodePoint").asInt());
+        assertEquals(9,resolved.path("endCodePoint").asInt());
+        assertEquals(2,resolved.path("occurrences").asInt());
+        call("POST",path,"owner",otherWorkspace,body,404);
+        body.remove("occurrence");body.put("exactQuote","定义。😀");
+        var unique=call("POST",path,"viewer",workspace,body,200);
+        assertEquals(3,unique.path("startCodePoint").asInt());
+        assertEquals(7,unique.path("endCodePoint").asInt());
+        body.put("exactQuote","😀设备");
+        body.put("occurrence",3);call("POST",path,"member",workspace,body,422);
+        body.put("occurrence",1);body.put("expectedSourceDigest",OntologyDocument.sha256("old"));
+        call("POST",path,"member",workspace,body,409);
+        assertEquals(2,call("GET","/ontologies/"+f.ontology()+"/draft","viewer",workspace,null,200).path("draftVersion").asLong());
+    }
     @Test void bindsExactSharedSnapshotAndCopiesWithoutLosingPublishedHistory() throws Exception {
         var f=fixture();var request=bind(f,2,f.axioms().get(0),UUID.randomUUID().toString());
         var first=call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,request,200);

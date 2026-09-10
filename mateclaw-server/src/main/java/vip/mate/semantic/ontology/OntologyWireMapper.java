@@ -112,6 +112,12 @@ public class OntologyWireMapper {
      * only after validating and escaping every user supplied value.
      */
     public List<AxiomEdit> modelEdits(OntologyRevisionRow row, String operationId, List<ModelEdit> edits) {
+        return compileModelCommands(row, operationId, edits).changes();
+    }
+
+    public record ModelCommandBatch(List<AxiomEdit> changes, List<ModelItemResult> items) {}
+
+    public ModelCommandBatch compileModelCommands(OntologyRevisionRow row, String operationId, List<ModelEdit> edits) {
         if (edits == null || edits.isEmpty() || edits.size() > 1000)
             throw new SemanticApiException(422, "INVALID_MODEL_EDIT", "One to 1000 model edits required");
         if (operationId == null || operationId.isBlank() || operationId.length() > 128)
@@ -121,19 +127,66 @@ public class OntologyWireMapper {
         Map<String, List<String>> termKinds = documents.termKinds(parsed);
         List<OntologyAxiomDescriptor> axioms = parsed.axioms();
         Map<String, String> generatedKinds = new HashMap<>();
-        List<AxiomEdit> result = new ArrayList<>();
+        Map<String, String> references = new HashMap<>();
+        Set<String> clientIds = new java.util.HashSet<>();
         for (int index = 0; index < edits.size(); index++) {
             ModelEdit edit = edits.get(index);
-            if (edit == null || edit.kind() == null)
-                throw invalidModel("Edit kind required");
+            if (edit == null || edit.kind() == null) throw invalidModel("Edit kind required");
+            if (edit.clientId() != null && (!edit.clientId().matches("[A-Za-z0-9_-]{1,128}")
+                    || !clientIds.add(edit.clientId()))) throw invalidModel("Invalid or duplicate clientId");
+            if ("CREATE_TERM".equals(edit.kind())) {
+                String target = generatedTermIri(row, operationId, index);
+                generatedKinds.put(target, requiredChoice(edit.termKind(), Set.of("OBJECT", "RELATION", "ATTRIBUTE"), "termKind"));
+                if (edit.clientId() != null) references.put(edit.clientId(), target);
+            }
+        }
+        List<AxiomEdit> result = new ArrayList<>();
+        List<ModelItemResult> items = new ArrayList<>();
+        long editBytes = 0;
+        for (int index = 0; index < edits.size(); index++) {
+            ModelEdit edit = resolveModelEdit(edits.get(index), references);
+            int start = result.size();
             switch (edit.kind()) {
                 case "CREATE_TERM" -> createTerm(row, operationId, index, edit, result, termKinds, generatedKinds);
                 case "REPLACE_DEFINITION" -> replaceDefinition(edit, termKinds, generatedKinds, axioms, result);
                 case "REPLACE_RESTRICTION" -> replaceRestriction(edit, termKinds, generatedKinds, axioms, result);
                 default -> throw invalidModel("Unsupported model edit kind");
             }
+            // Parse only the item's additions to obtain the adapter's canonical axiom IDs.
+            String additions = result.subList(start, result.size()).stream()
+                    .filter(change -> "ADD".equals(change.kind())).map(AxiomEdit::functionalSyntax)
+                    .collect(java.util.stream.Collectors.joining("\n"));
+            editBytes += additions.getBytes(StandardCharsets.UTF_8).length;
+            if (editBytes > MAX_DOCUMENT_BYTES)
+                throw new SemanticApiException(413, "DOCUMENT_TOO_LARGE", "Model edits exceed document budget");
+            ParsedOntologyDocument itemDocument;
+            try {
+                itemDocument = documents.parse(row.getOntologyId(), row.getId(),
+                        "Ontology(" + additions + ")", OntologyDocumentSyntax.FUNCTIONAL, List.of());
+            } catch (OntologyDocumentException | IllegalArgumentException exception) {
+                throw invalidModel(exception.getMessage());
+            }
+            items.add(new ModelItemResult(edit.clientId(), "CREATE_TERM".equals(edit.kind())
+                    ? generatedTermIri(row, operationId, index) : edit.targetId(),
+                    itemDocument.axioms().stream().map(OntologyAxiomDescriptor::axiomId).sorted().toList()));
         }
-        return List.copyOf(result);
+        return new ModelCommandBatch(List.copyOf(result), List.copyOf(items));
+    }
+
+    private static ModelEdit resolveModelEdit(ModelEdit edit, Map<String, String> references) {
+        String value = Set.of("PARENT", "DOMAIN", "RANGE").contains(edit.field() == null ? "" : edit.field().toUpperCase(Locale.ROOT))
+                ? resolveReference(edit.value(), references) : edit.value();
+        return new ModelEdit(edit.kind(), edit.termKind(), resolveReference(edit.targetId(), references),
+                edit.name(), resolveReference(edit.domainId(), references), resolveReference(edit.rangeId(), references),
+                edit.field(), value, edit.language(), edit.operator(), resolveReference(edit.propertyId(), references),
+                resolveReference(edit.fillerId(), references), edit.cardinality(), edit.originalAxiomId(), edit.clientId());
+    }
+
+    private static String resolveReference(String value, Map<String, String> references) {
+        if (value == null || !value.startsWith("$")) return value;
+        String target = references.get(value.substring(1));
+        if (target == null) throw invalidModel("Unknown temporary reference: " + value);
+        return target;
     }
 
     private void createTerm(
@@ -166,6 +219,7 @@ public class OntologyWireMapper {
                 requireClass(range, termKinds, generatedKinds, "rangeId");
             } else {
                 requireClass(domain, termKinds, generatedKinds, "domainId");
+                requireDatatype(range, termKinds, generatedKinds);
             }
             String property = iri(iri);
             result.add(new AxiomEdit("ADD", null,
@@ -205,6 +259,8 @@ public class OntologyWireMapper {
                                 ? edit.rangeId() : edit.value(),
                         "value");
                 boolean object = propertyKind.equals("RELATION");
+                if (object || field.equals("DOMAIN")) requireClass(value, termKinds, generatedKinds, "value");
+                else requireDatatype(value, termKinds, generatedKinds);
                 syntax = field.equals("DOMAIN")
                         ? (object ? "ObjectPropertyDomain(" : "DataPropertyDomain(") + iri(target) + " " + iri(value) + ")"
                         : (object ? "ObjectPropertyRange(" : "DataPropertyRange(") + iri(target) + " " + iri(value) + ")";
@@ -306,6 +362,13 @@ public class OntologyWireMapper {
         if (requested.equals("RELATION") && kinds.contains("ObjectProperty")) return requested;
         if (requested.equals("ATTRIBUTE") && kinds.contains("DataProperty")) return requested;
         throw invalidModel("targetId is not a declared property");
+    }
+
+    private static void requireDatatype(String value, Map<String, List<String>> termKinds,
+            Map<String, String> generatedKinds) {
+        if (generatedKinds.containsKey(value) || termKinds.getOrDefault(value, List.of()).stream()
+                .anyMatch(kind -> !"Datatype".equals(kind)))
+            throw invalidModel("rangeId is not a datatype");
     }
 
     private static void requireClass(

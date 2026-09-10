@@ -13,6 +13,12 @@ import static vip.mate.semantic.ontology.source.OntologySourceDtos.*;
 public class OntologySourceController {
     private final OntologySourceReviewService service;
     public OntologySourceController(OntologySourceReviewService service){this.service=service;}
+    @PostMapping("/source-evidence/resolve") @RequireWorkspaceRole("viewer")
+    public R<ResolvedEvidence> resolve(@RequestHeader(value="X-Workspace-Id",required=false)String scope,
+            @PathVariable String ontologyId,@RequestBody ResolveEvidenceRequest request){
+        return R.ok(service.resolveEvidence(scope,ontologyId,request.knowledgeBaseId(),request.sourceRef(),
+                request.expectedSourceDigest(),request.exactQuote(),request.occurrence()));
+    }
     @PostMapping("/draft/axiom-sources") @RequireWorkspaceRole("member")
     public R<Bound> bind(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,@RequestBody BindRequest request){return R.ok(service.bind(scope,ontologyId,request));}
     @GetMapping("/revisions/{revisionId}/axiom-sources") @RequireWorkspaceRole("viewer")
