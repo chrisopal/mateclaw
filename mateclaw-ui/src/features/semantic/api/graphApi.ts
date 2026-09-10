@@ -16,7 +16,7 @@ export const graphApi = {
   createEntity: (
     workspaceId: string,
     graphId: string,
-    body: Pick<SemanticEntity, 'typeKey' | 'displayName'>,
+    body: Pick<SemanticEntity, 'iri' | 'assertedTypes' | 'displayName'>,
     signal?: AbortSignal,
   ) => semanticRequest<SemanticEntity>(workspaceId, { url: `${graphPath(graphId)}/entities`, method: 'POST', data: body }, signal),
 }

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "SEM-01",
+    "file": "fixtures/open-world.ofn",
+    "expected": "CONSISTENT; 不要求已知 :p 目标；不能声称不存在目标",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-02",
+    "file": "fixtures/functional-identity.ofn",
+    "expected": "CONSISTENT; entails SameIndividual(:b :c); 不合并业务 EntityId",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-02-N",
+    "file": "fixtures/functional-distinct.ofn",
+    "expected": "INCONSISTENT",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-03",
+    "file": "fixtures/disjoint.ofn",
+    "expected": "INCONSISTENT",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-03-N",
+    "file": "fixtures/empty-class.ofn",
+    "expected": "CONSISTENT; :C UNSATISFIABLE; 不等于全本体不一致",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-04",
+    "file": "fixtures/data-conflict.ofn",
+    "expected": "INCONSISTENT",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-04-N",
+    "file": "fixtures/equal-data-values.ofn",
+    "expected": "CONSISTENT; 词法不同但值相等",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-05",
+    "file": "fixtures/domain-chain.ofn",
+    "expected": "CONSISTENT; entails ClassAssertion(:A :a), ObjectPropertyAssertion(:r :a :c); 不声称物理因果",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-06",
+    "file": "fixtures/non-simple-cardinality.ofn",
+    "expected": "OUTSIDE_OWL2_DL; 在 profile 阶段拒绝发布",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-07",
+    "file": "fixtures/invalid-literal.ofn",
+    "expected": "INVALID_LITERAL; 解析/词法验证报错，不字符串化",
+    "semantic_execution": "NOT_RUN"
+  },
+  {
+    "id": "SEM-08",
+    "file": "fixtures/negative-assertion.ofn",
+    "expected": "INCONSISTENT; 导入本身不生成 ACCEPTED_FACT",
+    "semantic_execution": "NOT_RUN"
+  }
+]

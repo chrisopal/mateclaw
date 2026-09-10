@@ -72,6 +72,37 @@ public class OntologyController {
         return R.ok(service.saveDraft(scope, id, body));
     }
 
+    @PatchMapping("/ontologies/{id}/draft/axioms")
+    @RequireWorkspaceRole("member")
+    public R<DraftView> edit(@RequestHeader(value="X-Workspace-Id", required=false) String scope,
+                             @PathVariable String id, @RequestBody EditDraft body) {
+        return R.ok(service.editDraft(scope, id, body));
+    }
+
+    @GetMapping("/ontologies/{id}/draft/document")
+    @RequireWorkspaceRole("viewer")
+    public org.springframework.http.ResponseEntity<byte[]> draftDocument(
+            @RequestHeader(value="X-Workspace-Id", required=false) String scope,
+            @PathVariable String id, @RequestParam Long expectedDraftVersion,
+            @RequestParam(defaultValue="RDF_XML") vip.mate.semantic.core.ontology.OntologyDocumentSyntax syntax) {
+        return org.springframework.http.ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=ontology." + (syntax == vip.mate.semantic.core.ontology.OntologyDocumentSyntax.RDF_XML ? "rdf" : "ofn"))
+                .contentType(org.springframework.http.MediaType.parseMediaType(syntax == vip.mate.semantic.core.ontology.OntologyDocumentSyntax.RDF_XML ? "application/rdf+xml" : "text/plain;charset=UTF-8"))
+                .body(service.exportDraftDocument(scope, id, expectedDraftVersion, syntax));
+    }
+
+    @GetMapping("/ontologies/{id}/revisions/{revisionId}/document")
+    @RequireWorkspaceRole("viewer")
+    public org.springframework.http.ResponseEntity<byte[]> document(
+            @RequestHeader(value="X-Workspace-Id", required=false) String scope,
+            @PathVariable String id, @PathVariable String revisionId,
+            @RequestParam(defaultValue="RDF_XML") vip.mate.semantic.core.ontology.OntologyDocumentSyntax syntax) {
+        return org.springframework.http.ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=ontology." + (syntax == vip.mate.semantic.core.ontology.OntologyDocumentSyntax.RDF_XML ? "rdf" : "ofn"))
+                .contentType(org.springframework.http.MediaType.parseMediaType(syntax == vip.mate.semantic.core.ontology.OntologyDocumentSyntax.RDF_XML ? "application/rdf+xml" : "text/plain;charset=UTF-8"))
+                .body(service.exportDocument(scope, id, revisionId, syntax));
+    }
+
     @DeleteMapping("/ontologies/{id}/draft")
     @RequireWorkspaceRole("member")
     public R<Void> discard(

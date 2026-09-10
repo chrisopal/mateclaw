@@ -14,13 +14,13 @@ public final class OntologyPackageDtos {
             String name,
             String description,
             Source source,
-            OntologyDtos.Definition definition) {}
+            OntologyDtos.DocumentInput document) {}
 
     public record Preview(
             String digest,
             String name,
-            int typeCount,
-            int predicateCount,
+            int axiomCount,
+            int importCount,
             List<OntologyDtos.Violation> violations) {}
 
     public record ImportRequest(

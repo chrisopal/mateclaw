@@ -1,32 +1,100 @@
 package vip.mate.semantic.extraction;
 
-import java.util.*;
-import vip.mate.semantic.core.fact.*;
-import vip.mate.semantic.core.identity.SemanticIds.EntityId;
 import static vip.mate.semantic.application.extraction.ExtractionContracts.*;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import vip.mate.semantic.core.fact.AssertionPayload;
+import vip.mate.semantic.core.fact.Entity;
+import vip.mate.semantic.core.fact.StatementContent;
+import vip.mate.semantic.core.fact.Validity;
+import vip.mate.semantic.core.identity.SemanticIds.EntityId;
+import vip.mate.semantic.owl.OwlAssertionAdapter;
+
 final class ExtractionMapping {
-    static RawSuggestion raw(ExtractionDtos.EditRequest e){
-        if(!Set.of("PROPERTY","RELATION").contains(e.predicateKind())||!Set.of("UNKNOWN","INTERVAL").contains(e.validityKind())||(e.status()!=null&&!Set.of("OPEN","IGNORED").contains(e.status())))throw new IllegalArgumentException("Invalid suggestion enum");
-        if("UNKNOWN".equals(e.validityKind())&&(e.validFrom()!=null||e.validTo()!=null))throw new IllegalArgumentException("Unknown time cannot have endpoints");
-        if(!"DECIMAL".equals(e.valueType())&&e.unit()!=null)throw new IllegalArgumentException("Unit only belongs to numeric values");
-        StatementValue value="ENTITY".equals(e.valueType())?null:value(e.valueType(),e.value(),e.unit());
-        return new RawSuggestion(new ObjectMention("subject",e.subjectTypeKey(),e.subjectName()),
-            "PROPERTY".equals(e.predicateKind())?PredicateRef.property(e.predicateKey()):PredicateRef.relation(e.predicateKey()),value,
-            "ENTITY".equals(e.valueType())?new ObjectMention("target",e.targetTypeKey(),e.targetName()):null,
-            "UNKNOWN".equals(e.validityKind())?Validity.unknown():Validity.interval(e.validFrom(),e.validTo()),
-            e.quotes()==null?List.of():e.quotes().stream().map(q->new Quote(q.startCodePoint(),q.endCodePoint(),q.exactQuote())).toList());
+    private ExtractionMapping() {}
+
+    static RawSuggestion raw(ExtractionDtos.EditRequest edit, OwlAssertionAdapter assertions) {
+        Objects.requireNonNull(edit, "edit");
+        Objects.requireNonNull(assertions, "assertions");
+        if (!Set.of("UNKNOWN", "INTERVAL").contains(edit.validityKind())
+                || (edit.status() != null && !Set.of("OPEN", "IGNORED").contains(edit.status()))) {
+            throw new IllegalArgumentException("invalid suggestion enum");
+        }
+        if ("UNKNOWN".equals(edit.validityKind())
+                && (edit.validFrom() != null || edit.validTo() != null)) {
+            throw new IllegalArgumentException("unknown time cannot have endpoints");
+        }
+        ObjectMention subject = mention("subject", edit.subjectIri(), edit.subjectTypeIris(), edit.subjectName());
+        AssertionPayload assertion = assertions.parse(edit.assertionText());
+        if (!assertion.subjectIri().filter(subject.temporaryRef()::equals).isPresent()) {
+            throw new IllegalArgumentException("assertion subject does not match subjectIri");
+        }
+
+        Optional<String> targetIri = assertion.objectIri().or(() -> assertion.relatedIndividualIri());
+        ObjectMention target = null;
+        if (targetIri.isPresent()) {
+            if (edit.targetIri() == null || !targetIri.get().equals(edit.targetIri())) {
+                throw new IllegalArgumentException("assertion target does not match targetIri");
+            }
+            target = mention("target", edit.targetIri(), edit.targetTypeIris(), edit.targetName());
+        } else if (edit.targetIri() != null || edit.targetEntityId() != null
+                || (edit.targetTypeIris() != null && !edit.targetTypeIris().isEmpty())
+                || edit.targetName() != null) {
+            throw new IllegalArgumentException("target mention is not allowed for this assertion");
+        }
+        Validity validity = "UNKNOWN".equals(edit.validityKind())
+                ? Validity.unknown() : Validity.interval(edit.validFrom(), edit.validTo());
+        List<Quote> quotes = edit.quotes() == null ? List.of() : edit.quotes().stream()
+                .map(q -> new Quote(q.startCodePoint(), q.endCodePoint(), q.exactQuote())).toList();
+        return new RawSuggestion(subject, assertion, target, validity, quotes);
     }
-    static StatementValue value(String type,String value,String unit){return switch(type){
-        case "TEXT"->new StatementValue.TextValue(value);case "DECIMAL"->new StatementValue.DecimalValue(value,unit);
-        case "BOOLEAN"->{if(!"true".equals(value)&&!"false".equals(value))throw new IllegalArgumentException("Boolean required");yield new StatementValue.BooleanValue(Boolean.parseBoolean(value));}
-        case "DATE"->new StatementValue.DateValue(value);case "INSTANT"->new StatementValue.InstantValue(value);
-        default->throw new IllegalArgumentException("Unsupported value type");};}
-    static String type(StatementValue v){return switch(v){case StatementValue.TextValue x->"TEXT";case StatementValue.DecimalValue x->"DECIMAL";case StatementValue.BooleanValue x->"BOOLEAN";case StatementValue.DateValue x->"DATE";case StatementValue.InstantValue x->"INSTANT";case StatementValue.EntityValue x->"ENTITY";case null->"ENTITY";};}
-    static String value(StatementValue v){return switch(v){case StatementValue.TextValue x->x.value();case StatementValue.DecimalValue x->x.value().toPlainString();case StatementValue.BooleanValue x->Boolean.toString(x.value());case StatementValue.DateValue x->x.value().toString();case StatementValue.InstantValue x->x.value().toString();case StatementValue.EntityValue x->null;case null->null;};}
-    static String unit(StatementValue v){return v instanceof StatementValue.DecimalValue d?d.unit():null;}
-    static ExtractionDtos.SuggestionView view(Suggestion s,Receipt receipt){return view(s,receipt,null);}
-    static ExtractionDtos.SuggestionView view(Suggestion s,Receipt receipt,String pending){RawSuggestion r=s.content();StatementContent c=s.mappedContent();
-        return new ExtractionDtos.SuggestionView(s.suggestionId(),s.editVersion(),s.status().name(),r.subject().typeKey(),r.subject().name(),c==null?null:c.subjectId().value(),r.predicate() instanceof PredicateRef.PropertyRef?"PROPERTY":"RELATION",r.predicate().key(),type(r.value()),value(r.value()),unit(r.value()),r.target()==null?null:r.target().typeKey(),r.target()==null?null:r.target().name(),c!=null&&c.value() instanceof StatementValue.EntityValue e?e.entityId().value():null,r.validity().kind().name(),r.validity().fromInclusive(),r.validity().toExclusive(),r.quotes().stream().map(q->new ExtractionDtos.Quote(q.startCodePoint(),q.endCodePoint(),q.exactQuote())).toList(),s.diagnostics().stream().map(v->v.code()).toList(),receipt==null?null:receipt.submission().statementId(),pending);
+
+    static ExtractionDtos.SuggestionView view(Suggestion suggestion, Receipt receipt) {
+        return view(suggestion, receipt, null, Map.of());
+    }
+
+    static ExtractionDtos.SuggestionView view(Suggestion suggestion, Receipt receipt, String pending,
+            Map<EntityId, Entity> entities) {
+        RawSuggestion raw = suggestion.content();
+        StatementContent mapped = suggestion.mappedContent();
+        AssertionPayload assertion = raw.assertion();
+        String targetIri = assertion.objectIri().or(() -> assertion.relatedIndividualIri()).orElse(null);
+        ObjectMention target = raw.target();
+        String targetEntityId = targetIri == null ? null : entities.entrySet().stream()
+                .filter(entry -> targetIri.equals(entry.getValue().iri()))
+                .map(entry -> entry.getKey().value()).findFirst().orElse(null);
+        return new ExtractionDtos.SuggestionView(
+                suggestion.suggestionId(), suggestion.editVersion(), suggestion.status().name(),
+                raw.subject().temporaryRef(), raw.subject().typeIris(), raw.subject().name(),
+                mapped == null ? null : mapped.subjectId().value(), assertion.functionalSyntax(),
+                target == null ? null : target.temporaryRef(),
+                target == null ? Set.of() : target.typeIris(), target == null ? null : target.name(), targetEntityId,
+                raw.validity().kind().name(), raw.validity().fromInclusive(), raw.validity().toExclusive(),
+                raw.quotes().stream().map(q -> new ExtractionDtos.Quote(
+                        q.startCodePoint(), q.endCodePoint(), q.exactQuote())).toList(),
+                suggestion.diagnostics().stream().map(v -> v.code()).toList(),
+                receipt == null ? null : receipt.submission().statementId(), pending);
+    }
+
+    private static ObjectMention mention(String temporaryRef, String iri, Set<String> typeIris, String name) {
+        if (iri == null || iri.isBlank() || !URI.create(iri).isAbsolute()) {
+            throw new IllegalArgumentException(temporaryRef + " IRI must be absolute");
+        }
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(temporaryRef + " name is required");
+        }
+        Set<String> types = typeIris == null ? Set.of() : Set.copyOf(typeIris);
+        for (String type : types) {
+            if (type == null || type.isBlank() || !URI.create(type).isAbsolute()) {
+                throw new IllegalArgumentException("type IRIs must be absolute");
+            }
+        }
+        return new ObjectMention(iri, types, name);
     }
 }

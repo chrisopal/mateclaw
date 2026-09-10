@@ -1,5 +1,5 @@
-import { beforeEach, expect, it, vi } from 'vitest'
-import { createApp, h, nextTick, ref } from 'vue'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { createApp, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import zh from '@/i18n/locales/zh-CN'
@@ -7,68 +7,59 @@ import type { GraphResult } from '../../api/workbenchTypes'
 import SemanticGraphView from '../SemanticGraphView.vue'
 
 const chart = vi.hoisted(() => ({ setOption: vi.fn(), on: vi.fn(), resize: vi.fn(), dispose: vi.fn() }))
-const lifecycle = vi.hoisted(() => ({ init: vi.fn(), resized: null as null | (() => void) }))
+const lifecycle = vi.hoisted(() => ({ init: vi.fn() }))
 vi.mock('echarts/core', () => ({ use: vi.fn(), init: lifecycle.init }))
-vi.stubGlobal('ResizeObserver', class {
-  constructor(callback: () => void) { lifecycle.resized = callback }
-  observe() {}
-  disconnect() {}
-})
-beforeEach(() => { vi.clearAllMocks(); lifecycle.init.mockReturnValue(chart) })
-
-it('offers named entity exploration and revision-specific evidence through real buttons', async () => {
-  const host = document.createElement('div')
-  document.body.append(host)
-  const selectEntity = vi.fn(), selectStatement = vi.fn()
-  const app = createApp(SemanticGraphView, {
-    definition: { types: [], properties: [], relations: [{ key: 'causedBy', label: '根因', description: '', sourceTypeKey: 'QualityIssue', targetTypeKey: 'RootCause', multiplicity: 'MULTI' }] },
-    result: { nodes: [{ id: 'issue', label: '批次裂纹', typeKey: 'QualityIssue', properties: [] }, { id: 'cause', label: '冷却不足', typeKey: 'RootCause', properties: [] }], edges: [{ statementId: 'fact', revision: 3, sourceId: 'issue', targetId: 'cause', predicateKey: 'causedBy' }], traceId: '', truncated: false },
-    onSelectEntity: selectEntity,
-    onSelectStatement: selectStatement,
+let width = 800, height = 360
+let notifyResize: () => void
+const disconnect = vi.fn()
+beforeEach(() => {
+  vi.clearAllMocks(); lifecycle.init.mockReturnValue(chart); width = 800; height = 360
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(() => width)
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => height)
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(private callback: () => void) {}
+    observe(target: Element) { if (target.classList.contains('semantic-chart')) notifyResize = this.callback }
+    disconnect = disconnect
   })
+})
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); document.body.innerHTML = '' })
+
+it('renders positive IRI relations and exposes entity and assertion controls', async () => {
+  const host = document.createElement('div'); document.body.append(host); const selectEntity = vi.fn(), selectStatement = vi.fn()
+  const result: GraphResult = { nodes: [{ id: 'issue', iri: 'https://example.test/issue/1', assertedTypes: ['https://example.test/QualityIssue'], label: '批次裂纹', properties: [] }, { id: 'cause', iri: 'https://example.test/cause/1', assertedTypes: ['https://example.test/RootCause'], label: '冷却不足', properties: [] }], edges: [{ statementId: 'fact', revision: 3, sourceId: 'issue', targetId: 'cause', predicateIri: 'https://example.test/causedBy' }], traceId: '', truncated: false }
+  const app = createApp(SemanticGraphView, { result, onSelectEntity: selectEntity, onSelectStatement: selectStatement }); app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': zh } })).mount(host); await nextTick()
+  try {
+    const button = [...host.querySelectorAll('button')].find(item => item.textContent?.includes('冷却不足'))!; button.click(); expect(selectEntity).toHaveBeenCalledWith('cause')
+    const edge = [...host.querySelectorAll('button')].find(item => item.textContent?.includes('https://example.test/causedBy'))!; edge.click(); expect(selectStatement).toHaveBeenCalledWith({ statementId: 'fact', revision: 3 })
+    expect(chart.setOption).toHaveBeenCalledWith(expect.objectContaining({ series: expect.arrayContaining([expect.objectContaining({ links: [expect.objectContaining({ value: 'https://example.test/causedBy' })] })]) }))
+  } finally { app.unmount(); host.remove() }
+})
+
+it('keeps the read-only graph empty when there are no asserted relations', async () => {
+  const host = document.createElement('div'); document.body.append(host); const result: GraphResult = { nodes: [], edges: [], traceId: '', truncated: false }
+  const app = createApp(SemanticGraphView, { result }); app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': zh } })).mount(host); await nextTick()
+  expect(host.textContent).toContain('暂时没有已确认的关联关系'); expect(host.querySelector('details')).toBeNull(); expect(lifecycle.init).not.toHaveBeenCalled(); app.unmount(); host.remove()
+})
+
+it('defers a hidden graph until it has dimensions and releases its observer on unmount', async () => {
+  height = 0
+  const host = document.createElement('div'); document.body.append(host)
+  const result: GraphResult = { nodes: [
+    { id: 'a', iri: 'urn:test:a', assertedTypes: [], label: 'A', properties: [] },
+    { id: 'b', iri: 'urn:test:b', assertedTypes: [], label: 'B', properties: [] }
+  ], edges: [{ statementId: 'f', revision: 1, sourceId: 'a', targetId: 'b', predicateIri: 'urn:test:relates' }], traceId: '', truncated: false }
+  const app = createApp(SemanticGraphView, { result })
   app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': zh } })).mount(host)
   await nextTick()
-  try {
-    const buttons = [...host.querySelectorAll('button')]
-    buttons.find(button => button.textContent?.trim() === '冷却不足')!.click()
-    expect(selectEntity).toHaveBeenCalledWith('cause')
-    const evidence = buttons.find(button => button.textContent?.includes('查看证据'))!
-    expect(evidence.textContent).toContain('批次裂纹 → 根因 → 冷却不足')
-    evidence.click()
-    expect(selectStatement).toHaveBeenCalledWith({ statementId: 'fact', revision: 3 })
-  } finally { app.unmount(); host.remove() }
-})
-
-it('defers initialization until drawable, disposes empty graphs, and resizes after tab visibility changes', async () => {
-  const host = document.createElement('div'); document.body.append(host)
-  const empty: GraphResult = { nodes: [], edges: [], traceId: '', truncated: false }
-  const graph = ref<GraphResult>(empty)
-  const populated: GraphResult = { ...empty, nodes: [{ id: 'a', typeKey: 'Batch', label: '批次', properties: [] }, { id: 'b', typeKey: 'Equipment', label: '设备', properties: [] }], edges: [{ statementId: 'f', revision: 1, sourceId: 'a', targetId: 'b', predicateKey: 'processedBy' }] }
-  const app = createApp({ render: () => h(SemanticGraphView, { result: graph.value, definition: { types: [], properties: [], relations: [] } }) })
-  app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': zh } })).mount(host)
-  const settle = async () => { await nextTick(); await nextTick() }
-  const element = host.querySelector('.semantic-chart')!
-  let width = 600, height = 360
-  Object.defineProperties(element, { clientWidth: { get: () => width }, clientHeight: { get: () => height } })
-  await settle()
-  try {
-    expect(lifecycle.init).not.toHaveBeenCalled()
-    height = 0; graph.value = populated
-    await settle()
-    expect(lifecycle.init).not.toHaveBeenCalled()
-    height = 360; lifecycle.resized!(); await settle()
-    expect(lifecycle.init).toHaveBeenCalledTimes(1)
-    expect(chart.setOption).toHaveBeenCalledTimes(1)
-    width = 0; height = 0; lifecycle.resized!(); await settle()
-    expect(chart.resize).not.toHaveBeenCalled()
-    width = 320; height = 260; lifecycle.resized!(); await settle()
-    expect(chart.resize).toHaveBeenCalledTimes(1)
-    expect(chart.setOption).toHaveBeenCalledTimes(2)
-    graph.value = empty; height = 0; await settle()
-    expect(chart.dispose).toHaveBeenCalledTimes(1)
-    expect(lifecycle.init).toHaveBeenCalledTimes(1)
-    graph.value = populated; height = 260; await settle()
-    expect(lifecycle.init).toHaveBeenCalledTimes(2)
-  } finally { app.unmount(); host.remove() }
-  expect(chart.dispose).toHaveBeenCalledTimes(2)
+  expect(lifecycle.init).not.toHaveBeenCalled()
+  height = 360; notifyResize(); await nextTick()
+  expect(lifecycle.init).toHaveBeenCalledTimes(1)
+  width = 1000; notifyResize(); await nextTick()
+  expect(chart.resize).toHaveBeenCalledTimes(1)
+  app.unmount()
+  expect(disconnect).toHaveBeenCalledTimes(1)
+  expect(chart.dispose).toHaveBeenCalledTimes(1)
+  notifyResize(); await nextTick()
+  expect(lifecycle.init).toHaveBeenCalledTimes(1)
+  host.remove()
 })

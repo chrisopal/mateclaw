@@ -12,7 +12,11 @@ import vip.mate.common.result.R;
 import java.util.*;
 
 @RestControllerAdvice(
-        basePackageClasses = {OntologyController.class, SemanticStatusController.class})
+        basePackageClasses = {OntologyController.class, SemanticStatusController.class,
+                vip.mate.semantic.ontology.source.OntologySourceController.class,
+                vip.mate.semantic.sourcechanges.SourceChangeController.class,
+                vip.mate.semantic.graph.migration.GraphMigrationController.class,
+                vip.mate.semantic.object.CompleteObjectValidationController.class})
 @Order(-100)
 public class SemanticExceptionHandler {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SemanticExceptionHandler.class);

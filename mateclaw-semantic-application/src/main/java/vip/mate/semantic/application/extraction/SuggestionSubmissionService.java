@@ -5,8 +5,9 @@ import static vip.mate.semantic.application.extraction.ExtractionPorts.*;
 
 /** A durable immutable submission intent closes the edit/propose/receipt failure window. */
 public final class SuggestionSubmissionService {
+    private final vip.mate.semantic.core.fact.AssertionValidationPort assertions;
     private final AccessPolicyPort access;private final ContextPort context;private final ExtractionTaskRepository repository;private final KnowledgeSubmissionPort submission;
-    public SuggestionSubmissionService(AccessPolicyPort access,ContextPort context,ExtractionTaskRepository repository,KnowledgeSubmissionPort submission){this.access=access;this.context=context;this.repository=repository;this.submission=submission;}
+    public SuggestionSubmissionService(AccessPolicyPort access,ContextPort context,ExtractionTaskRepository repository,KnowledgeSubmissionPort submission,vip.mate.semantic.core.fact.AssertionValidationPort assertions){this.access=access;this.context=context;this.repository=repository;this.submission=submission;this.assertions=java.util.Objects.requireNonNull(assertions);}
     public SubmissionRef submit(Actor actor,String graph,SubmitCommand command){
         ExtractionCoordinator.operation(command.operationId());
         Suggestion s=repository.suggestion(actor,graph,command.suggestionId()).orElseThrow(()->new ExtractionException(404,"NOT_FOUND"));
@@ -22,7 +23,7 @@ public final class SuggestionSubmissionService {
         }
         if(s.status()!=SuggestionStatus.OPEN||s.mappedContent()==null)throw new ExtractionException(422,"OBJECT_SELECTION_REQUIRED");
         if(!s.diagnostics().isEmpty())throw new ExtractionException(422,s.diagnostics().getFirst().code());
-        var report=new SuggestionValidator().validate(context.scope(actor,graph),task.ontology(),s.mappedContent(),context.entities(actor,graph),task.source().text(),s.content().quotes());
+        var report=new SuggestionValidator(assertions).validate(context.scope(actor,graph),task.ontology(),s.mappedContent(),context.entities(actor,graph),task.source().text(),s.content().quotes());
         if(!report.valid())throw new ExtractionException(422,report.violations().getFirst().code());
         String hash=ExtractionCoordinator.hash(s.mappedContent().toString()+s.content().quotes());
         repository.reserveSubmission(actor,graph,s,command.operationId(),hash);

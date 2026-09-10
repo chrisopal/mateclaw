@@ -11,27 +11,29 @@ class SemanticReviewInvariantTest extends SemanticHttpFixture {
     @Test
     void pairResolutionCannotOverrideAThirdAcceptedValue() throws Exception {
         Fixture f = fixture(); JsonNode existing = propose(f, "220"); review(f, existing, "ACCEPT", 200);
-        JsonNode a = propose(f, "380"), b = propose(f, "400");
+        JsonNode a = propose(f, "220", true), b = propose(f, "220");
         JsonNode pair = pair(f, a, b);
         resolve(f, pair, a, 409);
         JsonNode accepted = call("GET", f.base + "/statements?view=trusted", "viewer", workspace, null, 200).path("items");
-        assertEquals(1, accepted.size()); assertEquals("220", accepted.get(0).path("value").asText());
-        assertEquals(3, open(f).size());
+        assertEquals(1, accepted.size()); assertEquals("220", accepted.get(0).path("assertion").path("literal").path("lexicalValue").asText());
+        assertFalse(open(f).isEmpty());
         assertEquals(1, jdbc.queryForObject("SELECT current_revision FROM mate_semantic_statement WHERE id=?", Integer.class, a.path("id").asText()));
     }
 
     @Test
     void rejectingAConflictingCandidateLeavesAValidPathForItsPeer() throws Exception {
-        Fixture f = fixture(); JsonNode a = propose(f, "380"), b = propose(f, "400");
+        Fixture f = fixture(); JsonNode a = propose(f, "380"), b = propose(f, "380", true);
         review(f, a, "REJECT", 200);
         assertEquals(0, open(f).size());
         review(f, b, "ACCEPT", 200);
-        assertEquals("400", call("GET", f.base + "/statements?view=trusted", "viewer", workspace, null, 200).path("items").get(0).path("value").asText());
+        JsonNode trusted = call("GET", f.base + "/statements?view=trusted", "viewer", workspace, null, 200).path("items").get(0);
+        assertEquals("NEGATIVE_DATA_PROPERTY", trusted.path("assertion").path("kind").asText());
+        assertEquals("380", trusted.path("assertion").path("literal").path("lexicalValue").asText());
     }
 
     @Test
     void resolutionRefreshesOtherLiveConflictsInsteadOfClosingThem() throws Exception {
-        Fixture f = fixture(); JsonNode a = propose(f, "380"), b = propose(f, "400"), c = propose(f, "220");
+        Fixture f = fixture(); JsonNode a = propose(f, "380"), b = propose(f, "380", true), c = propose(f, "380", true);
         resolve(f, pair(f, a, b), a, 200);
         List<JsonNode> remaining = open(f);
         assertEquals(1, remaining.size(), "A vs C must remain reviewable; B is rejected");
@@ -40,7 +42,9 @@ class SemanticReviewInvariantTest extends SemanticHttpFixture {
         assertEquals(2, member.path("revision").asInt());
         resolve(f, ac, c, 200);
         JsonNode accepted = call("GET", f.base + "/statements?view=trusted", "viewer", workspace, null, 200).path("items");
-        assertEquals(1, accepted.size()); assertEquals("220", accepted.get(0).path("value").asText());
+        assertEquals(1, accepted.size());
+        assertEquals("NEGATIVE_DATA_PROPERTY", accepted.get(0).path("assertion").path("kind").asText());
+        assertEquals("380", accepted.get(0).path("assertion").path("literal").path("lexicalValue").asText());
     }
 
     @Test
@@ -48,13 +52,13 @@ class SemanticReviewInvariantTest extends SemanticHttpFixture {
         Fixture f = fixture(); JsonNode accepted = propose(f, "380"); review(f, accepted, "ACCEPT", 200);
         JsonNode change = call("POST", f.base + "/statements/" + accepted.path("id").asText() + "/changes", "member", workspace,
                 Map.of("expectedRevision", 2, "operationId", op(), "content", content(f, "381")), 200);
-        JsonNode replacement = propose(f, "400"); JsonNode acceptedPair = pair(f, accepted, replacement);
+        JsonNode replacement = propose(f, "380", true); JsonNode acceptedPair = pair(f, accepted, replacement);
         withdraw(f);
         call("POST", f.base + "/changes/" + change.path("id").asText() + "/review", "owner", workspace,
                 Map.of("expectedRevision", 2, "action", "ACCEPT", "reason", "must recheck source", "operationId", op()), 422);
         resolve(f, acceptedPair, accepted, 422);
         assertEquals(2, jdbc.queryForObject("SELECT current_revision FROM mate_semantic_statement WHERE id=?", Integer.class, accepted.path("id").asText()));
-        Fixture competing = fixture(); JsonNode a = propose(competing, "380"), b = propose(competing, "400");
+        Fixture competing = fixture(); JsonNode a = propose(competing, "380"), b = propose(competing, "380", true);
         JsonNode pair = pair(competing, a, b); withdraw(competing); resolve(competing, pair, a, 422);
         assertEquals(1, open(competing).size());
     }
@@ -78,15 +82,18 @@ class SemanticReviewInvariantTest extends SemanticHttpFixture {
         String kb = id(), raw = id(); LocalDateTime now = LocalDateTime.now();
         jdbc.update("INSERT INTO mate_wiki_knowledge_base(id,name,status,page_count,raw_count,workspace_id,create_time,update_time,deleted) VALUES(?,?,?,0,0,?,?,?,0)", Long.valueOf(kb), "review invariants", "active", Long.valueOf(workspace), now, now);
         String graph = call("PUT", "/knowledge-bases/" + kb + "/binding", "owner", workspace, Map.of("action", "ENABLE", "revisionId", revision), 200).path("graphId").asText(), base = "/graphs/" + graph;
-        String entity = call("POST", base + "/entities", "member", workspace, Map.of("typeKey", "Equipment", "displayName", "P-101"), 200).path("id").asText();
+        String entity = call("POST", base + "/entities", "member", workspace, Map.of("iri", "urn:test:review-subject", "assertedTypes", List.of("urn:test:Equipment"), "displayName", "P-101"), 200).path("id").asText();
         String text = "Records: 220V 380V 400V";
         jdbc.update("INSERT INTO mate_wiki_raw_material(id,kb_id,title,source_type,original_content,file_size,processing_status,create_time,update_time,deleted) VALUES(?,?,?,?,?,?,?,?,?,0)", Long.valueOf(raw), Long.valueOf(kb), "test", "text", text, text.length(), "completed", now, now);
         String snapshot = call("POST", base + "/imports", "member", workspace, Map.of("sourceKind", "WIKI_RAW", "sourceRef", raw, "operationId", op()), 200).path("snapshotId").asText();
         String evidence = call("POST", base + "/snapshots/" + snapshot + "/evidence", "member", workspace, Map.of("operationId", op(), "startCodePoint", 0, "endCodePoint", text.length(), "exactQuote", text), 200).path("id").asText();
         return new Fixture(base, entity, raw, evidence);
     }
-    private Map<String, Object> content(Fixture f, String value) { return Map.of("operationId", op(), "subjectId", f.entity, "predicateKind", "PROPERTY", "predicateKey", "voltage", "valueType", "DECIMAL", "value", value, "unit", "V", "validityKind", "INTERVAL", "evidenceIds", List.of(f.evidence)); }
-    private JsonNode propose(Fixture f, String value) throws Exception { return call("POST", f.base + "/statements", "member", workspace, content(f, value), 200); }
+    private Map<String, Object> content(Fixture f, String value) { return content(f, value, false); }
+    private Map<String, Object> content(Fixture f, String value, boolean negative) { return Map.of("operationId", op(), "subjectId", f.entity, "assertionText", assertion(value, negative), "validityKind", "INTERVAL", "evidenceIds", List.of(f.evidence)); }
+    private String assertion(String value, boolean negative) { return (negative ? "NegativeDataPropertyAssertion" : "DataPropertyAssertion") + "(<urn:test:voltage> <urn:test:review-subject> \"" + value + "\"^^<http://www.w3.org/2001/XMLSchema#decimal>)"; }
+    private JsonNode propose(Fixture f, String value) throws Exception { return propose(f, value, false); }
+    private JsonNode propose(Fixture f, String value, boolean negative) throws Exception { return call("POST", f.base + "/statements", "member", workspace, content(f, value, negative), 200); }
     private JsonNode change(Fixture f, JsonNode fact, String value) throws Exception { int revision=jdbc.queryForObject("SELECT current_revision FROM mate_semantic_statement WHERE id=?",Integer.class,fact.path("id").asText());return call("POST", f.base + "/statements/" + fact.path("id").asText() + "/changes", "member", workspace, Map.of("expectedRevision", revision, "operationId", op(), "content", content(f, value)), 200); }
     private void review(Fixture f, JsonNode fact, String action, int status) throws Exception { call("POST", f.base + "/statements/" + fact.path("id").asText() + "/review", "owner", workspace, Map.of("expectedRevision", fact.path("revision").asInt(), "action", action, "reason", "verified", "operationId", op()), status); }
     private List<JsonNode> open(Fixture f) throws Exception { List<JsonNode> result = new ArrayList<>(); call("GET", f.base + "/conflicts", "owner", workspace, null, 200).path("items").forEach(x -> { if (x.path("status").asText().equals("OPEN")) result.add(x); }); return result; }

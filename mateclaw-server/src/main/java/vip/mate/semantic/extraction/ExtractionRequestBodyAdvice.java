@@ -22,7 +22,8 @@ public class ExtractionRequestBodyAdvice extends RequestBodyAdviceAdapter {
     private final ObjectMapper json;
 
     public ExtractionRequestBodyAdvice(ObjectMapper json) {
-        this.json = json;
+        this.json = json.copy().enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
     }
 
     @Override
@@ -65,8 +66,12 @@ public class ExtractionRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     private void verify(JsonNode node, Type expected, String path) {
         if (node == null || node.isNull()) return;
-        if (expected instanceof ParameterizedType list && list.getRawType() == List.class) {
+        if (expected instanceof ParameterizedType optional && optional.getRawType() == Optional.class) {
+            verify(node,optional.getActualTypeArguments()[0],path); return;
+        }
+        if (expected instanceof ParameterizedType list && (list.getRawType() == List.class || list.getRawType() == Set.class)) {
             if (!node.isArray()) throw invalid(path);
+            if (list.getRawType()==Set.class) { var items=new HashSet<JsonNode>(); for(var item:node) if(!items.add(item)) throw invalid(path); }
             for (int i = 0; i < node.size(); i++)
                 verify(node.get(i), list.getActualTypeArguments()[0], path + "[" + i + "]");
             return;

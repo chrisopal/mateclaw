@@ -37,7 +37,7 @@ class SemanticGraphBindingTest extends SemanticHttpFixture {
                         "/graphs/" + binding.path("graphId").asText() + "/entities",
                         "member",
                         workspace,
-                        Map.of("typeKey", "Equipment", "displayName", "P-101"),
+                        Map.of("iri", "urn:test:P-101", "assertedTypes", java.util.Set.of("urn:test:Equipment"), "displayName", "P-101"),
                         200);
         assertEquals("P-101", entity.path("displayName").asText());
 

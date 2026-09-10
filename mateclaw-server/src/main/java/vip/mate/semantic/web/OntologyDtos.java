@@ -1,11 +1,8 @@
 package vip.mate.semantic.web;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import vip.mate.semantic.core.ontology.Multiplicity;
-import vip.mate.semantic.core.ontology.ValueType;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,113 +11,30 @@ import java.util.List;
 public final class OntologyDtos {
     private OntologyDtos() {}
 
-    public record Type(
-            String key,
-            String label,
-            String description,
-            List<String> aliases,
-            boolean deprecated) {
-        public Type {
-            aliases = normalizeAliases(aliases);
-        }
+    public record DocumentInput(
+            String modelSchema,
+            vip.mate.semantic.core.ontology.OntologyDocumentSyntax syntax,
+            String documentText,
+            List<vip.mate.semantic.core.ontology.LockedImport> imports,
+            vip.mate.semantic.core.policy.BusinessPolicySet policy) {}
 
-        public Type(String key, String label, String description) {
-            this(key, label, description, List.of(), false);
-        }
-    }
-
-    public record Constraints(List<String> allowedValues, String minimum, String maximum) {}
-
-    public record Property(
-            String key,
-            String label,
-            String description,
-            String ownerTypeKey,
-            ValueType valueType,
-            Multiplicity multiplicity,
-            String fixedUnit,
-            List<String> aliases,
-            boolean deprecated,
-            Constraints constraints) {
-        public Property {
-            aliases = normalizeAliases(aliases);
-        }
-
-        public Property(
-                String key,
-                String label,
-                String description,
-                String ownerTypeKey,
-                ValueType valueType,
-                Multiplicity multiplicity,
-                String fixedUnit) {
-            this(
-                    key,
-                    label,
-                    description,
-                    ownerTypeKey,
-                    valueType,
-                    multiplicity,
-                    fixedUnit,
-                    List.of(),
-                    false,
-                    null);
-        }
-    }
-
-    public record Relation(
-            String key,
-            String label,
-            String description,
-            String sourceTypeKey,
-            String targetTypeKey,
-            Multiplicity multiplicity,
-            List<String> aliases,
-            boolean deprecated) {
-        public Relation {
-            aliases = normalizeAliases(aliases);
-        }
-
-        public Relation(
-                String key,
-                String label,
-                String description,
-                String sourceTypeKey,
-                String targetTypeKey,
-                Multiplicity multiplicity) {
-            this(
-                    key,
-                    label,
-                    description,
-                    sourceTypeKey,
-                    targetTypeKey,
-                    multiplicity,
-                    List.of(),
-                    false);
-        }
-    }
-
-    @JsonDeserialize(using = vip.mate.semantic.ontology.OntologyDefinitionCodec.class)
-    public record Definition(
-            List<Type> types,
-            List<Property> properties,
-            List<Relation> relations,
-            Integer definitionFormatVersion) {
-        public Definition {
-            definitionFormatVersion = definitionFormatVersion == null ? 1 : definitionFormatVersion;
-        }
-
-        public Definition(List<Type> types, List<Property> properties, List<Relation> relations) {
-            this(types, properties, relations, 1);
-        }
-    }
+    public record DocumentView(
+            DocumentInput source,
+            String ontologyIri,
+            String versionIri,
+            String documentDigest,
+            String importLockDigest,
+            List<vip.mate.semantic.core.ontology.OntologyAxiomDescriptor> axioms) {}
 
     public record Metadata(String name, String description) {}
 
     public record CreateDraft(String baseRevisionId) {}
 
     public record SaveDraft(
-            Long expectedDraftVersion, String name, String description, Definition definition) {}
+            Long expectedDraftVersion, String name, String description, DocumentInput document, String operationId) {}
+
+    public record AxiomEdit(String kind, String axiomId, String functionalSyntax) {}
+    public record EditDraft(Long expectedDraftVersion, List<AxiomEdit> changes, String operationId) {}
 
     public record ValidateDraft(Long expectedDraftVersion) {}
 
@@ -152,7 +66,7 @@ public final class OntologyDtos {
             @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,
             String name,
             String description,
-            Definition definition) {}
+            DocumentView document) {}
 
     public record RevisionView(
             String id,
@@ -160,7 +74,7 @@ public final class OntologyDtos {
             int version,
             String name,
             String description,
-            Definition definition,
+            DocumentView document,
             boolean availableForNewBindings,
             @JsonFormat(shape = JsonFormat.Shape.STRING) Instant publishedAt,
             String publishedBy,
@@ -172,7 +86,9 @@ public final class OntologyDtos {
     public record ValidationView(
             @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,
             boolean valid,
-            List<Violation> violations) {}
+            List<Violation> violations,
+            String profile,
+            String reasoningStatus) {}
 
     public record Change(String kind, String category, String key, Object before, Object after) {}
 
@@ -195,14 +111,4 @@ public final class OntologyDtos {
 
     public record Status(boolean enabled) {}
 
-    private static List<String> normalizeAliases(List<String> values) {
-        return values == null
-                ? List.of()
-                : values.stream()
-                        .map(java.util.Objects::requireNonNull)
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .distinct()
-                        .toList();
-    }
 }

@@ -32,12 +32,14 @@ public class OntologyAuthoringTool {
     private final ObjectMapper json;
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
+    private final vip.mate.semantic.ontology.source.OntologySourceReviewService sources;
 
     public OntologyAuthoringTool(SemanticPrincipalResolver principals, SemanticAccessService access,
             AgentMapper agents, WikiKnowledgeBaseService knowledgeBases, OntologyApplicationService ontologies,
-            ObjectMapper json, JdbcTemplate jdbc, PlatformTransactionManager manager) {
+            ObjectMapper json, JdbcTemplate jdbc, PlatformTransactionManager manager,
+            vip.mate.semantic.ontology.source.OntologySourceReviewService sources) {
         this.principals=principals; this.access=access; this.agents=agents; this.knowledgeBases=knowledgeBases;
-        this.ontologies=ontologies; this.json=json; this.jdbc=jdbc; this.tx=new TransactionTemplate(manager);
+        this.ontologies=ontologies; this.json=json; this.jdbc=jdbc; this.tx=new TransactionTemplate(manager); this.sources=sources;
     }
 
     private <T> T execute(ToolContext context, String role,
@@ -56,9 +58,9 @@ public class OntologyAuthoringTool {
         try { SecurityContextHolder.setContext(scoped); return action.apply(principal); }
         finally { SecurityContextHolder.setContext(previous); }
     }
-    private Definition definition(String value) {
-        if(value==null || value.length()>200_000) throw new SemanticApiException(400,"INVALID_DEFINITION","Definition JSON is required and limited to 200000 characters");
-        try { return json.readValue(value,Definition.class); }
+    private DocumentInput document(String value) {
+        if(value==null || value.length()>200_000) throw new SemanticApiException(400,"INVALID_DEFINITION","OWL document JSON is required and limited to 200000 characters");
+        try { return json.readValue(value,DocumentInput.class); }
         catch(Exception e) { throw new SemanticApiException(400,"INVALID_DEFINITION","Use the ontology-builder skill definition schema"); }
     }
     @Tool(description="List existing ontologies in the authenticated workspace before creating a model. Page starts at 1.")
@@ -73,16 +75,16 @@ public class OntologyAuthoringTool {
             if(ontology.hasDraft())result.put("draft",ontologies.getDraft(p.workspaceId(),ontologyId));
             result.put("url","/semantic/ontologies/"+ontologyId+"/versions");return result;});
     }
-    @Tool(description="Create a new ontology and saved draft atomically. definitionJson must follow ontology-builder schema. Returns real identifiers. Never publishes. Check existing ontologies before retrying an uncertain response.")
-    public DraftView semantic_ontology_create_draft(String name,String description,String definitionJson,ToolContext context) {
-        return execute(context,"member",p->tx.execute(s->{var model=definition(definitionJson);
+    @Tool(description="Create a new ontology and saved draft atomically. documentJson must contain modelSchema owl-document-v1, standard OWL syntax/documentText, pinned imports and business policy. Returns real identifiers. Never publishes. Check existing ontologies before retrying an uncertain response.")
+    public DraftView semantic_ontology_create_draft(String name,String description,String documentJson,ToolContext context) {
+        return execute(context,"member",p->tx.execute(s->{var model=document(documentJson);
             var ontology=ontologies.create(p.workspaceId(),new Metadata(name,description));
             var draft=ontologies.createDraft(p.workspaceId(),ontology.id(),new CreateDraft(null));
-            return ontologies.saveDraft(p.workspaceId(),ontology.id(),new SaveDraft(draft.draftVersion(),name,description,model));}));
+            return ontologies.saveDraft(p.workspaceId(),ontology.id(),new SaveDraft(draft.draftVersion(),name,description,model,"builder-create:"+draft.id()));}));
     }
-    @Tool(description="Save a complete ontology draft with optimistic version check. Read current draft first. Never overwrites published versions. Include source references and unresolved business questions in descriptions.")
-    public DraftView semantic_ontology_save_draft(String ontologyId,long expectedDraftVersion,String name,String description,String definitionJson,ToolContext context) {
-        return execute(context,"member",p->ontologies.saveDraft(p.workspaceId(),ontologyId,new SaveDraft(expectedDraftVersion,name,description,definition(definitionJson))));
+    @Tool(description="Save a complete ontology draft with optimistic version check. Read current draft first. Never overwrites published versions. Bind sources to returned axiom IDs with semantic_ontology_bind_source; keep unresolved business questions in descriptions.")
+    public DraftView semantic_ontology_save_draft(String ontologyId,long expectedDraftVersion,String name,String description,String documentJson,String operationId,ToolContext context) {
+        return execute(context,"member",p->ontologies.saveDraft(p.workspaceId(),ontologyId,new SaveDraft(expectedDraftVersion,name,description,document(documentJson),operationId)));
     }
     @Tool(description="Create a new draft from an exact published revision. Existing drafts are never overwritten; read them to resume instead.")
     public DraftView semantic_ontology_copy_revision(String ontologyId,String revisionId,ToolContext context) {
@@ -113,6 +115,21 @@ public class OntologyAuthoringTool {
             if(text.isBlank() || text.length()>100_000)throw new SemanticApiException(422,"SOURCE_SIZE","Provide parsed material containing 1 to 100000 characters");
             return Map.of("knowledgeBaseId",knowledgeBaseId,"sourceRef",sourceRef,"title",Objects.toString(rows.getFirst().get("title"),""),"content",text,
                     "sha256",vip.mate.semantic.application.extraction.ExtractionCoordinator.hash(text));});
+    }
+
+    @Tool(description="Bind an exact source quote to one saved draft axiom. First read the authorized source and draft; supply their exact digest, axiomId and draftVersion. Quote offsets count Unicode code points, end exclusive. This increments draftVersion and never publishes. Reuse operationId only for the identical request.")
+    public vip.mate.semantic.ontology.source.OntologySourceDtos.Bound semantic_ontology_bind_source(
+            String ontologyId, long expectedDraftVersion, String operationId, String axiomId,
+            String knowledgeBaseId, String sourceRef, String expectedSourceDigest,
+            int startCodePoint, int endCodePoint, String exactQuote, ToolContext context) {
+        return execute(context,"member",p->{
+            // Reuse the trusted source reader so model-supplied KB IDs cannot bypass agent visibility.
+            semantic_ontology_read_source(knowledgeBaseId,sourceRef,context);
+            return sources.bind(p.workspaceId(),ontologyId,
+                new vip.mate.semantic.ontology.source.OntologySourceDtos.BindRequest(
+                    expectedDraftVersion,operationId,axiomId,knowledgeBaseId,sourceRef,expectedSourceDigest,
+                    startCodePoint,endCodePoint,exactQuote,"EXTRACTED"));
+        });
     }
 
     @Tool(description="Discover authorized knowledge bases and their first 50 raw materials each for domain modeling. Ask the user to choose sources before reading. Empty means an administrator must bind a knowledge base to this employee. IDs are strings.")

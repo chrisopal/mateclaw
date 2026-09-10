@@ -53,13 +53,13 @@ public interface OntologyMapper {
 
     @Insert(
             "INSERT INTO"
-                + " mate_semantic_ontology_revision(id,ontology_id,version,draft_version,revision_state,draft_slot,name,description,definition_json,base_revision_id,available_for_new_bindings)"
-                + " VALUES(#{id},#{ontologyId},#{version},#{draftVersion},'DRAFT',1,#{name},#{description},#{definitionJson},#{baseRevisionId},FALSE)")
+                + " mate_semantic_ontology_revision(id,ontology_id,version,draft_version,revision_state,draft_slot,name,description,document_text,document_syntax,document_digest,ontology_iri,version_iri,import_lock_digest,model_schema,imports_json,policy_json,base_revision_id,available_for_new_bindings)"
+                + " VALUES(#{id},#{ontologyId},#{version},#{draftVersion},'DRAFT',1,#{name},#{description},#{documentText},#{documentSyntax},#{documentDigest},#{ontologyIri},#{versionIri},#{importLockDigest},#{modelSchema},#{importsJson},#{policyJson},#{baseRevisionId},FALSE)")
     int insertDraft(OntologyRevisionRow row);
 
     @Update(
             "UPDATE mate_semantic_ontology_revision SET"
-                + " name=#{row.name},description=#{row.description},definition_json=#{row.definitionJson},draft_version=draft_version+1"
+                + " name=#{row.name},description=#{row.description},document_text=#{row.documentText},document_syntax=#{row.documentSyntax},document_digest=#{row.documentDigest},ontology_iri=#{row.ontologyIri},version_iri=#{row.versionIri},import_lock_digest=#{row.importLockDigest},model_schema=#{row.modelSchema},imports_json=#{row.importsJson},policy_json=#{row.policyJson},draft_version=draft_version+1"
                 + " WHERE id=#{row.id} AND revision_state='DRAFT' AND draft_version=#{expected}")
     int saveDraft(@Param("row") OntologyRevisionRow row, @Param("expected") long expected);
 

@@ -50,7 +50,7 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         JsonNode search = call("POST", "/graphs/" + f.graph + "/search", "viewer", workspace,
                 Map.of("query", "P-101", "limit", 10), 200);
         assertEquals(1, search.path("facts").size());
-        assertEquals("380", search.path("facts").get(0).path("value").asText());
+        assertEquals("380", search.path("facts").get(0).path("assertion").path("literal").path("lexicalValue").asText());
         JsonNode readback = call("GET", "/graphs/" + f.graph + "/evidence/" + evidence.path("id").asText(), "viewer", workspace, null, 200);
         assertEquals("380V", readback.path("exactQuote").asText());
 
@@ -71,13 +71,17 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         Fixture first = graph("设备😀额定380V");
         JsonNode e1 = call("POST", "/graphs/" + first.graph + "/snapshots/" + first.snapshot + "/evidence", "member", workspace,
                 Map.of("operationId", "evidence-a", "startCodePoint", 5, "endCodePoint", 9, "exactQuote", "380V"), 200);
-        String raw2 = raw(first.kb, "设备😀额定400V");
+        String raw2 = raw(first.kb, "设备😀不是380V");
         JsonNode imported2 = call("POST", "/graphs/" + first.graph + "/imports", "member", workspace,
                 Map.of("sourceKind", "WIKI_RAW", "sourceRef", raw2, "operationId", "import-400"), 200);
         JsonNode e2 = call("POST", "/graphs/" + first.graph + "/snapshots/" + imported2.path("snapshotId").asText() + "/evidence", "member", workspace,
-                Map.of("operationId", "evidence-b", "startCodePoint", 5, "endCodePoint", 9, "exactQuote", "400V"), 200);
+                Map.of("operationId", "evidence-b", "startCodePoint", 5, "endCodePoint", 9, "exactQuote", "380V"), 200);
         JsonNode a = propose(first, "380", e1.path("id").asText(), "candidate-a", 200);
-        JsonNode b = propose(first, "400", e2.path("id").asText(), "candidate-b", 200);
+        String iri=jdbc.queryForObject("SELECT iri FROM mate_semantic_entity WHERE id=?",String.class,first.entity);
+        JsonNode b=call("POST","/graphs/"+first.graph+"/statements","member",workspace,
+            Map.of("operationId","candidate-b","subjectId",first.entity,"assertionText",
+                "NegativeDataPropertyAssertion(<urn:test:voltage> <"+iri+"> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "validityKind","INTERVAL","evidenceIds",List.of(e2.path("id").asText())),200);
         call("POST", "/graphs/" + first.graph + "/statements/" + a.path("id").asText() + "/review", "member", workspace,
                 Map.of("expectedRevision", 1, "action", "ACCEPT", "reason", "unauthorized", "operationId", "member-review"), 403);
         JsonNode conflicts = call("GET", "/graphs/" + first.graph + "/conflicts", "owner", workspace, null, 200);
@@ -93,7 +97,7 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         assertEquals(resolved, call("POST", "/graphs/" + first.graph + "/conflicts/" + conflict.path("id").asText() + "/resolve", "owner", workspace, resolution, 200));
         JsonNode trusted = call("GET", "/graphs/" + first.graph + "/statements?view=trusted", "viewer", workspace, null, 200);
         assertEquals(1, trusted.path("total").asInt());
-        assertEquals("380", trusted.path("items").get(0).path("value").asText());
+        assertEquals("380", trusted.path("items").get(0).path("assertion").path("literal").path("lexicalValue").asText());
     }
 
     @Test
@@ -144,9 +148,11 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
     }
 
     private JsonNode propose(Fixture f, String value, String evidence, String operation, int status) throws Exception {
+        String iri=jdbc.queryForObject("SELECT iri FROM mate_semantic_entity WHERE id=?",String.class,f.entity);
+        String assertion="DataPropertyAssertion(<urn:test:voltage> <"+iri+"> \""+value+"\"^^<http://www.w3.org/2001/XMLSchema#decimal>)";
         return call("POST", "/graphs/" + f.graph + "/statements", "member", workspace,
-                Map.of("operationId", operation, "subjectId", f.entity, "predicateKind", "PROPERTY", "predicateKey", "voltage",
-                        "valueType", "DECIMAL", "value", value, "unit", "V", "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), status);
+                Map.of("operationId",operation,"subjectId",f.entity,"assertionText",assertion,
+                    "validityKind","INTERVAL","evidenceIds",List.of(evidence)),status);
     }
 
     @Test
@@ -156,7 +162,7 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         LocalDateTime now=LocalDateTime.now();
         for(int i=0;i<999;i++)entities.add(new Object[]{com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr(),f.graph,"Equipment","Capacity "+i,"ACTIVE","1",now});
         jdbc.batchUpdate("INSERT INTO mate_semantic_entity(id,graph_id,type_key,display_name,status,created_by,created_at) VALUES(?,?,?,?,?,?,?)",entities);
-        JsonNode entityError=call("POST","/graphs/"+f.graph+"/entities","member",workspace,Map.of("typeKey","Equipment","displayName","Over limit"),422);
+        JsonNode entityError=call("POST","/graphs/"+f.graph+"/entities","member",workspace,Map.of("assertedTypes",List.of("urn:test:Equipment"),"displayName","Over limit"),422);
         assertEquals("GRAPH_ENTITY_LIMIT",entityError.path("code").asText());
         // Identity rows are sufficient to exercise admission control; no query is
         // allowed to treat a capped prefix as the graph's complete fact set.
@@ -171,7 +177,7 @@ class SemanticM2IntegrationTest extends SemanticHttpFixture {
         String kb = kb(); String ontology = create(); JsonNode draft = draft(ontology); JsonNode saved = save(ontology, draft.path("draftVersion").asLong());
         JsonNode revision = publish(ontology, saved.path("draftVersion").asLong(), "publish-" + UUID.randomUUID());
         JsonNode binding = call("PUT", "/knowledge-bases/" + kb + "/binding", "owner", workspace, Map.of("action", "ENABLE", "revisionId", revision.path("id").asText()), 200);
-        JsonNode entity = call("POST", "/graphs/" + binding.path("graphId").asText() + "/entities", "member", workspace, Map.of("typeKey", "Equipment", "displayName", "P-101"), 200);
+        JsonNode entity = call("POST", "/graphs/" + binding.path("graphId").asText() + "/entities", "member", workspace, Map.of("assertedTypes", List.of("urn:test:Equipment"), "displayName", "P-101"), 200);
         String raw = raw(kb, text);
         String importOperation = "import-" + UUID.randomUUID();
         JsonNode imported = call("POST", "/graphs/" + binding.path("graphId").asText() + "/imports", "member", workspace, Map.of("sourceKind", "WIKI_RAW", "sourceRef", raw, "operationId", importOperation), 200);

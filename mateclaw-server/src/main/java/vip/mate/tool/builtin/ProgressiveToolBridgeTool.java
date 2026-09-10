@@ -147,7 +147,7 @@ public class ProgressiveToolBridgeTool {
         }
         set = set.withDeniedToolsFiltered(denied);
         if (agentId != null) {
-            set = set.withAllowedToolsOnly(agentBindingService.getEffectiveToolNames(agentId));
+            set = AgentBindingService.applyEffectiveToolScope(set, agentBindingService.getEffectiveToolNames(agentId));
         }
         return set;
     }

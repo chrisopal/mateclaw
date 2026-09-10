@@ -14,7 +14,7 @@ afterEach(() => { app?.unmount(); document.body.innerHTML = ''; vi.clearAllMocks
 it('loads typed proposal content before resolution and routes evidence without statement history', async () => {
  const pinia = createPinia(); setActivePinia(pinia); useWorkspaceStore().currentWorkspaceId = 'w'
  const select = vi.fn(), evidence = vi.fn()
- vi.mocked(statementApi.getChange).mockResolvedValue({ id: 'proposal', graphId: 'g', targetStatementId: 's', expectedRevision: 1, status: 'PENDING', resultRevision: null, content: { operationId: 'op', subjectId: 'e', predicateKind: 'PROPERTY', predicateKey: 'power', valueType: 'TEXT', value: '380', unit: 'V', targetEntityId: null, validityKind: 'UNKNOWN', validFrom: null, validTo: null, evidenceIds: ['ev'] } })
+ vi.mocked(statementApi.getChange).mockResolvedValue({ id: 'proposal', graphId: 'g', targetStatementId: 's', expectedRevision: 1, status: 'PENDING', resultRevision: null, content: { operationId: 'op', subjectId: 'e', assertionText: 'DataPropertyAssertion(<https://example.test/power> <https://example.test/e> "380"^^xsd:decimal)', validityKind: 'UNKNOWN', validFrom: null, validTo: null, evidenceIds: ['ev'] } })
  app = createApp({ setup: () => () => h(ConflictReviewPanel, { graphId: 'g', conflicts: [{ id: 'c', kind: 'SINGLE_VALUE_DISAGREEMENT', status: 'OPEN', left: { statementId: 's', revision: 1 }, right: { kind: 'CHANGE_PROPOSAL', statementId: 'proposal', revision: 1 }, resolution: '' }], onSelect: select, onEvidence: evidence }) })
  app.use(pinia).use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': en } }))
  const host = document.createElement('div'); document.body.append(host); app.mount(host); await flush()

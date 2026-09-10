@@ -9,7 +9,7 @@ import type { Statement } from '../../api/workbenchTypes'
 vi.mock('../../api/statementApi', () => ({ statementApi: { review: vi.fn() } }))
 vi.mock('../../api/graphQueryApi', () => ({ graphQueryApi: { history: vi.fn() } }))
 let app: App
-const statement: Statement = { id: 's', graphId: 'g', revision: 1, ontologyRevisionId: 'o', subjectId: 'e', predicateKind: 'PROPERTY', predicateKey: 'voltage', valueType: 'DECIMAL', value: '380', unit: 'V', targetEntityId: null, validityKind: 'INTERVAL', validFrom: null, validTo: null, evidenceIds: ['ev'], reviewStatus: 'PROPOSED', supportStatus: 'SUPPORTED', proposedBy: 'u', createdAt: '' }
+const statement: Statement = { id: 's', graphId: 'g', revision: 1, ontologyRevisionId: 'o', subjectId: 'e', assertion: { kind: 'POSITIVE_DATA_PROPERTY', functionalSyntax: 'DataPropertyAssertion(<https://example.test/voltage> <https://example.test/e> "380"^^xsd:decimal)', signatureIris: ['https://example.test/e', 'https://example.test/voltage'], subjectIri: 'https://example.test/e', predicateIri: 'https://example.test/voltage', literal: { lexicalValue: '380', datatypeIri: 'http://www.w3.org/2001/XMLSchema#decimal' } }, validityKind: 'INTERVAL', validFrom: null, validTo: null, evidenceIds: ['ev'], reviewStatus: 'PROPOSED', supportStatus: 'SUPPORTED', proposedBy: 'u', createdAt: '' }
 function setup() {
   const pinia = createPinia(); setActivePinia(pinia)
   useWorkspaceStore().currentWorkspaceId = 'w'

@@ -10,6 +10,7 @@ import vip.mate.semantic.application.extraction.*;
 import vip.mate.semantic.core.fact.*;
 import vip.mate.semantic.core.identity.SemanticIds.*;
 import vip.mate.semantic.web.SemanticApiException;
+import vip.mate.semantic.owl.OwlAssertionAdapter;
 import vip.mate.workspace.core.annotation.RequireWorkspaceRole;
 import static vip.mate.semantic.application.extraction.ExtractionContracts.*;
 
@@ -19,7 +20,8 @@ import static vip.mate.semantic.application.extraction.ExtractionContracts.*;
 public class ExtractionController {
     private final SemanticAccessService identity;private final MateClawAccessAdapter access;private final MateClawContextAdapter context;private final MateClawModelAdapter models;
     private final JdbcExtractionRepository repo;private final ExtractionCoordinator coordinator;private final SuggestionSubmissionService submissions;private final ExtractionConfiguration.Feature feature;private final MateClawSourceAdapter sources;
-    public ExtractionController(SemanticAccessService identity,MateClawAccessAdapter access,MateClawContextAdapter context,MateClawModelAdapter models,JdbcExtractionRepository repo,ExtractionCoordinator coordinator,SuggestionSubmissionService submissions,ExtractionConfiguration.Feature feature,MateClawSourceAdapter sources){this.identity=identity;this.access=access;this.context=context;this.models=models;this.repo=repo;this.coordinator=coordinator;this.submissions=submissions;this.feature=feature;this.sources=sources;}
+    private final OwlAssertionAdapter assertions;private final SuggestionValidator validator;
+    public ExtractionController(SemanticAccessService identity,MateClawAccessAdapter access,MateClawContextAdapter context,MateClawModelAdapter models,JdbcExtractionRepository repo,ExtractionCoordinator coordinator,SuggestionSubmissionService submissions,ExtractionConfiguration.Feature feature,MateClawSourceAdapter sources,OwlAssertionAdapter assertions){this.identity=identity;this.access=access;this.context=context;this.models=models;this.repo=repo;this.coordinator=coordinator;this.submissions=submissions;this.feature=feature;this.sources=sources;this.assertions=assertions;this.validator=new SuggestionValidator(assertions);}
     private Actor actor(String scope,String role){return new Actor(scope,identity.require(scope,role).getId().toString());}
     @GetMapping("/extraction-capabilities") @RequireWorkspaceRole("viewer")
     public R<ExtractionDtos.Capabilities> capabilities(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId){var a=actor(scope,"viewer");access.require(a,graphId,null,Action.READ);return R.ok(new ExtractionDtos.Capabilities(feature.enabled(),models.models(),context.ontology(a,graphId).revisionId().value()));}
@@ -37,20 +39,28 @@ public class ExtractionController {
     @PostMapping("/extraction-tasks/{taskId}/retry") @RequireWorkspaceRole("member")
     public R<ExtractionDtos.TaskView> retry(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId,@PathVariable String taskId,@RequestBody ExtractionDtos.OperationRequest r){var a=actor(scope,"member");Task t=visible(a,graphId,taskId);if(((Number)repo.metadata(taskId).get("attempts")).intValue()>=3)throw new SemanticApiException(409,"ATTEMPT_LIMIT","Task exhausted three attempts");coordinator.retry(a,graphId,taskId,r.operationId());return R.ok(view(visible(a,graphId,taskId)));}
     @GetMapping("/extraction-tasks/{taskId}/suggestions") @RequireWorkspaceRole("viewer")
-    public R<ExtractionDtos.Page<ExtractionDtos.SuggestionView>> suggestions(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId,@PathVariable String taskId,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize){var a=actor(scope,"viewer");visible(a,graphId,taskId);page(page,pageSize);var all=repo.suggestions(a,graphId,taskId,0,200);return R.ok(new ExtractionDtos.Page<>(all.stream().skip((long)(page-1)*pageSize).limit(pageSize).map(s->ExtractionMapping.view(s,repo.receipt(a,graphId,s.suggestionId(),s.editVersion()).orElse(null),repo.pendingOperation(s.suggestionId(),s.editVersion()))).toList(),all.size(),page,pageSize));}
+    public R<ExtractionDtos.Page<ExtractionDtos.SuggestionView>> suggestions(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId,@PathVariable String taskId,@RequestParam(defaultValue="1")int page,@RequestParam(defaultValue="20")int pageSize){var a=actor(scope,"viewer");visible(a,graphId,taskId);page(page,pageSize);var all=repo.suggestions(a,graphId,taskId,0,200);var entities=context.entities(a,graphId);return R.ok(new ExtractionDtos.Page<>(all.stream().skip((long)(page-1)*pageSize).limit(pageSize).map(s->ExtractionMapping.view(s,repo.receipt(a,graphId,s.suggestionId(),s.editVersion()).orElse(null),repo.pendingOperation(s.suggestionId(),s.editVersion()),entities)).toList(),all.size(),page,pageSize));}
     @PatchMapping("/suggestions/{suggestionId}") @RequireWorkspaceRole("member")
     public R<ExtractionDtos.SuggestionView> edit(@RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId,@PathVariable String suggestionId,@RequestBody ExtractionDtos.EditRequest r){
         var a=actor(scope,"member");ExtractionCoordinator.operation(r.operationId());if(r.expectedVersion()==null)throw new ExtractionException(400,"EXPECTED_VERSION_REQUIRED");
         Suggestion old=repo.suggestion(a,graphId,suggestionId).orElseThrow(()->new ExtractionException(404,"NOT_FOUND"));Task task=visible(a,graphId,old.taskId());access.require(a,graphId,task.source().sourceRef(),Action.EDIT);
         return R.ok(repo.editOperation(graphId,suggestionId,r.operationId(),ExtractionCoordinator.hash(repo.json.write(r)),ExtractionDtos.SuggestionView.class,()->{
         if(old.editVersion()!=r.expectedVersion()||old.status()!=SuggestionStatus.OPEN)throw new ExtractionException(409,"SUGGESTION_VERSION_CONFLICT");
-        RawSuggestion raw;StatementContent mapped=null;
-        try{raw="IGNORED".equals(r.status())?old.content():ExtractionMapping.raw(r);
-            if(!"IGNORED".equals(r.status())&&r.subjectId()!=null&&!r.subjectId().isBlank())mapped=new StatementContent(context.scope(a,graphId),task.ontology().revisionId(),new EntityId(r.subjectId()),raw.predicate(),raw.target()==null?raw.value():new StatementValue.EntityValue(new EntityId(r.targetEntityId())),raw.validity(),Set.of());
+        RawSuggestion raw;StatementContent mapped=null;Map<EntityId,Entity> entities=context.entities(a,graphId);
+        try{raw="IGNORED".equals(r.status())?old.content():ExtractionMapping.raw(r,assertions);
+            if(!"IGNORED".equals(r.status())&&r.subjectId()!=null&&!r.subjectId().isBlank()){
+                EntityId subjectId=new EntityId(Objects.requireNonNull(r.subjectId(),"subjectId"));
+                Entity subject=entities.get(subjectId);if(subject==null)throw new IllegalArgumentException("subject entity is not in graph");
+                Map<String,String> mappings=new LinkedHashMap<>();mappings.put(raw.subject().temporaryRef(),subject.iri());
+                if(raw.target()!=null){if(r.targetEntityId()==null||r.targetEntityId().isBlank())throw new IllegalArgumentException("target entity is required");Entity target=entities.get(new EntityId(r.targetEntityId()));if(target==null)throw new IllegalArgumentException("target entity is not in graph");mappings.put(raw.target().temporaryRef(),target.iri());}
+                AssertionPayload remapped=assertions.remapIndividuals(raw.assertion().functionalSyntax(),mappings);
+                Optional<PredicateRef> predicate=remapped.predicateIri().map(iri -> remapped.dataAssertion()?PredicateRef.property(iri):PredicateRef.relation(iri));
+                mapped=new StatementContent(context.scope(a,graphId),task.ontology().revisionId(),subjectId,predicate,remapped,raw.validity(),Set.of());
+            }
         }catch(RuntimeException e){throw new ExtractionException(422,"INVALID_SUGGESTION");}
-        var validator=new SuggestionValidator();var report=mapped==null?validator.validateRaw(context.scope(a,graphId),task.ontology(),raw,task.source().text()):validator.validate(context.scope(a,graphId),task.ontology(),mapped,context.entities(a,graphId),task.source().text(),raw.quotes());
+        var report=mapped==null?validator.validateRaw(context.scope(a,graphId),task.ontology(),raw,task.source().text()):validator.validate(context.scope(a,graphId),task.ontology(),mapped,entities,task.source().text(),raw.quotes());
         var next=new Suggestion(suggestionId,old.taskId(),old.attemptId(),raw,mapped,report.violations(),old.editVersion()+1,"IGNORED".equals(r.status())?SuggestionStatus.IGNORED:SuggestionStatus.OPEN);
-        if(!repo.edit(a,graphId,next,old.editVersion()))throw new ExtractionException(409,"SUGGESTION_VERSION_CONFLICT");return ExtractionMapping.view(next,null);
+        if(!repo.edit(a,graphId,next,old.editVersion()))throw new ExtractionException(409,"SUGGESTION_VERSION_CONFLICT");return ExtractionMapping.view(next,null,null,entities);
         }));
     }
     @PostMapping("/suggestions/{suggestionId}/submit") @RequireWorkspaceRole("member")

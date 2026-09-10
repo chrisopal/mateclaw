@@ -21,7 +21,7 @@ public interface GraphMapper {
     @Select("SELECT workspace_id FROM mate_wiki_knowledge_base WHERE id=#{kb} AND deleted=0")
     Long knowledgeBaseWorkspace(long kb);
 
-    @Select("SELECT r.id,r.ontology_id,o.workspace_id,r.version,r.revision_state,r.definition_json,r.available_for_new_bindings FROM mate_semantic_ontology_revision r JOIN mate_semantic_ontology o ON o.id=r.ontology_id WHERE r.id=#{id}")
+    @Select("SELECT r.*,o.workspace_id FROM mate_semantic_ontology_revision r JOIN mate_semantic_ontology o ON o.id=r.ontology_id WHERE r.id=#{id}")
     GraphOntologyRevisionRow revision(String id);
 
     @Insert("INSERT INTO mate_semantic_graph(id,workspace_id,kb_id,ontology_revision_id,enabled,mutation_version,created_at,updated_at) VALUES(#{id},#{workspaceId},#{kbId},#{ontologyRevisionId},#{enabled},#{mutationVersion},#{createdAt},#{updatedAt})")
@@ -39,7 +39,7 @@ public interface GraphMapper {
     @Select("SELECT * FROM mate_semantic_entity WHERE graph_id=#{graph} ORDER BY created_at,id")
     List<EntityRow> entities(String graph);
 
-    @Insert("INSERT INTO mate_semantic_entity(id,graph_id,type_key,display_name,status,created_by,created_at) VALUES(#{id},#{graphId},#{typeKey},#{displayName},#{status},#{createdBy},#{createdAt})")
+    @Insert("INSERT INTO mate_semantic_entity(id,graph_id,iri,iri_digest,asserted_types_json,display_name,status,created_by,created_at) VALUES(#{id},#{graphId},#{iri},#{iriDigest},#{assertedTypesJson},#{displayName},#{status},#{createdBy},#{createdAt})")
     int insertEntity(EntityRow row);
 
     @Update("UPDATE mate_semantic_graph SET mutation_version=mutation_version+1,updated_at=#{updatedAt} WHERE id=#{id} AND mutation_version=#{expected}")

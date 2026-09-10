@@ -28,7 +28,7 @@ public class OntologyPackageService {
     public static final int MAX_BYTES = 1024 * 1024;
     private static final String KIND = "IMPORT_ONTOLOGY_PACKAGE";
     private final ObjectMapper json =
-            OntologyDefinitionCodec.strictMapper(
+            new ObjectMapper(
                     JsonFactory.builder()
                             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
                             .streamReadConstraints(
@@ -37,7 +37,7 @@ public class OntologyPackageService {
                                             .maxStringLength(MAX_BYTES)
                                             .maxNumberLength(100)
                                             .build())
-                            .build());
+                            .build()).findAndRegisterModules().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     private final SemanticAccessService access;
     private final OntologyApplicationService ontologies;
     private final OntologyWireMapper wire;
@@ -52,6 +52,12 @@ public class OntologyPackageService {
             CommandRecordMapper commands,
             GovernanceRecordMapper governance,
             JdbcTemplate jdbc) {
+        json.coercionConfigFor(com.fasterxml.jackson.databind.type.LogicalType.Textual)
+                .setCoercion(com.fasterxml.jackson.databind.cfg.CoercionInputShape.Integer,com.fasterxml.jackson.databind.cfg.CoercionAction.Fail)
+                .setCoercion(com.fasterxml.jackson.databind.cfg.CoercionInputShape.Float,com.fasterxml.jackson.databind.cfg.CoercionAction.Fail)
+                .setCoercion(com.fasterxml.jackson.databind.cfg.CoercionInputShape.Boolean,com.fasterxml.jackson.databind.cfg.CoercionAction.Fail);
+        json.disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+        json.enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS);
         this.access = access;
         this.ontologies = ontologies;
         this.wire = wire;
@@ -63,11 +69,11 @@ public class OntologyPackageService {
     public Package export(String scope, String id, String revisionId) {
         var revision = ontologies.revision(scope, id, revisionId);
         return new Package(
-                1,
+                2,
                 revision.name(),
                 revision.description(),
                 new Source(revision.name(), revision.version()),
-                revision.definition());
+                revision.document().source());
     }
 
     public Preview preview(String scope, byte[] body) {
@@ -76,7 +82,7 @@ public class OntologyPackageService {
     }
 
     private Preview preview(Package value) {
-        if (value == null || !Integer.valueOf(1).equals(value.packageFormatVersion()))
+        if (value == null || !Integer.valueOf(2).equals(value.packageFormatVersion()))
             throw bad("Unsupported package format");
         wire.metadata(value.name(), value.description());
         if (value.source() != null) {
@@ -84,12 +90,12 @@ public class OntologyPackageService {
             if (value.source().version() == null || value.source().version() < 1)
                 throw bad("Invalid source version");
         }
-        var violations = wire.violations(value.definition());
+        var violations = wire.violations(value.document());
         return new Preview(
                 packageDigest(value),
                 value.name(),
-                value.definition().types().size(),
-                value.definition().properties().size() + value.definition().relations().size(),
+                wire.parse("preview", "preview", value.document()).axioms().size(),
+                value.document().imports().size(),
                 violations);
     }
 
@@ -134,7 +140,7 @@ public class OntologyPackageService {
                                 initial.draftVersion(),
                                 request.name(),
                                 request.content().description(),
-                                request.content().definition()));
+                                request.content().document(), "import-save:" + digest(json.valueToTree(request.operationId()))));
         var result = new ImportResult(request.operationId(), ontology.id(), draft);
         var command = new CommandRecordRow();
         command.setId(id());
@@ -192,32 +198,11 @@ public class OntologyPackageService {
      * claim.
      */
     private String packageDigest(Package value) {
-        ObjectNode node = json.valueToTree(value);
-        node.set("definition", normalizedDefinition(value.definition()));
-        return digest(node);
+        return digest(json.valueToTree(value));
     }
 
-    public static String definitionDigest(OntologyDtos.Definition definition) {
-        return digest(normalizedDefinition(definition));
-    }
-
-    private static JsonNode normalizedDefinition(OntologyDtos.Definition definition) {
-        JsonNode node = new ObjectMapper().valueToTree(definition);
-        for (JsonNode property : node.path("properties")) {
-            if (!"DECIMAL".equals(property.path("valueType").asText())) continue;
-            if (!(property.path("constraints") instanceof ObjectNode constraints)) continue;
-            for (String field : List.of("minimum", "maximum")) {
-                JsonNode bound = constraints.get(field);
-                if (bound == null || !bound.isTextual()) continue;
-                String text = bound.textValue();
-                // Diagnostic previews retain invalid bounds. Never expand exponent inputs.
-                if (text.length() <= 100 && text.matches("-?[0-9]+(\\.[0-9]+)?"))
-                    constraints.put(
-                            field,
-                            new java.math.BigDecimal(text).stripTrailingZeros().toPlainString());
-            }
-        }
-        return node;
+    public static String documentDigest(OntologyDtos.DocumentInput document) {
+        return digest(new ObjectMapper().findAndRegisterModules().valueToTree(document));
     }
 
     public static String digest(JsonNode node) {

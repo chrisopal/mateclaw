@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import vip.mate.semantic.core.conflict.ConflictDetector;
 import vip.mate.semantic.core.fact.*;
 import vip.mate.semantic.core.identity.SemanticIds.StatementId;
 import vip.mate.semantic.graph.*;
@@ -31,7 +30,6 @@ public class StatementApplicationService {
     final SemanticDomainMapper domain;
     final OntologyWireMapper wire;
     final SupportEvaluator support;
-    private final ConflictDetector conflicts=new ConflictDetector();
 
     public StatementApplicationService(JdbcTemplate jdbc,GraphApplicationService graphs,SemanticAccessService access,SemanticDomainMapper domain,OntologyWireMapper wire,SupportEvaluator support){this.jdbc=jdbc;this.graphs=graphs;this.access=access;this.domain=domain;this.wire=wire;this.support=support;}
 
@@ -52,9 +50,9 @@ public class StatementApplicationService {
         var ontology=domain.ontology(graph);
         for(StoredRevision other:current(graphId,List.of("PROPOSED","ACCEPTED"))){
             if(statementId.equals(other.statementId()))continue;
-            conflicts.compare(ontology,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"STATEMENT",other.statementId(),other.revision(),now));
+            domain.compare(ontology,graph,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"STATEMENT",other.statementId(),other.revision(),now));
         }
-        for(PendingChange other:pendingChanges(graphId))conflicts.compare(ontology,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
+        for(PendingChange other:pendingChanges(graphId))domain.compare(ontology,graph,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"STATEMENT",statementId,1,"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
         touch(graph);
         StatementView result=view(graph,row(graphId,statementId));
         command(graphId,request.operationId(),"PROPOSE_STATEMENT",request,result);
@@ -83,11 +81,11 @@ public class StatementApplicationService {
         var ontology=domain.ontology(graph);
         for(StoredRevision other:current(graphId,List.of("PROPOSED","ACCEPTED"))){
             if(statementId.equals(other.statementId()))continue;
-            conflicts.compare(ontology,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"STATEMENT",other.statementId(),other.revision(),now));
+            domain.compare(ontology,graph,content,domain.content(graph,decode(other.contentJson()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"STATEMENT",other.statementId(),other.revision(),now));
         }
         for(PendingChange other:pendingChanges(graphId)){
             if(proposal.equals(other.id()))continue;
-            conflicts.compare(ontology,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
+            domain.compare(ontology,graph,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
         }
         touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC),request.content());
     }
@@ -150,9 +148,10 @@ public class StatementApplicationService {
         return jdbc.query("SELECT r.* FROM mate_semantic_statement s JOIN mate_semantic_statement_revision r ON r.statement_id=s.id AND r.revision=s.current_revision WHERE s.graph_id=? AND r.review_status IN ("+placeholders+") ORDER BY r.created_at,r.statement_id",(rs,n)->stored(rs),args.toArray());
     }
     void insertRevision(GraphRow graph,String statementId,int revision,ProposeRequest request,String status,String actor,String reason,LocalDateTime now){
-        String kind="RELATION".equals(request.predicateKind())?"RELATION":"PROPERTY";
-        jdbc.update("INSERT INTO mate_semantic_statement_revision(statement_id,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_key,review_status,validity_kind,valid_from,valid_to,value_type,value_text,unit,target_entity_id,content_json,actor_id,reason,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                statementId,revision,graph.getId(),graph.getOntologyRevisionId(),request.subjectId(),kind,request.predicateKey(),status,request.validityKind()==null?"INTERVAL":request.validityKind(),timestamp(request.validFrom()),timestamp(request.validTo()),request.valueType(),request.value(),request.unit(),request.targetEntityId(),wire.encode(request),actor,reason,now);
+        var payload=domain.assertion(request.assertionText());
+        String kind=payload.predicateIri().isEmpty()?"ASSERTION":payload.literal().isPresent()?"PROPERTY":"RELATION";
+        jdbc.update("INSERT INTO mate_semantic_statement_revision(statement_id,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_iri,assertion_kind,assertion_text,review_status,validity_kind,valid_from,valid_to,value_type,value_text,content_json,actor_id,reason,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                statementId,revision,graph.getId(),graph.getOntologyRevisionId(),request.subjectId(),kind,payload.predicateIri().orElse(null),payload.kind().name(),payload.functionalSyntax(),status,request.validityKind(),timestamp(request.validFrom()),timestamp(request.validTo()),"OWL_AXIOM",payload.literal().map(v->v.lexicalValue()).orElse(null),wire.encode(request),actor,reason,now);
         if(request.evidenceIds()!=null)for(String evidence:request.evidenceIds())jdbc.update("INSERT INTO mate_semantic_revision_evidence(statement_id,revision,evidence_id) VALUES(?,?,?)",statementId,revision,evidence);
     }
     StatementView view(GraphRow graph,StoredRevision row){
@@ -162,7 +161,7 @@ public class StatementApplicationService {
     private StatementView viewWithSupport(GraphRow graph,StoredRevision row,String supportStatus){
         ProposeRequest request=decode(row.contentJson());
         List<String> evidence=request.evidenceIds()==null?List.of():request.evidenceIds().stream().sorted().toList();
-        return new StatementView(row.statementId(),graph.getId(),row.revision(),row.ontologyRevisionId(),request.subjectId(),request.predicateKind(),request.predicateKey(),request.valueType(),request.value(),request.unit(),request.targetEntityId(),request.validityKind(),request.validFrom(),request.validTo(),row.status(),supportStatus,evidence,row.actorId(),row.createdAt().toInstant(ZoneOffset.UTC));
+        return new StatementView(row.statementId(),graph.getId(),row.revision(),row.ontologyRevisionId(),request.subjectId(),domain.assertion(request.assertionText()),request.validityKind(),request.validFrom(),request.validTo(),row.status(),supportStatus,evidence,row.actorId(),row.createdAt().toInstant(ZoneOffset.UTC));
     }
     ProposeRequest decode(String json){return wire.decode(json,ProposeRequest.class);}
     void requireEvidence(String graphId,StatementContent content){

@@ -30,6 +30,7 @@ vi.mock('../../api/ontologyApi', () => ({
     ensureBuilder: vi.fn(),
   },
 }))
+const ontologyDocument = () => ({ source: { modelSchema: 'owl-document-v1' as const, syntax: 'FUNCTIONAL' as const, documentText: 'Ontology(<https://example.test/factory>)', imports: [], policy: { version: '1', rules: [] } }, ontologyIri: 'https://example.test/factory', versionIri: null, documentDigest: 'sha256:factory', importLockDigest: 'sha256:imports', axioms: [] })
 const data = () => ({
   id: '9223372036854775799',
   ontologyId: '9223372036854775800',
@@ -38,7 +39,7 @@ const data = () => ({
   baseRevisionId: null,
   name: 'Factory',
   description: '',
-  definition: { types: [{ key: 'Pump', label: 'Pump', description: '' }], properties: [], relations: [] },
+  document: ontologyDocument(),
 })
 let app: App, host: HTMLDivElement
 const flush = async () => {
@@ -182,9 +183,7 @@ it('renders immutable version detail and compares saved revisions for viewers', 
   vi.mocked(ontologyApi.diff).mockResolvedValue({
     fromRevisionId: null,
     toRevisionId: revision.id,
-    changes: [
-      { kind: 'ADDED', category: 'types', key: 'Pump', before: null, after: revision.definition.types[0] },
-    ],
+    changes: [{ kind: 'ADDED', category: 'axiom', key: 'axiom-1', before: null, after: revision.document.axioms[0] ?? null }],
   })
   await mount(['view:ontology'], OntologyVersions)
   expect(host.textContent).toContain('Initial release')
@@ -199,7 +198,7 @@ it('renders immutable version detail and compares saved revisions for viewers', 
     revision.id,
     expect.any(AbortSignal),
   )
-  expect(host.textContent).toContain('Added')
+  expect(host.textContent).toContain('ADDED')
 })
 it('registers the real dirty editor guard and preserves input on rejected workspace switch', async () => {
   const store = await mount(['view:ontology', 'manage:ontology'])

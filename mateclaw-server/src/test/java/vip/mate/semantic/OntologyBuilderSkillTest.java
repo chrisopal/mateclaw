@@ -24,7 +24,8 @@ class OntologyBuilderSkillTest {
             "semantic_ontology_save_draft",
             "semantic_ontology_validate",
             "semantic_ontology_prepare_publish",
-            "semantic_ontology_read_source");
+            "semantic_ontology_read_source",
+            "semantic_ontology_bind_source");
 
     @Test
     void shipsAParserCompatibleSkillWithTheBoundedOntologyWorkflow() throws IOException {
@@ -40,16 +41,16 @@ class OntologyBuilderSkillTest {
         assertNotNull(manifest);
         assertEquals("ontology-builder", manifest.getId());
         assertEquals(EXPECTED_TOOLS, Set.copyOf(manifest.getAllowedTools()));
-        assertTrue(content.contains("semantic_ontology_sources()"));
+        assertTrue(content.contains("semantic_ontology_sources"));
         assertTrue(content.contains("从资料生成本体"));
         assertTrue(content.contains("建立领域模型"));
-        assertTrue(content.contains("definitionFormatVersion"));
+        assertTrue(content.contains("owl-document-v1"));
         assertTrue(content.contains("expectedDraftVersion"));
-        assertTrue(content.contains("sha256:<digest>"));
-        assertTrue(content.contains("exact supporting quote"));
+        assertTrue(content.contains("contentDigest"));
+        assertTrue(content.contains("原文引句及区间"));
         assertTrue(content.contains("semantic_ontology_prepare_publish"));
         assertFalse(content.contains("semantic_ontology_publish"),
                 "the skill must not invent an autonomous publish tool");
-        assertTrue(content.contains("结构和规则校验通过，不证明业务语义"));
+        assertTrue(content.contains("NOT_RUN 不得宣称逻辑一致"));
     }
 }

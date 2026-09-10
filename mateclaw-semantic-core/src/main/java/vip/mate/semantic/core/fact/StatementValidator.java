@@ -1,23 +1,32 @@
 package vip.mate.semantic.core.fact;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import vip.mate.semantic.core.identity.GraphScope;
 import vip.mate.semantic.core.identity.SemanticIds.EntityId;
 import vip.mate.semantic.core.ontology.OntologyRevision;
-import vip.mate.semantic.core.ontology.PropertyDefinition;
-import vip.mate.semantic.core.ontology.PropertyConstraints;
-import vip.mate.semantic.core.ontology.RelationDefinition;
-import vip.mate.semantic.core.ontology.ValueType;
 import vip.mate.semantic.core.validation.ValidationReport;
 import vip.mate.semantic.core.validation.Violation;
 
-/** Deterministic validation of a statement against one ontology revision. */
+/**
+ * Governance validation for one business assertion.
+ *
+ * <p>OWL syntax, profile, and type checking are delegated to the injected
+ * adapter port. Core only checks graph/revision ownership and that the derived
+ * indexes are internally consistent with known entities.</p>
+ */
 public final class StatementValidator {
+
+    private final AssertionValidationPort assertionValidationPort;
+
+    public StatementValidator(AssertionValidationPort assertionValidationPort) {
+        this.assertionValidationPort = Objects.requireNonNull(
+                assertionValidationPort, "assertionValidationPort");
+    }
 
     public ValidationReport validate(
             GraphScope scope,
@@ -38,18 +47,15 @@ public final class StatementValidator {
         if (referencedEntities == null) {
             add(violations, "REQUIRED", "referencedEntities", "referenced entities are required");
         }
+        Map<EntityId, Entity> entities = referencedEntities == null ? Map.of() : referencedEntities;
         if (scope != null && !scope.equals(candidate.scope())) {
             add(violations, "SCOPE_MISMATCH", "scope", "statement scope does not match the target graph");
         }
-        if (ontology == null) {
-            return new ValidationReport(violations);
-        }
-        if (!ontology.revisionId().equals(candidate.ontologyRevisionId())) {
+        if (ontology != null && !ontology.revisionId().equals(candidate.ontologyRevisionId())) {
             add(violations, "ONTOLOGY_REVISION_MISMATCH", "ontologyRevisionId",
                     "statement references a different ontology revision");
         }
 
-        Map<EntityId, Entity> entities = referencedEntities == null ? Map.of() : referencedEntities;
         Entity subject = entities.get(candidate.subjectId());
         if (subject == null) {
             add(violations, "UNKNOWN_SUBJECT", "subjectId", "statement subject is not in the graph");
@@ -57,135 +63,84 @@ public final class StatementValidator {
             if (!subject.scope().equals(candidate.scope())) {
                 add(violations, "SCOPE_MISMATCH", "subjectId", "subject is in a different graph scope");
             }
-            validatePredicate(ontology, candidate, subject, entities, violations);
+            candidate.assertion().subjectIri().ifPresent(subjectIri -> {
+                if (!subject.iri().equals(subjectIri)) {
+                    add(violations, "SUBJECT_IRI_MISMATCH", "assertion.subjectIri",
+                            "assertion subject IRI does not match the referenced entity");
+                }
+            });
         }
-        if (subject == null) {
-            validatePredicate(ontology, candidate, null, entities, violations);
+        validateAssertionIndexes(candidate, subject, entities, violations);
+
+        if (ontology != null) {
+            ValidationReport adapterReport = assertionValidationPort.validate(ontology, candidate, entities);
+            violations.addAll(adapterReport.violations());
+            if (adapterReport.valid() && subject != null
+                    && candidate.assertion().kind() == AssertionPayload.AssertionKind.POSITIVE_DATA_PROPERTY) {
+                var literal=candidate.assertion().literal().orElseThrow();
+                try {
+                    var value=new vip.mate.semantic.core.policy.BusinessPolicySet.Literal(
+                            literal.lexicalValue(),literal.datatypeIri(),
+                            assertionValidationPort.businessUnit(candidate.assertion()).orElse(null));
+                    violations.addAll(ontology.policy().validate(subject.assertedTypes(),
+                            Map.of(candidate.assertion().predicateIri().orElseThrow(),List.of(value)),false).violations());
+                } catch (IllegalArgumentException e) {
+                    add(violations,"BUSINESS_UNIT_INVALID","assertion","Explicit unit annotation is invalid");
+                }
+            }
         }
         return new ValidationReport(violations);
     }
 
-    private static void validatePredicate(
-            OntologyRevision ontology,
+    private static void validateAssertionIndexes(
             StatementContent candidate,
             Entity subject,
             Map<EntityId, Entity> entities,
             List<Violation> violations) {
-        PredicateRef predicate = candidate.predicate();
-        if (predicate instanceof PredicateRef.PropertyRef propertyRef) {
-            Optional<PropertyDefinition> definition = ontology.definition().properties().stream()
-                    .filter(item -> item != null && item.key().equals(propertyRef.key()))
-                    .findFirst();
-            if (definition.isEmpty()) {
-                add(violations, "UNKNOWN_PREDICATE", "predicate", "property predicate is not declared");
-                return;
+        AssertionPayload assertion = candidate.assertion();
+        assertion.subjectIri().ifPresent(subjectIri -> requireSignature(
+                assertion, subjectIri, "assertion.subjectIri", violations));
+        assertion.predicateIri().ifPresent(predicateIri -> {
+            requireSignature(assertion, predicateIri, "assertion.predicateIri", violations);
+            Optional<PredicateRef> predicate = candidate.predicate();
+            if (predicate.isEmpty() || !predicate.orElseThrow().iri().equals(predicateIri)) {
+                add(violations, "PREDICATE_MISMATCH", "predicate",
+                        "statement predicate does not match assertion predicate IRI");
             }
-            PropertyDefinition property = definition.orElseThrow();
-            if (subject != null && !property.ownerTypeKey().equals(subject.typeKey())) {
-                add(violations, "SUBJECT_TYPE_MISMATCH", "subjectId", "subject type does not own this property");
-            }
-            validateLiteralValue(
-                    property.valueType(), property.fixedUnit(), property.constraints(), candidate.value(), "value", violations);
-            return;
+        });
+        if (assertion.objectAssertion()) {
+            assertion.objectIri().ifPresent(objectIri -> {
+                requireSignature(assertion, objectIri, "assertion.objectIri", violations);
+                requireEntityIri(entities, objectIri, "assertion.objectIri", violations);
+            });
         }
-        PredicateRef.RelationRef relationRef = (PredicateRef.RelationRef) predicate;
-        Optional<RelationDefinition> definition = ontology.definition().relations().stream()
-                .filter(item -> item != null && item.key().equals(relationRef.key()))
-                .findFirst();
-        if (definition.isEmpty()) {
-            add(violations, "UNKNOWN_PREDICATE", "predicate", "relation predicate is not declared");
-            return;
+        assertion.relatedIndividualIri().ifPresent(relatedIri -> {
+            requireSignature(assertion, relatedIri, "assertion.relatedIndividualIri", violations);
+            requireEntityIri(entities, relatedIri, "assertion.relatedIndividualIri", violations);
+        });
+        if (assertion.predicateIri().isEmpty() && candidate.predicate().isPresent()) {
+            add(violations, "UNEXPECTED_PREDICATE", "predicate",
+                    "class and individual identity assertions do not carry a business predicate");
         }
-        RelationDefinition relation = definition.orElseThrow();
-        if (subject != null && !relation.sourceTypeKey().equals(subject.typeKey())) {
-            add(violations, "SUBJECT_TYPE_MISMATCH", "subjectId", "subject type is not a relation source");
-        }
-        if (!(candidate.value() instanceof StatementValue.EntityValue entityValue)) {
-            add(violations, "VALUE_TYPE_MISMATCH", "value", "relation value must be an entity reference");
-            return;
-        }
-        Entity target = entities.get(entityValue.entityId());
-        if (target == null) {
-            add(violations, "UNKNOWN_ENTITY", "value.entityId", "relation target is not in the graph");
-        } else {
-            if (!target.scope().equals(candidate.scope())) {
-                add(violations, "SCOPE_MISMATCH", "value.entityId", "target is in a different graph scope");
-            }
-            if (!relation.targetTypeKey().equals(target.typeKey())) {
-                add(violations, "VALUE_ENTITY_TYPE_MISMATCH", "value.entityId",
-                        "relation target type does not match the ontology");
-            }
+        if (subject != null && !assertion.signatureIris().contains(subject.iri())) {
+            add(violations, "SIGNATURE_MISSING_SUBJECT", "assertion.signatureIris",
+                    "assertion signature must contain the subject IRI");
         }
     }
 
-    private static void validateLiteralValue(
-            ValueType expected,
-            Optional<String> fixedUnit,
-            PropertyConstraints constraints,
-            StatementValue value,
-            String path,
-            List<Violation> violations) {
-        if (expected == null) {
-            add(violations, "INVALID_PREDICATE", path, "property value type is undefined");
-            return;
-        }
-        boolean matches = switch (expected) {
-            case TEXT -> value instanceof StatementValue.TextValue;
-            case DECIMAL -> value instanceof StatementValue.DecimalValue;
-            case BOOLEAN -> value instanceof StatementValue.BooleanValue;
-            case DATE -> value instanceof StatementValue.DateValue;
-            case INSTANT -> value instanceof StatementValue.InstantValue;
-        };
-        if (!matches) {
-            add(violations, "VALUE_TYPE_MISMATCH", path, "value does not match the property type");
-            return;
-        }
-        if (value instanceof StatementValue.DecimalValue decimal
-                && fixedUnit != null && fixedUnit.isPresent()
-                && !fixedUnit.orElseThrow().equals(decimal.unit())) {
-            add(violations, "UNIT_MISMATCH", path + ".unit", "decimal unit does not match the fixed unit");
-        }
-        validateConstraints(expected, constraints, value, path, violations);
-    }
-
-    private static void validateConstraints(
-            ValueType expected,
-            PropertyConstraints constraints,
-            StatementValue value,
-            String path,
-            List<Violation> violations) {
-        if (constraints == null) {
-            return;
-        }
-        if (expected == ValueType.TEXT && value instanceof StatementValue.TextValue text
-                && constraints.allowedValues() != null
-                && !constraints.allowedValues().contains(text.value())) {
-            add(violations, "VALUE_NOT_ALLOWED", path,
-                    "text value is not one of the declared allowed values");
-        }
-        if (expected == ValueType.DECIMAL && value instanceof StatementValue.DecimalValue decimal) {
-            if (constraints.minimum() != null) {
-                BigDecimal minimum = parseBound(constraints.minimum());
-                if (minimum != null && decimal.value().compareTo(minimum) < 0) {
-                    add(violations, "VALUE_BELOW_MINIMUM", path,
-                            "decimal value is below the declared minimum");
-                }
-            }
-            if (constraints.maximum() != null) {
-                BigDecimal maximum = parseBound(constraints.maximum());
-                if (maximum != null && decimal.value().compareTo(maximum) > 0) {
-                    add(violations, "VALUE_ABOVE_MAXIMUM", path,
-                            "decimal value is above the declared maximum");
-                }
-            }
+    private static void requireEntityIri(
+            Map<EntityId, Entity> entities, String iri, String path, List<Violation> violations) {
+        boolean known = entities.values().stream().anyMatch(entity -> entity != null && iri.equals(entity.iri()));
+        if (!known) {
+            add(violations, "UNKNOWN_ENTITY", path, "assertion individual IRI is not in the graph");
         }
     }
 
-    private static BigDecimal parseBound(String value) {
-        try {
-            return new BigDecimal(value);
-        } catch (NumberFormatException exception) {
-            return null;
+    private static void requireSignature(
+            AssertionPayload assertion, String iri, String path, List<Violation> violations) {
+        if (!assertion.signatureIris().contains(iri)) {
+            add(violations, "SIGNATURE_MISSING_IRI", path,
+                    "assertion signature does not contain the indexed IRI");
         }
     }
 

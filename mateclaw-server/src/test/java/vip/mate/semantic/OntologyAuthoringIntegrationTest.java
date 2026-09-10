@@ -39,7 +39,7 @@ class OntologyAuthoringIntegrationTest extends SemanticHttpFixture {
         assertThrows(SemanticApiException.class,()->tool.semantic_ontology_create_draft("x","",json.writeValueAsString(definition()),viewer));
         var member=context("member");var original=SecurityContextHolder.getContext();
         var draft=tool.semantic_ontology_create_draft("x","",json.writeValueAsString(definition()),member);
-        tool.semantic_ontology_save_draft(draft.ontologyId(),draft.draftVersion(),"x","updated",json.writeValueAsString(definition()),member);
+        tool.semantic_ontology_save_draft(draft.ontologyId(),draft.draftVersion(),"x","updated",json.writeValueAsString(definition()),UUID.randomUUID().toString(),member);
         assertThrows(SemanticApiException.class,()->tool.semantic_ontology_validate(draft.ontologyId(),draft.draftVersion(),member));
         assertSame(original,SecurityContextHolder.getContext());
         long agent=ChatOrigin.from(member).agentId();

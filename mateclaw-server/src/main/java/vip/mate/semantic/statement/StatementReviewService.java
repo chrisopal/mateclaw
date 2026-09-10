@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import vip.mate.semantic.core.conflict.ConflictDetector;
 import vip.mate.semantic.core.fact.StatementRevision;
 import vip.mate.semantic.core.identity.SemanticIds.StatementId;
 import vip.mate.semantic.governance.SemanticGovernanceService;
@@ -30,7 +29,6 @@ public class StatementReviewService {
     private final OntologyWireMapper wire;
     private final SupportEvaluator support;
     private final SemanticGovernanceService governance;
-    private final ConflictDetector detector=new ConflictDetector();
     public StatementReviewService(StatementApplicationService statements,SemanticAccessService access,GraphApplicationService graphs,JdbcTemplate jdbc,SemanticDomainMapper domain,OntologyWireMapper wire,SupportEvaluator support,SemanticGovernanceService governance){
         this.statements=statements;this.access=access;this.graphs=graphs;this.jdbc=jdbc;this.domain=domain;this.wire=wire;this.support=support;this.governance=governance;
     }
@@ -125,7 +123,7 @@ public class StatementReviewService {
     }
     private void ensureNoAcceptedConflict(GraphRow graph,ProposeRequest candidate,String own,Set<String> ignored){
         domain.validate(graph,domain.content(graph,candidate));
-        var content=domain.content(graph,candidate);var ontology=domain.ontology(graph);for(var other:statements.current(graph.getId(),List.of("ACCEPTED"))){if(other.statementId().equals(own)||ignored.contains(other.statementId()))continue;detector.compare(ontology,content,domain.content(graph,statements.decode(other.contentJson()))).ifPresent(kind->{throw StatementApplicationService.conflict("FACT_CONFLICT","Accepted fact conflicts with current graph");});}
+        var content=domain.content(graph,candidate);var ontology=domain.ontology(graph);for(var other:statements.current(graph.getId(),List.of("ACCEPTED"))){if(other.statementId().equals(own)||ignored.contains(other.statementId()))continue;domain.compare(ontology,graph,content,domain.content(graph,statements.decode(other.contentJson()))).ifPresent(kind->{throw StatementApplicationService.conflict("FACT_CONFLICT","Accepted fact conflicts with current graph");});}
     }
     private void requireActiveEvidence(GraphRow graph,ProposeRequest request){
         if(request.evidenceIds()==null||request.evidenceIds().isEmpty())throw new SemanticApiException(422,"EVIDENCE_REQUIRED","Accepted facts require evidence");
@@ -166,7 +164,7 @@ public class StatementReviewService {
         for(ConflictView conflict:conflicts){
             if(Objects.equals(conflict.id(),excludedConflictId))continue;
             MemberState left=memberState(graph.getId(),conflict.left(),true),right=memberState(graph.getId(),conflict.right(),true);
-            var finding=left.active()&&right.active()?detector.compare(ontology,domain.content(graph,left.content()),domain.content(graph,right.content())):Optional.<vip.mate.semantic.core.conflict.ConflictKind>empty();
+            var finding=left.active()&&right.active()?domain.compare(ontology,graph,domain.content(graph,left.content()),domain.content(graph,right.content())):Optional.<vip.mate.semantic.core.conflict.ConflictKind>empty();
             if(finding.isPresent()){
                 String pairKey=pairKey(left.ref(),right.ref()),retained=retainedPairs.putIfAbsent(pairKey,conflict.id());
                 if(retained==null)jdbc.update("UPDATE mate_semantic_conflict SET kind=?,left_member_kind=?,left_statement_id=?,left_revision=?,right_member_kind=?,right_statement_id=?,right_revision=? WHERE id=? AND status='OPEN'",finding.get().name(),left.ref().kind(),left.ref().statementId(),left.ref().revision(),right.ref().kind(),right.ref().statementId(),right.ref().revision(),conflict.id());

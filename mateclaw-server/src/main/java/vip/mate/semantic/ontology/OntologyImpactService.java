@@ -97,36 +97,20 @@ public class OntologyImpactService {
         if (!source.ontologyId().value().equals(ontologyId))
             throw new SemanticApiException(404, "NOT_FOUND", "Graph is not bound to this ontology");
         Target target = target(scope, ontologyId, request);
-        wire.reject(wire.violations(target.definition()));
-        var revision =
-                new OntologyRevision(
-                        new OntologyRevisionId(target.id()),
-                        new OntologyId(ontologyId),
-                        target.version(),
-                        wire.core(target.definition()));
-        String classification =
-                new OntologyChangeClassifier()
-                        .classify(source.definition(), revision.definition())
-                        .definitionChangeClass()
-                        .name();
+        var parsed = wire.parse(ontologyId, target.id(), target.document().source());
+        wire.reject(wire.violations(parsed));
+        var revision = new OntologyRevision(new OntologyRevisionId(target.id()),
+                new OntologyId(ontologyId), target.version(), parsed, target.document().source().policy());
+        String classification = source.document().document().documentDigest().equals(parsed.document().documentDigest())
+                && source.policy().equals(revision.policy()) ? "UNCHANGED" : "REQUIRES_REVIEW";
         var entities = domain.entities(graph);
         if (entities.size() > 1000) throw incomplete();
         var findings = new Findings();
-        Set<String> declared = new HashSet<>();
-        revision.definition().types().forEach(t -> declared.add(t.key()));
-        entities.values().stream()
-                .sorted(Comparator.comparing(e -> e.entityId().value()))
-                .filter(e -> !declared.contains(e.typeKey()))
-                .forEach(
-                        e ->
-                                findings.add(
-                                        new Diagnostic(
-                                                "ENTITY",
-                                                e.entityId().value(),
-                                                null,
-                                                "UNKNOWN_ENTITY_TYPE",
-                                                "Entity type is absent from target ontology",
-                                                e.typeKey())));
+        Set<String> declared = wire.classIris(parsed);
+        entities.values().stream().sorted(Comparator.comparing(e -> e.entityId().value()))
+                .forEach(e -> e.assertedTypes().stream().filter(t -> !declared.contains(t)).forEach(t ->
+                    findings.add(new Diagnostic("ENTITY", e.entityId().value(), null,
+                        "UNKNOWN_ENTITY_TYPE", "Entity type is absent from target ontology", t))));
         List<Row> rows =
                 jdbc.query(
                         "SELECT s.id,r.revision,r.review_status,r.content_json FROM"
@@ -157,22 +141,24 @@ public class OntologyImpactService {
                         graph.getId());
         if (rows.size() > 10000 || proposals.size() > 10000) throw incomplete();
         List<Checked> checked = new ArrayList<>();
-        var validator = new StatementValidator();
+        Map<String,AssertionPayload> assertionCache=new HashMap<>();
+        Map<List<String>,vip.mate.semantic.core.validation.ValidationReport> validationCache=new HashMap<>();
         for (Row row : concat(rows, proposals)) {
             deadline(deadline);
             try {
                 var payload = wire.decode(row.payload(), ProposeRequest.class);
-                var original = domain.content(graph, payload);
+                var original = domain.content(graph, payload, assertionCache.computeIfAbsent(payload.assertionText(),domain::assertion));
                 var content =
                         new StatementContent(
                                 original.scope(),
                                 revision.revisionId(),
                                 original.subjectId(),
                                 original.predicate(),
-                                original.value(),
+                                original.assertion(),
                                 original.validity(),
                                 original.evidenceIds());
-                var report = validator.validate(domain.scope(graph), revision, content, entities);
+                var report = validationCache.computeIfAbsent(List.of(payload.subjectId(),payload.assertionText()),
+                        key -> domain.validation(revision, graph, content, entities));
                 if (report.valid()) checked.add(new Checked(row, content));
                 else
                     report.violations().stream()
@@ -190,7 +176,7 @@ public class OntologyImpactService {
                                                             row.revision(),
                                                             v.code(),
                                                             v.message(),
-                                                            payload.predicateKey())));
+                                                            original.assertion().predicateIri().orElse(null))));
             } catch (SemanticApiException e) {
                 findings.add(
                         new Diagnostic(
@@ -203,6 +189,7 @@ public class OntologyImpactService {
             }
         }
         conflicts(revision, checked, findings, deadline);
+        businessConflicts(revision, checked, entities, findings, deadline);
         deadline(deadline);
         // READ_COMMITTED also needs a fresh MyBatis session view for the final CAS/auth check.
         session.clearCache();
@@ -224,7 +211,7 @@ public class OntologyImpactService {
                 graph.getOntologyRevisionId(),
                 target.id(),
                 target.draftVersion(),
-                OntologyPackageService.definitionDigest(target.definition()),
+                OntologyPackageService.documentDigest(target.document().source()),
                 graph.getMutationVersion(),
                 Instant.now(),
                 classification,
@@ -245,10 +232,10 @@ public class OntologyImpactService {
             if (request.expectedDraftVersion() < 1
                     || draft.draftVersion() != request.expectedDraftVersion()) throw stale();
             return new Target(
-                    draft.id(), draft.version(), draft.draftVersion(), draft.definition());
+                    draft.id(), draft.version(), draft.draftVersion(), draft.document());
         }
         var revision = ontologies.revision(scope, ontologyId, request.targetRevisionId());
-        return new Target(revision.id(), revision.version(), null, revision.definition());
+        return new Target(revision.id(), revision.version(), null, revision.document());
     }
 
     private static List<Row> concat(List<Row> a, List<Row> b) {
@@ -258,7 +245,7 @@ public class OntologyImpactService {
     }
 
     private record Target(
-            String id, int version, Long draftVersion, OntologyDtos.Definition definition) {}
+            String id, int version, Long draftVersion, OntologyDtos.DocumentView document) {}
 
     private record Row(
             String kind, String id, int revision, String targetStatementId, String payload) {}
@@ -295,112 +282,60 @@ public class OntologyImpactService {
 
     private void conflicts(
             OntologyRevision ontology, List<Checked> rows, Findings findings, long deadline) {
-        Set<PredicateRef> single = new HashSet<>();
-        ontology.definition().properties().stream()
-                .filter(p -> p.multiplicity() == Multiplicity.SINGLE)
-                .forEach(p -> single.add(PredicateRef.property(p.key())));
-        ontology.definition().relations().stream()
-                .filter(r -> r.multiplicity() == Multiplicity.SINGLE)
-                .forEach(r -> single.add(PredicateRef.relation(r.key())));
-        Map<List<Object>, List<Checked>> groups = new LinkedHashMap<>();
-        rows.stream()
-                .filter(r -> single.contains(r.content().predicate()))
-                .forEach(
-                        r ->
-                                groups.computeIfAbsent(
-                                                List.of(
-                                                        r.content().subjectId(),
-                                                        r.content().predicate()),
-                                                k -> new ArrayList<>())
-                                        .add(r));
-        var detector = new ConflictDetector();
-        for (var group : groups.values()) {
-            group.sort(
-                    Comparator.comparing(
-                            r -> r.content().validity().fromInclusive(),
-                            Comparator.nullsFirst(Comparator.naturalOrder())));
-            Map<Object, Set<Checked>> active = new LinkedHashMap<>();
-            Map<Object, Set<Checked>> unresolved = new LinkedHashMap<>();
-            var ending =
-                    new PriorityQueue<Checked>(
-                            Comparator.comparing(r -> r.content().validity().toExclusive()));
-            for (Checked current : group) {
+        // Only opposite assertions for the same value can be explicit contradictions.
+        // Grouping first avoids quadratic work for ordinary multi-valued facts.
+        Map<List<Object>, List<Checked>> groups=new LinkedHashMap<>();
+        for (var row:rows) {
+            var assertion=row.content().assertion();
+            if (!assertion.objectAssertion() && !assertion.dataAssertion() && !assertion.identityAssertion()) continue;
+            var key=List.<Object>of(row.content().subjectId(),row.content().predicate(),
+                    assertion.objectIri(),assertion.literal(),assertion.relatedIndividualIri());
+            groups.computeIfAbsent(key,k->new ArrayList<>()).add(row);
+        }
+        var detector=new ConflictDetector();
+        for (var group:groups.values()) {
+            var positive=group.stream().filter(r->!oppositeSide(r.content().assertion())).toList();
+            var negative=group.stream().filter(r->oppositeSide(r.content().assertion())).toList();
+            for (var left:positive) for (var right:negative) {
                 deadline(deadline);
-                Instant start = current.content().validity().fromInclusive();
-                // Half-open intervals expire before processing a row beginning at the same instant.
-                // UNKNOWN has no endpoints, sorts first and stays active for every later interval.
-                while (start != null
-                        && !ending.isEmpty()
-                        && !ending.peek().content().validity().toExclusive().isAfter(start)) {
-                    Checked expired = ending.remove();
-                    remove(active, expired);
-                    remove(unresolved, expired);
-                }
-                Object key = valueKey(current.content().value());
-                Checked witness = null;
-                for (var bucket : active.entrySet()) {
-                    if (bucket.getKey().equals(key)) continue;
-                    for (Checked other : bucket.getValue()) {
-                        deadline(deadline);
-                        if (!replacementPair(current.row(), other.row())) {
-                            witness = other;
-                            break;
-                        }
-                    }
-                    if (witness != null) break;
-                }
-                if (witness != null) finding(ontology, detector, findings, current, witness);
-                // Each unresolved row is removed on its first conflict or expiry; no pair list.
-                for (var buckets = unresolved.entrySet().iterator(); buckets.hasNext(); ) {
-                    var bucket = buckets.next();
-                    if (bucket.getKey().equals(key)) continue;
-                    for (var rowsLeft = bucket.getValue().iterator(); rowsLeft.hasNext(); ) {
-                        Checked other = rowsLeft.next();
-                        deadline(deadline);
-                        if (replacementPair(current.row(), other.row())) continue;
-                        finding(ontology, detector, findings, other, current);
-                        rowsLeft.remove();
-                    }
-                    if (bucket.getValue().isEmpty()) buckets.remove();
-                }
-                active.computeIfAbsent(key, k -> new LinkedHashSet<>()).add(current);
-                if (witness == null)
-                    unresolved.computeIfAbsent(key, k -> new LinkedHashSet<>()).add(current);
-                if (current.content().validity().toExclusive() != null) ending.add(current);
+                if (replacementPair(left.row(),right.row())) continue;
+                detector.compare(ontology,left.content(),right.content()).ifPresent(kind->{
+                    for (var item:List.of(left,right)) findings.add(new Diagnostic(item.row().kind(),
+                            item.row().id(),item.row().revision(),kind.name(),
+                            "Explicit contradictory assertions require review",
+                            item.content().assertion().predicateIri().orElse(null)));
+                });
             }
         }
     }
-
-    private static void remove(Map<Object, Set<Checked>> buckets, Checked row) {
-        Object key = valueKey(row.content().value());
-        Set<Checked> bucket = buckets.get(key);
-        if (bucket != null) {
-            bucket.remove(row);
-            if (bucket.isEmpty()) buckets.remove(key);
-        }
+    private static boolean oppositeSide(AssertionPayload assertion) {
+        return assertion.negative() || assertion.kind()==AssertionPayload.AssertionKind.DIFFERENT_INDIVIDUAL;
     }
 
-    private static void finding(
-            OntologyRevision ontology,
-            ConflictDetector detector,
-            Findings findings,
-            Checked current,
-            Checked witness) {
-        detector.compare(ontology, current.content(), witness.content())
-                .ifPresent(
-                        kind ->
-                                findings.add(
-                                        new Diagnostic(
-                                                current.row().kind(),
-                                                current.row().id(),
-                                                current.row().revision(),
-                                                kind.name(),
-                                                "Conflicts with "
-                                                        + witness.row().kind()
-                                                        + " "
-                                                        + witness.row().id()
-                                                        + " under target single-value rule",
-                                                current.content().predicate().key())));
+    private void businessConflicts(OntologyRevision ontology,List<Checked> rows,Map<EntityId,Entity> entities,
+            Findings findings,long deadline) {
+        if (ontology.policy().rules().stream().noneMatch(v->v.singleValue())) return;
+        Map<List<Object>,List<Checked>> slots=new LinkedHashMap<>();
+        for (var row:rows) {
+            var content=row.content();var subject=entities.get(content.subjectId());
+            if (subject==null || content.predicate().isEmpty() || content.assertion().negative()) continue;
+            if (ontology.policy().rules().stream().noneMatch(rule->rule.singleValue()
+                    && subject.assertedTypes().contains(rule.classIri())
+                    && rule.predicateIri().equals(content.predicate().orElseThrow().iri()))) continue;
+            slots.computeIfAbsent(List.of(content.subjectId(),content.predicate()),k->new ArrayList<>()).add(row);
+        }
+        var detector=new ConflictDetector();
+        for (var slot:slots.values()) {
+            if (slot.stream().map(v->v.content().assertion()).distinct().limit(2).count()<2) continue;
+            for (int i=0;i<slot.size();i++) for (int j=i+1;j<slot.size();j++) {
+                deadline(deadline); var left=slot.get(i);var right=slot.get(j);
+                if (replacementPair(left.row(),right.row())) continue;
+                detector.compare(ontology,left.content(),right.content(),entities.get(left.content().subjectId()).assertedTypes())
+                        .ifPresent(kind->{for (var item:List.of(left,right)) findings.add(new Diagnostic(item.row().kind(),
+                                item.row().id(),item.row().revision(),kind.name(),"Explicit business single-value policy needs review",
+                                item.content().assertion().predicateIri().orElse(null)));});
+            }
+        }
     }
 
     private static boolean replacementPair(Row a, Row b) {
@@ -410,12 +345,6 @@ public class OntologyImpactService {
                 || ("CHANGE_PROPOSAL".equals(b.kind())
                         && "STATEMENT".equals(a.kind())
                         && a.id().equals(b.targetStatementId()));
-    }
-
-    private static Object valueKey(StatementValue value) {
-        return value instanceof StatementValue.DecimalValue d
-                ? List.of(d.value().stripTrailingZeros(), Objects.toString(d.unit(), ""))
-                : value;
     }
 
     private static void deadline(long deadline) {

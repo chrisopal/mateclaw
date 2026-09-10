@@ -1,7 +1,5 @@
 package vip.mate.semantic;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -15,24 +13,20 @@ import static org.mockito.Mockito.*;
 /** Synthetic corpus exercises deterministic boundaries; it does not measure model accuracy. */
 class SemanticExtractionQualityIntegrationTest extends SemanticExtractionFixture {
     private static final Path FIXTURES = Path.of("../docs/validation/semantic-m5/fixtures");
-    @Override protected Map<String,Object> definition() {
-        try {
-            return new ObjectMapper().convertValue(new ObjectMapper().readTree(FIXTURES.resolve("ontology.json").toFile()).path("definition"), new TypeReference<>() {});
-        } catch (Exception e) { throw new IllegalStateException(e); }
-    }
-
     @Test void measuredQualityFactNeedsMappingAndReviewBeforeTrustedReadback() throws Exception {
         String report = Files.readString(FIXTURES.resolve("01-quality-report.txt"));
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=?,extracted_text=? WHERE id=?", report, report, raw);
-        String issue = call("POST",base+"/entities","member",workspace,Map.of("typeKey","QualityIssue","displayName","孔径超差"),200).path("id").asText();
+        String issue = call("POST",base+"/entities","member",workspace,Map.of("iri","urn:test:quality-issue","assertedTypes",Set.of("urn:test:Equipment"),"displayName","孔径超差"),200).path("id").asText();
         var quote = new Quote(44,48,"0.08");
-        when(model.extract(any())).thenReturn(new ModelResult(List.of(new RawSuggestion(new ObjectMention("issue","QualityIssue","孔径超差"), PredicateRef.property("deviation"), new StatementValue.DecimalValue("0.08","mm"),null,Validity.unknown(),List.of(quote))),new Usage(10,5),"synthetic model"));
+        String temporaryIssue="urn:mateclaw:extraction:quality-issue";
+        String assertion="DataPropertyAssertion(<urn:test:voltage> <"+temporaryIssue+"> \"0.08\"^^<http://www.w3.org/2001/XMLSchema#decimal>)";
+        when(model.extract(any())).thenReturn(new ModelResult(List.of(new RawSuggestion(new ObjectMention(temporaryIssue,Set.of("urn:test:Equipment"),"孔径超差"), new vip.mate.semantic.owl.OwlAssertionAdapter().parse(assertion),null,Validity.unknown(),List.of(quote))),new Usage(10,5),"synthetic model"));
         var suggestion = generate(); String suggestionId = suggestion.path("id").asText();
         assertTrue(suggestion.path("diagnostics").isEmpty());
         assertEquals(0,call("GET",base+"/statements","viewer",workspace,null,200).path("total").asInt());
         call("POST",base+"/suggestions/"+suggestionId+"/submit","member",workspace,Map.of("expectedVersion",1,"operationId",op()),422);
-        var edit = edit(1); edit.put("subjectTypeKey","QualityIssue");edit.put("subjectName","孔径超差");edit.put("subjectId",issue);
-        edit.put("predicateKey","deviation");edit.put("value","0.08");edit.put("unit","mm");edit.put("quotes",List.of(Map.of("startCodePoint",44,"endCodePoint",48,"exactQuote","0.08")));
+        var edit = edit(1); edit.put("subjectIri",temporaryIssue);edit.put("subjectTypeIris",Set.of("urn:test:Equipment"));edit.put("subjectName","孔径超差");edit.put("subjectId",issue);
+        edit.put("assertionText",assertion);edit.put("quotes",List.of(Map.of("startCodePoint",44,"endCodePoint",48,"exactQuote","0.08")));
         call("PATCH",base+"/suggestions/"+suggestionId,"member",workspace,edit,200);
         var submitted=call("POST",base+"/suggestions/"+suggestionId+"/submit","member",workspace,Map.of("expectedVersion",2,"operationId",op()),200);
         assertEquals(0,call("GET",base+"/statements","viewer",workspace,null,200).path("total").asInt());
@@ -45,7 +39,7 @@ class SemanticExtractionQualityIntegrationTest extends SemanticExtractionFixture
 
     @Test void corpusQuotesLimitsAndUntrustedInputsKeepDeterministicBoundaries() throws Exception {
         var manifest=json.readTree(FIXTURES.resolve("manifest.json").toFile());assertEquals(10,manifest.size());
-        var validator=new SuggestionValidator();
+        var validator=new SuggestionValidator(new vip.mate.semantic.owl.OwlAssertionAdapter());
         for(var entry:manifest){
             String source=Files.readString(FIXTURES.resolve(entry.path("file").asText()));
             for(var q:entry.path("referenceQuotes")) assertTrue(validator.matches(source,new Quote(q.path("startCodePoint").asInt(),q.path("endCodePoint").asInt(),q.path("exactQuote").asText())),entry.path("file").asText());

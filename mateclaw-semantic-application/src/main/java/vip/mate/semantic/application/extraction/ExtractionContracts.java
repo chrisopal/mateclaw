@@ -30,9 +30,9 @@ public final class ExtractionContracts {
                                      Map<String, String> parameters) {
         public ModelConfiguration { parameters = Map.copyOf(parameters); }
     }
-    public record ObjectMention(String temporaryRef, String typeKey, String name) {}
-    /** Relations use target and no value; properties use a core literal value and no target. */
-    public record RawSuggestion(ObjectMention subject, PredicateRef predicate, StatementValue value,
+    public record ObjectMention(String temporaryRef, java.util.Set<String> typeIris, String name) { public ObjectMention { typeIris = java.util.Set.copyOf(typeIris); } }
+    /** Standard assertion with temporary individual IRIs; never a business identity match. */
+    public record RawSuggestion(ObjectMention subject, AssertionPayload assertion,
                                 ObjectMention target, Validity validity, List<Quote> quotes) {
         public RawSuggestion {
             validity = validity == null ? Validity.unknown() : validity;

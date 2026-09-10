@@ -27,6 +27,16 @@
             <artifactId>mateclaw-semantic-application</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>vip.mate</groupId>
+            <artifactId>mateclaw-semantic-owl</artifactId>
+            <exclusions>
+                <!-- Spring supplies spring-jcl; avoid competing Commons Logging bridges. -->
+                <exclusion><groupId>org.slf4j</groupId><artifactId>jcl-over-slf4j</artifactId></exclusion>
+                <exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- ===== MateClaw Plugin API ===== -->
         <dependency>
             <groupId>vip.mate</groupId>

@@ -25,13 +25,15 @@ public class OntologyApplicationService {
     private final GovernanceRecordMapper governance;
     private final SemanticAccessService access;
     private final OntologyWireMapper wire;
+    private final OntologyAxiomIndex axiomIndex;
 
     public OntologyApplicationService(
             OntologyMapper mapper,
             CommandRecordMapper commands,
             GovernanceRecordMapper governance,
             SemanticAccessService access,
-            OntologyWireMapper wire) {
+            OntologyWireMapper wire, OntologyAxiomIndex axiomIndex) {
+        this.axiomIndex=axiomIndex;
         this.mapper = mapper;
         this.commands = commands;
         this.governance = governance;
@@ -101,9 +103,11 @@ public class OntologyApplicationService {
         row.setBaseRevisionId(base == null ? null : base.getId());
         row.setName(base == null ? parent.getName() : base.getName());
         row.setDescription(base == null ? parent.getDescription() : base.getDescription());
-        row.setDefinitionJson(base == null ? wire.encode(wire.empty()) : base.getDefinitionJson());
+        wire.store(row, base == null ? wire.empty(id) : wire.document(base).source());
         row.setAvailableForNewBindings(false);
         mapper.insertDraft(row);
+        axiomIndex.synchronize(row);
+        if(base!=null)axiomIndex.copyBindings(base.getId(),row);
         parent.setDraftId(row.getId());
         parent.setDraftCounter(row.getDraftVersion());
         touch(parent);
@@ -119,22 +123,79 @@ public class OntologyApplicationService {
     public DraftView saveDraft(String scope, String id, SaveDraft request) {
         access.require(scope, "member");
         var parent = parent(scope, id, true);
+        validateOperation(request.operationId());
+        String requestHash = hash(wire.encode(request));
+        var previous = commands.find(parent.getWorkspaceId(), request.operationId());
+        if (previous != null) {
+            if (!"SAVE_ONTOLOGY_DRAFT".equals(previous.getKind()) || !id.equals(previous.getResourceId()) || !requestHash.equals(previous.getPayloadHash()))
+                throw conflict("OPERATION_CONFLICT", "Operation id already used with different payload");
+            return wire.decode(previous.getResultJson(), DraftView.class);
+        }
         var row = draft(parent);
         cas(row, request.expectedDraftVersion());
         wire.metadata(request.name(), request.description());
-        var stored = wire.decode(row.getDefinitionJson(), Definition.class);
-        if(stored.definitionFormatVersion()==2 && (request.definition()==null || request.definition().definitionFormatVersion()!=2))
-            throw conflict("DEFINITION_FORMAT_DOWNGRADE","Reload the draft with a client supporting definition format 2");
-        wire.structural(request.definition());
+        wire.store(row, request.document());
         row.setName(request.name());
         row.setDescription(request.description());
-        row.setDefinitionJson(wire.encode(request.definition()));
         if (mapper.saveDraft(row, request.expectedDraftVersion()) != 1)
             throw conflict("DRAFT_CONFLICT", "Draft has changed");
+        axiomIndex.synchronize(row);
         row.setDraftVersion(Math.incrementExact(row.getDraftVersion()));
         parent.setDraftCounter(row.getDraftVersion());
         touch(parent);
-        return wire.draft(row);
+        var result = wire.draft(row);
+        recordDraftCommand(parent, request.operationId(), "SAVE_ONTOLOGY_DRAFT", requestHash, result);
+        return result;
+    }
+
+    @Transactional
+    public DraftView editDraft(String scope, String id, EditDraft request) {
+        access.require(scope, "member");
+        var parent = parent(scope, id, true);
+        validateOperation(request.operationId());
+        String requestHash = hash(wire.encode(request));
+        var previous = commands.find(parent.getWorkspaceId(), request.operationId());
+        if (previous != null) {
+            if (!"EDIT_ONTOLOGY_AXIOMS".equals(previous.getKind()) || !id.equals(previous.getResourceId()) || !requestHash.equals(previous.getPayloadHash()))
+                throw conflict("OPERATION_CONFLICT", "Operation id already used with different payload");
+            return wire.decode(previous.getResultJson(), DraftView.class);
+        }
+        var row = draft(parent);
+        cas(row, request.expectedDraftVersion());
+        wire.edit(row, request.changes());
+        if (mapper.saveDraft(row, request.expectedDraftVersion()) != 1) throw conflict("DRAFT_CONFLICT", "Draft has changed");
+        axiomIndex.synchronize(row);
+        row.setDraftVersion(Math.incrementExact(row.getDraftVersion()));
+        parent.setDraftCounter(row.getDraftVersion()); touch(parent);
+        var result = wire.draft(row);
+        recordDraftCommand(parent, request.operationId(), "EDIT_ONTOLOGY_AXIOMS", requestHash, result);
+        return result;
+    }
+
+    public byte[] exportDraftDocument(String scope, String id, Long expectedDraftVersion,
+            vip.mate.semantic.core.ontology.OntologyDocumentSyntax syntax) {
+        access.require(scope, "viewer");
+        var row = draft(parent(scope, id, false));
+        cas(row, expectedDraftVersion);
+        return wire.export(row, syntax);
+    }
+
+    public byte[] exportDocument(String scope, String id, String revisionId, vip.mate.semantic.core.ontology.OntologyDocumentSyntax syntax) {
+        access.require(scope, "viewer");
+        return wire.export(published(parent(scope, id, false), revisionId), syntax);
+    }
+
+    private void validateOperation(String operationId) {
+        var errors = new ArrayList<Violation>();
+        wire.text(operationId, "operationId", 128, true, errors); wire.reject(errors);
+    }
+
+    private void recordDraftCommand(OntologyRow parent, String operationId, String kind, String requestHash, DraftView result) {
+        var command = new CommandRecordRow();
+        command.setId(id()); command.setWorkspaceId(parent.getWorkspaceId());
+        command.setOperationId(operationId); command.setKind(kind); command.setResourceId(parent.getId());
+        command.setPayloadHash(requestHash); command.setResultJson(wire.encode(result)); command.setCreatedAt(now());
+        commands.insert(command);
     }
 
     @Transactional
@@ -143,6 +204,7 @@ public class OntologyApplicationService {
         var parent = parent(scope, id, true);
         var row = draft(parent);
         cas(row, expected);
+        axiomIndex.discard(row.getId());
         if (mapper.deleteDraft(row.getId(), expected) != 1)
             throw conflict("DRAFT_CONFLICT", "Draft has changed");
         parent.setDraftId(null);
@@ -154,8 +216,8 @@ public class OntologyApplicationService {
         access.require(scope, "member");
         var row = draft(parent(scope, id, true));
         cas(row, request.expectedDraftVersion());
-        var violations = wire.violations(wire.decode(row.getDefinitionJson(), Definition.class));
-        return new ValidationView(row.getDraftVersion(), violations.stream().noneMatch(v->"ERROR".equals(v.severity())), violations);
+        var violations = wire.violations(row);
+        return new ValidationView(row.getDraftVersion(), violations.stream().noneMatch(v->"ERROR".equals(v.severity())), violations, "OWL 2 DL", "NOT_RUN");
     }
 
     @Transactional
@@ -175,14 +237,14 @@ public class OntologyApplicationService {
         // successful publication consumed.
         var replay = commands.find(parent.getWorkspaceId(), request.operationId());
         if (replay != null) {
-            if (!hash.equals(replay.getPayloadHash()) || !id.equals(replay.getResourceId()))
+            if (!"PUBLISH_ONTOLOGY".equals(replay.getKind()) || !hash.equals(replay.getPayloadHash()) || !id.equals(replay.getResourceId()))
                 throw conflict(
                         "OPERATION_CONFLICT", "Operation id already used with different payload");
             return wire.decode(replay.getResultJson(), RevisionView.class);
         }
         var row = draft(parent);
         cas(row, request.expectedDraftVersion());
-        wire.reject(wire.violations(wire.decode(row.getDefinitionJson(), Definition.class)));
+        wire.reject(wire.violations(row));
         row.setPublishedAt(now());
         row.setPublishedBy(actor.getId().toString());
         row.setPublicationNote(request.note());
@@ -258,6 +320,7 @@ public class OntologyApplicationService {
         access.require(scope, "admin");
         var row = commands.find(Long.parseLong(scope), operation);
         if (row == null) throw notFound();
+        if (!"PUBLISH_ONTOLOGY".equals(row.getKind())) throw new SemanticApiException(400, "UNSUPPORTED_OPERATION_KIND", "This endpoint returns publication operations only");
         parent(scope, row.getResourceId(), false);
         return new Operation(
                 row.getOperationId(),
@@ -271,40 +334,17 @@ public class OntologyApplicationService {
         var parent = parent(scope, id, false);
         var before = from == null ? null : published(parent, from);
         var after = Objects.equals(to, parent.getDraftId()) ? draft(parent) : published(parent, to);
-        Definition beforeDefinition =
-                before == null
-                        ? wire.empty()
-                        : wire.decode(before.getDefinitionJson(), Definition.class);
-        Definition afterDefinition = wire.decode(after.getDefinitionJson(), Definition.class);
         List<Change> changes = new ArrayList<>();
-        compare("types", beforeDefinition.types(), afterDefinition.types(), Type::key, changes);
-        compare(
-                "properties",
-                beforeDefinition.properties(),
-                afterDefinition.properties(),
-                Property::key,
-                changes);
-        compare(
-                "relations",
-                beforeDefinition.relations(),
-                afterDefinition.relations(),
-                Relation::key,
-                changes);
-        change(
-                "metadata",
-                "name",
-                before == null ? null : before.getName(),
-                after.getName(),
-                changes);
-        change(
-                "metadata",
-                "description",
-                before == null ? null : before.getDescription(),
-                after.getDescription(),
-                changes);
-        var classified=new vip.mate.semantic.core.ontology.OntologyChangeClassifier().classify(wire.core(beforeDefinition),wire.core(afterDefinition));
-        return new Diff(from, to, List.copyOf(changes),classified.definitionChangeClass().name(),
-                classified.termChanges().stream().map(c->new TermChange(c.kind().name(),c.key(),c.definitionChangeClass().name(),c.reasons())).toList());
+        var beforeAxioms = before == null ? List.<vip.mate.semantic.core.ontology.OntologyAxiomDescriptor>of() : wire.parsed(before).axioms();
+        var afterAxioms = wire.parsed(after).axioms();
+        compare("axioms", beforeAxioms.stream().map(vip.mate.semantic.core.ontology.OntologyAxiomDescriptor::rendering).toList(), afterAxioms.stream().map(vip.mate.semantic.core.ontology.OntologyAxiomDescriptor::rendering).toList(), Function.identity(), changes);
+        change("metadata", "name", before == null ? null : before.getName(), after.getName(), changes);
+        change("metadata", "description", before == null ? null : before.getDescription(), after.getDescription(), changes);
+        change("document", "source", before == null ? null : before.getDocumentText(), after.getDocumentText(), changes);
+        change("document", "imports", before == null ? null : before.getImportLockDigest(), after.getImportLockDigest(), changes);
+        change("policy", "businessPolicy", before == null ? null : before.getPolicyJson(), after.getPolicyJson(), changes);
+        // Syntactic change is not a proof of semantic compatibility. M8 must compute an impact plan.
+        return new Diff(from, to, List.copyOf(changes), changes.isEmpty() ? "UNCHANGED" : "REQUIRES_REVIEW", List.of());
     }
 
     private <T> void compare(

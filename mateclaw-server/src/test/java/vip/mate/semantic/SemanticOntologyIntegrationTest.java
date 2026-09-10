@@ -11,6 +11,41 @@ import java.util.concurrent.*;
 
 class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
     @Test
+    void draftExportPinsVersionAndRemainsSeparateFromPublishedExport() throws Exception {
+        String id = create(); var initial = draft(id); var saved = save(id, initial.path("draftVersion").asLong());
+        String path = "/ontologies/" + id + "/draft/document?expectedDraftVersion=" + saved.path("draftVersion").asLong();
+        for (String syntax : List.of("FUNCTIONAL", "RDF_XML")) {
+            var response = request("GET", path + "&syntax=" + syntax, "viewer", workspace, null);
+            assertEquals(200, response.getStatus());
+            assertTrue(response.getContentAsByteArray().length > 0);
+        }
+        call("GET", path, "viewer", otherWorkspace, null, 403);
+        call("GET", path, "owner", otherWorkspace, null, 404);
+        call("GET", "/ontologies/" + id + "/draft/document?expectedDraftVersion=1", "viewer", workspace, null, 409);
+        call("GET", "/ontologies/" + id + "/revisions/" + initial.path("id").asText() + "/document", "viewer", workspace, null, 404);
+        assertEquals(saved, call("GET", "/ontologies/" + id + "/draft", "viewer", workspace, null, 200));
+    }
+
+    @Test
+    void axiomEditsPreserveIndexAndReplayAndDiscardDeletesProjection() throws Exception {
+        String id=create(); var first=draft(id); var saved=save(id,1);
+        String revision=first.path("id").asText();
+        var oldIds=jdbc.query("SELECT axiom_id FROM mate_semantic_ontology_axiom WHERE revision_id=? ORDER BY axiom_id",(rs,n)->rs.getString(1),revision);
+        assertFalse(oldIds.isEmpty());
+        var edit=Map.of("expectedDraftVersion",2,"operationId",UUID.randomUUID().toString(),"changes",List.of(
+            Map.of("kind","ADD","functionalSyntax","SubClassOf(<urn:test:Equipment> <http://www.w3.org/2002/07/owl#Thing>)")));
+        var changed=call("PATCH","/ontologies/"+id+"/draft/axioms","member",workspace,edit,200);
+        assertEquals(changed,call("PATCH","/ontologies/"+id+"/draft/axioms","member",workspace,edit,200));
+        var after=jdbc.query("SELECT axiom_id FROM mate_semantic_ontology_axiom WHERE revision_id=?",(rs,n)->rs.getString(1),revision);
+        assertTrue(after.containsAll(oldIds)); assertEquals(oldIds.size()+1,after.size());
+        call("PATCH","/ontologies/"+id+"/draft/axioms","member",workspace,
+            Map.of("expectedDraftVersion",3,"operationId",UUID.randomUUID().toString(),"changes",List.of(Map.of("kind","ADD"))),422);
+        assertEquals(3,call("GET","/ontologies/"+id+"/draft","member",workspace,null,200).path("draftVersion").asInt());
+        call("DELETE","/ontologies/"+id+"/draft?expectedDraftVersion=3","member",workspace,null,200);
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_ontology_axiom WHERE revision_id=?",Integer.class,revision));
+    }
+
+    @Test
     void discardedDraftTokenCannotOverwriteReplacementDraft() throws Exception {
         String id = create();
         var original = draft(id);
@@ -214,12 +249,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
     void incompleteReferencesSaveButValidationAndPublishReject() throws Exception {
         String id = create();
         draft(id);
-        var broken = new HashMap<>(definition());
-        var prop =
-                new HashMap<>(
-                        (Map<String, Object>) ((List<?>) broken.get("properties")).getFirst());
-        prop.put("ownerTypeKey", "Missing");
-        broken.put("properties", List.of(prop));
+        var broken = owlDocument("Ontology(<urn:test:broken> Declaration(Class(<urn:test:C>)) Declaration(ObjectProperty(<urn:test:p>)) TransitiveObjectProperty(<urn:test:p>) SubClassOf(<urn:test:C> ObjectMaxCardinality(1 <urn:test:p>)))");
         call("PUT", "/ontologies/" + id + "/draft", "member", workspace, saveBody(1, broken), 200);
         var validation =
                 call(
@@ -230,7 +260,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                         Map.of("expectedDraftVersion", 2),
                         200);
         assertFalse(validation.path("valid").asBoolean());
-        assertEquals("UNKNOWN_TYPE", validation.path("violations").get(0).path("code").asText());
+        assertFalse(validation.path("violations").isEmpty());
         assertFalse(
                 call(
                                 "POST",
@@ -254,20 +284,9 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                 workspace,
                 Map.of("name", 12, "description", ""),
                 400);
-        for (Object type : List.of("NOT_A_TYPE", 0)) {
-            var broken = new HashMap<>(definition());
-            var prop =
-                    new HashMap<>(
-                            (Map<String, Object>) ((List<?>) broken.get("properties")).getFirst());
-            prop.put("valueType", type);
-            broken.put("properties", List.of(prop));
-            call(
-                    "PUT",
-                    "/ontologies/" + id + "/draft",
-                    "member",
-                    workspace,
-                    saveBody(1, broken),
-                    400);
+        for (Object syntax : List.of("NOT_A_SYNTAX", 0)) {
+            var broken=new HashMap<>(definition()); broken.put("syntax",syntax);
+            call("PUT","/ontologies/"+id+"/draft","member",workspace,saveBody(1,broken),400);
         }
         call(
                 "POST",
@@ -277,7 +296,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                 Map.of("name", "x".repeat(129), "description", ""),
                 422);
         var broken = new HashMap<>(definition());
-        broken.put("types", Arrays.asList((Object) null));
+        broken.put("documentText", "Ontology( malformed");
         call("PUT", "/ontologies/" + id + "/draft", "member", workspace, saveBody(1, broken), 422);
         var coerced = new HashMap<>(saveBody(1, definition()));
         coerced.put("expectedDraftVersion", 1.5);
@@ -333,7 +352,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                         Map.of("availableForNewBindings", false),
                         200);
         assertFalse(disabled.path("availableForNewBindings").asBoolean());
-        assertEquals(v1.path("definition"), disabled.path("definition"));
+        assertEquals(v1.path("document"), disabled.path("document"));
         call(
                 "DELETE",
                 "/ontologies/" + id + "/draft?expectedDraftVersion=1",

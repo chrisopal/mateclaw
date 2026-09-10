@@ -28,7 +28,7 @@ it('clears old evidence before a new permission failure is returned', async () =
  expect(document.body.textContent).toContain('Support withdrawn')
 })
 it('read-only review drawer has no accept or reject actions', async () => {
- mount({ setup: () => () => h(StatementReviewDrawer, { graphId: 'g', canReview: false, statement: { id: 's', graphId: 'g', revision: 1, ontologyRevisionId: 'o', subjectId: 'e', predicateKind: 'PROPERTY', predicateKey: 'p', valueType: 'TEXT', value: 'v', unit: null, targetEntityId: null, validityKind: 'UNKNOWN', validFrom: null, validTo: null, evidenceIds: [], reviewStatus: 'PROPOSED', supportStatus: 'SUPPORTED', proposedBy: 'u', createdAt: '' } }) })
+ mount({ setup: () => () => h(StatementReviewDrawer, { graphId: 'g', canReview: false, statement: { id: 's', graphId: 'g', revision: 1, ontologyRevisionId: 'o', subjectId: 'e', assertion: { kind: 'POSITIVE_DATA_PROPERTY', functionalSyntax: 'DataPropertyAssertion(<https://example.test/p> <https://example.test/e> "v")', signatureIris: ['https://example.test/e', 'https://example.test/p'], subjectIri: 'https://example.test/e', predicateIri: 'https://example.test/p', literal: { lexicalValue: 'v', datatypeIri: 'http://www.w3.org/2001/XMLSchema#string' } }, validityKind: 'UNKNOWN', validFrom: null, validTo: null, evidenceIds: [], reviewStatus: 'PROPOSED', supportStatus: 'SUPPORTED', proposedBy: 'u', createdAt: '' } }) })
  await flush()
  expect([...document.body.querySelectorAll('button')].some(b => ['Accept', 'Reject'].includes(b.textContent?.trim() ?? ''))).toBe(false)
  expect(graphQueryApi.history).not.toHaveBeenCalled()

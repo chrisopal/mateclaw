@@ -20,8 +20,8 @@ public class MateClawSubmissionAdapter implements KnowledgeSubmissionPort {
         access.require(actor,graph,source.sourceRef(),Action.SUBMIT);
         List<String> evidence=new ArrayList<>();int index=0;
         for(Quote quote:quotes)evidence.add(sources.createEvidence(actor.workspaceId(),graph,source.snapshotId(),new EvidenceRequest(operation+"-e"+index++,quote.startCodePoint(),quote.endCodePoint(),quote.exactQuote())).id());
-        var value=content.value();var validity=content.validity();
-        var request=new ProposeRequest(operation,content.subjectId().value(),content.predicate() instanceof PredicateRef.PropertyRef?"PROPERTY":"RELATION",content.predicate().key(),ExtractionMapping.type(value),ExtractionMapping.value(value),ExtractionMapping.unit(value),value instanceof StatementValue.EntityValue e?e.entityId().value():null,validity.kind().name(),validity.fromInclusive(),validity.toExclusive(),evidence);
+        var validity=content.validity();
+        var request=new ProposeRequest(operation,content.subjectId().value(),content.assertion().functionalSyntax(),validity.kind().name(),validity.fromInclusive(),validity.toExclusive(),evidence);
         var result=statements.propose(actor.workspaceId(),graph,request);return new SubmissionRef(result.id(),result.revision());
     });}
 }

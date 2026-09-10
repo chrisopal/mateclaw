@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:t="urn:test:">
+ <owl:Ontology rdf:about="urn:test:domain"/>
+ <owl:Class rdf:about="urn:test:A"/>
+ <owl:ObjectProperty rdf:about="urn:test:p"><rdfs:domain rdf:resource="urn:test:A"/></owl:ObjectProperty>
+ <owl:NamedIndividual rdf:about="urn:test:a"><t:p rdf:resource="urn:test:b"/></owl:NamedIndividual>
+ <owl:NamedIndividual rdf:about="urn:test:b"/>
+</rdf:RDF>

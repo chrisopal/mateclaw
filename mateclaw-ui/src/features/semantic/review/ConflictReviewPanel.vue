@@ -4,9 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { formatValidity } from '../shared/formatValidity'
 import { statementApi } from '../api/statementApi'
 import { useSemanticScope } from '../shared/useSemanticScope'
-import type { Definition, SemanticEntity } from '../api/types'
+import type { SemanticEntity } from '../api/types'
 import type { Change, Conflict, ConflictMember, Proposal, Statement } from '../api/workbenchTypes'
-const props = defineProps<{ graphId: string; conflicts: Conflict[]; statements?: Statement[]; entities?: SemanticEntity[]; definition?: Definition }>()
+const props = defineProps<{ graphId: string; conflicts: Conflict[]; statements?: Statement[]; entities?: SemanticEntity[] }>()
 const emit = defineEmits<{ saved: []; select: [id: string]; evidence: [id: string] }>()
 const { t, te } = useI18n(), { begin, workspace, cancel } = useSemanticScope()
 function statusName(status: string) { const key = `semantic.w.states.${status}`; return te(key) ? t(key) : status }
@@ -14,9 +14,8 @@ const proposals = ref<Record<string, Change>>({})
 function proposalMember(member: ConflictMember) { return member.kind === 'CHANGE_PROPOSAL' }
 function contentName(row: Proposal | Statement) {
   const entity = (id: string | null) => props.entities?.find(item => item.id === id)?.displayName ?? id
-  const terms = row.predicateKind === 'RELATION' ? props.definition?.relations : props.definition?.properties
-  const predicate = terms?.find(term => term.key === row.predicateKey)?.label ?? row.predicateKey
-  return `${entity(row.subjectId)} · ${predicate}: ${row.value ?? entity(row.targetEntityId)} ${row.unit ?? ''}`
+  if ('assertion' in row && row.assertion) return `${entity(row.subjectId)} · ${row.assertion.kind}: ${row.assertion.functionalSyntax}`
+  return `${entity(row.subjectId)} · ${'assertionText' in row ? row.assertionText ?? 'Assertion' : ('assertion' in row ? row.assertion?.functionalSyntax ?? 'Assertion' : 'Assertion')} `
 }
 function memberName(member: ConflictMember, index: number) {
   const row = proposalMember(member) ? proposals.value[member.statementId]?.content : props.statements?.find(statement => statement.id === member.statementId)

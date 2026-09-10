@@ -18,6 +18,19 @@ class SemanticOntologyPackageIntegrationTest extends SemanticHttpFixture {
     @MockitoSpyBean GovernanceRecordMapper governance;
 
     @Test
+    void standardDocumentWithoutItsImportLockCannotCreatePartialOntology() throws Exception {
+        var content = Map.of("packageFormatVersion", 2, "name", "unlocked import", "description", "synthetic",
+                "document", owlDocument("Ontology(<urn:test:unlocked> Import(<https://unresolved.invalid/ontology>) Declaration(Class(<urn:test:C>)))"));
+        int before = count();
+        call("POST", "/ontology-packages/preview", "member", workspace, content, 422);
+        String operation = "unlocked-" + UUID.randomUUID();
+        call("POST", "/ontology-packages/import", "member", workspace,
+                Map.of("package", content, "expectedDigest", "0".repeat(64), "operationId", operation, "name", "unlocked import"), 422);
+        assertEquals(before, count());
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_command_record WHERE operation_id=?", Integer.class, operation));
+    }
+
+    @Test
     void failedGovernanceWriteRollsBackEntireImportAndAllowsRetry() throws Exception {
         var pack = pack();
         var preview = call("POST", "/ontology-packages/preview", "member", workspace, pack, 200);
@@ -125,7 +138,7 @@ class SemanticOntologyPackageIntegrationTest extends SemanticHttpFixture {
         int before = count();
         var preview = call("POST", "/ontology-packages/preview", "member", workspace, pack, 200);
         assertEquals(before, count());
-        assertTrue(preview.path("typeCount").isNumber());
+        assertTrue(preview.path("axiomCount").isNumber());
         String op = "package-" + UUID.randomUUID();
         var body =
                 Map.of(
@@ -177,7 +190,8 @@ class SemanticOntologyPackageIntegrationTest extends SemanticHttpFixture {
                         200);
         assertFalse(exported.has("workspaceId"));
         assertFalse(exported.has("facts"));
-        assertEquals(2, exported.path("definition").path("definitionFormatVersion").asInt());
+        assertEquals(2, exported.path("packageFormatVersion").asInt());
+        assertEquals("owl-document-v1",exported.path("document").path("modelSchema").asText());
         call("POST", "/ontology-packages/preview", "member", workspace, exported, 200);
         assertEquals(
                 1,
@@ -205,47 +219,23 @@ class SemanticOntologyPackageIntegrationTest extends SemanticHttpFixture {
     }
 
     @Test
-    void normalizedDecimalPackageDigestSupportsEquivalentReplay() throws Exception {
-        var original = json.valueToTree(pack());
-        var equivalent = original.deepCopy();
-        var constraint =
-                (com.fasterxml.jackson.databind.node.ObjectNode)
-                        equivalent.path("definition").path("properties").get(0).path("constraints");
-        constraint.put("minimum", "0.000");
-        constraint.put("maximum", "400.00");
-        var first = call("POST", "/ontology-packages/preview", "member", workspace, original, 200);
-        var second =
-                call("POST", "/ontology-packages/preview", "member", workspace, equivalent, 200);
-        assertEquals(first.path("digest"), second.path("digest"));
-        var body =
-                new LinkedHashMap<String, Object>(
-                        Map.of(
-                                "package",
-                                original,
-                                "expectedDigest",
-                                first.path("digest").asText(),
-                                "operationId",
-                                "normalized-" + UUID.randomUUID(),
-                                "name",
-                                "等价数值模板"));
-        var imported = call("POST", "/ontology-packages/import", "member", workspace, body, 200);
-        body.put("package", equivalent);
-        assertEquals(
-                imported,
-                call("POST", "/ontology-packages/import", "member", workspace, body, 200));
+    void exactDocumentDigestAndIndependentClonesPreserveIdentity() throws Exception {
+        var original=json.valueToTree(pack()); var changed=original.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode)changed.path("document"))
+            .put("documentText",changed.path("document").path("documentText").asText()+"\n");
+        var first=call("POST","/ontology-packages/preview","member",workspace,original,200);
+        var second=call("POST","/ontology-packages/preview","member",workspace,changed,200);
+        assertNotEquals(first.path("digest"),second.path("digest"),"package identity preserves exact source bytes");
+        String op=UUID.randomUUID().toString();
+        var body=new LinkedHashMap<String,Object>(Map.of("package",original,"expectedDigest",first.path("digest").asText(),"operationId",op,"name","First"));
+        var imported=call("POST","/ontology-packages/import","member",workspace,body,200);
+        body.put("package",changed);
+        call("POST","/ontology-packages/import","member",workspace,body,409);
+        body.put("package",original);body.put("operationId",UUID.randomUUID().toString());body.put("name","Second");
+        var clone=call("POST","/ontology-packages/import","member",workspace,body,200);
+        assertNotEquals(imported.path("ontologyId"),clone.path("ontologyId"));
     }
-
-    private Map<String, Object> pack() {
-        return Map.of(
-                "packageFormatVersion",
-                1,
-                "name",
-                "设备😀模板",
-                "description",
-                "合成验证模型",
-                "definition",
-                SemanticOntologyM4IntegrationTest.enhanced());
-    }
+    private Map<String,Object> pack(){return Map.of("packageFormatVersion",2,"name","设备😀模板","description","合成验证模型","document",definition());}
 
     private int count() {
         return jdbc.queryForObject(

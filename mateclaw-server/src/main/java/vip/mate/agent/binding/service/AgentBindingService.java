@@ -520,6 +520,18 @@ public class AgentBindingService implements AgentBindingResolver {
      *       {@code AgentGraphBuilder}.</li>
      * </ul>
      */
+    /** Legacy global defaults never grant ontology authoring; it requires an explicit binding. */
+    public static vip.mate.agent.AgentToolSet applyEffectiveToolScope(
+            vip.mate.agent.AgentToolSet tools, Set<String> effective) {
+        if (effective != null) return tools.withAllowedToolsOnly(effective);
+        Set<String> excluded = new LinkedHashSet<>();
+        excluded.add("OntologyAuthoringTool");
+        excluded.add("ontologyAuthoringTool");
+        tools.allNames().stream().filter(name -> name.startsWith("semantic_ontology_"))
+                .forEach(excluded::add);
+        return tools.withDeniedToolsFiltered(excluded);
+    }
+
     public Set<String> getEffectiveToolNames(Long agentId) {
         AgentEntity agent = agentMapper.selectById(agentId);
         boolean skillsDisabled = agent != null && Boolean.TRUE.equals(agent.getSkillsDisabled());

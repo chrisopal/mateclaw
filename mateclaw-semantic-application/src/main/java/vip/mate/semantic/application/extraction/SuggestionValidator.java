@@ -16,8 +16,10 @@ import static vip.mate.semantic.application.extraction.ExtractionContracts.*;
 /** Evidence checks and delegation to the one core statement rule authority. */
 public final class SuggestionValidator {
     public static final int MAX_SUGGESTIONS = 200;
+    private final AssertionValidationPort assertions;
+    public SuggestionValidator(AssertionValidationPort assertions) { this.assertions = java.util.Objects.requireNonNull(assertions); }
 
-    public boolean matches(String snapshot, Quote quote) {
+    public static boolean matches(String snapshot, Quote quote) {
         if (snapshot == null || quote == null || quote.exactQuote() == null
                 || quote.startCodePoint() < 0 || quote.endCodePoint() <= quote.startCodePoint()
                 || quote.endCodePoint() > snapshot.codePointCount(0, snapshot.length())) {
@@ -36,7 +38,7 @@ public final class SuggestionValidator {
 
     public ValidationReport validate(GraphScope scope, OntologyRevision ontology, StatementContent content,
                                      Map<EntityId, Entity> entities, String snapshot, List<Quote> quotes) {
-        List<Violation> violations = new ArrayList<>(new StatementValidator()
+        List<Violation> violations = new ArrayList<>(new StatementValidator(assertions)
                 .validate(scope, ontology, content, entities).violations());
         if (quotes == null || quotes.isEmpty()) {
             violations.add(error("EVIDENCE_REQUIRED", "quotes", "at least one exact source quote is required"));
@@ -53,28 +55,20 @@ public final class SuggestionValidator {
     /** Temporary entities are used only to validate model terminology, never to resolve business identity. */
     public ValidationReport validateRaw(GraphScope scope, OntologyRevision ontology, RawSuggestion raw,
                                         String snapshot) {
-        if (raw == null || raw.subject() == null || raw.predicate() == null || ontology == null || scope == null) {
+        if (raw == null || raw.subject() == null || raw.assertion() == null || ontology == null || scope == null)
             return new ValidationReport(List.of(error("INVALID_SUGGESTION", "$", "suggestion structure is incomplete")));
-        }
         try {
             EntityId subjectId = new EntityId("1");
             Map<EntityId, Entity> entities = new HashMap<>();
-            entities.put(subjectId, new Entity(subjectId, scope, raw.subject().typeKey(), raw.subject().name()));
-            StatementValue value = raw.value();
-            if (raw.predicate() instanceof PredicateRef.RelationRef) {
-                if (raw.target() == null || value != null) {
-                    return new ValidationReport(List.of(error("INVALID_SUGGESTION", "target", "relation requires a target mention and no literal value")));
-                }
-                EntityId targetId = new EntityId("2");
-                entities.put(targetId, new Entity(targetId, scope, raw.target().typeKey(), raw.target().name()));
-                value = new StatementValue.EntityValue(targetId);
-            } else if (raw.target() != null || value == null || value instanceof StatementValue.EntityValue) {
-                return new ValidationReport(List.of(error("INVALID_SUGGESTION", "value", "property requires a core literal value and no target")));
+            entities.put(subjectId,new Entity(subjectId,scope,raw.subject().temporaryRef(),raw.subject().typeIris(),raw.subject().name()));
+            if (raw.target()!=null) {
+                EntityId targetId=new EntityId("2");
+                entities.put(targetId,new Entity(targetId,scope,raw.target().temporaryRef(),raw.target().typeIris(),raw.target().name()));
             }
-            StatementContent candidate = new StatementContent(scope, ontology.revisionId(), subjectId,
-                    raw.predicate(), value, raw.validity(), Set.of());
-            return validate(scope, ontology, candidate, entities, snapshot, raw.quotes());
-        } catch (IllegalArgumentException | NullPointerException exception) {
+            java.util.Optional<PredicateRef> predicate=raw.assertion().predicateIri().map(iri -> raw.assertion().literal().isPresent() ? PredicateRef.property(iri) : PredicateRef.relation(iri));
+            StatementContent candidate=new StatementContent(scope,ontology.revisionId(),subjectId,predicate,raw.assertion(),raw.validity(),Set.of());
+            return validate(scope,ontology,candidate,entities,snapshot,raw.quotes());
+        } catch(IllegalArgumentException | NullPointerException exception) {
             return new ValidationReport(List.of(error("INVALID_SUGGESTION", "$", "suggestion structure is invalid")));
         }
     }

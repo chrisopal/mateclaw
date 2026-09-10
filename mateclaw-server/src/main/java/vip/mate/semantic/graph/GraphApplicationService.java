@@ -9,7 +9,6 @@ import vip.mate.semantic.ontology.OntologyWireMapper;
 import vip.mate.semantic.graph.repository.GraphMapper;
 import vip.mate.semantic.security.SemanticAccessService;
 import vip.mate.semantic.web.GraphDtos.*;
-import vip.mate.semantic.web.OntologyDtos.Definition;
 import vip.mate.semantic.web.SemanticApiException;
 
 import java.time.*;
@@ -34,7 +33,7 @@ public class GraphApplicationService {
         GraphRow graph = requireGraph(scope, graphId, false);
         requireKb(graph.getWorkspaceId(), graph.getKbId());
         GraphOntologyRevisionRow revision = requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
-        return new GraphDetail(view(graph, revision), wire.decode(revision.getDefinitionJson(), Definition.class));
+        return new GraphDetail(view(graph, revision), wire.document(revision));
     }
 
     public Binding get(String scope, String kbId) {
@@ -106,9 +105,9 @@ public class GraphApplicationService {
     @Transactional
     public EntityView createEntity(String scope, String graphId, CreateEntity request) {
         var actor = access.require(scope, "member");
-        if (request == null || request.typeKey() == null || request.typeKey().isBlank()
+        if (request == null || request.assertedTypes() == null
                 || request.displayName() == null || request.displayName().isBlank())
-            throw bad("typeKey and displayName are required");
+            throw bad("assertedTypes and displayName are required");
         if (request.displayName().codePointCount(0, request.displayName().length()) > 256)
             throw new SemanticApiException(422, "INVALID_ENTITY", "displayName exceeds 256 characters");
         GraphRow graph = requireGraph(scope, graphId, true);
@@ -116,14 +115,19 @@ public class GraphApplicationService {
         if (mapper.entityCount(graph.getId()) >= 1000)
             throw new SemanticApiException(422, "GRAPH_ENTITY_LIMIT", "Graph supports at most 1000 entities");
         GraphOntologyRevisionRow revision = requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
-        Definition definition = wire.decode(revision.getDefinitionJson(), Definition.class);
-        if (definition.types().stream().noneMatch(t -> t.key().equals(request.typeKey())))
+        if (!wire.classIris(revision).containsAll(request.assertedTypes()))
             throw new SemanticApiException(422, "UNKNOWN_ENTITY_TYPE", "Entity type is not in the pinned ontology");
         EntityRow row = new EntityRow();
-        row.setId(id()); row.setGraphId(graph.getId()); row.setTypeKey(request.typeKey());
+        row.setId(id()); row.setGraphId(graph.getId());
+        String iri = request.iri() == null ? "urn:mateclaw:workspace:"+scope+":graph:"+graphId+":individual:"+row.getId() : request.iri();
+        try {
+            if (iri.length()>2048 || !java.net.URI.create(iri).isAbsolute()) throw new IllegalArgumentException();
+        } catch (IllegalArgumentException exception) { throw new SemanticApiException(422, "INVALID_IRI", "Absolute entity IRI required, at most 2048 characters"); }
+        row.setIri(iri); row.setIriDigest(vip.mate.semantic.core.ontology.OntologyDocument.sha256(iri));
+        row.setAssertedTypesJson(wire.encode(request.assertedTypes()));
         row.setDisplayName(request.displayName()); row.setStatus("ACTIVE");
         row.setCreatedBy(actor.getId().toString()); row.setCreatedAt(now());
-        mapper.insertEntity(row);
+        try { mapper.insertEntity(row); } catch (DuplicateKeyException exception) { throw conflict("ENTITY_ALREADY_EXISTS", "IRI already exists in this graph"); }
         if (mapper.touch(graph.getId(), graph.getMutationVersion(), now()) != 1)
             throw conflict("GRAPH_VERSION_CONFLICT", "Graph changed during entity creation");
         return entity(row);
@@ -144,12 +148,14 @@ public class GraphApplicationService {
                 mapper.contentCount(row.getId()) == 0, row.getUpdatedAt().toInstant(ZoneOffset.UTC));
     }
     private EntityView entity(EntityRow row) {
-        return new EntityView(row.getId(), row.getGraphId(), row.getTypeKey(), row.getDisplayName(), row.getStatus(), row.getCreatedAt().toInstant(ZoneOffset.UTC));
+        return new EntityView(row.getId(), row.getGraphId(), row.getIri(), java.util.Set.copyOf(java.util.Arrays.asList(wire.decode(row.getAssertedTypesJson(), String[].class))), row.getDisplayName(), row.getStatus(), row.getCreatedAt().toInstant(ZoneOffset.UTC));
     }
     private GraphOntologyRevisionRow requireRevision(long workspace, String revisionId, boolean mustBeAvailable) {
         if (revisionId == null || revisionId.isBlank()) throw bad("revisionId required");
         GraphOntologyRevisionRow row = mapper.revision(revisionId);
         if (row == null || row.getWorkspaceId() != workspace || !"PUBLISHED".equals(row.getRevisionState())) throw notFound();
+        if (!vip.mate.semantic.core.ontology.OntologyDocument.MODEL_SCHEMA.equals(row.getModelSchema()))
+            throw conflict("LEGACY_ONTOLOGY_RETIRED", "Rebuild the ontology as an OWL document before binding");
         if (mustBeAvailable && !Boolean.TRUE.equals(row.getAvailableForNewBindings()))
             throw conflict("REVISION_UNAVAILABLE", "Ontology revision is closed to new bindings");
         return row;

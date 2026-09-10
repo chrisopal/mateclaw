@@ -11,10 +11,10 @@ vi.mock('../../api/extractionApi', () => ({ extractionApi: { submit: vi.fn(), ed
 let app: App | undefined, host: HTMLElement | undefined
 const flush = async () => { await new Promise(r => setTimeout(r, 0)); await nextTick() }
 afterEach(() => { app?.unmount(); host?.remove(); vi.clearAllMocks() })
-const suggestion: ExtractionSuggestion = { id: 'suggestion', version: 2, status: 'OPEN', subjectTypeKey: 'Equipment', subjectName: 'Machine', subjectId: '1', predicateKind: 'PROPERTY', predicateKey: 'name', valueType: 'TEXT', value: 'Machine', unit: null, targetTypeKey: null, targetName: null, targetEntityId: null, validityKind: 'UNKNOWN', validFrom: null, validTo: null, quotes: [{ startCodePoint: 0, endCodePoint: 7, exactQuote: 'Machine' }], diagnostics: [], statementId: null }
+const suggestion: ExtractionSuggestion = { id: 'suggestion', version: 2, status: 'OPEN', subjectIri: 'https://example.test/entity/1', subjectTypeIris: ['https://example.test/Equipment'], subjectName: 'Machine', subjectId: '1', assertionText: 'ClassAssertion(<https://example.test/Equipment> <https://example.test/entity/1>)', targetIri: null, targetTypeIris: [], targetName: null, targetEntityId: null, validityKind: 'UNKNOWN', validFrom: null, validTo: null, quotes: [{ startCodePoint: 0, endCodePoint: 7, exactQuote: 'Machine' }], diagnostics: [], statementId: null, pendingOperationId: null }
 async function mount() {
   host = document.createElement('div'); document.body.append(host)
-  app = createApp(SuggestionReviewPanel, { graphId: 'g', suggestion, sourceText: 'Machine', entities: [{ id: '1', graphId: 'g', typeKey: 'Equipment', displayName: 'Machine', status: 'ACTIVE' }], definition: { types: [{ key: 'Equipment', label: 'Equipment' }], properties: [{ key: 'name', label: 'Name', ownerTypeKey: 'Equipment', valueType: 'TEXT', multiplicity: 'SINGLE', fixedUnit: null }], relations: [] } })
+  app = createApp(SuggestionReviewPanel, { graphId: 'g', suggestion, sourceText: 'Machine', entities: [{ id: '1', graphId: 'g', iri: 'https://example.test/entity/1', assertedTypes: ['https://example.test/Equipment'], displayName: 'Machine', status: 'ACTIVE', createdAt: '' }], document: undefined })
   app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': en } })).mount(host)
   await flush()
 }

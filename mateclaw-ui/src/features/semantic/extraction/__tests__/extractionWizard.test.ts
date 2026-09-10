@@ -15,7 +15,7 @@ afterEach(() => { app?.unmount(); host?.remove(); sessionStorage.clear(); vi.cle
 async function mount() {
   vi.mocked(extractionApi.list).mockResolvedValue({ items: [] })
   host = document.createElement('div'); document.body.append(host)
-  app = createApp(ExtractionWizard, { graphId: 'g', knowledgeBaseId: 'kb', definition: { types: [], properties: [], relations: [] }, entities: [] })
+  app = createApp(ExtractionWizard, { graphId: 'g', knowledgeBaseId: 'kb', document: undefined, entities: [] })
   app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': en } }))
   app.component('ElSelect', defineComponent({ props: ['modelValue'], emits: ['update:modelValue'], setup: (props, { emit, slots }) => () => h('select', { value: props.modelValue, onChange: (e: Event) => emit('update:modelValue', (e.target as HTMLSelectElement).value) }, slots.default?.()) }))
   app.component('ElOption', defineComponent({ props: ['value', 'label'], setup: props => () => h('option', { value: props.value }, props.label) }))

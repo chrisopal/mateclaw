@@ -313,7 +313,7 @@ public class AgentGraphBuilder {
         // Three-state semantics: null = no agent-level restriction (use
         // global default); non-null (possibly empty) = explicit allowlist.
         Set<String> boundTools = agentBindingService.getEffectiveToolNames(entity.getId());
-        toolSet = toolSet.withAllowedToolsOnly(boundTools); // null = 全局默认
+        toolSet = vip.mate.agent.binding.service.AgentBindingService.applyEffectiveToolScope(toolSet, boundTools); // null = global defaults, excluding opt-in authoring
 
         // Resolve the base model with the precedence: per-conversation pin >
         // per-Agent model override > global default. resolveRuntimeBaseModel

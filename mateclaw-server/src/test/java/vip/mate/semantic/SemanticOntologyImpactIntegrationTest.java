@@ -147,7 +147,7 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                         params,
                         200);
         System.out.println(
-                "M4 impact 10000 range violations ms=" + (System.nanoTime() - started) / 1_000_000);
+                "M4 impact 10000 policy violations ms=" + (System.nanoTime() - started) / 1_000_000);
         assertEquals(10000, full.path("affectedStatements").asInt());
         seedCopies(g, first.path("id").asText(), 1);
         assertEquals(
@@ -158,7 +158,7 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
     }
 
     @Test
-    void tenThousandSingleSlotRowsHandleEqualDenseAndDisjointValues() throws Exception {
+    void tenThousandPositiveRowsHandleEqualDenseAndDisjointValues() throws Exception {
         String ontology = create();
         var d = draft(ontology);
         var saved =
@@ -242,13 +242,13 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                             + (System.nanoTime() - started) / 1_000_000);
             assertEquals(10000, result.path("scannedStatements").asInt());
             assertEquals(
-                    distribution.equals("dense") ? 10000 : 0,
+                    0,
                     result.path("affectedStatements").asInt());
         }
     }
 
     @Test
-    void mixedIntervalsAndUnknownValidityMatchPairwiseReference() throws Exception {
+    void positiveMultiValuesDoNotBecomeConflictsForUnknownOrOverlappingIntervals() throws Exception {
         String ontology = create();
         var d = draft(ontology);
         var saved =
@@ -281,37 +281,7 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
             call("POST", "/graphs/" + g.graph() + "/statements", "member", workspace, payload, 200);
             rows.add(payload);
         }
-        int affected = 0;
-        for (var a : rows) {
-            boolean conflict = false;
-            for (var b : rows) {
-                if (a == b || a.get("value").equals(b.get("value"))) continue;
-                boolean overlap =
-                        "UNKNOWN".equals(a.get("validityKind"))
-                                || "UNKNOWN".equals(b.get("validityKind"))
-                                || ((a.get("validTo") == null
-                                                || b.get("validFrom") == null
-                                                || java.time.Instant.parse(
-                                                                (String) b.get("validFrom"))
-                                                        .isBefore(
-                                                                java.time.Instant.parse(
-                                                                        (String) a.get("validTo"))))
-                                        && (b.get("validTo") == null
-                                                || a.get("validFrom") == null
-                                                || java.time.Instant.parse(
-                                                                (String) a.get("validFrom"))
-                                                        .isBefore(
-                                                                java.time.Instant.parse(
-                                                                        (String)
-                                                                                b.get(
-                                                                                        "validTo")))));
-                if (overlap) {
-                    conflict = true;
-                    break;
-                }
-            }
-            if (conflict) affected++;
-        }
+        int affected = 0; // All generated assertions are positive; distinct values are allowed.
         var next =
                 call(
                         "POST",
@@ -358,15 +328,15 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                 statements);
         jdbc.batchUpdate(
                 "INSERT INTO"
-                    + " mate_semantic_statement_revision(statement_id,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_key,review_status,validity_kind,valid_from,valid_to,value_type,value_text,unit,target_entity_id,content_json,actor_id,reason,created_at)"
+                    + " mate_semantic_statement_revision(statement_id,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_key,predicate_iri,assertion_kind,assertion_text,review_status,validity_kind,valid_from,valid_to,value_type,value_text,unit,target_entity_id,content_json,actor_id,reason,created_at)"
                     + " SELECT"
-                    + " ?,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_key,review_status,validity_kind,valid_from,valid_to,value_type,value_text,unit,target_entity_id,content_json,actor_id,reason,created_at"
+                    + " ?,revision,graph_id,ontology_revision_id,subject_id,predicate_kind,predicate_key,predicate_iri,assertion_kind,assertion_text,review_status,validity_kind,valid_from,valid_to,value_type,value_text,unit,target_entity_id,content_json,actor_id,reason,created_at"
                     + " FROM mate_semantic_statement_revision WHERE statement_id=? AND revision=1",
                 revisions);
     }
 
     @Test
-    void qualityRangeImpactIsReadOnlyAndNewRulesOnlyAffectNewBindings() throws Exception {
+    void inspectionCodePolicyImpactIsReadOnlyAndOnlyNewBindingsUseNewPolicy() throws Exception {
         String ontology = create();
         var d = draft(ontology);
         var saved =
@@ -410,7 +380,7 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                                 "expectedDraftVersion",
                                 newDraft.path("draftVersion").asLong()),
                         200);
-        assertEquals("POTENTIALLY_BREAKING", result.path("definitionChangeClass").asText());
+        assertEquals("REQUIRES_REVIEW", result.path("definitionChangeClass").asText());
         assertEquals("VIOLATIONS", result.path("dataConformance").asText());
         assertEquals(1, result.path("affectedStatements").asInt());
         assertEquals(
@@ -452,15 +422,12 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                         "/graphs/" + fresh.graph() + "/search",
                         "viewer",
                         workspace,
-                        Map.of("query", "测量偏差"),
+                        Map.of("query", "检验编码"),
                         200);
         assertEquals(1, search.path("facts").size());
-        assertEquals("尺寸偏差", search.path("predicateLabels").path("PROPERTY:deviation").asText());
+        assertEquals("检验编码", search.path("predicateLabels").path("urn:test:inspectionCode").asText());
         var status = new LinkedHashMap<>(payload(fresh, "0.03", "INTERVAL", null, null));
-        status.put("predicateKey", "investigationStatus");
-        status.put("valueType", "TEXT");
-        status.put("value", "unknown");
-        status.remove("unit");
+        status.put("assertionText","DataPropertyAssertion(<urn:test:investigationStatus> <urn:test:issue:"+fresh.graph()+"> \"unknown\")");
         call("POST", "/graphs/" + fresh.graph() + "/statements", "member", workspace, status, 422);
         call(
                 "PUT",
@@ -525,10 +492,11 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                         200);
         var v1 = publish(ontology, saved.path("draftVersion").asLong(), op());
         var graph = graph(v1.path("id").asText());
-        var first = propose(graph, "0.03", "UNKNOWN", null, null, 200);
+        var first = propose(graph, "0.08", "UNKNOWN", null, null, 200);
         review(graph, first);
-        var second = propose(graph, "0.04", "INTERVAL", null, null, 200);
+        var second = propose(graph, "0.09", "INTERVAL", null, null, 200);
         review(graph, second);
+        propose(graph,"0.09","INTERVAL",null,null,200);
         var proposal =
                 call(
                         "POST",
@@ -601,7 +569,8 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                                 "expectedDraftVersion",
                                 target.path("draftVersion").asLong()),
                         200);
-        assertEquals(2, result.path("affectedStatements").asInt());
+        assertEquals(3,result.path("scannedStatements").asInt());
+        assertEquals(3, result.path("affectedStatements").asInt());
         assertEquals(1, result.path("affectedProposals").asInt());
         assertTrue(result.path("diagnostics").toString().contains(proposal.path("id").asText()));
         call(
@@ -617,63 +586,60 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                 409);
     }
 
+    @Test void explicitOppositeAssertionsAppearInImpactButDifferentPositiveValuesDoNot() throws Exception {
+        String ontology=create(); var d=draft(ontology);
+        var saved=call("PUT","/ontologies/"+ontology+"/draft","member",workspace,saveBody(d.path("draftVersion").asLong(),definition(false,"MULTI")),200);
+        var published=publish(ontology,saved.path("draftVersion").asLong(),op());
+        var graph=graph(published.path("id").asText());
+        var positive=propose(graph,"0.03","INTERVAL",null,null,200);
+        var negative=payload(graph,"0.03","INTERVAL",null,null);
+        negative.put("assertionText",negative.get("assertionText").toString().replace("DataPropertyAssertion(","NegativeDataPropertyAssertion("));
+        var opposite=call("POST","/graphs/"+graph.graph()+"/statements","member",workspace,negative,200);
+        var independent=propose(graph,"0.04","INTERVAL",null,null,200);
+        var report=call("POST","/ontologies/"+ontology+"/impact","owner",workspace,
+                Map.of("graphId",graph.graph(),"targetRevisionId",published.path("id").asText()),200);
+        assertEquals(2,report.path("affectedStatements").asInt());
+        assertTrue(report.path("diagnostics").toString().contains(positive.path("id").asText()));
+        assertTrue(report.path("diagnostics").toString().contains(opposite.path("id").asText()));
+        assertFalse(report.path("diagnostics").toString().contains(independent.path("id").asText()));
+        assertEquals("UNCHANGED",report.path("definitionChangeClass").asText());
+    }
+
+    @Test void explicitBusinessSingleValuePolicyCreatesReviewableConflict() throws Exception {
+        String ontology=create();var d=draft(ontology);var input=definition(false,"MULTI");
+        input.put("policy",Map.of("version","single-v1","rules",List.of(Map.of(
+                "classIri","urn:test:QualityIssue","predicateIri","urn:test:inspectionCode","required",false,
+                "allowedLexicalValues",List.of(),"singleValue",true))));
+        var saved=call("PUT","/ontologies/"+ontology+"/draft","member",workspace,saveBody(d.path("draftVersion").asLong(),input),200);
+        var published=publish(ontology,saved.path("draftVersion").asLong(),op());var graph=graph(published.path("id").asText());
+        var first=propose(graph,"0.03","INTERVAL",null,null,200);
+        var second=propose(graph,"0.04","INTERVAL",null,null,200);
+        var conflicts=call("GET","/graphs/"+graph.graph()+"/conflicts","owner",workspace,null,200).path("items");
+        assertEquals(1,conflicts.size());assertEquals("BUSINESS_SINGLE_VALUE",conflicts.get(0).path("kind").asText());
+        var report=call("POST","/ontologies/"+ontology+"/impact","owner",workspace,
+                Map.of("graphId",graph.graph(),"targetRevisionId",published.path("id").asText()),200);
+        assertEquals(2,report.path("affectedStatements").asInt());
+        call("POST","/graphs/"+graph.graph()+"/statements/"+first.path("id").asText()+"/review","owner",workspace,
+                Map.of("expectedRevision",1,"action","ACCEPT","reason","must review conflict","operationId",op()),409);
+        call("POST","/graphs/"+graph.graph()+"/conflicts/"+conflicts.get(0).path("id").asText()+"/resolve","owner",workspace,
+                Map.of("winnerStatementId",first.path("id").asText(),"expectedMembers",List.of(
+                    Map.of("statementId",first.path("id").asText(),"revision",1),Map.of("statementId",second.path("id").asText(),"revision",1)),
+                    "reason","Explicit policy verified","operationId",op()),200);
+    }
+
     private Map<String, Object> definition(boolean enhanced, String multiplicity) {
-        var property =
-                new LinkedHashMap<String, Object>(
-                        Map.of(
-                                "key",
-                                "deviation",
-                                "label",
-                                "尺寸偏差",
-                                "description",
-                                "",
-                                "ownerTypeKey",
-                                "QualityIssue",
-                                "valueType",
-                                "DECIMAL",
-                                "multiplicity",
-                                multiplicity,
-                                "fixedUnit",
-                                "mm"));
-        var properties = new ArrayList<Object>();
-        properties.add(property);
-        var result =
-                new LinkedHashMap<String, Object>(
-                        Map.of(
-                                "types",
-                                List.of(
-                                        Map.of(
-                                                "key",
-                                                "QualityIssue",
-                                                "label",
-                                                "质量问题",
-                                                "description",
-                                                "")),
-                                "properties",
-                                properties,
-                                "relations",
-                                List.of()));
-        if (enhanced) {
-            result.put("definitionFormatVersion", 2);
-            property.put("constraints", Map.of("minimum", "-0.05", "maximum", "0.05"));
-            property.put("aliases", List.of("测量偏差"));
-            properties.add(
-                    Map.of(
-                            "key",
-                            "investigationStatus",
-                            "label",
-                            "调查状态",
-                            "description",
-                            "",
-                            "ownerTypeKey",
-                            "QualityIssue",
-                            "valueType",
-                            "TEXT",
-                            "multiplicity",
-                            "SINGLE",
-                            "constraints",
-                            Map.of("allowedValues", List.of("待复核", "已确认"))));
-        }
+        var result=new LinkedHashMap<String,Object>(owlDocument("""
+            Ontology(<urn:test:inspection>
+              Declaration(Class(<urn:test:QualityIssue>))
+              Declaration(DataProperty(<urn:test:inspectionCode>))
+              DataPropertyRange(<urn:test:inspectionCode> <http://www.w3.org/2001/XMLSchema#decimal>)
+              Declaration(DataProperty(<urn:test:investigationStatus>))
+              AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:test:inspectionCode> "检验编码")
+              AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:test:inspectionCode> "测量编码"))
+            """));
+        if (enhanced) result.put("policy",Map.of("version","codes-v2","rules",List.of(
+                Map.of("classIri","urn:test:QualityIssue","predicateIri","urn:test:inspectionCode","required",false,"allowedLexicalValues",List.of("0.03","0.04")),
+                Map.of("classIri","urn:test:QualityIssue","predicateIri","urn:test:investigationStatus","required",false,"allowedLexicalValues",List.of("待复核","已确认")))));
         return result;
     }
 
@@ -709,7 +675,7 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                                 "/graphs/" + graph + "/entities",
                                 "member",
                                 workspace,
-                                Map.of("typeKey", "QualityIssue", "displayName", "孔径超差"),
+                                Map.of("iri","urn:test:issue:"+graph,"assertedTypes",Set.of("urn:test:QualityIssue"),"displayName","检验记录"),
                                 200)
                         .path("id")
                         .asText();
@@ -773,16 +739,8 @@ class SemanticOntologyImpactIntegrationTest extends SemanticHttpFixture {
                                 op(),
                                 "subjectId",
                                 g.entity(),
-                                "predicateKind",
-                                "PROPERTY",
-                                "predicateKey",
-                                "deviation",
-                                "valueType",
-                                "DECIMAL",
-                                "value",
-                                value,
-                                "unit",
-                                "mm",
+                                "assertionText",
+                                "DataPropertyAssertion(<urn:test:inspectionCode> <urn:test:issue:"+g.graph()+"> \""+value+"\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
                                 "validityKind",
                                 validity,
                                 "evidenceIds",

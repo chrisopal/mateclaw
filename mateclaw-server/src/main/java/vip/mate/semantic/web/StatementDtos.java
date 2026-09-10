@@ -9,8 +9,7 @@ import java.util.List;
 public final class StatementDtos {
     private StatementDtos() {}
     public record ProposeRequest(
-            String operationId, String subjectId, String predicateKind, String predicateKey,
-            String valueType, String value, String unit, String targetEntityId,
+            String operationId, String subjectId, String assertionText,
             String validityKind, Instant validFrom, Instant validTo, List<String> evidenceIds) {}
     public record ChangeRequest(Integer expectedRevision, String operationId, ProposeRequest content) {}
     public record ReviewRequest(Integer expectedRevision, String action, String reason, String operationId) {}
@@ -23,8 +22,7 @@ public final class StatementDtos {
     public record ResolveRequest(String winnerStatementId, List<ConflictMember> expectedMembers, String reason, String operationId) {}
     public record StatementView(
             String id, String graphId, int revision, String ontologyRevisionId, String subjectId,
-            String predicateKind, String predicateKey, String valueType, String value, String unit,
-            String targetEntityId, String validityKind,
+            vip.mate.semantic.core.fact.AssertionPayload assertion, String validityKind,
             @JsonFormat(shape=JsonFormat.Shape.STRING) Instant validFrom,
             @JsonFormat(shape=JsonFormat.Shape.STRING) Instant validTo,
             String reviewStatus, String supportStatus, List<String> evidenceIds, String proposedBy,

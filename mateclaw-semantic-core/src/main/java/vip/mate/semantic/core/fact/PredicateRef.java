@@ -1,35 +1,35 @@
 package vip.mate.semantic.core.fact;
 
-import java.util.Objects;
+import java.net.URI;
 
 /** A reference to a declared property or relation predicate. */
 public sealed interface PredicateRef permits PredicateRef.PropertyRef, PredicateRef.RelationRef {
 
-    String key();
+    String iri();
 
-    static PropertyRef property(String key) {
-        return new PropertyRef(key);
+    static PropertyRef property(String iri) {
+        return new PropertyRef(iri);
     }
 
-    static RelationRef relation(String key) {
-        return new RelationRef(key);
+    static RelationRef relation(String iri) {
+        return new RelationRef(iri);
     }
 
-    record PropertyRef(String key) implements PredicateRef {
+    record PropertyRef(String iri) implements PredicateRef {
         public PropertyRef {
-            requireKey(key);
+            requireIri(iri);
         }
     }
 
-    record RelationRef(String key) implements PredicateRef {
+    record RelationRef(String iri) implements PredicateRef {
         public RelationRef {
-            requireKey(key);
+            requireIri(iri);
         }
     }
 
-    private static void requireKey(String key) {
-        if (key == null || key.isBlank()) {
-            throw new IllegalArgumentException("predicate key must not be blank");
+    private static void requireIri(String iri) {
+        if (iri == null || iri.isBlank() || !URI.create(iri).isAbsolute()) {
+            throw new IllegalArgumentException("predicate must be an absolute IRI");
         }
     }
 }

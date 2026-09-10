@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { ontologyApi } from '../../api/ontologyApi'
 import { semanticError, type SemanticError } from '../../api/semanticErrors'
 import type { OntologyPackage, PackagePreview, PackageImportResult } from '../../api/types'
+import { importDocumentFile } from '../importDocumentFile'
 import { useSemanticScope } from '../../shared/useSemanticScope'
 
 const open = defineModel<boolean>({ required: true })
@@ -50,11 +51,10 @@ async function readFile(event: Event) {
     if (file.size > 1024 * 1024) throw new Error('package too large')
     const text = await file.text()
     if (generation !== fileGeneration) return
-    const parsed = JSON.parse(text) as OntologyPackage
-    rawPackage.value = text
-    if (parsed.packageFormatVersion !== 1 || !parsed.definition || !parsed.name) throw new Error('invalid package')
-    packageData.value = parsed
-    name.value = parsed.name
+    const imported = importDocumentFile(file.name, text)
+    rawPackage.value = imported.rawPackage
+    packageData.value = imported.packageData
+    name.value = imported.packageData.name
   } catch {
     if (generation !== fileGeneration) return
     packageData.value = null
@@ -112,9 +112,10 @@ async function importDraft(recover = false) {
 <template>
   <el-dialog v-model="open" :title="t('semantic.importTitle')" width="min(680px, 95vw)" :close-on-click-modal="false">
     <p class="semantic-muted">{{ t('semantic.importHelp') }}</p>
+    <p class="semantic-muted">支持 JSON 模板、Functional Syntax（.ofn/.fss）和 RDF/XML（.rdf/.owl/.xml）。含外部依赖时请使用带锁定 imports 的 JSON 模板。</p>
     <el-form label-position="top">
       <el-form-item :label="t('semantic.choosePackage')" required>
-        <input type="file" accept="application/json,.json" :disabled="busy" @change="readFile" />
+        <input type="file" accept="application/json,application/rdf+xml,.json,.ofn,.fss,.rdf,.owl,.xml" :disabled="busy" @change="readFile" />
         <span v-if="fileName" class="semantic-muted">{{ fileName }}</span>
       </el-form-item>
       <el-form-item v-if="packageData" :label="t('semantic.packageName')" required>
@@ -125,7 +126,7 @@ async function importDraft(recover = false) {
     <el-button :disabled="!packageData || busy" :loading="busy" @click="previewPackage">{{ t('semantic.preview') }}</el-button>
     <section v-if="preview" class="semantic-panel semantic-package-preview">
       <h3>{{ t('semantic.packageSummary') }}</h3>
-      <p>{{ t('semantic.typeCount', { count: preview.typeCount }) }} · {{ t('semantic.predicateCount', { count: preview.predicateCount }) }}</p>
+      <p>{{ t('semantic.axiomCount', { count: preview.axiomCount }) }} · {{ t('semantic.importCount', { count: preview.importCount }) }}</p>
       <p class="semantic-muted">{{ preview.digest }}</p>
       <el-alert v-if="preview.violations.length" type="warning" :title="t('semantic.previewRejected')" :closable="false">
         <ul><li v-for="violation in preview.violations" :key="violation.path + violation.code">{{ violation.path }}: {{ violation.message }}</li></ul>

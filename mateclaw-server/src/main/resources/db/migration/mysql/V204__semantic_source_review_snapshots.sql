@@ -1,0 +1,3 @@
+ALTER TABLE mate_semantic_ontology_source_review ADD COLUMN observed_snapshot_id VARCHAR(36);
+ALTER TABLE mate_semantic_ontology_source_review ADD CONSTRAINT fk_semantic_review_observed_snapshot FOREIGN KEY (observed_snapshot_id) REFERENCES mate_semantic_ontology_source_snapshot(id);
+CREATE UNIQUE INDEX uq_semantic_source_snapshot_digest ON mate_semantic_ontology_source_snapshot(workspace_id,kb_id,source_ref,source_digest);

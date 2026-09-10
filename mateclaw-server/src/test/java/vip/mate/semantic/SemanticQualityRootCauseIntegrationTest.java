@@ -14,13 +14,16 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
     @org.springframework.beans.factory.annotation.Autowired vip.mate.semantic.tool.SemanticTool tool;
     @Override
     protected Map<String, Object> definition() {
-        return Map.of("types", List.of(type("Batch", "生产批次"), type("Equipment", "加工设备"),
-                        type("QualityIssue", "质量问题"), type("Cause", "根因")),
-                "properties", List.of(Map.of("key", "deviation", "label", "尺寸偏差", "description", "实测相对名义尺寸偏差",
-                        "ownerTypeKey", "QualityIssue", "valueType", "DECIMAL", "multiplicity", "SINGLE", "fixedUnit", "mm")),
-                "relations", List.of(relation("producedOn", "加工设备", "Batch", "Equipment", "SINGLE"),
-                        relation("hasIssue", "发现问题", "Batch", "QualityIssue", "MULTI"),
-                        relation("rootCause", "确认根因", "QualityIssue", "Cause", "SINGLE")));
+        return owlDocument("""
+            Ontology(<urn:test:quality>
+              Declaration(Class(<urn:test:Batch>)) Declaration(Class(<urn:test:Equipment>))
+              Declaration(Class(<urn:test:QualityIssue>)) Declaration(Class(<urn:test:Cause>))
+              Declaration(DataProperty(<urn:test:deviation>))
+              DataPropertyRange(<urn:test:deviation> <http://www.w3.org/2001/XMLSchema#decimal>)
+              Declaration(ObjectProperty(<urn:test:producedOn>))
+              Declaration(ObjectProperty(<urn:test:hasIssue>)) Declaration(ObjectProperty(<urn:test:rootCause>))
+              AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:test:rootCause> "确认根因"))
+            """);
     }
 
     @Test
@@ -43,8 +46,7 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
         accept(base, proposeRelation(base, batch, "producedOn", machine, inspection.evidence()));
         accept(base, proposeRelation(base, batch, "hasIssue", issue, inspection.evidence()));
         Map<String, Object> measured = new HashMap<>(Map.of("operationId", op(), "subjectId", issue,
-                "predicateKind", "PROPERTY", "predicateKey", "deviation", "valueType", "DECIMAL", "value", "0.08",
-                "unit", "mm", "validityKind", "INTERVAL", "evidenceIds", List.of(inspection.evidence())));
+                "assertionText", "DataPropertyAssertion(<urn:test:deviation> <"+entityIri(issue)+"> \"0.08\"^^<http://www.w3.org/2001/XMLSchema#decimal>)", "validityKind", "INTERVAL", "evidenceIds", List.of(inspection.evidence())));
         measured.put("validFrom", "2026-09-08T00:00:00Z");
         accept(base, call("POST", base + "/statements", "member", workspace, measured, 200));
 
@@ -53,22 +55,21 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
         assertEquals(0, search(base, "rootCause").size(), "Hypotheses are not trusted roots before review");
         review(base, wearCandidate, "viewer", 403);
         review(base, wearCandidate, "member", 403);
-        review(base, wearCandidate, "owner", 409);
-        JsonNode conflict = call("GET", base + "/conflicts", "owner", workspace, null, 200).path("items").get(0);
-        Map<String, Object> resolution = Map.of("winnerStatementId", wearCandidate.path("id").asText(),
-                "expectedMembers", List.of(member(wearCandidate, 1), member(fixtureCandidate, 1)),
-                "reason", "依据复核报告和换刀验证确认刀具磨损，排除夹具偏移", "operationId", op());
-        call("POST", base + "/conflicts/" + conflict.path("id").asText() + "/resolve", "owner", workspace, resolution, 200);
+        assertTrue(call("GET",base+"/conflicts","owner",workspace,null,200).path("items").isEmpty(),
+                "Different possible causes do not constitute an OWL contradiction");
+        call("POST",base+"/statements/"+fixtureCandidate.path("id").asText()+"/review","owner",workspace,
+                Map.of("expectedRevision",1,"action","REJECT","reason","复核报告排除夹具偏移","operationId",op()),200);
+        review(base, wearCandidate, "owner", 200);
         review(base, wearCandidate, "owner", 409); // stale revision cannot overwrite the decision
         JsonNode root = search(base, "rootCause").get(0);
-        assertEquals(wear, root.path("targetEntityId").asText());
+        assertEquals(entityIri(wear), root.path("assertion").path("objectIri").asText());
         assertEquals(2, root.path("revision").asInt());
         assertEquals(investigation.evidence(), root.path("evidenceIds").get(0).asText());
         assertEquals(root.path("id"), search(base, "刀具磨损").get(0).path("id"), "Root cause must be discoverable by its target label");
         assertEquals(root.path("id"), search(base, "确认根因").get(0).path("id"), "Business users search the ontology label, not only the predicate key");
         JsonNode labeled = call("POST", base + "/search", "viewer", workspace, Map.of("query", "确认根因", "limit", 20), 200);
         assertEquals("刀具磨损", labeled.path("entityLabels").path(wear).asText());
-        assertEquals("确认根因", labeled.path("predicateLabels").path("RELATION:rootCause").asText());
+        assertEquals("确认根因", labeled.path("predicateLabels").path("urn:test:rootCause").asText());
         assertFalse(labeled.path("entityLabels").has(fixture), "Do not expose labels of excluded or unreturned facts");
 
         JsonNode newerDraft = call("POST", "/ontologies/" + ontology + "/draft", "member", workspace,
@@ -98,7 +99,7 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
             call("GET", base, "viewer", workspace, null, 404);
             call("POST", base + "/search", "viewer", workspace, Map.of("query", "刀具磨损"), 404);
             call("GET", base + "/evidence/" + inspection.evidence(), "viewer", workspace, null, 404);
-            call("POST", base + "/entities", "member", workspace, Map.of("typeKey", "Batch", "displayName", "must-not-write"), 404);
+            call("POST", base + "/entities", "member", workspace, Map.of("iri","urn:test:forbidden","assertedTypes",Set.of("urn:test:Batch"),"displayName","must-not-write"), 404);
             assertEquals(404, assertThrows(vip.mate.semantic.web.SemanticApiException.class,
                     () -> tool.semantic_search(graph, "刀具磨损", 5, toolContext)).status());
         }
@@ -122,12 +123,11 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
         return call("POST", base + "/search", "viewer", workspace, Map.of("query", query, "limit", 20), 200).path("facts");
     }
     private String entity(String base, String type, String label) throws Exception {
-        return call("POST", base + "/entities", "member", workspace, Map.of("typeKey", type, "displayName", label), 200).path("id").asText();
+        return call("POST", base + "/entities", "member", workspace, Map.of("iri", "urn:test:individual:"+id(), "assertedTypes", Set.of("urn:test:"+type), "displayName", label), 200).path("id").asText();
     }
     private JsonNode proposeRelation(String base, String subject, String key, String target, String evidence) throws Exception {
         return call("POST", base + "/statements", "member", workspace,
-                Map.of("operationId", op(), "subjectId", subject, "predicateKind", "RELATION", "predicateKey", key,
-                        "valueType", "ENTITY", "targetEntityId", target, "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), 200);
+                Map.of("operationId", op(), "subjectId", subject, "assertionText", "ObjectPropertyAssertion(<urn:test:"+key+"> <"+entityIri(subject)+"> <"+entityIri(target)+">)", "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), 200);
     }
     private void accept(String base, JsonNode fact) throws Exception { review(base, fact, "owner", 200); }
     private void review(String base, JsonNode fact, String role, int status) throws Exception {
@@ -145,11 +145,7 @@ class SemanticQualityRootCauseIntegrationTest extends SemanticHttpFixture {
         return new Source(raw, evidence.path("id").asText(), text);
     }
     private record Source(String raw, String evidence, String text) {}
-    private static Map<String, String> type(String key, String label) { return Map.of("key", key, "label", label, "description", ""); }
-    private static Map<String, String> relation(String key, String label, String from, String to, String multiplicity) {
-        return Map.of("key", key, "label", label, "description", "", "sourceTypeKey", from, "targetTypeKey", to, "multiplicity", multiplicity);
-    }
-    private static Map<String, Object> member(JsonNode fact, int revision) { return Map.of("statementId", fact.path("id").asText(), "revision", revision); }
+    private String entityIri(String entity) { return jdbc.queryForObject("SELECT iri FROM mate_semantic_entity WHERE id=?",String.class,entity); }
     private static String id() { return com.baomidou.mybatisplus.core.toolkit.IdWorker.getIdStr(); }
     private static String op() { return UUID.randomUUID().toString(); }
 }

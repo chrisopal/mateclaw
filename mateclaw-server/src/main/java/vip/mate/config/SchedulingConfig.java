@@ -41,6 +41,9 @@ public class SchedulingConfig implements SchedulingConfigurer {
         scheduler.setPoolSize(POOL_SIZE);
         scheduler.setThreadNamePrefix("sched-");
         scheduler.setRemoveOnCancelPolicy(true);
+        // Future one-shot/cron tasks must not keep a closing context alive.
+        // Already running tasks still receive the graceful shutdown window below.
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         scheduler.setAwaitTerminationSeconds(30);
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         return scheduler;

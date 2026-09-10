@@ -1,21 +1,24 @@
 package vip.mate.semantic.core.conflict;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import vip.mate.semantic.core.fact.PredicateRef;
+import vip.mate.semantic.core.fact.AssertionPayload;
 import vip.mate.semantic.core.fact.StatementContent;
 import vip.mate.semantic.core.fact.StatementRevision;
-import vip.mate.semantic.core.fact.StatementValue;
 import vip.mate.semantic.core.fact.Validity;
-import vip.mate.semantic.core.ontology.Multiplicity;
 import vip.mate.semantic.core.ontology.OntologyRevision;
-import vip.mate.semantic.core.ontology.PropertyDefinition;
 
-/** Pure, deterministic comparison for same-scope statement content. */
+/**
+ * Pure comparison for same-scope statement content.
+ *
+ * <p>OWL open-world semantics do not make two different values a conflict.
+ * This detector therefore reports only an explicit positive/negative
+ * contradiction for the same assertion value. Business single-value rules
+ * are evaluated by the versioned business policy layer.</p>
+ */
 public final class ConflictDetector {
 
     public Optional<ConflictKind> compare(
@@ -29,20 +32,38 @@ public final class ConflictDetector {
         if (!left.subjectId().equals(right.subjectId()) || !left.predicate().equals(right.predicate())) {
             return Optional.empty();
         }
-        if (!(left.predicate() instanceof PredicateRef.PropertyRef propertyRef)) {
-            return compareRelation(ontology, left, right);
-        }
-        PropertyDefinition property = ontology.definition().properties().stream()
-                .filter(item -> item != null && item.key().equals(propertyRef.key()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("predicate is not declared by the ontology"));
-        if (property.multiplicity() == Multiplicity.MULTI) {
-            return Optional.empty();
-        }
-        if (sameValue(left.value(), right.value())) {
+        if (!oppositeAssertionValues(left.assertion(), right.assertion())) {
             return Optional.empty();
         }
         return temporalConflict(left.validity(), right.validity());
+    }
+
+    public Optional<ConflictKind> compare(OntologyRevision ontology,StatementContent left,
+            StatementContent right, java.util.Set<String> subjectTypes) {
+        var explicit=compare(ontology,left,right);
+        if (explicit.isPresent()) return explicit;
+        if (!left.subjectId().equals(right.subjectId()) || !left.predicate().equals(right.predicate())
+                || left.predicate().isEmpty() || left.assertion().negative() || right.assertion().negative()
+                || (!left.assertion().objectAssertion() && !left.assertion().dataAssertion())
+                || left.assertion().kind()!=right.assertion().kind()) return Optional.empty();
+        boolean single=ontology.policy().rules().stream().anyMatch(rule->rule.singleValue()
+                && subjectTypes.contains(rule.classIri()) && rule.predicateIri().equals(left.predicate().orElseThrow().iri()));
+        if (!single || businessValue(left.assertion()).equals(businessValue(right.assertion()))) return Optional.empty();
+        if (left.validity().isUnknown() || right.validity().isUnknown()) return Optional.of(ConflictKind.BUSINESS_TEMPORAL_UNCERTAINTY);
+        return left.validity().overlaps(right.validity()) ? Optional.of(ConflictKind.BUSINESS_SINGLE_VALUE) : Optional.empty();
+    }
+    private static Object businessValue(AssertionPayload assertion) {
+        if (assertion.objectIri().isPresent()) return assertion.objectIri().orElseThrow();
+        var literal=assertion.literal().orElseThrow();
+        String datatype=literal.datatypeIri();
+        if (datatype.startsWith("http://www.w3.org/2001/XMLSchema#")
+                && java.util.Set.of("decimal","integer","long","int","short","byte","nonNegativeInteger",
+                    "positiveInteger","nonPositiveInteger","negativeInteger","unsignedLong","unsignedInt","unsignedShort","unsignedByte")
+                    .contains(datatype.substring(datatype.indexOf('#')+1))) {
+            try { return new java.math.BigDecimal(literal.lexicalValue()).stripTrailingZeros(); }
+            catch (NumberFormatException ignored) { /* Lexical validation reports malformed values separately. */ }
+        }
+        return literal;
     }
 
     public List<ConflictFinding> detect(
@@ -64,7 +85,6 @@ public final class ConflictDetector {
         return List.copyOf(findings);
     }
 
-    /** Compares one candidate against other candidate revisions before any is accepted. */
     public List<ConflictFinding> detectCandidates(
             OntologyRevision ontology,
             List<StatementRevision> candidates) {
@@ -90,14 +110,12 @@ public final class ConflictDetector {
         return List.copyOf(findings);
     }
 
-    /** Alias for callers that use the same detect entry point for candidate batches. */
     public List<ConflictFinding> detect(
             OntologyRevision ontology,
             List<StatementRevision> candidates) {
         return detectCandidates(ontology, candidates);
     }
 
-    /** Compares one candidate revision with other candidate revisions, retaining identities. */
     public List<ConflictFinding> detect(
             OntologyRevision ontology,
             StatementRevision candidate,
@@ -117,27 +135,22 @@ public final class ConflictDetector {
         return List.copyOf(findings);
     }
 
-    private static Optional<ConflictKind> compareRelation(
-            OntologyRevision ontology, StatementContent left, StatementContent right) {
-        String relationKey = ((PredicateRef.RelationRef) left.predicate()).key();
-        // Relations obey the same cardinality rule as properties: a MULTI relation
-        // may legitimately point to several different target entities.
-        // The caller has already checked that the predicates are equal.
-        // Relation lookup is intentionally kept local so this method remains pure.
-        var relation = ontology.definition().relations().stream()
-                .filter(item -> item != null && item.key().equals(relationKey))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("predicate is not declared by the ontology"));
-        if (relation.multiplicity() == Multiplicity.MULTI) {
-            return Optional.empty();
+    private static boolean oppositeAssertionValues(AssertionPayload left, AssertionPayload right) {
+        if (left.kind() == AssertionPayload.AssertionKind.SAME_INDIVIDUAL
+                || left.kind() == AssertionPayload.AssertionKind.DIFFERENT_INDIVIDUAL) {
+            return left.relatedIndividualIri().equals(right.relatedIndividualIri())
+                    && ((left.kind() == AssertionPayload.AssertionKind.SAME_INDIVIDUAL
+                            && right.kind() == AssertionPayload.AssertionKind.DIFFERENT_INDIVIDUAL)
+                        || (left.kind() == AssertionPayload.AssertionKind.DIFFERENT_INDIVIDUAL
+                            && right.kind() == AssertionPayload.AssertionKind.SAME_INDIVIDUAL));
         }
-        if (left.predicate() instanceof PredicateRef.RelationRef
-                && left.value() instanceof StatementValue.EntityValue
-                && right.value() instanceof StatementValue.EntityValue
-                && sameValue(left.value(), right.value())) {
-            return Optional.empty();
+        if (!left.objectAssertion() && !left.dataAssertion()) {
+            return false;
         }
-        return temporalConflict(left.validity(), right.validity());
+        boolean sameValue = left.objectIri().equals(right.objectIri())
+                && left.literal().equals(right.literal())
+                && left.predicateIri().equals(right.predicateIri());
+        return sameValue && left.negative() != right.negative();
     }
 
     private static void requireComparableScope(
@@ -151,28 +164,21 @@ public final class ConflictDetector {
         }
     }
 
-    private static boolean sameValue(StatementValue left, StatementValue right) {
-        if (left instanceof StatementValue.DecimalValue leftDecimal
-                && right instanceof StatementValue.DecimalValue rightDecimal) {
-            return leftDecimal.value().compareTo(rightDecimal.value()) == 0
-                    && Objects.equals(leftDecimal.unit(), rightDecimal.unit());
-        }
-        return left.equals(right);
-    }
-
     private static Optional<ConflictKind> temporalConflict(Validity left, Validity right) {
         if (left.isUnknown() || right.isUnknown()) {
             return Optional.of(ConflictKind.TEMPORAL_UNCERTAINTY);
         }
         return left.overlaps(right)
-                ? Optional.of(ConflictKind.SINGLE_VALUE_DISAGREEMENT)
+                ? Optional.of(ConflictKind.ASSERTION_CONTRADICTION)
                 : Optional.empty();
     }
 
     private static String reason(ConflictKind kind) {
         return switch (kind) {
-            case SINGLE_VALUE_DISAGREEMENT -> "different values overlap for a single-value predicate";
-            case TEMPORAL_UNCERTAINTY -> "different values cannot be compared because validity is unknown";
+            case BUSINESS_SINGLE_VALUE -> "explicit business single-value policy has overlapping distinct values";
+            case BUSINESS_TEMPORAL_UNCERTAINTY -> "single-value policy needs review because validity is unknown";
+            case ASSERTION_CONTRADICTION -> "positive and negative assertions overlap for the same value";
+            case TEMPORAL_UNCERTAINTY -> "contradictory assertions cannot be compared because validity is unknown";
         };
     }
 }

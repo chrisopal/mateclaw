@@ -12,7 +12,7 @@ public final class GraphDtos {
     public enum BindingAction { ENABLE, DISABLE, REBIND }
 
     public record BindRequest(BindingAction action, String revisionId, Long expectedGraphVersion) {}
-    public record CreateEntity(String typeKey, String displayName) {}
+    public record CreateEntity(String iri, java.util.Set<String> assertedTypes, String displayName) {}
     public record Binding(
             String graphId,
             String workspaceId,
@@ -24,8 +24,8 @@ public final class GraphDtos {
             boolean empty,
             @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt) {}
     public record EntityView(
-            String id, String graphId, String typeKey, String displayName, String status,
+            String id, String graphId, String iri, java.util.Set<String> assertedTypes, String displayName, String status,
             @JsonFormat(shape = JsonFormat.Shape.STRING) Instant createdAt) {}
     public record EntityPage(List<EntityView> items) {}
-    public record GraphDetail(Binding binding, OntologyDtos.Definition definition) {}
+    public record GraphDetail(Binding binding, OntologyDtos.DocumentView document) {}
 }

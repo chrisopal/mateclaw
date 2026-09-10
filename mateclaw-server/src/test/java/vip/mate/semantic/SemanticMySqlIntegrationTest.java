@@ -23,7 +23,7 @@ class SemanticMySqlIntegrationTest extends SemanticEndToEndIntegrationTest {
         var flyway=org.flywaydb.core.Flyway.configure().dataSource(url,user,password)
                 .locations("classpath:db/migration/mysql").placeholderReplacement(false).load();
         flyway.migrate(); flyway.validate();
-        org.junit.jupiter.api.Assertions.assertEquals("196",flyway.info().current().getVersion().getVersion());
+        org.junit.jupiter.api.Assertions.assertEquals("207",flyway.info().current().getVersion().getVersion());
         try(var connection=java.sql.DriverManager.getConnection(url,user,password);
             var statement=connection.createStatement();
             var rows=statement.executeQuery("SELECT enabled FROM mate_tool WHERE bean_name='semanticTool'")) {

@@ -16,6 +16,10 @@ import type {
   PackageImportResult,
   OntologyUsagePage,
   ImpactReport,
+  EditDraft,
+  OntologyDocumentSyntax,
+  OntologySourceBinding,
+  OntologySourceReview,
 } from './types'
 const path = (id: string) => `/semantic/ontologies/${encodeURIComponent(id)}`
 export function scopedConfig(workspaceId: string, signal?: AbortSignal): AxiosRequestConfig {
@@ -56,6 +60,8 @@ export const ontologyApi = {
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
+  editDraft: (ws: string, id: string, body: EditDraft, signal?: AbortSignal) =>
+    semanticRequest<Draft>(ws, { url: `${path(id)}/draft/axioms`, method: 'PATCH', data: body }, signal),
   discard: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
     semanticRequest<void>(
       ws,
@@ -74,6 +80,23 @@ export const ontologyApi = {
     semanticRequest<Revision[]>(ws, { url: `${path(id)}/revisions` }, signal),
   revision: (ws: string, id: string, revisionId: string, signal?: AbortSignal) =>
     semanticRequest<Revision>(ws, { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}` }, signal),
+  exportDraftDocument: async (ws: string, id: string, expectedDraftVersion: number, syntax: OntologyDocumentSyntax, signal?: AbortSignal) => {
+    const response = await http.get<ArrayBuffer, ArrayBuffer>(`${path(id)}/draft/document`, {
+      ...scopedConfig(ws, signal), params: { expectedDraftVersion, syntax }, responseType: 'arraybuffer',
+    })
+    return response
+  },
+  exportDocument: async (ws: string, id: string, revisionId: string, syntax: OntologyDocumentSyntax, signal?: AbortSignal) => {
+    try {
+      const response = await http.get<ArrayBuffer, ArrayBuffer>(
+        `${path(id)}/revisions/${encodeURIComponent(revisionId)}/document`,
+        { ...scopedConfig(ws, signal), params: { syntax }, responseType: 'arraybuffer' },
+      )
+      return response
+    } catch (error) {
+      throw semanticError(error)
+    }
+  },
   diff: (ws: string, id: string, from: string | null, to: string, signal?: AbortSignal) =>
     semanticRequest<Diff>(ws, { url: `${path(id)}/diff`, params: { from: from || undefined, to } }, signal),
   availability: (
@@ -134,6 +157,18 @@ export const ontologyApi = {
     body: { graphId: string; targetRevisionId?: string; expectedDraftVersion?: number },
     signal?: AbortSignal,
   ) => semanticRequest<ImpactReport>(ws, { url: `${path(id)}/impact`, method: 'POST', data: body }, signal),
+  bindAxiomSource: (ws: string, id: string, body: { expectedDraftVersion: number; operationId: string; axiomId: string; knowledgeBaseId: string; sourceRef: string; expectedSourceDigest: string; startCodePoint: number; endCodePoint: number; exactQuote: string; origin: 'EXTRACTED' | 'EXPERT' | 'INFERRED' }, signal?: AbortSignal) =>
+    semanticRequest<{ draftVersion: number; binding: OntologySourceBinding }>(ws, { url: `${path(id)}/draft/axiom-sources`, method: 'POST', data: body }, signal),
+  axiomSources: (ws: string, id: string, revisionId: string, signal?: AbortSignal) =>
+    semanticRequest<OntologySourceBinding[]>(ws, { url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}/axiom-sources` }, signal),
+  scanSourceReviews: (ws: string, id: string, operationId: string, signal?: AbortSignal) =>
+    semanticRequest<OntologySourceReview[]>(ws, { url: `${path(id)}/source-reviews/scan`, method: 'POST', data: { operationId } }, signal),
+  sourceReviews: (ws: string, id: string, signal?: AbortSignal) =>
+    semanticRequest<OntologySourceReview[]>(ws, { url: `${path(id)}/source-reviews` }, signal),
+  sourceReviewSnapshots: (ws: string, id: string, reviewId: string, signal?: AbortSignal) =>
+    semanticRequest<{ original: import('./types').OntologySourceSnapshot; observed?: import('./types').OntologySourceSnapshot }>(ws, { url: `${path(id)}/source-reviews/${encodeURIComponent(reviewId)}/snapshots` }, signal),
+  decideSourceReview: (ws: string, id: string, reviewId: string, body: { operationId: string; expectedObservedDigest: string; decision: 'ACKNOWLEDGE' | 'REMODEL' | 'KEEP_HISTORICAL'; reason: string }, signal?: AbortSignal) =>
+    semanticRequest<OntologySourceReview>(ws, { url: `${path(id)}/source-reviews/${encodeURIComponent(reviewId)}/decision`, method: 'POST', data: body }, signal),
   ensureBuilder: (ws: string, signal?: AbortSignal) =>
     semanticRequest<{ agentId: string }>(ws, { url: '/semantic/ontology-builder/ensure', method: 'POST' }, signal),
 }

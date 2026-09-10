@@ -1,6 +1,7 @@
 package vip.mate.semantic.core.fact;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import vip.mate.semantic.core.identity.GraphScope;
@@ -13,8 +14,8 @@ public record StatementContent(
         GraphScope scope,
         OntologyRevisionId ontologyRevisionId,
         EntityId subjectId,
-        PredicateRef predicate,
-        StatementValue value,
+        Optional<PredicateRef> predicate,
+        AssertionPayload assertion,
         Validity validity,
         Set<EvidenceId> evidenceIds) {
 
@@ -22,8 +23,9 @@ public record StatementContent(
         Objects.requireNonNull(scope, "scope");
         Objects.requireNonNull(ontologyRevisionId, "ontologyRevisionId");
         Objects.requireNonNull(subjectId, "subjectId");
-        Objects.requireNonNull(predicate, "predicate");
-        Objects.requireNonNull(value, "value");
+        predicate = predicate == null ? Optional.empty() : predicate;
+        predicate.ifPresent(Objects::requireNonNull);
+        Objects.requireNonNull(assertion, "assertion");
         Objects.requireNonNull(validity, "validity");
         Objects.requireNonNull(evidenceIds, "evidenceIds");
         evidenceIds = Set.copyOf(evidenceIds);

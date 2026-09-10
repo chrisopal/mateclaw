@@ -17,9 +17,10 @@ public final class ExtractionCoordinator {
     private final ExtractionModelPort model;
     private final Clock clock;
     private final BooleanSupplier enabled;
+    private final vip.mate.semantic.core.fact.AssertionValidationPort assertions;
     public ExtractionCoordinator(SourceContentPort sources,AccessPolicyPort access,ContextPort context,
-            ExtractionTaskRepository repository,ExtractionModelPort model,Clock clock,BooleanSupplier enabled){
-        this.sources=sources;this.access=access;this.context=context;this.repository=repository;this.model=model;this.clock=clock;this.enabled=enabled;
+            ExtractionTaskRepository repository,ExtractionModelPort model,Clock clock,BooleanSupplier enabled,vip.mate.semantic.core.fact.AssertionValidationPort assertions){
+        this.sources=sources;this.access=access;this.context=context;this.repository=repository;this.model=model;this.clock=clock;this.enabled=enabled;this.assertions=java.util.Objects.requireNonNull(assertions);
     }
     public TaskRef start(Actor actor,StartCommand command){
         if(!enabled.getAsBoolean())throw new ExtractionException(409,"EXTRACTION_DISABLED");
@@ -28,7 +29,7 @@ public final class ExtractionCoordinator {
         var source=sources.read(actor,command.graphId(),command.sourceRef());try{new SourceChunker().split(source.text());}catch(IllegalArgumentException e){throw new ExtractionException(422,"SOURCE_TOO_LARGE");}
         String hash=hash(List.of(command.graphId(),command.sourceRef(),source.snapshotId(),source.contentHash(),ontology.revisionId().value(),config.configurationHash()).toString());
         Instant now=clock.instant();
-        return ref(repository.insertOrReplay(new Task(UUID.randomUUID().toString(),actor,command.graphId(),command.operationId(),hash,source,ontology,hash(ontology.definition().toString()),"semantic-m5-v1",config,TaskStatus.QUEUED,1,false,now,now)));
+        return ref(repository.insertOrReplay(new Task(UUID.randomUUID().toString(),actor,command.graphId(),command.operationId(),hash,source,ontology,ontology.document().document().documentDigest(),"semantic-owl-v1",config,TaskStatus.QUEUED,1,false,now,now)));
     }
     public TaskRef cancel(Actor actor,String graph,String id){Task t=require(actor,graph,id);access.require(actor,graph,t.source().sourceRef(),Action.CANCEL);
         if(t.status()!=TaskStatus.QUEUED&&t.status()!=TaskStatus.RUNNING)return ref(t);
@@ -65,7 +66,7 @@ public final class ExtractionCoordinator {
                 for(RawSuggestion raw:result.suggestions()){
                     // Invalid block offsets remain diagnosable and cannot point into a different chunk.
                     var quotes=raw.quotes().stream().map(q->locate(chunk,q)).toList();
-                    all.add(new RawSuggestion(raw.subject(),raw.predicate(),raw.value(),raw.target(),raw.validity(),quotes));
+                    all.add(new RawSuggestion(raw.subject(),raw.assertion(),raw.target(),raw.validity(),quotes));
                 }
                 if(all.size()>SuggestionValidator.MAX_SUGGESTIONS)throw new ExtractionException(422,"MODEL_OUTPUT_LIMIT");
                 if(result.explanation()!=null&&!result.explanation().isBlank())explanations.add(result.explanation());
@@ -73,9 +74,9 @@ public final class ExtractionCoordinator {
             }
             // Normalize duplicate content within this attempt and preserve distinct exact references.
             Map<String,RawSuggestion> unique=new LinkedHashMap<>();
-            for(RawSuggestion raw:all){String key=List.of(raw.subject(),raw.predicate(),Objects.toString(raw.value()),Objects.toString(raw.target()),raw.validity()).toString();
-                RawSuggestion old=unique.get(key);if(old==null)unique.put(key,raw);else{var quotes=new LinkedHashSet<>(old.quotes());quotes.addAll(raw.quotes());unique.put(key,new RawSuggestion(raw.subject(),raw.predicate(),raw.value(),raw.target(),raw.validity(),List.copyOf(quotes)));}}
-            List<Suggestion> suggestions=new ArrayList<>();var validator=new SuggestionValidator();
+            for(RawSuggestion raw:all){String key=List.of(raw.subject(),raw.assertion(),Objects.toString(raw.target()),raw.validity()).toString();
+                RawSuggestion old=unique.get(key);if(old==null)unique.put(key,raw);else{var quotes=new LinkedHashSet<>(old.quotes());quotes.addAll(raw.quotes());unique.put(key,new RawSuggestion(raw.subject(),raw.assertion(),raw.target(),raw.validity(),List.copyOf(quotes)));}}
+            List<Suggestion> suggestions=new ArrayList<>();var validator=new SuggestionValidator(assertions);
             for(RawSuggestion raw:unique.values())suggestions.add(new Suggestion(UUID.randomUUID().toString(),task.taskId(),attempt.attemptId(),raw,null,validator.validateRaw(context.scope(task.actor(),task.graphId()),task.ontology(),raw,task.source().text()).violations(),1,SuggestionStatus.OPEN));
             requireLive(task,attempt);repository.complete(attempt.lease(),finished(attempt,input,output,null),suggestions,clock.instant(),String.join("\n",explanations));
         }catch(Exception e){
@@ -95,7 +96,7 @@ public final class ExtractionCoordinator {
     /** Exact unique substring fallback only; repeated or absent quotations remain diagnostics. */
     static Quote locate(Chunk chunk,Quote quote){
         Quote local=quote;
-        if(!new SuggestionValidator().matches(chunk.text(),quote)){
+        if(!SuggestionValidator.matches(chunk.text(),quote)){
             String exact=quote.exactQuote();int start=exact==null||exact.isEmpty()?-1:chunk.text().indexOf(exact);
             if(start<0||chunk.text().indexOf(exact,start+1)>=0)return new Quote(-1,-1,exact);
             int begin=chunk.text().codePointCount(0,start);local=new Quote(begin,begin+exact.codePointCount(0,exact.length()),exact);

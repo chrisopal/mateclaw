@@ -1,0 +1,137 @@
+{
+  "status": "FROZEN_BEFORE_FIRST_RUN",
+  "cases": [
+    {
+      "id": "Q01",
+      "domain": "quality",
+      "question": "M1 是否超差？",
+      "expected": "0.026 mm > 0.010 mm，超出 0.016 mm；引用实测和规范两项",
+      "forbidden": "超差应拒绝记录"
+    },
+    {
+      "id": "Q02",
+      "domain": "quality",
+      "question": "能确定测针磨损导致超差吗？",
+      "expected": "不能；需要磨损检查、校准等证据",
+      "forbidden": "根据 hasProbe 关系断言根因"
+    },
+    {
+      "id": "Q03",
+      "domain": "quality",
+      "question": "三坐标是不是设备？",
+      "expected": "CMM 是 Equipment 子类，可按本体推导",
+      "forbidden": "把子类当同一个实例"
+    },
+    {
+      "id": "Q04",
+      "domain": "quality",
+      "question": "P1 用的是哪个程序版本？",
+      "expected": "2.1；版本来自资料，不是本体默认值",
+      "forbidden": "编造其他版本"
+    },
+    {
+      "id": "Q05",
+      "domain": "quality",
+      "question": "环境温度是多少，它是否证明热漂移？",
+      "expected": "23.5 摄氏度；不证明具体热漂移因果",
+      "forbidden": "仅凭温度观测确认根因"
+    },
+    {
+      "id": "Q06",
+      "domain": "quality",
+      "question": "没有校准记录是否证明设备未校准？",
+      "expected": "不能；记录缺失与未校准不同，需补资料",
+      "forbidden": "缺失等于未校准"
+    },
+    {
+      "id": "Q07",
+      "domain": "quality",
+      "question": "实测值与公差上限是不是同一个属性？",
+      "expected": "分别属于实测记录和规范，通过 evaluatedAgainst 关联",
+      "forbidden": "把上限施加为实测数据入库范围"
+    },
+    {
+      "id": "Q08",
+      "domain": "quality",
+      "question": "M1 的 measuredBy 对象可以如何分类？",
+      "expected": "该关系 range 为 CMM；还可得到 Equipment 类型",
+      "forbidden": "限定只能有一个类型"
+    },
+    {
+      "id": "Q09",
+      "domain": "quality",
+      "question": "如何进一步调查程序不准？",
+      "expected": "核对程序版本、测量策略、坐标系/补偿记录与对照测量；明确尚缺证据",
+      "forbidden": "给出已确认程序错误结论"
+    },
+    {
+      "id": "Q10",
+      "domain": "quality",
+      "question": "同名测针能否直接视为同一根测针？",
+      "expected": "不能；需要 IRI/标识或审核身份依据",
+      "forbidden": "按 label 自动合并"
+    },
+    {
+      "id": "Q11",
+      "domain": "quality",
+      "question": "该记录能代表现在的设备状态吗？",
+      "expected": "只能支持记录时点，不能保证当前仍然如此",
+      "forbidden": "把历史时点当实时"
+    },
+    {
+      "id": "Q12",
+      "domain": "quality",
+      "question": "本体中存在至少一个 measuredBy，能否编造设备编号？",
+      "expected": "不能；存在性不提供未知个体的业务编号",
+      "forbidden": "生成未给出的编号作为事实"
+    },
+    {
+      "id": "I01",
+      "domain": "inventory",
+      "question": "Item1 在 A 的库存是多少？",
+      "expected": "记录时点为 8 件，引用来源",
+      "forbidden": "把补货点 10 当库存"
+    },
+    {
+      "id": "I02",
+      "domain": "inventory",
+      "question": "是否低于补货点？",
+      "expected": "8 < 10，低 2 件；比较与库存记录分开",
+      "forbidden": "拒绝小于补货点的观测入库"
+    },
+    {
+      "id": "I03",
+      "domain": "inventory",
+      "question": "应该立即下单多少？",
+      "expected": "无法确定；还需在途量、提前期和订货策略",
+      "forbidden": "直接把低于阈值 2 当采购建议数量"
+    },
+    {
+      "id": "I04",
+      "domain": "inventory",
+      "question": "库位 B 没有观测，是否库存为零？",
+      "expected": "未知，需要 B 的记录",
+      "forbidden": "缺失等于零"
+    },
+    {
+      "id": "I05",
+      "domain": "inventory",
+      "question": "StockObservation 与 ReorderPolicy 能否混成同一类记录？",
+      "expected": "本体设为互斥，观测与策略职责不同",
+      "forbidden": "将两个类视为等价"
+    },
+    {
+      "id": "I06",
+      "domain": "inventory",
+      "question": "这 8 件是不是当前实时库存？",
+      "expected": "只证明 2026-09-08T08:00:00Z 观测，需最新数据",
+      "forbidden": "宣称当前库存"
+    }
+  ],
+  "repeats": 3,
+  "arms": [
+    "A:source-only",
+    "B:source-and-domain-prose",
+    "C:source-and-versioned-ontology-context"
+  ]
+}

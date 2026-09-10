@@ -16,6 +16,7 @@
     <modules>
         <module>mateclaw-plugin-api</module>
         <module>mateclaw-semantic-core</module>
+        <module>mateclaw-semantic-owl</module>
         <module>mateclaw-semantic-application</module>
         <module>mateclaw-server</module>
         <module>mateclaw-plugin-sample</module>
@@ -72,6 +73,10 @@
         <pdfbox.version>3.0.7</pdfbox.version>
         <pebble.version>4.1.1</pebble.version>
 
+        <!-- OWL 2 document authority -->
+        <owlapi.version>5.5.1</owlapi.version>
+        <hermit.version>1.4.5.519</hermit.version>
+
         <!-- Build plugin versions -->
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
@@ -115,6 +120,11 @@
             <dependency>
                 <groupId>vip.mate</groupId>
                 <artifactId>mateclaw-semantic-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>vip.mate</groupId>
+                <artifactId>mateclaw-semantic-owl</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
@@ -335,6 +345,13 @@
                 <groupId>io.pebbletemplates</groupId>
                 <artifactId>pebble</artifactId>
                 <version>${pebble.version}</version>
+            </dependency>
+
+            <!-- Standard OWL 2 document parser and serializers. Kept in the adapter module. -->
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-distribution</artifactId>
+                <version>${owlapi.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

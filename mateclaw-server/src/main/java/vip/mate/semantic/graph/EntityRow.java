@@ -6,7 +6,9 @@ import lombok.Data;
 public class EntityRow {
     private String id;
     private String graphId;
-    private String typeKey;
+    private String iri;
+    private String iriDigest;
+    private String assertedTypesJson;
     private String displayName;
     private String status;
     private String createdBy;

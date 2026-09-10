@@ -12,7 +12,15 @@ public class OntologyRevisionRow {
     private Integer draftSlot;
     private String name;
     private String description;
-    private String definitionJson;
+    private String documentText;
+    private String documentSyntax;
+    private String documentDigest;
+    private String ontologyIri;
+    private String versionIri;
+    private String importLockDigest;
+    private String modelSchema;
+    private String importsJson;
+    private String policyJson;
     private String baseRevisionId;
     private Boolean availableForNewBindings;
     private java.time.LocalDateTime publishedAt;

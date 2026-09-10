@@ -24,7 +24,7 @@ beforeEach(() => {
     items: [{ id: '11', workspaceId: '1', name: 'Equipment', description: '', latestVersion: 1, latestRevisionId: '12', hasDraft: false, updatedAt: '' }],
     total: 1, page: 1, pageSize: 20,
   })
-  vi.mocked(ontologyApi.revisions).mockResolvedValue([{ id: '12', ontologyId: '11', version: 1, name: 'Equipment', description: '', definition: { types: [], properties: [], relations: [] }, availableForNewBindings: true, publishedAt: '', publishedBy: '1', publicationNote: '', baseRevisionId: null }])
+  vi.mocked(ontologyApi.revisions).mockResolvedValue([{ id: '12', ontologyId: '11', version: 1, name: 'Equipment', description: '', document: { source: { modelSchema: 'owl-document-v1', syntax: 'FUNCTIONAL', documentText: 'Ontology(<https://example.test/equipment>)', imports: [], policy: { version: '1', rules: [] } }, ontologyIri: 'https://example.test/equipment', versionIri: null, documentDigest: 'sha256:doc', importLockDigest: 'sha256:imports', axioms: [] }, availableForNewBindings: true, publishedAt: '', publishedBy: '1', publicationNote: '', baseRevisionId: null }])
 })
 
 afterEach(() => { app?.unmount(); host?.remove() })

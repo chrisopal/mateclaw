@@ -12,19 +12,11 @@ import java.time.Instant;
 final class ExtractionJson {
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, property="kind")
-    @JsonSubTypes({@JsonSubTypes.Type(value=StatementValue.TextValue.class,name="TEXT"),
-        @JsonSubTypes.Type(value=StatementValue.DecimalValue.class,name="DECIMAL"),
-        @JsonSubTypes.Type(value=StatementValue.BooleanValue.class,name="BOOLEAN"),
-        @JsonSubTypes.Type(value=StatementValue.DateValue.class,name="DATE"),
-        @JsonSubTypes.Type(value=StatementValue.InstantValue.class,name="INSTANT"),
-        @JsonSubTypes.Type(value=StatementValue.EntityValue.class,name="ENTITY")})
-    interface Values {}
-    @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, property="kind")
     @JsonSubTypes({@JsonSubTypes.Type(value=PredicateRef.PropertyRef.class,name="PROPERTY"),
         @JsonSubTypes.Type(value=PredicateRef.RelationRef.class,name="RELATION")})
     interface Predicates {}
     ExtractionJson() {
-        mapper.addMixIn(StatementValue.class, Values.class).addMixIn(PredicateRef.class,Predicates.class);
+        mapper.addMixIn(PredicateRef.class,Predicates.class);
         SimpleModule module=new SimpleModule();
         module.addSerializer(Validity.class,new JsonSerializer<>() {
             public void serialize(Validity v,JsonGenerator out,SerializerProvider p)throws IOException {

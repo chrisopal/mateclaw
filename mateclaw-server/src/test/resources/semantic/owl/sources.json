@@ -1,0 +1,28 @@
+[
+  {
+    "id": "quality-source-v1",
+    "synthetic": true,
+    "domain": "quality",
+    "text": "合成测试：2026-09-08T08:00:00Z，测量记录 M1 使用三坐标 CMM1，程序 P1 版本 2.1，测针 Probe1。实测偏差 0.026 mm，规范 T1 上限 0.010 mm，环境温度 23.5 摄氏度。此资料没有测针磨损检查结论、设备补偿记录或因果实验。",
+    "digest": "75f855af21d7c4545a29f7576ba954c5128ad112211318eda50244c1e34a2ef8",
+    "quote": {
+      "exactQuote": "合成测试：2026-09-08T08:00:00Z，测量记录 M1 使用三坐标 CMM1，程序 P1 版本 2.1，测针 Probe1。实测偏差 0.026 mm，规范 T1 上限 0.010 mm，环境温度 23.5 摄氏度。此资料没有测针磨损检查结论、设备补偿记录或因果实验。",
+      "startCodePoint": 0,
+      "endCodePoint": 140
+    },
+    "observedAt": "2026-09-08T08:00:00Z"
+  },
+  {
+    "id": "inventory-source-v1",
+    "synthetic": true,
+    "domain": "inventory",
+    "text": "合成测试：2026-09-08T08:00:00Z，物料 Item1 在库位 A 的库存观测为 8 件。规则 R1 的补货点为 10 件。资料没有采购提前期、在途量或库位 B 的观测。",
+    "digest": "5507905d91cedf9240b0fe3ef3ed4badcd47291492084dafb25150a9ddba850f",
+    "quote": {
+      "exactQuote": "合成测试：2026-09-08T08:00:00Z，物料 Item1 在库位 A 的库存观测为 8 件。规则 R1 的补货点为 10 件。资料没有采购提前期、在途量或库位 B 的观测。",
+      "startCodePoint": 0,
+      "endCodePoint": 92
+    },
+    "observedAt": "2026-09-08T08:00:00Z"
+  }
+]

@@ -14,6 +14,6 @@ class SemanticExtractionFeatureFlagTest extends SemanticExtractionFixture {
         call("GET",base+"/extraction-tasks/"+task,"viewer",workspace,null,200);
         call("POST",base+"/extraction-tasks/"+task+"/cancel","viewer",workspace,Map.of(),403);
         assertEquals("CANCELLED",call("POST",base+"/extraction-tasks/"+task+"/cancel","member",workspace,Map.of(),200).path("status").asText());
-        call("POST",base+"/entities","member",workspace,Map.of("typeKey","Equipment","displayName","Manual remains available"),200);
+        call("POST",base+"/entities","member",workspace,Map.of("iri","urn:test:manual","assertedTypes",java.util.Set.of("urn:test:Equipment"),"displayName","Manual remains available"),200);
     }
 }

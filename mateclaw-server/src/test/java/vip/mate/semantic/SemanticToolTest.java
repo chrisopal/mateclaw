@@ -82,15 +82,14 @@ class SemanticToolTest extends SemanticHttpFixture {
     }
     private JsonNode propose(Fixture f, String value, String evidence, String operation, int status) throws Exception {
         return call("POST", "/graphs/" + f.graph + "/statements", "member", workspace,
-                Map.of("operationId", operation, "subjectId", f.entity, "predicateKind", "PROPERTY", "predicateKey", "voltage",
-                        "valueType", "DECIMAL", "value", value, "unit", "V", "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), status);
+                Map.of("operationId", operation, "subjectId", f.entity, "assertionText", "DataPropertyAssertion(<urn:test:voltage> <urn:test:P-101> \""+value+"\"^^<http://www.w3.org/2001/XMLSchema#decimal>)", "validityKind", "INTERVAL", "evidenceIds", List.of(evidence)), status);
     }
 
     private Fixture graph(String text) throws Exception {
         String kb = kb(); String ontology = create(); JsonNode draft = draft(ontology); JsonNode saved = save(ontology, draft.path("draftVersion").asLong());
         JsonNode revision = publish(ontology, saved.path("draftVersion").asLong(), "publish-" + UUID.randomUUID());
         JsonNode binding = call("PUT", "/knowledge-bases/" + kb + "/binding", "owner", workspace, Map.of("action", "ENABLE", "revisionId", revision.path("id").asText()), 200);
-        JsonNode entity = call("POST", "/graphs/" + binding.path("graphId").asText() + "/entities", "member", workspace, Map.of("typeKey", "Equipment", "displayName", "P-101"), 200);
+        JsonNode entity = call("POST", "/graphs/" + binding.path("graphId").asText() + "/entities", "member", workspace, Map.of("iri", "urn:test:P-101", "assertedTypes", java.util.Set.of("urn:test:Equipment"), "displayName", "P-101"), 200);
         String raw = raw(kb, text);
         String importOperation = "import-" + UUID.randomUUID();
         JsonNode imported = call("POST", "/graphs/" + binding.path("graphId").asText() + "/imports", "member", workspace, Map.of("sourceKind", "WIKI_RAW", "sourceRef", raw, "operationId", importOperation), 200);

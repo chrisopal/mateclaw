@@ -62,7 +62,7 @@ public class EnableExtensionTool {
         Long agentId = ChatOrigin.from(ctx).agentId();
         if (agentId != null) {
             Set<String> effective = agentBindingService.getEffectiveToolNames(agentId);
-            agentSet = agentSet.withAllowedToolsOnly(effective); // null = no restriction
+            agentSet = AgentBindingService.applyEffectiveToolScope(agentSet, effective); // null = global defaults, excluding opt-in authoring
         }
         ToolCallback callback = agentSet.callbackByName().get(toolName);
         if (callback == null) {

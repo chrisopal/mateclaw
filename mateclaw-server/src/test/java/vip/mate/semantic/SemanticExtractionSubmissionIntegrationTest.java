@@ -25,7 +25,7 @@ class SemanticExtractionSubmissionIntegrationTest extends SemanticExtractionFixt
         var suggestion=generate();String id=suggestion.path("id").asText();
         var edit=edit(1);call("PATCH",base+"/suggestions/"+id,"member",workspace,edit,200);
         assertEquals(2,call("PATCH",base+"/suggestions/"+id,"member",workspace,edit,200).path("version").asInt(),"edit operation replays without creating a third revision");
-        var altered=new HashMap<>(edit);altered.put("value","221");call("PATCH",base+"/suggestions/"+id,"member",workspace,altered,409);
+        var altered=new HashMap<>(edit);altered.put("assertionText",assertion(SUBJECT_IRI).replace("\"220\"", "\"221\""));call("PATCH",base+"/suggestions/"+id,"member",workspace,altered,409);
         var fail=new java.util.concurrent.atomic.AtomicBoolean(true);
         doAnswer(invocation->{if(fail.getAndSet(false))throw new IllegalStateException("injected receipt storage outage");return invocation.callRealMethod();}).when(extraction).saveReceipt(any(),anyString(),any());
         String operation=op();var command=Map.of("expectedVersion",2,"operationId",operation);
@@ -55,7 +55,7 @@ class SemanticExtractionSubmissionIntegrationTest extends SemanticExtractionFixt
         var suggestion=generate();String id=suggestion.path("id").asText();var invalid=edit(1);invalid.put("quotes",List.of(Map.of("startCodePoint",0,"endCodePoint",1,"exactQuote","伪造")));
         var edited=call("PATCH",base+"/suggestions/"+id,"member",workspace,invalid,200);assertFalse(edited.path("diagnostics").isEmpty());
         call("POST",base+"/suggestions/"+id+"/submit","member",workspace,Map.of("expectedVersion",2,"operationId",op()),422);
-        var wrong=edit(2);wrong.put("subjectId","999999999999");call("PATCH",base+"/suggestions/"+id,"member",workspace,wrong,200);
-        call("POST",base+"/suggestions/"+id+"/submit","member",workspace,Map.of("expectedVersion",3,"operationId",op()),422);
+        var wrong=edit(2);wrong.put("subjectId","999999999999");
+        call("PATCH",base+"/suggestions/"+id,"member",workspace,wrong,422);
     }
 }

@@ -248,40 +248,23 @@ public abstract class SemanticHttpFixture {
     }
 
     protected Map<String, Object> definition() {
-        return Map.of(
-                "types",
-                List.of(Map.of("key", "Equipment", "label", "Equipment", "description", "")),
-                "properties",
-                List.of(
-                        Map.of(
-                                "key",
-                                "voltage",
-                                "label",
-                                "Voltage",
-                                "description",
-                                "",
-                                "ownerTypeKey",
-                                "Equipment",
-                                "valueType",
-                                "DECIMAL",
-                                "multiplicity",
-                                "SINGLE",
-                                "fixedUnit",
-                                "V")),
-                "relations",
-                List.of());
+        return owlDocument("""
+            Ontology(<urn:test:equipment>
+              Declaration(Class(<urn:test:Equipment>))
+              Declaration(DataProperty(<urn:test:voltage>))
+              AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:test:Equipment> "Equipment")
+              AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:test:voltage> "Voltage")
+              DataPropertyDomain(<urn:test:voltage> <urn:test:Equipment>)
+              DataPropertyRange(<urn:test:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))
+            """);
     }
-
-    protected Map<String, Object> saveBody(long version, Object definition) {
-        return Map.of(
-                "expectedDraftVersion",
-                version,
-                "name",
-                "Equipment",
-                "description",
-                "initial",
-                "definition",
-                definition);
+    protected Map<String,Object> owlDocument(String text) {
+        return Map.of("modelSchema","owl-document-v1","syntax","FUNCTIONAL", "documentText",text,
+            "imports",List.of(),"policy",Map.of("version","v1","rules",List.of()));
+    }
+    protected Map<String, Object> saveBody(long version, Object document) {
+        return Map.of("expectedDraftVersion",version,"name","Equipment","description","initial",
+            "document",document,"operationId","save-"+UUID.randomUUID());
     }
 
     protected JsonNode save(String id, long version) throws Exception {
