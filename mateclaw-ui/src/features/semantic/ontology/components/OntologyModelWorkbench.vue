@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from 'vue'
 import OntologyGraphCanvas from './OntologyGraphCanvas.vue'
+import OntologyDefinitionForm from './OntologyDefinitionForm.vue'
 import { graphView } from '../ontologyGraphView'
 import { useI18n } from 'vue-i18n'
 import type { AxiomDescriptor, AxiomEdit } from '../../api/types'
 import { projectOntology, type OntologyNodeKind, type OntologyProjectionEdge } from '../ontologyProjection'
 import { termEdits, type TermInput } from '../ontologyForm'
-const props = defineProps<{ axioms: AxiomDescriptor[]; editable?: boolean; disabled?: boolean; apply?: (edits: AxiomEdit[]) => Promise<boolean> }>()
+const props = defineProps<{ axioms: AxiomDescriptor[]; editable?: boolean; disabled?: boolean; reloadDraft?: () => Promise<boolean>; editPending?: boolean; retryEdit?: () => Promise<boolean>; failureMessage?: string; apply?: (edits: AxiomEdit[]) => Promise<boolean> }>()
 const emit = defineEmits<{ advanced: []; 'inspect-axiom': [axiomId: string] }>()
 const searchId = `ontology-term-search-${useId()}`
 const canvas = ref<InstanceType<typeof OntologyGraphCanvas>>()
 const inspectorOpen = ref(false)
+const editingDefinition = ref(false)
 const inspectorToggle = ref<{ $el: HTMLButtonElement }>()
 async function closeInspector() {
   inspectorOpen.value = false
@@ -19,7 +21,9 @@ async function closeInspector() {
 }
 const { locale } = useI18n()
 const tr = (zh: string, en: string) => locale.value.startsWith('zh') ? zh : en
-const model = computed(() => projectOntology(props.axioms))
+const labelLanguage = ref(locale.value)
+const labelLanguages = computed(() => [...new Set([locale.value, 'en', ...props.axioms.flatMap(a => { const match = /@([A-Za-z]+(?:-[A-Za-z0-9]+)*)\)$/.exec(a.rendering); return match ? [match[1]!] : [] })])])
+const model = computed(() => projectOntology(props.axioms, labelLanguage.value))
 const query = ref(''); const mode = ref<'schema' | 'individuals'>('schema'); const selectedId = ref(''); const selectedEdgeId = ref('')
 const onlyMatches = ref(false); const neighborhood = ref(false)
 const nodeKind = ref<OntologyNodeKind | ''>(''); const edgeKind = ref<OntologyProjectionEdge['kind'] | ''>('')
@@ -32,8 +36,8 @@ const selectedEdge = computed(() => model.value.edges.find(e => e.id === selecte
 const rules = computed(() => props.axioms.filter(a => selectedEdge.value ? a.axiomId === selectedEdge.value.axiomId : selected.value ? a.signatureIris.includes(selected.value.iri) : model.value.unprojectedAxiomIds.includes(a.axiomId)))
 const ruleLabel = (kind: string) => ({ Declaration:tr('类型定义','Declaration'), AnnotationAssertion:tr('名称与注释','Label / annotation'), SubClassOf:tr('概念继承与限制','Subclass / restriction'), ObjectPropertyDomain:tr('关系的所属概念','Relation domain'), ObjectPropertyRange:tr('关系的关联概念','Relation range'), DataPropertyDomain:tr('属性的所属概念','Attribute domain'), DataPropertyRange:tr('属性的数据类型','Attribute datatype'), HasKey:tr('组合标识规则','Key rule'), EquivalentClasses:tr('等价概念','Equivalent concepts'), DisjointClasses:tr('互斥概念','Disjoint concepts') }[kind] || kind)
 const kindLabel = (kind: string) => ({ class:tr('概念','Concept'), objectProperty:tr('关系','Relation'), dataProperty:tr('属性','Attribute'), individual:tr('本体个体','Ontology individual'), datatype:tr('数据类型','Datatype'), annotationProperty:tr('注释','Annotation') }[kind] || kind)
-function select(id: string) { selectedId.value = id; selectedEdgeId.value = ''; inspectorOpen.value = true; void nextTick(() => canvas.value?.focus()) }
-function selectEdge(id: string) { selectedEdgeId.value = id; neighborhood.value = false; selectedId.value = ''; inspectorOpen.value = true }
+function select(id: string) { editingDefinition.value = false; selectedId.value = id; selectedEdgeId.value = ''; inspectorOpen.value = true; void nextTick(() => canvas.value?.focus()) }
+function selectEdge(id: string) { editingDefinition.value = false; selectedEdgeId.value = id; neighborhood.value = false; selectedId.value = ''; inspectorOpen.value = true }
 watch(query, () => { void nextTick(() => canvas.value?.focus(view.value.matches[0])) })
 watch([mode, nodeKind], () => { selectedId.value = ''; selectedEdgeId.value = ''; neighborhood.value = false; inspectorOpen.value = false })
 watch(() => props.axioms, () => { if (!model.value.nodes.some(n => n.id === selectedId.value)) selectedId.value = ''; selectedEdgeId.value = '' })
@@ -63,6 +67,7 @@ async function submit() {
       <aside class="model-directory">
         <label :for="searchId">{{ tr('定义目录','Definition directory') }}</label>
         <el-input :id="searchId" v-model="query" clearable :placeholder="tr('搜索名称或标识','Search name or IRI')" />
+        <label class="model-kind-filter">{{ tr('显示语言','Display language') }}<select v-model="labelLanguage" :aria-label="tr('显示语言','Display language')"><option v-for="lang in labelLanguages" :key="lang" :value="lang">{{lang}}</option><option value="">{{tr('无语言优先','Untagged first')}}</option></select></label>
         <el-radio-group v-model="mode" size="small" class="model-mode"><el-radio-button value="schema">{{ tr('概念结构','Schema') }}</el-radio-button><el-radio-button value="individuals">{{ tr('本体个体','Individuals') }}</el-radio-button></el-radio-group>
         <label class="model-kind-filter">{{ tr('定义种类','Definition kind') }}<select v-model="nodeKind" :aria-label="tr('定义种类','Definition kind')"><option value="">{{ tr('全部','All') }}</option><option v-for="kind in (mode === 'individuals' ? ['individual'] : ['class','objectProperty','dataProperty','datatype','annotationProperty'])" :key="kind" :value="kind">{{ kindLabel(kind) }}</option></select></label>
         <el-checkbox v-model="onlyMatches">{{ tr('仅看匹配项','Only matching nodes') }}</el-checkbox>
@@ -82,6 +87,7 @@ async function submit() {
       <aside class="model-inspector" :class="{'is-open': inspectorOpen}">
         <el-button class="model-mobile-details" @click="closeInspector">{{ tr('关闭详情','Close details') }}</el-button>
         <h3>{{ selected?.label || (selectedEdge ? tr('关联定义','Link definition') : tr('定义详情','Definition details')) }}</h3>
+        <el-button v-if="selected && editable && apply" :disabled="disabled" @click="editingDefinition=true">{{ tr('编辑此定义','Edit this definition') }}</el-button>
         <template v-if="selected"><el-tag size="small">{{ kindLabel(selected.kind) }}</el-tag><details class="model-identifier"><summary>{{ tr('查看标识 IRI','Identifier IRI') }}</summary><code>{{ selected.iri }}</code></details></template>
         <p v-else-if="!selectedEdge" class="model-note">{{ tr('选择左侧定义或图中的节点、连线，查看关联规则。','Select a definition, node or edge to inspect its rules.') }}</p>
         <h4>{{ selected || selectedEdge ? tr('相关规则','Related rules') : tr('其他规则','Other rules') }} · {{ rules.length }}</h4>
@@ -90,6 +96,7 @@ async function submit() {
       </aside>
     </div>
     <p class="model-note model-footnote">{{ tr('结构图仅展示可明确解析的命名定义与直接关联。未完整图示的公理','Only named definitions and direct links are projected. Axioms not fully visualized') }}：{{ model.unprojectedAxiomIds.length }} / {{ axioms.length }} · {{ tr('全部内容保留在高级视图中。','All content remains available in the advanced view.') }}</p>
+    <OntologyDefinitionForm v-if="editingDefinition && selected && editable && apply" :node="selected" :nodes="model.nodes" :axioms="axioms" :disabled="!!disabled" :failure-message="failureMessage" :pending="editPending" :retry="retryEdit" :reload="reloadDraft" :apply="apply" @close="editingDefinition=false" />
     <el-dialog v-model="formOpen" :title="tr('新增定义','Add definition')" width="min(540px, 94vw)" :close-on-click-modal="!saving" :show-close="!saving">
       <el-form label-position="top" :disabled="disabled || saving" @submit.prevent="submit">
         <el-form-item :label="tr('名称','Name')" required><el-input v-model="form.label" /></el-form-item>

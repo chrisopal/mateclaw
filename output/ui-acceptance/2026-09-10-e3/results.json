@@ -1,0 +1,250 @@
+{
+  "results": [
+    {
+      "id": "language",
+      "steps": [
+        "选择 en、失焦、返回 zh-CN"
+      ],
+      "status": "PASS",
+      "actual": "语言回显及目录联动正确"
+    },
+    {
+      "id": "comment",
+      "steps": [
+        "选原说明、修改、重置、预览、确认、API 回读"
+      ],
+      "status": "PASS",
+      "actual": "单条说明替换成功"
+    },
+    {
+      "id": "multi-domain",
+      "steps": [
+        "选独立 Environment 定义域、换成 Probe、确认、回读两条域"
+      ],
+      "status": "PASS",
+      "actual": [
+        "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Machine>)",
+        "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Probe>)"
+      ]
+    },
+    {
+      "id": "datatype",
+      "steps": [
+        "选择 xsd:decimal、输入完整 integer IRI、确认"
+      ],
+      "status": "PASS",
+      "actual": "前缀展开与替换正确"
+    },
+    {
+      "id": "superclass",
+      "steps": [
+        "新增父类、无效 IRI 拦截、选择有效类、保存"
+      ],
+      "status": "PASS",
+      "actual": "简单父类新增，复杂限制保留"
+    },
+    {
+      "id": "cas",
+      "steps": [
+        "预览说明、另一客户端真实写入、确认触发冲突、载入最新、再预览保存"
+      ],
+      "status": "PASS",
+      "actual": "真实版本冲突保留输入，明确载入后成功"
+    },
+    {
+      "id": "lost-response",
+      "steps": [
+        "服务端提交后模拟丢失响应、冻结输入、恢复同一请求、回读只增一版"
+      ],
+      "status": "PASS",
+      "actual": {
+        "simulated": true,
+        "before": 9,
+        "after": 10,
+        "sameRequest": true
+      }
+    },
+    {
+      "id": "mobile-cancel",
+      "steps": [
+        "390px 打开、输入、Tab、取消、重开、关闭并检查焦点"
+      ],
+      "status": "PASS",
+      "actual": {
+        "box": {
+          "x": 0,
+          "y": -19.738224029541016,
+          "width": 390,
+          "height": 844.0000038146973
+        },
+        "cancelled": true
+      }
+    },
+    {
+      "id": "preservation-refresh",
+      "steps": [
+        "刷新并独立 API 回读"
+      ],
+      "status": "PASS",
+      "actual": {
+        "version": 10,
+        "preserved": 19,
+        "axioms": [
+          "AnnotationAssertion(rdfs:comment <urn:cmm:Environment> \"E3 响应恢复完成\"@zh)",
+          "AnnotationAssertion(rdfs:comment <urn:cmm:Probe> \"parallel fixture\")",
+          "AnnotationAssertion(rdfs:label <urn:cmm:Environment> \"Environment\"@en)",
+          "AnnotationAssertion(rdfs:label <urn:cmm:Environment> \"测量环境 E3\"@zh-cn)",
+          "AnnotationAssertion(rdfs:label <urn:cmm:Machine> \"三坐标测量机\")",
+          "AnnotationAssertion(rdfs:label <urn:cmm:Probe> \"测针\")",
+          "AnnotationAssertion(rdfs:label <urn:cmm:inEnvironment> \"处于环境\")",
+          "AnnotationAssertion(rdfs:label <urn:cmm:temperature> \"环境温度\")",
+          "AnnotationAssertion(rdfs:label <urn:cmm:usesProbe> \"使用测针\")",
+          "DataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Environment>)",
+          "DataPropertyRange(<urn:cmm:temperature> xsd:integer)",
+          "Declaration(Class(<urn:cmm:Environment>))",
+          "Declaration(Class(<urn:cmm:Machine>))",
+          "Declaration(Class(<urn:cmm:Probe>))",
+          "Declaration(DataProperty(<urn:cmm:temperature>))",
+          "Declaration(ObjectProperty(<urn:cmm:inEnvironment>))",
+          "Declaration(ObjectProperty(<urn:cmm:usesProbe>))",
+          "ObjectPropertyDomain(<urn:cmm:inEnvironment> <urn:cmm:Machine>)",
+          "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Machine>)",
+          "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Probe>)",
+          "ObjectPropertyRange(<urn:cmm:inEnvironment> <urn:cmm:Environment>)",
+          "ObjectPropertyRange(<urn:cmm:usesProbe> <urn:cmm:Probe>)",
+          "SubClassOf(<urn:cmm:Environment> <urn:cmm:Machine>)",
+          "SubClassOf(<urn:cmm:Environment> ObjectSomeValuesFrom(<urn:cmm:usesProbe> <urn:cmm:Probe>))"
+        ],
+        "digest": "0bd42ad7c67e1e02b8406bbdd14873ddc5a4abd4909b26b2a59be01359dda14f"
+      }
+    },
+    {
+      "id": "readonly",
+      "steps": [
+        "打开已发布版本、选节点"
+      ],
+      "status": "PASS",
+      "actual": "已发布版本无编辑入口"
+    }
+  ],
+  "writes": [
+    {
+      "expectedDraftVersion": 3,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "adc4c26e5489b56523de31277f6475daf879cd72f6c394c4200499e3120c50d9"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:cmm:Environment> \"E3 已核对说明\"@zh)"
+        }
+      ],
+      "operationId": "4b387fd1-45c8-4aac-9f41-07a6403d7b31"
+    },
+    {
+      "expectedDraftVersion": 4,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "0addc2628339d5003976cdb5260348d498e8ff8620ef5a9d42a12caf8f681a6f"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Probe>)"
+        }
+      ],
+      "operationId": "0cc6f755-d5d0-482b-b6da-19b7bdbb1b19"
+    },
+    {
+      "expectedDraftVersion": 5,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "37e7efcd8b905c47573844413eda6690f94e651312bbeb528abc7eed3572e196"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "DataPropertyRange(<urn:cmm:temperature> <http://www.w3.org/2001/XMLSchema#integer>)"
+        }
+      ],
+      "operationId": "fe9c7ee1-7b3c-4298-a63f-777fb0a81669"
+    },
+    {
+      "expectedDraftVersion": 6,
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "SubClassOf(<urn:cmm:Environment> <urn:cmm:Machine>)"
+        }
+      ],
+      "operationId": "527eb77f-38f5-48ad-bd1d-95c3f53b05f4"
+    },
+    {
+      "expectedDraftVersion": 7,
+      "operationId": "ed136d54-0928-4787-9163-705b45d01864",
+      "changes": [
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(rdfs:comment <urn:cmm:Probe> \"parallel fixture\")"
+        }
+      ]
+    },
+    {
+      "expectedDraftVersion": 7,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "b0fa2ec5ea0f408e5e8007e48fbb73dd4be38ac8e9ceaa3731faa8eec13b0ec6"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:cmm:Environment> \"E3 并发核对后\"@zh)"
+        }
+      ],
+      "operationId": "bb278cc1-a815-4613-a6dd-a60c4b165c9d"
+    },
+    {
+      "expectedDraftVersion": 8,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "b0fa2ec5ea0f408e5e8007e48fbb73dd4be38ac8e9ceaa3731faa8eec13b0ec6"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:cmm:Environment> \"E3 并发核对后\"@zh)"
+        }
+      ],
+      "operationId": "09dbc3ab-59bb-49ff-9a90-e2e00edf5d9c"
+    },
+    {
+      "expectedDraftVersion": 9,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "199c4d5455756f61da4ea8fff1f683372e663369b016636e6d5abd9e4874f268"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:cmm:Environment> \"E3 响应恢复完成\"@zh)"
+        }
+      ],
+      "operationId": "89c65eb2-bd27-4703-a28f-ee30ad58894a"
+    },
+    {
+      "expectedDraftVersion": 9,
+      "changes": [
+        {
+          "kind": "REMOVE",
+          "axiomId": "199c4d5455756f61da4ea8fff1f683372e663369b016636e6d5abd9e4874f268"
+        },
+        {
+          "kind": "ADD",
+          "functionalSyntax": "AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#comment> <urn:cmm:Environment> \"E3 响应恢复完成\"@zh)"
+        }
+      ],
+      "operationId": "89c65eb2-bd27-4703-a28f-ee30ad58894a"
+    }
+  ]
+}

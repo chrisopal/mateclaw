@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "field": "关系值域",
+      "target": "urn:cmm:Environment",
+      "status": "PASS"
+    },
+    {
+      "field": "属性定义域",
+      "target": "urn:cmm:Machine",
+      "status": "PASS"
+    },
+    {
+      "field": "unchanged/duplicate/invalid-language/Escape",
+      "status": "PASS"
+    }
+  ],
+  "data": {
+    "version": 12,
+    "renderings": [
+      "AnnotationAssertion(rdfs:comment <urn:cmm:Environment> \"E3 响应恢复完成\"@zh)",
+      "AnnotationAssertion(rdfs:comment <urn:cmm:Probe> \"parallel fixture\")",
+      "AnnotationAssertion(rdfs:label <urn:cmm:Environment> \"Environment\"@en)",
+      "AnnotationAssertion(rdfs:label <urn:cmm:Environment> \"测量环境 E3\"@zh-cn)",
+      "AnnotationAssertion(rdfs:label <urn:cmm:Machine> \"三坐标测量机\")",
+      "AnnotationAssertion(rdfs:label <urn:cmm:Probe> \"测针\")",
+      "AnnotationAssertion(rdfs:label <urn:cmm:inEnvironment> \"处于环境\")",
+      "AnnotationAssertion(rdfs:label <urn:cmm:temperature> \"环境温度\")",
+      "AnnotationAssertion(rdfs:label <urn:cmm:usesProbe> \"使用测针\")",
+      "DataPropertyDomain(<urn:cmm:temperature> <urn:cmm:Machine>)",
+      "DataPropertyRange(<urn:cmm:temperature> xsd:integer)",
+      "Declaration(Class(<urn:cmm:Environment>))",
+      "Declaration(Class(<urn:cmm:Machine>))",
+      "Declaration(Class(<urn:cmm:Probe>))",
+      "Declaration(DataProperty(<urn:cmm:temperature>))",
+      "Declaration(ObjectProperty(<urn:cmm:inEnvironment>))",
+      "Declaration(ObjectProperty(<urn:cmm:usesProbe>))",
+      "ObjectPropertyDomain(<urn:cmm:inEnvironment> <urn:cmm:Machine>)",
+      "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Machine>)",
+      "ObjectPropertyDomain(<urn:cmm:usesProbe> <urn:cmm:Probe>)",
+      "ObjectPropertyRange(<urn:cmm:inEnvironment> <urn:cmm:Environment>)",
+      "ObjectPropertyRange(<urn:cmm:usesProbe> <urn:cmm:Environment>)",
+      "SubClassOf(<urn:cmm:Environment> <urn:cmm:Machine>)",
+      "SubClassOf(<urn:cmm:Environment> ObjectSomeValuesFrom(<urn:cmm:usesProbe> <urn:cmm:Probe>))"
+    ]
+  }
+}

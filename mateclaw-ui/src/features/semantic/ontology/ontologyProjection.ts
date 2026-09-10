@@ -52,12 +52,12 @@ function literal(term: Term | undefined): string | undefined {
   if (!match || /\\[^"\\]/.test(match[1]!)) return undefined
   return match[1]!.replace(/\\(["\\])/g, '$1')
 }
-export function projectOntology(axioms: AxiomDescriptor[]): OntologyProjection {
+export function projectOntology(axioms: AxiomDescriptor[], preferredLanguage?: string): OntologyProjection {
   const nodes = new Map<string, OntologyProjectionNode>()
   const edges: OntologyProjectionEdge[] = []
   const restrictionProperties = new Map<string, string>()
   const unprojectedAxiomIds: string[] = []
-  const labels = new Map<string, { label: string; axiomIds: string[] }>()
+  const labels = new Map<string, { label: string; score: number; axiomIds: string[] }>()
   function node(value: string, kind: OntologyNodeKind, axiomId: string): OntologyProjectionNode {
     const id = `${kind}:${value}`
     let result = nodes.get(id)
@@ -75,7 +75,13 @@ export function projectOntology(axioms: AxiomDescriptor[]): OntologyProjection {
         if (kind && value && declaration.args.length === 1) { node(value, kind, axiom.axiomId); projected = true }
       } else if (root.name === 'AnnotationAssertion' && args.length === 3 && iri(args[0]) === `${prefixes.rdfs}label`) {
         const subject = iri(args[1]); const label = literal(args[2])
-        if (subject && label !== undefined) { const previous = labels.get(subject); labels.set(subject, { label: previous?.label ?? label, axiomIds: [...(previous?.axiomIds ?? []), axiom.axiomId] }); projected = true }
+        if (subject && label !== undefined) {
+          const previous = labels.get(subject)
+          const language = typeof args[2] === 'string' ? /@([\w-]+)$/.exec(args[2])?.[1]?.toLowerCase() ?? '' : ''
+          const preferred = preferredLanguage?.toLowerCase()
+          const score = preferred === undefined ? 0 : language === preferred ? 0 : language && language.split('-')[0] === preferred.split('-')[0] ? 1 : !language ? 2 : 3
+          labels.set(subject, { label: previous && previous.score <= score ? previous.label : label, score: Math.min(previous?.score ?? Infinity, score), axiomIds: [...(previous?.axiomIds ?? []), axiom.axiomId] }); projected = true
+        }
       } else if (args.length === 2) {
         const first = iri(args[0]); const second = iri(args[1])
         const restriction = args[1]

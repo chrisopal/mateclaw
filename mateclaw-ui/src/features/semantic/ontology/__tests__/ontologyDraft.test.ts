@@ -14,11 +14,12 @@ const source = (): Draft => ({
 })
 function setup() {
   const ws = ref('9223372036854775700')
-  const api = { getDraft: vi.fn().mockResolvedValue(source()), saveDraft: vi.fn(), validate: vi.fn(), publish: vi.fn(), operation: vi.fn(), discard: vi.fn(), editDraft: vi.fn() } as unknown as OntologyApi
+  const api = { getDraft: vi.fn().mockResolvedValue(source()), saveDraft: vi.fn(), validate: vi.fn(), publish: vi.fn(), operation: vi.fn(), discard: vi.fn(), editDraft: vi.fn(), retryEdit: vi.fn() } as unknown as OntologyApi
   const scope = effectScope()
   const draft = scope.run(() => useOntologyDraft(() => source().ontologyId, () => ws.value, api))!
   return { ws, api, scope, draft }
 }
+const changes = [{ kind: 'ADD' as const, functionalSyntax: 'Declaration(Class(<https://example.test/Pump>))' }]
 describe('ontology document draft', () => {
   it('keeps functional document input and structured conflict after 409', async () => {
     const { draft, api, scope } = setup(); await draft.load(); draft.document.value!.documentText += '\nDeclaration(Class(<https://example.test/Pump>))'
@@ -59,4 +60,72 @@ it('does not accept a validation result returned after input changed', async () 
 it('keeps edits made while save is pending and adopts the returned concurrency counter', async () => {
   const { draft, api, scope } = setup(); await draft.load(); draft.name.value = 'Submitted'; let resolve!: (value: Draft) => void; vi.mocked(api.saveDraft).mockImplementationOnce(() => new Promise(r => { resolve = r })); const pending = draft.save(); draft.name.value = 'More recent local input'; resolve({ ...source(), name: 'Submitted', draftVersion: 44 }); expect(await pending).toBe(true)
   expect(vi.mocked(api.saveDraft).mock.calls[0][2].document.documentText).toContain('plant'); expect(draft.name.value).toBe('More recent local input'); expect(draft.draftVersion.value).toBe(44); expect(draft.dirty.value).toBe(true); scope.stop()
+})
+
+describe('simple edit write boundary', () => {
+  it('blocks edits while the document is dirty or the API guard denies editing', async () => {
+    const { draft, api, scope } = setup(); await draft.load(); draft.name.value = 'Local change'
+    expect(await draft.edit(changes)).toBe(false)
+    expect(api.editDraft).not.toHaveBeenCalled()
+    scope.stop()
+
+    const denied = setup(); await denied.draft.load()
+    const guarded = denied.scope.run(() => useOntologyDraft(() => source().ontologyId, () => denied.ws.value, denied.api, () => false))!
+    await guarded.load()
+    expect(await guarded.edit(changes)).toBe(false)
+    expect(denied.api.editDraft).not.toHaveBeenCalled()
+    denied.scope.stop()
+  })
+
+  it('blocks edits while publication recovery is pending', async () => {
+    const { draft, api, scope } = setup(); await draft.load()
+    vi.mocked(api.validate).mockResolvedValue({ draftVersion: 17, valid: true, violations: [] }); await draft.validate()
+    vi.mocked(api.publish).mockRejectedValue({ status: 0, code: 'REQUEST_FAILED' }); vi.mocked(api.operation).mockRejectedValue({ status: 404, code: 'NOT_FOUND' }); await draft.publish('publish')
+    expect(draft.publicationPending.value).toBe(true)
+    expect(await draft.edit(changes)).toBe(false)
+    expect(api.editDraft).not.toHaveBeenCalled()
+    scope.stop()
+  })
+
+  it('ignores a duplicate click while the first edit request is in flight', async () => {
+    const { draft, api, scope } = setup(); await draft.load(); let resolve!: (value: Draft) => void
+    vi.mocked(api.editDraft).mockImplementationOnce(() => new Promise(r => { resolve = r }))
+    const first = draft.edit(changes); const second = draft.edit(changes)
+    expect(await second).toBe(false); expect(api.editDraft).toHaveBeenCalledTimes(1); expect(draft.busy.value).toBe(true)
+    resolve({ ...source(), draftVersion: 18 }); expect(await first).toBe(true); expect(draft.editPending.value).toBe(false); scope.stop()
+  })
+
+  it('retains the same operation body for explicit retry after an ambiguous response', async () => {
+    const { draft, api, scope } = setup(); await draft.load()
+    vi.mocked(api.editDraft).mockRejectedValueOnce({ status: 0, code: 'REQUEST_FAILED' })
+    expect(await draft.edit(changes)).toBe(false); expect(draft.editPending.value).toBe(true)
+    const original = vi.mocked(api.editDraft).mock.calls[0][2]
+    const result = { ...source(), draftVersion: 18 }
+    vi.mocked(api.retryEdit).mockResolvedValueOnce(result)
+    expect(await draft.retryEdit()).toBe(true)
+    expect(vi.mocked(api.retryEdit).mock.calls[0][2]).toEqual(original)
+    expect(draft.editPending.value).toBe(false); expect(draft.draftVersion.value).toBe(18); scope.stop()
+  })
+
+  it('blocks every other draft write while an edit operation is unresolved', async () => {
+    const { draft, api, scope } = setup(); await draft.load()
+    vi.mocked(api.editDraft).mockRejectedValueOnce({ status: 0, code: 'REQUEST_FAILED' }); await draft.edit(changes)
+    expect(draft.editPending.value).toBe(true)
+    expect(await draft.save()).toBe(false); expect(await draft.validate()).toBe(false); expect(await draft.publish('publish')).toBeNull(); expect(await draft.discard()).toBe(false); expect(await draft.load()).toBe(false)
+    expect(api.saveDraft).not.toHaveBeenCalled(); expect(api.validate).not.toHaveBeenCalled(); expect(api.publish).not.toHaveBeenCalled(); expect(api.discard).not.toHaveBeenCalled(); expect(api.getDraft).toHaveBeenCalledTimes(1); scope.stop()
+  })
+
+  it('drops an unresolved edit after the request is cancelled by a scope change', async () => {
+    const { draft, api, ws, scope } = setup(); await draft.load(); let reject!: (error: unknown) => void
+    vi.mocked(api.editDraft).mockImplementationOnce(() => new Promise((_resolve, r) => { reject = r }))
+    const pending = draft.edit(changes); const signal = vi.mocked(api.editDraft).mock.calls[0][3]; ws.value = 'next'; await Promise.resolve()
+    reject({ status: 0, code: 'REQUEST_FAILED' }); expect(await pending).toBe(false); expect(signal?.aborted).toBe(true); expect(draft.editPending.value).toBe(false); scope.stop()
+  })
+
+  it('preserves local form input on a CAS conflict and requires an explicit refresh', async () => {
+    const { draft, api, scope } = setup(); await draft.load(); let reject!: (error: unknown) => void
+    vi.mocked(api.editDraft).mockImplementationOnce(() => new Promise((_resolve, r) => { reject = r }))
+    const pending = draft.edit(changes); draft.name.value = 'Keep this input'; reject({ status: 409, code: 'DRAFT_CONFLICT' })
+    expect(await pending).toBe(false); expect(draft.name.value).toBe('Keep this input'); expect(draft.saveError.value?.code).toBe('DRAFT_CONFLICT'); expect(draft.editPending.value).toBe(false); expect(api.getDraft).toHaveBeenCalledTimes(1); scope.stop()
+  })
 })

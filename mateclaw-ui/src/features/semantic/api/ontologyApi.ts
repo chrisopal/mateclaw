@@ -22,6 +22,8 @@ import type {
   OntologySourceReview,
 } from './types'
 const path = (id: string) => `/semantic/ontologies/${encodeURIComponent(id)}`
+const editDraftRequest = (ws: string, id: string, body: EditDraft, signal?: AbortSignal) =>
+  semanticRequest<Draft>(ws, { url: `${path(id)}/draft/axioms`, method: 'PATCH', data: body }, signal)
 export function scopedConfig(workspaceId: string, signal?: AbortSignal): AxiosRequestConfig {
   const defaults = http.defaults.transformRequest
   const transforms = Array.isArray(defaults) ? defaults : defaults ? [defaults] : []
@@ -60,8 +62,9 @@ export const ontologyApi = {
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
-  editDraft: (ws: string, id: string, body: EditDraft, signal?: AbortSignal) =>
-    semanticRequest<Draft>(ws, { url: `${path(id)}/draft/axioms`, method: 'PATCH', data: body }, signal),
+  editDraft: editDraftRequest,
+  // An ambiguous edit response must be retried with the exact original command.
+  retryEdit: editDraftRequest,
   discard: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
     semanticRequest<void>(
       ws,
