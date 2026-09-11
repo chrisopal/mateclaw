@@ -177,6 +177,8 @@ T05 和 T06 在 T01 协议稳定后可以独立推进；涉及同一服务或迁
 
 ### T08：发布后知识库应用与抽取入口
 
+2026-09-11：本批已完成，见 [T08 交付与验证](2026-09-11-ontology-t08-delivery.md)。下一任务 T09；真实大模型效果与完整 M2 验收另行记录。
+
 涉及：KnowledgeBindingPanel、GraphApplicationService、ExtractionWizard、ExtractionConfiguration。
 
 - 发布后选择应用知识库并固定版本；资料来源 KB 与应用 KB 明确区分。

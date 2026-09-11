@@ -40,4 +40,19 @@ class SemanticExtractionModelAdapterTest {
         }finally{release.countDown();adapter.close();}
         verify(factory).buildFor(argThat(m->!m.getEnableSearch()&&m.getRequestTimeoutSeconds()==90),any());
     }
+    @Test void unavailableProviderIsNotOfferedOrAcceptedForExecution() {
+        var configs=mock(ModelConfigService.class);var factory=mock(ProviderChatModelFactory.class);
+        var providers=mock(vip.mate.llm.service.ModelProviderService.class);
+        var model=new ModelConfigEntity();model.setId(8L);model.setName("Fixture");model.setEnabled(true);model.setModelType("chat");model.setProvider("fixture");model.setModelName("fixture");
+        when(configs.listEnabledModels()).thenReturn(List.of(model));when(configs.getModel(8L)).thenReturn(model);
+        var beans=new StaticListableBeanFactory();beans.addBean("configs",configs);beans.addBean("factory",factory);beans.addBean("providers",providers);
+        var adapter=new MateClawModelAdapter(beans.getBeanProvider(ModelConfigService.class),beans.getBeanProvider(ProviderChatModelFactory.class),beans.getBeanProvider(vip.mate.llm.service.ModelProviderService.class),new vip.mate.semantic.owl.OwlAssertionAdapter());
+        try {
+            assertTrue(adapter.models().isEmpty());
+            assertEquals("MODEL_UNAVAILABLE",assertThrows(ExtractionException.class,()->adapter.configuration("8")).code());
+            when(providers.isProviderEnabledAndConfigured("fixture")).thenReturn(true);
+            assertEquals("8",adapter.models().getFirst().id());assertEquals("8",adapter.configuration("8").modelConfigId());
+        } finally {adapter.close();}
+    }
+
 }

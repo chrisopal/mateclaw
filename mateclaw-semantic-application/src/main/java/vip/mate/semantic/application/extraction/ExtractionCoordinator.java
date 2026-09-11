@@ -25,7 +25,10 @@ public final class ExtractionCoordinator {
     public TaskRef start(Actor actor,StartCommand command){
         if(!enabled.getAsBoolean())throw new ExtractionException(409,"EXTRACTION_DISABLED");
         operation(command.operationId());access.require(actor,command.graphId(),command.sourceRef(),Action.START);
-        var ontology=context.ontology(actor,command.graphId());var config=context.configuration(actor,command.graphId(),command.modelConfigId());
+        var ontology=context.ontology(actor,command.graphId());
+        if(command.expectedOntologyRevisionId()!=null && !command.expectedOntologyRevisionId().equals(ontology.revisionId().value()))
+            throw new ExtractionException(409,"ONTOLOGY_REVISION_CONFLICT");
+        var config=context.configuration(actor,command.graphId(),command.modelConfigId());
         var source=sources.read(actor,command.graphId(),command.sourceRef());try{new SourceChunker().split(source.text());}catch(IllegalArgumentException e){throw new ExtractionException(422,"SOURCE_TOO_LARGE");}
         String hash=hash(List.of(command.graphId(),command.sourceRef(),source.snapshotId(),source.contentHash(),ontology.revisionId().value(),config.configurationHash()).toString());
         Instant now=clock.instant();

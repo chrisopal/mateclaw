@@ -10,7 +10,12 @@ import vip.mate.semantic.web.SemanticCounterSerializer;
 public final class ExtractionDtos {
     private ExtractionDtos() {}
 
-    public record StartRequest(String sourceRef, String modelConfigId, String operationId) {}
+    public record StartRequest(String sourceRef, String modelConfigId, String operationId,
+            String expectedOntologyRevisionId) {
+        public StartRequest(String sourceRef, String modelConfigId, String operationId) {
+            this(sourceRef, modelConfigId, operationId, null);
+        }
+    }
     public record OperationRequest(String operationId) {}
     public record SubmitRequest(Long expectedVersion, String operationId) {}
     public record Quote(int startCodePoint, int endCodePoint, String exactQuote) {}
@@ -39,7 +44,17 @@ public final class ExtractionDtos {
 
     public record SubmissionView(String statementId, int revision) {}
     public record ModelView(String id, String name) {}
-    public record Capabilities(boolean enabled, List<ModelView> models, String ontologyRevisionId) {}
+    public record Capabilities(boolean enabled, List<ModelView> models, String ontologyRevisionId,
+            boolean canStart, List<String> unavailableReasons, String ontologyName, Integer ontologyVersion) {
+        public Capabilities {
+            models = models == null ? List.of() : List.copyOf(models);
+            unavailableReasons = unavailableReasons == null ? List.of() : List.copyOf(unavailableReasons);
+        }
+        public Capabilities(boolean enabled, List<ModelView> models, String ontologyRevisionId) {
+            this(enabled, models, ontologyRevisionId, enabled && models != null && !models.isEmpty(),
+                    enabled && models != null && !models.isEmpty() ? List.of() : List.of("MODEL_UNAVAILABLE"), null, null);
+        }
+    }
     public record Page<T>(List<T> items, @JsonSerialize(using = SemanticCounterSerializer.class) long total,
             int page, int pageSize) {}
 }

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { migrationApi, type MappingRole, type MigrationPlan, type MigrationTarget } from '../api/migrationApi'
 import { useSemanticScope } from '../shared/useSemanticScope'
-const props = defineProps<{ graphId: string; revisionId: string; graphVersion: number; canManage: boolean }>()
+const props = defineProps<{ graphId: string; revisionId: string; graphVersion: number; canManage: boolean; initialTarget?: string }>()
 const emit = defineEmits<{ changed: [] }>()
 const { t } = useI18n(); const { workspace, begin } = useSemanticScope()
 const targets = ref<MigrationTarget[]>([]); const target = ref(''); const plan = ref<MigrationPlan | null>(null)
@@ -21,7 +21,7 @@ async function refresh() {
     const available = await migrationApi.targets(run.id, props.graphId, run.signal)
     if (!run.current()) return
     targets.value = available
-    if (!available.some(item => item.id === target.value)) target.value = ''
+    if (!available.some(item => item.id === target.value)) target.value = available.some(item => item.id === props.initialTarget) ? props.initialTarget! : ''
     if (planId.value) { const value = await migrationApi.get(run.id, props.graphId, planId.value, run.signal); if (run.current()) accept(value) }
   } catch (e) { if (run.current()) error.value = (e as Error).message } finally { if (run.current()) busy.value = false }
 }

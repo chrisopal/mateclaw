@@ -22,7 +22,7 @@ async function mount() {
   app.mount(host); await flush()
 }
 it('retries a lost start response with the same operation and shows zero results separately from failure', async () => {
-  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: true, models: [{ id: 'model', name: 'Model' }], ontologyRevisionId: 'revision' })
+  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: true, canStart: true, ontologyName: 'Equipment', ontologyVersion: 2, unavailableReasons: [], models: [{ id: 'model', name: 'Model' }], ontologyRevisionId: 'revision' })
   const completed = { id: 'task', status: 'SUCCEEDED', sourceTitle: 'Report', sourceText: 'Text', attempts: 1, completedChunks: 1, totalChunks: 1 } as ExtractionTask
   vi.mocked(extractionApi.start).mockRejectedValueOnce(new Error('Network failed')).mockResolvedValue(completed)
   vi.mocked(extractionApi.read).mockResolvedValue(completed)
@@ -36,14 +36,31 @@ it('retries a lost start response with the same operation and shows zero results
   host!.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true })); await flush(); await flush()
   expect(extractionApi.start).toHaveBeenCalledTimes(2)
   const calls = vi.mocked(extractionApi.start).mock.calls
+  expect(calls[0]![2].expectedOntologyRevisionId).toBe('revision')
+  expect(host!.textContent).toContain('Equipment · v2')
   expect(calls[0]![2].operationId).toBe(calls[1]![2].operationId)
   expect(host!.textContent).toContain(en.semantic.extraction.empty)
   expect(host!.textContent).not.toContain('Network failed')
 })
 it('disabled generation preserves history access without offering a start action', async () => {
-  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: false, models: [], ontologyRevisionId: 'revision' })
+  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: false, canStart: false, unavailableReasons: ['EXTRACTION_DISABLED'], models: [], ontologyRevisionId: 'revision' })
   await mount()
-  expect(host!.textContent).toContain(en.semantic.extraction.disabled)
+  expect(host!.textContent).toContain('Extraction is disabled in this environment.')
   expect(host!.querySelector('form')).toBeNull()
   expect(extractionApi.list).toHaveBeenCalled()
+})
+
+it('does not present a start form without a usable model or confirmed readiness', async () => {
+  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: true, canStart: false, unavailableReasons: ['MODEL_UNAVAILABLE'], models: [], ontologyRevisionId: 'revision' })
+  await mount()
+  expect(host!.textContent).toContain('Configure an available extraction model first.')
+  expect(host!.querySelector('form')).toBeNull()
+  expect(extractionApi.start).not.toHaveBeenCalled()
+})
+it('shows scheduler and binding conditions independently of the feature flag', async () => {
+  vi.mocked(extractionApi.capabilities).mockResolvedValue({ enabled: true, canStart: false, unavailableReasons: ['SCHEDULER_DISABLED', 'BINDING_DISABLED'], models: [], ontologyRevisionId: 'revision' })
+  await mount()
+  expect(host!.textContent).toContain('The task executor is disabled.')
+  expect(host!.textContent).toContain('Enable this knowledge base binding first.')
+  expect(host!.querySelector('form')).toBeNull()
 })

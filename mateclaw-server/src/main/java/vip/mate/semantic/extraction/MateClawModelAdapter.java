@@ -9,6 +9,7 @@ import org.springframework.ai.chat.messages.*;
 import org.springframework.retry.support.RetryTemplate;
 import com.fasterxml.jackson.databind.*;
 import vip.mate.llm.service.ModelConfigService;
+import vip.mate.llm.service.ModelProviderService;
 import vip.mate.llm.model.ModelConfigEntity;
 import vip.mate.llm.chatmodel.ProviderChatModelFactory;
 import vip.mate.semantic.application.extraction.ExtractionException;
@@ -23,18 +24,30 @@ public class MateClawModelAdapter implements ExtractionModelPort {
     private final ThreadPoolExecutor calls=new ThreadPoolExecutor(4,4,0,TimeUnit.SECONDS,new SynchronousQueue<>(),r->{Thread t=new Thread(r,"semantic-model-call");t.setDaemon(true);return t;},new ThreadPoolExecutor.AbortPolicy());
     @jakarta.annotation.PreDestroy public void close(){calls.shutdownNow();}
     private final ObjectProvider<ModelConfigService> configs;private final ObjectProvider<ProviderChatModelFactory> factory;
+    private final ObjectProvider<ModelProviderService> providers;
     private final OwlAssertionAdapter assertions;
     private final ObjectMapper json=new ObjectMapper().findAndRegisterModules().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     private final long timeoutMillis;
-    public MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory){this(configs,factory,new OwlAssertionAdapter(),90000);}
-    public MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,OwlAssertionAdapter assertions){this(configs,factory,assertions,90000);}
-    MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,long timeoutMillis){this(configs,factory,new OwlAssertionAdapter(),timeoutMillis);}
-    MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,OwlAssertionAdapter assertions,long timeoutMillis){this.configs=configs;this.factory=factory;this.assertions=Objects.requireNonNull(assertions);this.timeoutMillis=timeoutMillis;}
+    public MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory){this(configs,factory,null,new OwlAssertionAdapter(),90000);}
+    public MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,OwlAssertionAdapter assertions){this(configs,factory,null,assertions,90000);}
+    public MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,ObjectProvider<ModelProviderService> providers,OwlAssertionAdapter assertions){this(configs,factory,providers,assertions,90000);}
+    MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,long timeoutMillis){this(configs,factory,null,new OwlAssertionAdapter(),timeoutMillis);}
+    MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,OwlAssertionAdapter assertions,long timeoutMillis){this(configs,factory,null,assertions,timeoutMillis);}
+    MateClawModelAdapter(ObjectProvider<ModelConfigService> configs,ObjectProvider<ProviderChatModelFactory> factory,ObjectProvider<ModelProviderService> providers,OwlAssertionAdapter assertions,long timeoutMillis){this.configs=configs;this.factory=factory;this.providers=providers;this.assertions=Objects.requireNonNull(assertions);this.timeoutMillis=timeoutMillis;}
 
-    public List<ExtractionDtos.ModelView> models(){var service=configs.getIfAvailable();if(service==null)return List.of();return service.listEnabledModels().stream().filter(m->m.getModelType()==null||"chat".equals(m.getModelType())).map(m->new ExtractionDtos.ModelView(m.getId().toString(),m.getName())).toList();}
+    public List<ExtractionDtos.ModelView> models(){
+        var service=configs.getIfAvailable();if(service==null||factory.getIfAvailable()==null)return List.of();
+        return service.listEnabledModels().stream().filter(m->m.getModelType()==null||"chat".equals(m.getModelType()))
+                .filter(m->m.getDeleted()==null||m.getDeleted()==0)
+                .filter(m->providerUsable(m.getProvider())).map(m->new ExtractionDtos.ModelView(m.getId().toString(),m.getName())).toList();
+    }
+    private boolean providerUsable(String providerId){
+        if(providers==null)return true;var service=providers.getIfAvailable();if(service==null)return true;
+        try{return service.isProviderEnabledAndConfigured(providerId);}catch(RuntimeException e){return false;}
+    }
     private ModelConfigEntity require(String id){
         var service=configs.getIfAvailable();if(service==null||factory.getIfAvailable()==null)throw new ExtractionException(409,"MODEL_UNAVAILABLE");
-        try{var m=service.getModel(Long.valueOf(id));if(m==null||!Boolean.TRUE.equals(m.getEnabled())||(m.getDeleted()!=null&&m.getDeleted()!=0)||("embedding".equals(m.getModelType())))throw new ExtractionException(409,"MODEL_UNAVAILABLE");return m;}
+        try{var m=service.getModel(Long.valueOf(id));if(m==null||!Boolean.TRUE.equals(m.getEnabled())||(m.getDeleted()!=null&&m.getDeleted()!=0)||("embedding".equals(m.getModelType()))||!providerUsable(m.getProvider()))throw new ExtractionException(409,"MODEL_UNAVAILABLE");return m;}
         catch(ExtractionException e){throw e;}catch(RuntimeException e){throw new ExtractionException(409,"MODEL_UNAVAILABLE");}
     }
     public ModelConfiguration configuration(String id){var m=require(id);Map<String,String> parameters=new TreeMap<>();parameters.put("provider",m.getProvider());parameters.put("temperature",Objects.toString(m.getTemperature(),""));parameters.put("maxTokens",Objects.toString(m.getMaxTokens(),""));parameters.put("topP",Objects.toString(m.getTopP(),""));parameters.put("timeoutSeconds","90");parameters.put("search","false");return new ModelConfiguration(id,m.getModelName(),ExtractionCoordinator.hash(id+"|"+m.getModelName()+"|"+parameters),parameters);}

@@ -13,6 +13,7 @@ public final class ExtractionScheduler {
     private final ExecutorService workers=Executors.newFixedThreadPool(4,r->{Thread t=new Thread(r,"semantic-extraction-worker");t.setDaemon(true);return t;});
     private final Semaphore slots=new Semaphore(4);private final String worker="semantic-"+UUID.randomUUID();
     public ExtractionScheduler(JdbcExtractionRepository repo,ExtractionCoordinator coordinator,ExtractionConfiguration.Feature feature,boolean enabled){this.repo=repo;this.coordinator=coordinator;this.feature=feature;this.enabled=enabled;}
+    public boolean enabled(){return enabled;}
     @PostConstruct void start(){if(enabled)timer.scheduleWithFixedDelay(this::tick,3,3,TimeUnit.SECONDS);}
     public void tick(){
         try{

@@ -141,6 +141,12 @@ public class GraphApplicationService {
         return row;
     }
 
+    /** Returns the published revision currently pinned by a graph binding. */
+    public GraphOntologyRevisionRow revision(String scope, String graphId) {
+        GraphRow graph = requireGraph(scope, graphId, false);
+        return requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
+    }
+
     private Binding view(GraphRow row) { return view(row, requireRevision(row.getWorkspaceId(), row.getOntologyRevisionId(), false)); }
     private Binding view(GraphRow row, GraphOntologyRevisionRow revision) {
         return new Binding(row.getId(), row.getWorkspaceId().toString(), row.getKbId().toString(),

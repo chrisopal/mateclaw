@@ -14,7 +14,7 @@ public class MateClawAccessAdapter implements AccessPolicyPort {
     public void require(Actor actor,String graphId,String sourceRef,Action action){
         access.requireActor(actor.workspaceId(),actor.userId(),action==Action.READ?"viewer":"member");
         var graph=graphs.requireGraph(actor.workspaceId(),graphId,false);
-        if(action!=Action.READ&&!Boolean.TRUE.equals(graph.getEnabled()))throw new SemanticApiException(409,"GRAPH_DISABLED","Graph is disabled");
+        if(action!=Action.READ&&action!=Action.CANCEL&&!Boolean.TRUE.equals(graph.getEnabled()))throw new SemanticApiException(409,"GRAPH_DISABLED","Graph is disabled");
         if(sourceRef==null)return;
         if(!sourceRef.matches("[1-9][0-9]*"))throw new SemanticApiException(400,"INVALID_SOURCE","WIKI_RAW source identifier required");
         int count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_wiki_raw_material WHERE id=? AND kb_id=? AND deleted=0",Integer.class,sourceRef,graph.getKbId());

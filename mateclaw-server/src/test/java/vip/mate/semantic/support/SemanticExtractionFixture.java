@@ -15,6 +15,7 @@ import static org.mockito.Mockito.*;
 @TestPropertySource(properties="mateclaw.semantic.extraction.scheduler-enabled=false")
 public abstract class SemanticExtractionFixture extends SemanticHttpFixture {
     @MockitoBean protected MateClawModelAdapter model;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean protected ExtractionScheduler scheduler;
     @Autowired protected ExtractionConfiguration.Feature feature;
     @Autowired protected ExtractionCoordinator coordinator;
     @org.springframework.test.context.bean.override.mockito.MockitoSpyBean protected JdbcExtractionRepository extraction;
@@ -29,6 +30,8 @@ public abstract class SemanticExtractionFixture extends SemanticHttpFixture {
     }
     @BeforeEach void extractionFixture()throws Exception{
         feature.setEnabled(true);extraction.cancelActive();
+        // Tests execute the coordinator explicitly; no asynchronous scheduler races.
+        doReturn(true).when(scheduler).enabled();
         when(model.configuration("8")).thenReturn(new ModelConfiguration("8","fixture","fixed-config",Map.of()));
         when(model.models()).thenReturn(List.of(new ExtractionDtos.ModelView("8","fixture")));
         when(model.extract(any())).thenReturn(new ModelResult(List.of(new RawSuggestion(new ObjectMention(SUBJECT_IRI,Set.of(EQUIPMENT_IRI),"机床"),new vip.mate.semantic.owl.OwlAssertionAdapter().parse(assertion(SUBJECT_IRI)),null,Validity.unknown(),List.of(new Quote(0,text.codePointCount(0,text.length()),text)))),new Usage(10,5),"fixture"));

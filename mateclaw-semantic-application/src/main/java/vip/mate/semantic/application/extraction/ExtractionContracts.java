@@ -11,7 +11,12 @@ import vip.mate.semantic.core.validation.Violation;
 public final class ExtractionContracts {
     private ExtractionContracts() {}
     public record Actor(String workspaceId, String userId) {}
-    public record StartCommand(String graphId, String sourceRef, String modelConfigId, String operationId) {}
+    public record StartCommand(String graphId, String sourceRef, String modelConfigId, String operationId,
+                               String expectedOntologyRevisionId) {
+        public StartCommand(String graphId, String sourceRef, String modelConfigId, String operationId) {
+            this(graphId, sourceRef, modelConfigId, operationId, null);
+        }
+    }
     public record TaskRef(String taskId, String status, long version) {}
     public record Chunk(int ordinal, int startCodePoint, String text) {}
     /** Half-open Unicode code point offsets, relative to the enclosing snapshot or model chunk. */

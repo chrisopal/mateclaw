@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { vLoading } from "element-plus";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -9,14 +9,25 @@ import { semanticError, type SemanticError } from "../api/semanticErrors";
 import type { Binding, Revision } from "../api/types";
 import { useSemanticScope } from "../shared/useSemanticScope";
 
-const props = defineProps<{ knowledgeBaseId: string }>();
-const { t } = useI18n();
+const props = defineProps<{ knowledgeBaseId: string; targetRevision?: Revision }>();
+const { t, locale } = useI18n();
+const tr = (zh: string, en: string) => locale.value.startsWith("zh") ? zh : en;
 const router = useRouter();
 const { workspace, begin } = useSemanticScope();
 const binding = ref<Binding | null>(null);
 const choices = ref<(Revision & { ontologyName: string })[]>([]);
 const selectedRevisionId = ref("");
 const busy = ref(false);
+const target = computed(() => props.targetRevision ?? choices.value.find(r => r.id === selectedRevisionId.value));
+const same = computed(() => !!binding.value && binding.value.ontologyRevisionId === selectedRevisionId.value);
+const currentName = computed(() => choices.value.find(r => r.id === binding.value?.ontologyRevisionId)?.name ?? tr('已绑定模型', 'Bound model'));
+function openWorkbench(tab = 'facts') {
+  if (binding.value) void router.push({ path: `/semantic/graphs/${binding.value.graphId}`, query: { tab, ...(tab === 'migration' ? { targetRevision: selectedRevisionId.value } : {}) } });
+}
+function compareVersions() {
+  if (binding.value && target.value) void router.push({ path: `/semantic/ontologies/${target.value.ontologyId}/versions`, query: { revision: target.value.id, from: binding.value.ontologyRevisionId } });
+}
+const sameOntology = computed(() => choices.value.find(r => r.id === binding.value?.ontologyRevisionId)?.ontologyId === target.value?.ontologyId);
 const error = ref<SemanticError | null>(null);
 
 async function load() {
@@ -56,9 +67,9 @@ async function load() {
       binding.value = current;
       choices.value = revisions
         .flat()
-        .filter((revision) => revision.availableForNewBindings);
+        .filter((revision) => revision.availableForNewBindings || revision.id === current?.ontologyRevisionId);
       selectedRevisionId.value =
-        current?.ontologyRevisionId ?? choices.value[0]?.id ?? "";
+        props.targetRevision?.id ?? current?.ontologyRevisionId ?? choices.value[0]?.id ?? "";
     }
   } catch (e) {
     if (request.current()) error.value = semanticError(e);
@@ -68,6 +79,9 @@ async function load() {
 }
 
 async function submit(action: "ENABLE" | "DISABLE" | "REBIND") {
+  if (busy.value || !workspace.can('publish:ontology')) return;
+  if (action === 'REBIND' && (!binding.value?.empty || same.value || !target.value?.availableForNewBindings)) return;
+  if (action === 'ENABLE' && ((binding.value && !same.value) || (!binding.value && !target.value?.availableForNewBindings))) return;
   const request = begin();
   busy.value = true;
   error.value = null;
@@ -91,7 +105,7 @@ async function submit(action: "ENABLE" | "DISABLE" | "REBIND") {
 }
 
 watch(
-  () => [props.knowledgeBaseId, workspace.currentWorkspaceId],
+  () => [props.knowledgeBaseId, props.targetRevision?.id, workspace.currentWorkspaceId],
   () => {
     binding.value = null;
     choices.value = [];
@@ -102,17 +116,17 @@ onMounted(load);
 </script>
 
 <template>
-  <section class="semantic-binding-panel">
+  <section class="semantic-binding-panel" :class="{ 'binding-inline': targetRevision }">
     <div class="semantic-binding-heading">
       <div>
-        <h3>{{ t("semantic.bindingTitle") }}</h3>
+        <h3>{{ targetRevision ? tr('应用状态', 'Application status') : t("semantic.bindingTitle") }}</h3>
       </div>
       <div class="semantic-binding-actions">
         <el-button
           v-if="binding?.enabled"
           type="primary"
           :disabled="busy"
-          @click="router.push(`/semantic/graphs/${binding.graphId}`)"
+          @click="openWorkbench()"
           >{{ t("semantic.w.openWorkbench") }}</el-button
         >
         <el-tag v-if="binding" :type="binding.enabled ? 'success' : 'info'">
@@ -134,7 +148,7 @@ onMounted(load);
       :description="error.message"
     />
     <div v-loading="busy" class="semantic-binding-controls">
-      <el-select
+      <el-select v-if="!targetRevision"
         v-model="selectedRevisionId"
         :aria-label="t('semantic.bindingRevision')"
         :disabled="busy || !workspace.can('publish:ontology')"
@@ -150,25 +164,26 @@ onMounted(load);
         <el-button
           v-if="!binding"
           type="primary"
-          :disabled="!selectedRevisionId"
+          :disabled="busy || !target?.availableForNewBindings"
           @click="submit('ENABLE')"
         >
           {{ t("semantic.bind") }}
         </el-button>
         <el-button
-          v-else-if="!binding.enabled"
+          v-else-if="!binding.enabled && same"
+          :disabled="busy"
           type="primary"
           @click="submit('ENABLE')"
         >
           {{ t("semantic.enableBinding") }}
         </el-button>
-        <el-button v-else @click="submit('DISABLE')">{{
+        <el-button v-else-if="binding.enabled" :disabled="busy" @click="submit('DISABLE')">{{
           t("semantic.disableBinding")
         }}</el-button>
         <el-button
           v-if="binding"
           :disabled="
-            !binding.empty || selectedRevisionId === binding.ontologyRevisionId
+            busy || !binding.empty || same || !target?.availableForNewBindings
           "
           @click="submit('REBIND')"
         >
@@ -177,16 +192,27 @@ onMounted(load);
       </template>
     </div>
 
-    <p v-if="binding" class="semantic-binding-meta">
+    <p v-if="targetRevision && !targetRevision.availableForNewBindings && !same" class="semantic-binding-meta">{{ tr('此版本已停止新应用，请选择其他版本。', 'This version is unavailable for new applications.') }}</p>
+    <p v-if="binding" class="semantic-binding-meta">{{ currentName }} ·
+
       {{ t("semantic.pinnedVersion", { version: binding.ontologyVersion }) }} ·
       {{
         binding.empty ? t("semantic.graphEmpty") : t("semantic.graphNotEmpty")
       }}
     </p>
+    <p v-if="binding && !binding.empty && !same" class="semantic-binding-meta">{{ sameOntology ? tr('知识库已有内容，需先检查版本差异并迁移。', 'This knowledge base contains data. Review differences and migrate first.') : tr('知识库已使用其他业务模型，请选择其他知识库。', 'This knowledge base uses another business model. Select another knowledge base.') }}</p>
+    <div v-if="binding" class="semantic-binding-actions binding-next">
+      <el-button v-if="!same && sameOntology" :disabled="busy" @click="compareVersions">{{ tr('查看版本差异', 'Compare versions') }}</el-button>
+      <el-button v-if="!same && sameOntology && !binding.empty && workspace.can('publish:ontology')" :disabled="busy" @click="openWorkbench('migration')">{{ tr('前往版本迁移', 'Open migration') }}</el-button>
+      <el-button v-if="binding.enabled && same" :disabled="busy" @click="openWorkbench('extraction')">{{ tr('试抽取', 'Try extraction') }}</el-button>
+      <el-button :disabled="busy" @click="load">{{ tr('刷新绑定', 'Refresh binding') }}</el-button>
+    </div>
   </section>
 </template>
 
 <style scoped>
+.binding-next { margin-top: 12px; }
+.semantic-binding-panel.binding-inline { margin: 0; padding: 16px 0 0; border: 0; border-radius: 0; }
 .semantic-binding-panel {
   margin: 16px 0 0;
   padding: 20px;
