@@ -2,7 +2,7 @@ import type { Statement } from '../api/workbenchTypes'
 import type { SemanticEntity } from '../api/types'
 
 /** Presentation only; the canonical assertion remains in the advanced view. */
-export function statementLabel(statement: Statement, entities: SemanticEntity[], language = 'zh-CN') {
+export function statementLabel(statement: Pick<Statement, 'subjectId' | 'assertion'>, entities: SemanticEntity[], language = 'zh-CN') {
   const zh = language.startsWith('zh')
   const short = (iri?: string | null) => iri?.split(/[#/:]/).filter(Boolean).at(-1) || '—'
   const name = (iri?: string | null) => entities.find(entity => entity.iri === iri)?.displayName || short(iri)

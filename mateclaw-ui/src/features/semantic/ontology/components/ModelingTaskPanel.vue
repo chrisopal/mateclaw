@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import {
   modelingTaskApi,
@@ -33,6 +34,10 @@ const tasks = ref<ModelingTask[]>([]),
   busy = ref(false),
   error = ref(''),
   answers = ref<Record<string, Record<string, string>>>({})
+const { locale } = useI18n()
+const tr = (zh: string, en: string) => locale.value.startsWith('zh') ? zh : en
+const comparison = ref<Awaited<ReturnType<typeof ontologyApi.sourceReviewSnapshots>> | null>(null)
+const comparisonOpen = ref(false)
 const names = computed(() =>
   Object.fromEntries(
     (props.projection?.nodes || []).flatMap((n) => [
@@ -126,6 +131,21 @@ async function decide(p: ModelingProposal, decision: 'ACCEPT' | 'REJECT') {
     if (c.current()) busy.value = false
   }
 }
+async function compareIncremental() {
+  if (busy.value || !task.value?.incremental) return
+  const c = begin()
+  busy.value = true
+  error.value = ''
+  comparison.value = null
+  try {
+    const result = await ontologyApi.sourceReviewSnapshots(c.id, props.ontologyId, task.value.incremental.reviewId, c.signal)
+    if (c.current()) { comparison.value = result; comparisonOpen.value = true }
+  } catch (e) {
+    if (c.current()) error.value = (e as Error).message
+  } finally {
+    if (c.current()) busy.value = false
+  }
+}
 async function chat() {
   if (!task.value || busy.value || props.disabled) return
   const c = begin()
@@ -151,6 +171,8 @@ watch(
   () => [workspace.currentWorkspaceId, props.ontologyId, props.taskId],
   () => {
     task.value = undefined
+    comparison.value = null
+    comparisonOpen.value = false
     tasks.value = []
     answers.value = {}
     if (props.active !== false) void load()
@@ -191,7 +213,11 @@ watch(
       尚无建模任务。描述业务需求或选择资料开始。
     </p>
     <template v-if="task"
-      ><details class="task-goal">
+      ><section v-if="task.incremental" class="incremental-scope" data-testid="incremental-model-scope">
+        <h3>{{ tr('资料变化 · 增量建模', 'Source change · Incremental modeling') }}</h3>
+        <p>{{ tr('本次核对', 'Reviewing') }} {{ task.incremental.affectedAxiomIds.length }} {{ tr('条受影响业务规则。建议仍需人工确认，确认前不会改变已发布模型。', 'affected business rules. Proposals require confirmation and do not change the published model automatically.') }}</p>
+        <el-button :disabled="busy" @click="compareIncremental">{{ tr('对比原始依据与新资料', 'Compare original and updated sources') }}</el-button>
+      </section><details class="task-goal">
         <summary>查看建模需求</summary>
         <p>{{ task.goal }}</p>
       </details>
@@ -270,9 +296,17 @@ watch(
         </div>
       </article></template
     >
+    <el-dialog v-model="comparisonOpen" :title="tr('资料变化范围', 'Changed source material')" width="min(980px, 94vw)">
+      <div v-if="comparison" class="incremental-comparison">
+        <section><h4>{{ tr('原始依据', 'Original evidence') }}</h4><p>{{ comparison.original.sourceTitle }}</p><pre>{{ comparison.original.sourceText }}</pre></section>
+        <section><h4>{{ tr('新资料', 'Updated material') }}</h4><template v-if="comparison.observed"><p>{{ comparison.observed.sourceTitle }}</p><pre>{{ comparison.observed.sourceText }}</pre></template><p v-else>{{ tr('新资料不可访问，原始快照仍保留。', 'Updated material is unavailable; the original snapshot remains.') }}</p></section>
+      </div>
+    </el-dialog>
   </section>
 </template>
 <style scoped>
+.incremental-scope { margin: 12px 0; padding: 12px 0; border-bottom: 1px solid var(--mc-border); }.incremental-scope h3 { font-size: 14px; }.incremental-scope p { color: var(--mc-text-secondary); line-height: 1.7; }.incremental-comparison { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }.incremental-comparison pre { white-space: pre-wrap; overflow-wrap: anywhere; }.incremental-comparison section { min-width: 0; }
+@media (max-width: 700px) { .incremental-comparison { grid-template-columns: 1fr; } }
 .modeling-task-panel {
   min-width: 0;
   padding: 0;

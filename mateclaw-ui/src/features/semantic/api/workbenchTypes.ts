@@ -7,7 +7,7 @@ export interface GraphDetail { ontologyId?: string; binding: Binding; document: 
 export interface Items<T> { items: T[]; total?: number }
 export interface Proposal { operationId: string; subjectId: string; assertionText: string; validityKind: string; validFrom: string | null; validTo: string | null; evidenceIds: string[] }
 export interface Statement { id: string; graphId: string; revision: number; ontologyRevisionId: string; subjectId: string; assertion: AssertionPayload; validityKind: string; validFrom: string | null; validTo: string | null; reviewStatus: string; supportStatus: string; evidenceIds: string[]; proposedBy: string; createdAt: string }
-export interface Change { id: string; graphId: string; targetStatementId: string; expectedRevision: number; status: string; resultRevision: number | null; proposedBy?: string; createdAt?: string; content: Proposal }
+export interface Change { assertion?: AssertionPayload; id: string; graphId: string; targetStatementId: string; expectedRevision: number; status: string; resultRevision: number | null; proposedBy?: string; createdAt?: string; content: Proposal }
 export interface ConflictMember { kind?: 'STATEMENT' | 'CHANGE_PROPOSAL'; statementId: string; revision: number }
 export interface Conflict { id: string; graphId?: string; kind: string; status: string; left: ConflictMember; right: ConflictMember; resolution: string }
 export interface Snapshot { id: string; sourceKind: string; sourceRef: string; sourceTitle: string; captureVersion: number; textDigest: string; createdAt: string }

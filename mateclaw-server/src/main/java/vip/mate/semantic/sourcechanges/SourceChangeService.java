@@ -50,6 +50,10 @@ public class SourceChangeService {
     private final TransactionTemplate transactions;
     private final TransactionTemplate lockTransactions;
     private final TransactionTemplate outsideTransactions;
+    @org.springframework.beans.factory.annotation.Autowired
+    private vip.mate.semantic.statement.StatementApplicationService statements;
+    @org.springframework.beans.factory.annotation.Autowired
+    private vip.mate.semantic.query.SemanticQueryService queries;
     private final ObjectMapper json = new ObjectMapper().findAndRegisterModules();
 
     public SourceChangeService(JdbcTemplate jdbc, GraphApplicationService graphs, GraphMapper graphMapper,
@@ -124,6 +128,54 @@ public class SourceChangeService {
         graphs.requireGraph(scope, graphId, false);
         return jdbc.query("SELECT * FROM mate_semantic_source_change_item WHERE graph_id=? AND change_id=? ORDER BY created_at,id",
                 (rs, n) -> item(rs), graphId, changeId);
+    }
+
+    @Transactional(readOnly=true)
+    public FactRevisionPreview factRevision(String scope,String graphId,String itemId) {
+        access.require(scope,"admin");
+        var graph=graphs.requireGraph(scope,graphId,false);
+        return factRevision(scope,graph,itemId,false);
+    }
+
+    private FactRevisionPreview factRevision(String scope,GraphRow graph,String itemId,boolean lockSource) {
+        var item=findItem(graph.getId(),itemId);
+        if(item==null || !"FACT".equals(item.itemKind()))throw notFound();
+        if(!"CHANGED".equals(item.sourceState()) || item.newSnapshotId()==null
+                || "STALE".equals(item.reviewState()))throw conflict("SOURCE_CHANGE_STALE","Only an available changed fact source can prepare a revision");
+        var live=lockSource?lockedMaterial(graph,item.sourceRef()):material(graph,new SourceRef(item.sourceKind(),item.sourceRef()));
+        if(live==null)throw notFound();
+        if(!live.digest().equals(item.newDigest()))throw conflict("SOURCE_CHANGE_STALE","Source changed again; scan it before revising");
+        Integer hidden=jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_source_governance WHERE graph_id=? AND source_kind=? AND source_id=? AND state='WITHDRAWN'",Integer.class,graph.getId(),item.sourceKind(),item.sourceRef());
+        if(hidden!=null&&hidden>0)throw notFound();
+        var original=factSnapshot(graph.getId(),item.oldSnapshotId(),item.sourceKind(),item.sourceRef());
+        var observed=factSnapshot(graph.getId(),item.newSnapshotId(),item.sourceKind(),item.sourceRef());
+        if(!Objects.equals(item.newDigest(),observed.digest()))throw conflict("SOURCE_CHANGE_STALE","Observed snapshot differs");
+        var statement=queries.history(scope,graph.getId(),item.itemId()).revisions().stream()
+                .filter(r->r.revision()==item.itemRevision()).findFirst().orElseThrow(SourceChangeService::notFound);
+        return new FactRevisionPreview(item,statement,original,observed);
+    }
+
+    private FactSnapshot factSnapshot(String graphId,String snapshotId,String kind,String sourceRef) {
+        var snapshots=jdbc.query("SELECT s.id,s.text_digest,s.text_content FROM mate_semantic_source_snapshot s WHERE s.id=? AND s.graph_id=? AND s.source_kind=? AND s.source_id=? AND NOT EXISTS(SELECT 1 FROM mate_semantic_snapshot_exclusion x WHERE x.graph_id=s.graph_id AND x.snapshot_id=s.id)",
+                (r,n)->new FactSnapshot(r.getString(1),r.getString(2),r.getString(3)),snapshotId,graphId,kind,sourceRef);
+        if(snapshots.size()!=1)throw notFound();return snapshots.getFirst();
+    }
+
+    @Transactional
+    public vip.mate.semantic.web.StatementDtos.ChangeView proposeFactRevision(String scope,String graphId,String itemId,FactRevisionRequest request) {
+        access.require(scope,"admin");
+        if(request==null||request.expectedRevision()==null||request.startCodePoint()==null||request.endCodePoint()==null)throw bad("Revision and exact quote range required");
+        var graph=graphs.requireGraph(scope,graphId,true);
+        var preview=factRevision(scope,graph,itemId,true);
+        if(!Objects.equals(request.expectedObservedDigest(),preview.item().newDigest())
+                || request.expectedRevision()!=preview.statement().revision())throw conflict("SOURCE_CHANGE_STALE","Source digest or original fact revision differs");
+        String operation="source-fact:"+itemId;
+        var evidence=sources.createEvidence(scope,graphId,preview.observed().id(),
+                new vip.mate.semantic.web.SourceDtos.EvidenceRequest(operation+":evidence",request.startCodePoint(),request.endCodePoint(),request.exactQuote()));
+        var content=new vip.mate.semantic.web.StatementDtos.ProposeRequest(operation,preview.statement().subjectId(),
+                request.assertionText(),request.validityKind(),request.validFrom(),request.validTo(),List.of(evidence.id()));
+        return statements.proposeChange(scope,graphId,preview.statement().id(),
+                new vip.mate.semantic.web.StatementDtos.ChangeRequest(request.expectedRevision(),operation,content));
     }
 
     @Transactional
@@ -434,6 +486,13 @@ public class SourceChangeService {
                 (rs, n) -> new Material(Objects.toString(rs.getString(1), "")), Long.valueOf(source.ref()), graph.getKbId());
         if (rows.isEmpty() || rows.getFirst().text().isBlank()) return null;
         return rows.getFirst();
+    }
+
+    private Material lockedMaterial(GraphRow graph,String sourceRef) {
+        // Pin source content and its KB authorization for the entire proposal transaction.
+        var rows=jdbc.query("SELECT COALESCE(NULLIF(m.extracted_text,''),m.original_content) AS content FROM mate_wiki_raw_material m JOIN mate_wiki_knowledge_base k ON k.id=m.kb_id WHERE m.id=? AND m.kb_id=? AND m.deleted=0 AND k.deleted=0 AND k.workspace_id=? FOR UPDATE",
+                (r,n)->new Material(Objects.toString(r.getString(1),"")),Long.valueOf(sourceRef),graph.getKbId(),graph.getWorkspaceId());
+        return rows.isEmpty()||rows.getFirst().text().isBlank()?null:rows.getFirst();
     }
 
     private String currentSourceDigest(GraphRow graph, String kind, String ref) {

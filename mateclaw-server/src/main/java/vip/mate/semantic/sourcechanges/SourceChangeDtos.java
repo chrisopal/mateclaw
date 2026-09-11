@@ -23,6 +23,13 @@ public final class SourceChangeDtos {
             String sourceState, String reviewState, String decision, String reason,
             Long observedGraphVersion, Instant createdAt, Instant reviewedAt) {}
 
+    public record FactSnapshot(String id,String digest,String text) {}
+    public record FactRevisionPreview(ReviewItem item,vip.mate.semantic.web.StatementDtos.StatementView statement,
+            FactSnapshot original,FactSnapshot observed) {}
+    public record FactRevisionRequest(String expectedObservedDigest,Integer expectedRevision,
+            String assertionText,String validityKind,Instant validFrom,Instant validTo,
+            String exactQuote,Integer startCodePoint,Integer endCodePoint) {}
+
     public record DecideRequest(String operationId, String expectedObservedDigest,
             Long expectedGraphVersion, String decision, String reason) {}
 }

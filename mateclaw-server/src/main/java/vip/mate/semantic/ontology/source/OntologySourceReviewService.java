@@ -226,6 +226,7 @@ public class OntologySourceReviewService {
         access.require(scope,"viewer");parent(scope,ontologyId,false);
         var review=reviews(scope,ontologyId).stream().filter(r->r.id().equals(reviewId)).findFirst().orElseThrow(OntologySourceReviewService::missing);
         var binding=stored(scope,ontologyId,review.bindingId()).binding();
+        if(material(scope,binding.knowledgeBaseId(),binding.sourceRef(),false)==null)throw missing();
         Map<String,Snapshot> result=new LinkedHashMap<>();result.put("original",snapshot(scope,binding.sourceSnapshotId()));
         if(review.observedSnapshotId()!=null)result.put("observed",snapshot(scope,review.observedSnapshotId()));
         return Map.copyOf(result);

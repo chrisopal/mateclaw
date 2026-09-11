@@ -27,7 +27,13 @@ public final class StatementDtos {
             @JsonFormat(shape=JsonFormat.Shape.STRING) Instant validTo,
             String reviewStatus, String supportStatus, List<String> evidenceIds, String proposedBy,
             @JsonFormat(shape=JsonFormat.Shape.STRING) Instant createdAt) {}
-    public record ChangeView(String id,String graphId,String targetStatementId,int expectedRevision,String status,Integer resultRevision,String proposedBy,@JsonFormat(shape=JsonFormat.Shape.STRING) Instant createdAt, ProposeRequest content) {}
+    public record ChangeView(String id,String graphId,String targetStatementId,int expectedRevision,String status,Integer resultRevision,String proposedBy,@JsonFormat(shape=JsonFormat.Shape.STRING) Instant createdAt, ProposeRequest content,
+            vip.mate.semantic.core.fact.AssertionPayload assertion) {
+        public ChangeView(String id,String graphId,String targetStatementId,int expectedRevision,String status,
+                Integer resultRevision,String proposedBy,Instant createdAt,ProposeRequest content) {
+            this(id,graphId,targetStatementId,expectedRevision,status,resultRevision,proposedBy,createdAt,content,null);
+        }
+    }
     public record ConflictView(String id,String graphId,String kind,String status,ConflictMember left,ConflictMember right,String resolution) {}
     public record Page<T>(List<T> items,@JsonSerialize(using=SemanticCounterSerializer.class) long total,int page,int pageSize) {}
 }

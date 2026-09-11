@@ -1,10 +1,13 @@
+import { createI18n } from 'vue-i18n'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createApp, h, nextTick, type App } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
+import { ontologyApi } from '../../api/ontologyApi'
 import ModelingTaskPanel from '../components/ModelingTaskPanel.vue'
 import { modelingTaskApi, type ModelingTask } from '../../api/modelingTaskApi'
+vi.mock('../../api/ontologyApi', () => ({ ontologyApi: { sourceReviewSnapshots: vi.fn(), ensureBuilder: vi.fn() }, semanticRequest: vi.fn() }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('../../api/modelingTaskApi', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -62,7 +65,7 @@ async function mount(canManage = true) {
         onChanged: changed,
       }),
   })
-  app.use(pinia).use(ElementPlus).mount(host)
+  app.use(pinia).use(ElementPlus).use(createI18n({ legacy: false, locale: 'zh-CN', messages: {} })).mount(host)
   await flush()
   return { store, changed }
 }
@@ -137,4 +140,28 @@ it('shows completed batch state for a READY task with accepted suggestions', asy
   expect(host.textContent).toContain('本批已确认，可继续建模')
   expect(host.textContent).not.toContain('待开始')
   expect(host.querySelector<HTMLDetailsElement>('.task-goal')?.open).toBe(false)
+})
+
+const incremental = { reviewId: 'review', bindingId: 'binding', baseRevisionId: 'base', oldSnapshotId: 'old', newSnapshotId: 'new', oldDigest: 'private-old-hash', newDigest: 'private-new-hash', affectedAxiomIds: ['a1', 'a2'] }
+it('summarizes incremental scope and opens original and updated source text only on request', async () => {
+  vi.mocked(modelingTaskApi.get).mockResolvedValue({ ...task, incremental })
+  vi.mocked(ontologyApi.sourceReviewSnapshots).mockResolvedValue({ original: { sourceTitle: '原始规范', sourceText: '旧定义原文' }, observed: { sourceTitle: '修订规范', sourceText: '新定义原文' } } as never)
+  await mount()
+  expect(host.querySelector('[data-testid="incremental-model-scope"]')?.textContent).toContain('2 条受影响业务规则')
+  expect(host.textContent).not.toContain('private-old-hash')
+  expect(ontologyApi.sourceReviewSnapshots).not.toHaveBeenCalled()
+  ;[...host.querySelectorAll('button')].find(b => b.textContent?.includes('对比原始依据与新资料'))!.click(); await flush()
+  expect(ontologyApi.sourceReviewSnapshots).toHaveBeenCalledWith('1', 'model', 'review', expect.any(AbortSignal))
+  expect(document.body.textContent).toContain('旧定义原文')
+  expect(document.body.textContent).toContain('新定义原文')
+})
+it('discards late comparison text when workspace changes', async () => {
+  vi.mocked(modelingTaskApi.get).mockResolvedValue({ ...task, incremental })
+  let finish!: (value: never) => void
+  vi.mocked(ontologyApi.sourceReviewSnapshots).mockImplementation(() => new Promise(resolve => { finish = resolve }))
+  const { store } = await mount()
+  ;[...host.querySelectorAll('button')].find(b => b.textContent?.includes('对比原始依据与新资料'))!.click()
+  store.currentWorkspaceId = '2'; await flush()
+  finish({ original: { sourceTitle: 'Old workspace', sourceText: 'PRIVATE-LATE-SOURCE' } } as never); await flush()
+  expect(document.body.textContent).not.toContain('PRIVATE-LATE-SOURCE')
 })

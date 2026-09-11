@@ -35,6 +35,16 @@ export interface ModelingTask {
   stage: string
   message?: string
   proposals: ModelingProposal[]
+  incremental?: {
+    reviewId: string
+    bindingId: string
+    baseRevisionId: string
+    oldSnapshotId: string
+    newSnapshotId: string
+    oldDigest: string
+    newDigest: string
+    affectedAxiomIds: string[]
+  }
 }
 export interface CreateModelingTask {
   operationId: string

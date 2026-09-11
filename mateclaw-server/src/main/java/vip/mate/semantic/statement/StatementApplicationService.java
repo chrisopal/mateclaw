@@ -87,7 +87,7 @@ public class StatementApplicationService {
             if(proposal.equals(other.id()))continue;
             domain.compare(ontology,graph,content,domain.content(graph,decode(other.payload()))).ifPresent(kind->insertConflict(graphId,kind.name(),"CHANGE_PROPOSAL",proposal,request.expectedRevision(),"CHANGE_PROPOSAL",other.id(),other.expectedRevision(),now));
         }
-        touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC),request.content());
+        touch(graph);return new ChangeView(proposal,graphId,statementId,request.expectedRevision(),"PENDING",null,actor.getId().toString(),now.toInstant(ZoneOffset.UTC),request.content(),domain.assertion(request.content().assertionText()));
     }
 
     public Page<StatementView> statements(String scope,String graphId,String view,String status,int page,int pageSize){
@@ -177,7 +177,15 @@ public class StatementApplicationService {
     }
     void command(String graph,String operation,String kind,Object payload,Object result){jdbc.update("INSERT INTO mate_semantic_mutation_command(id,graph_id,operation_id,kind,payload_hash,result_json,created_at) VALUES(?,?,?,?,?,?,?)",id(),graph,operation,kind,hash(wire.encode(payload)),wire.encode(result),now());}
     private static StoredRevision stored(ResultSet rs)throws SQLException{return new StoredRevision(rs.getString("statement_id"),rs.getInt("revision"),rs.getString("ontology_revision_id"),rs.getString("review_status"),rs.getString("content_json"),rs.getString("actor_id"),rs.getTimestamp("created_at").toLocalDateTime());}
-    private ChangeView change(ResultSet rs)throws SQLException{Integer result=(Integer)rs.getObject("result_revision");return new ChangeView(rs.getString("id"),rs.getString("graph_id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("status"),result,rs.getString("proposed_by"),rs.getTimestamp("created_at").toLocalDateTime().toInstant(ZoneOffset.UTC),decode(rs.getString("payload_json")));}
+    private ChangeView change(ResultSet rs)throws SQLException{
+        Integer result=(Integer)rs.getObject("result_revision");var content=decode(rs.getString("payload_json"));
+        return new ChangeView(rs.getString("id"),rs.getString("graph_id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("status"),result,rs.getString("proposed_by"),rs.getTimestamp("created_at").toLocalDateTime().toInstant(ZoneOffset.UTC),content,domain.assertion(content.assertionText()));
+    }
+    /** Derive a readable assertion for legacy command receipts without changing their authority. */
+    ChangeView withAssertion(ChangeView view){
+        return new ChangeView(view.id(),view.graphId(),view.targetStatementId(),view.expectedRevision(),view.status(),
+                view.resultRevision(),view.proposedBy(),view.createdAt(),view.content(),domain.assertion(view.content().assertionText()));
+    }
     private List<PendingChange> pendingChanges(String graphId){return jdbc.query("SELECT cp.id,cp.target_statement_id,cp.expected_revision,cp.payload_json FROM mate_semantic_change_proposal cp JOIN mate_semantic_statement s ON s.id=cp.target_statement_id AND s.graph_id=cp.graph_id AND s.current_revision=cp.expected_revision WHERE cp.graph_id=? AND cp.status='PENDING'",(rs,n)->new PendingChange(rs.getString("id"),rs.getString("target_statement_id"),rs.getInt("expected_revision"),rs.getString("payload_json")),graphId);}
     private void insertConflict(String graphId,String kind,String leftKind,String leftId,int leftRevision,String rightKind,String rightId,int rightRevision,LocalDateTime created){jdbc.update("INSERT INTO mate_semantic_conflict(id,graph_id,kind,status,left_member_kind,left_statement_id,left_revision,right_member_kind,right_statement_id,right_revision,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",id(),graphId,kind,"OPEN",leftKind,leftId,leftRevision,rightKind,rightId,rightRevision,created);}
     private static ConflictView conflictView(ResultSet rs)throws SQLException{return new ConflictView(rs.getString("id"),rs.getString("graph_id"),rs.getString("kind"),rs.getString("status"),new ConflictMember(rs.getString("left_member_kind"),rs.getString("left_statement_id"),rs.getInt("left_revision")),new ConflictMember(rs.getString("right_member_kind"),rs.getString("right_statement_id"),rs.getInt("right_revision")),rs.getString("resolution_json"));}

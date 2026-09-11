@@ -1,0 +1,122 @@
+{
+  "workspaceId": "2098435799210328065",
+  "ontologyId": "2098435799222910977",
+  "revisionId": "2098435799231299586",
+  "publishedBefore": {
+    "id": "2098435799231299586",
+    "ontologyId": "2098435799222910977",
+    "version": 1,
+    "name": "T10 设备模型",
+    "description": "Synthetic incremental acceptance",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Ontology(<urn:t10:model> Declaration(Class(<urn:t10:Equipment>)) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t10:Equipment> \"设备\") Declaration(DataProperty(<urn:t10:voltage>)) DataPropertyDomain(<urn:t10:voltage> <urn:t10:Equipment>) DataPropertyRange(<urn:t10:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:t10:model",
+      "versionIri": null,
+      "documentDigest": "a8d57e8d39c16ad9a1fcff7555be34a6d1c5a660fe0f6d9b0d87b8a125ebf582",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "6165852cc4f3022300b3f6614978ad8783b075ab77c3d05ea49cf8c44096552b",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:t10:Equipment> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "33ef119bb0743ffdeea19592da388b1580e5e8a48063a20d57d5fccdd43ad03e",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:t10:voltage> <urn:t10:Equipment>)",
+          "signatureIris": [
+            "urn:t10:Equipment",
+            "urn:t10:voltage"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "43dd7a7494fe2a2004d2a58ed5bcdb35487356cdedfba9d2a1939b7119f8677a",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:t10:voltage> xsd:decimal)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#decimal",
+            "urn:t10:voltage"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "62506f8066b51f6fd295dabf140fd45175213623e260ce929fe0e8d3814f5e6d",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:t10:Equipment>))",
+          "signatureIris": [
+            "urn:t10:Equipment"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "23805a201207b5b7f0c8969e60d71bfdde1a1bd1b5139ad43a2fb9b87e9c2815",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:t10:voltage>))",
+          "signatureIris": [
+            "urn:t10:voltage"
+          ],
+          "annotations": [],
+          "logical": false
+        }
+      ]
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-11T15:37:39.031502Z",
+    "publishedBy": "1",
+    "publicationNote": "T10 initial published version",
+    "baseRevisionId": null
+  },
+  "graphId": "2098435810945990657",
+  "knowledgeBaseId": "2098435799310991362",
+  "sourceRef": "2098435799327768577",
+  "entityId": "2098435810975350786",
+  "statementId": "2098435811092791298",
+  "oldText": "设备是生产现场使用的装备。设备A额定电压380V。",
+  "newText": "设备现称生产设备。设备A额定电压381V。",
+  "taskId": "1e1ff765-2aa3-4979-9189-a81912241308",
+  "modelReviewId": "fe58956d-2974-4c2b-b9da-afa4207885d3",
+  "modelProposalId": "36a4480a-98f9-42ce-9fd6-cd365bbc7b86",
+  "modelRequest": {
+    "operationId": "14253cf3-852f-4c14-9f85-d18355c06e03",
+    "expectedDraftVersion": 4,
+    "changes": [
+      {
+        "kind": "REPLACE_DEFINITION",
+        "targetId": "urn:t10:Equipment",
+        "field": "NAME",
+        "value": "生产设备",
+        "originalAxiomId": "051d9f6817a898c6b5b18291893c8dfbc4a0cdbf067ce6b8f82b0c15cf3d2f7e",
+        "clientId": "name"
+      }
+    ],
+    "evidence": [
+      {
+        "clientId": "name",
+        "knowledgeBaseId": "2098435799310991362",
+        "sourceRef": "2098435799327768577",
+        "sourceDigest": "dbb626de8e38a49e6421aa96720fb1514ae35ca6e10f2007192ef359882eb3b8",
+        "exactQuote": "设备现称生产设备。设备A额定电压381V。",
+        "origin": "EXTRACTED"
+      }
+    ]
+  }
+}

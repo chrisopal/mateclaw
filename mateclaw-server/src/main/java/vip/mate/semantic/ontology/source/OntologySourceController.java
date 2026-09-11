@@ -11,8 +11,16 @@ import static vip.mate.semantic.ontology.source.OntologySourceDtos.*;
 @RequestMapping("/api/v1/semantic/ontologies/{ontologyId}")
 @ConditionalOnProperty(name="mateclaw.semantic.enabled",havingValue="true")
 public class OntologySourceController {
+    @org.springframework.beans.factory.annotation.Autowired
+    private vip.mate.semantic.authoring.OntologyModelingService modeling;
     private final OntologySourceReviewService service;
     public OntologySourceController(OntologySourceReviewService service){this.service=service;}
+    @PostMapping("/source-reviews/{reviewId}/modeling-task") @RequireWorkspaceRole("member")
+    public R<vip.mate.semantic.authoring.OntologyModelingDtos.Task> incremental(
+            @RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String ontologyId,
+            @PathVariable String reviewId,@RequestBody vip.mate.semantic.authoring.OntologyModelingDtos.IncrementalRequest input) {
+        return R.ok(modeling.createFromReview(scope,ontologyId,reviewId,input));
+    }
     @PostMapping("/source-evidence/resolve") @RequireWorkspaceRole("viewer")
     public R<ResolvedEvidence> resolve(@RequestHeader(value="X-Workspace-Id",required=false)String scope,
             @PathVariable String ontologyId,@RequestBody ResolveEvidenceRequest request){

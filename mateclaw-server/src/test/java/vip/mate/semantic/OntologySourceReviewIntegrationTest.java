@@ -37,6 +37,62 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
                     Map.of("operationId",UUID.randomUUID().toString(),"expectedObservedDigest",review.path("observedDigest").asText(),"decision","ACKNOWLEDGE","reason","Test acknowledges current source"),200);
         }
     }
+    @Test void changedReviewCreatesOneRestrictedTaskAndPreservesPublishedRevision()throws Exception {
+        var f=fixture();
+        var originalDraft=call("GET","/ontologies/"+f.ontology()+"/draft","viewer",workspace,null,200);
+        var label=java.util.stream.StreamSupport.stream(originalDraft.path("document").path("axioms").spliterator(),false)
+                .filter(a->a.path("rendering").asText().contains("AnnotationAssertion") && a.path("rendering").asText().contains("urn:test:Equipment")).findFirst().orElseThrow();
+        String axiom=label.path("axiomId").asText();
+        call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,2,axiom,UUID.randomUUID().toString()),200);
+        acknowledgeCurrent(f);var published=publish(f.ontology(),3,UUID.randomUUID().toString());
+        String changedText="设备😀改称精密测量设备。";
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",changedText,Long.valueOf(f.raw()));
+        var reviews=call("POST","/ontologies/"+f.ontology()+"/source-reviews/scan","member",workspace,Map.of("operationId",UUID.randomUUID().toString()),200);
+        var review=java.util.stream.StreamSupport.stream(reviews.spliterator(),false).filter(r->"CHANGED".equals(r.path("sourceState").asText())).findFirst().orElseThrow();
+        String bridge="/ontologies/"+f.ontology()+"/source-reviews/"+review.path("id").asText()+"/modeling-task";
+        var input=Map.of("expectedObservedDigest",review.path("observedDigest").asText());
+        var task=call("POST",bridge,"member",workspace,input,200);
+        assertEquals(task,call("POST",bridge,"member",workspace,input,200));
+        assertEquals(review.path("observedSnapshotId"),task.path("incremental").path("newSnapshotId"));
+        String affectedAxiom=task.path("incremental").path("affectedAxiomIds").get(0).asText();
+        var targetDraft=call("GET","/ontologies/"+f.ontology()+"/draft","viewer",workspace,null,200);
+        assertNotEquals(axiom,affectedAxiom,"Published and new-draft axiom identities are revision-scoped");
+        assertTrue(java.util.stream.StreamSupport.stream(targetDraft.path("document").path("axioms").spliterator(),false)
+                .anyMatch(a->affectedAxiom.equals(a.path("axiomId").asText()) && label.path("rendering").equals(a.path("rendering"))));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_modeling_task WHERE ontology_id=?",Integer.class,f.ontology()));
+        String taskPath="/modeling-tasks/"+task.path("id").asText();
+        long version=call("GET","/ontologies/"+f.ontology()+"/draft","viewer",workspace,null,200).path("draftVersion").asLong();
+        call("POST",taskPath+"/proposals","member",workspace,Map.of("operationId",UUID.randomUUID().toString(),"expectedDraftVersion",version,
+                "changes",List.of(Map.of("kind","CREATE_TERM","termKind","OBJECT","name","Unrelated","clientId","bad"))),400);
+        var proposal=new HashMap<String,Object>();proposal.put("operationId",UUID.randomUUID().toString());proposal.put("expectedDraftVersion",version);
+        proposal.put("changes",List.of(Map.of("kind","REPLACE_DEFINITION","targetId","urn:test:Equipment","field","NAME","value","Precision equipment","originalAxiomId",affectedAxiom,"clientId","name")));
+        proposal.put("evidence",List.of(Map.of("clientId","name","knowledgeBaseId",f.kb(),"sourceRef",f.raw(),"sourceDigest",OntologyDocument.sha256(changedText),"exactQuote",changedText,"origin","EXTRACTED")));
+        var pending=call("POST",taskPath+"/proposals","member",workspace,proposal,200);
+        var decision=Map.of("operationId",UUID.randomUUID().toString(),"decision","ACCEPT");
+        String decisionPath=taskPath+"/proposals/"+pending.path("proposals").get(0).path("id").asText()+"/decision";
+        var accepted=call("POST",decisionPath,"member",workspace,decision,200);
+        assertEquals(accepted,call("POST",decisionPath,"member",workspace,decision,200));
+        assertEquals("ACCEPTED",accepted.path("proposals").get(0).path("status").asText());
+        assertEquals(published,call("GET","/ontologies/"+f.ontology()+"/revisions/"+f.draft(),"viewer",workspace,null,200));
+        assertEquals(task.path("id"),call("POST",bridge,"member",workspace,input,200).path("id"));
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=1 WHERE id=?",Long.valueOf(f.raw()));
+        call("POST",bridge,"member",workspace,input,404);
+        call("GET",taskPath,"viewer",workspace,null,404);
+        assertEquals(0,call("GET","/modeling-tasks?ontologyId="+f.ontology(),"viewer",workspace,null,200).size());
+        call("POST",taskPath+"/proposals","member",workspace,proposal,404);
+        call("POST",decisionPath,"member",workspace,decision,404);
+        call("PATCH",taskPath+"/stage","member",workspace,Map.of("stage","READY"),404);
+        call("GET","/ontologies/"+f.ontology()+"/source-reviews/"+review.path("id").asText()+"/snapshots","viewer",workspace,null,404);
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=0 WHERE id=?",Long.valueOf(f.raw()));
+        jdbc.update("UPDATE mate_wiki_knowledge_base SET workspace_id=? WHERE id=?",Long.valueOf(otherWorkspace),Long.valueOf(f.kb()));
+        call("POST",bridge,"member",workspace,input,404);
+        call("GET",taskPath,"viewer",workspace,null,404);
+        assertEquals(0,call("GET","/modeling-tasks?ontologyId="+f.ontology(),"viewer",workspace,null,200).size());
+        call("POST",taskPath+"/proposals","member",workspace,proposal,404);
+        call("POST",decisionPath,"member",workspace,decision,404);
+        call("PATCH",taskPath+"/stage","member",workspace,Map.of("stage","READY"),404);
+    }
+
     @Test void resolvesEvidenceOnServerAndRequiresExplicitRepeatedOccurrence() throws Exception {
         var f=fixture();String text="😀设备定义。😀设备定义。";
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",text,Long.valueOf(f.raw()));

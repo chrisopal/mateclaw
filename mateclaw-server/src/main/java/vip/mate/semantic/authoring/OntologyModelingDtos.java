@@ -19,6 +19,15 @@ public final class OntologyModelingDtos {
     public record StageChange(String stage, String message) {}
     public record Proposal(String id, SubmitProposal input, String status, String reason,
             Map<String,String> answers, ModelCommandResult result) {}
+    public record IncrementalRequest(String expectedObservedDigest, String goal) {}
+    public record Incremental(String reviewId, String bindingId, String baseRevisionId,
+            String oldSnapshotId, String newSnapshotId, String oldDigest, String newDigest,
+            List<String> affectedAxiomIds) {}
     public record Task(String id, String ontologyId, String draftId, String goal,
-            List<SourceVersion> sources, String stage, String message, List<Proposal> proposals) {}
+            List<SourceVersion> sources, String stage, String message, List<Proposal> proposals, Incremental incremental) {
+        public Task(String id, String ontologyId, String draftId, String goal, List<SourceVersion> sources,
+                String stage, String message, List<Proposal> proposals) {
+            this(id, ontologyId, draftId, goal, sources, stage, message, proposals, null);
+        }
+    }
 }

@@ -56,7 +56,7 @@ public class StatementReviewService {
     public ChangeView reviewChange(String scope,String graphId,String proposalId,ReviewRequest request){
         var actor=access.require(scope,"admin");GraphRow graph=graphs.requireGraph(scope,graphId,true);StatementApplicationService.requireEnabled(graph);validate(request);
         Object commandPayload=List.of(proposalId,request);String hash=StatementApplicationService.hash(wire.encode(commandPayload));
-        ChangeView replay=replay(graphId,proposalId,request.operationId(),hash,StatementApplicationService.hash(wire.encode(request)),"REVIEW_CHANGE",ChangeView.class);if(replay!=null)return replay;
+        ChangeView replay=replay(graphId,proposalId,request.operationId(),hash,StatementApplicationService.hash(wire.encode(request)),"REVIEW_CHANGE",ChangeView.class);if(replay!=null)return statements.withAssertion(replay);
         ChangeRow proposal=changeRow(graphId,proposalId);if(proposal==null)throw StatementApplicationService.notFound();
         if(!"PENDING".equals(proposal.status()))throw StatementApplicationService.conflict("PROPOSAL_STALE","Change proposal is no longer pending");
         var current=statements.row(graphId,proposal.statementId());if(current==null||current.revision()!=proposal.expectedRevision()||current.revision()!=request.expectedRevision())throw StatementApplicationService.conflict("STATEMENT_VERSION_CONFLICT","Change proposal base revision is stale");
@@ -72,7 +72,8 @@ public class StatementReviewService {
         statements.touch(graph);
         affected.add(MemberIdentity.change(proposalId));
         reconcileOpenConflicts(graph,affected,actor.getId().toString(),request.reason(),null);
-        ChangeView result=new ChangeView(proposalId,graphId,proposal.statementId(),proposal.expectedRevision(),status,resultRevision,proposal.proposedBy(),proposal.createdAt().toInstant(ZoneOffset.UTC),statements.decode(proposal.payload()));
+        var content=statements.decode(proposal.payload());
+        ChangeView result=new ChangeView(proposalId,graphId,proposal.statementId(),proposal.expectedRevision(),status,resultRevision,proposal.proposedBy(),proposal.createdAt().toInstant(ZoneOffset.UTC),content,domain.assertion(content.assertionText()));
         statements.command(graphId,request.operationId(),"REVIEW_CHANGE",commandPayload,result);
         governance.append(graphId,graph.getWorkspaceId(),"CHANGE_PROPOSAL",proposalId,resultRevision==null?proposal.expectedRevision():resultRevision,"REVIEW_CHANGE",request.operationId(),actor.getId().toString(),request.reason(),wire.encode(result));return result;
     }

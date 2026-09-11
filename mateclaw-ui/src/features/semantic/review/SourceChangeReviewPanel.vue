@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import SourceFactRevision from './SourceFactRevision.vue'
+import type { DocumentView, SemanticEntity } from '../api/types'
 import { useI18n } from 'vue-i18n'
 import { sourceChangeApi, type SourceChangeDecisionRequest } from '../api/sourceChangeApi'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import type { SourceChange, SourceChangeDecision, SourceChangeReviewItem } from '../api/workbenchTypes'
 
-const props = defineProps<{ graphId: string; graphVersion: number; canScan: boolean; canReview: boolean }>()
-const emit = defineEmits<{ changed: [] }>()
-const { t, te } = useI18n()
+const props = defineProps<{ graphId: string; graphVersion: number; canScan: boolean; canReview: boolean; entities?: SemanticEntity[]; document?: DocumentView }>()
+const emit = defineEmits<{ changed: []; revisionSubmitted: [] }>()
+const { t, te, locale } = useI18n()
+const tr = (zh: string, en: string) => locale.value.startsWith('zh') ? zh : en
+const revisionItemId = ref('')
 const { workspace, begin, cancel } = useSemanticScope()
 
 const changes = ref<SourceChange[]>([])
@@ -36,6 +40,7 @@ function digest(value: string | null | undefined) {
 }
 function clear() {
   cancel()
+  revisionItemId.value = ''
   changes.value = []
   pending.value = []
   items.value = []
@@ -154,31 +159,36 @@ watch(() => [workspace.currentWorkspaceId, props.graphId], () => { clear(); void
     <h4>{{ t('semantic.w.sourceChangesFound') }}</h4>
     <el-table v-if="changes.length" :data="changes" row-key="id" @row-click="inspect">
       <el-table-column :label="t('semantic.w.source')"><template #default="{ row }">{{ row.sourceRef }}<small class="metadata">{{ row.sourceKind }}</small></template></el-table-column>
-      <el-table-column :label="t('semantic.w.sourceState')"><template #default="{ row }">{{ statusName(row.sourceState) }}</template></el-table-column>
-      <el-table-column :label="t('semantic.w.sourceDigest')"><template #default="{ row }">{{ digest(row.oldDigest) }} → {{ digest(row.newDigest) }}</template></el-table-column>
-      <el-table-column prop="affectedCount" :label="t('semantic.w.affected')" />
+      <el-table-column :label="t('semantic.sourceState')"><template #default="{ row }">{{ statusName(row.sourceState) }}</template></el-table-column>
+      <el-table-column :label="t('semantic.sourceDigest')"><template #default="{ row }">{{ digest(row.oldDigest) }} → {{ digest(row.newDigest) }}</template></el-table-column>
+      <el-table-column prop="affectedCount" :label="t('semantic.affected')" />
       <el-table-column prop="observedGraphVersion" :label="t('semantic.w.graphVersion')" />
     </el-table>
     <el-empty v-else :description="t('semantic.w.noSourceChanges')" />
 
     <h4>{{ t('semantic.w.sourceChangeItems') }}</h4>
     <el-table :data="selectedChange ? items : pending" row-key="id" :empty-text="t('semantic.w.noSourceChangeItems')" @row-click="row => selectedItemId = row.id">
-      <el-table-column prop="itemKind" :label="t('semantic.w.item')" />
+      <el-table-column :label="t('semantic.w.item')"><template #default="{ row }">{{ row.itemKind === 'FACT' ? tr('已确认知识', 'Accepted fact') : row.itemKind === 'CANDIDATE' ? tr('待确认知识', 'Candidate') : tr('变更申请', 'Change proposal') }}</template></el-table-column>
       <el-table-column :label="t('semantic.w.record')"><template #default="{ row }">{{ row.itemId }}<span v-if="row.itemRevision != null"> · r{{ row.itemRevision }}</span></template></el-table-column>
-      <el-table-column :label="t('semantic.w.reviewState')"><template #default="{ row }">{{ statusName(row.reviewState) }}</template></el-table-column>
-      <el-table-column :label="t('semantic.w.sourceDigest')"><template #default="{ row }">{{ digest(row.oldDigest) }} → {{ digest(row.newDigest) }}</template></el-table-column>
+      <el-table-column :label="t('semantic.reviewState')"><template #default="{ row }">{{ statusName(row.reviewState) }}</template></el-table-column>
+      <el-table-column :label="t('semantic.sourceDigest')"><template #default="{ row }">{{ digest(row.oldDigest) }} → {{ digest(row.newDigest) }}</template></el-table-column>
     </el-table>
 
     <el-card v-if="selectedItem" class="source-change-decision">
+      <el-button v-if="canReview && document && selectedItem.itemKind === 'FACT' && selectedItem.sourceState === 'CHANGED' && selectedItem.reviewState === 'PENDING'" :disabled="busy" @click="revisionItemId = selectedItem.id">{{ tr('准备事实修订', 'Prepare fact revision') }}</el-button>
+      <p v-if="selectedItem.sourceState === 'UNAVAILABLE'" class="metadata">{{ tr('资料不可访问，无法据此提出新结论。', 'This source is unavailable and cannot support a new conclusion.') }}</p>
       <p class="metadata">{{ t('semantic.w.sourceChangeDecisionHint') }}</p>
       <el-select v-model="decision" :disabled="!canReview || busy" :placeholder="t('semantic.w.sourceChangeDecision')">
-        <el-option value="ACKNOWLEDGE" :label="t('semantic.w.acknowledge')" />
-        <el-option value="REMODEL" :label="t('semantic.w.remodel')" />
-        <el-option value="KEEP_HISTORICAL" :label="t('semantic.w.keepHistorical')" />
+        <el-option value="ACKNOWLEDGE" :label="t('semantic.acknowledge')" />
+        <el-option value="REMODEL" :label="tr('标记待重新建模', 'Mark for remodeling')" />
+        <el-option value="KEEP_HISTORICAL" :label="t('semantic.keepHistorical')" />
       </el-select>
-      <el-input v-model="reason" type="textarea" :rows="3" :disabled="!canReview || busy" :placeholder="t('semantic.w.sourceDecisionReason')" />
+      <el-input v-model="reason" type="textarea" :rows="3" :disabled="!canReview || busy" :placeholder="t('semantic.sourceDecisionReason')" />
       <el-button type="primary" :disabled="!reviewable" :loading="busy" @click="decide">{{ t('semantic.w.sourceChangeDecide') }}</el-button>
     </el-card>
+    <el-dialog :model-value="!!revisionItemId" @update:model-value="visible => { if (!visible) revisionItemId = '' }" :title="tr('根据资料修订事实', 'Revise fact from source')" width="min(760px, 94vw)" destroy-on-close>
+      <SourceFactRevision v-if="revisionItemId && document" :key="revisionItemId" :graph-id="graphId" :item-id="revisionItemId" :entities="entities ?? []" :document="document" @submitted="revisionItemId = ''; emit('revisionSubmitted')" />
+    </el-dialog>
   </section>
 </template>
 

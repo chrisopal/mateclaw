@@ -36,6 +36,58 @@ public class OntologyModelingService {
         this.mapper=mapper; this.wire=wire; this.sources=sources;
     }
 
+    @Transactional
+    public Task createFromReview(String scope,String ontologyId,String reviewId,IncrementalRequest input) {
+        access.require(scope,"member");
+        if(input==null || input.expectedObservedDigest()==null)throw bad("Observed digest required");
+        ontologies.get(scope,ontologyId);
+        String operation="source-review:"+reviewId;
+        var existing=jdbc.query("SELECT id FROM mate_semantic_modeling_task WHERE workspace_id=? AND ontology_id=? AND operation_id=?",(r,n)->r.getString(1),Long.valueOf(scope),ontologyId,operation);
+        if(!existing.isEmpty()) {
+            var previous=read(scope,existing.getFirst());
+            if(previous.incremental()==null || !reviewId.equals(previous.incremental().reviewId()))throw conflict("OPERATION_CONFLICT");
+            for(var selected:previous.sources()) {
+                var live=sources.materialViewForModeling(scope,ontologyId,selected.knowledgeBaseId(),selected.sourceRef());
+                if(live==null)throw missing();
+                if(!selected.sourceDigest().equals(live.sourceDigest()))throw conflict("SOURCE_REVIEW_STALE");
+            }
+            if(!input.expectedObservedDigest().equals(previous.incremental().newDigest()))throw conflict("SOURCE_REVIEW_STALE");
+            return previous;
+        }
+        // Serialize competing bridge creations before create() reserves its unique operation.
+        // Replays above follow the normal task -> ontology lock order; this fresh branch
+        // never locks an existing task while holding the ontology lock.
+        if(mapper.lock(ontologyId,Long.parseLong(scope))==null)throw missing();
+        var concurrent=jdbc.query("SELECT state_json FROM mate_semantic_modeling_task WHERE workspace_id=? AND ontology_id=? AND operation_id=?",(r,n)->wire.decode(r.getString(1),Task.class),Long.valueOf(scope),ontologyId,operation);
+        if(!concurrent.isEmpty()) {
+            var previous=concurrent.getFirst();
+            if(previous.incremental()==null || !input.expectedObservedDigest().equals(previous.incremental().newDigest()))throw conflict("OPERATION_CONFLICT");
+            if(!checkSources(scope,previous))throw conflict("SOURCE_REVIEW_STALE");
+            return previous;
+        }
+        var review=sources.reviews(scope,ontologyId).stream().filter(r->r.id().equals(reviewId)).findFirst().orElseThrow(OntologyModelingService::missing);
+        var binding=sources.binding(scope,ontologyId,review.bindingId());
+        if(!"CHANGED".equals(review.sourceState()) || review.observedSnapshotId()==null
+                || "STALE".equals(review.reviewState()) || !input.expectedObservedDigest().equals(review.observedDigest()))throw conflict("SOURCE_REVIEW_STALE");
+        var current=sources.materialViewForModeling(scope,ontologyId,binding.knowledgeBaseId(),binding.sourceRef());
+        if(current==null)throw missing();
+        if(!review.observedDigest().equals(current.sourceDigest()))throw conflict("SOURCE_REVIEW_STALE");
+        String goal=input.goal()==null||input.goal().isBlank()?"Review the changed source and propose only the affected ontology definition; preserve unrelated definitions.":input.goal();
+        var task=create(scope,new CreateTask(operation,ontologyId,null,binding.revisionId(),goal,
+                List.of(new SourceVersion(binding.knowledgeBaseId(),binding.sourceRef(),review.observedDigest()))));
+        var draft=ontologies.getDraft(scope,ontologyId);
+        // Axiom IDs are revision-scoped. Match the immutable original rendering, just
+        // like OntologyAxiomIndex.copyBindings, instead of carrying its old ID into a new draft.
+        var original=wire.parsed(mapper.revision(binding.revisionId(),ontologyId)).axioms().stream()
+                .filter(a->a.axiomId().equals(binding.axiomId())).findFirst().orElseThrow(()->conflict("AFFECTED_DEFINITION_CHANGED"));
+        var affected=draft.document().axioms().stream().filter(a->a.rendering().equals(original.rendering())).toList();
+        if(affected.size()!=1)throw conflict("AFFECTED_DEFINITION_CHANGED");
+        var incremental=new Incremental(reviewId,binding.id(),binding.revisionId(),binding.sourceSnapshotId(),
+                review.observedSnapshotId(),binding.sourceDigest(),review.observedDigest(),List.of(affected.getFirst().axiomId()));
+        task=new Task(task.id(),task.ontologyId(),task.draftId(),task.goal(),task.sources(),task.stage(),task.message(),task.proposals(),incremental);
+        save(task);return task;
+    }
+
     public Task create(String scope, CreateTask input) {
         try { return transactions.execute(status->createReserved(scope,input)); }
         catch(org.springframework.dao.DuplicateKeyException collision) {
@@ -92,6 +144,7 @@ public class OntologyModelingService {
     public Task read(String scope,String id) {
         access.require(scope,"viewer");
         var task=locked(scope,id);
+        requireIncrementalVisible(scope,task);
         task=refresh(scope,task);
         return task;
     }
@@ -101,7 +154,8 @@ public class OntologyModelingService {
         access.require(scope,"viewer");
         if(ontologyId!=null)ontologies.get(scope,ontologyId);
         return jdbc.query("SELECT state_json FROM mate_semantic_modeling_task WHERE workspace_id=? AND (? IS NULL OR ontology_id=?) ORDER BY created_at DESC,id LIMIT 100",
-                (r,n)->wire.decode(r.getString(1),Task.class),Long.valueOf(scope),ontologyId,ontologyId);
+                (r,n)->wire.decode(r.getString(1),Task.class),Long.valueOf(scope),ontologyId,ontologyId)
+                .stream().filter(task->incrementalVisible(scope,task)).toList();
     }
 
     @Transactional
@@ -110,6 +164,7 @@ public class OntologyModelingService {
         if(input==null)throw bad("Proposal required");
         operation(input.operationId());
         Task task=locked(scope,id);
+        requireIncrementalVisible(scope,task);
         Task replay=replay(task,input.operationId(),input);
         if(replay!=null){checkSources(scope,task);return replay;}
         active(task);
@@ -119,6 +174,7 @@ public class OntologyModelingService {
         if(!checkSources(scope,task))throw conflict("SOURCE_CHANGED");
         if(input.changes()==null||input.changes().isEmpty()||input.changes().size()>200)throw bad("Supply 1 to 200 business changes");
         if(wire.encode(input).length()>1000000)throw bad("Proposal too large");
+        checkIncremental(task,input.changes());
         Set<String> ids=new HashSet<>();
         for(var change:input.changes()) {
             if(change==null)throw bad("Change required");
@@ -135,6 +191,10 @@ public class OntologyModelingService {
             if(!task.sources().contains(new SourceVersion(e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest())))throw bad("Evidence must use a selected source version");
             if(!Set.of("EXTRACTED","EXPERT","INFERRED").contains(Objects.toString(e.origin(),"")))throw bad("Explicit evidence origin required");
             sources.resolveEvidence(scope,task.ontologyId(),e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest(),e.exactQuote(),e.occurrence());
+        }
+        if(task.incremental()!=null)for(var change:input.changes()) {
+            if(evidence.stream().noneMatch(e->change.clientId().equals(e.clientId()) && !"USER_STATEMENT".equals(e.origin())))
+                throw bad("Every incremental definition change requires evidence from the observed source version");
         }
         var questions=input.questions()==null?List.<String>of():new ArrayList<>(input.questions());
         if(questions.size()>100||new HashSet<>(questions).size()!=questions.size())throw bad("Questions must be unique, at most 100");
@@ -154,6 +214,7 @@ public class OntologyModelingService {
         if(input==null)throw bad("Decision required");
         operation(input.operationId());
         Task task=locked(scope,id);
+        requireIncrementalVisible(scope,task);
         Object payload=List.of(proposalId,input);
         Task replay=replay(task,input.operationId(),payload);
         if(replay!=null){checkSources(scope,task);return replay;}
@@ -168,6 +229,8 @@ public class OntologyModelingService {
         var answers=input.answers()==null?Map.<String,String>of():Map.copyOf(input.answers());
         if(answers.size()>100||wire.encode(answers).length()>250000)throw bad("Answers too large");
         if(input.decision().equals("ACCEPT")) {
+            checkIncremental(task,proposal.input().changes());
+            if(!checkSources(scope,task))throw conflict("SOURCE_CHANGED");
             for(String question:proposal.input().questions())text(answers.get(question),"Answer to "+question,2000);
             var resolved=new ArrayList<vip.mate.semantic.ontology.source.OntologySourceDtos.ResolvedEvidence>();
             for(var e:proposal.input().evidence())resolved.add("USER_STATEMENT".equals(e.origin())?null:sources.resolveEvidence(scope,task.ontologyId(),e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest(),e.exactQuote(),e.occurrence()));
@@ -200,6 +263,7 @@ public class OntologyModelingService {
         access.require(scope,"member");
         if(change==null||!Set.of("READY","RUNNING","FAILED","CANCELLED").contains(Objects.toString(change.stage(),"")))throw bad("Unsupported task stage");
         Task task=locked(scope,id);
+        requireIncrementalVisible(scope,task);
         if(task.stage().equals("CANCELLED")) {
             if(change.stage().equals("CANCELLED"))return task;
             throw conflict("TASK_CANCELLED");
@@ -239,7 +303,30 @@ public class OntologyModelingService {
         }
         return current;
     }
-    private Task replace(Task t,String stage,String message,List<Proposal> proposals){return new Task(t.id(),t.ontologyId(),t.draftId(),t.goal(),t.sources(),stage,message,List.copyOf(proposals));}
+    private boolean incrementalVisible(String scope,Task task) {
+        if(task.incremental()==null)return true;
+        // The nullable probe treats deleted/revoked source material as an ordinary absence.
+        // Catching materialView's 404 would leave this joined transaction rollback-only.
+        for(var source:task.sources()) {
+            if(sources.materialViewForModeling(scope,task.ontologyId(),source.knowledgeBaseId(),source.sourceRef())==null)return false;
+        }
+        return true;
+    }
+    private void requireIncrementalVisible(String scope,Task task) {
+        if(!incrementalVisible(scope,task))throw missing();
+    }
+    private void checkIncremental(Task task,List<ModelEdit> changes) {
+        if(task.incremental()==null)return;
+        if(task.proposals().stream().anyMatch(p->"ACCEPTED".equals(p.status())))throw conflict("INCREMENTAL_ALREADY_APPLIED");
+        for(var change:changes) {
+            if(change==null || !("REPLACE_DEFINITION".equals(change.kind()) || "REPLACE_RESTRICTION".equals(change.kind()))
+                    || change.originalAxiomId()==null || !task.incremental().affectedAxiomIds().contains(change.originalAxiomId()))
+                throw bad("Incremental changes must replace an explicitly affected originalAxiomId");
+        }
+        // Compile before presenting a proposal: original IDs cannot be paired with an unrelated target/field.
+        wire.compileModelCommands(mapper.revision(task.draftId(),task.ontologyId()),"incremental-validation",changes);
+    }
+    private Task replace(Task t,String stage,String message,List<Proposal> proposals){return new Task(t.id(),t.ontologyId(),t.draftId(),t.goal(),t.sources(),stage,message,List.copyOf(proposals),t.incremental());}
     private void save(Task task){jdbc.update("UPDATE mate_semantic_modeling_task SET state_json=?,updated_at=? WHERE id=?",wire.encode(task),LocalDateTime.now(ZoneOffset.UTC),task.id());}
     private Task replay(Task t,String operation,Object payload) {
         var rows=jdbc.query("SELECT request_digest,result_json FROM mate_semantic_modeling_operation WHERE task_id=? AND operation_id=?",(r,n)->Map.entry(r.getString(1),r.getString(2)),t.id(),operation);

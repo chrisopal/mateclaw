@@ -1,0 +1,137 @@
+{
+  "status": "PASS",
+  "checks": {
+    "published_unchanged": true,
+    "draft_only_updated": true,
+    "one_accepted_model_proposal": true,
+    "history_keeps_old_fact": true,
+    "identity_datatype_time_preserved": true,
+    "new_exact_evidence": true
+  },
+  "taskId": "1e1ff765-2aa3-4979-9189-a81912241308",
+  "history": {
+    "statementId": "2098435811092791298",
+    "revisions": [
+      {
+        "id": "2098435811092791298",
+        "graphId": "2098435810945990657",
+        "revision": 1,
+        "ontologyRevisionId": "2098435799231299586",
+        "subjectId": "2098435810975350786",
+        "assertion": {
+          "kind": "POSITIVE_DATA_PROPERTY",
+          "functionalSyntax": "DataPropertyAssertion(<urn:t10:voltage> <urn:t10:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+          "signatureIris": [
+            "urn:t10:equipment:a",
+            "urn:t10:voltage",
+            "http://www.w3.org/2001/XMLSchema#decimal"
+          ],
+          "subjectIri": "urn:t10:equipment:a",
+          "predicateIri": "urn:t10:voltage",
+          "objectIri": null,
+          "literal": {
+            "lexicalValue": "380",
+            "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+            "languageTag": null
+          },
+          "classExpressionFunctionalSyntax": null,
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098435811017293825"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T15:37:39.073920Z"
+      },
+      {
+        "id": "2098435811092791298",
+        "graphId": "2098435810945990657",
+        "revision": 2,
+        "ontologyRevisionId": "2098435799231299586",
+        "subjectId": "2098435810975350786",
+        "assertion": {
+          "kind": "POSITIVE_DATA_PROPERTY",
+          "functionalSyntax": "DataPropertyAssertion(<urn:t10:voltage> <urn:t10:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+          "signatureIris": [
+            "urn:t10:equipment:a",
+            "urn:t10:voltage",
+            "http://www.w3.org/2001/XMLSchema#decimal"
+          ],
+          "subjectIri": "urn:t10:equipment:a",
+          "predicateIri": "urn:t10:voltage",
+          "objectIri": null,
+          "literal": {
+            "lexicalValue": "380",
+            "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+            "languageTag": null
+          },
+          "classExpressionFunctionalSyntax": null,
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098435811017293825"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T15:37:39.094044Z"
+      },
+      {
+        "id": "2098435811092791298",
+        "graphId": "2098435810945990657",
+        "revision": 3,
+        "ontologyRevisionId": "2098435799231299586",
+        "subjectId": "2098435810975350786",
+        "assertion": {
+          "kind": "POSITIVE_DATA_PROPERTY",
+          "functionalSyntax": "DataPropertyAssertion(<urn:t10:voltage> <urn:t10:equipment:a> \"381\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+          "signatureIris": [
+            "urn:t10:equipment:a",
+            "urn:t10:voltage",
+            "http://www.w3.org/2001/XMLSchema#decimal"
+          ],
+          "subjectIri": "urn:t10:equipment:a",
+          "predicateIri": "urn:t10:voltage",
+          "objectIri": null,
+          "literal": {
+            "lexicalValue": "381",
+            "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+            "languageTag": null
+          },
+          "classExpressionFunctionalSyntax": null,
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098438076960677889"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T15:52:15.099554Z"
+      }
+    ]
+  },
+  "evidence": {
+    "id": "2098438076960677889",
+    "snapshotId": "2098437650878111746",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2098435799327768577",
+    "sourceTitle": "T10 合成设备资料",
+    "exactQuote": "设备A额定电压381V。",
+    "startCodePoint": 9,
+    "endCodePoint": 21,
+    "textDigest": "dbb626de8e38a49e6421aa96720fb1514ae35ca6e10f2007192ef359882eb3b8"
+  },
+  "publishedDigest": "a8d57e8d39c16ad9a1fcff7555be34a6d1c5a660fe0f6d9b0d87b8a125ebf582"
+}

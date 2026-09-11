@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { sourceIncrementalApi } from '../../api/sourceIncrementalApi'
 import { ontologyApi } from '../../api/ontologyApi'
 import { exactQuoteRange, sourceSelectionApi, type SourceKnowledgeBase, type SourceMaterial, type SourceMaterialSummary } from '../../api/sourceSelectionApi'
 import type { AxiomDescriptor, OntologySourceBinding, OntologySourceOrigin, OntologySourceReview } from '../../api/types'
@@ -9,7 +10,7 @@ import { businessRuleLabel } from '../businessModel'
 import { useSemanticScope } from '../../shared/useSemanticScope'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error' | 'unknown'
-type ReviewDecision = 'ACKNOWLEDGE' | 'REMODEL' | 'KEEP_HISTORICAL'
+type ReviewDecision = 'ACKNOWLEDGE' | 'KEEP_HISTORICAL'
 type BindingWithTitle = OntologySourceBinding & { sourceTitle?: string }
 
 const props = defineProps<{
@@ -22,7 +23,7 @@ const props = defineProps<{
   canReview: boolean
   focusedAxiomId?: string
 }>()
-const emit = defineEmits<{ changed: [draftVersion?: number]; 'clear-focus': [] }>()
+const emit = defineEmits<{ changed: [draftVersion?: number]; 'clear-focus': []; 'modeling-task': [taskId: string] }>()
 const { locale } = useI18n()
 const { begin, workspace } = useSemanticScope()
 const tr = (zh: string, en: string) => locale.value.startsWith('zh') ? zh : en
@@ -72,7 +73,7 @@ function sourceStateLabel(value: string) {
   return ({ CURRENT: tr('当前有效', 'Current'), CHANGED: tr('资料已变化', 'Changed'), UNAVAILABLE: tr('资料不可访问', 'Unavailable'), UNCHECKED: tr('尚未检查', 'Not checked') } as Record<string, string>)[value] || value
 }
 function reviewStateLabel(value: string) {
-  return ({ PENDING: tr('待确认', 'Needs confirmation'), REVIEWED: tr('已处理', 'Reviewed'), STALE: tr('已过期', 'Stale'), ACKNOWLEDGE: tr('已确认变化', 'Change acknowledged'), REMODEL: tr('已重新建模', 'Remodeled'), KEEP_HISTORICAL: tr('已保留历史依据', 'Historical evidence kept') } as Record<string, string>)[value] || value
+  return ({ PENDING: tr('待确认', 'Needs confirmation'), REVIEWED: tr('已处理', 'Reviewed'), STALE: tr('已过期', 'Stale'), ACKNOWLEDGE: tr('已确认变化', 'Change acknowledged'), REMODEL: tr('已请求重新建模', 'Remodeling requested'), KEEP_HISTORICAL: tr('已保留历史依据', 'Historical evidence kept') } as Record<string, string>)[value] || value
 }
 
 const focusedAxiomId = computed(() => props.focusedAxiomId?.trim() || '')
@@ -297,6 +298,23 @@ async function compareSources(item: OntologySourceReview) {
     if (run.current()) busy.value = false
   }
 }
+async function remodel(item: OntologySourceReview) {
+  if (busy.value || !props.canReview || item.reviewState !== 'PENDING' || item.sourceState !== 'CHANGED' || !item.observedDigest) return
+  const run = begin()
+  busy.value = true
+  error.value = ''
+  try {
+    const task = await sourceIncrementalApi.modelTask(run.id, props.ontologyId, item.id, {
+      expectedObservedDigest: item.observedDigest,
+      goal: reason.value[item.id]?.trim() || undefined,
+    }, run.signal)
+    if (run.current()) emit('modeling-task', task.id)
+  } catch (e) {
+    if (run.current()) error.value = (e as Error).message
+  } finally {
+    if (run.current()) busy.value = false
+  }
+}
 async function decide(item: OntologySourceReview, decision: ReviewDecision) {
   const reviewReason = reason.value[item.id]?.trim() || ''
   if (!reviewReason || busy.value) return
@@ -379,7 +397,7 @@ watch(() => [workspace.currentWorkspaceId, props.ontologyId, props.revisionId, p
         <el-table :data="visibleReviewable" :empty-text="reviewEmptyText">
           <el-table-column :label="tr('业务规则', 'Business rule')" min-width="190"><template #default="{ row }"><span>{{ ruleLabel(visibleBindings.find(item => item.id === row.bindingId)?.axiomId || '') }}</span></template></el-table-column>
           <el-table-column :label="tr('资料状态', 'Material status')" width="140"><template #default="{ row }">{{ sourceStateLabel(row.sourceState) }}</template></el-table-column>
-          <el-table-column :label="tr('操作', 'Actions')" min-width="450"><template #default="{ row }"><div class="review-actions"><el-input v-model="reason[row.id]" :placeholder="tr('填写处理理由', 'Reason for this decision')" :disabled="busy" /><el-button :disabled="busy" @click="compareSources(row)">{{ tr('查看变化', 'Compare') }}</el-button><el-button :disabled="busy || !reason[row.id]?.trim()" @click="decide(row, 'ACKNOWLEDGE')">{{ tr('确认变化', 'Acknowledge') }}</el-button><el-button :disabled="busy || !reason[row.id]?.trim()" @click="decide(row, 'REMODEL')">{{ tr('重新建模', 'Remodel') }}</el-button><el-button :disabled="busy || !reason[row.id]?.trim()" @click="decide(row, 'KEEP_HISTORICAL')">{{ tr('保留历史', 'Keep history') }}</el-button></div></template></el-table-column>
+          <el-table-column :label="tr('操作', 'Actions')" min-width="450"><template #default="{ row }"><div class="review-actions"><el-input v-model="reason[row.id]" :placeholder="tr('填写处理理由', 'Reason for this decision')" :disabled="busy" /><el-button :disabled="busy" @click="compareSources(row)">{{ tr('查看变化', 'Compare') }}</el-button><el-button :disabled="busy || !reason[row.id]?.trim()" @click="decide(row, 'ACKNOWLEDGE')">{{ tr('确认变化', 'Acknowledge') }}</el-button><el-button data-testid="remodel-source" :disabled="busy || row.sourceState !== 'CHANGED' || !row.observedDigest" @click="remodel(row)">{{ tr('重新建模', 'Remodel') }}</el-button><el-button :disabled="busy || !reason[row.id]?.trim()" @click="decide(row, 'KEEP_HISTORICAL')">{{ tr('保留历史', 'Keep history') }}</el-button><span v-if="row.sourceState === 'UNAVAILABLE'" class="field-help">{{ tr('当前资料不可访问，无法据此重新建模。', 'Unavailable material cannot start remodeling.') }}</span></div></template></el-table-column>
         </el-table>
       </div>
     </template>

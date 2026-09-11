@@ -38,6 +38,18 @@ public class SourceChangeController {
         return R.ok(service.items(scope, graphId, changeId));
     }
 
+    @GetMapping("/items/{itemId}/fact-revision") @RequireWorkspaceRole("admin")
+    public R<FactRevisionPreview> factRevision(@RequestHeader(value="X-Workspace-Id",required=false)String scope,
+            @PathVariable String graphId,@PathVariable String itemId) {
+        return R.ok(service.factRevision(scope,graphId,itemId));
+    }
+    @PostMapping("/items/{itemId}/fact-revision") @RequireWorkspaceRole("admin")
+    public R<vip.mate.semantic.web.StatementDtos.ChangeView> proposeFactRevision(
+            @RequestHeader(value="X-Workspace-Id",required=false)String scope,@PathVariable String graphId,
+            @PathVariable String itemId,@RequestBody FactRevisionRequest request) {
+        return R.ok(service.proposeFactRevision(scope,graphId,itemId,request));
+    }
+
     @PostMapping("/items/{itemId}/decision")
     @RequireWorkspaceRole("admin")
     public R<ReviewItem> decide(@RequestHeader(value = "X-Workspace-Id", required = false) String scope,

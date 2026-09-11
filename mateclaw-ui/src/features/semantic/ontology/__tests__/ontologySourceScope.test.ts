@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { createApp, h, nextTick, reactive, type App } from 'vue'
 import ElementPlus from 'element-plus'
 import OntologySourcePanel from '../components/OntologySourcePanel.vue'
+import { sourceIncrementalApi } from '../../api/sourceIncrementalApi'
 import { ontologyApi } from '../../api/ontologyApi'
 import { exactQuoteRange, sourceSelectionApi } from '../../api/sourceSelectionApi'
 import type { AxiomDescriptor } from '../../api/types'
@@ -10,6 +11,7 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string, fallback: string) => fallback ?? key, locale: { value: 'en-US' } }) }))
 vi.mock('@/api/index', () => ({ workspaceTeamApi: { getAccess: vi.fn() } }))
+vi.mock('../../api/sourceIncrementalApi', () => ({ sourceIncrementalApi: { modelTask: vi.fn() } }))
 vi.mock('../../api/ontologyApi', () => ({ ontologyApi: { axiomSources: vi.fn(), sourceReviews: vi.fn(), decideSourceReview: vi.fn(), bindAxiomSource: vi.fn(), sourceReviewSnapshots: vi.fn(), scanSourceReviews: vi.fn() } }))
 vi.mock('../../api/sourceSelectionApi', () => ({ sourceSelectionApi: { knowledgeBases: vi.fn().mockResolvedValue([]), materials: vi.fn().mockResolvedValue([]), material: vi.fn() }, exactQuoteRange: (text: string, quote: string) => { const value = quote.trim(); const start = text.indexOf(value); if (!value || start < 0) return null; const begin = [...text.slice(0, start)].length; return { startCodePoint: begin, endCodePoint: begin + [...value].length, exactQuote: value } } }))
 let app: App
@@ -17,9 +19,9 @@ const flushPromises = async () => { await new Promise(resolve => setTimeout(reso
 afterEach(() => { app?.unmount(); document.body.innerHTML = '' })
 const props: { ontologyId: string; revisionId: string; axioms: AxiomDescriptor[]; canManage: boolean; canReview: boolean; draftVersion?: number; focusedAxiomId?: string } = { ontologyId: 'ontology', revisionId: 'revision', axioms: [], canManage: false, canReview: false }
 beforeEach(() => { localStorage.clear(); localStorage.setItem('mc-workspace-id', 'old'); setActivePinia(createPinia()); vi.resetAllMocks() })
-function panel(overrides: Partial<typeof props> = {}) {
+function panel(overrides: Partial<typeof props> = {}, onModelingTask = vi.fn()) {
   const host = document.createElement('div'); document.body.append(host)
-  app = createApp(OntologySourcePanel, { ...props, ...overrides }); app.use(createPinia()).use(ElementPlus)
+  app = createApp(OntologySourcePanel, { ...props, ...overrides, onModelingTask }); app.use(createPinia()).use(ElementPlus)
   // Keep the same active store instance used by the component and test.
   useWorkspaceStore().currentWorkspaceId = 'old'; app.mount(host)
   return { host, text: () => host.textContent ?? '' }
@@ -161,4 +163,48 @@ it('shows the selected source text beside the exact excerpt field', async () => 
 it('rejects a missing excerpt and counts Unicode code points for a valid excerpt', () => {
   expect(exactQuoteRange('设备😀用于测量。', '不存在')).toBeNull()
   expect(exactQuoteRange('设备😀用于测量。', '😀')).toEqual({ startCodePoint: 2, endCodePoint: 3, exactQuote: '😀' })
+})
+
+async function pendingReview(sourceState = 'CHANGED', onModelingTask = vi.fn()) {
+  vi.mocked(ontologyApi.axiomSources).mockResolvedValue([])
+  vi.mocked(ontologyApi.sourceReviews).mockResolvedValue([{ id: 'review', bindingId: 'binding', sourceState, observedDigest: 'observed-v2', reviewState: 'PENDING' }] as never)
+  const wrapper = panel({ canReview: true }, onModelingTask)
+  await flushPromises()
+  wrapper.host.querySelector<HTMLButtonElement>('[data-testid="toggle-pending-reviews"]')!.click()
+  await flushPromises()
+  return wrapper
+}
+it('starts a real incremental task once and emits its ID instead of marking a review remodeled', async () => {
+  const selected = vi.fn()
+  let finish!: (value: never) => void
+  vi.mocked(sourceIncrementalApi.modelTask).mockImplementation(() => new Promise(resolve => { finish = resolve }))
+  const wrapper = await pendingReview('CHANGED', selected)
+  const input = wrapper.host.querySelector<HTMLInputElement>('input[placeholder="Reason for this decision"]')!
+  input.value = 'Check revised equipment definition'; input.dispatchEvent(new Event('input', { bubbles: true })); await nextTick()
+  const button = wrapper.host.querySelector<HTMLButtonElement>('[data-testid="remodel-source"]')!
+  button.click(); button.click(); await nextTick()
+  expect(sourceIncrementalApi.modelTask).toHaveBeenCalledTimes(1)
+  expect(vi.mocked(sourceIncrementalApi.modelTask).mock.calls[0]!.slice(0, 4)).toEqual(['old', 'ontology', 'review', { expectedObservedDigest: 'observed-v2', goal: 'Check revised equipment definition' }])
+  expect(ontologyApi.decideSourceReview).not.toHaveBeenCalled()
+  finish({ id: 'incremental-task' } as never); await flushPromises()
+  expect(selected).toHaveBeenCalledWith('incremental-task')
+})
+it('does not offer automatic remodeling for unavailable material', async () => {
+  const wrapper = await pendingReview('UNAVAILABLE')
+  const button = wrapper.host.querySelector<HTMLButtonElement>('[data-testid="remodel-source"]')!
+  expect(button.disabled).toBe(true); button.click(); await flushPromises()
+  expect(sourceIncrementalApi.modelTask).not.toHaveBeenCalled()
+  expect(wrapper.text()).toContain('Unavailable material cannot start remodeling.')
+  expect(wrapper.text()).toContain('Keep history')
+  expect(wrapper.text()).not.toContain('Remodeled')
+})
+it('ignores a late incremental task response after workspace switch', async () => {
+  const selected = vi.fn()
+  let finish!: (value: never) => void
+  vi.mocked(sourceIncrementalApi.modelTask).mockImplementation(() => new Promise(resolve => { finish = resolve }))
+  const wrapper = await pendingReview('CHANGED', selected)
+  wrapper.host.querySelector<HTMLButtonElement>('[data-testid="remodel-source"]')!.click()
+  useWorkspaceStore().currentWorkspaceId = 'new'; await flushPromises()
+  finish({ id: 'old-workspace-task' } as never); await flushPromises()
+  expect(selected).not.toHaveBeenCalled()
 })

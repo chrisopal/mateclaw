@@ -17,8 +17,77 @@ import vip.mate.semantic.support.SemanticHttpFixture;
 
 /** M7 source-change queue integration against isolated H2 data. */
 class SemanticSourceChangeIntegrationTest extends SemanticHttpFixture {
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+    vip.mate.semantic.source.SourceApplicationService sourceApplication;
     private record Fixture(String ontology, String revision, String graph, String kb, String raw,
             String snapshot, String evidence, String entity) {}
+
+    @Test
+    void changedFactPreparesOneHumanRevisionWithNewSnapshotEvidence()throws Exception {
+        var f=fixture("P-101 reading 380V");var fact=propose(f,"380",op(),200);accept(f,fact.path("id").asText(),1);
+        String text="P-101 reading 381V";
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",text,Long.valueOf(f.raw()));
+        call("POST","/graphs/"+f.graph()+"/source-changes/scan","member",workspace,Map.of("operationId",op(),"sourceKind","WIKI_RAW","sourceRef",f.raw()),200);
+        var items=call("GET","/graphs/"+f.graph()+"/source-changes","viewer",workspace,null,200);
+        var item=java.util.stream.StreamSupport.stream(items.spliterator(),false).filter(v->"FACT".equals(v.path("itemKind").asText())).findFirst().orElseThrow();
+        String path="/graphs/"+f.graph()+"/source-changes/items/"+item.path("id").asText()+"/fact-revision";
+        var preview=call("GET",path,"owner",workspace,null,200);
+        assertEquals("P-101 reading 380V",preview.path("original").path("text").asText());
+        assertEquals(text,preview.path("observed").path("text").asText());
+        call("GET",path,"member",workspace,null,403);call("GET",path,"owner",otherWorkspace,null,404);
+        var request=Map.of("expectedObservedDigest",item.path("newDigest").asText(),"expectedRevision",2,
+                "assertionText",content(f,"381").get("assertionText"),"validityKind","UNKNOWN","exactQuote",text,"startCodePoint",0,"endCodePoint",text.length());
+        var proposed=call("POST",path,"owner",workspace,request,200);
+        assertEquals("PENDING",proposed.path("status").asText());
+        assertEquals("381",proposed.path("assertion").path("literal").path("lexicalValue").asText());
+        assertEquals("urn:test:reading",proposed.path("assertion").path("predicateIri").asText());
+        assertEquals(proposed.path("assertion"),call("GET","/graphs/"+f.graph()+"/changes/"+proposed.path("id").asText(),"owner",workspace,null,200).path("assertion"));
+        assertEquals(proposed,call("POST",path,"owner",workspace,request,200));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_change_proposal WHERE graph_id=?",Integer.class,f.graph()));
+        assertEquals(2,jdbc.queryForObject("SELECT current_revision FROM mate_semantic_statement WHERE id=?",Integer.class,fact.path("id").asText()));
+        assertEquals(item.path("newSnapshotId").asText(),jdbc.queryForObject("SELECT snapshot_id FROM mate_semantic_evidence WHERE id=?",String.class,proposed.path("content").path("evidenceIds").get(0).asText()));
+        var reviewed=call("POST","/graphs/"+f.graph()+"/changes/"+proposed.path("id").asText()+"/review","owner",workspace,
+                Map.of("expectedRevision",2,"action","ACCEPT","reason","Checked changed source","operationId",op()),200);
+        assertEquals(proposed.path("assertion"),reviewed.path("assertion"));
+        assertEquals(3,jdbc.queryForObject("SELECT current_revision FROM mate_semantic_statement WHERE id=?",Integer.class,fact.path("id").asText()));
+        assertEquals(proposed.path("id"),call("POST",path,"owner",workspace,request,200).path("id"));
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=1 WHERE id=?",Long.valueOf(f.raw()));
+        call("GET",path,"owner",workspace,null,404);call("POST",path,"owner",workspace,request,404);
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=0 WHERE id=?",Long.valueOf(f.raw()));
+        jdbc.update("UPDATE mate_wiki_raw_material SET kb_id=? WHERE id=?",999999L,Long.valueOf(f.raw()));
+        call("GET",path,"owner",workspace,null,404);
+    }
+
+    @Test
+    void factRevisionHoldsSourceLockUntilProposalCommits()throws Exception {
+        var f=fixture("P-101 reading 380V");var fact=propose(f,"380",op(),200);accept(f,fact.path("id").asText(),1);
+        String text="P-101 reading 381V";
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",text,Long.valueOf(f.raw()));
+        call("POST","/graphs/"+f.graph()+"/source-changes/scan","member",workspace,Map.of("operationId",op(),"sourceKind","WIKI_RAW","sourceRef",f.raw()),200);
+        var items=call("GET","/graphs/"+f.graph()+"/source-changes","viewer",workspace,null,200);
+        var item=java.util.stream.StreamSupport.stream(items.spliterator(),false).filter(v->"FACT".equals(v.path("itemKind").asText())).findFirst().orElseThrow();
+        String path="/graphs/"+f.graph()+"/source-changes/items/"+item.path("id").asText()+"/fact-revision";
+        var request=Map.of("expectedObservedDigest",item.path("newDigest").asText(),"expectedRevision",2,
+                "assertionText",content(f,"381").get("assertionText"),"validityKind","UNKNOWN","exactQuote",text,"startCodePoint",0,"endCodePoint",text.length());
+        var started=new java.util.concurrent.CountDownLatch(1);
+        var writer=new java.util.concurrent.atomic.AtomicReference<java.util.concurrent.Future<Integer>>();
+        try(var executor=java.util.concurrent.Executors.newSingleThreadExecutor()) {
+            org.mockito.Mockito.doAnswer(invocation->{
+                writer.set(executor.submit(()->{
+                    started.countDown();
+                    return jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?","P-101 reading 382V",Long.valueOf(f.raw()));
+                }));
+                assertTrue(started.await(2,java.util.concurrent.TimeUnit.SECONDS));
+                assertThrows(java.util.concurrent.TimeoutException.class,()->writer.get().get(200,java.util.concurrent.TimeUnit.MILLISECONDS),
+                        "Concurrent source mutation must wait until the proposal transaction completes");
+                return invocation.callRealMethod();
+            }).when(sourceApplication).createEvidence(org.mockito.ArgumentMatchers.eq(workspace),org.mockito.ArgumentMatchers.eq(f.graph()),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.any());
+            call("POST",path,"owner",workspace,request,200);
+            assertEquals(1,writer.get().get(5,java.util.concurrent.TimeUnit.SECONDS));
+        }
+        call("POST",path,"owner",workspace,request,409);
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_semantic_change_proposal WHERE graph_id=?",Integer.class,f.graph()));
+    }
 
     @Test
     void resumeUsesFrozenBaselineAfterCapturedSnapshotSurvivesQueueFailure() throws Exception {
