@@ -142,12 +142,44 @@ public final class OntologyDtos {
 
     public record Violation(String code, String path, String message, String severity) {}
 
+    public record ValidationCheck(
+            String kind,
+            String status,
+            List<Violation> violations,
+            List<String> unsatisfiableClasses) {
+        public ValidationCheck {
+            violations = violations == null ? List.of() : List.copyOf(violations);
+            unsatisfiableClasses = unsatisfiableClasses == null ? List.of() : List.copyOf(unsatisfiableClasses);
+        }
+
+        public ValidationCheck(String kind, String status, List<Violation> violations) {
+            this(kind, status, violations, List.of());
+        }
+    }
+
     public record ValidationView(
             @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,
             boolean valid,
             List<Violation> violations,
             String profile,
-            String reasoningStatus) {}
+            String reasoningStatus,
+            String reportId,
+            String inputDigest,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) Instant checkedAt,
+            List<ValidationCheck> checks,
+            boolean stale) {
+        public ValidationView {
+            violations = violations == null ? List.of() : List.copyOf(violations);
+            checks = checks == null ? List.of() : List.copyOf(checks);
+        }
+
+        /** Compatibility constructor for callers that only understand the old structure result. */
+        public ValidationView(long draftVersion, boolean valid, List<Violation> violations,
+                String profile, String reasoningStatus) {
+            this(draftVersion, valid, violations, profile, reasoningStatus, null, null, null,
+                    List.of(new ValidationCheck("STRUCTURE", valid ? "PASS" : "FAIL", violations)), false);
+        }
+    }
 
     public record BusinessPolicyCheckView(
             @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,

@@ -11,6 +11,10 @@ public final class OntologySourceDtos {
     public record Binding(String id,String revisionId,String axiomId,String sourceSnapshotId,String knowledgeBaseId,
         String sourceRef,String sourceDigest,String exactQuote,int startCodePoint,int endCodePoint,String origin,
         String reviewState,String currentSourceState) {}
+    /** Current source state used by the unified ontology validation gate. */
+    public record ValidationState(String bindingId, String revisionId, String axiomId,
+        String sourceSnapshotId, String origin, String sourceDigest, String observedDigest,
+        String currentSourceState, String reviewState, String decision) {}
     public record Bound(@JsonSerialize(using=SemanticCounterSerializer.class) long draftVersion,Binding binding) {}
     public record ScanRequest(String operationId) {}
     public record Review(String id,String bindingId,String observedDigest,String sourceState,String reviewState,String decision,String reason,String observedSnapshotId) {}

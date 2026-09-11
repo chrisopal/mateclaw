@@ -29,6 +29,14 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         return Map.of("expectedDraftVersion",version,"operationId",operation,"axiomId",axiom,"knowledgeBaseId",f.kb(),"sourceRef",f.raw(),
             "expectedSourceDigest",OntologyDocument.sha256(f.text()),"startCodePoint",2,"endCodePoint",3,"exactQuote","😀","origin","EXTRACTED");
     }
+    private void acknowledgeCurrent(Fixture f) throws Exception {
+        var reviews=call("GET","/ontologies/"+f.ontology()+"/source-reviews","viewer",workspace,null,200);
+        for(var review:java.util.stream.StreamSupport.stream(reviews.spliterator(),false).toList()) {
+            if("CURRENT".equals(review.path("sourceState").asText()) && "PENDING".equals(review.path("reviewState").asText()))
+                call("POST","/ontologies/"+f.ontology()+"/source-reviews/"+review.path("id").asText()+"/decision","owner",workspace,
+                    Map.of("operationId",UUID.randomUUID().toString(),"expectedObservedDigest",review.path("observedDigest").asText(),"decision","ACKNOWLEDGE","reason","Test acknowledges current source"),200);
+        }
+    }
     @Test void resolvesEvidenceOnServerAndRequiresExplicitRepeatedOccurrence() throws Exception {
         var f=fixture();String text="😀设备定义。😀设备定义。";
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",text,Long.valueOf(f.raw()));
@@ -59,7 +67,7 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         assertEquals(first,call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,request,200));
         var second=call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,3,f.axioms().get(1),UUID.randomUUID().toString()),200);
         assertEquals(first.path("binding").path("sourceSnapshotId"),second.path("binding").path("sourceSnapshotId"));
-        var published=publish(f.ontology(),4,UUID.randomUUID().toString());
+        acknowledgeCurrent(f); var published=publish(f.ontology(),4,UUID.randomUUID().toString());
         var copied=call("POST","/ontologies/"+f.ontology()+"/draft","member",workspace,Map.of("baseRevisionId",f.draft()),200);
         var bindings=call("GET","/ontologies/"+f.ontology()+"/revisions/"+copied.path("id").asText()+"/axiom-sources","viewer",workspace,null,200);
         assertEquals(2,bindings.size());assertNotEquals(first.path("binding").path("id"),bindings.get(0).path("id"));
@@ -70,7 +78,7 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
     }
     @Test void changedAndDeletedSourcesRequireReviewWithoutRewritingPublishedAxioms() throws Exception {
         var f=fixture();call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,2,f.axioms().get(0),UUID.randomUUID().toString()),200);
-        var published=publish(f.ontology(),3,UUID.randomUUID().toString());
+        acknowledgeCurrent(f); var published=publish(f.ontology(),3,UUID.randomUUID().toString());
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?","修订后的定义",Long.valueOf(f.raw()));
         var command=Map.of("operationId",UUID.randomUUID().toString());
         var reviews=call("POST","/ontologies/"+f.ontology()+"/source-reviews/scan","member",workspace,command,200);
@@ -97,7 +105,7 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         var f=fixture();
         var first=call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,2,f.axioms().get(0),UUID.randomUUID().toString()),200);
         var second=call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,3,f.axioms().get(1),UUID.randomUUID().toString()),200);
-        var published=publish(f.ontology(),4,UUID.randomUUID().toString());
+        acknowledgeCurrent(f); var published=publish(f.ontology(),4,UUID.randomUUID().toString());
         Set<String> bindingIds=Set.of(first.path("binding").path("id").asText(),second.path("binding").path("id").asText());
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?","Both definitions changed",Long.valueOf(f.raw()));
         var command=Map.of("operationId",UUID.randomUUID().toString());
@@ -133,6 +141,7 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         var a=call("POST","/ontologies/"+first.ontology()+"/draft/axiom-sources","member",workspace,bind(first,2,first.axioms().get(0),UUID.randomUUID().toString()),200);
         var b=call("POST","/ontologies/"+second.ontology()+"/draft/axiom-sources","member",workspace,bind(second,2,second.axioms().get(0),UUID.randomUUID().toString()),200);
         assertEquals(a.path("binding").path("sourceSnapshotId"),b.path("binding").path("sourceSnapshotId"));
+        acknowledgeCurrent(first); acknowledgeCurrent(second);
         var publishedA=publish(first.ontology(),3,UUID.randomUUID().toString());
         var publishedB=publish(second.ontology(),3,UUID.randomUUID().toString());
         jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?","Shared updated source",Long.valueOf(first.raw()));
@@ -158,7 +167,7 @@ class OntologySourceReviewIntegrationTest extends SemanticHttpFixture {
         assertEquals(2,call("GET","/ontologies/"+f.ontology()+"/draft","member",workspace,null,200).path("draftVersion").asLong());
         call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","owner",otherWorkspace,wrong,404);
         var bound=call("POST","/ontologies/"+f.ontology()+"/draft/axiom-sources","member",workspace,bind(f,2,f.axioms().get(0),UUID.randomUUID().toString()),200);
-        publish(f.ontology(),3,UUID.randomUUID().toString());
+        acknowledgeCurrent(f); publish(f.ontology(),3,UUID.randomUUID().toString());
         String graph=call("PUT","/knowledge-bases/"+f.kb()+"/binding","owner",workspace,Map.of("action","ENABLE","revisionId",f.draft()),200).path("graphId").asText();
         Long agent=agentWithKnowledgeBase(f.kb());String actor=jdbc.queryForObject("SELECT user_id FROM mate_workspace_member WHERE workspace_id=? AND role='member' AND deleted=0",String.class,Long.valueOf(workspace));
         String binding=bound.path("binding").path("id").asText();

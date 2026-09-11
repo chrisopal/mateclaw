@@ -250,6 +250,8 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
         draft(second);
         save(first, 1);
         save(second, 1);
+        checkPassed(first, 2);
+        checkPassed(second, 2);
         String op = "shared-" + UUID.randomUUID();
         var barrier = new CyclicBarrier(2);
         try (var pool = Executors.newFixedThreadPool(2)) {
@@ -351,6 +353,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                         200);
         long secondVersion =
                 save(id, secondDraft.path("draftVersion").asLong()).path("draftVersion").asLong();
+        checkPassed(id, secondVersion);
         String op = "rollback-" + UUID.randomUUID();
         org.mockito.Mockito.doThrow(new IllegalStateException("test governance fault"))
                 .when(governance)
@@ -438,7 +441,7 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                                 "owner",
                                 workspace,
                                 publishBody(2, "bad-ref"),
-                                422)
+                                409)
                         .path("fieldErrors")
                         .isEmpty());
     }
@@ -580,13 +583,14 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
             assertEquals(List.of(200, 409), codes);
         }
         save(id, 1);
+        checkPassed(id, 2);
         String op = "concurrent-" + UUID.randomUUID();
         barrier.reset();
         try (var pool = Executors.newFixedThreadPool(2)) {
             Callable<com.fasterxml.jackson.databind.JsonNode> publish =
                     () -> {
                         barrier.await();
-                        return publish(id, 2, op);
+                        return call("POST", "/ontologies/" + id + "/draft/publish", "owner", workspace, publishBody(2, op), 200);
                     };
             var a = pool.submit(publish);
             var b = pool.submit(publish);
@@ -692,4 +696,9 @@ class SemanticOntologyIntegrationTest extends SemanticHttpFixture {
                         Integer.class,
                         id));
     }
+    private void checkPassed(String ontology, long version) throws Exception {
+        assertTrue(call("POST", "/ontologies/" + ontology + "/draft/validate", "member", workspace,
+                Map.of("expectedDraftVersion", version), 200).path("valid").asBoolean());
+    }
+
 }

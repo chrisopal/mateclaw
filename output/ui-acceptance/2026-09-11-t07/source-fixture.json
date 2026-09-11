@@ -1,0 +1,22 @@
+{
+  "knowledgeBaseId": "2098258290635165697",
+  "sourceRef": "2098258290689691650",
+  "bound": {
+    "draftVersion": 3,
+    "binding": {
+      "id": "f95c5d1e-2ad7-4626-9d0e-d39637a6f946",
+      "revisionId": "2098255446351794177",
+      "axiomId": "6be0e5a1dc3cd3820ca247fa6fb7d42206d64e68d3c8f8f209a1db7d0a1d82a3",
+      "sourceSnapshotId": "be3d3aad-ab65-456b-98a2-72eb7bb26999",
+      "knowledgeBaseId": "2098258290635165697",
+      "sourceRef": "2098258290689691650",
+      "sourceDigest": "45f12b3f0f91e2fcc5dbe3d2a4e92e42b88e78bdb2b75a5b52e014e81ca2eba7",
+      "exactQuote": "传感器是一种设备。",
+      "startCodePoint": 0,
+      "endCodePoint": 9,
+      "origin": "EXPERT",
+      "reviewState": "PENDING",
+      "currentSourceState": "CURRENT"
+    }
+  }
+}

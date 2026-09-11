@@ -1,3 +1,4 @@
+import { requiredChecks } from '../validationReport'
 import { afterEach, beforeEach, it, expect, vi } from 'vitest'
 import { createApp, nextTick, type App, type Component } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
@@ -24,6 +25,7 @@ vi.mock('../../api/ontologyApi', () => ({
     get: vi.fn(),
     revisions: vi.fn(),
     getDraft: vi.fn(),
+    latestValidation: vi.fn().mockResolvedValue(null),
     saveDraft: vi.fn(),
     validate: vi.fn(),
     publish: vi.fn(),
@@ -111,8 +113,8 @@ it('edits real draft state through an Element Plus input and keeps it after a 40
 })
 it('locks editor and exposes recovery after uncertain publication', async () => {
   await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
-  vi.mocked(ontologyApi.validate).mockResolvedValue({ draftVersion: 25, valid: true, violations: [] })
-  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Structural checks'))!.click()
+  vi.mocked(ontologyApi.validate).mockResolvedValue({ draftVersion: 25, valid: true, violations: [], reportId:'report',inputDigest:'digest',stale:false,checks:requiredChecks.map(kind=>({kind,status:'PASS',violations:[]})) })
+  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Run checks'))!.click()
   await flush()
   vi.mocked(ontologyApi.diff).mockResolvedValue({
     fromRevisionId: null,
@@ -242,4 +244,14 @@ it('opens task deep links in a separate suggestions tab and returns to the model
   expect((host.querySelector('.editor-suggestions') as HTMLElement).style.display).toBe('none')
   expect(host.querySelector('.editor-design')).not.toBeNull()
   expect(ontologyApi.getDraft).toHaveBeenCalledTimes(2)
+})
+
+it('shows a business-friendly transport failure and keeps publication locked', async () => {
+  vi.mocked(ontologyApi.validate).mockRejectedValueOnce(new Error('timeout of 120000ms exceeded'))
+  await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
+  ;[...host.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Run checks')!.click()
+  await flush()
+  expect(host.textContent).toContain('The request did not complete. Check your connection and try again.')
+  expect(host.textContent).not.toContain('120000ms')
+  expect([...host.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Publish version')?.disabled).toBe(true)
 })

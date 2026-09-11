@@ -31,7 +31,11 @@ export interface AxiomEdit { kind: 'ADD' | 'REMOVE'; axiomId?: string; functiona
 export interface EditDraft { expectedDraftVersion: number; changes: AxiomEdit[]; operationId: string }
 export interface PublishDraft { expectedDraftVersion: number; operationId: string; note: string }
 export interface Violation { code: string; path: string; message: string; severity?: string }
-export interface ValidationReport { draftVersion: number; valid: boolean; violations: Violation[]; profile?: string; reasoningStatus?: string }
+export interface ValidationCheck { kind: string; status: string; violations: Violation[]; unsatisfiableClasses?: string[] }
+export interface ValidationReport {
+  draftVersion: number; valid: boolean; violations: Violation[]; profile?: string; reasoningStatus?: string
+  reportId?: string; inputDigest?: string; checkedAt?: string; stale?: boolean; checks?: ValidationCheck[]
+}
 /** Result of the bounded logical consistency worker for one saved draft. */
 export interface LogicalConsistencyReport {
   draftVersion: number

@@ -11,7 +11,6 @@ import { useOntologyDraft } from './useOntologyDraft'
 import ModelingTaskPanel from './components/ModelingTaskPanel.vue'
 import ModelingTaskCreate from './components/ModelingTaskCreate.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
-import LogicalConsistencyPanel from './components/LogicalConsistencyPanel.vue'
 import PublishDialog from './components/PublishDialog.vue'
 import OntologySourcePanel from './components/OntologySourcePanel.vue'
 import OntologyModelWorkbench from './components/OntologyModelWorkbench.vue'
@@ -24,6 +23,12 @@ const ontologyId = () => String(route.params.id); const workspaceId = () => work
 const draft = useOntologyDraft(ontologyId, workspaceId, undefined, () => workspace.can('manage:ontology'))
 const { document, axioms, name, description, id, dirty, busy, version, draftVersion, validationReport, saveError, canPublish, publicationPending, editPending } = draft
 const { data: projectionData, loading: projectionLoading, error: projectionError, reload: reloadProjection } = useOntologyProjection(()=>({workspaceId:workspaceId(),ontologyId:ontologyId(),revisionId:id.value || '',draftVersion:draftVersion.value}))
+const requestError = computed(() => {
+ const code=saveError.value?.code
+ if (saveError.value?.status === 0) return tr('请求未完成，请检查连接后重试。', 'The request did not complete. Check your connection and try again.')
+ const labels:Record<string,[string,string]>={VALIDATION_REQUIRED:['请先运行完整检查。','Run the complete checks first.'],VALIDATION_STALE:['模型或资料已变化，请重新检查。','The model or references changed. Run checks again.'],VALIDATION_FAILED:['仍有检查未通过，请处理后重新检查。','Some checks have not passed. Resolve the issues and run checks again.'],REASONING_DISABLED:['当前环境未启用逻辑检查。','Logical checking is disabled in this environment.']}
+ return code&&labels[code]?tr(...labels[code]):saveError.value?.message||t(`semantic.errors.${code}`,t('semantic.requestFailed'))
+})
 const modelingOpen=ref(false)
 function selectTask(taskId:string){area.value='suggestions';void router.replace({query:{...route.query,taskId}})}
 async function taskChanged(decision: 'ACCEPT' | 'REJECT'){await draft.load();await reloadProjection();if(decision==='ACCEPT')area.value='model'}
@@ -40,6 +45,7 @@ const businessPolicyPending = ref(false)
 const businessPolicyDirty = ref(false)
 async function businessPolicySaved() { await draft.load(); await reloadProjection() }
 function navigateArea(next: 'model'|'suggestions'|'policy'|'sources'|'publish') { if (businessPolicyPending.value || businessPolicyDirty.value) { ElMessage.warning(tr('请先保存业务规则，再离开当前编辑。','Save business rules before leaving this edit.')); return } area.value = next }
+function locateValidation(path:string) { const value=path.toLowerCase(); if(value.includes('source')||value.includes('binding'))area.value='sources';else if(value.includes('rule')||value.includes('policy'))area.value='policy';else {area.value='model';tab.value='axioms'} }
 async function checkModel(){area.value='publish';await draft.validate()}
 async function mainAction(){if(dirty.value)await draft.save();else if(canPublish.value&&workspace.can('publish:ontology'))publishOpen.value=true;else await checkModel()}
 async function importFile(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file||!document.value)return;importing.value=true;try{const text=await file.text();if(!text.trim())throw Error(tr('文件内容为空','Empty document'));document.value={...document.value,syntax:/^\s*(?:Prefix|Ontology)\s*\(/.test(text)?'FUNCTIONAL':'RDF_XML',documentText:text};toolsOpen.value=false;tab.value='model';area.value='model';ElMessage.success(tr('已载入文件，请保存并检查模型。','Document loaded. Save and check the model.'))}catch(e){ElMessage.error((e as Error).message)}finally{importing.value=false;(event.target as HTMLInputElement).value=''}}
@@ -85,13 +91,13 @@ onMounted(draft.load)
   <div class="editor-heading"><el-button link :disabled="businessPolicyPending||businessPolicyDirty" @click="router.push({name:'OntologyList'})">← {{tr('本体管理','Ontologies')}}</el-button><h1>{{name||tr('业务模型','Business model')}}</h1><span class="semantic-muted">v{{version}} · {{tr(unsaved?'未保存':'已保存',unsaved?'Unsaved':'Saved')}}</span></div>
    <div class="editor-actions"><el-button v-if="editable" :disabled="busy||dirty||editPending||businessPolicyPending||businessPolicyDirty" @click="modelingOpen=true">开始建模</el-button>
     <el-dropdown trigger="click" :disabled="businessPolicyPending||businessPolicyDirty" @command="more"><el-button :disabled="businessPolicyPending||businessPolicyDirty">{{tr('更多','More')}} ▾</el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="metadata">{{tr('基本信息','Basic information')}}</el-dropdown-item><el-dropdown-item command="history">{{t('semantic.history')}}</el-dropdown-item><el-dropdown-item command="exchange">{{tr('OWL 导入与导出','OWL import and export')}}</el-dropdown-item><el-dropdown-item v-if="editable&&id" command="discard" divided :disabled="busy||editPending||businessPolicyPending||businessPolicyDirty">{{t('semantic.discard')}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
-    <el-button v-if="editable&&id" type="primary" :loading="busy" :disabled="editPending||businessPolicyPending||businessPolicyDirty" @click="mainAction">{{dirty?t('semantic.save'):canPublish&&workspace.can('publish:ontology')?t('semantic.publish'):tr('结构检查','Structural checks')}}</el-button>
+    <el-button v-if="editable&&id" type="primary" :loading="busy" :disabled="editPending||businessPolicyPending||businessPolicyDirty" @click="mainAction">{{dirty?t('semantic.save'):canPublish&&workspace.can('publish:ontology')?t('semantic.publish'):tr('运行检查','Run checks')}}</el-button>
    </div>
   </header>
   <el-alert v-if="editPending&&!busy" type="warning" :title="tr('上次保存结果待确认，请先恢复保存。','Recover the previous save before continuing.')" :closable="false"/><el-button v-if="editPending" :loading="busy" @click="draft.retryEdit">{{tr('恢复保存','Recover save')}}</el-button>
   <el-alert v-if="publicationPending" type="warning" :title="t('semantic.pendingPublication')" :closable="false"/><el-button v-if="publicationPending" :loading="busy" @click="publish('')">{{t('semantic.recoverPublication')}}</el-button>
   <el-alert v-if="!editable&&!publicationPending" type="info" :title="t('semantic.readonly')" :closable="false"/>
-  <el-alert v-if="saveError" type="error" :title="saveError.message||t(`semantic.errors.${saveError.code}`,t('semantic.requestFailed'))" :closable="false"/>
+  <el-alert v-if="saveError" type="error" :title="requestError" :closable="false"/>
   <nav class="editor-navigation" :aria-label="tr('模型工作区','Model workspace')"><button v-for="item in ([['model',tr('业务模型','Business model')],['suggestions',tr('建模建议','Modeling suggestions')],['policy',tr('业务规则','Business rules')],['sources',tr('参考资料','References')],['publish',tr('检查发布','Check and publish')]] as const)" :key="item[0]" type="button" :disabled="businessPolicyPending" :aria-current="area===item[0]?'page':undefined" :class="{active:area===item[0]}" @click="navigateArea(item[0])">{{item[1]}}</button></nav>
   <div v-if="document" v-loading="busy" class="editor-workspace">
    <ModelingTaskCreate v-model="modelingOpen" :ontology-id="ontologyId()" @created="selectTask"/>
@@ -112,15 +118,14 @@ onMounted(draft.load)
    <section v-show="area==='publish'" class="editor-release">
     <h2>{{tr('发布前检查','Before publishing')}}</h2>
     <div class="editor-check-row"><div><strong>{{tr('保存修改','Save changes')}}</strong><p>{{tr(dirty?'还有未保存的修改':'当前修改已保存',dirty?'Unsaved changes remain':'Changes are saved')}}</p></div><el-button v-if="dirty" :disabled="busy||!editable" @click="draft.save">{{t('semantic.save')}}</el-button></div>
-    <div class="editor-check-row"><div><strong>{{tr('结构检查','Structural checks')}}</strong><p>{{validationReport?.valid&&!dirty?tr('结构检查通过','Structural checks passed'):tr('检查模型结构','Check model structure')}}</p></div><el-button :disabled="dirty||busy||editPending||!editable" @click="draft.validate">{{tr('重新检查','Run checks')}}</el-button></div>
-    <ValidationPanel v-if="validationReport" :report="validationReport" :dirty="dirty" @locate="area='model';tab='axioms'"/>
-    <LogicalConsistencyPanel :ontology-id="ontologyId()" :draft-version="draftVersion" :dirty="dirty" :projection="projectionData?.projection" :editable="editable&&!!id" :disabled="busy||editPending||businessPolicyPending||businessPolicyDirty" />
+    <div class="editor-check-row"><div><strong>{{tr('检查模型','Check model')}}</strong><p>{{tr('检查当前已保存的模型和资料。','Check the saved model and references.')}}</p></div><el-button :loading="busy" :disabled="dirty||busy||editPending||!editable||businessPolicyPending||businessPolicyDirty" @click="draft.validate">{{tr('运行检查','Run checks')}}</el-button></div>
+    <ValidationPanel :report="validationReport" :dirty="dirty" :projection="projectionData?.projection" @locate="locateValidation"/>
     <div class="editor-check-row"><div><strong>{{tr('发布版本','Publish version')}}</strong><p>{{tr('通过检查后填写发布说明。','Add release notes after checks pass.')}}</p></div><el-button v-if="workspace.can('publish:ontology')" :disabled="!canPublish" @click="publishOpen=true">{{t('semantic.publish')}}</el-button></div>
    </section>
   </div>
   <el-dialog v-model="metadataOpen" :title="tr('基本信息','Basic information')" width="min(560px,94vw)"><el-form label-position="top" :disabled="!editable||busy||editPending"><el-form-item :label="t('semantic.name')"><el-input id="ontology-name" v-model="name" maxlength="128"/></el-form-item><el-form-item :label="t('semantic.description')"><el-input id="ontology-description" v-model="description" type="textarea" :rows="3"/></el-form-item></el-form><template #footer><el-button @click="metadataOpen=false">{{tr('完成','Done')}}</el-button></template></el-dialog>
   <el-dialog v-model="toolsOpen" :title="tr('OWL 导入与导出','OWL import and export')" width="min(560px,94vw)"><div class="editor-exchange"><label>{{tr('导入模型文件','Import model file')}}<input ref="importInput" type="file" accept=".ofn,.fss,.owl,.rdf,.xml" :disabled="!editable||busy||editPending||importing" @change="importFile"/></label><div><strong>{{tr('导出当前模型','Export current model')}}</strong><div class="editor-exchange-actions"><el-button :disabled="!id||dirty||busy" @click="exportRevision('FUNCTIONAL')">OWL Functional</el-button><el-button :disabled="!id||dirty||busy" @click="exportRevision('RDF_XML')">OWL RDF/XML</el-button></div></div><details><summary>{{tr('高级维护','Advanced maintenance')}}</summary><el-button link @click="area='model';tab='editor';toolsOpen=false">{{tr('编辑 OWL 文档','Edit OWL document')}}</el-button><el-button link @click="area='model';tab='axioms';toolsOpen=false">{{tr('查看底层规则','Inspect underlying rules')}}</el-button></details></div></el-dialog>
-  <PublishDialog v-if="publishOpen" v-model="publishOpen" :busy="busy" :diff="null" @publish="publish"/>
+  <PublishDialog v-if="publishOpen" v-model="publishOpen" :busy="busy" :diff="null" :ready="canPublish" :error="saveError?requestError:undefined" @publish="publish"/>
  </section>
 </template>
 <style scoped>

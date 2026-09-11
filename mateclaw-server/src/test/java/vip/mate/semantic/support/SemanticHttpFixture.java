@@ -282,6 +282,17 @@ public abstract class SemanticHttpFixture {
     }
 
     protected JsonNode publish(String id, long version, String op) throws Exception {
+        // Replay is authorized and resolved before draft/report lookup. Probe publication first
+        // so a retry after a consumed draft still returns its recorded result. A first attempt
+        // requiring validation falls through to the real complete-report path.
+        var first = request("POST", "/ontologies/" + id + "/draft/publish", "owner", workspace,
+                publishBody(version, op));
+        if (first.getStatus() == 200)
+            return json.readTree(first.getContentAsString()).path("data");
+        assertEquals(409, first.getStatus(), first.getContentAsString());
+        assertTrue(java.util.Set.of("VALIDATION_REQUIRED", "VALIDATION_STALE").contains(json.readTree(first.getContentAsString()).path("data").path("code").asText()), first.getContentAsString());
+        call("POST", "/ontologies/" + id + "/draft/validate", "member", workspace,
+                Map.of("expectedDraftVersion", version), 200);
         return call(
                 "POST",
                 "/ontologies/" + id + "/draft/publish",

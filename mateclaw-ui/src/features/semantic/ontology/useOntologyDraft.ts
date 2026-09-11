@@ -1,3 +1,4 @@
+import { isPublicationReport } from './validationReport'
 import type { ModelChange, ModelEdit } from './businessModel'
 import { computed, onScopeDispose, ref, watch } from 'vue'
 import { ontologyApi, type OntologyApi } from '../api/ontologyApi'
@@ -25,7 +26,7 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
   const dirty = computed(() => id.value !== null && snapshot() !== saved.value)
   const publicationPending = computed(() => pendingPublication.value !== null)
   const editPending = computed(() => pendingEdit.value !== null)
-  const canPublish = computed(() => !!id.value && !dirty.value && !busy.value && !publicationPending.value && !editPending.value && validationReport.value?.valid === true && validationReport.value.draftVersion === draftVersion.value)
+  const canPublish = computed(() => !!id.value && !dirty.value && !busy.value && !publicationPending.value && !editPending.value && isPublicationReport(validationReport.value, draftVersion.value))
   let generation = 0
   let controller: AbortController | null = null
   function cancel() { generation++; controller?.abort(); controller = null; busy.value = false }
@@ -35,7 +36,7 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
   function apply(value: Draft) { id.value = value.id; baseRevisionId.value = value.baseRevisionId; draftVersion.value = value.draftVersion; version.value = value.version; name.value = value.name; description.value = value.description; document.value = clone(value.document.source); axioms.value = clone(value.document.axioms); saved.value = snapshot(); validationReport.value = null }
   function failure(c: Context, error: unknown) { if (current(c)) saveError.value = semanticError(error) }
   function finish(c: Context) { if (current(c)) busy.value = false }
-  async function load() { if (publicationPending.value || editPending.value) return false; const c = context(); try { const value = await api.getDraft(c.ws, c.ontology, c.signal); if (current(c)) { apply(value); return true } } catch (error) { failure(c, error) } finally { finish(c) } return false }
+  async function load() { if (publicationPending.value || editPending.value) return false; const c = context(); try { const value = await api.getDraft(c.ws, c.ontology, c.signal); if (current(c)) { apply(value); const report = await api.latestValidation(c.ws, c.ontology, c.signal); if (current(c) && !dirty.value) validationReport.value = report; return current(c) } } catch (error) { failure(c, error) } finally { finish(c) } return false }
   async function save() {
     if (!id.value || !document.value || busy.value || publicationPending.value || editPending.value) return false
     const c = context(); const sent = snapshot()
@@ -79,11 +80,11 @@ export function useOntologyDraft(ontologyId: () => string, workspaceId: () => st
     if (!pending || busy.value || !canEdit() || pending.scope !== workspaceId() || pending.ontology !== ontologyId()) return false
     return runEdit(pending, true)
   }
-  async function validate() { if (dirty.value || !id.value || busy.value || publicationPending.value || editPending.value) return false; const c = context(); const sent = snapshot(); try { const report = await api.validate(c.ws, c.ontology, draftVersion.value, c.signal); if (current(c) && snapshot() === sent && report.draftVersion === draftVersion.value) { validationReport.value = report; return report.valid } } catch (error) { failure(c, error) } finally { finish(c) } return false }
+  async function validate() { if (dirty.value || !id.value || busy.value || publicationPending.value || editPending.value) return false; const c = context(); validationReport.value = null; const sent = snapshot(); try { const report = await api.validate(c.ws, c.ontology, draftVersion.value, c.signal); if (current(c) && snapshot() === sent && report.draftVersion === draftVersion.value) { validationReport.value = report; return isPublicationReport(report, draftVersion.value) } } catch (error) { failure(c, error) } finally { finish(c) } return false }
   async function publish(note: string): Promise<Revision | null> {
     if ((!publicationPending.value && (!canPublish.value || !note.trim())) || busy.value || editPending.value) return null
     const c = context(); pendingPublication.value ??= { scope: c.ws, ontology: c.ontology, body: { expectedDraftVersion: draftVersion.value, operationId: crypto.randomUUID(), note: note.trim() } }; const pending = pendingPublication.value
-    try { let revision: Revision; try { revision = await api.publish(c.ws, c.ontology, pending.body, c.signal) } catch (error) { const failure = semanticError(error); if (failure.status && failure.status < 500) { if (current(c)) pendingPublication.value = null; throw error } revision = (await api.operation(c.ws, pending.body.operationId, c.signal)).result }
+    try { let revision: Revision; try { revision = await api.publish(c.ws, c.ontology, pending.body, c.signal) } catch (error) { const failure = semanticError(error); if (failure.status && failure.status < 500) { if (current(c)) { pendingPublication.value = null; validationReport.value = null }; throw error } revision = (await api.operation(c.ws, pending.body.operationId, c.signal)).result }
       if (current(c)) { pendingPublication.value = null; id.value = null; saved.value = snapshot(); validationReport.value = null; return revision }
     } catch (error) { failure(c, error) } finally { finish(c) }
     return null

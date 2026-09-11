@@ -156,3 +156,9 @@ it('exports the raw binary body after the global response interceptor unwraps it
     expect(urls).toEqual(['/semantic/ontologies/ontology/draft/document', '/semantic/ontologies/ontology/revisions/revision/document'])
   } finally { http.defaults.adapter = previous }
 })
+
+it('loads persisted checks and gives the unified worker a bounded long request window',async()=>{
+ const previous=http.defaults.adapter;const calls:string[]=[]
+ http.defaults.adapter=async config=>{calls.push(config.url!);expect(config.headers.get('X-Workspace-Id')).toBe('ws');if(config.method==='post')expect(config.timeout).toBe(120000);return {data:{code:200,data:null},status:200,statusText:'OK',headers:{},config}}
+ try{await ontologyApi.latestValidation('ws','ontology');await ontologyApi.validate('ws','ontology',2);expect(calls).toEqual(['/semantic/ontologies/ontology/draft/validation','/semantic/ontologies/ontology/draft/validate'])}finally{http.defaults.adapter=previous}
+})

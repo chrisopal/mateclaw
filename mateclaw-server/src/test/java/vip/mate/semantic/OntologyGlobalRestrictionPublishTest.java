@@ -31,8 +31,11 @@ class OntologyGlobalRestrictionPublishTest extends SemanticHttpFixture {
             saveBody(next.path("draftVersion").asLong(),owlDocument(text)),200);
         var before=call("GET","/ontologies/"+id+"/draft","viewer",workspace,null,200);
         var history=call("GET","/ontologies/"+id+"/revisions","viewer",workspace,null,200);
+        var report=call("POST","/ontologies/"+id+"/draft/validate","member",workspace,
+            Map.of("expectedDraftVersion",saved.path("draftVersion").asLong()),200);
+        assertFalse(report.path("valid").asBoolean());
         call("POST","/ontologies/"+id+"/draft/publish","owner",workspace,
-            publishBody(saved.path("draftVersion").asLong(),UUID.randomUUID().toString()),422);
+            publishBody(saved.path("draftVersion").asLong(),UUID.randomUUID().toString()),409);
         assertEquals(before,call("GET","/ontologies/"+id+"/draft","viewer",workspace,null,200));
         assertEquals(history,call("GET","/ontologies/"+id+"/revisions","viewer",workspace,null,200));
         assertEquals(original,call("GET","/ontologies/"+id+"/revisions/"+original.path("id").asText(),"viewer",workspace,null,200));

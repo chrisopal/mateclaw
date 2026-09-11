@@ -37,3 +37,12 @@ it('translates known validation codes and retains unknown server messages', asyn
     host.remove()
   }
 })
+
+it('does not label a legacy structural success as publication ready', async () => {
+ const host=document.createElement('div');document.body.append(host)
+ const app=createApp(ValidationPanel,{dirty:false,report:{draftVersion:1,valid:true,violations:[]}})
+ app.use(ElementPlus).use(createI18n({legacy:false,locale:'zh-CN',messages:{'zh-CN':zh}})).mount(host)
+ await nextTick()
+ try {expect(host.textContent).not.toContain('检查通过，可以发布');expect(host.textContent).toContain('模型结构');expect(host.textContent).toContain('模型逻辑');expect(host.textContent).toContain('参考资料');expect(host.textContent).toContain('未完成')}
+ finally {app.unmount();host.remove()}
+})

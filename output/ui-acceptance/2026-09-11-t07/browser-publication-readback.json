@@ -1,0 +1,85 @@
+[
+  {
+    "id": "2098255446351794177",
+    "ontologyId": "2098255446330822657",
+    "version": 1,
+    "name": "正常设备模型 · T07 验收",
+    "description": "T07 synthetic consistent",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Ontology(<urn:t07:consistent> Declaration(Class(<urn:t07:Equipment>)) Declaration(Class(<urn:t07:Sensor>)) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t07:Equipment> \"设备\"@zh-CN) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t07:Sensor> \"传感器\"@zh-CN) SubClassOf(<urn:t07:Sensor> <urn:t07:Equipment>))",
+        "imports": [],
+        "policy": {
+          "version": "t07-qa",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:t07:consistent",
+      "versionIri": null,
+      "documentDigest": "a4efa4252bf28cef5b3da307c7df7fc20aa67274156539e0063da99b596a8c54",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "e0596432a70aa66e1e32a5c458a8af00def3fef0ddd00c27fe9e17f1d41492a6",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:t07:Equipment> \"设备\"@zh-cn)",
+          "signatureIris": [
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+            "http://www.w3.org/2000/01/rdf-schema#label"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "e61e8ccc4e74778d6eece2cd3e627afce52d0076a86137e75cdb4b97f1906940",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:t07:Sensor> \"传感器\"@zh-cn)",
+          "signatureIris": [
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+            "http://www.w3.org/2000/01/rdf-schema#label"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "e5c05fefc8ee60f2fb8ff198121564e6bc892d46ed38bc38e22b7dd02bddceb8",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:t07:Equipment>))",
+          "signatureIris": [
+            "urn:t07:Equipment"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "02c146c802c654d42e3f67c1fcac3cc30b915d8833d442cdfb6564dfef2871df",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:t07:Sensor>))",
+          "signatureIris": [
+            "urn:t07:Sensor"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "6be0e5a1dc3cd3820ca247fa6fb7d42206d64e68d3c8f8f209a1db7d0a1d82a3",
+          "axiomType": "SubClassOf",
+          "rendering": "SubClassOf(<urn:t07:Sensor> <urn:t07:Equipment>)",
+          "signatureIris": [
+            "urn:t07:Equipment",
+            "urn:t07:Sensor"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-11T04:13:08.288903Z",
+    "publishedBy": "1",
+    "publicationNote": "T07 完整检查及资料确认后发布",
+    "baseRevisionId": null
+  }
+]

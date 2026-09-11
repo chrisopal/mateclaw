@@ -1,0 +1,228 @@
+{
+  "consistent": {
+    "report": {
+      "draftVersion": 4,
+      "valid": true,
+      "violations": [],
+      "profile": "OWL 2 DL",
+      "reasoningStatus": "CONSISTENT",
+      "reportId": "e2373a92-1e96-402d-bf8e-6e647406f756",
+      "inputDigest": "046767d12cfb369212323f8ff128e56a7a1fe391f6fe25aaa7fb412a29d9ddcb",
+      "checkedAt": "2026-09-11T04:10:58.116369Z",
+      "checks": [
+        {
+          "kind": "STRUCTURE",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "LOGIC",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "POLICY",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "SOURCES",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        }
+      ],
+      "stale": false
+    },
+    "publishRejected": null
+  },
+  "unsatisfiable": {
+    "report": {
+      "draftVersion": 2,
+      "valid": false,
+      "violations": [
+        {
+          "code": "LOGIC_UNSATISFIABLE",
+          "path": "Draft is consistent but contains unsatisfiable classes",
+          "message": "LOGIC_UNSATISFIABLE",
+          "severity": "ERROR"
+        }
+      ],
+      "profile": "OWL 2 DL",
+      "reasoningStatus": "UNSATISFIABLE",
+      "reportId": "45fb6f96-1826-438e-9653-37e33da5798d",
+      "inputDigest": "5f35dce336ede060dd2e2407da879f8a4b969294e5ccc70dc9e740183f46a6e6",
+      "checkedAt": "2026-09-11T04:11:00.839507Z",
+      "checks": [
+        {
+          "kind": "STRUCTURE",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "LOGIC",
+          "status": "FAIL",
+          "violations": [
+            {
+              "code": "LOGIC_UNSATISFIABLE",
+              "path": "Draft is consistent but contains unsatisfiable classes",
+              "message": "LOGIC_UNSATISFIABLE",
+              "severity": "ERROR"
+            }
+          ],
+          "unsatisfiableClasses": [
+            "urn:t07:Sensor"
+          ]
+        },
+        {
+          "kind": "POLICY",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "SOURCES",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        }
+      ],
+      "stale": false
+    },
+    "publishRejected": {
+      "status": 409,
+      "code": "VALIDATION_FAILED"
+    }
+  },
+  "inconsistent": {
+    "report": {
+      "draftVersion": 2,
+      "valid": false,
+      "violations": [
+        {
+          "code": "LOGIC_INCONSISTENT",
+          "path": "explicit top-bottom contradiction in SubClassOf",
+          "message": "LOGIC_INCONSISTENT",
+          "severity": "ERROR"
+        }
+      ],
+      "profile": "OWL 2 DL",
+      "reasoningStatus": "INCONSISTENT",
+      "reportId": "63573639-69e6-4212-b046-0f44bc51792f",
+      "inputDigest": "8f935cc18fd0279bdf69b397f599cbd0ff71493ecd769cb5c27051ddfe1ab543",
+      "checkedAt": "2026-09-11T04:11:03.409037Z",
+      "checks": [
+        {
+          "kind": "STRUCTURE",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "LOGIC",
+          "status": "FAIL",
+          "violations": [
+            {
+              "code": "LOGIC_INCONSISTENT",
+              "path": "explicit top-bottom contradiction in SubClassOf",
+              "message": "LOGIC_INCONSISTENT",
+              "severity": "ERROR"
+            }
+          ],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "POLICY",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "SOURCES",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        }
+      ],
+      "stale": false
+    },
+    "publishRejected": {
+      "status": 409,
+      "code": "VALIDATION_FAILED"
+    }
+  },
+  "abox": {
+    "report": {
+      "draftVersion": 2,
+      "valid": false,
+      "violations": [
+        {
+          "code": "LOGIC_INCONSISTENT",
+          "path": "ontology and selected assertion scope are inconsistent",
+          "message": "LOGIC_INCONSISTENT",
+          "severity": "ERROR"
+        }
+      ],
+      "profile": "OWL 2 DL",
+      "reasoningStatus": "INCONSISTENT",
+      "reportId": "69140d2d-0232-4591-a506-76f57cd48cc9",
+      "inputDigest": "0c9bd7fd2117fe2682581c788abd8387056fb0d1e44004da2dd9d45f75320772",
+      "checkedAt": "2026-09-11T04:11:06.109308Z",
+      "checks": [
+        {
+          "kind": "STRUCTURE",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "LOGIC",
+          "status": "FAIL",
+          "violations": [
+            {
+              "code": "LOGIC_INCONSISTENT",
+              "path": "ontology and selected assertion scope are inconsistent",
+              "message": "LOGIC_INCONSISTENT",
+              "severity": "ERROR"
+            }
+          ],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "POLICY",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        },
+        {
+          "kind": "SOURCES",
+          "status": "PASS",
+          "violations": [],
+          "unsatisfiableClasses": []
+        }
+      ],
+      "stale": false
+    },
+    "publishRejected": {
+      "status": 409,
+      "code": "VALIDATION_FAILED"
+    }
+  },
+  "noReport": {
+    "status": 409,
+    "code": "VALIDATION_REQUIRED"
+  },
+  "stale": {
+    "status": 409,
+    "code": "VALIDATION_STALE"
+  },
+  "publication": {
+    "ontologyId": "2098263035361861634",
+    "revisionId": "2098263035391221761",
+    "idempotent": true
+  }
+}

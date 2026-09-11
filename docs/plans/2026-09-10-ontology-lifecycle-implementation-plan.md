@@ -160,6 +160,8 @@ T05 和 T06 在 T01 协议稳定后可以独立推进；涉及同一服务或迁
 
 ### T07：统一检查报告和服务端发布门禁
 
+2026-09-11：本批已完成，见 [T07 交付与验证](2026-09-11-ontology-t07-delivery.md)。下一任务 T08；M1 完整自然语言链路的新一轮综合验收需独立记录。
+
 涉及：OntologyApplicationService.validate/publish、检查报告持久化、ValidationPanel、PublishDialog、建模师校验 Tool。
 
 - 将结构、逻辑、业务策略、来源状态汇总为绑定精确输入的报告；领域覆盖保留为辅助业务确认。

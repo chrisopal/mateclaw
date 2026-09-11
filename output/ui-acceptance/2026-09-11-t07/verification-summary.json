@@ -1,0 +1,32 @@
+{
+  "backend_regression": [
+    "[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.456 s -- in vip.mate.semantic.SemanticOntologyPackageIntegrationTest",
+    "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.532 s -- in vip.mate.semantic.OntologyAuthoringIntegrationTest",
+    "[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.239 s -- in vip.mate.semantic.SemanticOntologyIntegrationTest",
+    "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.982 s -- in vip.mate.semantic.OntologySourceReviewIntegrationTest",
+    "[ERROR] Tests run: 8, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.928 s <<< FAILURE! -- in vip.mate.semantic.SemanticPublicationGateRegressionTest",
+    "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.125 s -- in vip.mate.semantic.SemanticValidationReportIntegrationTest",
+    "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.783 s -- in vip.mate.semantic.SemanticOntologyM4IntegrationTest",
+    "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.714 s -- in vip.mate.semantic.CompleteObjectValidationIntegrationTest",
+    "[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.46 s -- in vip.mate.semantic.OntologyGlobalRestrictionPublishTest",
+    "[ERROR] Tests run: 56, Failures: 0, Errors: 1, Skipped: 0"
+  ],
+  "backend_final_source_gate": [
+    "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.860 s -- in vip.mate.semantic.OntologySourceReviewIntegrationTest",
+    "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.059 s -- in vip.mate.semantic.SemanticPublicationGateRegressionTest",
+    "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.131 s -- in vip.mate.semantic.SemanticValidationReportIntegrationTest",
+    "[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0",
+    "[INFO] BUILD SUCCESS"
+  ],
+  "frontend": [
+    " Test Files  27 passed (27)",
+    "      Tests  139 passed (139)"
+  ],
+  "build": [
+    "✓ built in 36.99s"
+  ],
+  "package": [
+    "[INFO] BUILD SUCCESS"
+  ],
+  "note": "Initial regression fixture NPE fixed; final source/gate/report 18 tests all passed. Distinct backend cases total 56. Frontend 139 passed. Scoped ESLint and diff check passed."
+}

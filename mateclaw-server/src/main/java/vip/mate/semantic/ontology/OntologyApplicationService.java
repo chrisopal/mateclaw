@@ -1,11 +1,17 @@
 package vip.mate.semantic.ontology;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.beans.factory.ObjectProvider;
 
 import vip.mate.semantic.ontology.repository.OntologyMapper;
 import vip.mate.semantic.security.SemanticAccessService;
+import vip.mate.semantic.reasoning.DraftReasoningService;
+import vip.mate.semantic.ontology.source.OntologySourceReviewService;
+import vip.mate.semantic.ontology.source.OntologySourceDtos.ValidationState;
 import vip.mate.semantic.statement.CommandRecordRow;
 import vip.mate.semantic.statement.repository.*;
 import vip.mate.semantic.web.OntologyDtos.*;
@@ -26,19 +32,31 @@ public class OntologyApplicationService {
     private final SemanticAccessService access;
     private final OntologyWireMapper wire;
     private final OntologyAxiomIndex axiomIndex;
+    private final JdbcTemplate jdbc;
+    private final TransactionTemplate transactions;
+    private final DraftReasoningService draftReasoning;
+    private final ObjectProvider<OntologySourceReviewService> sourceProvider;
 
     public OntologyApplicationService(
             OntologyMapper mapper,
             CommandRecordMapper commands,
             GovernanceRecordMapper governance,
             SemanticAccessService access,
-            OntologyWireMapper wire, OntologyAxiomIndex axiomIndex) {
+            OntologyWireMapper wire, OntologyAxiomIndex axiomIndex,
+            JdbcTemplate jdbc,
+            org.springframework.transaction.PlatformTransactionManager transactionManager,
+            DraftReasoningService draftReasoning,
+            ObjectProvider<OntologySourceReviewService> sourceProvider) {
         this.axiomIndex=axiomIndex;
         this.mapper = mapper;
         this.commands = commands;
         this.governance = governance;
         this.access = access;
         this.wire = wire;
+        this.jdbc = jdbc;
+        this.transactions = new TransactionTemplate(transactionManager);
+        this.draftReasoning = draftReasoning;
+        this.sourceProvider = sourceProvider;
     }
 
     public Page list(String scope, String query, int page, int pageSize) {
@@ -289,13 +307,59 @@ public class OntologyApplicationService {
         touch(parent);
     }
 
-    @Transactional
     public ValidationView validate(String scope, String id, ValidateDraft request) {
+        var actor = access.require(scope, "member");
+        if (request == null || request.expectedDraftVersion() == null || request.expectedDraftVersion() < 1)
+            throw new SemanticApiException(400, "INVALID_REQUEST", "Positive expectedDraftVersion required");
+        ValidationSnapshot before = validationSnapshot(scope, id, request.expectedDraftVersion());
+        List<ValidationCheck> checks = new ArrayList<>();
+        checks.add(structureCheck(before.row()));
+        checks.add(logicCheck(scope, id, request.expectedDraftVersion()));
+        checks.add(policyCheck(before.row()));
+        // The source check is the locked source snapshot captured before the worker starts.
+        // Re-reading it here would allow a mid-flight source change to be hidden from the report.
+        SourceCheck source = before.source();
+        checks.add(source.check());
+
+        // The worker is deliberately called through DraftReasoningService. It takes a short
+        // snapshot transaction, runs the bounded child process outside that transaction, and
+        // rechecks the snapshot before returning.
+        String inputDigest = before.inputDigest();
+        ValidationSnapshot after;
+        try {
+            after = validationSnapshot(scope, id, null);
+        } catch (SemanticApiException exception) {
+            if (exception.status() == 404) {
+                throw new SemanticApiException(409, "VALIDATION_STALE", "Draft was removed while validation was running");
+            }
+            throw exception;
+        }
+        boolean stale = !inputDigest.equals(after.inputDigest());
+        List<Violation> violations = checks.stream().flatMap(check -> check.violations().stream()).toList();
+        boolean valid = !stale && checks.stream().allMatch(check -> "PASS".equals(check.status()));
+        ValidationView report = new ValidationView(before.row().getDraftVersion(), valid, violations,
+                "OWL 2 DL", reasoningStatus(checks), UUID.randomUUID().toString(), inputDigest,
+                java.time.Instant.now(), checks, stale);
         access.require(scope, "member");
-        var row = draft(parent(scope, id, true));
-        cas(row, request.expectedDraftVersion());
-        var violations = wire.violations(row);
-        return new ValidationView(row.getDraftVersion(), violations.stream().noneMatch(v->"ERROR".equals(v.severity())), violations, "OWL 2 DL", "NOT_RUN");
+        return persistValidation(scope, id, before, report, actor.getId().toString());
+    }
+
+    /** Returns the persisted report and marks it stale against the current draft/source state. */
+    public ValidationView latestValidation(String scope, String id) {
+        access.require(scope, "viewer");
+        ValidationSnapshot current;
+        try {
+            current = validationSnapshot(scope, id, null);
+        } catch (SemanticApiException exception) {
+            if (exception.status() == 404) return null;
+            throw exception;
+        }
+        ValidationRecord record = transactions.execute(status -> latestValidationRecord(scope, id));
+        if (record == null) return null;
+        boolean stale = !Objects.equals(record.draftRevisionId(), current.row().getId())
+                || record.draftVersion() != current.row().getDraftVersion()
+                || !record.inputDigest().equals(current.inputDigest());
+        return view(record, stale);
     }
 
     @Transactional
@@ -322,7 +386,16 @@ public class OntologyApplicationService {
         }
         var row = draft(parent);
         cas(row, request.expectedDraftVersion());
-        wire.reject(wire.violations(row));
+        ValidationRecord report = latestValidationRecord(scope, id);
+        if (report == null)
+            throw new SemanticApiException(409, "VALIDATION_REQUIRED", "Run the complete ontology validation before publishing");
+        String currentDigest = validationDigest(row, sourceCheck(scope, row).signature());
+        if (!Objects.equals(report.draftRevisionId(), row.getId())
+                || report.draftVersion() != row.getDraftVersion()
+                || !currentDigest.equals(report.inputDigest()))
+            throw new SemanticApiException(409, "VALIDATION_STALE", "Validation report is stale; run validation again");
+        if (!report.valid() || !allChecksPass(report.checks()))
+            throw new SemanticApiException(409, "VALIDATION_FAILED", "All validation checks must pass before publishing", reportViolations(report.checks()));
         row.setPublishedAt(now());
         row.setPublishedBy(actor.getId().toString());
         row.setPublicationNote(request.note());
@@ -357,6 +430,176 @@ public class OntologyApplicationService {
                 now());
         return result;
     }
+
+    private ValidationSnapshot validationSnapshot(String scope, String id, Long expectedDraftVersion) {
+        ValidationSnapshot result = transactions.execute(status -> {
+            OntologyRow parent = mapper.lock(id, Long.parseLong(scope));
+            if (parent == null) throw missing();
+            OntologyRevisionRow row = draft(parent);
+            if (expectedDraftVersion != null) cas(row, expectedDraftVersion);
+            SourceCheck source = sourceCheck(scope, row);
+            return new ValidationSnapshot(row, source, validationDigest(row, source.signature()));
+        });
+        if (result == null) throw missing();
+        return result;
+    }
+
+    private ValidationView persistValidation(String scope, String id, ValidationSnapshot snapshot,
+            ValidationView report, String actor) {
+        return transactions.execute(status -> {
+            var verifiedActor = access.require(scope, "member");
+            OntologyRow parent = mapper.lock(id, Long.parseLong(scope));
+            if (parent == null) throw missing();
+            OntologyRevisionRow current = draft(parent);
+            SourceCheck source = sourceCheck(scope, current);
+            String currentDigest = validationDigest(current, source.signature());
+            boolean stale = report.stale() || !snapshot.row().getId().equals(current.getId())
+                    || !Objects.equals(snapshot.row().getDraftVersion(), current.getDraftVersion())
+                    || !report.inputDigest().equals(currentDigest);
+            ValidationView persisted = stale ? stale(report) : report;
+            java.time.Instant checkedAt = now().toInstant(java.time.ZoneOffset.UTC);
+            jdbc.update(
+                    "INSERT INTO mate_semantic_ontology_validation_report(id,workspace_id,ontology_id,draft_revision_id,draft_version,input_digest,checks_json,valid,created_by,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    persisted.reportId(), Long.valueOf(scope), id, snapshot.row().getId(), snapshot.row().getDraftVersion(),
+                    persisted.inputDigest(), wire.encode(persisted.checks()), persisted.valid(), verifiedActor.getId().toString(),
+                    java.time.LocalDateTime.ofInstant(checkedAt, java.time.ZoneOffset.UTC));
+            return new ValidationView(persisted.draftVersion(), persisted.valid(), persisted.violations(), persisted.profile(),
+                    persisted.reasoningStatus(), persisted.reportId(), persisted.inputDigest(), checkedAt, persisted.checks(), persisted.stale());
+        });
+    }
+
+    private ValidationCheck structureCheck(OntologyRevisionRow row) {
+        try {
+            List<Violation> violations = wire.violations(row);
+            return new ValidationCheck("STRUCTURE", violations.stream().anyMatch(v -> "ERROR".equals(v.severity())) ? "FAIL" : "PASS", violations);
+        } catch (RuntimeException exception) {
+            return new ValidationCheck("STRUCTURE", "ERROR", List.of(problem("STRUCTURE_CHECK_ERROR", message(exception))));
+        }
+    }
+
+    private ValidationCheck logicCheck(String scope, String id, long draftVersion) {
+        try {
+            DraftReasoningView result = draftReasoning.reason(scope, id, new ReasonDraft(draftVersion));
+            String status = result.status();
+            if ("CONSISTENT".equals(status)) return new ValidationCheck("LOGIC", "PASS", List.of(), result.unsatisfiableClasses());
+            List<Violation> violations = List.of(problem("LOGIC_" + status, result.message()));
+            String checkStatus = switch (status) {
+                case "INCONSISTENT", "UNSATISFIABLE" -> "FAIL";
+                case "NOT_RUN" -> "NOT_RUN";
+                default -> "ERROR";
+            };
+            return new ValidationCheck("LOGIC", checkStatus, violations, result.unsatisfiableClasses());
+        } catch (SemanticApiException exception) {
+            return new ValidationCheck("LOGIC", "ERROR", List.of(problem(exception.code(), exception.getMessage())));
+        } catch (RuntimeException exception) {
+            return new ValidationCheck("LOGIC", "ERROR", List.of(problem("LOGIC_CHECK_ERROR", message(exception))));
+        }
+    }
+
+    private ValidationCheck policyCheck(OntologyRevisionRow row) {
+        List<Violation> violations = new ArrayList<>();
+        try {
+            var policy = wire.policy(row);
+            var parsed = wire.parsed(row);
+            var classes = wire.classIris(parsed);
+            var termKinds = wire.termKinds(row);
+            Set<String> seen = new HashSet<>();
+            for (int index = 0; index < policy.rules().size(); index++) {
+                var rule = policy.rules().get(index);
+                String path = "rules[" + index + "]";
+                if (!classes.contains(rule.classIri())) violations.add(problem("POLICY_CLASS_NOT_FOUND", path + ".classIri"));
+                List<String> kinds = termKinds.get(rule.predicateIri());
+                if (kinds == null || kinds.stream().noneMatch(kind -> "DataProperty".equalsIgnoreCase(kind)))
+                    violations.add(problem("POLICY_DATA_PROPERTY_NOT_FOUND", path + ".predicateIri"));
+                if (!seen.add(rule.classIri() + "\u0000" + rule.predicateIri())) violations.add(problem("POLICY_DUPLICATE_RULE", path));
+            }
+            return new ValidationCheck("POLICY", violations.isEmpty() ? "PASS" : "FAIL", violations);
+        } catch (RuntimeException exception) {
+            return new ValidationCheck("POLICY", "ERROR", List.of(problem("POLICY_CHECK_ERROR", message(exception))));
+        }
+    }
+
+    private SourceCheck sourceCheck(String scope, OntologyRevisionRow row) {
+        List<ValidationState> items = sourceProvider.getObject().validationStates(scope, row.getOntologyId(), row.getId());
+        List<Violation> violations = new ArrayList<>();
+        List<String> signatures = new ArrayList<>();
+        for (ValidationState item : items) {
+            signatures.add(String.join(":", Objects.toString(item.bindingId(),""), Objects.toString(item.revisionId(),""),
+                    Objects.toString(item.axiomId(),""), Objects.toString(item.sourceSnapshotId(),""),
+                    Objects.toString(item.origin(),""), Objects.toString(item.sourceDigest(),""),
+                    Objects.toString(item.observedDigest(),""), Objects.toString(item.currentSourceState(),""),
+                    Objects.toString(item.reviewState(),""), Objects.toString(item.decision(),"")));
+            if (!"CURRENT".equals(item.currentSourceState()))
+                violations.add(problem("SOURCE_" + item.currentSourceState(), "binding " + item.bindingId()));
+            if (!"REVIEWED".equals(item.reviewState()) || !"ACKNOWLEDGE".equals(item.decision()))
+                violations.add(problem("SOURCE_REVIEW_REQUIRED", "binding " + item.bindingId()));
+        }
+        String signature = String.join("|", signatures);
+        return new SourceCheck(new ValidationCheck("SOURCES", violations.isEmpty() ? "PASS" : "FAIL", violations), signature);
+    }
+
+    private String validationDigest(OntologyRevisionRow row, String sourceSignature) {
+        StringBuilder value = new StringBuilder();
+        appendDigest(value, row.getOntologyId()); appendDigest(value, row.getId()); appendDigest(value, row.getDraftVersion());
+        appendDigest(value, row.getDocumentDigest()); appendDigest(value, row.getImportLockDigest()); appendDigest(value, row.getDocumentText());
+        appendDigest(value, row.getImportsJson()); appendDigest(value, row.getPolicyJson()); appendDigest(value, sourceSignature);
+        appendDigest(value, draftReasoning.inputFingerprint());
+        return vip.mate.semantic.core.ontology.OntologyDocument.sha256(value.toString());
+    }
+
+    private ValidationRecord latestValidationRecord(String scope, String id) {
+        List<ValidationRecord> rows = jdbc.query(
+                "SELECT id,draft_revision_id,draft_version,input_digest,checks_json,valid,created_at FROM mate_semantic_ontology_validation_report WHERE workspace_id=? AND ontology_id=? ORDER BY created_at DESC,id DESC LIMIT 1",
+                (rs, n) -> new ValidationRecord(rs.getString("id"), rs.getString("draft_revision_id"), rs.getLong("draft_version"),
+                        rs.getString("input_digest"), decodeChecks(rs.getString("checks_json")),
+                        rs.getBoolean("valid"), rs.getTimestamp("created_at").toLocalDateTime().toInstant(java.time.ZoneOffset.UTC)), Long.valueOf(scope), id);
+        return rows.isEmpty() ? null : rows.getFirst();
+    }
+
+    private ValidationView view(ValidationRecord record, boolean stale) {
+        List<ValidationCheck> checks = record.checks();
+        List<Violation> violations = reportViolations(checks);
+        boolean valid = !stale && record.valid() && allChecksPass(checks);
+        return new ValidationView(record.draftVersion(), valid, violations, "OWL 2 DL", reasoningStatus(checks),
+                record.id(), record.inputDigest(), record.createdAt(), checks, stale);
+    }
+
+    private static boolean allChecksPass(List<ValidationCheck> checks) {
+        if (checks.size() != 4) return false;
+        Set<String> kinds = checks.stream().map(ValidationCheck::kind).collect(java.util.stream.Collectors.toSet());
+        return kinds.equals(Set.of("STRUCTURE", "LOGIC", "POLICY", "SOURCES"))
+                && checks.stream().allMatch(check -> "PASS".equals(check.status()));
+    }
+
+    private static List<Violation> reportViolations(List<ValidationCheck> checks) {
+        return checks.stream().flatMap(check -> check.violations().stream()).toList();
+    }
+
+    private List<ValidationCheck> decodeChecks(String value) {
+        ValidationCheck[] checks = wire.decode(value, ValidationCheck[].class);
+        return checks == null ? List.of() : List.of(checks);
+    }
+
+    private static String reasoningStatus(List<ValidationCheck> checks) {
+        return checks.stream().filter(check -> "LOGIC".equals(check.kind())).map(check -> switch (check.status()) {
+            case "PASS" -> "CONSISTENT"; case "FAIL" -> check.violations().stream().anyMatch(v -> "LOGIC_UNSATISFIABLE".equals(v.code())) ? "UNSATISFIABLE" : "INCONSISTENT"; case "NOT_RUN" -> "NOT_RUN"; default -> "ERROR";
+        }).findFirst().orElse("NOT_RUN");
+    }
+
+    private static ValidationView stale(ValidationView report) {
+        return new ValidationView(report.draftVersion(), false, report.violations(), report.profile(), report.reasoningStatus(),
+                report.reportId(), report.inputDigest(), report.checkedAt(), report.checks(), true);
+    }
+
+    private static Violation problem(String code, String path) { return new Violation(code, path, code, "ERROR"); }
+    private static Violation problem(String code) { return problem(code, code); }
+    private static String message(Throwable exception) { return exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage(); }
+    private static void appendDigest(StringBuilder value, Object item) { String text = item == null ? "" : item.toString(); value.append(text.length()).append(':').append(text).append('|'); }
+    private static SemanticApiException missing() { return new SemanticApiException(404, "NOT_FOUND", "Semantic resource not found in workspace"); }
+    private record ValidationSnapshot(OntologyRevisionRow row, SourceCheck source, String inputDigest) {}
+    private record SourceCheck(ValidationCheck check, String signature) {}
+    private record ValidationRecord(String id, String draftRevisionId, long draftVersion, String inputDigest,
+            List<ValidationCheck> checks, boolean valid, java.time.Instant createdAt) {}
 
     public List<RevisionView> revisions(String scope, String id) {
         access.require(scope, "viewer");

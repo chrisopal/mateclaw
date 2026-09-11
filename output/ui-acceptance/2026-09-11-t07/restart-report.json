@@ -1,0 +1,37 @@
+{
+  "draftVersion": 4,
+  "valid": true,
+  "violations": [],
+  "profile": "OWL 2 DL",
+  "reasoningStatus": "CONSISTENT",
+  "reportId": "4c931af7-46e5-44ce-a8bb-7b92b7839f50",
+  "inputDigest": "046767d12cfb369212323f8ff128e56a7a1fe391f6fe25aaa7fb412a29d9ddcb",
+  "checkedAt": "2026-09-11T04:09:04.834513Z",
+  "checks": [
+    {
+      "kind": "STRUCTURE",
+      "status": "PASS",
+      "violations": [],
+      "unsatisfiableClasses": []
+    },
+    {
+      "kind": "LOGIC",
+      "status": "PASS",
+      "violations": [],
+      "unsatisfiableClasses": []
+    },
+    {
+      "kind": "POLICY",
+      "status": "PASS",
+      "violations": [],
+      "unsatisfiableClasses": []
+    },
+    {
+      "kind": "SOURCES",
+      "status": "PASS",
+      "violations": [],
+      "unsatisfiableClasses": []
+    }
+  ],
+  "stale": false
+}

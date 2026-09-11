@@ -31,7 +31,8 @@ public class OntologySourceReviewService {
         this.jdbc=jdbc;this.access=access;this.mapper=mapper;this.ontologies=ontologies;this.wire=wire;this.commands=commands;this.knowledgeBases=knowledgeBases;
     }
     private record Material(String title,String text,String digest) {}
-    private record Stored(Binding binding,String text,String title,Instant capturedAt) {}
+    private record Stored(Binding binding,String text,String title,Instant capturedAt,String observedDigest) {}
+    private record ReviewDecision(String reviewState, String decision) {}
 
     @Transactional
     public Bound bind(String scope,String ontologyId,BindRequest request) {
@@ -120,6 +121,25 @@ public class OntologySourceReviewService {
         if(mapper.revision(revisionId,ontologyId)==null)throw missing();
         return jdbc.query("SELECT id FROM mate_semantic_axiom_source WHERE revision_id=? ORDER BY id",(rs,n)->rs.getString(1),revisionId)
             .stream().map(id->stored(scope,ontologyId,id,true).binding()).toList();
+    }
+    /**
+     * Member-capable source snapshot for validation. The source material is resolved through the
+     * same permission-aware lookup as source review; the caller must compare currentSourceState
+     * with CURRENT and never treat a reviewed changed source as a strict publish pass.
+     */
+    @Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public List<ValidationState> validationStates(String scope,String ontologyId,String revisionId) {
+        access.require(scope,"viewer"); parent(scope,ontologyId,false);
+        if (mapper.revision(revisionId,ontologyId)==null) throw missing();
+        var ids=jdbc.query("SELECT b.id FROM mate_semantic_axiom_source b WHERE b.revision_id=? ORDER BY b.id",(rs,n)->rs.getString(1),revisionId);
+        return ids.stream().map(id -> {
+            var stored=stored(scope,ontologyId,id,true); var binding=stored.binding();
+            var decision=jdbc.query("SELECT review_state,decision FROM mate_semantic_ontology_source_review WHERE binding_id=? AND observed_digest=?",
+                    (rs,n)->new ReviewDecision(rs.getString("review_state"),rs.getString("decision")),
+                    binding.id(),stored.observedDigest()).stream().findFirst().orElse(new ReviewDecision("PENDING",null));
+            return new ValidationState(binding.id(),binding.revisionId(),binding.axiomId(),binding.sourceSnapshotId(),binding.origin(),
+                    binding.sourceDigest(),stored.observedDigest(),binding.currentSourceState(),decision.reviewState(),decision.decision());
+        }).toList();
     }
     public Binding binding(String scope,String ontologyId,String id) {
         access.require(scope,"viewer");return stored(scope,ontologyId,id).binding();
@@ -220,7 +240,7 @@ public class OntologySourceReviewService {
     }
     private Stored stored(String scope,String ontology,String id,boolean lockSource) {
         var rows=jdbc.query("SELECT b.*,s.kb_id,s.source_ref,s.source_text,s.source_title,s.captured_at FROM mate_semantic_axiom_source b JOIN mate_semantic_ontology_revision r ON r.id=b.revision_id JOIN mate_semantic_ontology o ON o.id=r.ontology_id JOIN mate_semantic_ontology_source_snapshot s ON s.id=b.source_snapshot_id AND s.workspace_id=o.workspace_id WHERE b.id=? AND o.id=? AND o.workspace_id=?",
-            (rs,n)->new Stored(new Binding(rs.getString("id"),rs.getString("revision_id"),rs.getString("axiom_id"),rs.getString("source_snapshot_id"),rs.getString("kb_id"),rs.getString("source_ref"),rs.getString("source_digest"),rs.getString("exact_quote"),rs.getInt("start_code_point"),rs.getInt("end_code_point"),rs.getString("origin"),rs.getString("review_state"),"UNCHECKED"),rs.getString("source_text"),rs.getString("source_title"),rs.getTimestamp("captured_at").toLocalDateTime().toInstant(ZoneOffset.UTC)),id,ontology,Long.valueOf(scope));
+            (rs,n)->new Stored(new Binding(rs.getString("id"),rs.getString("revision_id"),rs.getString("axiom_id"),rs.getString("source_snapshot_id"),rs.getString("kb_id"),rs.getString("source_ref"),rs.getString("source_digest"),rs.getString("exact_quote"),rs.getInt("start_code_point"),rs.getInt("end_code_point"),rs.getString("origin"),rs.getString("review_state"),"UNCHECKED"),rs.getString("source_text"),rs.getString("source_title"),rs.getTimestamp("captured_at").toLocalDateTime().toInstant(ZoneOffset.UTC),null),id,ontology,Long.valueOf(scope));
         if(rows.size()!=1)throw missing();var old=rows.getFirst();var b=old.binding();
         // Historical snapshots remain immutable; agent reads additionally require current KB visibility.
         var current=material(scope,b.knowledgeBaseId(),b.sourceRef(),lockSource);
@@ -229,7 +249,7 @@ public class OntologySourceReviewService {
         var decisions=jdbc.query("SELECT review_state,decision FROM mate_semantic_ontology_source_review WHERE binding_id=? AND observed_digest=?",
                 (rs,n)->"REVIEWED".equals(rs.getString(1))?rs.getString(2):rs.getString(1),id,observed);
         String review=decisions.isEmpty()?"PENDING":decisions.getFirst();
-        return new Stored(new Binding(b.id(),b.revisionId(),b.axiomId(),b.sourceSnapshotId(),b.knowledgeBaseId(),b.sourceRef(),b.sourceDigest(),b.exactQuote(),b.startCodePoint(),b.endCodePoint(),b.origin(),review,state),old.text(),old.title(),old.capturedAt());
+        return new Stored(new Binding(b.id(),b.revisionId(),b.axiomId(),b.sourceSnapshotId(),b.knowledgeBaseId(),b.sourceRef(),b.sourceDigest(),b.exactQuote(),b.startCodePoint(),b.endCodePoint(),b.origin(),review,state),old.text(),old.title(),old.capturedAt(),observed);
     }
     private Material material(String scope,String kb,String source,boolean lock) {
         var rows=jdbc.query("SELECT m.title,COALESCE(NULLIF(m.extracted_text,''),m.original_content) AS content FROM mate_wiki_raw_material m JOIN mate_wiki_knowledge_base k ON k.id=m.kb_id WHERE m.id=? AND m.kb_id=? AND k.workspace_id=? AND m.deleted=0 AND k.deleted=0"+(lock?" FOR UPDATE":""),

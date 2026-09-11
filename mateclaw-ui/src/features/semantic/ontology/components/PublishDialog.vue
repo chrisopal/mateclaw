@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import type { Diff } from '../../api/types'
 import OntologyImpactPanel from './OntologyImpactPanel.vue'
 const open = defineModel<boolean>({ required: true })
-const props = defineProps<{ busy: boolean; diff: Diff | null; error?: string; ontologyId?: string; expectedDraftVersion?: number }>()
+const props = defineProps<{ busy: boolean; ready?: boolean; diff: Diff | null; error?: string; ontologyId?: string; expectedDraftVersion?: number }>()
 defineEmits<{ publish: [note: string] }>()
 const { t } = useI18n(),
   note = ref('')
@@ -57,7 +57,7 @@ function changeClassLabel(value?: string) {
           maxlength="1000" /></el-form-item></el-form
     ><template #footer
       ><el-button :disabled="busy" @click="open = false">{{ t('semantic.cancel') }}</el-button
-      ><el-button type="primary" :disabled="!note.trim()" :loading="busy" @click="$emit('publish', note)">{{
+      ><el-button type="primary" :disabled="!note.trim() || props.ready !== true" :loading="busy" @click="$emit('publish', note)">{{
         t('semantic.confirmPublish')
       }}</el-button></template
     ></el-dialog

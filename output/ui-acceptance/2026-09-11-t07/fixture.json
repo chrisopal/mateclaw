@@ -1,0 +1,21 @@
+{
+  "workspaceId": "2098255446318239745",
+  "cases": {
+    "consistent": {
+      "ontologyId": "2098255446330822657",
+      "draftVersion": 2
+    },
+    "unsatisfiable": {
+      "ontologyId": "2098255446439874561",
+      "draftVersion": 2
+    },
+    "inconsistent": {
+      "ontologyId": "2098255446519566337",
+      "draftVersion": 2
+    },
+    "abox": {
+      "ontologyId": "2098255446595063810",
+      "draftVersion": 2
+    }
+  }
+}

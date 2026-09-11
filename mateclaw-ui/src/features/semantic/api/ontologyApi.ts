@@ -86,10 +86,12 @@ export const ontologyApi = {
       { url: `${path(id)}/draft`, method: 'DELETE', params: { expectedDraftVersion } },
       signal,
     ),
+  latestValidation: (ws: string, id: string, signal?: AbortSignal) =>
+    semanticRequest<ValidationReport | null>(ws, { url: `${path(id)}/draft/validation`, method: 'GET' }, signal),
   validate: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
     semanticRequest<ValidationReport>(
       ws,
-      { url: `${path(id)}/draft/validate`, method: 'POST', data: { expectedDraftVersion } },
+      { url: `${path(id)}/draft/validate`, method: 'POST', data: { expectedDraftVersion }, timeout: 120_000 },
       signal,
     ),
   reason: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>

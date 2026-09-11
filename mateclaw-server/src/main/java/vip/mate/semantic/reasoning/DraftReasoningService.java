@@ -79,6 +79,11 @@ public final class DraftReasoningService {
         return view(before, result);
     }
 
+    /** Stable configuration identity included in composite validation report inputs. */
+    public String inputFingerprint() {
+        return propertiesFingerprint();
+    }
+
     private Snapshot snapshot(String scope, String ontologyId, Long expectedDraftVersion, boolean enforceExpected) {
         if (scope == null || ontologyId == null || ontologyId.isBlank()) {
             throw new SemanticApiException(400, "INVALID_REQUEST", "Ontology and workspace are required");

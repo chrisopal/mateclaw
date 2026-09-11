@@ -184,6 +184,14 @@ public class OntologyController {
         return R.ok(service.validate(scope, id, body));
     }
 
+    @GetMapping("/ontologies/{id}/draft/validation")
+    @RequireWorkspaceRole("viewer")
+    public R<ValidationView> latestValidation(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id) {
+        return R.ok(service.latestValidation(scope, id));
+    }
+
     @PostMapping("/ontologies/{id}/draft/reason")
     @RequireWorkspaceRole("member")
     public R<DraftReasoningView> reasonDraft(
