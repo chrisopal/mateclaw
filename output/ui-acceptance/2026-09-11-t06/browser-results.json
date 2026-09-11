@@ -1,0 +1,46 @@
+[
+  {
+    "case": "consistent",
+    "status": "PASS",
+    "text": "模型逻辑检查\n\n检查已保存模型能否在逻辑上成立；这不替代结构检查。\n\n运行逻辑检查\n未发现逻辑矛盾\n检查详情"
+  },
+  {
+    "case": "unsatisfiable",
+    "status": "PASS",
+    "text": "模型逻辑检查\n\n检查已保存模型能否在逻辑上成立；这不替代结构检查。\n\n运行逻辑检查\n存在无法成立的对象类型\n检查详情\n无法满足的对象类型\n传感器"
+  },
+  {
+    "case": "inconsistent",
+    "status": "PASS",
+    "text": "模型逻辑检查\n\n检查已保存模型能否在逻辑上成立；这不替代结构检查。\n\n运行逻辑检查\n模型存在矛盾\n检查详情"
+  },
+  {
+    "case": "viewport-390",
+    "status": "PASS",
+    "dimensions": {
+      "width": 390,
+      "scroll": 390
+    }
+  },
+  {
+    "case": "viewport-768",
+    "status": "PASS",
+    "dimensions": {
+      "width": 768,
+      "scroll": 768
+    }
+  },
+  {
+    "case": "viewport-2560",
+    "status": "PASS",
+    "dimensions": {
+      "width": 2560,
+      "scroll": 2560
+    }
+  },
+  {
+    "case": "stop-waiting",
+    "status": "PASS",
+    "mode": "controlled delayed HTTP"
+  }
+]

@@ -85,6 +85,18 @@ public final class OntologyDtos {
 
     public record ValidateDraft(Long expectedDraftVersion) {}
 
+    /** Requests a bounded logical check of the current draft snapshot. */
+    public record ReasonDraft(Long expectedDraftVersion) {}
+
+    /** Logical check result; failed execution states keep consistent nullable. */
+    public record DraftReasoningView(
+            @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,
+            String inputDigest,
+            String status,
+            Boolean consistent,
+            List<String> unsatisfiableClasses,
+            String message) {}
+
     public record PublishDraft(Long expectedDraftVersion, String operationId, String note) {}
 
     public record Availability(Boolean availableForNewBindings) {}

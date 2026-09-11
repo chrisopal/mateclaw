@@ -81,6 +81,25 @@ class HermitReasoningAdapterTest {
     }
 
     @Test
+    void reportsUnsatisfiableNamedClassesSeparatelyFromOverallConsistency() {
+        String sensor = "urn:test:Sensor";
+        String equipment = "urn:test:Equipment";
+        String document = "Ontology(<urn:test:unsatisfiable> "
+                + "Declaration(Class(<" + sensor + ">)) "
+                + "Declaration(Class(<" + equipment + ">)) "
+                + "SubClassOf(<" + sensor + "> <" + equipment + ">) "
+                + "DisjointClasses(<" + sensor + "> <" + equipment + ">))";
+
+        var result = new HermitReasoningWorker().reason(new ReasoningRequest(
+                ReasoningRequest.SCHEMA_VERSION, "unsatisfiable-class", ontology(document), List.of(),
+                AssertionScope.ONTOLOGY_ABOX, List.of(), List.of(), Optional.empty(),
+                ReasoningRequest.Task.classification(), ReasoningRequest.Engine.hermit()));
+
+        assertEquals(ReasoningStatus.UNSATISFIABLE, result.status(), () -> result.diagnostics().toString());
+        assertEquals(List.of(sensor), result.unsatisfiableClasses());
+    }
+
+    @Test
     void defaultScopeExcludesOntologyAboxAndExplicitScopeIncludesIt() {
         String document = "Ontology(<urn:test:reasoning> "
                 + "Declaration(Class(<" + C + ">)) "

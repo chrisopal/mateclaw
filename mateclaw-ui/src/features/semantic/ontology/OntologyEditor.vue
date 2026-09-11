@@ -11,6 +11,7 @@ import { useOntologyDraft } from './useOntologyDraft'
 import ModelingTaskPanel from './components/ModelingTaskPanel.vue'
 import ModelingTaskCreate from './components/ModelingTaskCreate.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
+import LogicalConsistencyPanel from './components/LogicalConsistencyPanel.vue'
 import PublishDialog from './components/PublishDialog.vue'
 import OntologySourcePanel from './components/OntologySourcePanel.vue'
 import OntologyModelWorkbench from './components/OntologyModelWorkbench.vue'
@@ -111,8 +112,9 @@ onMounted(draft.load)
    <section v-show="area==='publish'" class="editor-release">
     <h2>{{tr('发布前检查','Before publishing')}}</h2>
     <div class="editor-check-row"><div><strong>{{tr('保存修改','Save changes')}}</strong><p>{{tr(dirty?'还有未保存的修改':'当前修改已保存',dirty?'Unsaved changes remain':'Changes are saved')}}</p></div><el-button v-if="dirty" :disabled="busy||!editable" @click="draft.save">{{t('semantic.save')}}</el-button></div>
-    <div class="editor-check-row"><div><strong>{{tr('结构检查','Structural checks')}}</strong><p>{{validationReport?.valid&&!dirty?tr('结构检查通过；推理尚未执行','Structural checks passed; reasoning has not run'):tr('检查模型结构；推理尚未执行','Check model structure; reasoning has not run')}}</p></div><el-button :disabled="dirty||busy||editPending||!editable" @click="draft.validate">{{tr('重新检查','Run checks')}}</el-button></div>
+    <div class="editor-check-row"><div><strong>{{tr('结构检查','Structural checks')}}</strong><p>{{validationReport?.valid&&!dirty?tr('结构检查通过','Structural checks passed'):tr('检查模型结构','Check model structure')}}</p></div><el-button :disabled="dirty||busy||editPending||!editable" @click="draft.validate">{{tr('重新检查','Run checks')}}</el-button></div>
     <ValidationPanel v-if="validationReport" :report="validationReport" :dirty="dirty" @locate="area='model';tab='axioms'"/>
+    <LogicalConsistencyPanel :ontology-id="ontologyId()" :draft-version="draftVersion" :dirty="dirty" :projection="projectionData?.projection" :editable="editable&&!!id" :disabled="busy||editPending||businessPolicyPending||businessPolicyDirty" />
     <div class="editor-check-row"><div><strong>{{tr('发布版本','Publish version')}}</strong><p>{{tr('通过检查后填写发布说明。','Add release notes after checks pass.')}}</p></div><el-button v-if="workspace.can('publish:ontology')" :disabled="!canPublish" @click="publishOpen=true">{{t('semantic.publish')}}</el-button></div>
    </section>
   </div>

@@ -179,7 +179,7 @@ public final class HermitReasoningWorker implements ReasoningPort {
             if (process != null) {
                 destroy(process);
             }
-            return result(request, digest, ReasoningStatus.TIMEOUT, elapsed(started),
+            return result(request, digest, ReasoningStatus.CANCELLED, elapsed(started),
                     List.of("reasoning worker interrupted"), List.of(), List.of());
         } catch (IOException | RuntimeException exception) {
             if (process != null) {
@@ -296,6 +296,7 @@ public final class HermitReasoningWorker implements ReasoningPort {
             array(node, "classIris", value.classIris());
         });
         array(root, "diagnostics", result.diagnostics());
+        array(root, "unsatisfiableClasses", result.unsatisfiableClasses());
         ObjectNode provenance = root.putObject("provenance");
         provenance.put("scope", result.provenance().scope());
         provenance.put("task", result.provenance().task());
@@ -326,12 +327,17 @@ public final class HermitReasoningWorker implements ReasoningPort {
         for (JsonNode item : required(root, "diagnostics")) {
             diagnostics.add(item.asText());
         }
+        List<String> unsatisfiableClasses = new ArrayList<>();
+        JsonNode unsatisfiable = root.get("unsatisfiableClasses");
+        if (unsatisfiable != null && !unsatisfiable.isNull()) {
+            for (JsonNode item : unsatisfiable) unsatisfiableClasses.add(item.asText());
+        }
         JsonNode provenance = required(root, "provenance");
         return new ReasoningResult(text(root, "schemaVersion"), text(root, "requestId"),
                 ReasoningStatus.valueOf(text(root, "status")),
                 ReasoningRequest.TaskKind.valueOf(text(root, "task")), text(root, "requestDigest"),
                 text(root, "engineName"), text(root, "engineVersion"),
-                required(root, "durationMillis").asLong(), relations, individuals, diagnostics,
+                required(root, "durationMillis").asLong(), relations, individuals, diagnostics, unsatisfiableClasses,
                 new ReasoningResult.Provenance(text(provenance, "scope"), text(provenance, "task"),
                         Instant.parse(text(provenance, "completedAt")),
                         text(provenance, "workerProtocolVersion")));
@@ -556,7 +562,13 @@ public final class HermitReasoningWorker implements ReasoningPort {
                         .getFlattened().stream().map(value -> value.getIRI().getIRIString())
                         .collect(Collectors.toCollection(LinkedHashSet::new))))
                 .toList();
-        return result(request, digest, ReasoningStatus.CONSISTENT, elapsed(started), List.of(), relations, List.of());
+        List<String> unsatisfiable = reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom().stream()
+                .map(item -> item.getIRI().getIRIString())
+                .sorted()
+                .toList();
+        return result(request, digest,
+                unsatisfiable.isEmpty() ? ReasoningStatus.CONSISTENT : ReasoningStatus.UNSATISFIABLE,
+                elapsed(started), List.of(), relations, List.of(), unsatisfiable);
     }
 
     private static ReasoningResult instanceTypes(ReasoningRequest request, OWLReasoner reasoner,
@@ -621,9 +633,15 @@ public final class HermitReasoningWorker implements ReasoningPort {
     private static ReasoningResult result(ReasoningRequest request, String digest, ReasoningStatus status,
             long durationMillis, List<String> diagnostics, List<ClassRelation> classRelations,
             List<IndividualTypes> individualTypes) {
+        return result(request, digest, status, durationMillis, diagnostics, classRelations, individualTypes, List.of());
+    }
+
+    private static ReasoningResult result(ReasoningRequest request, String digest, ReasoningStatus status,
+            long durationMillis, List<String> diagnostics, List<ClassRelation> classRelations,
+            List<IndividualTypes> individualTypes, List<String> unsatisfiableClasses) {
         return new ReasoningResult(ReasoningResult.SCHEMA_VERSION, request.requestId(), status,
                 request.task().kind(), digest, request.engine().name(), request.engine().version(),
-                Math.max(0, durationMillis), classRelations, individualTypes, diagnostics,
+                Math.max(0, durationMillis), classRelations, individualTypes, diagnostics, unsatisfiableClasses,
                 new ReasoningResult.Provenance(request.scope().name(), request.task().kind().name(),
                         Instant.now(), WORKER_PROTOCOL_VERSION));
     }

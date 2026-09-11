@@ -1,0 +1,9 @@
+{
+  "score": 93,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "沿用检查发布页面的平面企业布局；窄屏按钮完整，结果与详情对齐，未发现横向溢出。",
+  "next_actions": []
+}

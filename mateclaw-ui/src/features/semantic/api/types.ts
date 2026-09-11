@@ -32,6 +32,15 @@ export interface EditDraft { expectedDraftVersion: number; changes: AxiomEdit[];
 export interface PublishDraft { expectedDraftVersion: number; operationId: string; note: string }
 export interface Violation { code: string; path: string; message: string; severity?: string }
 export interface ValidationReport { draftVersion: number; valid: boolean; violations: Violation[]; profile?: string; reasoningStatus?: string }
+/** Result of the bounded logical consistency worker for one saved draft. */
+export interface LogicalConsistencyReport {
+  draftVersion: number
+  inputDigest: string
+  status: string
+  consistent: boolean | null
+  unsatisfiableClasses: string[]
+  message: string
+}
 export interface Diff { fromRevisionId: string | null; toRevisionId: string; changes: { kind: string; category: string; key: string; before: unknown; after: unknown }[]; definitionChangeClass?: string; termChanges?: { kind: string; key: string; definitionChangeClass: string; reasons: string[] }[] }
 export interface OntologyPackage { packageFormatVersion: 2; name: string; description: string; source?: { ontologyName: string; version: number }; document: DocumentInput }
 export interface PackagePreview { digest: string; name: string; axiomCount: number; importCount: number; typeCount?: number; predicateCount?: number; violations: Violation[] }

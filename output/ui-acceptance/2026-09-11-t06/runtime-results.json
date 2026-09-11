@@ -1,0 +1,36 @@
+{
+  "consistent": {
+    "draftVersion": 2,
+    "inputDigest": "1f0dee432ad6a2b0544fd9dd23d52264506dae7c101306b3b7940e349f9e1e88",
+    "status": "CONSISTENT",
+    "consistent": true,
+    "unsatisfiableClasses": [],
+    "message": "Draft is logically consistent"
+  },
+  "unsatisfiable": {
+    "draftVersion": 2,
+    "inputDigest": "d86c95eb5d3b345f2d2f57b4b8d758e802203db9a1bb48ec304efcf100d288f9",
+    "status": "UNSATISFIABLE",
+    "consistent": true,
+    "unsatisfiableClasses": [
+      "urn:t06:Sensor"
+    ],
+    "message": "Draft is consistent but contains unsatisfiable classes"
+  },
+  "inconsistent": {
+    "draftVersion": 2,
+    "inputDigest": "43f78af29e7f490001e0988fc02c35df63b187e4bee60b7ea3f0ba3efb373139",
+    "status": "INCONSISTENT",
+    "consistent": false,
+    "unsatisfiableClasses": [],
+    "message": "explicit top-bottom contradiction in SubClassOf"
+  },
+  "abox": {
+    "draftVersion": 2,
+    "inputDigest": "3143c1db606d255f9d7fa72202a4e04beb57fcf3c610099fa9a0e3bc9bb349e6",
+    "status": "INCONSISTENT",
+    "consistent": false,
+    "unsatisfiableClasses": [],
+    "message": "ontology and selected assertion scope are inconsistent"
+  }
+}

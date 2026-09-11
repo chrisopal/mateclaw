@@ -18,6 +18,7 @@ public record ReasoningResult(
         List<ClassRelation> classRelations,
         List<IndividualTypes> individualTypes,
         List<String> diagnostics,
+        List<String> unsatisfiableClasses,
         Provenance provenance) {
 
     public static final String SCHEMA_VERSION = ReasoningRequest.SCHEMA_VERSION;
@@ -38,7 +39,17 @@ public record ReasoningResult(
         classRelations = List.copyOf(Objects.requireNonNull(classRelations, "classRelations"));
         individualTypes = List.copyOf(Objects.requireNonNull(individualTypes, "individualTypes"));
         diagnostics = List.copyOf(Objects.requireNonNull(diagnostics, "diagnostics"));
+        unsatisfiableClasses = List.copyOf(Objects.requireNonNull(unsatisfiableClasses, "unsatisfiableClasses"));
         provenance = Objects.requireNonNull(provenance, "provenance");
+    }
+
+    /** Compatibility constructor for callers predating unsatisfiable-class reporting. */
+    public ReasoningResult(String schemaVersion, String requestId, ReasoningStatus status,
+            ReasoningRequest.TaskKind task, String requestDigest, String engineName,
+            String engineVersion, long durationMillis, List<ClassRelation> classRelations,
+            List<IndividualTypes> individualTypes, List<String> diagnostics, Provenance provenance) {
+        this(schemaVersion, requestId, status, task, requestDigest, engineName, engineVersion,
+                durationMillis, classRelations, individualTypes, diagnostics, List.of(), provenance);
     }
 
     public boolean completedSuccessfully() {
@@ -68,6 +79,7 @@ public record ReasoningResult(
         PROFILE_VIOLATION,
         TIMEOUT,
         RESOURCE_EXHAUSTED,
+        CANCELLED,
         FAILED
     }
 

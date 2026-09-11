@@ -91,6 +91,22 @@ it('pins workspace and preserves business-policy authoring and sample-check bodi
   } finally { http.defaults.adapter = previous }
 })
 
+it('uses the long bounded timeout and exact draft version body for logical checks', async () => {
+  const previous = http.defaults.adapter
+  let config: { url?: string; method?: string; data?: unknown; timeout?: number } | undefined
+  http.defaults.adapter = async request => {
+    config = request as unknown as typeof config
+    return { data: { code: 200, data: { draftVersion: 9, inputDigest: 'sha256:input', status: 'CONSISTENT', consistent: true, unsatisfiableClasses: [], message: '' } }, status: 200, statusText: 'OK', headers: {}, config: request }
+  }
+  try {
+    await ontologyApi.reason('workspace', 'ontology', 9)
+    expect(config?.url).toBe('/semantic/ontologies/ontology/draft/reason')
+    expect(config?.method).toBe('post')
+    expect(JSON.parse(String(config?.data))).toEqual({ expectedDraftVersion: 9 })
+    expect(config?.timeout).toBe(120_000)
+  } finally { http.defaults.adapter = previous }
+})
+
 it('shares concurrent availability checks without falsely denying navigation', async () => {
   localStorage.setItem('token', 'test')
   let resolve!: (value: { enabled: boolean }) => void

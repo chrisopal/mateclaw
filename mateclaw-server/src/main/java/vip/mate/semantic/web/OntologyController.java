@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import vip.mate.common.result.R;
 import vip.mate.semantic.ontology.OntologyApplicationService;
 import vip.mate.semantic.ontology.BusinessPolicyService;
+import vip.mate.semantic.reasoning.DraftReasoningService;
 import vip.mate.semantic.web.OntologyDtos.*;
 import vip.mate.workspace.core.annotation.RequireWorkspaceRole;
 
@@ -17,10 +18,13 @@ import java.util.List;
 public class OntologyController {
     private final OntologyApplicationService service;
     private final BusinessPolicyService businessPolicies;
+    private final DraftReasoningService draftReasoning;
 
-    public OntologyController(OntologyApplicationService service, BusinessPolicyService businessPolicies) {
+    public OntologyController(OntologyApplicationService service, BusinessPolicyService businessPolicies,
+            DraftReasoningService draftReasoning) {
         this.service = service;
         this.businessPolicies = businessPolicies;
+        this.draftReasoning = draftReasoning;
     }
 
     @GetMapping("/ontologies")
@@ -178,6 +182,15 @@ public class OntologyController {
             @PathVariable String id,
             @RequestBody ValidateDraft body) {
         return R.ok(service.validate(scope, id, body));
+    }
+
+    @PostMapping("/ontologies/{id}/draft/reason")
+    @RequireWorkspaceRole("member")
+    public R<DraftReasoningView> reasonDraft(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @RequestBody ReasonDraft body) {
+        return R.ok(draftReasoning.reason(scope, id, body));
     }
 
     @PostMapping("/ontologies/{id}/draft/publish")

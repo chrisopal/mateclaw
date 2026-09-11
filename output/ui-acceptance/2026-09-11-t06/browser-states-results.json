@@ -1,0 +1,22 @@
+[
+  {
+    "status": "TIMEOUT",
+    "result": "PASS",
+    "mode": "controlled HTTP"
+  },
+  {
+    "status": "FAILED",
+    "result": "PASS",
+    "mode": "controlled HTTP"
+  },
+  {
+    "status": "UNSUPPORTED",
+    "result": "PASS",
+    "mode": "controlled HTTP"
+  },
+  {
+    "status": "REASONING_STALE",
+    "result": "PASS",
+    "mode": "controlled HTTP"
+  }
+]

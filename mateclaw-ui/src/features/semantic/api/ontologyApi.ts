@@ -15,6 +15,7 @@ import type {
   BusinessPolicyCheck,
   PublishDraft,
   ValidationReport,
+  LogicalConsistencyReport,
   Diff,
   OntologyPackage,
   PackagePreview,
@@ -89,6 +90,19 @@ export const ontologyApi = {
     semanticRequest<ValidationReport>(
       ws,
       { url: `${path(id)}/draft/validate`, method: 'POST', data: { expectedDraftVersion } },
+      signal,
+    ),
+  reason: (ws: string, id: string, expectedDraftVersion: number, signal?: AbortSignal) =>
+    semanticRequest<LogicalConsistencyReport>(
+      ws,
+      {
+        url: `${path(id)}/draft/reason`,
+        method: 'POST',
+        data: { expectedDraftVersion },
+        // The server bounds the worker above the normal 30s request budget.
+        // Keep the client wait bounded, but long enough for that worker.
+        timeout: 120_000,
+      },
       signal,
     ),
   publish: (ws: string, id: string, body: PublishDraft, signal?: AbortSignal) =>
