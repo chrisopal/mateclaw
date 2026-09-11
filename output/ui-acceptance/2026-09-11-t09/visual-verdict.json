@@ -1,0 +1,8 @@
+{
+  "score": 92,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [],
+  "suggestions": [],
+  "reasoning": "企业样式保持一致；1440桌面和390窄屏审核/样例均可读，技术原文默认折叠。切换与下拉动画须结束后采图。"
+}

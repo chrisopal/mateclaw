@@ -33,7 +33,7 @@ public class GraphApplicationService {
         GraphRow graph = requireGraph(scope, graphId, false);
         requireKb(graph.getWorkspaceId(), graph.getKbId());
         GraphOntologyRevisionRow revision = requireRevision(graph.getWorkspaceId(), graph.getOntologyRevisionId(), false);
-        return new GraphDetail(view(graph, revision), wire.document(revision));
+        return new GraphDetail(view(graph, revision), wire.document(revision), revision.getOntologyId());
     }
 
     public Binding get(String scope, String kbId) {

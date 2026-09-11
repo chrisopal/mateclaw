@@ -1,0 +1,184 @@
+{
+  "synthetic": true,
+  "workspaceId": "2098322026657886209",
+  "workspaceName": "T09 API 生命周期 20260911T080530Z",
+  "ontologyId": "2098322026687246338",
+  "graphId": "2098322037907009537",
+  "knowledgeBaseId": "2098322037873455105",
+  "entityA": "2098322037940563969",
+  "entityB": "2098322037969924098",
+  "taskId": "9b88bdb3-c1de-4e55-9e0f-c7af8acee566",
+  "proposalId": "a65bc0ba-a0b7-446b-8c8a-4c10b309c227",
+  "snapshotId": "2098322423535513602",
+  "sourceRef": "2098322423518736385",
+  "sourceTitle": "T09 合成建模样例：同句不同上下文",
+  "sourceText": "车间甲记录：同名设备属于设备。序列号A，核对人为张工。\n车间乙记录：同名设备属于设备。序列号B，核对人为李工。",
+  "ambiguousQuote": "同名设备属于设备。",
+  "uniqueQuote": "车间甲记录：同名设备属于设备。",
+  "sample": {
+    "name": "T09 合成样例：同名设备A",
+    "subject": "同名设备",
+    "serial": "A",
+    "type": "urn:t09:Equipment",
+    "description": "人工合成验收样例，非真实模型输出；核对车间甲原文。"
+  },
+  "acceptedReadback": {
+    "id": "9b88bdb3-c1de-4e55-9e0f-c7af8acee566",
+    "ontologyId": "2098322026687246338",
+    "draftId": "2098322423556485122",
+    "goal": "T09 synthetic sample for Equipment identity and repeated quote review",
+    "sources": [
+      {
+        "knowledgeBaseId": "2098322037873455105",
+        "sourceRef": "2098322423518736385",
+        "sourceDigest": "20d22d64eae1309656037b471e92060a7af886102f356bd74ce189c435a48f0f"
+      }
+    ],
+    "stage": "READY",
+    "message": null,
+    "proposals": [
+      {
+        "id": "a65bc0ba-a0b7-446b-8c8a-4c10b309c227",
+        "input": {
+          "operationId": "e445b84e-faa5-468a-8a71-cb4860310226",
+          "expectedDraftVersion": 3,
+          "changes": [
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "OBJECT",
+              "targetId": null,
+              "name": "T09样例核对标记",
+              "domainId": null,
+              "rangeId": null,
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "qa_sample_marker"
+            }
+          ],
+          "evidence": [],
+          "questions": [],
+          "samples": [
+            {
+              "name": "T09 合成样例：同名设备A",
+              "subject": "同名设备",
+              "serial": "A",
+              "type": "urn:t09:Equipment",
+              "description": "人工合成验收样例，非真实模型输出；核对车间甲原文。"
+            }
+          ]
+        },
+        "status": "ACCEPTED",
+        "reason": null,
+        "answers": {},
+        "result": {
+          "draft": {
+            "id": "2098322423556485122",
+            "ontologyId": "2098322026687246338",
+            "baseRevisionId": "2098322026704023553",
+            "version": 2,
+            "draftVersion": 4,
+            "name": "T09 设备模型 20260911T080530Z",
+            "description": "Synthetic T09",
+            "document": {
+              "source": {
+                "modelSchema": "owl-document-v1",
+                "syntax": "FUNCTIONAL",
+                "documentText": "Prefix(:=<urn:t09:model#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:t09:model>\n\nDeclaration(Class(<urn:t09:Equipment>))\nDeclaration(Class(<urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb>))\nDeclaration(DataProperty(<urn:t09:voltage>))\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:t09:voltage> (<urn:t09:voltage>)\n\nDataPropertyDomain(<urn:t09:voltage> <urn:t09:Equipment>)\nDataPropertyRange(<urn:t09:voltage> xsd:decimal)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb> (T09样例核对标记)\n\nAnnotationAssertion(rdfs:label <urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb> \"T09样例核对标记\")\n\n\n)",
+                "imports": [],
+                "policy": {
+                  "version": "1",
+                  "rules": []
+                }
+              },
+              "ontologyIri": "urn:t09:model",
+              "versionIri": null,
+              "documentDigest": "c750e26e1adf41eb09d09a5c80e77e165e51c5e472de5224006e68d7a1b9f4d0",
+              "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "axioms": [
+                {
+                  "axiomId": "4b384c068f79ad4cae8bd7bbe8dd07c8814905a4ff5ffa5899dcf266618f8534",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb> \"T09样例核对标记\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "565a35638aa3d4ba4f6d51b95cf8b8b3e80fb09c990f3efb5ab4da48b80e56a8",
+                  "axiomType": "DataPropertyDomain",
+                  "rendering": "DataPropertyDomain(<urn:t09:voltage> <urn:t09:Equipment>)",
+                  "signatureIris": [
+                    "urn:t09:Equipment",
+                    "urn:t09:voltage"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "6b9aa5c919c3f4f7ef7a284d4ba8c7425bb54f53a4b9648c3598f9c8603e33f0",
+                  "axiomType": "DataPropertyRange",
+                  "rendering": "DataPropertyRange(<urn:t09:voltage> xsd:decimal)",
+                  "signatureIris": [
+                    "http://www.w3.org/2001/XMLSchema#decimal",
+                    "urn:t09:voltage"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "4ba1685e3c2e099b0e9b2ecc9157ea6ca7beaf2e658042d1c60acd778465d109",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(Class(<urn:t09:Equipment>))",
+                  "signatureIris": [
+                    "urn:t09:Equipment"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "600ec177ae96c9c33f85e538dbe4f0118636107f3fcb1bd28d2618a4435d264b",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(Class(<urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb>))",
+                  "signatureIris": [
+                    "urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "a41bed43be28ed1784ac671d17b46dc9bff84a922271f8ce581a1db2ccf3e17f",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(DataProperty(<urn:t09:voltage>))",
+                  "signatureIris": [
+                    "urn:t09:voltage"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "clientId": "qa_sample_marker",
+              "targetId": "urn:t09:model/model-term/ff8160a53f8d41f1392dd0134e09e3b79a985c147ef8229f7e9aff46073fddfb",
+              "axiomIds": [
+                "4b384c068f79ad4cae8bd7bbe8dd07c8814905a4ff5ffa5899dcf266618f8534",
+                "600ec177ae96c9c33f85e538dbe4f0118636107f3fcb1bd28d2618a4435d264b"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

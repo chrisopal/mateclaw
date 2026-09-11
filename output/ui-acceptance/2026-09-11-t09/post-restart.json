@@ -1,0 +1,148 @@
+{
+  "pass": true,
+  "sampleHistory": {
+    "statementId": "2098323105969745921",
+    "revisions": [
+      {
+        "id": "2098323105969745921",
+        "graphId": "2098322037907009537",
+        "revision": 1,
+        "ontologyRevisionId": "2098322026704023553",
+        "subjectId": "2098322037940563969",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:t09:Equipment> <urn:t09:equipment:a>)",
+          "signatureIris": [
+            "urn:t09:Equipment",
+            "urn:t09:equipment:a"
+          ],
+          "subjectIri": "urn:t09:equipment:a",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:t09:Equipment>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098323105923608578"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T08:09:48.078966Z"
+      }
+    ]
+  },
+  "sampleEvidence": {
+    "id": "2098323105923608578",
+    "snapshotId": "2098322423535513602",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2098322423518736385",
+    "sourceTitle": "T09 合成建模样例：同句不同上下文",
+    "exactQuote": "车间甲记录：同名设备属于设备。",
+    "startCodePoint": 0,
+    "endCodePoint": 15,
+    "textDigest": "20d22d64eae1309656037b471e92060a7af886102f356bd74ce189c435a48f0f"
+  },
+  "reviewHistory": {
+    "statementId": "2098311584749334530",
+    "revisions": [
+      {
+        "id": "2098311584749334530",
+        "graphId": "2098268824352825345",
+        "revision": 1,
+        "ontologyRevisionId": "2098268047706136577",
+        "subjectId": "2098311330394144769",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:t08:Equipment> <urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f>)",
+          "signatureIris": [
+            "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+            "urn:t08:Equipment"
+          ],
+          "subjectIri": "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:t08:Equipment>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098311584707391489"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T07:24:01.206244Z"
+      },
+      {
+        "id": "2098311584749334530",
+        "graphId": "2098268824352825345",
+        "revision": 2,
+        "ontologyRevisionId": "2098268047706136577",
+        "subjectId": "2098311330394144769",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:t08:Equipment> <urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f>)",
+          "signatureIris": [
+            "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+            "urn:t08:Equipment"
+          ],
+          "subjectIri": "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:t08:Equipment>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098311584707391489"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T08:05:21.483651Z"
+      },
+      {
+        "id": "2098311584749334530",
+        "graphId": "2098268824352825345",
+        "revision": 3,
+        "ontologyRevisionId": "2098268047706136577",
+        "subjectId": "2098311330394144769",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:t08:Equipment> <urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f>)",
+          "signatureIris": [
+            "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+            "urn:t08:Equipment"
+          ],
+          "subjectIri": "urn:mateclaw:entity:a989623c-505d-4e27-b25b-4afd88cb191f",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:t08:Equipment>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "RETRACTED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098311584707391489"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-11T08:06:06.547354Z"
+      }
+    ]
+  }
+}

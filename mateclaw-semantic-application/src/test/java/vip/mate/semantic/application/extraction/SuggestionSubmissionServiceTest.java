@@ -12,13 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class SuggestionSubmissionServiceTest {
     @Test void lostReceiptReusesStableProposeOperationAndRestoresOriginalReference(){
         var fixture=new ExtractionCoordinatorTest();String text="Voltage 220V";
-        var raw=new RawSuggestion(new ObjectMention(OwlExtractionFixtures.SUBJECT,Set.of(OwlExtractionFixtures.TYPE),"Machine"),OwlExtractionFixtures.assertion(),null,Validity.unknown(),List.of(new Quote(0,text.length(),text)));
+        var raw=new RawSuggestion(new ObjectMention(OwlExtractionFixtures.SUBJECT,Set.of(OwlExtractionFixtures.TYPE),"Machine"),OwlExtractionFixtures.assertion(),null,Validity.unknown(),List.of(new Quote(0,text.length(),text)),new IdentityResolution("EXISTING","Verified fixture identity"),null);
         var content=new StatementContent(fixture.scope,fixture.ontology.revisionId(),new EntityId("11"),Optional.of(PredicateRef.property(OwlExtractionFixtures.PROPERTY)),raw.assertion(),raw.validity(),Set.of());
-        var suggestion=new Suggestion("12","13","14",raw,content,List.of(),2,SuggestionStatus.OPEN);
+        var suggestion=new Suggestion[]{new Suggestion("12","13","14",raw,content,List.of(),2,SuggestionStatus.OPEN)};
         var task=new Task("13",fixture.actor,"4","start","hash",new SourceSnapshotInput("9","10","digest",text,Map.of()),fixture.ontology,"def","v1",fixture.config,TaskStatus.SUCCEEDED,3,false,fixture.now,fixture.now);
         Receipt[] receipt={null};String[] reserved={null};AtomicBoolean fail=new AtomicBoolean(true);List<String> operations=new ArrayList<>();
         ExtractionTaskRepository repo=ExtractionCoordinatorTest.port(ExtractionTaskRepository.class,(name,args)->switch(name){
-            case "suggestion"->Optional.of(suggestion);case "find"->Optional.of(task);case "receipt"->Optional.ofNullable(receipt[0]);
+            case "suggestion"->Optional.of(suggestion[0]);case "find"->Optional.of(task);case "receipt"->Optional.ofNullable(receipt[0]);
+            case "pendingSubmissionOperation"->Optional.ofNullable(reserved[0]);
             case "reserveSubmission"->{String operation=(String)args[3];if(reserved[0]!=null&&!reserved[0].equals(operation))throw new ExtractionException(409,"OPERATION_CONFLICT");reserved[0]=operation;yield null;}
             case "saveReceipt"->{if(fail.getAndSet(false))throw new IllegalStateException("injected receipt failure");receipt[0]=(Receipt)args[2];yield null;}
             default->throw new AssertionError(name);
@@ -29,6 +30,10 @@ class SuggestionSubmissionServiceTest {
         });
         var service=new SuggestionSubmissionService((a,g,s,action)->{},context,repo,(a,g,c,s,q,op)->{operations.add(op);return new SubmissionRef("15",1);},OwlExtractionFixtures.VALID);
         var command=new SubmitCommand("12",2,"submit");assertThrows(IllegalStateException.class,()->service.submit(fixture.actor,"4",command));
+        var legacy=new RawSuggestion(raw.subject(),raw.assertion(),raw.target(),raw.validity(),raw.quotes());
+        suggestion[0]=new Suggestion("12","13","14",legacy,content,List.of(),2,SuggestionStatus.OPEN);
+        assertEquals("OPERATION_CONFLICT",assertThrows(ExtractionException.class,
+                ()->service.submit(fixture.actor,"4",new SubmitCommand("12",2,"different"))).code());
         assertEquals(new SubmissionRef("15",1),service.submit(fixture.actor,"4",command));assertEquals(operations.get(0),operations.get(1));
         assertEquals(new SubmissionRef("15",1),service.submit(fixture.actor,"4",command));assertEquals(2,operations.size(),"existing receipt avoids another proposal invocation");
         assertThrows(ExtractionException.class,()->service.submit(fixture.actor,"4",new SubmitCommand("12",2,"different")));

@@ -36,9 +36,16 @@ public final class ExtractionContracts {
         public ModelConfiguration { parameters = Map.copyOf(parameters); }
     }
     public record ObjectMention(String temporaryRef, java.util.Set<String> typeIris, String name) { public ObjectMention { typeIris = java.util.Set.copyOf(typeIris); } }
+    /** Human identity decision retained with the suggestion, not an entity uniqueness rule. */
+    public record IdentityResolution(String mode, String reason) {}
     /** Standard assertion with temporary individual IRIs; never a business identity match. */
     public record RawSuggestion(ObjectMention subject, AssertionPayload assertion,
-                                ObjectMention target, Validity validity, List<Quote> quotes) {
+                                ObjectMention target, Validity validity, List<Quote> quotes,
+                                IdentityResolution subjectResolution, IdentityResolution targetResolution) {
+        public RawSuggestion(ObjectMention subject, AssertionPayload assertion, ObjectMention target,
+                             Validity validity, List<Quote> quotes) {
+            this(subject, assertion, target, validity, quotes, null, null);
+        }
         public RawSuggestion {
             validity = validity == null ? Validity.unknown() : validity;
             quotes = List.copyOf(quotes);

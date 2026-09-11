@@ -22,6 +22,11 @@ final class ExtractionMapping {
     static RawSuggestion raw(ExtractionDtos.EditRequest edit, OwlAssertionAdapter assertions) {
         Objects.requireNonNull(edit, "edit");
         Objects.requireNonNull(assertions, "assertions");
+        validateResolution(edit.subjectResolution(), edit.subjectId());
+        validateResolution(edit.targetResolution(), edit.targetEntityId());
+        if (edit.targetIri() == null && edit.targetResolution() != null) {
+            throw new IllegalArgumentException("target resolution requires target mention");
+        }
         if (!Set.of("UNKNOWN", "INTERVAL").contains(edit.validityKind())
                 || (edit.status() != null && !Set.of("OPEN", "IGNORED").contains(edit.status()))) {
             throw new IllegalArgumentException("invalid suggestion enum");
@@ -52,7 +57,8 @@ final class ExtractionMapping {
                 ? Validity.unknown() : Validity.interval(edit.validFrom(), edit.validTo());
         List<Quote> quotes = edit.quotes() == null ? List.of() : edit.quotes().stream()
                 .map(q -> new Quote(q.startCodePoint(), q.endCodePoint(), q.exactQuote())).toList();
-        return new RawSuggestion(subject, assertion, target, validity, quotes);
+        return new RawSuggestion(subject, assertion, target, validity, quotes,
+                edit.subjectResolution(), edit.targetResolution());
     }
 
     static ExtractionDtos.SuggestionView view(Suggestion suggestion, Receipt receipt) {
@@ -64,7 +70,8 @@ final class ExtractionMapping {
         RawSuggestion raw = suggestion.content();
         StatementContent mapped = suggestion.mappedContent();
         AssertionPayload assertion = raw.assertion();
-        String targetIri = assertion.objectIri().or(() -> assertion.relatedIndividualIri()).orElse(null);
+        AssertionPayload mappedAssertion = mapped == null ? assertion : mapped.assertion();
+        String targetIri = mappedAssertion.objectIri().or(() -> mappedAssertion.relatedIndividualIri()).orElse(null);
         ObjectMention target = raw.target();
         String targetEntityId = targetIri == null ? null : entities.entrySet().stream()
                 .filter(entry -> targetIri.equals(entry.getValue().iri()))
@@ -79,7 +86,24 @@ final class ExtractionMapping {
                 raw.quotes().stream().map(q -> new ExtractionDtos.Quote(
                         q.startCodePoint(), q.endCodePoint(), q.exactQuote())).toList(),
                 suggestion.diagnostics().stream().map(v -> v.code()).toList(),
-                receipt == null ? null : receipt.submission().statementId(), pending);
+                receipt == null ? null : receipt.submission().statementId(), pending,
+                raw.subjectResolution(), raw.targetResolution());
+    }
+
+    private static void validateResolution(IdentityResolution resolution, String entityId) {
+        boolean selected = entityId != null && !entityId.isBlank();
+        if (resolution == null) {
+            if (selected) throw new IllegalArgumentException("selected entity requires an identity decision and reason");
+            return;
+        }
+        if (resolution.mode() == null || !Set.of("NEW", "EXISTING", "UNRESOLVED").contains(resolution.mode()))
+            throw new IllegalArgumentException("invalid identity resolution mode");
+        if ("UNRESOLVED".equals(resolution.mode()) ? selected : !selected)
+            throw new IllegalArgumentException("identity resolution and selected entity disagree");
+        String reason = resolution.reason();
+        if ((reason != null && reason.length() > 1000)
+                || (!"UNRESOLVED".equals(resolution.mode()) && (reason == null || reason.isBlank())))
+            throw new IllegalArgumentException("resolved identity requires a reason of at most 1000 characters");
     }
 
     private static ObjectMention mention(String temporaryRef, String iri, Set<String> typeIris, String name) {

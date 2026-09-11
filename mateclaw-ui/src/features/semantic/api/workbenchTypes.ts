@@ -3,7 +3,7 @@ import type { Binding, DocumentView } from './types'
 export interface LiteralValue { lexicalValue: string; datatypeIri: string; languageTag?: string | null }
 export type AssertionKind = 'CLASS_ASSERTION' | 'POSITIVE_OBJECT_PROPERTY' | 'NEGATIVE_OBJECT_PROPERTY' | 'POSITIVE_DATA_PROPERTY' | 'NEGATIVE_DATA_PROPERTY' | 'SAME_INDIVIDUAL' | 'DIFFERENT_INDIVIDUAL'
 export interface AssertionPayload { kind: AssertionKind; functionalSyntax: string; signatureIris: string[]; subjectIri?: string | null; predicateIri?: string | null; objectIri?: string | null; literal?: LiteralValue | null; classExpressionFunctionalSyntax?: string | null; relatedIndividualIri?: string | null }
-export interface GraphDetail { binding: Binding; document: DocumentView }
+export interface GraphDetail { ontologyId?: string; binding: Binding; document: DocumentView }
 export interface Items<T> { items: T[]; total?: number }
 export interface Proposal { operationId: string; subjectId: string; assertionText: string; validityKind: string; validFrom: string | null; validTo: string | null; evidenceIds: string[] }
 export interface Statement { id: string; graphId: string; revision: number; ontologyRevisionId: string; subjectId: string; assertion: AssertionPayload; validityKind: string; validFrom: string | null; validTo: string | null; reviewStatus: string; supportStatus: string; evidenceIds: string[]; proposedBy: string; createdAt: string }

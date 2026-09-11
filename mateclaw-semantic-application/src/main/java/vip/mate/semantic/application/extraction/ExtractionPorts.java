@@ -45,6 +45,8 @@ public final class ExtractionPorts {
         Optional<Suggestion> suggestion(Actor actor, String graphId, String suggestionId);
         boolean edit(Actor actor, String graphId, Suggestion suggestion, long expectedVersion);
         Optional<Receipt> receipt(Actor actor, String graphId, String suggestionId, long editVersion);
+        /** Existing immutable intent for precisely this scoped suggestion version. */
+        Optional<String> pendingSubmissionOperation(Actor actor, String graphId, String suggestionId, long editVersion);
         void reserveSubmission(Actor actor, String graphId, Suggestion suggestion, String operationId, String requestHash);
         void saveReceipt(Actor actor, String graphId, Receipt receipt);
     }

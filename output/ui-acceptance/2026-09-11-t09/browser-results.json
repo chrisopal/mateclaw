@@ -1,0 +1,83 @@
+{
+  "pass": true,
+  "profile": "enterprise",
+  "claims": [
+    {
+      "claim": "对象关系",
+      "incompleteDisabled": true
+    },
+    {
+      "claim": "文本属性",
+      "incompleteDisabled": true
+    },
+    {
+      "claim": "是同一对象",
+      "incompleteDisabled": true
+    },
+    {
+      "claim": "是不同对象",
+      "incompleteDisabled": true
+    },
+    {
+      "claim": "对象类型",
+      "incompleteDisabled": true
+    }
+  ],
+  "ambiguousBlocked": true,
+  "uniqueAllowed": true,
+  "narrowDrawer": {
+    "x": 0.17418134212493896,
+    "y": 0,
+    "width": 390.00001299381256,
+    "height": 844
+  },
+  "readback": {
+    "history": {
+      "statementId": "2098323105969745921",
+      "revisions": [
+        {
+          "id": "2098323105969745921",
+          "graphId": "2098322037907009537",
+          "revision": 1,
+          "ontologyRevisionId": "2098322026704023553",
+          "subjectId": "2098322037940563969",
+          "assertion": {
+            "kind": "CLASS_ASSERTION",
+            "functionalSyntax": "ClassAssertion(<urn:t09:Equipment> <urn:t09:equipment:a>)",
+            "signatureIris": [
+              "urn:t09:Equipment",
+              "urn:t09:equipment:a"
+            ],
+            "subjectIri": "urn:t09:equipment:a",
+            "predicateIri": null,
+            "objectIri": null,
+            "literal": null,
+            "classExpressionFunctionalSyntax": "<urn:t09:Equipment>",
+            "relatedIndividualIri": null
+          },
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "reviewStatus": "PROPOSED",
+          "supportStatus": "UNREVIEWED",
+          "evidenceIds": [
+            "2098323105923608578"
+          ],
+          "proposedBy": "1",
+          "createdAt": "2026-09-11T08:09:48.078966Z"
+        }
+      ]
+    },
+    "evidence": {
+      "id": "2098323105923608578",
+      "snapshotId": "2098322423535513602",
+      "sourceKind": "WIKI_RAW",
+      "sourceRef": "2098322423518736385",
+      "sourceTitle": "T09 合成建模样例：同句不同上下文",
+      "exactQuote": "车间甲记录：同名设备属于设备。",
+      "startCodePoint": 0,
+      "endCodePoint": 15,
+      "textDigest": "20d22d64eae1309656037b471e92060a7af886102f356bd74ce189c435a48f0f"
+    }
+  }
+}

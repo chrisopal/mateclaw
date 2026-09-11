@@ -1,0 +1,590 @@
+{
+  "run": "20260911T080530Z",
+  "synthetic": true,
+  "checks": {
+    "same_name_distinct_ids": {
+      "passed": true,
+      "evidence": [
+        {
+          "id": "2098322037940563969",
+          "graphId": "2098322037907009537",
+          "iri": "urn:t09:equipment:a",
+          "assertedTypes": [
+            "urn:t09:Equipment"
+          ],
+          "displayName": "同名设备",
+          "status": "ACTIVE",
+          "createdAt": "2026-09-11T08:05:33.441024Z"
+        },
+        {
+          "id": "2098322037969924098",
+          "graphId": "2098322037907009537",
+          "iri": "urn:t09:equipment:b",
+          "assertedTypes": [
+            "urn:t09:Equipment"
+          ],
+          "displayName": "同名设备",
+          "status": "ACTIVE",
+          "createdAt": "2026-09-11T08:05:33.448064Z"
+        }
+      ]
+    },
+    "exact_source_1": {
+      "passed": true,
+      "evidence": {
+        "id": "2098322038066393090",
+        "snapshotId": "2098322038049615874",
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2098322037999284226",
+        "sourceTitle": "T09 来源 1",
+        "exactQuote": "设备A铭牌：额定电压380V。设备B电压220V。",
+        "startCodePoint": 0,
+        "endCodePoint": 25,
+        "textDigest": "886c324056ef3720603e707833b2b91acb9d3cf32ceb320972124f9c1149a79d"
+      }
+    },
+    "exact_source_2": {
+      "passed": true,
+      "evidence": {
+        "id": "2098322038133501954",
+        "snapshotId": "2098322038116724739",
+        "sourceKind": "WIKI_RAW",
+        "sourceRef": "2098322038099947521",
+        "sourceTitle": "T09 来源 2",
+        "exactQuote": "设备A检修记录：历史电压400V，当前复核380V。",
+        "startCodePoint": 0,
+        "endCodePoint": 26,
+        "textDigest": "f93e2d7498d28c5e6b8f731ea2bae5f1d843f23a5858457a916768c27cc7a427"
+      }
+    },
+    "pending_excluded": {
+      "passed": true,
+      "evidence": {
+        "facts": []
+      }
+    },
+    "accepted_interval_visible_unknown_excluded": {
+      "passed": true,
+      "evidence": {
+        "facts": [
+          {
+            "id": "2098322038225776641",
+            "graphId": "2098322037907009537",
+            "revision": 2,
+            "ontologyRevisionId": "2098322026704023553",
+            "subjectId": "2098322037940563969",
+            "assertion": {
+              "kind": "POSITIVE_DATA_PROPERTY",
+              "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+              "signatureIris": [
+                "urn:t09:voltage",
+                "urn:t09:equipment:a",
+                "http://www.w3.org/2001/XMLSchema#decimal"
+              ],
+              "subjectIri": "urn:t09:equipment:a",
+              "predicateIri": "urn:t09:voltage",
+              "objectIri": null,
+              "literal": {
+                "lexicalValue": "380",
+                "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                "languageTag": null
+              },
+              "classExpressionFunctionalSyntax": null,
+              "relatedIndividualIri": null
+            },
+            "validityKind": "INTERVAL",
+            "validFrom": "2026-01-01T00:00:00Z",
+            "validTo": "2027-01-01T00:00:00Z",
+            "reviewStatus": "ACCEPTED",
+            "supportStatus": "SUPPORTED",
+            "evidenceIds": [
+              "2098322038066393090"
+            ],
+            "proposedBy": "1",
+            "createdAt": "2026-09-11T08:05:33.577646Z"
+          },
+          {
+            "id": "2098322038359994370",
+            "graphId": "2098322037907009537",
+            "revision": 2,
+            "ontologyRevisionId": "2098322026704023553",
+            "subjectId": "2098322037969924098",
+            "assertion": {
+              "kind": "POSITIVE_DATA_PROPERTY",
+              "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:b> \"220\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+              "signatureIris": [
+                "urn:t09:voltage",
+                "urn:t09:equipment:b",
+                "http://www.w3.org/2001/XMLSchema#decimal"
+              ],
+              "subjectIri": "urn:t09:equipment:b",
+              "predicateIri": "urn:t09:voltage",
+              "objectIri": null,
+              "literal": {
+                "lexicalValue": "220",
+                "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                "languageTag": null
+              },
+              "classExpressionFunctionalSyntax": null,
+              "relatedIndividualIri": null
+            },
+            "validityKind": "INTERVAL",
+            "validFrom": "2026-01-01T00:00:00Z",
+            "validTo": "2027-01-01T00:00:00Z",
+            "reviewStatus": "ACCEPTED",
+            "supportStatus": "SUPPORTED",
+            "evidenceIds": [
+              "2098322038133501954"
+            ],
+            "proposedBy": "1",
+            "createdAt": "2026-09-11T08:05:33.618714Z"
+          }
+        ],
+        "unknownAccepted": {
+          "id": "2098322038288691201",
+          "graphId": "2098322037907009537",
+          "revision": 2,
+          "ontologyRevisionId": "2098322026704023553",
+          "subjectId": "2098322037940563969",
+          "assertion": {
+            "kind": "POSITIVE_DATA_PROPERTY",
+            "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"400\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+            "signatureIris": [
+              "urn:t09:voltage",
+              "urn:t09:equipment:a",
+              "http://www.w3.org/2001/XMLSchema#decimal"
+            ],
+            "subjectIri": "urn:t09:equipment:a",
+            "predicateIri": "urn:t09:voltage",
+            "objectIri": null,
+            "literal": {
+              "lexicalValue": "400",
+              "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+              "languageTag": null
+            },
+            "classExpressionFunctionalSyntax": null,
+            "relatedIndividualIri": null
+          },
+          "validityKind": "UNKNOWN",
+          "validFrom": null,
+          "validTo": null,
+          "reviewStatus": "ACCEPTED",
+          "supportStatus": "SUPPORTED",
+          "evidenceIds": [
+            "2098322038133501954"
+          ],
+          "proposedBy": "1",
+          "createdAt": "2026-09-11T08:05:33.601192Z"
+        }
+      }
+    },
+    "two_sources_reuse_one_entity": {
+      "passed": true,
+      "evidence": {
+        "first": {
+          "statementId": "2098322038225776641",
+          "revisions": [
+            {
+              "id": "2098322038225776641",
+              "graphId": "2098322037907009537",
+              "revision": 1,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037940563969",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:a",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:a",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "380",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "INTERVAL",
+              "validFrom": "2026-01-01T00:00:00Z",
+              "validTo": "2027-01-01T00:00:00Z",
+              "reviewStatus": "PROPOSED",
+              "supportStatus": "UNREVIEWED",
+              "evidenceIds": [
+                "2098322038066393090"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.508769Z"
+            },
+            {
+              "id": "2098322038225776641",
+              "graphId": "2098322037907009537",
+              "revision": 2,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037940563969",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:a",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:a",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "380",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "INTERVAL",
+              "validFrom": "2026-01-01T00:00:00Z",
+              "validTo": "2027-01-01T00:00:00Z",
+              "reviewStatus": "ACCEPTED",
+              "supportStatus": "SUPPORTED",
+              "evidenceIds": [
+                "2098322038066393090"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.577646Z"
+            }
+          ]
+        },
+        "second": {
+          "statementId": "2098322038288691201",
+          "revisions": [
+            {
+              "id": "2098322038288691201",
+              "graphId": "2098322037907009537",
+              "revision": 1,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037940563969",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"400\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:a",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:a",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "400",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "UNKNOWN",
+              "validFrom": null,
+              "validTo": null,
+              "reviewStatus": "PROPOSED",
+              "supportStatus": "UNREVIEWED",
+              "evidenceIds": [
+                "2098322038133501954"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.524142Z"
+            },
+            {
+              "id": "2098322038288691201",
+              "graphId": "2098322037907009537",
+              "revision": 2,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037940563969",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"400\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:a",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:a",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "400",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "UNKNOWN",
+              "validFrom": null,
+              "validTo": null,
+              "reviewStatus": "ACCEPTED",
+              "supportStatus": "SUPPORTED",
+              "evidenceIds": [
+                "2098322038133501954"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.601192Z"
+            }
+          ]
+        }
+      }
+    },
+    "out_of_interval_excluded": {
+      "passed": true,
+      "evidence": {
+        "beforeIntervalFacts": []
+      }
+    },
+    "stale_revision_rejected": {
+      "passed": true,
+      "evidence": {
+        "httpStatus": 409,
+        "response": {
+          "code": 409,
+          "msg": "Statement revision changed",
+          "data": {
+            "traceId": "c0c57f7f-4ae7-4c29-af8c-007ab1668392",
+            "fieldErrors": [],
+            "code": "STATEMENT_VERSION_CONFLICT"
+          }
+        }
+      }
+    },
+    "retracted_excluded": {
+      "passed": true,
+      "evidence": {
+        "retracted": {
+          "id": "2098322038225776641",
+          "graphId": "2098322037907009537",
+          "revision": 3,
+          "ontologyRevisionId": "2098322026704023553",
+          "subjectId": "2098322037940563969",
+          "assertion": {
+            "kind": "POSITIVE_DATA_PROPERTY",
+            "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:a> \"380\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+            "signatureIris": [
+              "urn:t09:voltage",
+              "urn:t09:equipment:a",
+              "http://www.w3.org/2001/XMLSchema#decimal"
+            ],
+            "subjectIri": "urn:t09:equipment:a",
+            "predicateIri": "urn:t09:voltage",
+            "objectIri": null,
+            "literal": {
+              "lexicalValue": "380",
+              "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+              "languageTag": null
+            },
+            "classExpressionFunctionalSyntax": null,
+            "relatedIndividualIri": null
+          },
+          "validityKind": "INTERVAL",
+          "validFrom": "2026-01-01T00:00:00Z",
+          "validTo": "2027-01-01T00:00:00Z",
+          "reviewStatus": "RETRACTED",
+          "supportStatus": "UNREVIEWED",
+          "evidenceIds": [
+            "2098322038066393090"
+          ],
+          "proposedBy": "1",
+          "createdAt": "2026-09-11T08:05:33.681160Z"
+        },
+        "facts": [
+          {
+            "id": "2098322038359994370",
+            "graphId": "2098322037907009537",
+            "revision": 2,
+            "ontologyRevisionId": "2098322026704023553",
+            "subjectId": "2098322037969924098",
+            "assertion": {
+              "kind": "POSITIVE_DATA_PROPERTY",
+              "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:b> \"220\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+              "signatureIris": [
+                "urn:t09:voltage",
+                "urn:t09:equipment:b",
+                "http://www.w3.org/2001/XMLSchema#decimal"
+              ],
+              "subjectIri": "urn:t09:equipment:b",
+              "predicateIri": "urn:t09:voltage",
+              "objectIri": null,
+              "literal": {
+                "lexicalValue": "220",
+                "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                "languageTag": null
+              },
+              "classExpressionFunctionalSyntax": null,
+              "relatedIndividualIri": null
+            },
+            "validityKind": "INTERVAL",
+            "validFrom": "2026-01-01T00:00:00Z",
+            "validTo": "2027-01-01T00:00:00Z",
+            "reviewStatus": "ACCEPTED",
+            "supportStatus": "SUPPORTED",
+            "evidenceIds": [
+              "2098322038133501954"
+            ],
+            "proposedBy": "1",
+            "createdAt": "2026-09-11T08:05:33.618714Z"
+          }
+        ]
+      }
+    },
+    "conflict_acceptance_rejected": {
+      "passed": true,
+      "evidence": {
+        "rejection": {
+          "httpStatus": 409,
+          "response": {
+            "code": 409,
+            "msg": "Resolve deterministic conflicts before acceptance",
+            "data": {
+              "traceId": "10bc52d8-d01d-4abb-94fc-991ddd0105b4",
+              "fieldErrors": [],
+              "code": "OPEN_CONFLICT"
+            }
+          }
+        },
+        "conflicts": {
+          "items": [
+            {
+              "id": "2098322039114969090",
+              "graphId": "2098322037907009537",
+              "kind": "ASSERTION_CONTRADICTION",
+              "status": "OPEN",
+              "left": {
+                "kind": "STATEMENT",
+                "statementId": "2098322039093997569",
+                "revision": 1
+              },
+              "right": {
+                "kind": "STATEMENT",
+                "statementId": "2098322038359994370",
+                "revision": 2
+              },
+              "resolution": null
+            }
+          ],
+          "total": 1,
+          "page": 1,
+          "pageSize": 20
+        }
+      }
+    },
+    "withdrawn_source_excluded": {
+      "passed": true,
+      "evidence": {
+        "facts": [],
+        "history": {
+          "statementId": "2098322038359994370",
+          "revisions": [
+            {
+              "id": "2098322038359994370",
+              "graphId": "2098322037907009537",
+              "revision": 1,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037969924098",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:b> \"220\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:b",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:b",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "220",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "INTERVAL",
+              "validFrom": "2026-01-01T00:00:00Z",
+              "validTo": "2027-01-01T00:00:00Z",
+              "reviewStatus": "PROPOSED",
+              "supportStatus": "UNREVIEWED",
+              "evidenceIds": [
+                "2098322038133501954"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.540787Z"
+            },
+            {
+              "id": "2098322038359994370",
+              "graphId": "2098322037907009537",
+              "revision": 2,
+              "ontologyRevisionId": "2098322026704023553",
+              "subjectId": "2098322037969924098",
+              "assertion": {
+                "kind": "POSITIVE_DATA_PROPERTY",
+                "functionalSyntax": "DataPropertyAssertion(<urn:t09:voltage> <urn:t09:equipment:b> \"220\"^^<http://www.w3.org/2001/XMLSchema#decimal>)",
+                "signatureIris": [
+                  "urn:t09:voltage",
+                  "urn:t09:equipment:b",
+                  "http://www.w3.org/2001/XMLSchema#decimal"
+                ],
+                "subjectIri": "urn:t09:equipment:b",
+                "predicateIri": "urn:t09:voltage",
+                "objectIri": null,
+                "literal": {
+                  "lexicalValue": "220",
+                  "datatypeIri": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "languageTag": null
+                },
+                "classExpressionFunctionalSyntax": null,
+                "relatedIndividualIri": null
+              },
+              "validityKind": "INTERVAL",
+              "validFrom": "2026-01-01T00:00:00Z",
+              "validTo": "2027-01-01T00:00:00Z",
+              "reviewStatus": "ACCEPTED",
+              "supportStatus": "SUPPORT_LOST",
+              "evidenceIds": [
+                "2098322038133501954"
+              ],
+              "proposedBy": "1",
+              "createdAt": "2026-09-11T08:05:33.618714Z"
+            }
+          ]
+        }
+      }
+    },
+    "withdrawn_evidence_hidden": {
+      "passed": true,
+      "evidence": {
+        "httpStatus": 404
+      }
+    }
+  },
+  "gaps": [
+    "semantic_context is a Spring tool, not an HTTP endpoint; this run verifies formal search, not model-generated answers."
+  ],
+  "workspaceId": "2098322026657886209",
+  "ontologyId": "2098322026687246338",
+  "ontologyRevisionId": "2098322026704023553",
+  "knowledgeBaseId": "2098322037873455105",
+  "graphId": "2098322037907009537",
+  "entityA": "2098322037940563969",
+  "entityB": "2098322037969924098",
+  "sourceRefs": [
+    "2098322037999284226",
+    "2098322038099947521"
+  ],
+  "evidenceIds": [
+    "2098322038066393090",
+    "2098322038133501954"
+  ],
+  "status": "PASS"
+}

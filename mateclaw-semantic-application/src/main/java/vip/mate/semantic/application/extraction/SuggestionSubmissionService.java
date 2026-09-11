@@ -22,6 +22,16 @@ public final class SuggestionSubmissionService {
             return receipt.get().submission();
         }
         if(s.status()!=SuggestionStatus.OPEN||s.mappedContent()==null)throw new ExtractionException(422,"OBJECT_SELECTION_REQUIRED");
+        // New submissions need human identity decisions. A pre-existing immutable intent
+        // must remain recoverable after an upgrade or a lost receipt; reserveSubmission
+        // below still verifies the original operation and content hash before replay.
+        var pending=repository.pendingSubmissionOperation(actor,graph,s.suggestionId(),s.editVersion());
+        if(pending.isPresent()) {
+            if(!pending.get().equals(command.operationId()))throw new ExtractionException(409,"OPERATION_CONFLICT");
+        } else {
+            requireResolved(s.content().subjectResolution());
+            if(s.content().target()!=null)requireResolved(s.content().targetResolution());
+        }
         if(!s.diagnostics().isEmpty())throw new ExtractionException(422,s.diagnostics().getFirst().code());
         var report=new SuggestionValidator(assertions).validate(context.scope(actor,graph),task.ontology(),s.mappedContent(),context.entities(actor,graph),task.source().text(),s.content().quotes());
         if(!report.valid())throw new ExtractionException(422,report.violations().getFirst().code());
@@ -30,5 +40,10 @@ public final class SuggestionSubmissionService {
         String stable="m5-"+ExtractionCoordinator.hash(graph+":"+s.suggestionId()+":"+s.editVersion()+":"+command.operationId());
         SubmissionRef result=submission.submit(actor,graph,s.mappedContent(),task.source(),s.content().quotes(),stable);
         repository.saveReceipt(actor,graph,new Receipt(s.suggestionId(),s.editVersion(),command.operationId(),hash,result));return result;
+    }
+    private static void requireResolved(IdentityResolution resolution) {
+        if(resolution==null || !("NEW".equals(resolution.mode()) || "EXISTING".equals(resolution.mode()))
+                || resolution.reason()==null || resolution.reason().isBlank() || resolution.reason().length()>1000)
+            throw new ExtractionException(422,"IDENTITY_DECISION_REQUIRED");
     }
 }

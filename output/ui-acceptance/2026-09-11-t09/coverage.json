@@ -1,0 +1,301 @@
+{
+  "scope": "T09 本轮关键交互：样例核对、知识记录审核与证据；非全站穷尽验收。",
+  "environment": "semantic-m1 / 127.0.0.1:5189 / enterprise / Chromium admin / persistent H2 / 1440x960,390x844",
+  "pages": [
+    {
+      "id": "t09",
+      "url": "/semantic/graphs/:id",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "sample-select",
+      "page": "t09",
+      "name": "建模样例选择",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-identity",
+      "page": "t09",
+      "name": "同名对象核对",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-kind",
+      "page": "t09",
+      "name": "核对内容",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-type",
+      "page": "t09",
+      "name": "类型选择",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-source",
+      "page": "t09",
+      "name": "来源快照",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-quote",
+      "page": "t09",
+      "name": "原文定位",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-submit",
+      "page": "t09",
+      "name": "提交审核",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "review-open",
+      "page": "t09",
+      "name": "审核详情",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "review-proof",
+      "page": "t09",
+      "name": "证据抽屉",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "review-accept-retract",
+      "page": "t09",
+      "name": "确认与撤回",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-narrow",
+      "page": "t09",
+      "name": "样例窄屏",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "review-narrow",
+      "page": "t09",
+      "name": "审核窄屏",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-dark",
+      "page": "t09",
+      "name": "样例暗色",
+      "locator": "browser-replay.js 对应真实控件或审核抽屉",
+      "checks": [
+        "flow"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "sample-select",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "选择样例，失焦后显示业务名称"
+      ],
+      "expected": "选择样例，失焦后显示业务名称",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-identity",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "先选B，再选A，按不同ID区分"
+      ],
+      "expected": "先选B，再选A，按不同ID区分",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-kind",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "切换五种内容，不完整不能提交"
+      ],
+      "expected": "切换五种内容，不完整不能提交",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-type",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "选Equipment，按发布版本转换ClassAssertion"
+      ],
+      "expected": "选Equipment，按发布版本转换ClassAssertion",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-source",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "选择同句不同上下文来源，读回不可变快照"
+      ],
+      "expected": "选择同句不同上下文来源，读回不可变快照",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-quote",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "重复引用阻断，补充上下文后可提交"
+      ],
+      "expected": "重复引用阻断，补充上下文后可提交",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "sample-submit",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "点击提交后GET复核对象版本证据和PROPOSED状态"
+      ],
+      "expected": "点击提交后GET复核对象版本证据和PROPOSED状态",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "post-restart.json"
+      ]
+    },
+    {
+      "control": "review-open",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "打开记录显示业务类型与状态"
+      ],
+      "expected": "打开记录显示业务类型与状态",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "history-390.png"
+      ]
+    },
+    {
+      "control": "review-proof",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "打开原文引用再关闭返回审核"
+      ],
+      "expected": "打开原文引用再关闭返回审核",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "browser-results.json"
+      ]
+    },
+    {
+      "control": "review-accept-retract",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "填写理由确认r2撤回r3刷新及重启回读"
+      ],
+      "expected": "填写理由确认r2撤回r3刷新及重启回读",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "post-restart.json"
+      ]
+    },
+    {
+      "control": "sample-narrow",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "390宽度重进稳定后截图"
+      ],
+      "expected": "390宽度重进稳定后截图",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "sample-390.png"
+      ]
+    },
+    {
+      "control": "review-narrow",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "390宽度打开审核抽屉完整可见"
+      ],
+      "expected": "390宽度打开审核抽屉完整可见",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "history-390.png"
+      ]
+    },
+    {
+      "control": "sample-dark",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "点击深色主题检查可读性再恢复系统主题"
+      ],
+      "expected": "点击深色主题检查可读性再恢复系统主题",
+      "actual": "已按步骤验证，结果及回读见证据。",
+      "evidence": [
+        "sample-dark.png"
+      ]
+    }
+  ]
+}

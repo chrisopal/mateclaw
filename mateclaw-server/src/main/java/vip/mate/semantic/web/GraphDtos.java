@@ -27,5 +27,7 @@ public final class GraphDtos {
             String id, String graphId, String iri, java.util.Set<String> assertedTypes, String displayName, String status,
             @JsonFormat(shape = JsonFormat.Shape.STRING) Instant createdAt) {}
     public record EntityPage(List<EntityView> items) {}
-    public record GraphDetail(Binding binding, OntologyDtos.DocumentView document) {}
+    public record GraphDetail(Binding binding, OntologyDtos.DocumentView document, String ontologyId) {
+        public GraphDetail(Binding binding, OntologyDtos.DocumentView document) { this(binding, document, null); }
+    }
 }

@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import vip.mate.semantic.web.SemanticCounterSerializer;
+import vip.mate.semantic.application.extraction.ExtractionContracts.IdentityResolution;
 
 /** HTTP-only extraction records. OWL Functional Syntax is the assertion authority. */
 public final class ExtractionDtos {
@@ -24,7 +25,17 @@ public final class ExtractionDtos {
             String subjectIri, Set<String> subjectTypeIris, String subjectName, String subjectId,
             String assertionText,
             String targetIri, Set<String> targetTypeIris, String targetName, String targetEntityId,
-            String validityKind, Instant validFrom, Instant validTo, List<Quote> quotes) {}
+            String validityKind, Instant validFrom, Instant validTo, List<Quote> quotes,
+            IdentityResolution subjectResolution, IdentityResolution targetResolution) {
+        public EditRequest(Long expectedVersion, String operationId, String status,
+                String subjectIri, Set<String> subjectTypeIris, String subjectName, String subjectId,
+                String assertionText, String targetIri, Set<String> targetTypeIris, String targetName,
+                String targetEntityId, String validityKind, Instant validFrom, Instant validTo, List<Quote> quotes) {
+            this(expectedVersion, operationId, status, subjectIri, subjectTypeIris, subjectName, subjectId,
+                    assertionText, targetIri, targetTypeIris, targetName, targetEntityId, validityKind,
+                    validFrom, validTo, quotes, null, null);
+        }
+    }
 
     public record SuggestionView(String id,
             @JsonSerialize(using = SemanticCounterSerializer.class) long version,
@@ -33,7 +44,8 @@ public final class ExtractionDtos {
             String assertionText,
             String targetIri, Set<String> targetTypeIris, String targetName, String targetEntityId,
             String validityKind, Instant validFrom, Instant validTo, List<Quote> quotes,
-            List<String> diagnostics, String statementId, String pendingOperationId) {}
+            List<String> diagnostics, String statementId, String pendingOperationId,
+            IdentityResolution subjectResolution, IdentityResolution targetResolution) {}
 
     public record TaskView(String id, String taskId, String status,
             @JsonSerialize(using = SemanticCounterSerializer.class) long version, String graphId,

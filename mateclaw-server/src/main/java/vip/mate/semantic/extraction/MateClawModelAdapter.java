@@ -62,7 +62,11 @@ public class MateClawModelAdapter implements ExtractionModelPort {
             String text=response.getResult().getOutput().getText();if(text==null||text.length()>1024*1024)throw new ExtractionException(422,"MODEL_OUTPUT_LIMIT");
             Envelope envelope=json.readValue(text,Envelope.class);if(envelope.suggestions()==null)throw new ExtractionException(422,"MODEL_FORMAT");
             if(envelope.suggestions().size()>200)throw new ExtractionException(422,"MODEL_OUTPUT_LIMIT");
-            var result=envelope.suggestions().stream().map(item -> ExtractionMapping.raw(item, assertions)).toList();
+            var result=envelope.suggestions().stream().map(item -> {
+                if(item.subjectResolution()!=null||item.targetResolution()!=null)
+                    throw new ExtractionException(422,"MODEL_FORMAT");
+                return ExtractionMapping.raw(item, assertions);
+            }).toList();
             var usage=response.getMetadata().getUsage();return new ModelResult(result,new Usage(usage.getPromptTokens(),usage.getCompletionTokens()),envelope.explanation());
         }catch(ExtractionException e){throw e;}catch(RejectedExecutionException e){throw new ExtractionException(422,"TEMPORARY_UNAVAILABLE");}catch(Exception e){
             Throwable cause=e instanceof ExecutionException?e.getCause():e;

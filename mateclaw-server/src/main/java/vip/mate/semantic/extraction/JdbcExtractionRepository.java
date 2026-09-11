@@ -92,6 +92,10 @@ public class JdbcExtractionRepository implements ExtractionTaskRepository {
         if(n==1)jdbc.update("INSERT INTO mate_semantic_extraction_edit(suggestion_id,version,payload_json,actor_id,created_at) VALUES(?,?,?,?,?)",value.suggestionId(),value.editVersion(),json.write(value),a.userId(),at(Instant.now()));return n==1;
     }));}
     public Optional<Receipt> receipt(Actor a,String graph,String id,long version){if(suggestion(a,graph,id).isEmpty())return Optional.empty();return jdbc.query("SELECT payload_json FROM mate_semantic_extraction_receipt WHERE suggestion_id=? AND edit_version=? AND graph_id=?",(rs,n)->json.read(rs.getString(1),Receipt.class),id,version,graph).stream().findFirst();}
+    public Optional<String> pendingSubmissionOperation(Actor actor,String graph,String id,long version){
+        if(suggestion(actor,graph,id).isEmpty())return Optional.empty();
+        return jdbc.query("SELECT operation_id FROM mate_semantic_extraction_submission_intent WHERE graph_id=? AND suggestion_id=? AND edit_version=?",(rs,n)->rs.getString(1),graph,id,version).stream().findFirst();
+    }
     public void reserveSubmission(Actor a,String graph,Suggestion suggestion,String operation,String hash){tx.executeWithoutResult(s->{
         gate();
         var current=suggestion(a,graph,suggestion.suggestionId()).orElseThrow(()->conflict("SUGGESTION_VERSION_CONFLICT"));
