@@ -1,0 +1,41 @@
+Prefix(:=<urn:mateclaw:ontology:2098226012030738434#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<urn:mateclaw:ontology:2098226012030738434>
+
+Declaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>))
+Declaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96>))
+Declaration(DataProperty(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9>))
+
+############################
+#   Data Properties
+############################
+
+# Data Property: <urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> (设备编号)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> "设备编号")
+DataPropertyDomain(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)
+DataPropertyRange(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> xsd:string)
+
+
+
+############################
+#   Classes
+############################
+
+# Class: <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7> (设备)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7> "设备")
+
+# Class: <urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> (传感器)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> "传感器")
+SubClassOf(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)
+
+
+)

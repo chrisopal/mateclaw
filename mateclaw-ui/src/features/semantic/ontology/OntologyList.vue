@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { ontologyApi } from '../api/ontologyApi'
 import { semanticError, type SemanticError } from '../api/semanticErrors'
 import type { Ontology, PackageImportResult } from '../api/types'
+import ModelingTaskCreate from './components/ModelingTaskCreate.vue'
 import OntologyWorkbenchDialog from './components/OntologyWorkbenchDialog.vue'
 import OntologyPackageDialog from './components/OntologyPackageDialog.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
@@ -26,12 +27,10 @@ const creating = ref(false),
   name = ref(''),
   description = ref(''),
   createdId = ref<string | null>(null)
-let launchGeneration = 0
 watch(
   () => workspace.currentWorkspaceId,
   () => {
     workbenchOntology.value = null
-    launchGeneration++
     launching.value = false
     busy.value = false
     error.value = null
@@ -91,26 +90,9 @@ function openCreate() {
 function openImport() {
   importing.value = true
 }
-async function launchBuilder() {
-  if (launching.value || !workspace.can('manage:ontology')) return
-  const c = begin()
-  const requestGeneration = ++launchGeneration
-  // begin() cancels a prior list/create request; clear its indicator because
-  // the canceled request's stale finally block must not own this component's UI.
-  busy.value = false
-  launching.value = true
-  error.value = null
-  try {
-    const result = await ontologyApi.ensureBuilder(c.id, c.signal)
-    if (c.current()) {
-      await router.push({ path: '/chat', query: { agentId: String(result.agentId) } })
-    }
-  } catch (e) {
-    if (c.current()) error.value = semanticError(e)
-  } finally {
-    if (requestGeneration === launchGeneration) launching.value = false
-  }
-}
+function launchBuilder() { modelingOpen.value = true }
+const modelingOpen = ref(false)
+function taskCreated(taskId: string, ontologyId: string) { void router.push({name:'OntologyEditor',params:{id:ontologyId},query:{taskId}}) }
 function imported(result: PackageImportResult) {
   void router.push({ name: 'OntologyEditor', params: { id: result.ontologyId } })
 }
@@ -118,6 +100,7 @@ onMounted(load)
 </script>
 <template>
   <section class="semantic-page">
+    <ModelingTaskCreate v-model="modelingOpen" @created="taskCreated"/>
     <OntologyWorkbenchDialog v-if="workbenchOntology" :ontology="workbenchOntology" @close="workbenchOntology = null" />
     <header class="semantic-header">
       <div>

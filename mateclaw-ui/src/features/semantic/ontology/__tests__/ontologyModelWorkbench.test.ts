@@ -84,3 +84,18 @@ it('keeps restriction inputs through projection refresh and exposes rules only f
  props.editable=false;await flush();expect(document.body.querySelector('input[aria-label="关系 IRI"]')).toBeNull()
  expect([...host.querySelectorAll('button')].some(b=>b.textContent?.includes('编辑业务规则'))).toBe(false)
 })
+
+it('keeps mobile directory collapsed until explicitly opened or searched', async () => {
+ mount();await flush()
+ const toggle=host.querySelector<HTMLButtonElement>('.model-directory-toggle')!
+ const directory=host.querySelector('.model-directory-content')!
+ expect(toggle.getAttribute('aria-expanded')).toBe('false')
+ expect(directory.classList.contains('is-open')).toBe(false)
+ toggle.click();await flush();expect(directory.classList.contains('is-open')).toBe(true)
+ toggle.click();await flush()
+ const search=host.querySelector<HTMLInputElement>('input[id^=ontology-term-search]')!
+ search.value='Probe';search.dispatchEvent(new Event('input',{bubbles:true}));await flush()
+ expect(directory.classList.contains('is-open')).toBe(true)
+ expect(toggle.getAttribute('aria-expanded')).toBe('true')
+ expect(host.querySelector<HTMLDetailsElement>('.model-canvas-filters')?.open).toBe(false)
+})

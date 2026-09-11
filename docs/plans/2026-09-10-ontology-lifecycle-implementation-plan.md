@@ -1,6 +1,6 @@
 # 本体全生命周期：现状对比与实施计划
 
-状态：B1（T01、T02）已实施并通过范围内验证；B2—B5 尚未实施。详见 [B1 交付记录](2026-09-10-ontology-b1-delivery.md)。
+状态：B1（T01、T02）、B2（T03、T04）已实施并通过各自声明范围内验证；B3—B5 尚未实施。详见 [B1 交付记录](2026-09-10-ontology-b1-delivery.md)、[B2 交付记录](2026-09-11-ontology-b2-delivery.md)。
 
 基线：`19fa7558`，2026-09-10。依据：[完整功能设计](2026-09-10-ontology-business-lifecycle-design.md)、[能力审查](2026-09-10-ontology-capability-audit.md)及当前实现。实施前重新检查 HEAD、工作区改动及数据库迁移版本，不能把此基线当作永久不变。
 

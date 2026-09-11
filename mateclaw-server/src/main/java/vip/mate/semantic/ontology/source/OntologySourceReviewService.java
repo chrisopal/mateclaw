@@ -234,7 +234,7 @@ public class OntologySourceReviewService {
     private Material material(String scope,String kb,String source,boolean lock) {
         var rows=jdbc.query("SELECT m.title,COALESCE(NULLIF(m.extracted_text,''),m.original_content) AS content FROM mate_wiki_raw_material m JOIN mate_wiki_knowledge_base k ON k.id=m.kb_id WHERE m.id=? AND m.kb_id=? AND k.workspace_id=? AND m.deleted=0 AND k.deleted=0"+(lock?" FOR UPDATE":""),
             (rs,n)->{String text=Objects.toString(rs.getString("content"),"");return new Material(Objects.toString(rs.getString("title"),""),text,OntologyDocument.sha256(text));},positive(source),positive(kb),Long.valueOf(scope));
-        if(rows.isEmpty())return null;var result=rows.getFirst();if(result.text().isBlank()||result.text().length()>100000)throw bad("Source must contain 1..100000 parsed characters");return result;
+        if(rows.isEmpty())return null;var result=rows.getFirst();if(result.text().isBlank()||result.text().length()>1_000_000)throw bad("Source must contain 1..1000000 parsed characters");return result;
     }
     private OntologyRow parent(String scope,String id,boolean lock){var row=lock?mapper.lock(id,Long.parseLong(scope)):mapper.find(id,Long.parseLong(scope));if(row==null)throw missing();return row;}
     private <T>T replay(OntologyRow parent,String operation,String kind,Object payload,Class<T> type) {

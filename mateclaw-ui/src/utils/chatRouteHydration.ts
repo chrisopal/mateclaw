@@ -93,6 +93,9 @@ export function buildChatRouteQuery(options: {
     ...(options.agentId ? { agentId: options.agentId } : {}),
     ...(options.conversationId ? { conversationId: options.conversationId } : {}),
     ...runQuery,
+    ...(preserveRunQuery && typeof options.currentQuery.modelingTaskId === 'string' && typeof options.currentQuery.ontologyId === 'string'
+      ? { modelingTaskId: options.currentQuery.modelingTaskId, ontologyId: options.currentQuery.ontologyId }
+      : {}),
   }
 }
 

@@ -1,0 +1,583 @@
+{
+  "scope": "B2 additions and changed responsive controls, not every pre-existing UI control",
+  "environment": "5189 -> 18109; persistent H2; dedicated B2 workspace",
+  "pages": [
+    {
+      "id": "editor",
+      "url": "/semantic/ontologies/:id/edit",
+      "inventoryComplete": true
+    },
+    {
+      "id": "intake",
+      "url": "/semantic/ontologies",
+      "inventoryComplete": true
+    },
+    {
+      "id": "wiki",
+      "url": "/wiki/:id",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "task_recovery",
+      "page": "editor",
+      "name": "task_recovery",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "goal_collapsed",
+      "page": "editor",
+      "name": "goal_collapsed",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "action_alignment",
+      "page": "editor",
+      "name": "action_alignment",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "width_1440",
+      "page": "editor",
+      "name": "width_1440",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "width_1920",
+      "page": "editor",
+      "name": "width_1920",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "width_2560",
+      "page": "editor",
+      "name": "width_2560",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "width_768",
+      "page": "editor",
+      "name": "width_768",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "width_390",
+      "page": "editor",
+      "name": "width_390",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "catalog_collapsed",
+      "page": "editor",
+      "name": "catalog_collapsed",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "zoom_group",
+      "page": "editor",
+      "name": "zoom_group",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "zoom_in",
+      "page": "editor",
+      "name": "zoom_in",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "search_blur",
+      "page": "editor",
+      "name": "search_blur",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "empty_create_blocked",
+      "page": "editor",
+      "name": "empty_create_blocked",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "create_cancel",
+      "page": "editor",
+      "name": "create_cancel",
+      "locator": "replay-ui.js",
+      "checks": [
+        "interaction"
+      ]
+    },
+    {
+      "id": "natural_create",
+      "page": "intake",
+      "name": "natural_create",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "source_upload",
+      "page": "wiki",
+      "name": "source_upload",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "source_checked",
+      "page": "intake",
+      "name": "source_checked",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "conflict_review",
+      "page": "editor",
+      "name": "conflict_review",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "question_gate",
+      "page": "editor",
+      "name": "question_gate",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "accept_readback",
+      "page": "editor",
+      "name": "accept_readback",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "reject",
+      "page": "editor",
+      "name": "reject",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "dark_theme",
+      "page": "editor",
+      "name": "dark_theme",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "mobile_refit",
+      "page": "editor",
+      "name": "mobile_refit",
+      "locator": "Business UI",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "live_viewer",
+      "page": "editor",
+      "name": "live_viewer",
+      "locator": "Test suite",
+      "checks": [
+        "live"
+      ]
+    },
+    {
+      "id": "source_next_page",
+      "page": "intake",
+      "name": "source_next_page",
+      "locator": "Test suite",
+      "checks": [
+        "live"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "task_recovery",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Accepted proposal and task restored\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "goal_collapsed",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Requirement disclosure defaults closed\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "action_alignment",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"headerRight\":1374,\"modelRight\":1374}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "width_1440",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"width\":1440,\"scrollWidth\":1440,\"right\":1440,\"contentScroll\":1214,\"contentWidth\":1214}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "width_1920",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"width\":1920,\"scrollWidth\":1920,\"right\":1920,\"contentScroll\":1694,\"contentWidth\":1694}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "width_2560",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"width\":2560,\"scrollWidth\":2560,\"right\":2560,\"contentScroll\":2334,\"contentWidth\":2334}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "width_768",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"width\":768,\"scrollWidth\":768,\"right\":768,\"contentScroll\":762,\"contentWidth\":762}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "width_390",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"width\":390,\"scrollWidth\":390,\"right\":390,\"contentScroll\":384,\"contentWidth\":384}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "catalog_collapsed",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Mobile catalog collapsed with search available\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "zoom_group",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "[{\"top\":475.3984375,\"bottom\":499.3984375},{\"top\":478.3984375,\"bottom\":496.3984375},{\"top\":475.3984375,\"bottom\":499.3984375}]",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "zoom_in",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "{\"before\":47,\"enlarged\":59}",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "search_blur",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Search opens matching directory and survives blur\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "empty_create_blocked",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Empty required goal cannot create\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "create_cancel",
+      "check": "interaction",
+      "status": "PASS",
+      "steps": [
+        "Run replay-ui.js against persistent B2 fixture"
+      ],
+      "expected": "Assertion passes",
+      "actual": "\"Cancel closes intake without mutation\"",
+      "evidence": [
+        "ui-replay-results.json",
+        "replay-ui.js"
+      ]
+    },
+    {
+      "control": "natural_create",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Create through UI, continue real DeepSeek conversation"
+      ],
+      "expected": "Pending proposal leaves draft unchanged",
+      "actual": "Pending proposal leaves draft unchanged",
+      "evidence": [
+        "natural-task-before-confirmation.json"
+      ]
+    },
+    {
+      "control": "source_upload",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Upload two TXT files and select via Wiki entry"
+      ],
+      "expected": "Pinned sources persisted on same task",
+      "actual": "Pinned sources persisted on same task",
+      "evidence": [
+        "source-task-before-confirmation.json"
+      ]
+    },
+    {
+      "control": "source_checked",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Select then blur and wait for transition"
+      ],
+      "expected": "Checked background rgb(9,102,217), selection retained",
+      "actual": "Checked background rgb(9,102,217), selection retained",
+      "evidence": [
+        "source-checked-fixed.png"
+      ]
+    },
+    {
+      "control": "conflict_review",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Read both sources using actual model"
+      ],
+      "expected": "Conflicting 2/4 limit becomes question, no limit silently applied",
+      "actual": "Conflicting 2/4 limit becomes question, no limit silently applied",
+      "evidence": [
+        "source-task-before-confirmation.json"
+      ]
+    },
+    {
+      "control": "question_gate",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Empty answer, fill, blur, confirm"
+      ],
+      "expected": "Disabled before answer, enabled after blur, accepted",
+      "actual": "Disabled before answer, enabled after blur, accepted",
+      "evidence": [
+        "source-proposal-review.png"
+      ]
+    },
+    {
+      "control": "accept_readback",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Accept, refresh, restart, API readback"
+      ],
+      "expected": "OWL inheritance and attributes persisted with same digest",
+      "actual": "OWL inheritance and attributes persisted with same digest",
+      "evidence": [
+        "persistent-readback.json"
+      ]
+    },
+    {
+      "control": "reject",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Reject incomplete proposal, regenerate, accept"
+      ],
+      "expected": "Rejected history preserved; corrected 4 commands accepted",
+      "actual": "Rejected history preserved; corrected 4 commands accepted",
+      "evidence": [
+        "natural-task-after-confirmation.json"
+      ]
+    },
+    {
+      "control": "dark_theme",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Switch theme, inspect screenshot"
+      ],
+      "expected": "Legible text, borders and collapsed requirements",
+      "actual": "Legible text, borders and collapsed requirements",
+      "evidence": [
+        "proposal-dark.png"
+      ]
+    },
+    {
+      "control": "mobile_refit",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Resize 1920 to 390, zoom and fit"
+      ],
+      "expected": "All 6 nodes visible, zoom group stays together",
+      "actual": "All 6 nodes visible, zoom group stays together",
+      "evidence": [
+        "editor-mobile-final.png"
+      ]
+    },
+    {
+      "control": "live_viewer",
+      "check": "live",
+      "status": "NOT_RUN",
+      "steps": [],
+      "expected": "Live browser scenario",
+      "actual": "Not run",
+      "reason": "Permissions covered by integration and component tests, no separate live viewer session",
+      "evidence": []
+    },
+    {
+      "control": "source_next_page",
+      "check": "live",
+      "status": "NOT_RUN",
+      "steps": [],
+      "expected": "Live browser scenario",
+      "actual": "Not run",
+      "reason": "Two live documents only; multi-page behavior covered by tool integration tests",
+      "evidence": []
+    }
+  ]
+}

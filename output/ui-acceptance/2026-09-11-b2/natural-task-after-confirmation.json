@@ -1,0 +1,386 @@
+{
+  "id": "5edbcb4b-47ef-4c27-b7fa-5054c6d94e79",
+  "ontologyId": "2098226012030738434",
+  "draftId": "2098226012034932738",
+  "goal": "建立设备和传感器两个业务对象。传感器是一种设备。设备具有文本类型的设备编号。仅根据这段用户陈述建立模型，不引用任何外部资料。先提交建模建议，等待我确认，不发布版本。",
+  "sources": [],
+  "stage": "READY",
+  "message": null,
+  "proposals": [
+    {
+      "id": "e97619b6-cc90-4594-8c93-359b7a34d59c",
+      "input": {
+        "operationId": "proposal-device-sensor-20260911-v1",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "设备",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "device"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "设备编号",
+            "domainId": "$device",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "deviceCode"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "device",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "建立设备和传感器两个业务对象",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "sensor",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "传感器是一种设备",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "deviceCode",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "设备具有文本类型的设备编号",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          }
+        ],
+        "questions": [],
+        "samples": []
+      },
+      "status": "REJECTED",
+      "reason": null,
+      "answers": {},
+      "result": null
+    },
+    {
+      "id": "81923440-8bf9-4307-a404-4da85b576b13",
+      "input": {
+        "operationId": "proposal-device-sensor-20260911-v3",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "设备",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "device"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensor"
+          },
+          {
+            "kind": "REPLACE_DEFINITION",
+            "termKind": "OBJECT",
+            "targetId": "$sensor",
+            "name": null,
+            "domainId": null,
+            "rangeId": null,
+            "field": "PARENT",
+            "value": "$device",
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensorParent"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "设备编号",
+            "domainId": "$device",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "deviceCode"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "device",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "建立设备和传感器两个业务对象",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "sensor",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "传感器是一种设备",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "sensorParent",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "传感器是一种设备",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "deviceCode",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "设备具有文本类型的设备编号",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          }
+        ],
+        "questions": [],
+        "samples": []
+      },
+      "status": "ACCEPTED",
+      "reason": null,
+      "answers": {},
+      "result": {
+        "draft": {
+          "id": "2098226012034932738",
+          "ontologyId": "2098226012030738434",
+          "baseRevisionId": null,
+          "version": 1,
+          "draftVersion": 2,
+          "name": "B2 自然语言设备模型",
+          "description": "",
+          "document": {
+            "source": {
+              "modelSchema": "owl-document-v1",
+              "syntax": "FUNCTIONAL",
+              "documentText": "Prefix(:=<urn:mateclaw:ontology:2098226012030738434#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098226012030738434>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>))\nDeclaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9>))\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> (设备编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> \"设备编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)\nDataPropertyRange(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7> (设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7> \"设备\")\n\n# Class: <urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> (传感器)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> \"传感器\")\nSubClassOf(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)\n\n\n)",
+              "imports": [],
+              "policy": {
+                "version": "1",
+                "rules": []
+              }
+            },
+            "ontologyIri": "urn:mateclaw:ontology:2098226012030738434",
+            "versionIri": null,
+            "documentDigest": "82b3e5ea62459b0c9c22ac82355e07593625c0d18c726b337fe8d0eb0cc4684b",
+            "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "axioms": [
+              {
+                "axiomId": "71cfde44210caaee2602b7a32cade3442bfe7013a1e3886f0ef1c3bbbd2a7699",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> \"传感器\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "c3b6f527ee5dc57800ea29ea62d6fae319f9de6c9112b9cdede126095a5dcf7e",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> \"设备编号\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "a10a30ba35aac929db6a56ded130719ec0aab059019122ec0a1c0c3990d14537",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7> \"设备\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "f06d9be17621b3e30a4d5e8708cef80ed5c87291a18b58a97004bd6746b9e451",
+                "axiomType": "DataPropertyDomain",
+                "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7",
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "b4641c56b12709ca9ec8a5f7636cccc238f64801cc2b4021e915c68168d964de",
+                "axiomType": "DataPropertyRange",
+                "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9> xsd:string)",
+                "signatureIris": [
+                  "http://www.w3.org/2001/XMLSchema#string",
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "7904d268c9ba65fdb50d49df66cbfb8d9ffb666f74eab5690840865d6499de91",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "88941bfc5e112271f9317087193b3b7dcfdc82908c7fb584de2135b03cbd45c1",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "b01823dd0d0f9c767144727ef2a162f88a2b933bada4bd5f4ea777d6d4ef71e4",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "4fdec6aac9b809996e5c0897b0f54aa1c840a16043a639befe62b354c5ce2d2c",
+                "axiomType": "SubClassOf",
+                "rendering": "SubClassOf(<urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96> <urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7",
+                  "urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96"
+                ],
+                "annotations": [],
+                "logical": true
+              }
+            ]
+          }
+        },
+        "items": [
+          {
+            "clientId": "device",
+            "targetId": "urn:mateclaw:ontology:2098226012030738434/model-term/d7224d360b574651f62838f28e48efa05ee2cea41ae86903a2f96e32fa9081c7",
+            "axiomIds": [
+              "88941bfc5e112271f9317087193b3b7dcfdc82908c7fb584de2135b03cbd45c1",
+              "a10a30ba35aac929db6a56ded130719ec0aab059019122ec0a1c0c3990d14537"
+            ]
+          },
+          {
+            "clientId": "sensor",
+            "targetId": "urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96",
+            "axiomIds": [
+              "71cfde44210caaee2602b7a32cade3442bfe7013a1e3886f0ef1c3bbbd2a7699",
+              "7904d268c9ba65fdb50d49df66cbfb8d9ffb666f74eab5690840865d6499de91"
+            ]
+          },
+          {
+            "clientId": "sensorParent",
+            "targetId": "urn:mateclaw:ontology:2098226012030738434/model-term/0b70f946aee5fc6bb02ffb5723315c2d11a1518458c3be0f1453848b99c04e96",
+            "axiomIds": [
+              "4fdec6aac9b809996e5c0897b0f54aa1c840a16043a639befe62b354c5ce2d2c"
+            ]
+          },
+          {
+            "clientId": "deviceCode",
+            "targetId": "urn:mateclaw:ontology:2098226012030738434/model-term/9d4caff76da109ef2d70abffa0353d49cf56e2846302dd53200bb848784eeec9",
+            "axiomIds": [
+              "b01823dd0d0f9c767144727ef2a162f88a2b933bada4bd5f4ea777d6d4ef71e4",
+              "b4641c56b12709ca9ec8a5f7636cccc238f64801cc2b4021e915c68168d964de",
+              "c3b6f527ee5dc57800ea29ea62d6fae319f9de6c9112b9cdede126095a5dcf7e",
+              "f06d9be17621b3e30a4d5e8708cef80ed5c87291a18b58a97004bd6746b9e451"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -16,6 +16,8 @@ let cy: Core | undefined
 let resizeObserver: ResizeObserver | undefined
 let themeObserver: MutationObserver | undefined
 let activeLayout: ReturnType<Core['layout']> | undefined
+let fittedWidth = 0
+let compactAtFit = window.innerWidth <= 650
 const positions = new Map<string, { x: number; y: number }>()
 function styles(): StylesheetJson {
   const css = getComputedStyle(host.value!)
@@ -39,7 +41,23 @@ function decorate() {
   for (const id of props.highlightedIds) cy.getElementById(id).addClass('matched')
   cy.getElementById(props.selectedNodeId || props.selectedEdgeId).addClass('chosen')
 }
-function fit() { cy?.fit(undefined, 30) }
+function fit() {
+  cy?.fit(undefined, 24)
+  const width = host.value?.getBoundingClientRect().width || 0
+  if (width > 0) { fittedWidth = width; compactAtFit = window.innerWidth <= 650 }
+}
+function resizeCanvas(entries: ResizeObserverEntry[]) {
+  const size = entries.find(entry => entry.target === host.value)?.contentRect
+  if (!cy || !size || size.width <= 0 || size.height <= 0) return
+  cy.resize()
+  const compact = window.innerWidth <= 650
+  const majorWidthChange = Math.abs(size.width - fittedWidth) >= Math.max(80, fittedWidth * 0.25)
+  if (!fittedWidth || compact !== compactAtFit || majorWidthChange) {
+    fit()
+    fittedWidth = size.width
+    compactAtFit = compact
+  }
+}
 function focus(id?: string) {
   if (!cy) return
   const target = cy.getElementById(id || props.selectedNodeId || props.selectedEdgeId || props.highlightedIds[0] || '')
@@ -87,7 +105,7 @@ onMounted(() => {
     cy.on('tap', 'edge', e => emit('select-edge', e.target.id()))
     cy.on('zoom', () => { zoom.value = cy!.zoom() })
     update()
-    resizeObserver = new ResizeObserver(() => cy?.resize())
+    resizeObserver = new ResizeObserver(resizeCanvas)
     resizeObserver.observe(host.value!)
     themeObserver = new MutationObserver(() => cy?.style(styles()))
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] })
@@ -104,15 +122,24 @@ defineExpose({ focus, fit })
 <template>
   <div class="ontology-graph-canvas">
     <div class="graph-toolbar">
-      <label>{{ tr('布局', 'Layout') }} <select v-model="layoutMode" :aria-label="tr('图形布局', 'Graph layout')" :disabled="unavailable" @change="arrange"><option value="hierarchy">{{ tr('层级', 'Hierarchy') }}</option><option value="relations">{{ tr('关系探索', 'Relationships') }}</option></select></label>
-      <div class="graph-actions">
-        <el-button size="small" :disabled="unavailable" @click="arrange">{{ tr('重新布局', 'Arrange') }}</el-button>
-        <el-button size="small" :disabled="unavailable" @click="fit">{{ tr('适应画布', 'Fit') }}</el-button>
-        <el-button size="small" :disabled="unavailable || !(selectedNodeId || selectedEdgeId || highlightedIds.length)" @click="focus()">{{ tr('定位所选', 'Locate') }}</el-button>
-        <el-button size="small" :aria-label="tr('缩小', 'Zoom out')" :disabled="unavailable" @click="scale(0.8)">−</el-button>
-        <output class="graph-zoom" :aria-label="tr('缩放比例', 'Zoom level')">{{ Math.round(zoom * 100) }}%</output>
-        <el-button size="small" :aria-label="tr('放大', 'Zoom in')" :disabled="unavailable" @click="scale(1.25)">＋</el-button>
+      <div class="graph-primary-controls">
+        <div class="graph-view-actions">
+          <el-button size="small" :disabled="unavailable" @click="fit">{{ tr('适应画布', 'Fit') }}</el-button>
+          <el-button size="small" :disabled="unavailable || !(selectedNodeId || selectedEdgeId || highlightedIds.length)" @click="focus()">{{ tr('定位所选', 'Locate') }}</el-button>
+        </div>
+        <div class="graph-zoom-controls" role="group" :aria-label="tr('画布缩放', 'Canvas zoom')">
+          <el-button size="small" :aria-label="tr('缩小', 'Zoom out')" :disabled="unavailable" @click="scale(0.8)">−</el-button>
+          <output class="graph-zoom" :aria-label="tr('缩放比例', 'Zoom level')">{{ Math.round(zoom * 100) }}%</output>
+          <el-button size="small" :aria-label="tr('放大', 'Zoom in')" :disabled="unavailable" @click="scale(1.25)">＋</el-button>
+        </div>
       </div>
+      <details class="graph-layout-controls">
+        <summary>{{ tr('布局设置', 'Layout settings') }}</summary>
+        <div class="graph-layout-options">
+          <label>{{ tr('布局', 'Layout') }} <select v-model="layoutMode" :aria-label="tr('图形布局', 'Graph layout')" :disabled="unavailable" @change="arrange"><option value="hierarchy">{{ tr('层级', 'Hierarchy') }}</option><option value="relations">{{ tr('关系探索', 'Relationships') }}</option></select></label>
+          <el-button size="small" :disabled="unavailable" @click="arrange">{{ tr('重新布局', 'Arrange') }}</el-button>
+        </div>
+      </details>
     </div>
     <p v-if="unavailable" role="status" class="graph-message">{{ tr('图形画布暂不可用，请使用定义目录与关系列表查看。', 'Canvas unavailable. Use the definition directory and relationship list.') }}</p>
     <div ref="host" class="graph-surface" tabindex="0" role="group" :aria-label="tr('本体画布，可拖动节点、平移和缩放；键盘选择请使用定义目录与关系列表', 'Ontology canvas: drag nodes, pan and zoom. Use the directory and link list for keyboard selection.')" @keydown="keydown" />
@@ -121,4 +148,5 @@ defineExpose({ focus, fit })
 </template>
 <style scoped>
 .ontology-graph-canvas{min-width:0}.graph-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--mc-border);flex-wrap:wrap}.graph-toolbar label{font-size:12px;display:flex;gap:6px;align-items:center}.graph-toolbar select{background:var(--mc-bg-elevated);color:var(--mc-text-primary);border:1px solid var(--mc-border);border-radius:4px;padding:4px}.graph-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.graph-actions .el-button+.el-button{margin-left:0}.graph-zoom{min-width:36px;text-align:center;font-size:12px}.graph-surface{height:480px;position:relative;min-width:0;touch-action:none}.graph-surface:focus-visible{outline:2px solid var(--el-color-primary);outline-offset:-2px}.graph-help,.graph-message{font-size:12px;color:var(--mc-text-secondary);line-height:1.6;margin:0;padding:8px 12px}.graph-help{border-top:1px solid var(--mc-border)}@media(max-width:650px){.graph-surface{height:340px}}
+.graph-toolbar{display:block}.graph-primary-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.graph-view-actions,.graph-zoom-controls{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}.graph-view-actions .el-button+.el-button,.graph-zoom-controls .el-button+.el-button{margin-left:0}.graph-zoom-controls{white-space:nowrap;flex-shrink:0;margin-left:auto}.graph-layout-controls{margin-top:8px;font-size:12px}.graph-layout-controls>summary{cursor:pointer;color:var(--mc-text-secondary)}.graph-layout-options{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:8px}@media(max-width:650px){.graph-help{display:none}.graph-primary-controls{gap:8px}.graph-view-actions .el-button{padding:5px 8px}.graph-zoom-controls .el-button{padding:5px 8px}.graph-zoom{min-width:40px}}
 </style>

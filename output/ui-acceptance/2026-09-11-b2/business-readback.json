@@ -1,0 +1,24 @@
+{
+  "natural": {
+    "taskId": "5edbcb4b-47ef-4c27-b7fa-5054c6d94e79",
+    "ontologyId": "2098226012030738434",
+    "draftVersion": 2,
+    "status": "ACCEPTED",
+    "subClassCount": 1,
+    "sourceCount": 0,
+    "questions": 0,
+    "answerCount": 0,
+    "evidenceCount": 4
+  },
+  "source": {
+    "taskId": "c5e4cce8-aba3-48f2-814c-9b473b571cd5",
+    "ontologyId": "2098228271250644993",
+    "draftVersion": 16,
+    "status": "ACCEPTED",
+    "subClassCount": 1,
+    "sourceCount": 2,
+    "questions": 1,
+    "answerCount": 1,
+    "evidenceCount": 5
+  }
+}

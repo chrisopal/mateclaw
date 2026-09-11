@@ -17,7 +17,10 @@ public record OntologyAxiomDescriptor(
         axiomId = Objects.requireNonNull(axiomId, "axiomId");
         axiomType = Objects.requireNonNull(axiomType, "axiomType");
         rendering = Objects.requireNonNull(rendering, "rendering");
-        signatureIris = Set.copyOf(Objects.requireNonNull(signatureIris, "signatureIris"));
+        // JSON exposes this set as an array. Canonical order must survive database
+        // deserialization so idempotent replay returns the same wire representation.
+        signatureIris = java.util.Collections.unmodifiableSortedSet(
+                new java.util.TreeSet<>(Objects.requireNonNull(signatureIris, "signatureIris")));
         annotations = List.copyOf(Objects.requireNonNull(annotations, "annotations"));
     }
 }

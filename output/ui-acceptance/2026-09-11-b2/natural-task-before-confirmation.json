@@ -1,0 +1,106 @@
+{
+  "id": "5edbcb4b-47ef-4c27-b7fa-5054c6d94e79",
+  "ontologyId": "2098226012030738434",
+  "draftId": "2098226012034932738",
+  "goal": "建立设备和传感器两个业务对象。传感器是一种设备。设备具有文本类型的设备编号。仅根据这段用户陈述建立模型，不引用任何外部资料。先提交建模建议，等待我确认，不发布版本。",
+  "sources": [],
+  "stage": "AWAITING_CONFIRMATION",
+  "message": null,
+  "proposals": [
+    {
+      "id": "e97619b6-cc90-4594-8c93-359b7a34d59c",
+      "input": {
+        "operationId": "proposal-device-sensor-20260911-v1",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "设备",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "device"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "设备编号",
+            "domainId": "$device",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "deviceCode"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "device",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "建立设备和传感器两个业务对象",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "sensor",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "传感器是一种设备",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          },
+          {
+            "clientId": "deviceCode",
+            "knowledgeBaseId": null,
+            "sourceRef": null,
+            "sourceDigest": null,
+            "exactQuote": "设备具有文本类型的设备编号",
+            "occurrence": null,
+            "origin": "USER_STATEMENT"
+          }
+        ],
+        "questions": [],
+        "samples": []
+      },
+      "status": "PENDING",
+      "reason": null,
+      "answers": {},
+      "result": null
+    }
+  ]
+}

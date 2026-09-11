@@ -1,6 +1,12 @@
 <template>
   <div class="mc-page-shell chat-console-shell">
     <div class="mc-page-frame chat-console-frame">
+      <div v-if="route.query.modelingTaskId && route.query.ontologyId" class="modeling-chat-context">
+        <span>业务建模：建议需返回草稿确认</span>
+        <el-button @click="router.push({ name: 'OntologyEditor', params: { id: String(route.query.ontologyId) }, query: { taskId: String(route.query.modelingTaskId) } })">
+          返回建议确认
+        </el-button>
+      </div>
       <div class="chat-layout mc-surface-card">
         <!-- 移动端会话面板遮罩 -->
         <Transition name="fade">
@@ -307,6 +313,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mcToast } from '@/composables/useMcToast'
 import { ChatDotRound, Delete, Setting, UploadFilled } from '@element-plus/icons-vue'
+import { modelingTaskPrompt } from '@/features/semantic/api/modelingTaskApi'
 import { conversationApi, agentApi, modelApi, chatApi, cronJobApi, approvalApi } from '@/api/index'
 import { copyToClipboard } from '@/utils/clipboard'
 import { useFileDrop } from '@/composables/useFileDrop'
@@ -415,6 +422,9 @@ const conversations = ref<Conversation[]>([])
 const selectedAgentId = ref<string | number>('')
 const currentConversationId = ref<string>('')
 const inputText = ref('')
+watch(() => route.query.modelingTaskId, value => {
+  if (typeof value === 'string' && !inputText.value) inputText.value = modelingTaskPrompt(value)
+}, { immediate: true })
 const modelSaving = ref(false)
 // Monotonic counter for in-flight setModel PUTs. The finally handler
 // only clears modelSaving when its captured seq is still the latest, so a
@@ -2526,6 +2536,7 @@ function handleCodeCopy(e: MouseEvent) {
 </script>
 
 <style scoped>
+.modeling-chat-context { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 8px 16px; }
 .ctx-usage-row {
   display: flex;
   justify-content: flex-end;

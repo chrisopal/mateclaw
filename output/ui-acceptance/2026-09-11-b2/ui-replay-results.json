@@ -1,0 +1,121 @@
+[
+  {
+    "check": "task_recovery",
+    "passed": true,
+    "actual": "Accepted proposal and task restored"
+  },
+  {
+    "check": "goal_collapsed",
+    "passed": true,
+    "actual": "Requirement disclosure defaults closed"
+  },
+  {
+    "check": "action_alignment",
+    "passed": true,
+    "actual": {
+      "headerRight": 1374,
+      "modelRight": 1374
+    }
+  },
+  {
+    "check": "width_1440",
+    "passed": true,
+    "actual": {
+      "width": 1440,
+      "scrollWidth": 1440,
+      "right": 1440,
+      "contentScroll": 1214,
+      "contentWidth": 1214
+    }
+  },
+  {
+    "check": "width_1920",
+    "passed": true,
+    "actual": {
+      "width": 1920,
+      "scrollWidth": 1920,
+      "right": 1920,
+      "contentScroll": 1694,
+      "contentWidth": 1694
+    }
+  },
+  {
+    "check": "width_2560",
+    "passed": true,
+    "actual": {
+      "width": 2560,
+      "scrollWidth": 2560,
+      "right": 2560,
+      "contentScroll": 2334,
+      "contentWidth": 2334
+    }
+  },
+  {
+    "check": "width_768",
+    "passed": true,
+    "actual": {
+      "width": 768,
+      "scrollWidth": 768,
+      "right": 768,
+      "contentScroll": 762,
+      "contentWidth": 762
+    }
+  },
+  {
+    "check": "width_390",
+    "passed": true,
+    "actual": {
+      "width": 390,
+      "scrollWidth": 390,
+      "right": 390,
+      "contentScroll": 384,
+      "contentWidth": 384
+    }
+  },
+  {
+    "check": "catalog_collapsed",
+    "passed": true,
+    "actual": "Mobile catalog collapsed with search available"
+  },
+  {
+    "check": "zoom_group",
+    "passed": true,
+    "actual": [
+      {
+        "top": 475.3984375,
+        "bottom": 499.3984375
+      },
+      {
+        "top": 478.3984375,
+        "bottom": 496.3984375
+      },
+      {
+        "top": 475.3984375,
+        "bottom": 499.3984375
+      }
+    ]
+  },
+  {
+    "check": "zoom_in",
+    "passed": true,
+    "actual": {
+      "before": 47,
+      "enlarged": 59
+    }
+  },
+  {
+    "check": "search_blur",
+    "passed": true,
+    "actual": "Search opens matching directory and survives blur"
+  },
+  {
+    "check": "empty_create_blocked",
+    "passed": true,
+    "actual": "Empty required goal cannot create"
+  },
+  {
+    "check": "create_cancel",
+    "passed": true,
+    "actual": "Cancel closes intake without mutation"
+  }
+]

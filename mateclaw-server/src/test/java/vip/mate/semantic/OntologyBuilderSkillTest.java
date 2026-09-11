@@ -16,16 +16,10 @@ import vip.mate.skill.runtime.SkillFrontmatterParser;
 class OntologyBuilderSkillTest {
 
     private static final Set<String> EXPECTED_TOOLS = Set.of(
-            "semantic_ontology_copy_revision",
-            "semantic_ontology_sources",
-            "semantic_ontology_list",
-            "semantic_ontology_get",
-            "semantic_ontology_create_draft",
-            "semantic_ontology_save_draft",
-            "semantic_ontology_validate",
-            "semantic_ontology_prepare_publish",
-            "semantic_ontology_read_source",
-            "semantic_ontology_bind_source");
+            "semantic_modeling_create_task", "semantic_modeling_get_task",
+            "semantic_modeling_submit_proposal", "semantic_modeling_sources",
+            "semantic_modeling_read_source", "semantic_ontology_list",
+            "semantic_ontology_get", "semantic_ontology_validate", "semantic_ontology_prepare_publish");
 
     @Test
     void shipsAParserCompatibleSkillWithTheBoundedOntologyWorkflow() throws IOException {
@@ -41,16 +35,18 @@ class OntologyBuilderSkillTest {
         assertNotNull(manifest);
         assertEquals("ontology-builder", manifest.getId());
         assertEquals(EXPECTED_TOOLS, Set.copyOf(manifest.getAllowedTools()));
-        assertTrue(content.contains("semantic_ontology_sources"));
-        assertTrue(content.contains("从资料生成本体"));
-        assertTrue(content.contains("建立领域模型"));
-        assertTrue(content.contains("owl-document-v1"));
+        var registered=java.util.Arrays.stream(vip.mate.semantic.authoring.OntologyAuthoringTool.class.getMethods())
+                .filter(method->method.isAnnotationPresent(org.springframework.ai.tool.annotation.Tool.class))
+                .map(java.lang.reflect.Method::getName).collect(java.util.stream.Collectors.toSet());
+        assertTrue(registered.containsAll(EXPECTED_TOOLS), "every skill dependency must be an actual registered tool");
+        assertFalse(manifest.getAllowedTools().contains("semantic_ontology_save_draft"), "standard modeling must not route through complete OWL writes");
+        assertTrue(content.contains("USER_STATEMENT"));
+        assertTrue(content.contains("$clientId"));
         assertTrue(content.contains("expectedDraftVersion"));
-        assertTrue(content.contains("contentDigest"));
-        assertTrue(content.contains("原文引句及区间"));
+        assertTrue(content.contains("sourceDigest"));
+        assertTrue(content.contains("remaining") || content.contains("剩余范围"));
         assertTrue(content.contains("semantic_ontology_prepare_publish"));
-        assertFalse(content.contains("semantic_ontology_publish"),
-                "the skill must not invent an autonomous publish tool");
-        assertTrue(content.contains("NOT_RUN 不得宣称逻辑一致"));
+        assertFalse(content.contains("semantic_ontology_publish"), "the skill must not invent an autonomous publish tool");
+        assertTrue(content.contains("NOT_RUN 不得宣称推理通过"));
     }
 }

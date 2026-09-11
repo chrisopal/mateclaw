@@ -1,0 +1,20 @@
+{
+  "natural": {
+    "taskId": "5edbcb4b-47ef-4c27-b7fa-5054c6d94e79",
+    "ontologyId": "2098226012030738434",
+    "draftId": "2098226012034932738",
+    "draftVersion": 2,
+    "documentDigest": "82b3e5ea62459b0c9c22ac82355e07593625c0d18c726b337fe8d0eb0cc4684b",
+    "proposalStatus": "ACCEPTED",
+    "sourceCount": 0
+  },
+  "source": {
+    "taskId": "c5e4cce8-aba3-48f2-814c-9b473b571cd5",
+    "ontologyId": "2098228271250644993",
+    "draftId": "2098228271250644994",
+    "draftVersion": 16,
+    "documentDigest": "5b0b3060e6ef930e3e63619c1a79054bb1f8411657db629878ff7fd675c5683e",
+    "proposalStatus": "ACCEPTED",
+    "sourceCount": 2
+  }
+}

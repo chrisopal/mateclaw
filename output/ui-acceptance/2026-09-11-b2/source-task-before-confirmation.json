@@ -1,0 +1,190 @@
+{
+  "id": "c5e4cce8-aba3-48f2-814c-9b473b571cd5",
+  "ontologyId": "2098228271250644993",
+  "draftId": "2098228271250644994",
+  "goal": "根据所选两份资料建立设备、传感器及其属性关系模型。请逐份读取资料，记录真实引用依据，识别矛盾并提出需要我回答的问题。文档里的设备实例仅作示例，不要当作业务类型。仅保存建议，等待人工确认，不发布。",
+  "sources": [
+    {
+      "knowledgeBaseId": "2098226601875709954",
+      "sourceRef": "2098227241255411713",
+      "sourceDigest": "37cbcdb4c32b5ad755df429718c275653e32b0e4114734e863a6f966f8a6cb76"
+    },
+    {
+      "knowledgeBaseId": "2098226601875709954",
+      "sourceRef": "2098227241255411714",
+      "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd"
+    }
+  ],
+  "stage": "AWAITING_CONFIRMATION",
+  "message": null,
+  "proposals": [
+    {
+      "id": "d6d441a0-4519-401c-9425-834046cf0e4c",
+      "input": {
+        "operationId": "proposal-device-sensor-v3",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "生产设备",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "equipment"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "温度传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "temperatureSensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "RELATION",
+            "targetId": null,
+            "name": "安装传感器",
+            "domainId": "$equipment",
+            "rangeId": "$sensor",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "installsSensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "设备编号",
+            "domainId": "$equipment",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "equipmentCode"
+          },
+          {
+            "kind": "REPLACE_DEFINITION",
+            "termKind": null,
+            "targetId": "$temperatureSensor",
+            "name": null,
+            "domainId": null,
+            "rangeId": null,
+            "field": "PARENT",
+            "value": "$sensor",
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "temperatureSensor-parent"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "equipment",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "生产设备是工厂用于生产的设备类型",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "sensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "传感器是一类测量装置",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "temperatureSensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411713",
+            "sourceDigest": "37cbcdb4c32b5ad755df429718c275653e32b0e4114734e863a6f966f8a6cb76",
+            "exactQuote": "温度传感器属于传感器",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "installsSensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "生产设备可以安装传感器，安装关系从生产设备指向传感器",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "equipmentCode",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "每台生产设备有设备编号，编号是文本",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          }
+        ],
+        "questions": [
+          "两份资料对“每台生产设备可安装的传感器数量上限”规定不一致：maintenance-guide.txt 规定最多四个，equipment-spec.txt 规定最多两个。资料本身要求上限不一致时须由业务人员确认，不能自动挑选。请确认以哪个上限为准（四个 / 两个 / 其他）。"
+        ],
+        "samples": [
+          "设备编号示例 EQ-QA-001（资料明确说明为实例示例，不是新的对象类型，仅作隔离样例，不作为通用定义或正式事实）。"
+        ]
+      },
+      "status": "PENDING",
+      "reason": null,
+      "answers": {},
+      "result": null
+    }
+  ]
+}

@@ -1,0 +1,433 @@
+{
+  "id": "c5e4cce8-aba3-48f2-814c-9b473b571cd5",
+  "ontologyId": "2098228271250644993",
+  "draftId": "2098228271250644994",
+  "goal": "根据所选两份资料建立设备、传感器及其属性关系模型。请逐份读取资料，记录真实引用依据，识别矛盾并提出需要我回答的问题。文档里的设备实例仅作示例，不要当作业务类型。仅保存建议，等待人工确认，不发布。",
+  "sources": [
+    {
+      "knowledgeBaseId": "2098226601875709954",
+      "sourceRef": "2098227241255411713",
+      "sourceDigest": "37cbcdb4c32b5ad755df429718c275653e32b0e4114734e863a6f966f8a6cb76"
+    },
+    {
+      "knowledgeBaseId": "2098226601875709954",
+      "sourceRef": "2098227241255411714",
+      "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd"
+    }
+  ],
+  "stage": "READY",
+  "message": null,
+  "proposals": [
+    {
+      "id": "d6d441a0-4519-401c-9425-834046cf0e4c",
+      "input": {
+        "operationId": "proposal-device-sensor-v3",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "生产设备",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "equipment"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "sensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "温度传感器",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "temperatureSensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "RELATION",
+            "targetId": null,
+            "name": "安装传感器",
+            "domainId": "$equipment",
+            "rangeId": "$sensor",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "installsSensor"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "设备编号",
+            "domainId": "$equipment",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "equipmentCode"
+          },
+          {
+            "kind": "REPLACE_DEFINITION",
+            "termKind": null,
+            "targetId": "$temperatureSensor",
+            "name": null,
+            "domainId": null,
+            "rangeId": null,
+            "field": "PARENT",
+            "value": "$sensor",
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "temperatureSensor-parent"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "equipment",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "生产设备是工厂用于生产的设备类型",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "sensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "传感器是一类测量装置",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "temperatureSensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411713",
+            "sourceDigest": "37cbcdb4c32b5ad755df429718c275653e32b0e4114734e863a6f966f8a6cb76",
+            "exactQuote": "温度传感器属于传感器",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "installsSensor",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "生产设备可以安装传感器，安装关系从生产设备指向传感器",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "equipmentCode",
+            "knowledgeBaseId": "2098226601875709954",
+            "sourceRef": "2098227241255411714",
+            "sourceDigest": "af69b2787529b5193674a9d432d500c16856416d12bfceb2bf6fc8a57d6368dd",
+            "exactQuote": "每台生产设备有设备编号，编号是文本",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          }
+        ],
+        "questions": [
+          "两份资料对“每台生产设备可安装的传感器数量上限”规定不一致：maintenance-guide.txt 规定最多四个，equipment-spec.txt 规定最多两个。资料本身要求上限不一致时须由业务人员确认，不能自动挑选。请确认以哪个上限为准（四个 / 两个 / 其他）。"
+        ],
+        "samples": [
+          "设备编号示例 EQ-QA-001（资料明确说明为实例示例，不是新的对象类型，仅作隔离样例，不作为通用定义或正式事实）。"
+        ]
+      },
+      "status": "ACCEPTED",
+      "reason": null,
+      "answers": {
+        "两份资料对“每台生产设备可安装的传感器数量上限”规定不一致：maintenance-guide.txt 规定最多四个，equipment-spec.txt 规定最多两个。资料本身要求上限不一致时须由业务人员确认，不能自动挑选。请确认以哪个上限为准（四个 / 两个 / 其他）。": "本轮仅确认上述对象、继承、安装关系和编号属性。传感器数量上限暂不设置，保留冲突待业务确认后另提建议。"
+      },
+      "result": {
+        "draft": {
+          "id": "2098228271250644994",
+          "ontologyId": "2098228271250644993",
+          "baseRevisionId": null,
+          "version": 1,
+          "draftVersion": 16,
+          "name": "B2 双资料设备模型",
+          "description": "",
+          "document": {
+            "source": {
+              "modelSchema": "owl-document-v1",
+              "syntax": "FUNCTIONAL",
+              "documentText": "Prefix(:=<urn:mateclaw:ontology:2098228271250644993#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098228271250644993>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d>))\nDeclaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>))\nDeclaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> (安装传感器)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> \"安装传感器\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> (设备编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> \"设备编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)\nDataPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> (温度传感器)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> \"温度传感器\")\nSubClassOf(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)\n\n# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367> (传感器)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367> \"传感器\")\n\n# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78> (生产设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78> \"生产设备\")\n\n\n)",
+              "imports": [],
+              "policy": {
+                "version": "1",
+                "rules": []
+              }
+            },
+            "ontologyIri": "urn:mateclaw:ontology:2098228271250644993",
+            "versionIri": null,
+            "documentDigest": "5b0b3060e6ef930e3e63619c1a79054bb1f8411657db629878ff7fd675c5683e",
+            "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "axioms": [
+              {
+                "axiomId": "6deb33c844881600f27ebc6d3525d9c501f4bc3ab9697c31093a882207b12a72",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> \"安装传感器\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "46a82278ad33b09ee5210e0bae86ab64b2ef028886359c447191d4ff51c74d7c",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367> \"传感器\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "b338969da859092394e1afa50586330d4b8d9c7ea1c8abe20c09ee475fa37ef9",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78> \"生产设备\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "a98d5b38cd534143fab491c171800bc037a6ba7d0d232bd261695a4e430a2244",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> \"温度传感器\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "408d21f71a5fa684db12bbaa95e81078a1bc399a15301be1011e7c4d34dbd6c6",
+                "axiomType": "AnnotationAssertion",
+                "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> \"设备编号\")",
+                "signatureIris": [
+                  "http://www.w3.org/2000/01/rdf-schema#label",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "0e26e3f39ddea912ff624e62c5bf4411315ddcd41645feec119a734d72c93066",
+                "axiomType": "DataPropertyDomain",
+                "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78",
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "afeee955fa3f966a7d20542f81a3682b5dcea485761efc87ec57b49c911ea515",
+                "axiomType": "DataPropertyRange",
+                "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> xsd:string)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "2168ec5d6dbd8edd330f432a3eaebe571ee614ec851d45a625009862f28d0bbb",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "41d2581f403c8ebd8b0d90f3d010b694cf7e891b74fac761756b675aa6a00499",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "9b81387dd288de47b51c6d282399ea6c0b32b9674417f5c0b9cb7467075a5eda",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "aeceda774e230e00049f0d72aa6813be3707e96370e8591aa76711788de868c1",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "a359d05a98a3cece982135fdb3baaa608da047894237b47a7d527f00eb64ab96",
+                "axiomType": "Declaration",
+                "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828>))",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828"
+                ],
+                "annotations": [],
+                "logical": false
+              },
+              {
+                "axiomId": "1f36a27d4cd6eb20a3cf5777e5bf0eda816e4d49332b46e698df8c6b067a3427",
+                "axiomType": "ObjectPropertyDomain",
+                "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78",
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "157803f8ed2016a4e93726f0b2a5b9eee64b546c87ffd6958e89b41f6d206cf1",
+                "axiomType": "ObjectPropertyRange",
+                "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367",
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828"
+                ],
+                "annotations": [],
+                "logical": true
+              },
+              {
+                "axiomId": "5f021b2ccf22d2cfcbb2333f803eef156e31c7980c24fb8fdc6638f9eb773527",
+                "axiomType": "SubClassOf",
+                "rendering": "SubClassOf(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)",
+                "signatureIris": [
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d",
+                  "urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367"
+                ],
+                "annotations": [],
+                "logical": true
+              }
+            ]
+          }
+        },
+        "items": [
+          {
+            "clientId": "equipment",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78",
+            "axiomIds": [
+              "41d2581f403c8ebd8b0d90f3d010b694cf7e891b74fac761756b675aa6a00499",
+              "b338969da859092394e1afa50586330d4b8d9c7ea1c8abe20c09ee475fa37ef9"
+            ]
+          },
+          {
+            "clientId": "sensor",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367",
+            "axiomIds": [
+              "2168ec5d6dbd8edd330f432a3eaebe571ee614ec851d45a625009862f28d0bbb",
+              "46a82278ad33b09ee5210e0bae86ab64b2ef028886359c447191d4ff51c74d7c"
+            ]
+          },
+          {
+            "clientId": "temperatureSensor",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d",
+            "axiomIds": [
+              "9b81387dd288de47b51c6d282399ea6c0b32b9674417f5c0b9cb7467075a5eda",
+              "a98d5b38cd534143fab491c171800bc037a6ba7d0d232bd261695a4e430a2244"
+            ]
+          },
+          {
+            "clientId": "installsSensor",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828",
+            "axiomIds": [
+              "157803f8ed2016a4e93726f0b2a5b9eee64b546c87ffd6958e89b41f6d206cf1",
+              "1f36a27d4cd6eb20a3cf5777e5bf0eda816e4d49332b46e698df8c6b067a3427",
+              "6deb33c844881600f27ebc6d3525d9c501f4bc3ab9697c31093a882207b12a72",
+              "a359d05a98a3cece982135fdb3baaa608da047894237b47a7d527f00eb64ab96"
+            ]
+          },
+          {
+            "clientId": "equipmentCode",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208",
+            "axiomIds": [
+              "0e26e3f39ddea912ff624e62c5bf4411315ddcd41645feec119a734d72c93066",
+              "408d21f71a5fa684db12bbaa95e81078a1bc399a15301be1011e7c4d34dbd6c6",
+              "aeceda774e230e00049f0d72aa6813be3707e96370e8591aa76711788de868c1",
+              "afeee955fa3f966a7d20542f81a3682b5dcea485761efc87ec57b49c911ea515"
+            ]
+          },
+          {
+            "clientId": "temperatureSensor-parent",
+            "targetId": "urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d",
+            "axiomIds": [
+              "5f021b2ccf22d2cfcbb2333f803eef156e31c7980c24fb8fdc6638f9eb773527"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -9,9 +9,11 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import OntologyEditor from '../OntologyEditor.vue'
 import OntologyList from '../OntologyList.vue'
 import OntologyVersions from '../OntologyVersions.vue'
+import { modelingTaskApi, type ModelingTask } from '../../api/modelingTaskApi'
 import { ontologyApi } from '../../api/ontologyApi'
+const routeState = vi.hoisted(() => ({ params: { id: '9223372036854775800' }, query: {} as Record<string,string> }))
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: { id: '9223372036854775800' }, query: {} }),
+  useRoute: () => routeState,
   useRouter: () => ({ push: vi.fn() }),
   onBeforeRouteLeave: vi.fn(),
   onBeforeRouteUpdate: vi.fn(),
@@ -32,6 +34,7 @@ vi.mock('../../api/ontologyApi', () => ({
     sourceReviews: vi.fn().mockResolvedValue([]),
   },
 }))
+vi.mock('../../api/modelingTaskApi', async original => ({...await original<object>(),modelingTaskApi: {list:vi.fn().mockResolvedValue([]), get:vi.fn(), decide:vi.fn()}}))
 const ontologyDocument = () => ({ source: { modelSchema: 'owl-document-v1' as const, syntax: 'FUNCTIONAL' as const, documentText: 'Ontology(<https://example.test/factory>)', imports: [], policy: { version: '1', rules: [] } }, ontologyIri: 'https://example.test/factory', versionIri: null, documentDigest: 'sha256:factory', importLockDigest: 'sha256:imports', axioms: [] })
 const data = () => ({
   id: '9223372036854775799',
@@ -71,6 +74,8 @@ async function mount(
 }
 beforeEach(() => {
   vi.clearAllMocks()
+  routeState.query = {}
+  vi.mocked(modelingTaskApi.list).mockResolvedValue([])
   vi.mocked(ontologyApi.getDraft).mockResolvedValue(data())
 })
 afterEach(() => {
@@ -107,7 +112,7 @@ it('edits real draft state through an Element Plus input and keeps it after a 40
 it('locks editor and exposes recovery after uncertain publication', async () => {
   await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
   vi.mocked(ontologyApi.validate).mockResolvedValue({ draftVersion: 25, valid: true, violations: [] })
-  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Check model'))!.click()
+  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Structural checks'))!.click()
   await flush()
   vi.mocked(ontologyApi.diff).mockResolvedValue({
     fromRevisionId: null,
@@ -151,22 +156,20 @@ it('launches the ontology builder from the list for members', async () => {
   const launch = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Generate from source'))!
   launch.click()
   await flush()
-  expect(ontologyApi.ensureBuilder).toHaveBeenCalledWith('1', expect.any(AbortSignal))
+  expect(document.body.textContent).toContain('开始业务建模')
+  expect(ontologyApi.ensureBuilder).not.toHaveBeenCalled()
 })
-it('clears an in-flight builder launch when the workspace changes', async () => {
+it('closes the task intake when the workspace changes', async () => {
   vi.mocked(ontologyApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
-  let resolveEnsure!: (value: { agentId: string }) => void
-  vi.mocked(ontologyApi.ensureBuilder).mockImplementation(() => new Promise((resolve) => { resolveEnsure = resolve }))
   const store = await mount(['view:ontology', 'manage:ontology'], OntologyList)
-  const launch = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Generate from source'))!
-  launch.click()
-  await nextTick()
-  expect(launch.className).toContain('is-loading')
-  store.currentWorkspaceId = '2'
-  await nextTick()
-  expect(launch.className).not.toContain('is-loading')
-  resolveEnsure({ agentId: '9223372036854775807' })
+  ;[...host.querySelectorAll('button')].find(b => b.textContent?.includes('Generate from source'))!.click()
   await flush()
+  expect(document.querySelector('.el-dialog')).not.toBeNull()
+  store.currentWorkspaceId = '2'
+  await flush()
+  await new Promise(r=>setTimeout(r,350))
+  const overlay=document.querySelector('.el-overlay') as HTMLElement|null
+  expect(!overlay||overlay.style.display==='none').toBe(true)
 })
 it('renders immutable version detail and compares saved revisions for viewers', async () => {
   const revision = {
@@ -222,4 +225,21 @@ it('registers the real dirty editor guard and preserves input on rejected worksp
   expect(store.can('manage:ontology')).toBe(true)
   expect(input.value).toBe('Keep my draft')
   confirm.mockRestore()
+})
+
+it('opens task deep links in a separate suggestions tab and returns to the model after acceptance', async () => {
+  routeState.query = {taskId:'task'}
+  const task: ModelingTask = {id:'task',ontologyId:'9223372036854775800',draftId:'9223372036854775799',goal:'建立设备模型',stage:'AWAITING_CONFIRMATION',sources:[],proposals:[{id:'proposal',status:'PENDING',answers:{},input:{changes:[{kind:'CREATE_TERM',name:'设备'}],questions:[],evidence:[],samples:[]}}]}
+  vi.mocked(modelingTaskApi.list).mockResolvedValue([task])
+  vi.mocked(modelingTaskApi.get).mockResolvedValue(task)
+  vi.mocked(modelingTaskApi.decide).mockResolvedValue({...task,proposals:[{...task.proposals[0]!,status:'ACCEPTED'}]})
+  await mount(['view:ontology','manage:ontology'])
+  expect(host.querySelector('.editor-navigation .active')?.textContent).toBe('Modeling suggestions')
+  expect(host.querySelector('.editor-design')).toBeNull()
+  ;[...host.querySelectorAll('button')].find(button=>button.textContent?.includes('确认本批建议'))!.click()
+  await flush();await flush()
+  expect(host.querySelector('.editor-navigation .active')?.textContent).toBe('Business model')
+  expect((host.querySelector('.editor-suggestions') as HTMLElement).style.display).toBe('none')
+  expect(host.querySelector('.editor-design')).not.toBeNull()
+  expect(ontologyApi.getDraft).toHaveBeenCalledTimes(2)
 })

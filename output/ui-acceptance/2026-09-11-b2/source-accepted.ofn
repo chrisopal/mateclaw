@@ -1,0 +1,58 @@
+Prefix(:=<urn:mateclaw:ontology:2098228271250644993#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+
+Ontology(<urn:mateclaw:ontology:2098228271250644993>
+
+Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d>))
+Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>))
+Declaration(Class(<urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>))
+Declaration(ObjectProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828>))
+Declaration(DataProperty(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208>))
+
+############################
+#   Object Properties
+############################
+
+# Object Property: <urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> (安装传感器)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> "安装传感器")
+ObjectPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)
+ObjectPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/12f02807ac40bd696a96259c0a724eb04a910570857b8077d77a65b6f9219828> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)
+
+
+############################
+#   Data Properties
+############################
+
+# Data Property: <urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> (设备编号)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> "设备编号")
+DataPropertyDomain(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78>)
+DataPropertyRange(<urn:mateclaw:ontology:2098228271250644993/model-term/dd78da24097db832100337da5f1c4e865d0ee7d60ca543a357a79cba46b72208> xsd:string)
+
+
+
+############################
+#   Classes
+############################
+
+# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> (温度传感器)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> "温度传感器")
+SubClassOf(<urn:mateclaw:ontology:2098228271250644993/model-term/db9227d2c47a266293f5c4166d744e46a8a1966b34c0607ace4bb984dfd37f5d> <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367>)
+
+# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367> (传感器)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/3056a5f73fef053e8d3f54cb3dd9a1aa700ea7b9294805c0647cd56e71aa6367> "传感器")
+
+# Class: <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78> (生产设备)
+
+AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098228271250644993/model-term/867d34c81511b044a2328d213212c71e593b350cad22407f7afc0968a15b0d78> "生产设备")
+
+
+)

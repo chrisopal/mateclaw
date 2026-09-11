@@ -8,6 +8,8 @@ import { ontologyApi } from '../api/ontologyApi'
 import type { AxiomDescriptor, OntologyDocumentSyntax } from '../api/types'
 import { useOntologyProjection } from './useOntologyProjection'
 import { useOntologyDraft } from './useOntologyDraft'
+import ModelingTaskPanel from './components/ModelingTaskPanel.vue'
+import ModelingTaskCreate from './components/ModelingTaskCreate.vue'
 import ValidationPanel from './components/ValidationPanel.vue'
 import PublishDialog from './components/PublishDialog.vue'
 import OntologySourcePanel from './components/OntologySourcePanel.vue'
@@ -20,10 +22,18 @@ const ontologyId = () => String(route.params.id); const workspaceId = () => work
 const draft = useOntologyDraft(ontologyId, workspaceId, undefined, () => workspace.can('manage:ontology'))
 const { document, axioms, name, description, id, dirty, busy, version, draftVersion, validationReport, saveError, canPublish, publicationPending, editPending } = draft
 const { data: projectionData, loading: projectionLoading, error: projectionError, reload: reloadProjection } = useOntologyProjection(()=>({workspaceId:workspaceId(),ontologyId:ontologyId(),revisionId:id.value || '',draftVersion:draftVersion.value}))
+const modelingOpen=ref(false)
+function selectTask(taskId:string){area.value='suggestions';void router.replace({query:{...route.query,taskId}})}
+async function taskChanged(decision: 'ACCEPT' | 'REJECT'){await draft.load();await reloadProjection();if(decision==='ACCEPT')area.value='model'}
 const editable = computed(() => workspace.can('manage:ontology') && !publicationPending.value)
 const selectedAxiom = ref<AxiomDescriptor | null>(null); const newAxiom = ref(''); const tab = ref<'model' | 'editor' | 'axioms'>('model'); const publishOpen = ref(false)
 const focusedAxiomId = ref('')
-const area=ref<'model'|'sources'|'publish'>('model');const metadataOpen=ref(false);const toolsOpen=ref(false);const importInput=ref<HTMLInputElement>();const importing=ref(false)
+const taskEntry = () => typeof route.query.taskId === 'string' && !!route.query.taskId
+const area=ref<'model'|'suggestions'|'sources'|'publish'>(taskEntry()?'suggestions':'model');
+const modelOpened=ref(!taskEntry())
+watch(area,value=>{if(value==='model')modelOpened.value=true})
+watch(()=>route.query.taskId,()=>{if(taskEntry())area.value='suggestions'})
+const metadataOpen=ref(false);const toolsOpen=ref(false);const importInput=ref<HTMLInputElement>();const importing=ref(false)
 async function checkModel(){area.value='publish';await draft.validate()}
 async function mainAction(){if(dirty.value)await draft.save();else if(canPublish.value&&workspace.can('publish:ontology'))publishOpen.value=true;else await checkModel()}
 async function importFile(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file||!document.value)return;importing.value=true;try{const text=await file.text();if(!text.trim())throw Error(tr('文件内容为空','Empty document'));document.value={...document.value,syntax:/^\s*(?:Prefix|Ontology)\s*\(/.test(text)?'FUNCTIONAL':'RDF_XML',documentText:text};toolsOpen.value=false;tab.value='model';area.value='model';ElMessage.success(tr('已载入文件，请保存并检查模型。','Document loaded. Save and check the model.'))}catch(e){ElMessage.error((e as Error).message)}finally{importing.value=false;(event.target as HTMLInputElement).value=''}}
@@ -59,25 +69,29 @@ function inspectAxiom(axiomId: string) {
   })
 }
 function clearAxiomFocus() { focusedAxiomId.value = '' }
-watch(() => [workspace.currentWorkspaceId, ontologyId(), id.value], () => { focusedAxiomId.value = '';area.value='model';tab.value='model';metadataOpen.value=false;toolsOpen.value=false }, { flush: 'sync' })
+watch(() => [workspace.currentWorkspaceId, ontologyId(), id.value], () => { focusedAxiomId.value = '';area.value=taskEntry()?'suggestions':'model';tab.value='model';metadataOpen.value=false;toolsOpen.value=false }, { flush: 'sync' })
 onMounted(draft.load)
 </script>
 <template>
  <section class="semantic-page ontology-business-editor">
   <header class="editor-header">
    <div class="editor-heading"><el-button link @click="router.push({name:'OntologyList'})">← {{tr('本体管理','Ontologies')}}</el-button><h1>{{name||tr('业务模型','Business model')}}</h1><span class="semantic-muted">v{{version}} · {{tr(dirty?'未保存':'已保存',dirty?'Unsaved':'Saved')}}</span></div>
-   <div class="editor-actions">
+   <div class="editor-actions"><el-button v-if="editable" :disabled="busy||dirty||editPending" @click="modelingOpen=true">开始建模</el-button>
     <el-dropdown trigger="click" @command="more"><el-button>{{tr('更多','More')}} ▾</el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="metadata">{{tr('基本信息','Basic information')}}</el-dropdown-item><el-dropdown-item command="history">{{t('semantic.history')}}</el-dropdown-item><el-dropdown-item command="exchange">{{tr('OWL 导入与导出','OWL import and export')}}</el-dropdown-item><el-dropdown-item v-if="editable&&id" command="discard" divided :disabled="busy||editPending">{{t('semantic.discard')}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
-    <el-button v-if="editable&&id" type="primary" :loading="busy" :disabled="editPending" @click="mainAction">{{dirty?t('semantic.save'):canPublish&&workspace.can('publish:ontology')?t('semantic.publish'):tr('检查模型','Check model')}}</el-button>
+    <el-button v-if="editable&&id" type="primary" :loading="busy" :disabled="editPending" @click="mainAction">{{dirty?t('semantic.save'):canPublish&&workspace.can('publish:ontology')?t('semantic.publish'):tr('结构检查','Structural checks')}}</el-button>
    </div>
   </header>
   <el-alert v-if="editPending&&!busy" type="warning" :title="tr('上次保存结果待确认，请先恢复保存。','Recover the previous save before continuing.')" :closable="false"/><el-button v-if="editPending" :loading="busy" @click="draft.retryEdit">{{tr('恢复保存','Recover save')}}</el-button>
   <el-alert v-if="publicationPending" type="warning" :title="t('semantic.pendingPublication')" :closable="false"/><el-button v-if="publicationPending" :loading="busy" @click="publish('')">{{t('semantic.recoverPublication')}}</el-button>
   <el-alert v-if="!editable&&!publicationPending" type="info" :title="t('semantic.readonly')" :closable="false"/>
   <el-alert v-if="saveError" type="error" :title="saveError.message||t(`semantic.errors.${saveError.code}`,t('semantic.requestFailed'))" :closable="false"/>
-  <nav class="editor-navigation" :aria-label="tr('模型工作区','Model workspace')"><button v-for="item in ([['model',tr('业务模型','Business model')],['sources',tr('参考资料','References')],['publish',tr('检查发布','Check and publish')]] as const)" :key="item[0]" type="button" :aria-current="area===item[0]?'page':undefined" :class="{active:area===item[0]}" @click="area=item[0]">{{item[1]}}</button></nav>
+  <nav class="editor-navigation" :aria-label="tr('模型工作区','Model workspace')"><button v-for="item in ([['model',tr('业务模型','Business model')],['suggestions',tr('建模建议','Modeling suggestions')],['sources',tr('参考资料','References')],['publish',tr('检查发布','Check and publish')]] as const)" :key="item[0]" type="button" :aria-current="area===item[0]?'page':undefined" :class="{active:area===item[0]}" @click="area=item[0]">{{item[1]}}</button></nav>
   <div v-if="document" v-loading="busy" class="editor-workspace">
-   <section v-show="area==='model'" class="editor-design">
+   <ModelingTaskCreate v-model="modelingOpen" :ontology-id="ontologyId()" @created="selectTask"/>
+   <section v-show="area==='suggestions'" class="editor-suggestions">
+    <ModelingTaskPanel :active="area==='suggestions'" :projection="projectionData?.projection" :ontology-id="ontologyId()" :task-id="typeof route.query.taskId==='string'?route.query.taskId:undefined" :can-manage="editable" :disabled="busy||dirty||editPending" @selected="selectTask" @changed="taskChanged"/>
+   </section>
+   <section v-if="modelOpened" v-show="area==='model'" class="editor-design">
     <div v-if="tab!=='model'" class="semantic-toolbar"><el-button @click="tab='model'">← {{tr('返回业务模型','Back to business model')}}</el-button><el-radio-group v-model="tab"><el-radio-button value="editor">OWL</el-radio-button><el-radio-button value="axioms">{{tr('底层规则','Underlying rules')}}</el-radio-button></el-radio-group></div>
     <OntologyModelWorkbench v-if="tab==='model'" :key="workbenchKey" :projection="projectionData?.projection" :projection-loading="projectionLoading" :projection-error="projectionError" @reload-projection="reloadProjection" :axioms="axioms" :editable="editable&&!!id" :disabled="busy||dirty||editPending" :edit-pending="editPending" :retry-edit="draft.retryEdit" :reload-draft="draft.load" :failure-message="saveError?.message" :apply="draft.edit" :apply-model="draft.modelEdit" @advanced="toolsOpen=true" @inspect-axiom="inspectAxiom"/>
     <el-alert v-if="dirty" type="info" :closable="false" :title="tr('请先保存修改，再继续编辑模型。','Save your changes before editing the model.')"/>
@@ -87,7 +101,7 @@ onMounted(draft.load)
    <section v-show="area==='publish'" class="editor-release">
     <h2>{{tr('发布前检查','Before publishing')}}</h2>
     <div class="editor-check-row"><div><strong>{{tr('保存修改','Save changes')}}</strong><p>{{tr(dirty?'还有未保存的修改':'当前修改已保存',dirty?'Unsaved changes remain':'Changes are saved')}}</p></div><el-button v-if="dirty" :disabled="busy||!editable" @click="draft.save">{{t('semantic.save')}}</el-button></div>
-    <div class="editor-check-row"><div><strong>{{tr('检查模型','Check model')}}</strong><p>{{validationReport?.valid&&!dirty?tr('检查通过，可以发布','Checks passed. Ready to publish'):tr('检查对象、关系和规则是否一致','Check consistency of objects, relations and rules')}}</p></div><el-button :disabled="dirty||busy||editPending||!editable" @click="draft.validate">{{tr('重新检查','Run checks')}}</el-button></div>
+    <div class="editor-check-row"><div><strong>{{tr('结构检查','Structural checks')}}</strong><p>{{validationReport?.valid&&!dirty?tr('结构检查通过；推理尚未执行','Structural checks passed; reasoning has not run'):tr('检查模型结构；推理尚未执行','Check model structure; reasoning has not run')}}</p></div><el-button :disabled="dirty||busy||editPending||!editable" @click="draft.validate">{{tr('重新检查','Run checks')}}</el-button></div>
     <ValidationPanel v-if="validationReport" :report="validationReport" :dirty="dirty" @locate="area='model';tab='axioms'"/>
     <div class="editor-check-row"><div><strong>{{tr('发布版本','Publish version')}}</strong><p>{{tr('通过检查后填写发布说明。','Add release notes after checks pass.')}}</p></div><el-button v-if="workspace.can('publish:ontology')" :disabled="!canPublish" @click="publishOpen=true">{{t('semantic.publish')}}</el-button></div>
    </section>
@@ -98,5 +112,6 @@ onMounted(draft.load)
  </section>
 </template>
 <style scoped>
-.editor-header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:20px}.editor-heading{min-width:0}.editor-heading h1{font-size:22px;font-weight:600;margin:8px 0;overflow-wrap:anywhere}.editor-heading>.el-button{font-size:12px}.editor-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}.editor-navigation{display:flex;gap:28px;border-bottom:1px solid var(--mc-border);margin-bottom:0}.editor-navigation>button{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mc-text-secondary);padding:12px 0;font-size:14px;cursor:pointer}.editor-navigation>button.active{color:var(--mc-action-text,var(--el-color-primary));border-bottom-color:var(--el-color-primary);font-weight:600}.editor-navigation>button:focus-visible{outline:2px solid var(--el-color-primary);outline-offset:2px}.editor-workspace{background:var(--mc-bg-elevated);padding:20px 0;min-width:0}.editor-release{max-width:860px;padding:0 24px}.editor-release h2{font-size:18px;margin:12px 0 24px}.editor-check-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid var(--mc-border)}.editor-check-row strong{font-size:14px}.editor-check-row p{font-size:13px;color:var(--mc-text-secondary);margin:8px 0 0}.editor-exchange{display:grid;gap:24px}.editor-exchange label{display:grid;gap:12px}.editor-exchange-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.editor-exchange details{border-top:1px solid var(--mc-border);padding-top:16px;font-size:13px}.editor-exchange summary{cursor:pointer;margin-bottom:12px}.editor-design{min-width:0}.editor-references{padding:0 20px;min-width:0}@media(max-width:650px){.editor-header{align-items:flex-start;gap:12px;flex-wrap:wrap}.editor-heading h1{font-size:20px}.editor-actions{margin-left:auto}.editor-navigation{gap:24px}.editor-references,.editor-release{padding:0 12px}.editor-check-row{align-items:flex-start;flex-wrap:wrap}.editor-workspace{padding-top:12px}}
+.editor-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;padding:0 36px}.editor-heading{min-width:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.editor-heading h1{font-size:20px;font-weight:600;margin:0;overflow-wrap:anywhere}.editor-heading>.el-button{font-size:12px}.editor-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}.editor-navigation{display:flex;gap:24px;flex-wrap:wrap;padding:0 20px;border-bottom:1px solid var(--mc-border);margin-bottom:0}.editor-navigation>button{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mc-text-secondary);padding:12px 0;font-size:14px;cursor:pointer}.editor-navigation>button.active{color:var(--mc-action-text,var(--el-color-primary));border-bottom-color:var(--el-color-primary);font-weight:600}.editor-navigation>button:focus-visible{outline:2px solid var(--el-color-primary);outline-offset:2px}.editor-workspace{background:var(--mc-bg-elevated);padding:16px 20px;min-width:0}.editor-suggestions{min-width:0}.editor-release{max-width:860px;padding:0 16px}.editor-release h2{font-size:18px;margin:12px 0 24px}.editor-check-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0;border-bottom:1px solid var(--mc-border)}.editor-check-row strong{font-size:14px}.editor-check-row p{font-size:13px;color:var(--mc-text-secondary);margin:8px 0 0}.editor-exchange{display:grid;gap:24px}.editor-exchange label{display:grid;gap:12px}.editor-exchange-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.editor-exchange details{border-top:1px solid var(--mc-border);padding-top:16px;font-size:13px}.editor-exchange summary{cursor:pointer;margin-bottom:12px}.editor-design{min-width:0}.editor-references{min-width:0}@media(max-width:650px){.editor-header{align-items:flex-start;gap:12px;flex-wrap:wrap;padding:0 12px}.editor-heading h1{font-size:20px}.editor-actions{margin-left:auto}.editor-navigation{gap:16px;padding:0 12px}.editor-references,.editor-release,.editor-suggestions{padding:0}.editor-check-row{align-items:flex-start;flex-wrap:wrap}.editor-workspace{padding:12px}}
+.editor-design :deep(.model-bar){padding:4px 16px 12px}.editor-design :deep(.model-note){padding:0 16px}.editor-actions .el-button+.el-button{margin-left:0}@media(max-width:650px){.editor-design :deep(.model-bar){padding:0 0 12px}.editor-design :deep(.model-note){padding:0}}
 </style>

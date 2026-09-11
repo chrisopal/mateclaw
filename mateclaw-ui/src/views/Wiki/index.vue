@@ -16,8 +16,12 @@
           @create="showCreateKB = true"
           @delete="handleDeleteKB"
         />
+        <div v-if="store.currentKB && workspaceStore.can('manage:ontology')" class="wiki-modeling-entry">
+          <el-button @click="modelingOpen = true">从资料建立业务模型</el-button>
+          <ModelingTaskCreate v-model="modelingOpen" :initial-knowledge-base-id="String(store.currentKB.id)" :initial-knowledge-base-name="store.currentKB.name" @created="openModelingTask" />
+        </div>
         <WikiWorkspace
-          v-else
+          v-if="store.currentKB"
           :kb="store.currentKB"
         />
         <KnowledgeBindingPanel
@@ -59,6 +63,7 @@ import { mcToast } from '@/composables/useMcToast'
 import WikiLibrary from './components/WikiLibrary.vue'
 import WikiWorkspace from './components/WikiWorkspace.vue'
 import WikiFailureCenter from './components/WikiFailureCenter.vue'
+import ModelingTaskCreate from '@/features/semantic/ontology/components/ModelingTaskCreate.vue'
 import KnowledgeBindingPanel from '@/features/semantic/graph/KnowledgeBindingPanel.vue'
 import { openWikiFailureItem } from './utils/failureOpen'
 
@@ -68,6 +73,11 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useWikiStore()
 const workspaceStore = useWorkspaceStore()
+const modelingOpen = ref(false)
+function openModelingTask(taskId: string, ontologyId: string) {
+  void router.push({ name: 'OntologyEditor', params: { id: ontologyId }, query: { taskId } })
+}
+watch(() => store.currentKB?.id, () => { modelingOpen.value = false })
 
 // The cross-KB failure center spans every workspace, so it is admin-only —
 // mirrors the gate on the backing endpoint.
@@ -247,4 +257,8 @@ onMounted(async () => {
 @media (max-width: 980px) {
   .wiki-frame { height: 100%; min-height: calc(100vh - 28px); }
 }
+</style>
+
+<style scoped>
+.wiki-modeling-entry { display:flex; justify-content:flex-end; padding:8px 0; }
 </style>

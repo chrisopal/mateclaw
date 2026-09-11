@@ -128,6 +128,10 @@ public class OntologyModelingService {
         var evidence=input.evidence()==null?List.<Evidence>of():input.evidence();
         for(var e:evidence) {
             if(e==null||!ids.contains(e.clientId()))throw bad("Evidence must reference a proposal item");
+            if("USER_STATEMENT".equals(e.origin())) {
+                if(e.knowledgeBaseId()!=null||e.sourceRef()!=null||e.sourceDigest()!=null||e.exactQuote()==null||e.exactQuote().isBlank()||!task.goal().contains(e.exactQuote()))throw bad("User statement evidence must quote the task goal without source identifiers");
+                continue;
+            }
             if(!task.sources().contains(new SourceVersion(e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest())))throw bad("Evidence must use a selected source version");
             if(!Set.of("EXTRACTED","EXPERT","INFERRED").contains(Objects.toString(e.origin(),"")))throw bad("Explicit evidence origin required");
             sources.resolveEvidence(scope,task.ontologyId(),e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest(),e.exactQuote(),e.occurrence());
@@ -166,13 +170,14 @@ public class OntologyModelingService {
         if(input.decision().equals("ACCEPT")) {
             for(String question:proposal.input().questions())text(answers.get(question),"Answer to "+question,2000);
             var resolved=new ArrayList<vip.mate.semantic.ontology.source.OntologySourceDtos.ResolvedEvidence>();
-            for(var e:proposal.input().evidence())resolved.add(sources.resolveEvidence(scope,task.ontologyId(),e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest(),e.exactQuote(),e.occurrence()));
+            for(var e:proposal.input().evidence())resolved.add("USER_STATEMENT".equals(e.origin())?null:sources.resolveEvidence(scope,task.ontologyId(),e.knowledgeBaseId(),e.sourceRef(),e.sourceDigest(),e.exactQuote(),e.occurrence()));
             String operation="model-task:"+proposal.id();
             result=ontologies.applyModelCommands(scope,task.ontologyId(),new ModelEditRequest(proposal.input().expectedDraftVersion(),operation,proposal.input().changes()));
             long version=result.draft().draftVersion();
             int binding=0;
             for(int i=0;i<proposal.input().evidence().size();i++) {
                 var evidence=proposal.input().evidence().get(i);var quote=resolved.get(i);
+                if("USER_STATEMENT".equals(evidence.origin()))continue;
                 var item=result.items().stream().filter(r->Objects.equals(r.clientId(),evidence.clientId())).findFirst().orElseThrow(()->bad("Missing applied evidence target"));
                 if(item.axiomIds().isEmpty())throw bad("Evidence target has no resulting axioms");
                 for(String axiom:item.axiomIds()) {
