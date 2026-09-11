@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.List;
 import vip.mate.semantic.core.ontology.OntologyDisplayProjection;
 
@@ -33,6 +34,19 @@ public final class OntologyDtos {
 
     public record SaveDraft(
             Long expectedDraftVersion, String name, String description, DocumentInput document, String operationId) {}
+
+    /** Versioned business rules are persisted in the OWL document's policy metadata. */
+    public record SaveBusinessPolicy(
+            Long expectedDraftVersion,
+            String operationId,
+            List<vip.mate.semantic.core.policy.BusinessPolicySet.Rule> rules) {}
+
+    /** Non-persisting sample input for the business policy engine. */
+    public record CheckBusinessPolicySample(
+            Long expectedDraftVersion,
+            String classIri,
+            Boolean completeSubmission,
+            Map<String, List<vip.mate.semantic.core.policy.BusinessPolicySet.Literal>> properties) {}
 
     public record AxiomEdit(String kind, String axiomId, String functionalSyntax) {}
     public record EditDraft(Long expectedDraftVersion, List<AxiomEdit> changes, String operationId) {}
@@ -122,6 +136,12 @@ public final class OntologyDtos {
             List<Violation> violations,
             String profile,
             String reasoningStatus) {}
+
+    public record BusinessPolicyCheckView(
+            @JsonSerialize(using = SemanticCounterSerializer.class) long draftVersion,
+            String policyVersion,
+            boolean valid,
+            List<Violation> violations) {}
 
     public record Snapshot(
             String ontologyId,

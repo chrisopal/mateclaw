@@ -1,0 +1,509 @@
+{
+  "scope": "T05 business rules panel and rule dialog only",
+  "environment": "Local Chromium independent context; admin; 5189/18109 persistent H2; light theme; 390/1440/1920",
+  "pages": [
+    {
+      "id": "policy",
+      "url": "/semantic/ontologies/2098236751617421313/edit",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "entry",
+      "page": "policy",
+      "name": "业务规则入口",
+      "locator": "业务规则入口",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "rule-class",
+      "page": "policy",
+      "name": "规则业务对象",
+      "locator": "规则业务对象",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "attribute",
+      "page": "policy",
+      "name": "属性选择器",
+      "locator": "属性选择器",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "required",
+      "page": "policy",
+      "name": "必填开关",
+      "locator": "必填开关",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "single",
+      "page": "policy",
+      "name": "单值开关",
+      "locator": "单值开关",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "unit",
+      "page": "policy",
+      "name": "规则单位",
+      "locator": "规则单位",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "allowed",
+      "page": "policy",
+      "name": "可选值",
+      "locator": "可选值",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "apply",
+      "page": "policy",
+      "name": "应用规则",
+      "locator": "应用规则",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "cancel",
+      "page": "policy",
+      "name": "取消编辑",
+      "locator": "取消编辑",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "edit",
+      "page": "policy",
+      "name": "编辑规则",
+      "locator": "编辑规则",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "delete",
+      "page": "policy",
+      "name": "删除规则",
+      "locator": "删除规则",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "discard",
+      "page": "policy",
+      "name": "放弃修改",
+      "locator": "放弃修改",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "save",
+      "page": "policy",
+      "name": "保存规则",
+      "locator": "保存规则",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "mode",
+      "page": "policy",
+      "name": "完整/部分模式",
+      "locator": "完整/部分模式",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "values",
+      "page": "policy",
+      "name": "样例值输入",
+      "locator": "样例值输入",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-unit",
+      "page": "policy",
+      "name": "样例单位",
+      "locator": "样例单位",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "check",
+      "page": "policy",
+      "name": "样例检查",
+      "locator": "样例检查",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "recover",
+      "page": "policy",
+      "name": "恢复保存",
+      "locator": "恢复保存",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "layout",
+      "page": "policy",
+      "name": "响应式布局",
+      "locator": "响应式布局",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "sample-class",
+      "page": "policy",
+      "name": "样例跨对象切换",
+      "locator": "样例跨对象切换",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "viewer",
+      "page": "policy",
+      "name": "只读角色界面",
+      "locator": "只读角色界面",
+      "checks": [
+        "flow"
+      ]
+    },
+    {
+      "id": "keyboard",
+      "page": "policy",
+      "name": "完整键盘流程",
+      "locator": "完整键盘流程",
+      "checks": [
+        "flow"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "entry",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Open independent navigation tab"
+      ],
+      "expected": "Open independent navigation tab",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "rule-class",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Initial object label matches fixture"
+      ],
+      "expected": "Initial object label matches fixture",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "attribute",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Select second attribute and apply after blur"
+      ],
+      "expected": "Select second attribute and apply after blur",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "required",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Enable and save; empty sample identifies field"
+      ],
+      "expected": "Enable and save; empty sample identifies field",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "single",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Enable and save; two values rejected in complete mode"
+      ],
+      "expected": "Enable and save; two values rejected in complete mode",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "unit",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Edit MW then kW; save and refresh each"
+      ],
+      "expected": "Edit MW then kW; save and refresh each",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "allowed",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Save two values; invalid sample rejected"
+      ],
+      "expected": "Save two values; invalid sample rejected",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "apply",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Dialog applies to local rules; dirty guard activates"
+      ],
+      "expected": "Dialog applies to local rules; dirty guard activates",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "cancel",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Change unit then cancel; stored unit retained"
+      ],
+      "expected": "Change unit then cancel; stored unit retained",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "edit",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Reopen existing rule and save changed unit"
+      ],
+      "expected": "Reopen existing rule and save changed unit",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "delete",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Confirm local deletion then discard restores"
+      ],
+      "expected": "Confirm local deletion then discard restores",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "discard",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Restore server rules and reenable sample check"
+      ],
+      "expected": "Restore server rules and reenable sample check",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "save",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "PUT succeeds; independent GET and refresh agree"
+      ],
+      "expected": "PUT succeeds; independent GET and refresh agree",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "mode",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Missing complete fails; partial missing passes"
+      ],
+      "expected": "Missing complete fails; partial missing passes",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "values",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Newline multiple values; change to valid value"
+      ],
+      "expected": "Newline multiple values; change to valid value",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "sample-unit",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "W fails and kW passes"
+      ],
+      "expected": "W fails and kW passes",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "check",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "Run missing, single, unit, allowed, valid cases"
+      ],
+      "expected": "Run missing, single, unit, allowed, valid cases",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "recover",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "SIMULATED lost response; replay identical body"
+      ],
+      "expected": "SIMULATED lost response; replay identical body",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "layout",
+      "check": "flow",
+      "status": "PASS",
+      "steps": [
+        "390/1440/1920 no page overflow; screenshots inspected"
+      ],
+      "expected": "390/1440/1920 no page overflow; screenshots inspected",
+      "actual": "Verified in real browser; see report and API readback",
+      "evidence": [
+        "browser-results.json",
+        "api-acceptance.json"
+      ]
+    },
+    {
+      "control": "sample-class",
+      "check": "flow",
+      "status": "NOT_RUN",
+      "reason": "Browser fixture has one class; two-class separation covered by component regression",
+      "steps": [],
+      "expected": "Browser fixture has one class; two-class separation covered by component regression",
+      "actual": "",
+      "evidence": []
+    },
+    {
+      "control": "viewer",
+      "check": "flow",
+      "status": "NOT_RUN",
+      "reason": "Permission rejection covered by HTTP tests; no live viewer session exercised",
+      "steps": [],
+      "expected": "Permission rejection covered by HTTP tests; no live viewer session exercised",
+      "actual": "",
+      "evidence": []
+    },
+    {
+      "control": "keyboard",
+      "check": "flow",
+      "status": "NOT_RUN",
+      "reason": "Dialog mouse operations exercised; exhaustive keyboard/focus return not run",
+      "steps": [],
+      "expected": "Dialog mouse operations exercised; exhaustive keyboard/focus return not run",
+      "actual": "",
+      "evidence": []
+    }
+  ]
+}

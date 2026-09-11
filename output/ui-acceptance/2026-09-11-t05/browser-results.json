@@ -1,0 +1,55 @@
+{
+  "editSaveRefresh": true,
+  "missing": [
+    "设备编号：缺少必填属性",
+    "额定功率：缺少必填属性"
+  ],
+  "partial": "符合业务规则",
+  "singleAndUnit": [
+    "设备编号：只允许一个不同值",
+    "额定功率：单位不匹配"
+  ],
+  "allowedValues": "设备编号：不在允许值范围内",
+  "valid": "符合业务规则",
+  "layout": [
+    {
+      "width": 390,
+      "scrollWidth": 390
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1440
+    },
+    {
+      "width": 1920,
+      "scrollWidth": 1920
+    }
+  ],
+  "cancelPreserved": true,
+  "deleteDiscardRestored": true,
+  "recovery": {
+    "mode": "SIMULATED response loss after real server save",
+    "pendingBlocked": true,
+    "requests": 2,
+    "exactBodyReplay": true
+  },
+  "restart": {
+    "health": "UP",
+    "rulesReadback": true,
+    "apiCases": 6
+  },
+  "earlierFailures": [
+    {
+      "cause": "Product: footer slot nested under form, no apply button",
+      "fix": "Move footer to dialog; real apply/save/reload passed"
+    },
+    {
+      "cause": "Script selected hidden select input; placeholder intercepted pointer",
+      "fix": "Use visible select wrapper; no force click"
+    },
+    {
+      "cause": "Screenshot during responsive sidebar transition",
+      "fix": "Wait all current CSS animations complete before screenshot"
+    }
+  ]
+}

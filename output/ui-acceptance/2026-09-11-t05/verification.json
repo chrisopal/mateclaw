@@ -1,0 +1,40 @@
+{
+  "backend": {
+    "tests": 13,
+    "failures": 0,
+    "skipped": 0,
+    "classes": [
+      "BusinessPolicySetTest",
+      "BusinessPolicyServiceTest",
+      "BusinessPolicyIntegrationTest",
+      "CompleteObjectValidationIntegrationTest"
+    ],
+    "package": "PASS"
+  },
+  "frontend": {
+    "files": 25,
+    "tests": 127,
+    "failures": 0,
+    "buildWithTypecheck": "PASS",
+    "scopedESLint": "PASS"
+  },
+  "runtime": {
+    "health": "UP",
+    "database": "data/semantic-owl-runtime/database.mv.db",
+    "restartReadback": "PASS"
+  },
+  "visual": {
+    "score": 92,
+    "widths": [
+      390,
+      1440,
+      1920
+    ],
+    "pageOverflow": false
+  },
+  "uiCoverage": {
+    "PASS": 19,
+    "NOT_RUN": 3,
+    "errors": []
+  }
+}

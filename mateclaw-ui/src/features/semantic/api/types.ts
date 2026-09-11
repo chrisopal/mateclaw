@@ -9,8 +9,12 @@ export interface LockedImport {
   contentDigest: string
   artifactId: string
 }
-export interface BusinessPolicyRule { classIri: string; predicateIri: string; required: boolean; unit: string | null; allowedLexicalValues: string[]; singleValue?: boolean }
+export interface BusinessPolicyRule { classIri: string; predicateIri: string; required: boolean; unit: string | null; allowedLexicalValues: string[]; singleValue: boolean }
 export interface BusinessPolicySet { version: string; rules: BusinessPolicyRule[] }
+export interface BusinessPolicyLiteral { lexicalValue: string; datatypeIri: string; unit: string | null }
+export interface SaveBusinessPolicy { expectedDraftVersion: number; operationId: string; rules: BusinessPolicyRule[] }
+export interface CheckBusinessPolicySample { expectedDraftVersion: number; classIri: string; completeSubmission: boolean; properties: Record<string, BusinessPolicyLiteral[]> }
+export interface BusinessPolicyCheck { draftVersion: number; policyVersion: string; valid: boolean; violations: Violation[] }
 export interface DocumentInput { modelSchema: 'owl-document-v1'; syntax: OntologyDocumentSyntax; documentText: string; imports: LockedImport[]; policy: BusinessPolicySet }
 export interface OntologyAnnotationDescriptor { propertyIri: string; valueRendering: string; nestedAnnotations: OntologyAnnotationDescriptor[] }
 export interface AxiomDescriptor { axiomId: string; axiomType: string; rendering: string; signatureIris: string[]; annotations: OntologyAnnotationDescriptor[]; logical: boolean }

@@ -72,6 +72,25 @@ it('uses the M4 package and impact endpoints with string IDs and scoped requests
   }
 })
 
+it('pins workspace and preserves business-policy authoring and sample-check bodies', async () => {
+  const previous = http.defaults.adapter
+  const bodies: unknown[] = []
+  http.defaults.adapter = async config => {
+    bodies.push(typeof config.data === 'string' ? JSON.parse(config.data) : config.data)
+    const data = String(config.url).endsWith('/draft/business-policy')
+      ? { id: 'draft', ontologyId: 'ontology', baseRevisionId: null, version: 1, draftVersion: 9, name: 'Factory', description: '', document: { source: { modelSchema: 'owl-document-v1', syntax: 'FUNCTIONAL', documentText: 'Ontology(<urn:factory>)', imports: [], policy: { version: 'policy-2', rules: [] } }, ontologyIri: 'urn:factory', versionIri: null, documentDigest: 'digest', importLockDigest: 'imports', axioms: [] } }
+      : { draftVersion: 9, policyVersion: 'policy-2', valid: false, violations: [{ code: 'BUSINESS_REQUIRED', path: 'urn:serial', message: 'Required', severity: 'ERROR' }] }
+    return { data: { code: 200, data }, status: 200, statusText: 'OK', headers: {}, config }
+  }
+  try {
+    await ontologyApi.saveBusinessPolicy('workspace', 'ontology', { expectedDraftVersion: 8, operationId: 'policy-op', rules: [] })
+    await ontologyApi.checkBusinessPolicySample('workspace', 'ontology', { expectedDraftVersion: 9, classIri: 'urn:equipment', completeSubmission: true, properties: { 'urn:serial': [{ lexicalValue: 'EQ-01', datatypeIri: 'http://www.w3.org/2001/XMLSchema#string', unit: null }] } })
+    expect(bodies).toHaveLength(2)
+    expect(bodies[0]).toMatchObject({ expectedDraftVersion: 8, operationId: 'policy-op', rules: [] })
+    expect(bodies[1]).toMatchObject({ expectedDraftVersion: 9, classIri: 'urn:equipment', completeSubmission: true })
+  } finally { http.defaults.adapter = previous }
+})
+
 it('shares concurrent availability checks without falsely denying navigation', async () => {
   localStorage.setItem('token', 'test')
   let resolve!: (value: { enabled: boolean }) => void

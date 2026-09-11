@@ -10,6 +10,9 @@ import type {
   Metadata,
   Ontology,
   SaveDraft,
+  SaveBusinessPolicy,
+  CheckBusinessPolicySample,
+  BusinessPolicyCheck,
   PublishDraft,
   ValidationReport,
   Diff,
@@ -68,6 +71,10 @@ export const ontologyApi = {
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft` }, signal),
   saveDraft: (ws: string, id: string, body: SaveDraft, signal?: AbortSignal) =>
     semanticRequest<Draft>(ws, { url: `${path(id)}/draft`, method: 'PUT', data: body }, signal),
+  saveBusinessPolicy: (ws: string, id: string, body: SaveBusinessPolicy, signal?: AbortSignal) =>
+    semanticRequest<Draft>(ws, { url: `${path(id)}/draft/business-policy`, method: 'PUT', data: body }, signal),
+  checkBusinessPolicySample: (ws: string, id: string, body: CheckBusinessPolicySample, signal?: AbortSignal) =>
+    semanticRequest<BusinessPolicyCheck>(ws, { url: `${path(id)}/draft/check-sample`, method: 'POST', data: body }, signal),
   modelEdit: (ws: string, id: string, body: ModelEdit, signal?: AbortSignal) => semanticRequest<Draft>(ws, {url: `${path(id)}/draft/model-edits`, method: 'POST', data: body}, signal),
   editDraft: editDraftRequest,
   // An ambiguous edit response must be retried with the exact original command.

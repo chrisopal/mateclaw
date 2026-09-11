@@ -1,0 +1,35 @@
+{
+  "workspaceId": "2098236751592255489",
+  "ontologyId": "2098236751617421313",
+  "items": [
+    {
+      "clientId": "equipment",
+      "targetId": "urn:mateclaw:ontology:2098236751617421313/model-term/5c1cbddc3f6e058a3e2b8e7991dda97b99afbe971c1d1f8525fd66029b0035cc",
+      "axiomIds": [
+        "75604f2e3b31ff8384e013b401c2b0a92ce7ec5cc32533d814e0dddbb39a91d7",
+        "7b397be7fe2094b8a3ba42db7c71a20795f6e8f4a841375ab3a5e267050a719e"
+      ]
+    },
+    {
+      "clientId": "code",
+      "targetId": "urn:mateclaw:ontology:2098236751617421313/model-term/dd2d7527132a03d4c3f91be91b96e6b8248ef5e1b648b9252007cedf7ee07793",
+      "axiomIds": [
+        "28abb66bab49d226127df43d4e37f7bd762ec7c2c73a4aaae7e702380633343d",
+        "40af6545265119499a1fcd7b4d2c3922ab13db867a0277cfb23291f35a5a0eb3",
+        "6c51aed76a1f8cb6f1e20ca1e8b507d6901da15500a00c5664872f372bdba53f",
+        "954e64ff23a198b6618d6aabdb56463a3ceb4ee8514f9e199c1298746f7a68f2"
+      ]
+    },
+    {
+      "clientId": "power",
+      "targetId": "urn:mateclaw:ontology:2098236751617421313/model-term/22dccab0b5fa2441aeae4d2c76738ad1733115a85616aedd32fc4b59cab5c416",
+      "axiomIds": [
+        "4b6fd01660716a23f49bb4124b178a2ef68485adf07f2b054455162401203d35",
+        "6d7174fdf4761cf5260073d3b1184141b68063d68bd4b5dfed5594ee924abd58",
+        "a1dfd5d849d6147d79728ca96c2a5ae5f43c1a3a4eb301f6cb7a9c13c7abb6d9",
+        "d33498dc7598094419459def443aa944ae338870a4678acf48260d2f2733149e"
+      ]
+    }
+  ],
+  "draftVersion": 2
+}

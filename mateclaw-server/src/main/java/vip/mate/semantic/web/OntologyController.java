@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import vip.mate.common.result.R;
 import vip.mate.semantic.ontology.OntologyApplicationService;
+import vip.mate.semantic.ontology.BusinessPolicyService;
 import vip.mate.semantic.web.OntologyDtos.*;
 import vip.mate.workspace.core.annotation.RequireWorkspaceRole;
 
@@ -15,9 +16,11 @@ import java.util.List;
 @ConditionalOnProperty(name = "mateclaw.semantic.enabled", havingValue = "true")
 public class OntologyController {
     private final OntologyApplicationService service;
+    private final BusinessPolicyService businessPolicies;
 
-    public OntologyController(OntologyApplicationService service) {
+    public OntologyController(OntologyApplicationService service, BusinessPolicyService businessPolicies) {
         this.service = service;
+        this.businessPolicies = businessPolicies;
     }
 
     @GetMapping("/ontologies")
@@ -90,6 +93,24 @@ public class OntologyController {
             @PathVariable String id,
             @RequestBody SaveDraft body) {
         return R.ok(service.saveDraft(scope, id, body));
+    }
+
+    @PutMapping("/ontologies/{id}/draft/business-policy")
+    @RequireWorkspaceRole("member")
+    public R<DraftView> saveBusinessPolicy(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @RequestBody SaveBusinessPolicy body) {
+        return R.ok(businessPolicies.save(scope, id, body));
+    }
+
+    @PostMapping("/ontologies/{id}/draft/check-sample")
+    @RequireWorkspaceRole("member")
+    public R<BusinessPolicyCheckView> checkBusinessPolicySample(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+            @PathVariable String id,
+            @RequestBody CheckBusinessPolicySample body) {
+        return R.ok(businessPolicies.checkSample(scope, id, body));
     }
 
     @PatchMapping("/ontologies/{id}/draft/axioms")
