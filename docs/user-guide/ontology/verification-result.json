@@ -1,25 +1,37 @@
 {
-  "checkedAt": "2026-09-12T16:14:26.759Z",
-  "build": "node docs/user-guide/ontology/build.mjs passed",
-  "duplicateIds": 0,
-  "brokenInternalAnchors": [],
-  "embeddedImages": 32,
-  "allImagesEmbedded": true,
-  "browser": {
-    "engine": "Chrome headless",
-    "transport": "file URL (offline)",
-    "directoryNavigation": true,
-    "imageEnlargement": true,
-    "imageClose": true,
-    "attachmentDownloadMatches": true,
-    "pageErrors": []
-  },
-  "screenshotCopiesMatch": {
-    "entity-business-types.png": true,
-    "relation-accepted.png": true
-  },
-  "scope": "Documentation checks only. Product evidence separately described in verification.md",
-  "layoutFix": "Removed lazy image loading to prevent late image sizing from displacing anchor destinations",
-  "finalHtmlSha256": "c8547c972bc48b8feb58dc6673721faf11f746558240a743ec683a393add89a1",
-  "finalBuild": "PASS after replacing source-review pending note with verified result; no interaction code changes"
+  "checkedAt": "2026-09-12T17:23:02.443Z",
+  "scope": "Offline manual only; no product E2E claim",
+  "cases": [
+    {
+      "id": "embedded-assets",
+      "status": "PASS",
+      "images": 16
+    },
+    {
+      "id": "directory-links",
+      "status": "PASS",
+      "count": 17
+    },
+    {
+      "id": "image-open-close",
+      "status": "PASS",
+      "count": 16
+    },
+    {
+      "id": "attachment-download",
+      "status": "PASS"
+    },
+    {
+      "id": "mobile-menu-image-layout",
+      "status": "PASS",
+      "viewport": 390
+    },
+    {
+      "id": "print-layout",
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": [],
+  "status": "PASS",
+  "finalHtmlSha256": "528ec67cef1da71fe7ecc08f9ff244a6506091c8a7ebbe6107c66d7afc6623d4"
 }

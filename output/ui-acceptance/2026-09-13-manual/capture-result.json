@@ -1,0 +1,159 @@
+[
+  {
+    "name": "current-01-list",
+    "url": "http://127.0.0.1:5189/semantic/ontologies",
+    "capturedAt": "2026-09-12T17:21:20.101Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-02-start",
+    "url": "http://127.0.0.1:5189/semantic/ontologies",
+    "capturedAt": "2026-09-12T17:21:21.656Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": "从资料生成"
+  },
+  {
+    "name": "current-16-source-selection",
+    "url": "http://127.0.0.1:5189/semantic/ontologies",
+    "capturedAt": "2026-09-12T17:21:24.105Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": "从资料生成"
+  },
+  {
+    "name": "current-06-versions",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/versions",
+    "capturedAt": "2026-09-12T17:21:25.931Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-07-binding",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/versions",
+    "capturedAt": "2026-09-12T17:21:28.763Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": "应用到知识库"
+  },
+  {
+    "name": "current-08-entities",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098772602979139585",
+    "capturedAt": "2026-09-12T17:21:30.371Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-09-samples",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098772602979139585",
+    "capturedAt": "2026-09-12T17:21:33.710Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-10-facts",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098772602979139585",
+    "capturedAt": "2026-09-12T17:21:34.928Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    }
+  },
+  {
+    "name": "current-11-evidence",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098772602979139585",
+    "capturedAt": "2026-09-12T17:21:36.876Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-14-snapshots",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098772602979139585",
+    "capturedAt": "2026-09-12T17:21:38.490Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-13-migration",
+    "url": "http://127.0.0.1:5189/semantic/graphs/2098803418832609281?tab=migration",
+    "capturedAt": "2026-09-12T17:21:39.729Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    }
+  },
+  {
+    "name": "current-12-query",
+    "url": "http://127.0.0.1:5189/chat?agentId=2098800899200950273&conversationId=conv_1789228307596_isab6e",
+    "capturedAt": "2026-09-12T17:21:41.336Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-03-model",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/edit",
+    "capturedAt": "2026-09-12T17:21:43.150Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": null
+  },
+  {
+    "name": "current-04-suggestions",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/edit?taskId=2cf5374f-e16a-43cf-9662-a04c6fc4d6fb",
+    "capturedAt": "2026-09-12T17:21:44.405Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    }
+  },
+  {
+    "name": "current-05-sources",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/edit",
+    "capturedAt": "2026-09-12T17:21:46.096Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": "参考资料"
+  },
+  {
+    "name": "current-15-check",
+    "url": "http://127.0.0.1:5189/semantic/ontologies/2098771602272731138/edit",
+    "capturedAt": "2026-09-12T17:21:51.327Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "button": "检查发布"
+  }
+]
