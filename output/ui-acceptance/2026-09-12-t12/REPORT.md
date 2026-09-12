@@ -36,3 +36,7 @@
 在 semantic-m1 工作树运行 `python3 output/ui-acceptance/2026-09-12-t12/verify_readback.py`：只读持久化运行环境，对两任务、发布版本、OWL 往返、样例状态和证据做断言。它不重新生成模型，不替代 UI 验收。
 
 UI 步骤见 ui-run.md；台账见 coverage.json；运行验证见 runtime/REPORT.md 和 runtime/maven-results.json；能力边界见 support-boundaries.md。prepare.py 会新建独立合成工作区，不能将其与已有固定 ID 回读脚本混用。所有数据保留在现有持久化库，未推送远程 Git。
+
+## 2026-09-13 后续结果
+
+上述优先项已继续执行，新增12个明确端到端场景完成、3处缺陷修复与重测，见 [续验报告](../2026-09-12-t12-e2e/REPORT.md)。本文件保留原批次结果，不将旧测试计入新批次；T12/M3整体仍受生产数据库、容量和故障演练等门槛限制。

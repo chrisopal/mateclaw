@@ -59,6 +59,25 @@ class SemanticSourceChangeIntegrationTest extends SemanticHttpFixture {
     }
 
     @Test
+    void sourceChangeVersionFieldsAreJsonNumbersOnTheRealHttpResponse() throws Exception {
+        Fixture f = fixture("P-101 reading 380V");
+        JsonNode fact = propose(f, "380", op(), 200);
+        accept(f, fact.path("id").asText(), 1);
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=?,update_time=? WHERE id=?",
+                "P-101 reading 381V", LocalDateTime.now(), Long.valueOf(f.raw()));
+
+        JsonNode scan = call("POST", "/graphs/" + f.graph() + "/source-changes/scan", "member", workspace,
+                Map.of("operationId", op(), "sourceKind", "WIKI_RAW", "sourceRef", f.raw()), 200);
+
+        assertTrue(scan.path("graphMutationVersion").isNumber(), scan.toString());
+        JsonNode change = scan.path("changes").get(0);
+        assertTrue(change.path("observedGraphVersion").isNumber(), scan.toString());
+        assertTrue(change.path("sourceRef").isTextual(), scan.toString());
+        JsonNode item = call("GET", "/graphs/" + f.graph() + "/source-changes?limit=20", "viewer", workspace, null, 200).get(0);
+        assertTrue(item.path("observedGraphVersion").isNumber(), item.toString());
+    }
+
+    @Test
     void factRevisionHoldsSourceLockUntilProposalCommits()throws Exception {
         var f=fixture("P-101 reading 380V");var fact=propose(f,"380",op(),200);accept(f,fact.path("id").asText(),1);
         String text="P-101 reading 381V";

@@ -57,4 +57,4 @@ export interface SourceChangeScanResult {
   changes: SourceChange[]
 }
 export interface GraphResult { nodes: { id: string; iri: string; assertedTypes: string[]; label: string; properties: Statement[] }[]; edges: { statementId: string; revision: number; sourceId: string; targetId: string; predicateIri: string }[]; traceId: string; truncated: boolean }
-export interface SearchResult { facts: Statement[]; traceId: string; truncated: boolean; entityLabels: Record<string, string>; predicateLabels: Record<string, string> }
+export interface SearchResult { facts: Statement[]; traceId: string; truncated: boolean; entityLabels: Record<string, string>; predicateLabels: Record<string, string>; termLabels: Record<string, string> }

@@ -1,0 +1,54 @@
+{
+  "scope": "T12 continuation: query, governance, model lifecycle, role controls and responsive inspection",
+  "baseline": "82b9a2b0",
+  "cases": [
+    {
+      "id": "real-agent-query",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "source-governance",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "entity-relations",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "revision-migration",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "archive-restore",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "viewer-permissions",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "member-permissions",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "workspace-isolation",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "responsive",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "manual-model-edit",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "invalid-import",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "version-comparison",
+      "status": "NOT_RUN"
+    }
+  ]
+}

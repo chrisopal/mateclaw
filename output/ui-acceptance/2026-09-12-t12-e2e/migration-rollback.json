@@ -1,0 +1,30 @@
+{
+  "id": "80601af6-1235-4ed4-b590-f2d4efbf8170",
+  "graphId": "2098803418832609281",
+  "sourceRevisionId": "2098802785266212865",
+  "targetRevisionId": "2098804109324099586",
+  "sourceVersion": 2,
+  "targetVersion": 3,
+  "status": "ROLLED_BACK",
+  "planDigest": "d4155a87cbc58bd7b9b3e18606f88eae67200e516bc260ef19dc1d47f6c1be1c",
+  "sourceDocumentDigest": "0c47c2259ed291a3ccad0dab8457c302d1350a2a8eacd2047bd487b16f4d60ab",
+  "targetDocumentDigest": "5af7a3b410de0f5aa280cfae62897ba9e235d293d2269a74365b686d8eb8db41",
+  "sourceImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "targetImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "expectedGraphVersion": 1,
+  "executedGraphVersion": 2,
+  "impact": {
+    "entities": 0,
+    "facts": 0,
+    "changedEntities": 0,
+    "changedFacts": 0,
+    "blockers": [],
+    "truncated": false
+  },
+  "entities": [],
+  "facts": [],
+  "createdAt": "2026-09-12T16:01:34.524848Z",
+  "approvedAt": "2026-09-12T16:01:45.231707Z",
+  "executedAt": "2026-09-12T16:02:29.205298Z",
+  "rolledBackAt": "2026-09-12T16:02:51.287464Z"
+}

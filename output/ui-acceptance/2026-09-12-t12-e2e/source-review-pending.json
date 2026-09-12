@@ -1,0 +1,23 @@
+[
+  {
+    "id": "787ba8f4-5d4d-4612-af03-6f9af820884d",
+    "changeId": "7cd492f7-933a-45de-a6c5-55b7c0d4e160",
+    "graphId": "2098803418832609281",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2098803864347385857",
+    "itemKind": "FACT",
+    "itemId": "2098805277643333633",
+    "itemRevision": "4",
+    "oldSnapshotId": "2098803926767017986",
+    "newSnapshotId": null,
+    "oldDigest": "c57bc4fb38ee84dcd1a0c37b05932434641506968979e5498fe0aa67d2b311e4",
+    "newDigest": "SOURCE_UNAVAILABLE",
+    "sourceState": "UNAVAILABLE",
+    "reviewState": "PENDING",
+    "decision": null,
+    "reason": null,
+    "observedGraphVersion": "10",
+    "createdAt": "2026-09-12T08:09:00.610681Z",
+    "reviewedAt": null
+  }
+]

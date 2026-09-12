@@ -1,0 +1,76 @@
+{
+  "fixturePreparation": "API creates proposal only; UI creates entities, captures source and reviews proposal",
+  "entities": [
+    {
+      "id": "2098805120310796289",
+      "graphId": "2098803418832609281",
+      "iri": "urn:t12:lifecycle:EQ-01",
+      "assertedTypes": [
+        "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+      ],
+      "displayName": "EQ-01",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-12T16:05:09.253626Z"
+    },
+    {
+      "id": "2098805176359280641",
+      "graphId": "2098803418832609281",
+      "iri": "urn:t12:lifecycle:L-01",
+      "assertedTypes": [
+        "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+      ],
+      "displayName": "L-01",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-12T16:05:22.616162Z"
+    }
+  ],
+  "snapshot": {
+    "id": "2098803926767017986",
+    "graphId": "2098803418832609281",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2098803864347385857",
+    "sourceTitle": "T12 生命周期设备记录",
+    "captureVersion": 1,
+    "textDigest": "c57bc4fb38ee84dcd1a0c37b05932434641506968979e5498fe0aa67d2b311e4",
+    "createdAt": "2026-09-12T16:00:24.688924Z"
+  },
+  "evidence": {
+    "id": "2098805277496532993",
+    "snapshotId": "2098803926767017986",
+    "startCodePoint": 0,
+    "endCodePoint": 16,
+    "exactQuote": "设备EQ-01位于产线L-01。"
+  },
+  "proposal": {
+    "id": "2098805277643333633",
+    "graphId": "2098803418832609281",
+    "revision": 1,
+    "ontologyRevisionId": "2098802785266212865",
+    "subjectId": "2098805120310796289",
+    "assertion": {
+      "kind": "POSITIVE_OBJECT_PROPERTY",
+      "functionalSyntax": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+      "signatureIris": [
+        "urn:t12:lifecycle:EQ-01",
+        "urn:t12:lifecycle:L-01",
+        "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+      ],
+      "subjectIri": "urn:t12:lifecycle:EQ-01",
+      "predicateIri": "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+      "objectIri": "urn:t12:lifecycle:L-01",
+      "literal": null,
+      "classExpressionFunctionalSyntax": null,
+      "relatedIndividualIri": null
+    },
+    "validityKind": "UNKNOWN",
+    "validFrom": null,
+    "validTo": null,
+    "reviewStatus": "PROPOSED",
+    "supportStatus": "UNREVIEWED",
+    "evidenceIds": [
+      "2098805277496532993"
+    ],
+    "proposedBy": "1",
+    "createdAt": "2026-09-12T16:05:46.765081Z"
+  }
+}

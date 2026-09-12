@@ -1,0 +1,318 @@
+{
+  "status": "PASS",
+  "ontologyId": "2098802182863495170",
+  "versions": [
+    1,
+    2,
+    3
+  ],
+  "axiomCounts": [
+    12,
+    14,
+    16
+  ],
+  "binding": {
+    "graphId": "2098803418832609281",
+    "workspaceId": "2098771185501519874",
+    "knowledgeBaseId": "2098803255409942529",
+    "ontologyRevisionId": "2098802785266212865",
+    "ontologyVersion": 2,
+    "enabled": true,
+    "graphVersion": 11,
+    "empty": false,
+    "updatedAt": "2026-09-12T16:16:29.308861Z"
+  },
+  "entities": [
+    {
+      "id": "2098805120310796289",
+      "graphId": "2098803418832609281",
+      "iri": "urn:t12:lifecycle:EQ-01",
+      "assertedTypes": [
+        "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+      ],
+      "displayName": "EQ-01",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-12T16:05:09.253626Z"
+    },
+    {
+      "id": "2098805176359280641",
+      "graphId": "2098803418832609281",
+      "iri": "urn:t12:lifecycle:L-01",
+      "assertedTypes": [
+        "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+      ],
+      "displayName": "L-01",
+      "status": "ACTIVE",
+      "createdAt": "2026-09-12T16:05:22.616162Z"
+    }
+  ],
+  "relationHistory": [
+    {
+      "id": "2098805277643333633",
+      "graphId": "2098803418832609281",
+      "revision": 1,
+      "ontologyRevisionId": "2098802785266212865",
+      "subjectId": "2098805120310796289",
+      "assertion": {
+        "kind": "POSITIVE_OBJECT_PROPERTY",
+        "functionalSyntax": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+        "signatureIris": [
+          "urn:t12:lifecycle:L-01",
+          "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+          "urn:t12:lifecycle:EQ-01"
+        ],
+        "subjectIri": "urn:t12:lifecycle:EQ-01",
+        "predicateIri": "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+        "objectIri": "urn:t12:lifecycle:L-01",
+        "literal": null,
+        "classExpressionFunctionalSyntax": null,
+        "relatedIndividualIri": null
+      },
+      "validityKind": "UNKNOWN",
+      "validFrom": null,
+      "validTo": null,
+      "reviewStatus": "PROPOSED",
+      "supportStatus": "UNREVIEWED",
+      "evidenceIds": [
+        "2098805277496532993"
+      ],
+      "proposedBy": "1",
+      "createdAt": "2026-09-12T16:05:46.765081Z"
+    },
+    {
+      "id": "2098805277643333633",
+      "graphId": "2098803418832609281",
+      "revision": 2,
+      "ontologyRevisionId": "2098802785266212865",
+      "subjectId": "2098805120310796289",
+      "assertion": {
+        "kind": "POSITIVE_OBJECT_PROPERTY",
+        "functionalSyntax": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+        "signatureIris": [
+          "urn:t12:lifecycle:L-01",
+          "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+          "urn:t12:lifecycle:EQ-01"
+        ],
+        "subjectIri": "urn:t12:lifecycle:EQ-01",
+        "predicateIri": "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+        "objectIri": "urn:t12:lifecycle:L-01",
+        "literal": null,
+        "classExpressionFunctionalSyntax": null,
+        "relatedIndividualIri": null
+      },
+      "validityKind": "UNKNOWN",
+      "validFrom": null,
+      "validTo": null,
+      "reviewStatus": "ACCEPTED",
+      "supportStatus": "SUPPORT_LOST",
+      "evidenceIds": [
+        "2098805277496532993"
+      ],
+      "proposedBy": "1",
+      "createdAt": "2026-09-12T16:06:21.756866Z"
+    },
+    {
+      "id": "2098805277643333633",
+      "graphId": "2098803418832609281",
+      "revision": 3,
+      "ontologyRevisionId": "2098804109324099586",
+      "subjectId": "2098805120310796289",
+      "assertion": {
+        "kind": "POSITIVE_OBJECT_PROPERTY",
+        "functionalSyntax": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+        "signatureIris": [
+          "urn:t12:lifecycle:L-01",
+          "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+          "urn:t12:lifecycle:EQ-01"
+        ],
+        "subjectIri": "urn:t12:lifecycle:EQ-01",
+        "predicateIri": "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+        "objectIri": "urn:t12:lifecycle:L-01",
+        "literal": null,
+        "classExpressionFunctionalSyntax": null,
+        "relatedIndividualIri": null
+      },
+      "validityKind": "UNKNOWN",
+      "validFrom": null,
+      "validTo": null,
+      "reviewStatus": "ACCEPTED",
+      "supportStatus": "SUPPORT_LOST",
+      "evidenceIds": [
+        "2098805277496532993"
+      ],
+      "proposedBy": "1",
+      "createdAt": "2026-09-12T16:07:28.744394Z"
+    },
+    {
+      "id": "2098805277643333633",
+      "graphId": "2098803418832609281",
+      "revision": 4,
+      "ontologyRevisionId": "2098802785266212865",
+      "subjectId": "2098805120310796289",
+      "assertion": {
+        "kind": "POSITIVE_OBJECT_PROPERTY",
+        "functionalSyntax": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+        "signatureIris": [
+          "urn:t12:lifecycle:L-01",
+          "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+          "urn:t12:lifecycle:EQ-01"
+        ],
+        "subjectIri": "urn:t12:lifecycle:EQ-01",
+        "predicateIri": "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477",
+        "objectIri": "urn:t12:lifecycle:L-01",
+        "literal": null,
+        "classExpressionFunctionalSyntax": null,
+        "relatedIndividualIri": null
+      },
+      "validityKind": "UNKNOWN",
+      "validFrom": null,
+      "validTo": null,
+      "reviewStatus": "ACCEPTED",
+      "supportStatus": "SUPPORT_LOST",
+      "evidenceIds": [
+        "2098805277496532993"
+      ],
+      "proposedBy": "1",
+      "createdAt": "2026-09-12T16:07:50.144648Z"
+    }
+  ],
+  "trustedAfterWithdrawal": [],
+  "sources": [
+    {
+      "sourceKind": "WIKI_RAW",
+      "sourceRef": "2098803864347385857",
+      "title": "T12 生命周期设备记录",
+      "state": "WITHDRAWN",
+      "snapshotCount": 1
+    }
+  ],
+  "sourceReviews": [
+    {
+      "id": "787ba8f4-5d4d-4612-af03-6f9af820884d",
+      "changeId": "7cd492f7-933a-45de-a6c5-55b7c0d4e160",
+      "graphId": "2098803418832609281",
+      "sourceKind": "WIKI_RAW",
+      "sourceRef": "2098803864347385857",
+      "itemKind": "FACT",
+      "itemId": "2098805277643333633",
+      "itemRevision": "4",
+      "oldSnapshotId": "2098803926767017986",
+      "newSnapshotId": null,
+      "oldDigest": "c57bc4fb38ee84dcd1a0c37b05932434641506968979e5498fe0aa67d2b311e4",
+      "newDigest": "SOURCE_UNAVAILABLE",
+      "sourceState": "UNAVAILABLE",
+      "reviewState": "REVIEWED",
+      "decision": "KEEP_HISTORICAL",
+      "reason": "合成原始资料已删除，保留历史引用，不作为当前可信依据",
+      "observedGraphVersion": 10,
+      "createdAt": "2026-09-12T08:09:00.610681Z",
+      "reviewedAt": "2026-09-12T08:16:29.308861Z"
+    }
+  ],
+  "migrations": [
+    {
+      "id": "80601af6-1235-4ed4-b590-f2d4efbf8170",
+      "graphId": "2098803418832609281",
+      "sourceRevisionId": "2098802785266212865",
+      "targetRevisionId": "2098804109324099586",
+      "sourceVersion": 2,
+      "targetVersion": 3,
+      "status": "ROLLED_BACK",
+      "planDigest": "d4155a87cbc58bd7b9b3e18606f88eae67200e516bc260ef19dc1d47f6c1be1c",
+      "sourceDocumentDigest": "0c47c2259ed291a3ccad0dab8457c302d1350a2a8eacd2047bd487b16f4d60ab",
+      "targetDocumentDigest": "5af7a3b410de0f5aa280cfae62897ba9e235d293d2269a74365b686d8eb8db41",
+      "sourceImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "targetImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedGraphVersion": 1,
+      "executedGraphVersion": 2,
+      "impact": {
+        "entities": 0,
+        "facts": 0,
+        "changedEntities": 0,
+        "changedFacts": 0,
+        "blockers": [],
+        "truncated": false
+      },
+      "entities": [],
+      "facts": [],
+      "createdAt": "2026-09-12T16:01:34.524848Z",
+      "approvedAt": "2026-09-12T16:01:45.231707Z",
+      "executedAt": "2026-09-12T16:02:29.205298Z",
+      "rolledBackAt": "2026-09-12T16:02:51.287464Z"
+    },
+    {
+      "id": "820d22e5-8df9-4401-b4b9-d154ef59f4ff",
+      "graphId": "2098803418832609281",
+      "sourceRevisionId": "2098802785266212865",
+      "targetRevisionId": "2098804109324099586",
+      "sourceVersion": 2,
+      "targetVersion": 3,
+      "status": "ROLLED_BACK",
+      "planDigest": "56be78d33933642c3ad65c171c69a3a8db4a6a144947b9319c087dfd2364db88",
+      "sourceDocumentDigest": "0c47c2259ed291a3ccad0dab8457c302d1350a2a8eacd2047bd487b16f4d60ab",
+      "targetDocumentDigest": "5af7a3b410de0f5aa280cfae62897ba9e235d293d2269a74365b686d8eb8db41",
+      "sourceImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "targetImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expectedGraphVersion": 7,
+      "executedGraphVersion": 8,
+      "impact": {
+        "entities": 2,
+        "facts": 1,
+        "changedEntities": 0,
+        "changedFacts": 0,
+        "blockers": [],
+        "truncated": false
+      },
+      "entities": [
+        {
+          "entityId": "2098805120310796289",
+          "oldIri": "urn:t12:lifecycle:EQ-01",
+          "targetIri": "urn:t12:lifecycle:EQ-01",
+          "oldTypes": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "targetTypes": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "blockers": []
+        },
+        {
+          "entityId": "2098805176359280641",
+          "oldIri": "urn:t12:lifecycle:L-01",
+          "targetIri": "urn:t12:lifecycle:L-01",
+          "oldTypes": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+          ],
+          "targetTypes": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+          ],
+          "blockers": []
+        }
+      ],
+      "facts": [
+        {
+          "statementId": "2098805277643333633",
+          "sourceRevision": 2,
+          "sourceAssertionText": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+          "targetAssertionText": "ObjectPropertyAssertion(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:t12:lifecycle:EQ-01> <urn:t12:lifecycle:L-01>)",
+          "status": "READY",
+          "blockers": []
+        }
+      ],
+      "createdAt": "2026-09-12T16:07:20.013909Z",
+      "approvedAt": "2026-09-12T16:07:28.624727Z",
+      "executedAt": "2026-09-12T16:07:28.744804Z",
+      "rolledBackAt": "2026-09-12T16:07:50.145001Z"
+    }
+  ],
+  "query": {
+    "conversationId": "conv_1789228307596_isab6e",
+    "actualToolCalls": 3,
+    "factId": "2098776967022428161",
+    "revision": 2,
+    "businessLabel": "泵",
+    "validity": "UNKNOWN",
+    "unsupportedTodayClaimRejected": true
+  },
+  "originalEquipmentFixtureStillTrusted": true
+}

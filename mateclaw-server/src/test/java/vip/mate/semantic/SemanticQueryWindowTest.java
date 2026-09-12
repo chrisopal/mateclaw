@@ -16,11 +16,14 @@ import java.util.*;
 
 class SemanticQueryWindowTest {
     private SemanticQueryService query(StatementApplicationService statements) {
+        return query(statements, Map.of());
+    }
+    private SemanticQueryService query(StatementApplicationService statements, Map<String,List<String>> labels) {
         var domain=mock(vip.mate.semantic.statement.SemanticDomainMapper.class);
         var ontology=mock(vip.mate.semantic.core.ontology.OntologyRevision.class);
         when(domain.ontology(any())).thenReturn(ontology);
         var port=mock(vip.mate.semantic.core.ontology.OntologyDocumentPort.class);
-        when(port.termLabels(any())).thenReturn(Map.of());
+        when(port.termLabels(any())).thenReturn(labels);
         return new SemanticQueryService(mock(JdbcTemplate.class),mock(GraphApplicationService.class),mock(SemanticAccessService.class),
             statements,mock(SupportEvaluator.class),mock(vip.mate.agent.repository.AgentMapper.class),
             mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class),domain,port);
@@ -51,5 +54,22 @@ class SemanticQueryWindowTest {
         var result=query.search("w","g",new SearchRequest("needle",1,null));
         assertEquals("f100",result.facts().getFirst().id());
         assertTrue(result.truncated());
+    }
+
+    @Test
+    void searchReturnsLabelsForAllAssertionSignatureIris() {
+        var statements=mock(StatementApplicationService.class);
+        var query=query(statements, Map.of("urn:test:Pump", List.of("泵")));
+        var classAssertion=new vip.mate.semantic.owl.OwlAssertionAdapter()
+                .parse("ClassAssertion(<urn:test:Pump> <urn:test:individual:P-101>)");
+        var fact=new StatementView("f","g",1,"o","entity",classAssertion,"INTERVAL",null,null,
+                "ACCEPTED","SUPPORTED",List.of("evidence"),"actor",Instant.now());
+        when(statements.trusted("w","g")).thenReturn(List.of(fact));
+
+        var result=query.search("w","g",new SearchRequest("泵",10,null));
+
+        assertEquals(List.of("f"),result.facts().stream().map(StatementView::id).toList());
+        assertEquals("泵",result.termLabels().get("urn:test:Pump"));
+        assertTrue(result.predicateLabels().isEmpty(),"Class assertions must keep predicateLabels empty");
     }
 }

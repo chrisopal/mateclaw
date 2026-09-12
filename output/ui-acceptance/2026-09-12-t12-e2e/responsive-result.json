@@ -1,0 +1,1730 @@
+{
+  "startedAt": "2026-09-12T15:59:21.257Z",
+  "role": "admin",
+  "workspaceId": "2098771185501519874",
+  "cases": [
+    {
+      "name": "list",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "/semantic/ontologies",
+      "geometry": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 390,
+          "height": 795,
+          "right": 390,
+          "bottom": 844
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 16,
+            "y": 65,
+            "width": 352,
+            "height": 99.5,
+            "right": 368,
+            "bottom": 164.5
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 33,
+            "y": 201.5,
+            "width": 318,
+            "height": 78,
+            "right": 351,
+            "bottom": 279.5
+          }
+        ],
+        "buttons": [
+          {
+            "label": "从资料生成",
+            "disabled": false,
+            "x": 16,
+            "y": 132.5,
+            "width": 102,
+            "height": 32,
+            "right": 118,
+            "bottom": 164.5
+          },
+          {
+            "label": "导入模板",
+            "disabled": false,
+            "x": 142,
+            "y": 132.5,
+            "width": 88,
+            "height": 32,
+            "right": 230,
+            "bottom": 164.5
+          },
+          {
+            "label": "新建本体",
+            "disabled": false,
+            "x": 254,
+            "y": 132.5,
+            "width": 88,
+            "height": 32,
+            "right": 342,
+            "bottom": 164.5
+          },
+          {
+            "label": "搜索",
+            "disabled": false,
+            "x": 33,
+            "y": 247.5,
+            "width": 60,
+            "height": 32,
+            "right": 93,
+            "bottom": 279.5
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "从资料生成",
+          "reachable": true
+        },
+        {
+          "label": "导入模板",
+          "reachable": true
+        },
+        {
+          "label": "新建本体",
+          "reachable": true
+        },
+        {
+          "label": "搜索",
+          "reachable": true
+        }
+      ],
+      "screenshot": "responsive/list-390.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。 表格右侧列处于内部横向区域，未计为页面整体溢出；本次未操作表格所有行按钮。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "editor",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "/semantic/ontologies/2098803131598282754/edit",
+      "geometry": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 390,
+          "height": 795,
+          "right": 390,
+          "bottom": 844
+        },
+        "panels": [
+          {
+            "name": "editor-header",
+            "x": 16,
+            "y": 65,
+            "width": 352,
+            "height": 165.5,
+            "right": 368,
+            "bottom": 230.5
+          },
+          {
+            "name": "editor-navigation",
+            "x": 16,
+            "y": 242.5,
+            "width": 352,
+            "height": 46.5,
+            "right": 368,
+            "bottom": 289
+          },
+          {
+            "name": "model-bar",
+            "x": 28,
+            "y": 301,
+            "width": 328,
+            "height": 101,
+            "right": 356,
+            "bottom": 402
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 29,
+            "y": 500,
+            "width": 326,
+            "height": 541.390625,
+            "right": 355,
+            "bottom": 1041.390625
+          }
+        ],
+        "buttons": [
+          {
+            "label": "← 本体管理",
+            "disabled": false,
+            "x": 28,
+            "y": 65,
+            "width": 68.234375,
+            "height": 18,
+            "right": 96.234375,
+            "bottom": 83
+          },
+          {
+            "label": "开始建模",
+            "disabled": false,
+            "x": 93.75,
+            "y": 198.5,
+            "width": 88,
+            "height": 32,
+            "right": 181.75,
+            "bottom": 230.5
+          },
+          {
+            "label": "更多 ▾",
+            "disabled": false,
+            "x": 189.75,
+            "y": 198.5,
+            "width": 70.25,
+            "height": 32,
+            "right": 260,
+            "bottom": 230.5
+          },
+          {
+            "label": "运行检查",
+            "disabled": false,
+            "x": 268,
+            "y": 198.5,
+            "width": 88,
+            "height": 32,
+            "right": 356,
+            "bottom": 230.5
+          },
+          {
+            "label": "业务模型",
+            "disabled": false,
+            "x": 28,
+            "y": 242.5,
+            "width": 52,
+            "height": 45.5,
+            "right": 80,
+            "bottom": 288
+          },
+          {
+            "label": "建模建议",
+            "disabled": false,
+            "x": 92,
+            "y": 242.5,
+            "width": 52,
+            "height": 45.5,
+            "right": 144,
+            "bottom": 288
+          },
+          {
+            "label": "业务规则",
+            "disabled": false,
+            "x": 156,
+            "y": 242.5,
+            "width": 52,
+            "height": 45.5,
+            "right": 208,
+            "bottom": 288
+          },
+          {
+            "label": "参考资料",
+            "disabled": false,
+            "x": 220,
+            "y": 242.5,
+            "width": 52,
+            "height": 45.5,
+            "right": 272,
+            "bottom": 288
+          },
+          {
+            "label": "检查发布",
+            "disabled": false,
+            "x": 284,
+            "y": 242.5,
+            "width": 52,
+            "height": 45.5,
+            "right": 336,
+            "bottom": 288
+          },
+          {
+            "label": "＋ 业务对象",
+            "disabled": false,
+            "x": 28,
+            "y": 358,
+            "width": 105.328125,
+            "height": 32,
+            "right": 133.328125,
+            "bottom": 390
+          },
+          {
+            "label": "＋ 关系",
+            "disabled": false,
+            "x": 139.328125,
+            "y": 358,
+            "width": 105.328125,
+            "height": 32,
+            "right": 244.65625,
+            "bottom": 390
+          },
+          {
+            "label": "＋ 属性",
+            "disabled": false,
+            "x": 250.65625,
+            "y": 358,
+            "width": 105.34375,
+            "height": 32,
+            "right": 356,
+            "bottom": 390
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "← 本体管理",
+          "reachable": true
+        },
+        {
+          "label": "开始建模",
+          "reachable": true
+        },
+        {
+          "label": "更多 ▾",
+          "reachable": true
+        },
+        {
+          "label": "运行检查",
+          "reachable": true
+        },
+        {
+          "label": "业务模型",
+          "reachable": true
+        },
+        {
+          "label": "建模建议",
+          "reachable": true
+        },
+        {
+          "label": "业务规则",
+          "reachable": true
+        },
+        {
+          "label": "参考资料",
+          "reachable": true
+        },
+        {
+          "label": "检查发布",
+          "reachable": true
+        },
+        {
+          "label": "＋ 业务对象",
+          "reachable": true
+        },
+        {
+          "label": "＋ 关系",
+          "reachable": true
+        },
+        {
+          "label": "＋ 属性",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/editor-390.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "versions",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "/semantic/ontologies/2098772686139604993/versions",
+      "geometry": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 390,
+          "height": 795,
+          "right": 390,
+          "bottom": 844
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 16,
+            "y": 65,
+            "width": 352,
+            "height": 80,
+            "right": 368,
+            "bottom": 145
+          },
+          {
+            "name": "semantic-header",
+            "x": 33,
+            "y": 565,
+            "width": 318,
+            "height": 211.5,
+            "right": 351,
+            "bottom": 776.5
+          },
+          {
+            "name": "model-bar",
+            "x": 33,
+            "y": 796.5,
+            "width": 318,
+            "height": 61,
+            "right": 351,
+            "bottom": 857.5
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 34,
+            "y": 955.5,
+            "width": 316,
+            "height": 557.390625,
+            "right": 350,
+            "bottom": 1512.890625
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 33,
+            "y": 1768.890625,
+            "width": 318,
+            "height": 153,
+            "right": 351,
+            "bottom": 1921.890625
+          },
+          {
+            "name": "semantic-header source-header",
+            "x": 16,
+            "y": 2166.890625,
+            "width": 352,
+            "height": 104,
+            "right": 368,
+            "bottom": 2270.890625
+          }
+        ],
+        "buttons": [
+          {
+            "label": "归档模型",
+            "disabled": false,
+            "x": 16,
+            "y": 113,
+            "width": 88,
+            "height": 32,
+            "right": 104,
+            "bottom": 145
+          },
+          {
+            "label": "返回列表",
+            "disabled": false,
+            "x": 116,
+            "y": 113,
+            "width": 88,
+            "height": 32,
+            "right": 204,
+            "bottom": 145
+          },
+          {
+            "label": "建立草稿",
+            "disabled": false,
+            "x": 228,
+            "y": 113,
+            "width": 88,
+            "height": 32,
+            "right": 316,
+            "bottom": 145
+          },
+          {
+            "label": "应用到知识库",
+            "disabled": false,
+            "x": 33,
+            "y": 656.5,
+            "width": 116,
+            "height": 32,
+            "right": 149,
+            "bottom": 688.5
+          },
+          {
+            "label": "导出 Functional",
+            "disabled": false,
+            "x": 173,
+            "y": 656.5,
+            "width": 133.078125,
+            "height": 32,
+            "right": 306.078125,
+            "bottom": 688.5
+          },
+          {
+            "label": "导出 RDF/XML",
+            "disabled": false,
+            "x": 45,
+            "y": 700.5,
+            "width": 126.84375,
+            "height": 32,
+            "right": 171.84375,
+            "bottom": 732.5
+          },
+          {
+            "label": "导出模板",
+            "disabled": false,
+            "x": 195.84375,
+            "y": 700.5,
+            "width": 88,
+            "height": 32,
+            "right": 283.84375,
+            "bottom": 732.5
+          },
+          {
+            "label": "禁止新绑定使用",
+            "disabled": false,
+            "x": 45,
+            "y": 744.5,
+            "width": 130,
+            "height": 32,
+            "right": 175,
+            "bottom": 776.5
+          },
+          {
+            "label": "比较版本",
+            "disabled": false,
+            "x": 33,
+            "y": 1889.890625,
+            "width": 88,
+            "height": 32,
+            "right": 121,
+            "bottom": 1921.890625
+          },
+          {
+            "label": "检查资料变化",
+            "disabled": false,
+            "x": 16,
+            "y": 2238.890625,
+            "width": 116,
+            "height": 32,
+            "right": 132,
+            "bottom": 2270.890625
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "归档模型",
+          "reachable": true
+        },
+        {
+          "label": "返回列表",
+          "reachable": true
+        },
+        {
+          "label": "建立草稿",
+          "reachable": true
+        },
+        {
+          "label": "应用到知识库",
+          "reachable": true
+        },
+        {
+          "label": "导出 Functional",
+          "reachable": true
+        },
+        {
+          "label": "导出 RDF/XML",
+          "reachable": true
+        },
+        {
+          "label": "导出模板",
+          "reachable": true
+        },
+        {
+          "label": "禁止新绑定使用",
+          "reachable": true
+        },
+        {
+          "label": "比较版本",
+          "reachable": true
+        },
+        {
+          "label": "检查资料变化",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/versions-390.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。 长发布说明使版本行增高但仍可读；图谱位于下方，适应画布已实际点击成功。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "url": "/semantic/ontologies",
+      "geometry": {
+        "viewport": 768,
+        "documentWidth": 768,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 768,
+          "height": 975,
+          "right": 768,
+          "bottom": 1024
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 24,
+            "y": 73,
+            "width": 714,
+            "height": 55.5,
+            "right": 738,
+            "bottom": 128.5
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 41,
+            "y": 165.5,
+            "width": 680,
+            "height": 34,
+            "right": 721,
+            "bottom": 199.5
+          }
+        ],
+        "buttons": [
+          {
+            "label": "从资料生成",
+            "disabled": false,
+            "x": 412,
+            "y": 84.75,
+            "width": 102,
+            "height": 32,
+            "right": 514,
+            "bottom": 116.75
+          },
+          {
+            "label": "导入模板",
+            "disabled": false,
+            "x": 538,
+            "y": 84.75,
+            "width": 88,
+            "height": 32,
+            "right": 626,
+            "bottom": 116.75
+          },
+          {
+            "label": "新建本体",
+            "disabled": false,
+            "x": 650,
+            "y": 84.75,
+            "width": 88,
+            "height": 32,
+            "right": 738,
+            "bottom": 116.75
+          },
+          {
+            "label": "搜索",
+            "disabled": false,
+            "x": 373,
+            "y": 166.5,
+            "width": 60,
+            "height": 32,
+            "right": 433,
+            "bottom": 198.5
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "从资料生成",
+          "reachable": true
+        },
+        {
+          "label": "导入模板",
+          "reachable": true
+        },
+        {
+          "label": "新建本体",
+          "reachable": true
+        },
+        {
+          "label": "搜索",
+          "reachable": true
+        }
+      ],
+      "screenshot": "responsive/list-768.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。 表格右侧列处于内部横向区域，未计为页面整体溢出；本次未操作表格所有行按钮。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "editor",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "url": "/semantic/ontologies/2098803131598282754/edit",
+      "geometry": {
+        "viewport": 768,
+        "documentWidth": 768,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 768,
+          "height": 975,
+          "right": 768,
+          "bottom": 1024
+        },
+        "panels": [
+          {
+            "name": "editor-header",
+            "x": 24,
+            "y": 73,
+            "width": 714,
+            "height": 121.5,
+            "right": 738,
+            "bottom": 194.5
+          },
+          {
+            "name": "editor-navigation",
+            "x": 24,
+            "y": 206.5,
+            "width": 714,
+            "height": 48,
+            "right": 738,
+            "bottom": 254.5
+          },
+          {
+            "name": "model-bar",
+            "x": 44,
+            "y": 270.5,
+            "width": 674,
+            "height": 48,
+            "right": 718,
+            "bottom": 318.5
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 235,
+            "y": 319.5,
+            "width": 482,
+            "height": 685.578125,
+            "right": 717,
+            "bottom": 1005.078125
+          }
+        ],
+        "buttons": [
+          {
+            "label": "← 本体管理",
+            "disabled": false,
+            "x": 60,
+            "y": 73,
+            "width": 68.234375,
+            "height": 18,
+            "right": 128.234375,
+            "bottom": 91
+          },
+          {
+            "label": "开始建模",
+            "disabled": false,
+            "x": 439.75,
+            "y": 117.75,
+            "width": 88,
+            "height": 32,
+            "right": 527.75,
+            "bottom": 149.75
+          },
+          {
+            "label": "更多 ▾",
+            "disabled": false,
+            "x": 535.75,
+            "y": 117.75,
+            "width": 70.25,
+            "height": 32,
+            "right": 606,
+            "bottom": 149.75
+          },
+          {
+            "label": "运行检查",
+            "disabled": false,
+            "x": 614,
+            "y": 117.75,
+            "width": 88,
+            "height": 32,
+            "right": 702,
+            "bottom": 149.75
+          },
+          {
+            "label": "业务模型",
+            "disabled": false,
+            "x": 44,
+            "y": 206.5,
+            "width": 56,
+            "height": 47,
+            "right": 100,
+            "bottom": 253.5
+          },
+          {
+            "label": "建模建议",
+            "disabled": false,
+            "x": 124,
+            "y": 206.5,
+            "width": 56,
+            "height": 47,
+            "right": 180,
+            "bottom": 253.5
+          },
+          {
+            "label": "业务规则",
+            "disabled": false,
+            "x": 204,
+            "y": 206.5,
+            "width": 56,
+            "height": 47,
+            "right": 260,
+            "bottom": 253.5
+          },
+          {
+            "label": "参考资料",
+            "disabled": false,
+            "x": 284,
+            "y": 206.5,
+            "width": 56,
+            "height": 47,
+            "right": 340,
+            "bottom": 253.5
+          },
+          {
+            "label": "检查发布",
+            "disabled": false,
+            "x": 364,
+            "y": 206.5,
+            "width": 56,
+            "height": 47,
+            "right": 420,
+            "bottom": 253.5
+          },
+          {
+            "label": "＋ 业务对象",
+            "disabled": false,
+            "x": 424.796875,
+            "y": 274.5,
+            "width": 105.734375,
+            "height": 32,
+            "right": 530.53125,
+            "bottom": 306.5
+          },
+          {
+            "label": "＋ 关系",
+            "disabled": false,
+            "x": 538.53125,
+            "y": 274.5,
+            "width": 77.734375,
+            "height": 32,
+            "right": 616.265625,
+            "bottom": 306.5
+          },
+          {
+            "label": "＋ 属性",
+            "disabled": false,
+            "x": 624.265625,
+            "y": 274.5,
+            "width": 77.734375,
+            "height": 32,
+            "right": 702,
+            "bottom": 306.5
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "← 本体管理",
+          "reachable": true
+        },
+        {
+          "label": "开始建模",
+          "reachable": true
+        },
+        {
+          "label": "更多 ▾",
+          "reachable": true
+        },
+        {
+          "label": "运行检查",
+          "reachable": true
+        },
+        {
+          "label": "业务模型",
+          "reachable": true
+        },
+        {
+          "label": "建模建议",
+          "reachable": true
+        },
+        {
+          "label": "业务规则",
+          "reachable": true
+        },
+        {
+          "label": "参考资料",
+          "reachable": true
+        },
+        {
+          "label": "检查发布",
+          "reachable": true
+        },
+        {
+          "label": "＋ 业务对象",
+          "reachable": true
+        },
+        {
+          "label": "＋ 关系",
+          "reachable": true
+        },
+        {
+          "label": "＋ 属性",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/editor-768.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "versions",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "url": "/semantic/ontologies/2098772686139604993/versions",
+      "geometry": {
+        "viewport": 768,
+        "documentWidth": 768,
+        "scope": {
+          "x": 0,
+          "y": 49,
+          "width": 768,
+          "height": 975,
+          "right": 768,
+          "bottom": 1024
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 24,
+            "y": 73,
+            "width": 714,
+            "height": 36,
+            "right": 738,
+            "bottom": 109
+          },
+          {
+            "name": "semantic-header",
+            "x": 41,
+            "y": 368,
+            "width": 680,
+            "height": 148,
+            "right": 721,
+            "bottom": 516
+          },
+          {
+            "name": "model-bar",
+            "x": 41,
+            "y": 536,
+            "width": 680,
+            "height": 37,
+            "right": 721,
+            "bottom": 573
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 232,
+            "y": 574,
+            "width": 488,
+            "height": 701.578125,
+            "right": 720,
+            "bottom": 1275.578125
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 41,
+            "y": 1698.96875,
+            "width": 680,
+            "height": 153,
+            "right": 721,
+            "bottom": 1851.96875
+          },
+          {
+            "name": "semantic-header source-header",
+            "x": 24,
+            "y": 2112.46875,
+            "width": 714,
+            "height": 40.5,
+            "right": 738,
+            "bottom": 2152.96875
+          }
+        ],
+        "buttons": [
+          {
+            "label": "归档模型",
+            "disabled": false,
+            "x": 438,
+            "y": 75,
+            "width": 88,
+            "height": 32,
+            "right": 526,
+            "bottom": 107
+          },
+          {
+            "label": "返回列表",
+            "disabled": false,
+            "x": 538,
+            "y": 75,
+            "width": 88,
+            "height": 32,
+            "right": 626,
+            "bottom": 107
+          },
+          {
+            "label": "建立草稿",
+            "disabled": false,
+            "x": 650,
+            "y": 75,
+            "width": 88,
+            "height": 32,
+            "right": 738,
+            "bottom": 107
+          },
+          {
+            "label": "应用到知识库",
+            "disabled": false,
+            "x": 41,
+            "y": 440,
+            "width": 116,
+            "height": 32,
+            "right": 157,
+            "bottom": 472
+          },
+          {
+            "label": "导出 Functional",
+            "disabled": false,
+            "x": 181,
+            "y": 440,
+            "width": 133.078125,
+            "height": 32,
+            "right": 314.078125,
+            "bottom": 472
+          },
+          {
+            "label": "导出 RDF/XML",
+            "disabled": false,
+            "x": 338.078125,
+            "y": 440,
+            "width": 126.84375,
+            "height": 32,
+            "right": 464.921875,
+            "bottom": 472
+          },
+          {
+            "label": "导出模板",
+            "disabled": false,
+            "x": 488.921875,
+            "y": 440,
+            "width": 88,
+            "height": 32,
+            "right": 576.921875,
+            "bottom": 472
+          },
+          {
+            "label": "禁止新绑定使用",
+            "disabled": false,
+            "x": 53,
+            "y": 484,
+            "width": 130,
+            "height": 32,
+            "right": 183,
+            "bottom": 516
+          },
+          {
+            "label": "比较版本",
+            "disabled": false,
+            "x": 41,
+            "y": 1819.96875,
+            "width": 88,
+            "height": 32,
+            "right": 129,
+            "bottom": 1851.96875
+          },
+          {
+            "label": "检查资料变化",
+            "disabled": false,
+            "x": 622,
+            "y": 2112.46875,
+            "width": 116,
+            "height": 32,
+            "right": 738,
+            "bottom": 2144.46875
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "归档模型",
+          "reachable": true
+        },
+        {
+          "label": "返回列表",
+          "reachable": true
+        },
+        {
+          "label": "建立草稿",
+          "reachable": true
+        },
+        {
+          "label": "应用到知识库",
+          "reachable": true
+        },
+        {
+          "label": "导出 Functional",
+          "reachable": true
+        },
+        {
+          "label": "导出 RDF/XML",
+          "reachable": true
+        },
+        {
+          "label": "导出模板",
+          "reachable": true
+        },
+        {
+          "label": "禁止新绑定使用",
+          "reachable": true
+        },
+        {
+          "label": "比较版本",
+          "reachable": true
+        },
+        {
+          "label": "检查资料变化",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/versions-768.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "url": "/semantic/ontologies",
+      "geometry": {
+        "viewport": 2560,
+        "documentWidth": 2560,
+        "scope": {
+          "x": 220,
+          "y": 48,
+          "width": 2340,
+          "height": 1392,
+          "right": 2560,
+          "bottom": 1440
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 244,
+            "y": 72,
+            "width": 2286,
+            "height": 55.5,
+            "right": 2530,
+            "bottom": 127.5
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 261,
+            "y": 164.5,
+            "width": 2252,
+            "height": 34,
+            "right": 2513,
+            "bottom": 198.5
+          }
+        ],
+        "buttons": [
+          {
+            "label": "从资料生成",
+            "disabled": false,
+            "x": 2204,
+            "y": 83.75,
+            "width": 102,
+            "height": 32,
+            "right": 2306,
+            "bottom": 115.75
+          },
+          {
+            "label": "导入模板",
+            "disabled": false,
+            "x": 2330,
+            "y": 83.75,
+            "width": 88,
+            "height": 32,
+            "right": 2418,
+            "bottom": 115.75
+          },
+          {
+            "label": "新建本体",
+            "disabled": false,
+            "x": 2442,
+            "y": 83.75,
+            "width": 88,
+            "height": 32,
+            "right": 2530,
+            "bottom": 115.75
+          },
+          {
+            "label": "搜索",
+            "disabled": false,
+            "x": 593,
+            "y": 165.5,
+            "width": 60,
+            "height": 32,
+            "right": 653,
+            "bottom": 197.5
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "从资料生成",
+          "reachable": true
+        },
+        {
+          "label": "导入模板",
+          "reachable": true
+        },
+        {
+          "label": "新建本体",
+          "reachable": true
+        },
+        {
+          "label": "搜索",
+          "reachable": true
+        }
+      ],
+      "screenshot": "responsive/list-2560.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "editor",
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "url": "/semantic/ontologies/2098803131598282754/edit",
+      "geometry": {
+        "viewport": 2560,
+        "documentWidth": 2560,
+        "scope": {
+          "x": 220,
+          "y": 48,
+          "width": 2340,
+          "height": 1392,
+          "right": 2560,
+          "bottom": 1440
+        },
+        "panels": [
+          {
+            "name": "editor-header",
+            "x": 244,
+            "y": 72,
+            "width": 2286,
+            "height": 32,
+            "right": 2530,
+            "bottom": 104
+          },
+          {
+            "name": "editor-navigation",
+            "x": 244,
+            "y": 116,
+            "width": 2286,
+            "height": 48,
+            "right": 2530,
+            "bottom": 164
+          },
+          {
+            "name": "model-bar",
+            "x": 264,
+            "y": 180,
+            "width": 2246,
+            "height": 48,
+            "right": 2510,
+            "bottom": 228
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 485,
+            "y": 229,
+            "width": 1764,
+            "height": 685.578125,
+            "right": 2249,
+            "bottom": 914.578125
+          }
+        ],
+        "buttons": [
+          {
+            "label": "← 本体管理",
+            "disabled": false,
+            "x": 280,
+            "y": 79,
+            "width": 68.234375,
+            "height": 18,
+            "right": 348.234375,
+            "bottom": 97
+          },
+          {
+            "label": "开始建模",
+            "disabled": false,
+            "x": 2231.75,
+            "y": 72,
+            "width": 88,
+            "height": 32,
+            "right": 2319.75,
+            "bottom": 104
+          },
+          {
+            "label": "更多 ▾",
+            "disabled": false,
+            "x": 2327.75,
+            "y": 72,
+            "width": 70.25,
+            "height": 32,
+            "right": 2398,
+            "bottom": 104
+          },
+          {
+            "label": "运行检查",
+            "disabled": false,
+            "x": 2406,
+            "y": 72,
+            "width": 88,
+            "height": 32,
+            "right": 2494,
+            "bottom": 104
+          },
+          {
+            "label": "业务模型",
+            "disabled": false,
+            "x": 264,
+            "y": 116,
+            "width": 56,
+            "height": 47,
+            "right": 320,
+            "bottom": 163
+          },
+          {
+            "label": "建模建议",
+            "disabled": false,
+            "x": 344,
+            "y": 116,
+            "width": 56,
+            "height": 47,
+            "right": 400,
+            "bottom": 163
+          },
+          {
+            "label": "业务规则",
+            "disabled": false,
+            "x": 424,
+            "y": 116,
+            "width": 56,
+            "height": 47,
+            "right": 480,
+            "bottom": 163
+          },
+          {
+            "label": "参考资料",
+            "disabled": false,
+            "x": 504,
+            "y": 116,
+            "width": 56,
+            "height": 47,
+            "right": 560,
+            "bottom": 163
+          },
+          {
+            "label": "检查发布",
+            "disabled": false,
+            "x": 584,
+            "y": 116,
+            "width": 56,
+            "height": 47,
+            "right": 640,
+            "bottom": 163
+          },
+          {
+            "label": "＋ 业务对象",
+            "disabled": false,
+            "x": 2216.796875,
+            "y": 184,
+            "width": 105.734375,
+            "height": 32,
+            "right": 2322.53125,
+            "bottom": 216
+          },
+          {
+            "label": "＋ 关系",
+            "disabled": false,
+            "x": 2330.53125,
+            "y": 184,
+            "width": 77.734375,
+            "height": 32,
+            "right": 2408.265625,
+            "bottom": 216
+          },
+          {
+            "label": "＋ 属性",
+            "disabled": false,
+            "x": 2416.265625,
+            "y": 184,
+            "width": 77.734375,
+            "height": 32,
+            "right": 2494,
+            "bottom": 216
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "← 本体管理",
+          "reachable": true
+        },
+        {
+          "label": "开始建模",
+          "reachable": true
+        },
+        {
+          "label": "更多 ▾",
+          "reachable": true
+        },
+        {
+          "label": "运行检查",
+          "reachable": true
+        },
+        {
+          "label": "业务模型",
+          "reachable": true
+        },
+        {
+          "label": "建模建议",
+          "reachable": true
+        },
+        {
+          "label": "业务规则",
+          "reachable": true
+        },
+        {
+          "label": "参考资料",
+          "reachable": true
+        },
+        {
+          "label": "检查发布",
+          "reachable": true
+        },
+        {
+          "label": "＋ 业务对象",
+          "reachable": true
+        },
+        {
+          "label": "＋ 关系",
+          "reachable": true
+        },
+        {
+          "label": "＋ 属性",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/editor-2560.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    },
+    {
+      "name": "versions",
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "url": "/semantic/ontologies/2098772686139604993/versions",
+      "geometry": {
+        "viewport": 2560,
+        "documentWidth": 2560,
+        "scope": {
+          "x": 220,
+          "y": 48,
+          "width": 2340,
+          "height": 1392,
+          "right": 2560,
+          "bottom": 1440
+        },
+        "panels": [
+          {
+            "name": "semantic-header",
+            "x": 244,
+            "y": 72,
+            "width": 2286,
+            "height": 36,
+            "right": 2530,
+            "bottom": 108
+          },
+          {
+            "name": "semantic-header",
+            "x": 261,
+            "y": 275.171875,
+            "width": 2252,
+            "height": 40.5,
+            "right": 2513,
+            "bottom": 315.671875
+          },
+          {
+            "name": "model-bar",
+            "x": 261,
+            "y": 335.671875,
+            "width": 2252,
+            "height": 37,
+            "right": 2513,
+            "bottom": 372.671875
+          },
+          {
+            "name": "model-canvas-panel",
+            "x": 482,
+            "y": 373.671875,
+            "width": 1770,
+            "height": 701.578125,
+            "right": 2252,
+            "bottom": 1075.25
+          },
+          {
+            "name": "semantic-toolbar",
+            "x": 261,
+            "y": 1331.25,
+            "width": 2252,
+            "height": 153,
+            "right": 2513,
+            "bottom": 1484.25
+          },
+          {
+            "name": "semantic-header source-header",
+            "x": 244,
+            "y": 1744.75,
+            "width": 2286,
+            "height": 40.5,
+            "right": 2530,
+            "bottom": 1785.25
+          }
+        ],
+        "buttons": [
+          {
+            "label": "归档模型",
+            "disabled": false,
+            "x": 2230,
+            "y": 74,
+            "width": 88,
+            "height": 32,
+            "right": 2318,
+            "bottom": 106
+          },
+          {
+            "label": "返回列表",
+            "disabled": false,
+            "x": 2330,
+            "y": 74,
+            "width": 88,
+            "height": 32,
+            "right": 2418,
+            "bottom": 106
+          },
+          {
+            "label": "建立草稿",
+            "disabled": false,
+            "x": 2442,
+            "y": 74,
+            "width": 88,
+            "height": 32,
+            "right": 2530,
+            "bottom": 106
+          },
+          {
+            "label": "应用到知识库",
+            "disabled": false,
+            "x": 1823.078125,
+            "y": 279.421875,
+            "width": 116,
+            "height": 32,
+            "right": 1939.078125,
+            "bottom": 311.421875
+          },
+          {
+            "label": "导出 Functional",
+            "disabled": false,
+            "x": 1963.078125,
+            "y": 279.421875,
+            "width": 133.078125,
+            "height": 32,
+            "right": 2096.15625,
+            "bottom": 311.421875
+          },
+          {
+            "label": "导出 RDF/XML",
+            "disabled": false,
+            "x": 2120.15625,
+            "y": 279.421875,
+            "width": 126.84375,
+            "height": 32,
+            "right": 2247,
+            "bottom": 311.421875
+          },
+          {
+            "label": "导出模板",
+            "disabled": false,
+            "x": 2271,
+            "y": 279.421875,
+            "width": 88,
+            "height": 32,
+            "right": 2359,
+            "bottom": 311.421875
+          },
+          {
+            "label": "禁止新绑定使用",
+            "disabled": false,
+            "x": 2383,
+            "y": 279.421875,
+            "width": 130,
+            "height": 32,
+            "right": 2513,
+            "bottom": 311.421875
+          },
+          {
+            "label": "比较版本",
+            "disabled": false,
+            "x": 261,
+            "y": 1452.25,
+            "width": 88,
+            "height": 32,
+            "right": 349,
+            "bottom": 1484.25
+          },
+          {
+            "label": "检查资料变化",
+            "disabled": false,
+            "x": 2414,
+            "y": 1744.75,
+            "width": 116,
+            "height": 32,
+            "right": 2530,
+            "bottom": 1776.75
+          }
+        ],
+        "overlaps": []
+      },
+      "reachability": [
+        {
+          "label": "归档模型",
+          "reachable": true
+        },
+        {
+          "label": "返回列表",
+          "reachable": true
+        },
+        {
+          "label": "建立草稿",
+          "reachable": true
+        },
+        {
+          "label": "应用到知识库",
+          "reachable": true
+        },
+        {
+          "label": "导出 Functional",
+          "reachable": true
+        },
+        {
+          "label": "导出 RDF/XML",
+          "reachable": true
+        },
+        {
+          "label": "导出模板",
+          "reachable": true
+        },
+        {
+          "label": "禁止新绑定使用",
+          "reachable": true
+        },
+        {
+          "label": "比较版本",
+          "reachable": true
+        },
+        {
+          "label": "检查资料变化",
+          "reachable": true
+        }
+      ],
+      "fitCanvas": "PASS",
+      "screenshot": "responsive/versions-2560.png",
+      "domVerdict": "PASS",
+      "visualVerdict": "PASS",
+      "visualReview": "截图已逐张查看：标题、页面工具条及模型工具条未发生可见重叠；按钮按窄屏换行或布局调整。",
+      "verdict": "PASS"
+    }
+  ],
+  "scope": "Read-only UI, geometry and screenshots; no product mutation",
+  "finishedAt": "2026-09-12T15:59:47.512Z",
+  "summary": {
+    "cases": 9,
+    "pass": 9,
+    "fail": 0,
+    "fitCanvasClicks": 6
+  },
+  "limitations": [
+    "此项验收覆盖9个指定页面视口的页面与工具条几何、可达性、截图及图谱适应画布；不替代所有弹窗、菜单和表格行按钮组合验收。",
+    "页面采用内部纵向滚动容器，fullPage截图展示当前可视区域；工具条可达性另由scrollIntoView与Playwright trial click验证。",
+    "可复跑脚本将视觉状态设为PENDING，必须重新人工查看截图后确认，禁止自动继承本次视觉PASS。"
+  ]
+}

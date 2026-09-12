@@ -1,0 +1,23 @@
+// Read-only responsive browser acceptance, one UI login/context. No session export.
+const fs=require('fs'),path=require('path');
+const {chromium}=require('/Users/guojiexie/.npm/_npx/9833c18b2d85bc59/node_modules/playwright');
+const root=path.resolve(__dirname,'../../..'),out=path.join(__dirname,'responsive');fs.mkdirSync(out,{recursive:true});
+const result={startedAt:new Date().toISOString(),role:'admin',workspaceId:'2098771185501519874',cases:[],scope:'Read-only UI, geometry and screenshots; no product mutation'};
+const save=()=>fs.writeFileSync(path.join(__dirname,'responsive-result.json'),JSON.stringify(result,null,2)+'\n');
+(async()=>{let browser;try{
+ const password=fs.readFileSync(path.join(root,'mateclaw-server/src/main/resources/db/data-mysql-zh.sql'),'utf8').match(/密码：([^，]+)/)[1];
+ browser=await chromium.launch({channel:'chrome',headless:true});const ctx=await browser.newContext({viewport:{width:1440,height:1000}}),page=await ctx.newPage();await page.goto('http://127.0.0.1:5189');await page.getByPlaceholder('请输入用户名').fill('admin');await page.getByPlaceholder('请输入密码').fill(password);await page.getByRole('button',{name:'登录',exact:true}).click();await page.waitForTimeout(1400);await page.locator('.ws-trigger').click();await page.locator('.ws-item').filter({hasText:'T12 完整验收 20260912-215018'}).click();
+ for(const viewport of [{width:390,height:844},{width:768,height:1024},{width:2560,height:1440}]){
+ await page.setViewportSize(viewport);
+ for(const [name,url] of [['list','/semantic/ontologies'],['editor','/semantic/ontologies/2098803131598282754/edit'],['versions','/semantic/ontologies/2098772686139604993/versions']]){
+ const item={name,viewport,url};result.cases.push(item);await page.goto('http://127.0.0.1:5189'+url);await page.waitForTimeout(1600);
+ item.geometry=await page.evaluate(()=>{const scope=document.querySelector('.semantic-page');if(!scope)return {error:'No semantic page'};const rect=r=>({x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom});const els=[...scope.querySelectorAll('.semantic-header,.editor-header,.editor-navigation,.model-bar,.model-canvas-panel,.semantic-toolbar')].filter(e=>e.getBoundingClientRect().height>0);const buttons=[...scope.querySelectorAll('.semantic-header button,.editor-header button,.editor-navigation button,.model-bar button,.semantic-toolbar button')].filter(e=>e.getBoundingClientRect().height>0);const overlaps=[];for(let a=0;a<buttons.length;a++)for(let b=a+1;b<buttons.length;b++){const x=buttons[a].getBoundingClientRect(),y=buttons[b].getBoundingClientRect();if(Math.min(x.right,y.right)-Math.max(x.left,y.left)>2&&Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top)>2)overlaps.push([buttons[a].innerText,buttons[b].innerText]);}return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,scope:rect(scope.getBoundingClientRect()),panels:els.map(e=>({name:e.className,...rect(e.getBoundingClientRect())})),buttons:buttons.map(e=>({label:e.innerText,disabled:e.disabled,...rect(e.getBoundingClientRect())})),overlaps};});
+ item.reachability=[];const controls=page.locator('.semantic-page .semantic-header button,.semantic-page .editor-header button,.semantic-page .editor-navigation button,.semantic-page .model-bar button,.semantic-page .semantic-toolbar button');
+ for(let i=0;i<await controls.count();i++){const el=controls.nth(i);if(!await el.isVisible())continue;const label=(await el.innerText()).trim();if(await el.isDisabled()){item.reachability.push({label,disabled:true});continue;}try{await el.scrollIntoViewIfNeeded({timeout:1500});await el.click({trial:true,timeout:1500});item.reachability.push({label,reachable:true});}catch{item.reachability.push({label,reachable:false});}}
+ if(name!=='list'){try{const fit=page.getByRole('button',{name:'适应画布',exact:true});await fit.click({timeout:3000});item.fitCanvas='PASS';}catch{item.fitCanvas='FAIL';}}
+ await page.evaluate(()=>{for(const e of document.querySelectorAll('*')){if(e.scrollTop)e.scrollTop=0;if(e.scrollLeft)e.scrollLeft=0}window.scrollTo(0,0)});
+ item.screenshot='responsive/'+name+'-'+viewport.width+'.png';await page.screenshot({path:path.join(__dirname,item.screenshot),fullPage:true});item.domVerdict=item.geometry.documentWidth<=viewport.width+1&&!item.geometry.overlaps?.length&&item.reachability.every(x=>x.disabled||x.reachable)&&item.fitCanvas!=='FAIL'?'PASS':'FAIL';item.visualVerdict='PENDING';save();
+ }
+ }
+ result.finishedAt=new Date().toISOString();
+}catch(e){result.error=String(e.message).slice(0,500);process.exitCode=1}finally{if(browser)await browser.close();save();console.log(JSON.stringify({cases:result.cases.map(({name,viewport,domVerdict,fitCanvas})=>({name,viewport,domVerdict,fitCanvas})),error:result.error},null,2));}})();

@@ -1,0 +1,14 @@
+{
+  "action": "UI scan then KEEP_HISTORICAL decision",
+  "request": {
+    "expectedGraphVersion": "10",
+    "expectedObservedDigest": "SOURCE_UNAVAILABLE",
+    "decision": "KEEP_HISTORICAL"
+  },
+  "response": {
+    "status": 400,
+    "code": "INVALID_REQUEST",
+    "field": "$.expectedGraphVersion"
+  },
+  "cause": "Global Long serializer returns string in ScanResult; strict body advice expects integral JSON"
+}

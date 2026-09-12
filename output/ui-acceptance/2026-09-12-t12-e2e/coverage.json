@@ -1,0 +1,68 @@
+{
+  "baseline": "82b9a2b0",
+  "scope": "T12 continuation: query, governance, model lifecycle, role controls and responsive inspection",
+  "status": "PASS_FOR_FROZEN_SCENARIOS",
+  "fullControlRoleViewportMatrixComplete": false,
+  "cases": [
+    {
+      "id": "real-agent-query",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "source-governance",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "entity-relations",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "revision-migration",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "archive-restore",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "viewer-permissions",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "member-permissions",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "workspace-isolation",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "responsive",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "manual-model-edit",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "invalid-import",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    },
+    {
+      "id": "version-comparison",
+      "status": "PASS",
+      "evidence": "REPORT.md and ui-run.md"
+    }
+  ]
+}

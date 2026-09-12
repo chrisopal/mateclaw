@@ -1,0 +1,29 @@
+{
+  "backend": [
+    {
+      "name": "vip.mate.semantic.SemanticQueryWindowTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.166"
+    },
+    {
+      "name": "vip.mate.semantic.SemanticSourceChangeIntegrationTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "8.621"
+    }
+  ],
+  "frontend": {
+    "files": 4,
+    "tests": 10,
+    "failed": 0,
+    "command": "npx vitest run workbenchEntityTypes semanticWorkbench workbenchFocus ontologyProjection (explicit paths in ui-run.md)"
+  },
+  "enterpriseBuild": "PASS; existing large chunk warning",
+  "typescript": "PASS",
+  "eslintChangedFiles": "PASS"
+}

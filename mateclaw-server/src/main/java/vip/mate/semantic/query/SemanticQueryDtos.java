@@ -10,7 +10,14 @@ public final class SemanticQueryDtos {
     private SemanticQueryDtos() {}
     public record SearchRequest(String query,Integer limit,Instant atTime) {}
     public record SearchResult(List<StatementView> facts,String traceId,boolean truncated,
-                               Map<String,String> entityLabels,Map<String,String> predicateLabels) {}
+                               Map<String,String> entityLabels,Map<String,String> predicateLabels,
+                               Map<String,String> termLabels) {
+        /** Keeps source compatibility for callers compiled against the original response shape. */
+        public SearchResult(List<StatementView> facts,String traceId,boolean truncated,
+                            Map<String,String> entityLabels,Map<String,String> predicateLabels) {
+            this(facts,traceId,truncated,entityLabels,predicateLabels,Map.of());
+        }
+    }
     public record Node(String id,String iri,java.util.Set<String> assertedTypes,String label,List<StatementView> properties) {}
     public record Edge(String statementId,String sourceId,String targetId,String predicateIri,int revision) {}
     public record GraphResult(List<Node> nodes,List<Edge> edges,String traceId,boolean truncated) {}

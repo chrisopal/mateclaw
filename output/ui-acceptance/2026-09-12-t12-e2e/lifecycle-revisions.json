@@ -1,0 +1,539 @@
+[
+  {
+    "id": "2098804109324099586",
+    "ontologyId": "2098802182863495170",
+    "version": 3,
+    "name": "T12 生命周期界面验收",
+    "description": "独立合成验收：人工建模、版本比较、归档恢复",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Prefix(:=<urn:mateclaw:ontology:2098802182863495170#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098802182863495170>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> (位于)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> (编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nDataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> (设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2> (车间)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2> \"车间\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> (产线)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> (工厂)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> \"工厂\")\n\n\n)",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:mateclaw:ontology:2098802182863495170",
+      "versionIri": null,
+      "documentDigest": "5af7a3b410de0f5aa280cfae62897ba9e235d293d2269a74365b686d8eb8db41",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "80197996ab1e2f9d8c6b7b013a55a826109195d88a371cb07e32f757ad7628aa",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "7e63e6c546516f85a7bd5cea51bedf500b5e99340d66efd5b7a6b1306927b28c",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> \"工厂\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "67d0cb6a38c866c696961084d0b28ccd2425ce3891815a7d2fe1e12c592ca7a7",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "185a53b6c776334a8e734e79c0b2351a30d3737d04a5e883d8fbbe838c4e7706",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "678f8830a4ae6a7baa61236e5e53077c35be47f42843b08fe03d0cf5351ceaf4",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "2d3e34736364245cbc8b34e1b110605f3eb6790d3a7639d67eacaca005aa827b",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2> \"车间\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "748647bb0ab556f2f30202a21ef82c6b0a266d9f22176397f9191e7daed00922",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "83c7e0abb92de6ac96d63f4b7049d19e261137c9ef943dab7804050c2b74c573",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#string",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "ccddd53afe1f808387ccb7a037e29c1243f093743bc3cb1555ccc1164ab92b01",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "07c0f2e3ad6d749ab37bcd1153d90a56539c1fbcf2631aaff6242105d829fe0c",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "3e4dddb26ec7a6efcd13e9cbaa43ca3d5b04d563d90acbfbfe2ddf0a4358b433",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "aca255fc3925031fc144418787a491a1da3aef3872047bf95eca22ebb13a9c3a",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/ff63c5aa788e26602f214c5dd700650172b1d55c5c3bd5be75a7a5fcfcb5efd2"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "6008186edd76a4acf0ea74c973efe6c9ba87e68049723bd219ecf1fb386362a2",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "f3ed36e066639fd5cf53808517ab74685f81eb4a6957171b466621a589c548d7",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "f50017d7be97f1f836030d267d6ba4d23312724e1d943d46225f86f79849f223",
+          "axiomType": "ObjectPropertyDomain",
+          "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "0b1bebac2de448eb0be2dfd87a2d7d33389fb04f79dbbb5fb680c7ade5bb431a",
+          "axiomType": "ObjectPropertyRange",
+          "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-12T16:01:17.607920Z",
+    "publishedBy": "1",
+    "publicationNote": "新增车间，验证知识库版本升级与回滚",
+    "baseRevisionId": "2098802785266212865"
+  },
+  {
+    "id": "2098802785266212865",
+    "ontologyId": "2098802182863495170",
+    "version": 2,
+    "name": "T12 生命周期界面验收",
+    "description": "独立合成验收：人工建模、版本比较、归档恢复",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Prefix(:=<urn:mateclaw:ontology:2098802182863495170#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098802182863495170>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> (位于)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> (编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nDataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> (设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> (产线)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> (工厂)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> \"工厂\")\n\n\n)",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:mateclaw:ontology:2098802182863495170",
+      "versionIri": null,
+      "documentDigest": "0c47c2259ed291a3ccad0dab8457c302d1350a2a8eacd2047bd487b16f4d60ab",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "e77b86591fb050ab45fd52cf88acc5143a7f547876cbe54a21611301eeb3ac82",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "a7d81a41a8e8244109c317afa23c42b5e9af9725ee20bef9093ae93929ae0097",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7> \"工厂\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "cff0f5ac4e0fb702f5fe4265a6a9824850018da9bd6de853d963bf2fb8d51141",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "1bec0ec61d2460c2536d4552ea9f1b6523abdc0b8b1053b7ce5f3db409cc2c48",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "32178f78754b31dac0467dec70765ad1d979605c8de63e5694feae71e7b76a90",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "ae4220e7cadb463b3ee3616d6b4b1e54d298821163f88b9ac925234ad993e944",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "f166e1ffb08cb1d21c8afa128cacb999b6fbd810f301f06798ed6e89afa42fd4",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#string",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "73158e742a2c3ef6633ee953d8a7fe2bfbca38982a670ccc617864296b477ace",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "e0cee1364d7645878614a69142ec7a5e6ed494dee85920215b6d611d0da1d18b",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/98c08835a6dc5f37e62fcf3a1832b0056b3327f9a6e696e75e3ce0bebc25c0e7"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "4db76e368fd2864dec8e5c96301aa25da02fe3e2b52bc63eeb4ac81031053872",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "c634a4de63490ca2c9e5f46176b05f530cd81edd6a01408739bda52f75aa3476",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "2ee90db1ad907a9d4e61766572584722fc61b9d4274dfd3d97aef2b8b1c95f3e",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "a958520f8643627675f00badf274bbd74761db5acb5bb9da9dc2366fee3994fc",
+          "axiomType": "ObjectPropertyDomain",
+          "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "230016d27c97f66a117a05d191cb3290a01172ffe919e327cea8b21877746dee",
+          "axiomType": "ObjectPropertyRange",
+          "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-12T15:56:04.124864Z",
+    "publishedBy": "1",
+    "publicationNote": "新增工厂对象，验证版本差异",
+    "baseRevisionId": "2098802182897049601"
+  },
+  {
+    "id": "2098802182897049601",
+    "ontologyId": "2098802182863495170",
+    "version": 1,
+    "name": "T12 生命周期界面验收",
+    "description": "独立合成验收：人工建模、版本比较、归档恢复",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Prefix(:=<urn:mateclaw:ontology:2098802182863495170#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098802182863495170>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))\nDeclaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> (位于)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> (编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)\nDataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> (设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")\n\n# Class: <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> (产线)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")\n\n\n)",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:mateclaw:ontology:2098802182863495170",
+      "versionIri": null,
+      "documentDigest": "6e0bf1461796706bfeaf9e2e57ec812a8ca54aa2d72005267fec564aca13e651",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "932a891682c82c245aa4016915f8d51c616166bbc181cf4a9ef7fc1d941ae31f",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03> \"产线\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "2c54535c7b2810b9aab325e7c154ec429b0c97ab02b93956888abe8bf282b53e",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> \"编号\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "8acf2e6f6c6a9029b4ddec475d86af07248abcc83e790872662930099835a46a",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "0c898be825b8c55d7169979b849df10e084b9b7fb91f0aa784b2b0b33e0519e8",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> \"位于\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "fd3d19fd69b2d1afc541aacebf6b2587658cd0c4ee35f92e74689368c09a39f1",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "baf7e431e5c8c3c04b9da76469f00d74c331282306331f17d26e827ba77ceeff",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015> xsd:string)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#string",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "778231d0cdb179229b7acadc48ff1d89235154b5bcba2c704f4c0f1d78a44e4d",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "bc2b4db2a31564781adeb4b9e4aa9634fec6efdae3e88dbd11ed195f097ab758",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "285cdf4636a30406b48936e7545106175afbbbfbe7231705ce3b4e09c74d30a9",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e0a85bf242a6c50099df7f8a9e63b0f37d1e15cab4299ed8356c5dc593cb1015"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "8bb75d2f48f363c72e273eb32175fb2b04ed0738db11181a3a65dfbd42e4095a",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "e2c1dd6d758b0ba467fa2d9129c4955b59b3377c50a79e7500900fb15b2d93e7",
+          "axiomType": "ObjectPropertyDomain",
+          "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/e2f8a1068d0b3501fd899b10430ae944c7a57d1f8eaf82b978c38ae086b9ad72",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "6d4f27ff793f4ce5ef3a4253d08dc9032f82a3d5fff3ead2c30026250464ae2f",
+          "axiomType": "ObjectPropertyRange",
+          "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477> <urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098802182863495170/model-term/03ea96014266d3844027cb07efc7bc7314abe3519b6fe786188f593b075fdd03",
+            "urn:mateclaw:ontology:2098802182863495170/model-term/fe3c94c5c5d34945710d9b0093b039894c6a179401c8d1e1f636a4931c9bb477"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    },
+    "availableForNewBindings": false,
+    "publishedAt": "2026-09-12T15:55:35.068605Z",
+    "publishedBy": "1",
+    "publicationNote": "人工建立设备、产线、位于关系和编号属性",
+    "baseRevisionId": null
+  }
+]

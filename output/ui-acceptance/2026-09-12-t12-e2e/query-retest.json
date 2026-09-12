@@ -1,0 +1,211 @@
+[
+  {
+    "role": "user",
+    "content": "请实际调用 semantic_search，只读查询图谱2098772602979139585中的P-101是什么类型，引用事实版本和证据。有效期未知能否断言今天仍然有效？",
+    "metadata": {},
+    "runtimeModel": null,
+    "runtimeProvider": null,
+    "promptTokens": 0,
+    "completionTokens": 0
+  },
+  {
+    "role": "assistant",
+    "content": "## 查询结果\n\n**P-101 的类型**\n\n在知识图谱 `2098772602979139585` 中检索到一条关于 P-101 的事实：\n\n- **事实 ID**：`2098776967022428161`，**版本（revision）**：2，本体版本 `2098771602276925442`\n- **断言类型**：CLASS_ASSERTION（类断言）\n- **主体**：`urn:t12:equipment:P-101`（标签：P-101）\n- **类表达式**：`urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765`\n- **证据 ID**：`2098776966951124994`\n- **审核状态**：ACCEPTED；**支持状态**：SUPPORTED\n- **有效期**：`validityKind = UNKNOWN`，`validFrom = null`，`validTo = null`\n- **Trace ID**：`e5de7b71-1088-4d1c-bbd2-332a834ddf50`\n\n该事实确认 P-101 被断言为某个类（通过一个模型术语 IRI 引用），但**返回结果中未给出该类的可读名称**（`predicateLabels` 为空），因此仅凭本次检索无法直接断言这个类的自然语言名称就是\"泵\"。\n\n**关于有效期能否断言今天仍然有效**\n\n**不能。** 该事实的 `validityKind` 为 `UNKNOWN`，且 `validFrom` 与 `validTo` 均为 `null`。按照规则，UNKNOWN 不构成任何有效时间区间，因此**无法据此断言 P-101 的类型在 2026-09-12（今天）仍然有效**。它只表示该断言在业务时间上未被赋予明确的有效期，不能等同于\"当前有效\"或\"一直有效\"。\n\n**说明与限制**\n\n- 我实际调用了 `semantic_search` 三次（查询词分别为\"P-101 设备 类型 泵\"、\"P-101\"、\"设备 泵 设备编号\"），仅第三次返回了上述 1 条事实。\n- 未检索到不等于资源不存在——本次只覆盖了该图谱中与查询语义匹配的已接受事实，未命中的内容可能因索引/匹配范围而未返回。\n- 我未对本体、知识或资料做任何修改。\n\n**来源**\n\n[1] semantic_search 结果，图谱 `2098772602979139585`，事实 `2098776967022428161`（revision 2，证据 `2098776966951124994`，validityKind=UNKNOWN）",
+    "metadata": {
+      "toolCalls": [
+        {
+          "toolCallId": "call_00_stZq6B6CgZoplDnEox558191",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"query\": \"P-101 设备 类型 泵\", \"limit\": 20}",
+          "status": "completed",
+          "result": "{\"facts\":[],\"traceId\":\"8fd7f9ac-3de5-42b2-8527-4a856bb58503\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{}}",
+          "success": true
+        },
+        {
+          "toolCallId": "call_00_7Qw0CCBKbNLIAwtOPxKE9467",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101\"}",
+          "status": "completed",
+          "result": "{\"facts\":[{\"id\":\"2098776967022428161\",\"graphId\":\"2098772602979139585\",\"revision\":2,\"ontologyRevisionId\":\"2098771602276925442\",\"subjectId\":\"2098776214774005761\",\"assertion\":{\"kind\":\"CLASS_ASSERTION\",\"functionalSyntax\":\"ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)\",\"signatureIris\":[\"urn:t12:equipment:P-101\",\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\"],\"subjectIri\":\"urn:t12:equipment:P-101\",\"predicateIri\":null,\"objectIri\":null,\"literal\":null,\"classExpressionFunctionalSyntax\":\"<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>\",\"relatedIndividualIri\":null},\"validityKind\":\"UNKNOWN\",\"validFrom\":null,\"validTo\":null,\"reviewStatus\":\"ACCEPTED\",\"supportStatus\":\"SUPPORTED\",\"evidenceIds\":[\"2098776966951124994\"],\"proposedBy\":\"1\",\"createdAt\":\"2026-09-12T14:15:11.466107Z\"}],\"traceId\":\"e5de7b71-1088-4d1c-bbd2-332a834ddf50\",\"truncated\":false,\"entityLabels\":{\"2098776214774005761\":\"P-101\"},\"predicateLabels\":{}}",
+          "success": true
+        },
+        {
+          "toolCallId": "call_01_eTzkgXmGYYE30Sf5mbll4287",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"设备 泵 设备编号\"}",
+          "status": "completed",
+          "result": "{\"facts\":[],\"traceId\":\"3807b47c-baa8-4ab1-b58b-745fd6eb7627\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{}}",
+          "success": true
+        }
+      ],
+      "segments": [
+        {
+          "id": "co-0",
+          "type": "content",
+          "seq": 0,
+          "status": "completed",
+          "timestamp": "1789228308842",
+          "text": "I'll query the knowledge graph for P-101's type.",
+          "kind": "pre_tool_narration",
+          "endTimestamp": "1789228308867",
+          "superseded": true,
+          "supersededBySegmentId": "co-4",
+          "supersededReason": "pre_tool_content_replaced_by_post_tool_answer"
+        },
+        {
+          "id": "to-1",
+          "type": "tool_call",
+          "seq": 1,
+          "status": "completed",
+          "timestamp": "1789228308867",
+          "toolCallId": "call_00_stZq6B6CgZoplDnEox558191",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"query\": \"P-101 设备 类型 泵\", \"limit\": 20}",
+          "endTimestamp": "1789228308867",
+          "toolResult": "{\"facts\":[],\"traceId\":\"8fd7f9ac-3de5-42b2-8527-4a856bb58503\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "to-2",
+          "type": "tool_call",
+          "seq": 2,
+          "status": "completed",
+          "timestamp": "1789228310907",
+          "toolCallId": "call_00_7Qw0CCBKbNLIAwtOPxKE9467",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101\"}",
+          "endTimestamp": "1789228310907",
+          "toolResult": "{\"facts\":[{\"id\":\"2098776967022428161\",\"graphId\":\"2098772602979139585\",\"revision\":2,\"ontologyRevisionId\":\"2098771602276925442\",\"subjectId\":\"2098776214774005761\",\"assertion\":{\"kind\":\"CLASS_ASSERTION\",\"functionalSyntax\":\"ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)\",\"signatureIris\":[\"urn:t12:equipment:P-101\",\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\"],\"subjectIri\":\"urn:t12:equipment:P-101\",\"predicateIri\":null,\"objectIri\":null,\"literal\":null,\"classExpressionFunctionalSyntax\":\"<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>\",\"relatedIndividualIri\":null},\"validityKind\":\"UNKNOWN\",\"validFrom\":null,\"validTo\":null,\"reviewStatus\":\"ACCEPTED\",\"supportStatus\":\"SUPPORTED\",\"evidenceIds\":[\"2098776966951124994\"],\"proposedBy\":\"1\",\"createdAt\":\"2026-09-12T14:15:11.466107Z\"}],\"traceId\":\"e5de7b71-1088-4d1c-bbd2-332a834ddf50\",\"truncated\":false,\"entityLabels\":{\"2098776214774005761\":\"P-101\"},\"predicateLabels\":{}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "to-3",
+          "type": "tool_call",
+          "seq": 3,
+          "status": "completed",
+          "timestamp": "1789228310907",
+          "toolCallId": "call_01_eTzkgXmGYYE30Sf5mbll4287",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"设备 泵 设备编号\"}",
+          "endTimestamp": "1789228310907",
+          "toolResult": "{\"facts\":[],\"traceId\":\"3807b47c-baa8-4ab1-b58b-745fd6eb7627\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "co-4",
+          "type": "content",
+          "seq": 4,
+          "status": "completed",
+          "timestamp": "1789228314280",
+          "text": "## 查询结果\n\n**P-101 的类型**\n\n在知识图谱 `2098772602979139585` 中检索到一条关于 P-101 的事实：\n\n- **事实 ID**：`2098776967022428161`，**版本（revision）**：2，本体版本 `2098771602276925442`\n- **断言类型**：CLASS_ASSERTION（类断言）\n- **主体**：`urn:t12:equipment:P-101`（标签：P-101）\n- **类表达式**：`urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765`\n- **证据 ID**：`2098776966951124994`\n- **审核状态**：ACCEPTED；**支持状态**：SUPPORTED\n- **有效期**：`validityKind = UNKNOWN`，`validFrom = null`，`validTo = null`\n- **Trace ID**：`e5de7b71-1088-4d1c-bbd2-332a834ddf50`\n\n该事实确认 P-101 被断言为某个类（通过一个模型术语 IRI 引用），但**返回结果中未给出该类的可读名称**（`predicateLabels` 为空），因此仅凭本次检索无法直接断言这个类的自然语言名称就是\"泵\"。\n\n**关于有效期能否断言今天仍然有效**\n\n**不能。** 该事实的 `validityKind` 为 `UNKNOWN`，且 `validFrom` 与 `validTo` 均为 `null`。按照规则，UNKNOWN 不构成任何有效时间区间，因此**无法据此断言 P-101 的类型在 2026-09-12（今天）仍然有效**。它只表示该断言在业务时间上未被赋予明确的有效期，不能等同于\"当前有效\"或\"一直有效\"。\n\n**说明与限制**\n\n- 我实际调用了 `semantic_search` 三次（查询词分别为\"P-101 设备 类型 泵\"、\"P-101\"、\"设备 泵 设备编号\"），仅第三次返回了上述 1 条事实。\n- 未检索到不等于资源不存在——本次只覆盖了该图谱中与查询语义匹配的已接受事实，未命中的内容可能因索引/匹配范围而未返回。\n- 我未对本体、知识或资料做任何修改。\n\n**来源**\n\n[1] semantic_search 结果，图谱 `2098772602979139585`，事实 `2098776967022428161`（revision 2，证据 `2098776966951124994`，validityKind=UNKNOWN）",
+          "kind": "final_answer",
+          "endTimestamp": "1789228314288"
+        }
+      ],
+      "currentPhase": "reasoning",
+      "finishReason": "normal"
+    },
+    "runtimeModel": "deepseek-chat",
+    "runtimeProvider": "deepseek",
+    "promptTokens": 49307,
+    "completionTokens": 851
+  },
+  {
+    "role": "user",
+    "content": "请重新实际调用 semantic_search 查询P-101。这次请根据返回的业务术语名称回答它是什么类型，给出事实版本与证据ID，并说明有效期UNKNOWN能否证明今天仍有效。",
+    "metadata": {},
+    "runtimeModel": null,
+    "runtimeProvider": null,
+    "promptTokens": 0,
+    "completionTokens": 0
+  },
+  {
+    "role": "assistant",
+    "content": "## 查询结果\n\n**P-101 是什么类型**\n\n在知识图谱 `2098772602979139585` 中检索到关于 P-101 的类型事实：\n\n- **事实 ID**：`2098776967022428161`，**版本（revision）**：2\n- **本体版本**：`2098771602276925442`\n- **断言类型**：CLASS_ASSERTION（类断言）\n- **主体**：`urn:t12:equipment:P-101`（标签：P-101）\n- **类型（业务术语名称）**：**泵**\n  - 对应类表达式 IRI：`urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765`\n  - 该 IRI 在本次返回的 `termLabels` 中映射为业务术语 **\"泵\"**\n- **证据 ID**：`2098776966951124994`\n- **审核状态**：ACCEPTED；**支持状态**：SUPPORTED\n- **有效期**：`validityKind = UNKNOWN`，`validFrom = null`，`validTo = null`\n- **Trace ID**：`5ebd2614-2466-4163-adc7-044f68392969`\n\n即：**P-101 的类型是「泵」**（依据事实 `2098776967022428161` revision 2，证据 `2098776966951124994`）。\n\n**有效期 UNKNOWN 能否证明今天仍有效**\n\n**不能。** 该事实的 `validityKind` 为 `UNKNOWN`，`validFrom` 与 `validTo` 均为 `null`，不构成任何明确的业务时间区间。因此**无法据此断言该类型在 2026-09-13（今天）仍然有效**——UNKNOWN 只表示该断言未被赋予明确有效期，不能等同于\"当前有效\"或\"永久有效\"。\n\n**说明与限制**\n\n- 本轮实际调用了 `semantic_search` 三次（\"P-101 是什么类型\"、\"P-101 属于 泵 设备 类型\"、\"泵\"），仅第三次返回上述 1 条事实；业务术语名称\"泵\"来自该次返回的 `termLabels` 字段。\n- 未检索到不等于资源不存在——本次仅覆盖与查询语义匹配的已接受事实。\n- 未对本体、知识或资料做任何修改。\n\n**来源**\n\n[1] semantic_search 结果，图谱 `2098772602979139585`，事实 `2098776967022428161`（revision 2，证据 `2098776966951124994`，termLabel=\"泵\"，validityKind=UNKNOWN）",
+    "metadata": {
+      "toolCalls": [
+        {
+          "toolCallId": "call_00_oU6uXHdC04z3zzA3gqJP1205",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101 是什么类型\"}",
+          "status": "completed",
+          "result": "{\"facts\":[],\"traceId\":\"24241e96-6710-4117-81a3-20e5967040e0\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{},\"termLabels\":{}}",
+          "success": true
+        },
+        {
+          "toolCallId": "call_01_JcshKNEPpFNzqyn65noR9275",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101 属于 泵 设备 类型\"}",
+          "status": "completed",
+          "result": "{\"facts\":[],\"traceId\":\"ed0c0fc2-efe5-4cb2-8662-860562d5e363\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{},\"termLabels\":{}}",
+          "success": true
+        },
+        {
+          "toolCallId": "call_02_yRicpsmkVsnkqULJTcn31902",
+          "name": "semantic_search",
+          "arguments": "{\"graphId\": \"2098772602979139585\", \"limit\": 30, \"query\": \"泵\"}",
+          "status": "completed",
+          "result": "{\"facts\":[{\"id\":\"2098776967022428161\",\"graphId\":\"2098772602979139585\",\"revision\":2,\"ontologyRevisionId\":\"2098771602276925442\",\"subjectId\":\"2098776214774005761\",\"assertion\":{\"kind\":\"CLASS_ASSERTION\",\"functionalSyntax\":\"ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)\",\"signatureIris\":[\"urn:t12:equipment:P-101\",\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\"],\"subjectIri\":\"urn:t12:equipment:P-101\",\"predicateIri\":null,\"objectIri\":null,\"literal\":null,\"classExpressionFunctionalSyntax\":\"<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>\",\"relatedIndividualIri\":null},\"validityKind\":\"UNKNOWN\",\"validFrom\":null,\"validTo\":null,\"reviewStatus\":\"ACCEPTED\",\"supportStatus\":\"SUPPORTED\",\"evidenceIds\":[\"2098776966951124994\"],\"proposedBy\":\"1\",\"createdAt\":\"2026-09-12T14:15:11.466107Z\"}],\"traceId\":\"5ebd2614-2466-4163-adc7-044f68392969\",\"truncated\":false,\"entityLabels\":{\"2098776214774005761\":\"P-101\"},\"predicateLabels\":{},\"termLabels\":{\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\":\"泵\"}}",
+          "success": true
+        }
+      ],
+      "segments": [
+        {
+          "id": "to-0",
+          "type": "tool_call",
+          "seq": 0,
+          "status": "completed",
+          "timestamp": "1789229030892",
+          "toolCallId": "call_00_oU6uXHdC04z3zzA3gqJP1205",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101 是什么类型\"}",
+          "endTimestamp": "1789229030892",
+          "toolResult": "{\"facts\":[],\"traceId\":\"24241e96-6710-4117-81a3-20e5967040e0\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{},\"termLabels\":{}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "to-1",
+          "type": "tool_call",
+          "seq": 1,
+          "status": "completed",
+          "timestamp": "1789229030892",
+          "toolCallId": "call_01_JcshKNEPpFNzqyn65noR9275",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"limit\": 20, \"query\": \"P-101 属于 泵 设备 类型\"}",
+          "endTimestamp": "1789229030892",
+          "toolResult": "{\"facts\":[],\"traceId\":\"ed0c0fc2-efe5-4cb2-8662-860562d5e363\",\"truncated\":false,\"entityLabels\":{},\"predicateLabels\":{},\"termLabels\":{}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "to-2",
+          "type": "tool_call",
+          "seq": 2,
+          "status": "completed",
+          "timestamp": "1789229030892",
+          "toolCallId": "call_02_yRicpsmkVsnkqULJTcn31902",
+          "toolName": "semantic_search",
+          "toolArgs": "{\"graphId\": \"2098772602979139585\", \"limit\": 30, \"query\": \"泵\"}",
+          "endTimestamp": "1789229030892",
+          "toolResult": "{\"facts\":[{\"id\":\"2098776967022428161\",\"graphId\":\"2098772602979139585\",\"revision\":2,\"ontologyRevisionId\":\"2098771602276925442\",\"subjectId\":\"2098776214774005761\",\"assertion\":{\"kind\":\"CLASS_ASSERTION\",\"functionalSyntax\":\"ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)\",\"signatureIris\":[\"urn:t12:equipment:P-101\",\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\"],\"subjectIri\":\"urn:t12:equipment:P-101\",\"predicateIri\":null,\"objectIri\":null,\"literal\":null,\"classExpressionFunctionalSyntax\":\"<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>\",\"relatedIndividualIri\":null},\"validityKind\":\"UNKNOWN\",\"validFrom\":null,\"validTo\":null,\"reviewStatus\":\"ACCEPTED\",\"supportStatus\":\"SUPPORTED\",\"evidenceIds\":[\"2098776966951124994\"],\"proposedBy\":\"1\",\"createdAt\":\"2026-09-12T14:15:11.466107Z\"}],\"traceId\":\"5ebd2614-2466-4163-adc7-044f68392969\",\"truncated\":false,\"entityLabels\":{\"2098776214774005761\":\"P-101\"},\"predicateLabels\":{},\"termLabels\":{\"urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765\":\"泵\"}}",
+          "toolSuccess": true
+        },
+        {
+          "id": "co-3",
+          "type": "content",
+          "seq": 3,
+          "status": "completed",
+          "timestamp": "1789229033862",
+          "text": "## 查询结果\n\n**P-101 是什么类型**\n\n在知识图谱 `2098772602979139585` 中检索到关于 P-101 的类型事实：\n\n- **事实 ID**：`2098776967022428161`，**版本（revision）**：2\n- **本体版本**：`2098771602276925442`\n- **断言类型**：CLASS_ASSERTION（类断言）\n- **主体**：`urn:t12:equipment:P-101`（标签：P-101）\n- **类型（业务术语名称）**：**泵**\n  - 对应类表达式 IRI：`urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765`\n  - 该 IRI 在本次返回的 `termLabels` 中映射为业务术语 **\"泵\"**\n- **证据 ID**：`2098776966951124994`\n- **审核状态**：ACCEPTED；**支持状态**：SUPPORTED\n- **有效期**：`validityKind = UNKNOWN`，`validFrom = null`，`validTo = null`\n- **Trace ID**：`5ebd2614-2466-4163-adc7-044f68392969`\n\n即：**P-101 的类型是「泵」**（依据事实 `2098776967022428161` revision 2，证据 `2098776966951124994`）。\n\n**有效期 UNKNOWN 能否证明今天仍有效**\n\n**不能。** 该事实的 `validityKind` 为 `UNKNOWN`，`validFrom` 与 `validTo` 均为 `null`，不构成任何明确的业务时间区间。因此**无法据此断言该类型在 2026-09-13（今天）仍然有效**——UNKNOWN 只表示该断言未被赋予明确有效期，不能等同于\"当前有效\"或\"永久有效\"。\n\n**说明与限制**\n\n- 本轮实际调用了 `semantic_search` 三次（\"P-101 是什么类型\"、\"P-101 属于 泵 设备 类型\"、\"泵\"），仅第三次返回上述 1 条事实；业务术语名称\"泵\"来自该次返回的 `termLabels` 字段。\n- 未检索到不等于资源不存在——本次仅覆盖与查询语义匹配的已接受事实。\n- 未对本体、知识或资料做任何修改。\n\n**来源**\n\n[1] semantic_search 结果，图谱 `2098772602979139585`，事实 `2098776967022428161`（revision 2，证据 `2098776966951124994`，termLabel=\"泵\"，validityKind=UNKNOWN）",
+          "kind": "final_answer",
+          "endTimestamp": "1789229033900"
+        }
+      ],
+      "currentPhase": "reasoning",
+      "finishReason": "normal"
+    },
+    "runtimeModel": "deepseek-chat",
+    "runtimeProvider": "deepseek",
+    "promptTokens": 36330,
+    "completionTokens": 842
+  }
+]

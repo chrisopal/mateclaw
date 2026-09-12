@@ -101,15 +101,17 @@ public class SemanticQueryService {
             if(text.toString().toLowerCase(Locale.ROOT).contains(needle)) matches.add(fact);
         }
         List<StatementView> selected=List.copyOf(matches.subList(0,Math.min(limit,matches.size())));
-        Map<String,String> selectedEntities=new LinkedHashMap<>(), selectedPredicates=new LinkedHashMap<>();
+        Map<String,String> selectedEntities=new LinkedHashMap<>(), selectedPredicates=new LinkedHashMap<>(), selectedTerms=new LinkedHashMap<>();
         for(var fact:selected){
             for(String id:Arrays.asList(fact.subjectId(),target(fact,index)))
                 if(index.labels().containsKey(id)) selectedEntities.put(id,index.labels().get(id));
+            for(String iri:fact.assertion().signatureIris())
+                terms.getOrDefault(iri,List.of()).stream().findFirst().ifPresent(label -> selectedTerms.put(iri,label));
             fact.assertion().predicateIri().ifPresent(iri -> selectedPredicates.put(iri,
                     terms.getOrDefault(iri,List.of(iri)).stream().findFirst().orElse(iri)));
         }
         return new SearchResult(selected,UUID.randomUUID().toString(),matches.size()>limit,
-                Map.copyOf(selectedEntities),Map.copyOf(selectedPredicates));
+                Map.copyOf(selectedEntities),Map.copyOf(selectedPredicates),Map.copyOf(selectedTerms));
     }
 
     public GraphResult neighbors(String scope,String graphId,String entityId,int depth,int nodeLimit,int edgeLimit){
