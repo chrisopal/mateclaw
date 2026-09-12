@@ -11,7 +11,7 @@ import OntologyWorkbenchDialog from './components/OntologyWorkbenchDialog.vue'
 import OntologyPackageDialog from './components/OntologyPackageDialog.vue'
 import { useSemanticScope } from '../shared/useSemanticScope'
 import './semantic.css'
-const { t } = useI18n(),
+const { t, locale } = useI18n(),
   router = useRouter(),
   { workspace, begin } = useSemanticScope()
 const workbenchOntology = ref<Ontology | null>(null)
@@ -144,7 +144,7 @@ onMounted(load)
         >
         <el-table-column :label="t('semantic.state')" width="120"
           ><template #default="{ row }">{{
-            t(
+            row.archived ? (locale.startsWith('zh') ? '已归档' : 'Archived') : t(
               row.hasDraft
                 ? 'semantic.draft'
                 : row.latestVersion === null
@@ -160,7 +160,7 @@ onMounted(load)
               link
               type="primary"
               @click="router.push({ name: 'OntologyEditor', params: { id: row.id } })"
-              >{{ t(workspace.can('manage:ontology') ? 'semantic.edit' : 'semantic.view') }}</el-button
+              >{{ t(workspace.can('manage:ontology') && !row.archived ? 'semantic.edit' : 'semantic.view') }}</el-button
             ><el-button
               link
               type="primary"

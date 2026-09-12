@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class OntologyRow {
+    private boolean archived;
     private String id;
     private Long workspaceId;
     private String name;

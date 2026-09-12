@@ -57,7 +57,7 @@ public class OntologyModelingService {
         // Serialize competing bridge creations before create() reserves its unique operation.
         // Replays above follow the normal task -> ontology lock order; this fresh branch
         // never locks an existing task while holding the ontology lock.
-        if(mapper.lock(ontologyId,Long.parseLong(scope))==null)throw missing();
+        requireWritable(scope,ontologyId);
         var concurrent=jdbc.query("SELECT state_json FROM mate_semantic_modeling_task WHERE workspace_id=? AND ontology_id=? AND operation_id=?",(r,n)->wire.decode(r.getString(1),Task.class),Long.valueOf(scope),ontologyId,operation);
         if(!concurrent.isEmpty()) {
             var previous=concurrent.getFirst();
@@ -121,6 +121,7 @@ public class OntologyModelingService {
                 taskId,Long.valueOf(scope),input.operationId(),digest(input),"RESERVED","{}",now,now);
         String ontology=input.ontologyId()==null?ontologies.create(scope,input.newOntology()).id():input.ontologyId();
         var parent=mapper.lock(ontology,Long.parseLong(scope));
+        if(parent!=null)OntologyApplicationService.requireWritable(parent);
         if(parent==null)throw missing();
         var draft=parent.getDraftId()==null?ontologies.createDraft(scope,ontology,new CreateDraft(input.baseRevisionId())):ontologies.getDraft(scope,ontology);
         for(var source:selected) {
@@ -164,6 +165,7 @@ public class OntologyModelingService {
         if(input==null)throw bad("Proposal required");
         operation(input.operationId());
         Task task=locked(scope,id);
+        requireWritable(scope,task.ontologyId());
         requireIncrementalVisible(scope,task);
         Task replay=replay(task,input.operationId(),input);
         if(replay!=null){checkSources(scope,task);return replay;}
@@ -214,6 +216,7 @@ public class OntologyModelingService {
         if(input==null)throw bad("Decision required");
         operation(input.operationId());
         Task task=locked(scope,id);
+        requireWritable(scope,task.ontologyId());
         requireIncrementalVisible(scope,task);
         Object payload=List.of(proposalId,input);
         Task replay=replay(task,input.operationId(),payload);
@@ -263,6 +266,7 @@ public class OntologyModelingService {
         access.require(scope,"member");
         if(change==null||!Set.of("READY","RUNNING","FAILED","CANCELLED").contains(Objects.toString(change.stage(),"")))throw bad("Unsupported task stage");
         Task task=locked(scope,id);
+        requireWritable(scope,task.ontologyId());
         requireIncrementalVisible(scope,task);
         if(task.stage().equals("CANCELLED")) {
             if(change.stage().equals("CANCELLED"))return task;
@@ -275,6 +279,11 @@ public class OntologyModelingService {
         task=replace(task,change.stage(),change.message(),proposals);save(task);return task;
     }
 
+    private void requireWritable(String scope, String ontologyId) {
+        var parent=mapper.lock(ontologyId,Long.parseLong(scope));
+        if(parent==null)throw missing();
+        OntologyApplicationService.requireWritable(parent);
+    }
     private Task locked(String scope,String id) {
         var values=jdbc.query("SELECT state_json FROM mate_semantic_modeling_task WHERE id=? AND workspace_id=? FOR UPDATE",(r,n)->r.getString(1),id,Long.valueOf(scope));
         if(values.isEmpty())throw missing();

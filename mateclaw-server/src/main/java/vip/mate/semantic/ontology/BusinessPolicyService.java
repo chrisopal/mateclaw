@@ -65,6 +65,7 @@ public class BusinessPolicyService {
         validateOperation(request == null ? null : request.operationId());
         long workspace = workspace(scope);
         OntologyRow parent = requireParent(scope, ontologyId, true);
+        OntologyApplicationService.requireWritable(parent);
         String requestHash = hash(wire.encode(request));
         CommandRecordRow previous = commands.find(workspace, request.operationId());
         if (previous != null) {

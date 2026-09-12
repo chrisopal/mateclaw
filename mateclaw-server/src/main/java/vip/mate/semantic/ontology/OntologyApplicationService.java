@@ -102,6 +102,7 @@ public class OntologyApplicationService {
     public DraftView createDraft(String scope, String id, CreateDraft request) {
         access.require(scope, "member");
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         if (parent.getDraftId() != null)
             throw conflict("DRAFT_EXISTS", "An active draft already exists");
         OntologyRevisionRow base =
@@ -169,6 +170,7 @@ public class OntologyApplicationService {
     public DraftView saveDraft(String scope, String id, SaveDraft request) {
         access.require(scope, "member");
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         validateOperation(request.operationId());
         String requestHash = hash(wire.encode(request));
         var previous = commands.find(parent.getWorkspaceId(), request.operationId());
@@ -212,6 +214,7 @@ public class OntologyApplicationService {
     public ModelCommandResult applyModelCommands(String scope, String id, ModelEditRequest request) {
         access.require(scope, "member");
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         validateOperation(request.operationId());
         String requestHash = hash(wire.encode(request));
         String kind = "APPLY_ONTOLOGY_MODEL_COMMANDS";
@@ -244,6 +247,7 @@ public class OntologyApplicationService {
             String operationKind,
             Function<OntologyRevisionRow, List<AxiomEdit>> changes) {
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         String operationId = request instanceof EditDraft edit ? edit.operationId()
                 : ((ModelEditRequest) request).operationId();
         Long expectedDraftVersion = request instanceof EditDraft edit ? edit.expectedDraftVersion()
@@ -298,6 +302,7 @@ public class OntologyApplicationService {
     public void discard(String scope, String id, Long expected) {
         access.require(scope, "member");
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         var row = draft(parent);
         cas(row, expected);
         axiomIndex.discard(row.getId());
@@ -366,6 +371,7 @@ public class OntologyApplicationService {
     public RevisionView publish(String scope, String id, PublishDraft request) {
         var actor = access.require(scope, "admin");
         var parent = parent(scope, id, true);
+        requireWritable(parent);
         var fields = new ArrayList<Violation>();
         wire.text(request.operationId(), "operationId", 128, true, fields);
         wire.text(request.note(), "note", 1000, true, fields);
@@ -435,6 +441,7 @@ public class OntologyApplicationService {
         ValidationSnapshot result = transactions.execute(status -> {
             OntologyRow parent = mapper.lock(id, Long.parseLong(scope));
             if (parent == null) throw missing();
+            requireWritable(parent);
             OntologyRevisionRow row = draft(parent);
             if (expectedDraftVersion != null) cas(row, expectedDraftVersion);
             SourceCheck source = sourceCheck(scope, row);
@@ -450,6 +457,7 @@ public class OntologyApplicationService {
             var verifiedActor = access.require(scope, "member");
             OntologyRow parent = mapper.lock(id, Long.parseLong(scope));
             if (parent == null) throw missing();
+            requireWritable(parent);
             OntologyRevisionRow current = draft(parent);
             SourceCheck source = sourceCheck(scope, current);
             String currentDigest = validationDigest(current, source.signature());
@@ -621,6 +629,7 @@ public class OntologyApplicationService {
         if (request.availableForNewBindings() == null)
             throw new SemanticApiException(
                     400, "INVALID_REQUEST", "availableForNewBindings required");
+        if (request.availableForNewBindings()) requireWritable(parent);
         boolean before = row.getAvailableForNewBindings();
         mapper.availability(row.getId(), request.availableForNewBindings());
         row.setAvailableForNewBindings(request.availableForNewBindings());
@@ -693,6 +702,27 @@ public class OntologyApplicationService {
                             key,
                             before,
                             after));
+    }
+
+    public static void requireWritable(OntologyRow row) {
+        if (row.isArchived()) throw conflict("ONTOLOGY_ARCHIVED", "Restore the ontology before modifying it");
+    }
+
+    @Transactional
+    public OntologyView lifecycle(String scope, String id, LifecycleRequest request, boolean archived) {
+        var actor = access.require(scope, "admin");
+        var row = parent(scope, id, true);
+        if (row.isArchived() == archived) return wire.ontology(row);
+        if (request == null || request.expectedUpdatedAt() == null)
+            throw new SemanticApiException(400, "INVALID_REQUEST", "expectedUpdatedAt required");
+        if (!row.getUpdatedAt().toInstant(java.time.ZoneOffset.UTC).equals(request.expectedUpdatedAt()))
+            throw conflict("ONTOLOGY_CONFLICT", "Ontology changed; reload before changing its lifecycle");
+        row.setArchived(archived);
+        if (archived) for (var revision : mapper.revisions(id)) mapper.availability(revision.getId(), false);
+        governance.insert(id(), row.getWorkspaceId(), id, null, archived ? "ARCHIVE_ONTOLOGY" : "RESTORE_ONTOLOGY",
+                actor.getId().toString(), wire.encode(Map.of("archived", archived)), now());
+        touch(row);
+        return wire.ontology(row);
     }
 
     private OntologyRow parent(String scope, String id, boolean lock) {

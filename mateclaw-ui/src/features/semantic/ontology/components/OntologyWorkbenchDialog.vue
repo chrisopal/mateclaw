@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vLoading } from "element-plus";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -81,7 +82,7 @@ onMounted(load);
         ><template #default="{ row }"
           ><el-button
             type="primary"
-            :disabled="!row.enabled"
+
             @click="
               router.push({
                 name: 'SemanticWorkbench',

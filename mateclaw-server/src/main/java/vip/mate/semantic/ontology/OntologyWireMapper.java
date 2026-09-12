@@ -500,7 +500,7 @@ public class OntologyWireMapper {
     public OntologyView ontology(OntologyRow row) {
         return new OntologyView(row.getId(), row.getWorkspaceId().toString(), row.getName(), row.getDescription(),
                 row.getLatestVersion(), row.getLatestRevisionId(), row.getDraftId()!=null,
-                row.getUpdatedAt().toInstant(java.time.ZoneOffset.UTC));
+                row.getUpdatedAt().toInstant(java.time.ZoneOffset.UTC), row.isArchived());
     }
     public DraftView draft(OntologyRevisionRow row) {
         return new DraftView(row.getId(), row.getOntologyId(), row.getBaseRevisionId(), row.getVersion(),

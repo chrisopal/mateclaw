@@ -1,0 +1,290 @@
+{
+  "workspaceId": "2098761233575731202",
+  "ontologyId": "2098761233626062849",
+  "revisions": [
+    {
+      "id": "2098761233659617282",
+      "ontologyId": "2098761233626062849",
+      "version": 1,
+      "name": "T11 设备业务模型",
+      "description": "",
+      "document": {
+        "source": {
+          "modelSchema": "owl-document-v1",
+          "syntax": "FUNCTIONAL",
+          "documentText": "Ontology(<urn:t11:model> Declaration(Class(<urn:t11:Equipment>)) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t11:Equipment> \"设备\") Declaration(DataProperty(<urn:t11:voltage>)) DataPropertyDomain(<urn:t11:voltage> <urn:t11:Equipment>) DataPropertyRange(<urn:t11:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))",
+          "imports": [],
+          "policy": {
+            "version": "1",
+            "rules": []
+          }
+        },
+        "ontologyIri": "urn:t11:model",
+        "versionIri": null,
+        "documentDigest": "04aa7a00093d132e1a63533f6149a95e201d6eb4e6e6029839197c32df22f06e",
+        "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "axioms": [
+          {
+            "axiomId": "cd402c954ec69e5f230203dcba46370ad6c7fe43549438323057c6ef2f63b5a5",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:t11:Equipment> \"设备\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "734aaf24e5bbc56c1a0e9920c856a5081eaf3f9e361ef94982b0c24cae5792ea",
+            "axiomType": "DataPropertyDomain",
+            "rendering": "DataPropertyDomain(<urn:t11:voltage> <urn:t11:Equipment>)",
+            "signatureIris": [
+              "urn:t11:Equipment",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "5b45788efa52753023a301446f2bd3fde872cda3f4af4c3e9a9630c27433fe80",
+            "axiomType": "DataPropertyRange",
+            "rendering": "DataPropertyRange(<urn:t11:voltage> xsd:decimal)",
+            "signatureIris": [
+              "http://www.w3.org/2001/XMLSchema#decimal",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "19c97cff8959911ec2b3bb613ecc0ed8b45203c148e48d25f0795c7680781eee",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:t11:Equipment>))",
+            "signatureIris": [
+              "urn:t11:Equipment"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "cc5dd112483f49b517e9c79f1273595832e48ee11a9392aeee7573c9f8d6308c",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(DataProperty(<urn:t11:voltage>))",
+            "signatureIris": [
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": false
+          }
+        ]
+      },
+      "availableForNewBindings": true,
+      "publishedAt": "2026-09-12T13:10:49.459570Z",
+      "publishedBy": "1",
+      "publicationNote": "设备版本",
+      "baseRevisionId": null
+    },
+    {
+      "id": "2098761248801054721",
+      "ontologyId": "2098761233626062849",
+      "version": 2,
+      "name": "T11 设备业务模型",
+      "description": "",
+      "document": {
+        "source": {
+          "modelSchema": "owl-document-v1",
+          "syntax": "FUNCTIONAL",
+          "documentText": "Ontology(<urn:t11:model> Declaration(Class(<urn:t11:Equipment>)) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t11:Equipment> \"生产设备\") Declaration(DataProperty(<urn:t11:voltage>)) DataPropertyDomain(<urn:t11:voltage> <urn:t11:Equipment>) DataPropertyRange(<urn:t11:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))",
+          "imports": [],
+          "policy": {
+            "version": "1",
+            "rules": []
+          }
+        },
+        "ontologyIri": "urn:t11:model",
+        "versionIri": null,
+        "documentDigest": "4e6f51f52431b5fb366b2c7de80f4495c21afa91f7d1eb2f201011472f95f122",
+        "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "axioms": [
+          {
+            "axiomId": "45706672ea545d5268329a83f958e5f326567efa4707d7c2c2c3893cc552adee",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:t11:Equipment> \"生产设备\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "3339576abc7a1ba58d956d22592e35f7518a0d8b04fd9b23426576ca92bfb3e3",
+            "axiomType": "DataPropertyDomain",
+            "rendering": "DataPropertyDomain(<urn:t11:voltage> <urn:t11:Equipment>)",
+            "signatureIris": [
+              "urn:t11:Equipment",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "bf96fdd67f718030a51343d2d00095e1f3c3c66b6c86c5623322d40bcc6c4380",
+            "axiomType": "DataPropertyRange",
+            "rendering": "DataPropertyRange(<urn:t11:voltage> xsd:decimal)",
+            "signatureIris": [
+              "http://www.w3.org/2001/XMLSchema#decimal",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "4b2687db34ec292b88608262d1a11a7be7dbedcb24fa6a257daf0f96f910e9c1",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:t11:Equipment>))",
+            "signatureIris": [
+              "urn:t11:Equipment"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "ee84054b3e23b69515958225d5ac770821434ed7d56d0d2dfbc84a4765e63854",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(DataProperty(<urn:t11:voltage>))",
+            "signatureIris": [
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": false
+          }
+        ]
+      },
+      "availableForNewBindings": true,
+      "publishedAt": "2026-09-12T13:10:52.805730Z",
+      "publishedBy": "1",
+      "publicationNote": "生产设备版本",
+      "baseRevisionId": null
+    },
+    {
+      "id": "2098761262826807297",
+      "ontologyId": "2098761233626062849",
+      "version": 3,
+      "name": "T11 设备业务模型",
+      "description": "",
+      "document": {
+        "source": {
+          "modelSchema": "owl-document-v1",
+          "syntax": "FUNCTIONAL",
+          "documentText": "Ontology(<urn:t11:model> Declaration(Class(<urn:t11:Machine>)) AnnotationAssertion(<http://www.w3.org/2000/01/rdf-schema#label> <urn:t11:Machine> \"生产设备\") Declaration(DataProperty(<urn:t11:voltage>)) DataPropertyDomain(<urn:t11:voltage> <urn:t11:Machine>) DataPropertyRange(<urn:t11:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))",
+          "imports": [],
+          "policy": {
+            "version": "1",
+            "rules": []
+          }
+        },
+        "ontologyIri": "urn:t11:model",
+        "versionIri": null,
+        "documentDigest": "1b6dd336a4cc50df8030e278a7723afc3da164ab8c0c3fc01f17548a1674a8e7",
+        "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "axioms": [
+          {
+            "axiomId": "51f24d859bae56e8f1af237425045be387a090969d841ceb1c134e5a349ccc7c",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:t11:Machine> \"生产设备\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "965c59e253a03971a87397df95d4dd270f193e45acf86c31b3485cfdbf6166b0",
+            "axiomType": "DataPropertyDomain",
+            "rendering": "DataPropertyDomain(<urn:t11:voltage> <urn:t11:Machine>)",
+            "signatureIris": [
+              "urn:t11:Machine",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "861f655c85bc13f916523b8c1d51d0bef13a8650c9d2a8210603a30b3f245fec",
+            "axiomType": "DataPropertyRange",
+            "rendering": "DataPropertyRange(<urn:t11:voltage> xsd:decimal)",
+            "signatureIris": [
+              "http://www.w3.org/2001/XMLSchema#decimal",
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "e50da538c75a1863cced5728566cab1813d6bfc58d57283127db26a77bbee0e1",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:t11:Machine>))",
+            "signatureIris": [
+              "urn:t11:Machine"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "91096195ae5c306f50637bee2e851f152111a39d42ea7446d9da384f6ea93b1b",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(DataProperty(<urn:t11:voltage>))",
+            "signatureIris": [
+              "urn:t11:voltage"
+            ],
+            "annotations": [],
+            "logical": false
+          }
+        ]
+      },
+      "availableForNewBindings": true,
+      "publishedAt": "2026-09-12T13:10:55.593023Z",
+      "publishedBy": "1",
+      "publicationNote": "生产设备版本",
+      "baseRevisionId": null
+    }
+  ],
+  "applications": [
+    {
+      "kbId": "2098761274512138241",
+      "name": "T11 装配车间",
+      "graphId": "2098761274558275586",
+      "entity": {
+        "id": "2098761274600218626",
+        "graphId": "2098761274558275586",
+        "iri": "urn:t11:equipment:2098761274512138241",
+        "assertedTypes": [
+          "urn:t11:Equipment"
+        ],
+        "displayName": "装配车间设备A",
+        "status": "ACTIVE",
+        "createdAt": "2026-09-12T13:10:55.621189Z"
+      }
+    },
+    {
+      "kbId": "2098761274621190146",
+      "name": "T11 维修车间",
+      "graphId": "2098761274646355970",
+      "entity": {
+        "id": "2098761274675716098",
+        "graphId": "2098761274646355970",
+        "iri": "urn:t11:equipment:2098761274621190146",
+        "assertedTypes": [
+          "urn:t11:Equipment"
+        ],
+        "displayName": "维修车间设备A",
+        "status": "ACTIVE",
+        "createdAt": "2026-09-12T13:10:55.638730Z"
+      }
+    }
+  ],
+  "draftId": "2098761274692493314"
+}

@@ -37,7 +37,7 @@ public interface OntologyMapper {
 
     @Update(
             "UPDATE mate_semantic_ontology SET"
-                + " name=#{name},description=#{description},draft_id=#{draftId},draft_counter=#{draftCounter},latest_version=#{latestVersion},latest_revision_id=#{latestRevisionId},updated_at=#{updatedAt}"
+                + " archived=#{archived},name=#{name},description=#{description},draft_id=#{draftId},draft_counter=#{draftCounter},latest_version=#{latestVersion},latest_revision_id=#{latestRevisionId},updated_at=#{updatedAt}"
                 + " WHERE id=#{id}")
     int updateParent(OntologyRow row);
 

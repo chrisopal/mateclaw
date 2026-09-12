@@ -23,7 +23,7 @@ export interface OntologySourceBinding { id: string; revisionId: string; axiomId
 export interface OntologySourceReview { id: string; bindingId: string; observedDigest: string; sourceState: string; reviewState: string; decision: string | null; reason: string | null; observedSnapshotId?: string | null }
 export interface DocumentView { source: DocumentInput; ontologyIri: string; versionIri: string | null; documentDigest: string; importLockDigest: string; axioms: AxiomDescriptor[] }
 export interface Metadata { name: string; description: string }
-export interface Ontology extends Metadata { id: string; workspaceId: string; latestVersion: number | null; latestRevisionId: string | null; hasDraft: boolean; updatedAt: string }
+export interface Ontology extends Metadata { archived?: boolean; id: string; workspaceId: string; latestVersion: number | null; latestRevisionId: string | null; hasDraft: boolean; updatedAt: string }
 export interface Draft extends Metadata { id: string; ontologyId: string; baseRevisionId: string | null; version: number; draftVersion: number; document: DocumentView }
 export interface Revision extends Metadata { id: string; ontologyId: string; version: number; document: DocumentView; availableForNewBindings: boolean; publishedAt: string; publishedBy: string; publicationNote: string; baseRevisionId: string | null }
 export interface SaveDraft extends Metadata { expectedDraftVersion: number; document: DocumentInput; operationId: string }

@@ -53,6 +53,20 @@ public class OntologyController {
         return R.ok(service.get(scope, id));
     }
 
+    @PostMapping("/ontologies/{id}/archive")
+    @RequireWorkspaceRole("admin")
+    public R<OntologyView> archive(@RequestHeader("X-Workspace-Id") String scope,
+            @PathVariable String id, @RequestBody LifecycleRequest body) {
+        return R.ok(service.lifecycle(scope, id, body, true));
+    }
+
+    @PostMapping("/ontologies/{id}/restore")
+    @RequireWorkspaceRole("admin")
+    public R<OntologyView> restore(@RequestHeader("X-Workspace-Id") String scope,
+            @PathVariable String id, @RequestBody LifecycleRequest body) {
+        return R.ok(service.lifecycle(scope, id, body, false));
+    }
+
     @PostMapping("/ontologies/{id}/draft")
     @RequireWorkspaceRole("member")
     public R<DraftView> createDraft(

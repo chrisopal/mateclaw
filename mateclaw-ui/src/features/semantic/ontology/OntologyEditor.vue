@@ -20,7 +20,8 @@ import './semantic.css'
 
 const { t, locale } = useI18n(); const tr=(zh:string,en:string)=>locale.value.startsWith('zh')?zh:en; const route = useRoute(); const router = useRouter(); const workspace = useWorkspaceStore()
 const ontologyId = () => String(route.params.id); const workspaceId = () => workspace.currentWorkspaceId ?? ''
-const draft = useOntologyDraft(ontologyId, workspaceId, undefined, () => workspace.can('manage:ontology'))
+const archived = ref<boolean | null>(null)
+const draft = useOntologyDraft(ontologyId, workspaceId, undefined, () => workspace.can('manage:ontology') && archived.value === false)
 const { document, axioms, name, description, id, dirty, busy, version, draftVersion, validationReport, saveError, canPublish, publicationPending, editPending } = draft
 const { data: projectionData, loading: projectionLoading, error: projectionError, reload: reloadProjection } = useOntologyProjection(()=>({workspaceId:workspaceId(),ontologyId:ontologyId(),revisionId:id.value || '',draftVersion:draftVersion.value}))
 const requestError = computed(() => {
@@ -32,7 +33,7 @@ const requestError = computed(() => {
 const modelingOpen=ref(false)
 function selectTask(taskId:string){area.value='suggestions';void router.replace({query:{...route.query,taskId}})}
 async function taskChanged(decision: 'ACCEPT' | 'REJECT'){await draft.load();await reloadProjection();if(decision==='ACCEPT')area.value='model'}
-const editable = computed(() => workspace.can('manage:ontology') && !publicationPending.value)
+const editable = computed(() => workspace.can('manage:ontology') && archived.value === false && !publicationPending.value)
 const selectedAxiom = ref<AxiomDescriptor | null>(null); const newAxiom = ref(''); const tab = ref<'model' | 'editor' | 'axioms'>('model'); const publishOpen = ref(false)
 const focusedAxiomId = ref('')
 const taskEntry = () => typeof route.query.taskId === 'string' && !!route.query.taskId
@@ -83,6 +84,11 @@ function inspectAxiom(axiomId: string) {
 }
 function clearAxiomFocus() { focusedAxiomId.value = '' }
 watch(() => [workspace.currentWorkspaceId, ontologyId(), id.value], () => { businessPolicyDirty.value=false;businessPolicyPending.value=false;focusedAxiomId.value = '';area.value=taskEntry()?'suggestions':'model';tab.value='model';metadataOpen.value=false;toolsOpen.value=false }, { flush: 'sync' })
+watch(() => [workspaceId(), ontologyId(), draftVersion.value], async (_, __, cleanup) => {
+ const controller = new AbortController(); cleanup(() => controller.abort()); archived.value = null
+ try { const value = await ontologyApi.get(workspaceId(), ontologyId(), controller.signal); if (!controller.signal.aborted) archived.value = !!value.archived }
+ catch { /* Keep maintenance disabled until lifecycle state can be read. */ }
+}, { immediate: true })
 onMounted(draft.load)
 </script>
 <template>
@@ -98,7 +104,7 @@ onMounted(draft.load)
   <el-alert v-if="publicationPending" type="warning" :title="t('semantic.pendingPublication')" :closable="false"/><el-button v-if="publicationPending" :loading="busy" @click="publish('')">{{t('semantic.recoverPublication')}}</el-button>
   <el-alert v-if="!editable&&!publicationPending" type="info" :title="t('semantic.readonly')" :closable="false"/>
   <el-alert v-if="saveError" type="error" :title="requestError" :closable="false"/>
-  <nav class="editor-navigation" :aria-label="tr('模型工作区','Model workspace')"><button v-for="item in ([['model',tr('业务模型','Business model')],['suggestions',tr('建模建议','Modeling suggestions')],['policy',tr('业务规则','Business rules')],['sources',tr('参考资料','References')],['publish',tr('检查发布','Check and publish')]] as const)" :key="item[0]" type="button" :disabled="businessPolicyPending" :aria-current="area===item[0]?'page':undefined" :class="{active:area===item[0]}" @click="navigateArea(item[0])">{{item[1]}}</button></nav>
+  <el-alert v-if="archived" type="info" :closable="false" :title="tr('模型已归档，当前为只读。可在版本历史中恢复。','This model is archived and read-only. Restore it in version history.')" /><nav class="editor-navigation" :aria-label="tr('模型工作区','Model workspace')"><button v-for="item in ([['model',tr('业务模型','Business model')],['suggestions',tr('建模建议','Modeling suggestions')],['policy',tr('业务规则','Business rules')],['sources',tr('参考资料','References')],['publish',tr('检查发布','Check and publish')]] as const)" :key="item[0]" type="button" :disabled="businessPolicyPending" :aria-current="area===item[0]?'page':undefined" :class="{active:area===item[0]}" @click="navigateArea(item[0])">{{item[1]}}</button></nav>
   <div v-if="document" v-loading="busy" class="editor-workspace">
    <ModelingTaskCreate v-model="modelingOpen" :ontology-id="ontologyId()" @created="selectTask"/>
    <section v-show="area==='suggestions'" class="editor-suggestions">
@@ -114,13 +120,13 @@ onMounted(draft.load)
    <section v-show="area==='policy'" class="editor-policy">
     <BusinessPolicyPanel :key="workbenchKey" :ontology-id="ontologyId()" :draft-version="draftVersion" :policy="document.policy" :projection="projectionData?.projection" :editable="editable&&!!id" :disabled="busy||dirty||editPending" @saved="businessPolicySaved" @pending-change="businessPolicyPending=$event" @dirty-change="businessPolicyDirty=$event" />
    </section>
-   <section v-show="area==='sources'" class="editor-references"><OntologySourcePanel data-ontology-source-panel tabindex="-1" :ontology-id="ontologyId()" :revision-id="id||undefined" :projection="projectionData?.projection" :focused-axiom-id="focusedAxiomId" @changed="sourceChanged" @modeling-task="selectTask" @clear-focus="clearAxiomFocus" :draft-version="id?draftVersion:undefined" :axioms="axioms" :can-manage="editable&&!!id&&!dirty&&!busy&&!editPending" :can-review="workspace.can('publish:ontology')&&!editPending"/></section>
+   <section v-show="area==='sources'" class="editor-references"><OntologySourcePanel data-ontology-source-panel tabindex="-1" :ontology-id="ontologyId()" :revision-id="id||undefined" :projection="projectionData?.projection" :focused-axiom-id="focusedAxiomId" @changed="sourceChanged" @modeling-task="selectTask" @clear-focus="clearAxiomFocus" :draft-version="id?draftVersion:undefined" :axioms="axioms" :can-manage="editable&&!!id&&!dirty&&!busy&&!editPending" :can-review="archived===false&&workspace.can('publish:ontology')&&!editPending"/></section>
    <section v-show="area==='publish'" class="editor-release">
     <h2>{{tr('发布前检查','Before publishing')}}</h2>
     <div class="editor-check-row"><div><strong>{{tr('保存修改','Save changes')}}</strong><p>{{tr(dirty?'还有未保存的修改':'当前修改已保存',dirty?'Unsaved changes remain':'Changes are saved')}}</p></div><el-button v-if="dirty" :disabled="busy||!editable" @click="draft.save">{{t('semantic.save')}}</el-button></div>
     <div class="editor-check-row"><div><strong>{{tr('检查模型','Check model')}}</strong><p>{{tr('检查当前已保存的模型和资料。','Check the saved model and references.')}}</p></div><el-button :loading="busy" :disabled="dirty||busy||editPending||!editable||businessPolicyPending||businessPolicyDirty" @click="draft.validate">{{tr('运行检查','Run checks')}}</el-button></div>
     <ValidationPanel :report="validationReport" :dirty="dirty" :projection="projectionData?.projection" @locate="locateValidation"/>
-    <div class="editor-check-row"><div><strong>{{tr('发布版本','Publish version')}}</strong><p>{{tr('通过检查后填写发布说明。','Add release notes after checks pass.')}}</p></div><el-button v-if="workspace.can('publish:ontology')" :disabled="!canPublish" @click="publishOpen=true">{{t('semantic.publish')}}</el-button></div>
+    <div class="editor-check-row"><div><strong>{{tr('发布版本','Publish version')}}</strong><p>{{tr('通过检查后填写发布说明。','Add release notes after checks pass.')}}</p></div><el-button v-if="editable&&workspace.can('publish:ontology')" :disabled="!canPublish" @click="publishOpen=true">{{t('semantic.publish')}}</el-button></div>
    </section>
   </div>
   <el-dialog v-model="metadataOpen" :title="tr('基本信息','Basic information')" width="min(560px,94vw)"><el-form label-position="top" :disabled="!editable||busy||editPending"><el-form-item :label="t('semantic.name')"><el-input id="ontology-name" v-model="name" maxlength="128"/></el-form-item><el-form-item :label="t('semantic.description')"><el-input id="ontology-description" v-model="description" type="textarea" :rows="3"/></el-form-item></el-form><template #footer><el-button @click="metadataOpen=false">{{tr('完成','Done')}}</el-button></template></el-dialog>

@@ -18,6 +18,8 @@ import java.util.List;
 @Service
 @ConditionalOnProperty(name = "mateclaw.semantic.enabled", havingValue = "true")
 public class GraphApplicationService {
+    @org.springframework.beans.factory.annotation.Autowired
+    private vip.mate.semantic.ontology.repository.OntologyMapper ontologyMapper;
     private final GraphMapper mapper;
     private final SemanticAccessService access;
     private final OntologyWireMapper wire;
@@ -162,9 +164,19 @@ public class GraphApplicationService {
         if (row == null || row.getWorkspaceId() != workspace || !"PUBLISHED".equals(row.getRevisionState())) throw notFound();
         if (!vip.mate.semantic.core.ontology.OntologyDocument.MODEL_SCHEMA.equals(row.getModelSchema()))
             throw conflict("LEGACY_ONTOLOGY_RETIRED", "Rebuild the ontology as an OWL document before binding");
+        if (mustBeAvailable) {
+            requireBindingAvailable(workspace, row.getOntologyId());
+            row = mapper.revision(revisionId);
+        }
         if (mustBeAvailable && !Boolean.TRUE.equals(row.getAvailableForNewBindings()))
             throw conflict("REVISION_UNAVAILABLE", "Ontology revision is closed to new bindings");
         return row;
+    }
+    /** Call inside the binding transaction; shares the lifecycle transition lock. */
+    public void requireBindingAvailable(long workspace, String ontologyId) {
+        var parent = ontologyMapper.lock(ontologyId, workspace);
+        if (parent == null) throw notFound();
+        vip.mate.semantic.ontology.OntologyApplicationService.requireWritable(parent);
     }
     private void requireKb(long workspace, long kb) {
         Long owner = mapper.knowledgeBaseWorkspace(kb);

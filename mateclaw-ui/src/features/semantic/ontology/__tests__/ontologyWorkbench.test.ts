@@ -24,7 +24,7 @@ afterEach(() => {
   host?.remove();
   vi.clearAllMocks();
 });
-it("shows knowledge-base names and routes only enabled bindings with exact graph IDs", async () => {
+it("shows knowledge-base names and keeps paused history accessible with exact graph IDs", async () => {
   const pinia = createPinia();
   setActivePinia(pinia);
   useWorkspaceStore().currentWorkspaceId = "1";
@@ -73,7 +73,9 @@ it("shows knowledge-base names and routes only enabled bindings with exact graph
     b.textContent?.includes("Open knowledge workbench"),
   );
   expect(buttons).toHaveLength(2);
-  expect(buttons[1]!.disabled).toBe(true);
+  expect(buttons[1]!.disabled).toBe(false);
+  buttons[1]!.click();
+  expect(push).toHaveBeenCalledWith({ name: "SemanticWorkbench", params: { graphId: "43" } });
   buttons[0]!.click();
   expect(push).toHaveBeenCalledWith({
     name: "SemanticWorkbench",

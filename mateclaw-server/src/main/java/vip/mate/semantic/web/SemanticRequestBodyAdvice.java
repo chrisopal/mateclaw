@@ -95,7 +95,7 @@ public class SemanticRequestBodyAdvice extends RequestBodyAdviceAdapter {
             return;
         }
         if (!(expected instanceof Class<?> type)) throw invalid(path);
-        if (type == String.class) {
+        if (type == String.class || type == java.time.Instant.class) {
             if (!node.isTextual()) throw invalid(path);
             return;
         }

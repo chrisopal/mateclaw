@@ -1,0 +1,90 @@
+{
+  "archived": true,
+  "versions": [
+    {
+      "id": "2098761262826807297",
+      "version": 3,
+      "available": false
+    },
+    {
+      "id": "2098761248801054721",
+      "version": 2,
+      "available": false
+    },
+    {
+      "id": "2098761233659617282",
+      "version": 1,
+      "available": false
+    }
+  ],
+  "applications": [
+    {
+      "graphId": "2098761274558275586",
+      "workspaceId": "2098761233575731202",
+      "knowledgeBaseId": "2098761274512138241",
+      "ontologyRevisionId": "2098761262826807297",
+      "ontologyVersion": 3,
+      "enabled": true,
+      "graphVersion": 5,
+      "empty": false,
+      "updatedAt": "2026-09-12T13:18:09.082772Z"
+    },
+    {
+      "graphId": "2098761274646355970",
+      "workspaceId": "2098761233575731202",
+      "knowledgeBaseId": "2098761274621190146",
+      "ontologyRevisionId": "2098761233659617282",
+      "ontologyVersion": 1,
+      "enabled": true,
+      "graphVersion": 3,
+      "empty": false,
+      "updatedAt": "2026-09-12T13:18:45.935519Z"
+    }
+  ],
+  "plan": {
+    "id": "25942cb6-aa77-4c4c-a5e5-12dbf6292340",
+    "graphId": "2098761274558275586",
+    "sourceRevisionId": "2098761233659617282",
+    "targetRevisionId": "2098761262826807297",
+    "sourceVersion": 1,
+    "targetVersion": 3,
+    "status": "EXECUTED",
+    "planDigest": "b6c77313aaf72943b87a84f3a433f9d2c76bd48d1ac937a81e999f16f316526e",
+    "sourceDocumentDigest": "04aa7a00093d132e1a63533f6149a95e201d6eb4e6e6029839197c32df22f06e",
+    "targetDocumentDigest": "1b6dd336a4cc50df8030e278a7723afc3da164ab8c0c3fc01f17548a1674a8e7",
+    "sourceImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "targetImportLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expectedGraphVersion": 3,
+    "executedGraphVersion": 4,
+    "impact": {
+      "entities": 1,
+      "facts": 0,
+      "changedEntities": 1,
+      "changedFacts": 0,
+      "blockers": [],
+      "truncated": false
+    },
+    "entities": [
+      {
+        "entityId": "2098761274600218626",
+        "oldIri": "urn:t11:equipment:2098761274512138241",
+        "targetIri": "urn:t11:equipment:2098761274512138241",
+        "oldTypes": [
+          "urn:t11:Equipment"
+        ],
+        "targetTypes": [
+          "urn:t11:Machine"
+        ],
+        "blockers": []
+      }
+    ],
+    "facts": [],
+    "createdAt": "2026-09-12T13:17:27.124625Z",
+    "approvedAt": "2026-09-12T13:17:35.338600Z",
+    "executedAt": "2026-09-12T13:17:35.428934Z",
+    "rolledBackAt": null
+  },
+  "unsafeRollbackCode": "GRAPH_VERSION_CONFLICT",
+  "publishedDigestsUnchanged": true,
+  "draftRetained": true
+}

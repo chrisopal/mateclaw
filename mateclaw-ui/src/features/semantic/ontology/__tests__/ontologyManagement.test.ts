@@ -78,6 +78,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   routeState.query = {}
   vi.mocked(modelingTaskApi.list).mockResolvedValue([])
+  vi.mocked(ontologyApi.get).mockResolvedValue({ id: '9223372036854775800', workspaceId: '1', name: 'Factory', description: '', latestVersion: 1, latestRevisionId: null, hasDraft: true, updatedAt: '2026-09-12T00:00:00Z', archived: false })
   vi.mocked(ontologyApi.getDraft).mockResolvedValue(data())
 })
 afterEach(() => {

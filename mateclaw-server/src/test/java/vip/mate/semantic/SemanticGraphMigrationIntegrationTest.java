@@ -261,7 +261,18 @@ class SemanticGraphMigrationIntegrationTest extends SemanticHttpFixture {
                         "knowledgeBaseId", kb, "sourceRef", rawId,
                         "expectedSourceDigest", vip.mate.semantic.core.ontology.OntologyDocument.sha256(text),
                         "startCodePoint", 0, "endCodePoint", text.length(), "exactQuote", text, "origin", "EXPERT"), 200);
+        // Publication requires the captured source to be reviewed first.
+        JsonNode initialReviews = call("GET", "/ontologies/" + ontology + "/source-reviews", "owner", workspace, null, 200);
+        JsonNode initialReview = initialReviews.get(0);
+        call("POST", "/ontologies/" + ontology + "/source-reviews/" + initialReview.path("id").asText() + "/decision", "owner", workspace,
+                Map.of("operationId", "publish-ack-" + UUID.randomUUID(), "expectedObservedDigest", initialReview.path("observedDigest").asText(),
+                        "decision", "ACKNOWLEDGE", "reason", "verified source before publication"), 200);
         JsonNode target = publish(ontology, bound.path("draftVersion").asLong(), "target-" + UUID.randomUUID());
+        // A later source change creates the pending review that must block migration.
+        text = "verified revised specification";
+        jdbc.update("UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?", text, Long.valueOf(rawId));
+        call("POST", "/ontologies/" + ontology + "/source-reviews/scan", "member", workspace,
+                Map.of("operationId", "target-scan-" + UUID.randomUUID()), 200);
         long version = call("GET", "/knowledge-bases/" + kb + "/binding", "viewer", workspace, null, 200).path("graphVersion").asLong();
         JsonNode plan = call("POST", "/graphs/" + graph + "/migrations/owl/prepare", "owner", workspace,
                 Map.of("operationId", "prepare-" + UUID.randomUUID(), "sourceRevisionId", source.path("id").asText(),
@@ -270,7 +281,10 @@ class SemanticGraphMigrationIntegrationTest extends SemanticHttpFixture {
         assertEquals("BLOCKED", plan.path("status").asText());
         assertTrue(plan.path("impact").path("blockers").toString().contains("TARGET_ONTOLOGY_SOURCE_REVIEW_PENDING"));
         JsonNode reviews = call("GET", "/ontologies/" + ontology + "/source-reviews", "owner", workspace, null, 200);
-        JsonNode review = reviews.get(0);
+        JsonNode review = java.util.stream.StreamSupport.stream(reviews.spliterator(), false)
+                .filter(r -> "PENDING".equals(r.path("reviewState").asText())
+                        && "CHANGED".equals(r.path("sourceState").asText()))
+                .findFirst().orElseThrow();
         call("POST", "/ontologies/" + ontology + "/source-reviews/" + review.path("id").asText() + "/decision", "owner", workspace,
                 Map.of("operationId", "ack-" + UUID.randomUUID(), "expectedObservedDigest", review.path("observedDigest").asText(),
                         "decision", "ACKNOWLEDGE", "reason", "verified original source"), 200);

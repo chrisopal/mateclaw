@@ -101,6 +101,8 @@ public final class OntologyDtos {
 
     public record Availability(Boolean availableForNewBindings) {}
 
+    public record LifecycleRequest(Instant expectedUpdatedAt) {}
+
     public record OntologyView(
             String id,
             String workspaceId,
@@ -109,7 +111,12 @@ public final class OntologyDtos {
             Integer latestVersion,
             String latestRevisionId,
             boolean hasDraft,
-            @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt) {}
+            @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt, boolean archived) {
+        public OntologyView(String id, String workspaceId, String name, String description, Integer latestVersion,
+                String latestRevisionId, boolean hasDraft, Instant updatedAt) {
+            this(id, workspaceId, name, description, latestVersion, latestRevisionId, hasDraft, updatedAt, false);
+        }
+    }
 
     public record Page(
             List<OntologyView> items,
