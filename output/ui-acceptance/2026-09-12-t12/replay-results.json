@@ -1,0 +1,31 @@
+{
+  "natural": {
+    "stage": "READY",
+    "revision": "2098771602276925442",
+    "axioms": 22,
+    "samples": 2,
+    "allQuotesExact": true,
+    "instancesNotInModel": true
+  },
+  "library": {
+    "stage": "READY",
+    "revision": "2098772686139604994",
+    "axioms": 22,
+    "samples": 3,
+    "allQuotesExact": true,
+    "instancesNotInModel": true
+  },
+  "roundtrip": {
+    "canonicalTextAndAxiomSetEqual": true,
+    "count": 22
+  },
+  "sample": {
+    "trusted": 1,
+    "history": [
+      "PROPOSED",
+      "ACCEPTED"
+    ],
+    "evidenceExact": true,
+    "validity": "UNKNOWN"
+  }
+}

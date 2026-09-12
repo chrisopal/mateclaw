@@ -1,0 +1,638 @@
+{
+  "scope": "T12 main flows; full product control inventory remains incomplete",
+  "environment": "2026-09-12 Chromium admin 1440x960 enterprise; UI5189 API18109 persistent H2; baseline6272f669 plus scoped label fixes",
+  "pages": [
+    {
+      "id": "list",
+      "inventoryComplete": false
+    },
+    {
+      "id": "editor",
+      "inventoryComplete": false
+    },
+    {
+      "id": "versions",
+      "inventoryComplete": false
+    },
+    {
+      "id": "workbench",
+      "inventoryComplete": false
+    },
+    {
+      "id": "chat",
+      "inventoryComplete": false
+    }
+  ],
+  "controls": [
+    {
+      "id": "create",
+      "page": "list",
+      "name": "create",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "select-source",
+      "page": "editor",
+      "name": "select-source",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "natural-model",
+      "page": "chat",
+      "name": "natural-model",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "document-model",
+      "page": "chat",
+      "name": "document-model",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "confirm-proposals",
+      "page": "editor",
+      "name": "confirm-proposals",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "publication-checks",
+      "page": "editor",
+      "name": "publication-checks",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "compare-source",
+      "page": "editor",
+      "name": "compare-source",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "acknowledge-source",
+      "page": "editor",
+      "name": "acknowledge-source",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "publish",
+      "page": "editor",
+      "name": "publish",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "apply-kb",
+      "page": "versions",
+      "name": "apply-kb",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "owl-roundtrip",
+      "page": "versions",
+      "name": "owl-roundtrip",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "source-labels",
+      "page": "versions",
+      "name": "source-labels",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "create-entity",
+      "page": "workbench",
+      "name": "create-entity",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "capture-source",
+      "page": "workbench",
+      "name": "capture-source",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "select-sample",
+      "page": "workbench",
+      "name": "select-sample",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "reject-invalid-quote",
+      "page": "workbench",
+      "name": "reject-invalid-quote",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "pending-isolation",
+      "page": "workbench",
+      "name": "pending-isolation",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "accept-sample",
+      "page": "workbench",
+      "name": "accept-sample",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "open-evidence",
+      "page": "workbench",
+      "name": "open-evidence",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "history-labels",
+      "page": "workbench",
+      "name": "history-labels",
+      "checks": [
+        "desktop-admin"
+      ]
+    },
+    {
+      "id": "search-filter-pagination",
+      "page": "list",
+      "name": "search-filter-pagination",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "manual-rule-edit",
+      "page": "editor",
+      "name": "manual-rule-edit",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "reject-remodel",
+      "page": "editor",
+      "name": "reject-remodel",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "source-update",
+      "page": "editor",
+      "name": "source-update",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "responsive-keyboard-theme",
+      "page": "editor",
+      "name": "responsive-keyboard-theme",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "compare-availability",
+      "page": "versions",
+      "name": "compare-availability",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "upgrade-rollback-archive",
+      "page": "versions",
+      "name": "upgrade-rollback-archive",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "relation-attribute-identity",
+      "page": "workbench",
+      "name": "relation-attribute-identity",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "long-model-extraction",
+      "page": "workbench",
+      "name": "long-model-extraction",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "retract-conflicts",
+      "page": "workbench",
+      "name": "retract-conflicts",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "role-isolation-ui",
+      "page": "workbench",
+      "name": "role-isolation-ui",
+      "checks": [
+        "remaining-matrix"
+      ]
+    },
+    {
+      "id": "knowledge-query-update",
+      "page": "chat",
+      "name": "knowledge-query-update",
+      "checks": [
+        "remaining-matrix"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "control": "create",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "natural-final-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "select-source",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "library-final-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "natural-model",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "natural-conversation.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "document-model",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "library-conversation.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "confirm-proposals",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "replay-results.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "publication-checks",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "ui-run.md",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "compare-source",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "ui-run.md",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "acknowledge-source",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "library-final-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "publish",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "replay-results.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "apply-kb",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "natural-final-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "owl-roundtrip",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "roundtrip-result.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "source-labels",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "published-source-labels.png",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "create-entity",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "sample-accepted-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "capture-source",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "sample-accepted-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "select-sample",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "ui-run.md",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "reject-invalid-quote",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "ui-run.md",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "pending-isolation",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "sample-pending-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "accept-sample",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "sample-accepted-readback.json",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "open-evidence",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "sample-evidence.png",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "history-labels",
+      "check": "desktop-admin",
+      "status": "PASS",
+      "steps": [
+        "Execute matching numbered steps in ui-run.md"
+      ],
+      "expected": "Business behavior and persisted state match the documented scenario",
+      "actual": "Observed browser action and independent readback documented in ui-run.md",
+      "evidence": [
+        "ui-run.md",
+        "ui-run.md"
+      ]
+    },
+    {
+      "control": "search-filter-pagination",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "manual-rule-edit",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "reject-remodel",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "source-update",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "responsive-keyboard-theme",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "compare-availability",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "upgrade-rollback-archive",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "relation-attribute-identity",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "long-model-extraction",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "retract-conflicts",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "role-isolation-ui",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    },
+    {
+      "control": "knowledge-query-update",
+      "check": "remaining-matrix",
+      "status": "NOT_RUN",
+      "reason": "Not executed in this run; historical tests do not count as current UI evidence."
+    }
+  ]
+}

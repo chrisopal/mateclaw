@@ -1,0 +1,6 @@
+2026-09-12 local probe
+mysql client: /opt/homebrew/opt/mysql-client/bin/mysql
+mysqld, ksql, kingbase commands: unavailable in PATH
+3306 / 54321 TCP LISTEN: none
+Docker daemon: unavailable at configured local socket
+No native MySQL/Kingbase migration execution performed. No credentials read or emitted.

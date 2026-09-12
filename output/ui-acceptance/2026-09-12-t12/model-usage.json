@@ -1,0 +1,84 @@
+[
+  {
+    "scenario": "natural",
+    "runtimeProvider": "deepseek",
+    "runtimeModel": "deepseek-chat",
+    "promptTokens": 103619,
+    "completionTokens": 1966,
+    "cacheReadTokens": 25088,
+    "cacheWriteTokens": 0,
+    "toolCalls": [
+      {
+        "name": "load_skill",
+        "status": "completed"
+      },
+      {
+        "name": "semantic_modeling_get_task",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      },
+      {
+        "name": "semantic_modeling_submit_proposal",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      }
+    ],
+    "billedCost": null,
+    "costStatus": "Not returned by API; no currency estimate"
+  },
+  {
+    "scenario": "library",
+    "runtimeProvider": "deepseek",
+    "runtimeModel": "deepseek-chat",
+    "promptTokens": 126461,
+    "completionTokens": 2424,
+    "cacheReadTokens": 34688,
+    "cacheWriteTokens": 0,
+    "toolCalls": [
+      {
+        "name": "load_skill",
+        "status": "completed"
+      },
+      {
+        "name": "semantic_modeling_get_task",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      },
+      {
+        "name": "semantic_modeling_read_source",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      },
+      {
+        "name": "semantic_modeling_submit_proposal",
+        "status": "completed"
+      },
+      {
+        "name": "progress_update",
+        "status": "completed"
+      }
+    ],
+    "billedCost": null,
+    "costStatus": "Not returned by API; no currency estimate"
+  }
+]

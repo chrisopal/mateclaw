@@ -1,0 +1,19 @@
+{
+  "verdict": "INCOMPLETE",
+  "pages": 5,
+  "controls": 32,
+  "assignedChecks": 32,
+  "counts": {
+    "PASS": 20,
+    "NOT_RUN": 12
+  },
+  "executionCoverage": 0.625,
+  "errors": [
+    "list: inventory incomplete",
+    "editor: inventory incomplete",
+    "versions: inventory incomplete",
+    "workbench: inventory incomplete",
+    "chat: inventory incomplete"
+  ],
+  "notice": "Ledger audit only; inspect real browser evidence separately."
+}

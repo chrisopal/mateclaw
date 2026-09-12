@@ -19,7 +19,7 @@ it.each([false, true])('requires explicit identity and unambiguous evidence (rep
  vi.mocked(sourceApi.evidence).mockResolvedValue({ id: '6' } as Awaited<ReturnType<typeof sourceApi.evidence>>)
  vi.mocked(statementApi.propose).mockResolvedValue({ id: '7' } as Awaited<ReturnType<typeof statementApi.propose>>)
  const host = document.createElement('div'); document.body.append(host)
- app = createApp(ModelSampleReview, { graphId: '4', ontologyId: '2', entities: [{ id: '8', graphId: '4', iri: 'urn:pump', displayName: 'Pump', assertedTypes: ['urn:Equipment'], status: 'ACTIVE', createdAt: '' }], snapshots: [{ id: '5', sourceTitle: 'Register', captureVersion: 1, sourceKind: 'WIKI_RAW', sourceRef: '9', textDigest: 'hash', createdAt: '' }], document: { source: { syntax: 'FUNCTIONAL', text: '' }, ontologyIri: 'urn:model', versionIri: null, documentDigest: 'h', importLockDigest: 'h', axioms: [{ axiomId: 'a', axiomType: 'Declaration', rendering: 'Declaration(Class(<urn:Equipment>))', signatureIris: ['urn:Equipment'], annotations: [], logical: false }] } })
+ app = createApp(ModelSampleReview, { graphId: '4', ontologyId: '2', entities: [{ id: '8', graphId: '4', iri: 'urn:pump', displayName: 'Pump', assertedTypes: ['urn:Equipment'], status: 'ACTIVE', createdAt: '' }], snapshots: [{ id: '5', sourceTitle: 'Register', captureVersion: 1, sourceKind: 'WIKI_RAW', sourceRef: '9', textDigest: 'hash', createdAt: '' }], document: { source: { syntax: 'FUNCTIONAL', text: '' }, ontologyIri: 'urn:model', versionIri: null, documentDigest: 'h', importLockDigest: 'h', axioms: [{ axiomId: 'a', axiomType: 'Declaration', rendering: 'Declaration(Class(<urn:Equipment>))', signatureIris: ['urn:Equipment'], annotations: [], logical: false }, { axiomId: 'label', axiomType: 'AnnotationAssertion', rendering: 'AnnotationAssertion(rdfs:label <urn:Equipment> "设备")', signatureIris: [], annotations: [], logical: false }] } })
  app.use(ElementPlus).use(createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': {} } })).mount(host); await flush()
  expect(statementApi.propose).not.toHaveBeenCalled()
  async function choose(index: number, label: string) {
@@ -27,7 +27,7 @@ it.each([false, true])('requires explicit identity and unambiguous evidence (rep
   const option = [...document.querySelectorAll('.el-select-dropdown__item')].find(el => el.textContent?.trim() === label) as HTMLElement
   option.click(); await flush()
  }
- await choose(0, '1 · Pump is equipment'); await choose(1, 'Pump · 8'); await choose(3, 'Equipment'); await choose(4, 'Register · 1')
+ await choose(0, '1 · Pump is equipment'); await choose(1, 'Pump · 8'); await choose(3, '设备'); await choose(4, 'Register · 1')
  const submit = [...host.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Submit for review')!
  expect(submit.disabled).toBe(true)
  const textarea = host.querySelector('textarea')!; textarea.value = 'not in source'; textarea.dispatchEvent(new Event('input')); await flush(); expect(submit.disabled).toBe(true)

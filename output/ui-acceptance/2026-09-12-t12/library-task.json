@@ -1,0 +1,224 @@
+{
+  "id": "e3567a30-dec9-4f1d-9b2a-40fa5071993b",
+  "ontologyId": "2098772686139604993",
+  "draftId": "2098772686139604994",
+  "goal": "根据选中的图书借阅资料建立业务模型，完整读取资料，引用真实原文，区分类型与编号实例，不编造借阅限制或罚款规则。只提交建议与样例，不直接确认或发布。",
+  "sources": [
+    {
+      "knowledgeBaseId": "2098771185526685698",
+      "sourceRef": "2098771185631543297",
+      "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637"
+    }
+  ],
+  "stage": "AWAITING_CONFIRMATION",
+  "message": null,
+  "proposals": [
+    {
+      "id": "8412fbcf-8f8b-47c3-97d7-d18e9212d659",
+      "input": {
+        "operationId": "library-v1-model-proposal-001",
+        "expectedDraftVersion": 1,
+        "changes": [
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "图书",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "book"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "读者",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "reader"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "OBJECT",
+            "targetId": null,
+            "name": "借阅记录",
+            "domainId": null,
+            "rangeId": null,
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "loan"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "ISBN",
+            "domainId": "$book",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "book-isbn"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "ATTRIBUTE",
+            "targetId": null,
+            "name": "读者编号",
+            "domainId": "$reader",
+            "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "reader-no"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "RELATION",
+            "targetId": null,
+            "name": "借阅图书",
+            "domainId": "$loan",
+            "rangeId": "$book",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "loans-book"
+          },
+          {
+            "kind": "CREATE_TERM",
+            "termKind": "RELATION",
+            "targetId": null,
+            "name": "借阅人",
+            "domainId": "$loan",
+            "rangeId": "$reader",
+            "field": null,
+            "value": null,
+            "language": null,
+            "operator": null,
+            "propertyId": null,
+            "fillerId": null,
+            "cardinality": null,
+            "originalAxiomId": null,
+            "clientId": "loan-reader"
+          }
+        ],
+        "evidence": [
+          {
+            "clientId": "book",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "图书、读者、借阅记录是三类业务对象",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "reader",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "图书、读者、借阅记录是三类业务对象",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "loan",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "图书、读者、借阅记录是三类业务对象",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "book-isbn",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "图书有文本类型的ISBN",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "reader-no",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "读者有文本类型的读者编号",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "loans-book",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "借阅记录通过“借阅图书”关联图书",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          },
+          {
+            "clientId": "loan-reader",
+            "knowledgeBaseId": "2098771185526685698",
+            "sourceRef": "2098771185631543297",
+            "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+            "exactQuote": "通过“借阅人”关联读者",
+            "occurrence": 1,
+            "origin": "EXTRACTED"
+          }
+        ],
+        "questions": [
+          "资料没有规定一本图书能否同时借给多位读者，是否需要为“借阅图书”关系增加数量约束（例如最多同时借给一位读者）？",
+          "资料没有规定逾期罚款规则，是否需要补充逾期罚款相关的业务规则或属性？"
+        ],
+        "samples": [
+          "图书 B-001 的 ISBN 是 9780000000001（实例，不是通用定义）",
+          "读者 R-001 的读者编号是 R-001（实例，不是通用定义）",
+          "借阅记录 L-001 对应图书 B-001 和读者 R-001（实例，不是通用定义）"
+        ]
+      },
+      "status": "PENDING",
+      "reason": null,
+      "answers": {},
+      "result": null
+    }
+  ],
+  "incremental": null
+}

@@ -1,0 +1,7 @@
+{
+  "sourceTextEqual": true,
+  "digestEqual": true,
+  "renderingSetEqual": true,
+  "axiomCount": 22,
+  "note": "Different ontology resource IDs; compare canonical renderings rather than resource-scoped axiom IDs."
+}

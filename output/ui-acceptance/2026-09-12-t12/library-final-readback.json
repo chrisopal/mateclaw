@@ -1,0 +1,1048 @@
+{
+  "task": {
+    "id": "e3567a30-dec9-4f1d-9b2a-40fa5071993b",
+    "ontologyId": "2098772686139604993",
+    "draftId": "2098772686139604994",
+    "goal": "根据选中的图书借阅资料建立业务模型，完整读取资料，引用真实原文，区分类型与编号实例，不编造借阅限制或罚款规则。只提交建议与样例，不直接确认或发布。",
+    "sources": [
+      {
+        "knowledgeBaseId": "2098771185526685698",
+        "sourceRef": "2098771185631543297",
+        "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637"
+      }
+    ],
+    "stage": "READY",
+    "message": null,
+    "proposals": [
+      {
+        "id": "8412fbcf-8f8b-47c3-97d7-d18e9212d659",
+        "input": {
+          "operationId": "library-v1-model-proposal-001",
+          "expectedDraftVersion": 1,
+          "changes": [
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "OBJECT",
+              "targetId": null,
+              "name": "图书",
+              "domainId": null,
+              "rangeId": null,
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "book"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "OBJECT",
+              "targetId": null,
+              "name": "读者",
+              "domainId": null,
+              "rangeId": null,
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "reader"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "OBJECT",
+              "targetId": null,
+              "name": "借阅记录",
+              "domainId": null,
+              "rangeId": null,
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "loan"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "ATTRIBUTE",
+              "targetId": null,
+              "name": "ISBN",
+              "domainId": "$book",
+              "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "book-isbn"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "ATTRIBUTE",
+              "targetId": null,
+              "name": "读者编号",
+              "domainId": "$reader",
+              "rangeId": "http://www.w3.org/2001/XMLSchema#string",
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "reader-no"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "RELATION",
+              "targetId": null,
+              "name": "借阅图书",
+              "domainId": "$loan",
+              "rangeId": "$book",
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "loans-book"
+            },
+            {
+              "kind": "CREATE_TERM",
+              "termKind": "RELATION",
+              "targetId": null,
+              "name": "借阅人",
+              "domainId": "$loan",
+              "rangeId": "$reader",
+              "field": null,
+              "value": null,
+              "language": null,
+              "operator": null,
+              "propertyId": null,
+              "fillerId": null,
+              "cardinality": null,
+              "originalAxiomId": null,
+              "clientId": "loan-reader"
+            }
+          ],
+          "evidence": [
+            {
+              "clientId": "book",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "图书、读者、借阅记录是三类业务对象",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "reader",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "图书、读者、借阅记录是三类业务对象",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "loan",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "图书、读者、借阅记录是三类业务对象",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "book-isbn",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "图书有文本类型的ISBN",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "reader-no",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "读者有文本类型的读者编号",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "loans-book",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "借阅记录通过“借阅图书”关联图书",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            },
+            {
+              "clientId": "loan-reader",
+              "knowledgeBaseId": "2098771185526685698",
+              "sourceRef": "2098771185631543297",
+              "sourceDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+              "exactQuote": "通过“借阅人”关联读者",
+              "occurrence": 1,
+              "origin": "EXTRACTED"
+            }
+          ],
+          "questions": [
+            "资料没有规定一本图书能否同时借给多位读者，是否需要为“借阅图书”关系增加数量约束（例如最多同时借给一位读者）？",
+            "资料没有规定逾期罚款规则，是否需要补充逾期罚款相关的业务规则或属性？"
+          ],
+          "samples": [
+            "图书 B-001 的 ISBN 是 9780000000001（实例，不是通用定义）",
+            "读者 R-001 的读者编号是 R-001（实例，不是通用定义）",
+            "借阅记录 L-001 对应图书 B-001 和读者 R-001（实例，不是通用定义）"
+          ]
+        },
+        "status": "ACCEPTED",
+        "reason": null,
+        "answers": {
+          "资料没有规定一本图书能否同时借给多位读者，是否需要为“借阅图书”关系增加数量约束（例如最多同时借给一位读者）？": "暂不增加数量约束。",
+          "资料没有规定逾期罚款规则，是否需要补充逾期罚款相关的业务规则或属性？": "不补充罚款规则。"
+        },
+        "result": {
+          "draft": {
+            "id": "2098772686139604994",
+            "ontologyId": "2098772686139604993",
+            "baseRevisionId": null,
+            "version": 1,
+            "draftVersion": 24,
+            "name": "T12 图书借阅资料模型",
+            "description": "",
+            "document": {
+              "source": {
+                "modelSchema": "owl-document-v1",
+                "syntax": "FUNCTIONAL",
+                "documentText": "Prefix(:=<urn:mateclaw:ontology:2098772686139604993#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098772686139604993>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>))\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>))\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> (借阅图书)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> \"借阅图书\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)\n\n# Object Property: <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> (借阅人)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> \"借阅人\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> (ISBN)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> \"ISBN\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)\nDataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> xsd:string)\n\n# Data Property: <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> (读者编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> \"读者编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)\nDataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> (读者)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> \"读者\")\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> (图书)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> \"图书\")\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> (借阅记录)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> \"借阅记录\")\n\n\n)",
+                "imports": [],
+                "policy": {
+                  "version": "1",
+                  "rules": []
+                }
+              },
+              "ontologyIri": "urn:mateclaw:ontology:2098772686139604993",
+              "versionIri": null,
+              "documentDigest": "9766cb12d6866243b3e8ac458c250be6a3f5819668e66f27af494e13122a2d61",
+              "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "axioms": [
+                {
+                  "axiomId": "0f6910bf7f8f94effd7cbb5a8c280e0e139fe46ac15377f40afbac2583da80e7",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> \"借阅图书\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "acf00c32a15e101bc82837988a6bfdce1664bcb87195bc83dc8690ed1d7524a4",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> \"读者编号\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "ab535addc46a5e4499a682ac7a782abe3b914291dee8fb9fd7c852ef42573bd8",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> \"借阅人\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "37955069c68afdaba19dbb292bce35603037e4f0e50d83f346ec00bfee8b4842",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> \"图书\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "8a4944f82f549cd752029293c3c4c183fc1104f646bd03ce50591a0f4748c4db",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> \"借阅记录\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "cd5f32ac7305dbf2a3bae410455ae3e28f37b0b128fd11788e19661738bddf3d",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> \"ISBN\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "a74b1c000812cda58975c110ebfe0f7809f13f33f66bf589169eac514d48c475",
+                  "axiomType": "AnnotationAssertion",
+                  "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> \"读者\")",
+                  "signatureIris": [
+                    "http://www.w3.org/2000/01/rdf-schema#label",
+                    "http://www.w3.org/2001/XMLSchema#string"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "905aca4a99b97b67c7ee3df6413178f344fba01d3795a0e04cc8fde8df88aaac",
+                  "axiomType": "DataPropertyDomain",
+                  "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "5cdda30d46df1f8d701e50f6f4a846d5f000e884d1ba6fdcc9570563c718ad47",
+                  "axiomType": "DataPropertyDomain",
+                  "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "0f6ac79ea948de3b11751f50713c84dabea1107498adc1b99f2866d1c0712d3e",
+                  "axiomType": "DataPropertyRange",
+                  "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> xsd:string)",
+                  "signatureIris": [
+                    "http://www.w3.org/2001/XMLSchema#string",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "5a0895e4cd3b1ae47c5e8e8a72ea233d12fa5cdd8a1c1b13bb107a3f73416aa0",
+                  "axiomType": "DataPropertyRange",
+                  "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> xsd:string)",
+                  "signatureIris": [
+                    "http://www.w3.org/2001/XMLSchema#string",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "7628d983810d4fe903a84c612b3b9ca57e987b21907edabfaa74d88059cfd361",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "8d42db201906d0c70fb4a4251665b2ee8e18173f6b9ff55275d179b312602589",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "cf8f8ed4c55d2a471bbc71522590d26aaf840d1e903921c747a5dc1b0cd16720",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "f93f41c959dc464bee1f02adaa4ccd533f8c688fe5b5dd9e77daaa9cbd764327",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "406eb54412db239c02c941df65a1b65510ee2bf05832724332e3357f01b62b0c",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "b8a31d7d36134596d5457ffa61afcb32dd6f7a7759d4f6a46706b2ecc84ef12a",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "fe3bcd01734fd5e5223817b5d3f068d78cff38338e4a7e7a395998575e8ca818",
+                  "axiomType": "Declaration",
+                  "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14>))",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14"
+                  ],
+                  "annotations": [],
+                  "logical": false
+                },
+                {
+                  "axiomId": "2ca733bc01a2f5ed366f96815cb8cce55665d9d5fe5c5baf41ef6473323731e0",
+                  "axiomType": "ObjectPropertyDomain",
+                  "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "746087f4c07c7da617974922ce5af1816204a3eac1fee5c26c7072ab0e3c3e76",
+                  "axiomType": "ObjectPropertyDomain",
+                  "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "e157e764a875cbcf18e982a264c654a6af15a7186afbfcf4fef1aef42e7303bc",
+                  "axiomType": "ObjectPropertyRange",
+                  "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                },
+                {
+                  "axiomId": "248f758370b8957fd8e059939bc09bb0a7ecda3269ab790f4542c636bdb40957",
+                  "axiomType": "ObjectPropertyRange",
+                  "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)",
+                  "signatureIris": [
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14",
+                    "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+                  ],
+                  "annotations": [],
+                  "logical": true
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "clientId": "book",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162",
+              "axiomIds": [
+                "37955069c68afdaba19dbb292bce35603037e4f0e50d83f346ec00bfee8b4842",
+                "7628d983810d4fe903a84c612b3b9ca57e987b21907edabfaa74d88059cfd361"
+              ]
+            },
+            {
+              "clientId": "reader",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920",
+              "axiomIds": [
+                "a74b1c000812cda58975c110ebfe0f7809f13f33f66bf589169eac514d48c475",
+                "cf8f8ed4c55d2a471bbc71522590d26aaf840d1e903921c747a5dc1b0cd16720"
+              ]
+            },
+            {
+              "clientId": "loan",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61",
+              "axiomIds": [
+                "8a4944f82f549cd752029293c3c4c183fc1104f646bd03ce50591a0f4748c4db",
+                "8d42db201906d0c70fb4a4251665b2ee8e18173f6b9ff55275d179b312602589"
+              ]
+            },
+            {
+              "clientId": "book-isbn",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3",
+              "axiomIds": [
+                "406eb54412db239c02c941df65a1b65510ee2bf05832724332e3357f01b62b0c",
+                "5a0895e4cd3b1ae47c5e8e8a72ea233d12fa5cdd8a1c1b13bb107a3f73416aa0",
+                "5cdda30d46df1f8d701e50f6f4a846d5f000e884d1ba6fdcc9570563c718ad47",
+                "cd5f32ac7305dbf2a3bae410455ae3e28f37b0b128fd11788e19661738bddf3d"
+              ]
+            },
+            {
+              "clientId": "reader-no",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee",
+              "axiomIds": [
+                "0f6ac79ea948de3b11751f50713c84dabea1107498adc1b99f2866d1c0712d3e",
+                "905aca4a99b97b67c7ee3df6413178f344fba01d3795a0e04cc8fde8df88aaac",
+                "acf00c32a15e101bc82837988a6bfdce1664bcb87195bc83dc8690ed1d7524a4",
+                "f93f41c959dc464bee1f02adaa4ccd533f8c688fe5b5dd9e77daaa9cbd764327"
+              ]
+            },
+            {
+              "clientId": "loans-book",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae",
+              "axiomIds": [
+                "0f6910bf7f8f94effd7cbb5a8c280e0e139fe46ac15377f40afbac2583da80e7",
+                "2ca733bc01a2f5ed366f96815cb8cce55665d9d5fe5c5baf41ef6473323731e0",
+                "b8a31d7d36134596d5457ffa61afcb32dd6f7a7759d4f6a46706b2ecc84ef12a",
+                "e157e764a875cbcf18e982a264c654a6af15a7186afbfcf4fef1aef42e7303bc"
+              ]
+            },
+            {
+              "clientId": "loan-reader",
+              "targetId": "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14",
+              "axiomIds": [
+                "248f758370b8957fd8e059939bc09bb0a7ecda3269ab790f4542c636bdb40957",
+                "746087f4c07c7da617974922ce5af1816204a3eac1fee5c26c7072ab0e3c3e76",
+                "ab535addc46a5e4499a682ac7a782abe3b914291dee8fb9fd7c852ef42573bd8",
+                "fe3bcd01734fd5e5223817b5d3f068d78cff38338e4a7e7a395998575e8ca818"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "incremental": null
+  },
+  "revisions": [
+    {
+      "id": "2098772686139604994",
+      "ontologyId": "2098772686139604993",
+      "version": 1,
+      "name": "T12 图书借阅资料模型",
+      "description": "",
+      "document": {
+        "source": {
+          "modelSchema": "owl-document-v1",
+          "syntax": "FUNCTIONAL",
+          "documentText": "Prefix(:=<urn:mateclaw:ontology:2098772686139604993#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098772686139604993>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>))\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>))\nDeclaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> (借阅图书)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> \"借阅图书\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)\n\n# Object Property: <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> (借阅人)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> \"借阅人\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> (ISBN)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> \"ISBN\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)\nDataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> xsd:string)\n\n# Data Property: <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> (读者编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> \"读者编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)\nDataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> (读者)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> \"读者\")\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> (图书)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> \"图书\")\n\n# Class: <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> (借阅记录)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> \"借阅记录\")\n\n\n)",
+          "imports": [],
+          "policy": {
+            "version": "1",
+            "rules": []
+          }
+        },
+        "ontologyIri": "urn:mateclaw:ontology:2098772686139604993",
+        "versionIri": null,
+        "documentDigest": "9766cb12d6866243b3e8ac458c250be6a3f5819668e66f27af494e13122a2d61",
+        "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "axioms": [
+          {
+            "axiomId": "0f6910bf7f8f94effd7cbb5a8c280e0e139fe46ac15377f40afbac2583da80e7",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> \"借阅图书\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "acf00c32a15e101bc82837988a6bfdce1664bcb87195bc83dc8690ed1d7524a4",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> \"读者编号\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "ab535addc46a5e4499a682ac7a782abe3b914291dee8fb9fd7c852ef42573bd8",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> \"借阅人\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "37955069c68afdaba19dbb292bce35603037e4f0e50d83f346ec00bfee8b4842",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162> \"图书\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "8a4944f82f549cd752029293c3c4c183fc1104f646bd03ce50591a0f4748c4db",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61> \"借阅记录\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "cd5f32ac7305dbf2a3bae410455ae3e28f37b0b128fd11788e19661738bddf3d",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> \"ISBN\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "a74b1c000812cda58975c110ebfe0f7809f13f33f66bf589169eac514d48c475",
+            "axiomType": "AnnotationAssertion",
+            "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920> \"读者\")",
+            "signatureIris": [
+              "http://www.w3.org/2000/01/rdf-schema#label",
+              "http://www.w3.org/2001/XMLSchema#string"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "905aca4a99b97b67c7ee3df6413178f344fba01d3795a0e04cc8fde8df88aaac",
+            "axiomType": "DataPropertyDomain",
+            "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "5cdda30d46df1f8d701e50f6f4a846d5f000e884d1ba6fdcc9570563c718ad47",
+            "axiomType": "DataPropertyDomain",
+            "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "0f6ac79ea948de3b11751f50713c84dabea1107498adc1b99f2866d1c0712d3e",
+            "axiomType": "DataPropertyRange",
+            "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee> xsd:string)",
+            "signatureIris": [
+              "http://www.w3.org/2001/XMLSchema#string",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "5a0895e4cd3b1ae47c5e8e8a72ea233d12fa5cdd8a1c1b13bb107a3f73416aa0",
+            "axiomType": "DataPropertyRange",
+            "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3> xsd:string)",
+            "signatureIris": [
+              "http://www.w3.org/2001/XMLSchema#string",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "7628d983810d4fe903a84c612b3b9ca57e987b21907edabfaa74d88059cfd361",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "8d42db201906d0c70fb4a4251665b2ee8e18173f6b9ff55275d179b312602589",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "cf8f8ed4c55d2a471bbc71522590d26aaf840d1e903921c747a5dc1b0cd16720",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "f93f41c959dc464bee1f02adaa4ccd533f8c688fe5b5dd9e77daaa9cbd764327",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/37795582216a17557a7f9b9cd50b564f12f487dfdb70e511d162e522ae1bafee"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "406eb54412db239c02c941df65a1b65510ee2bf05832724332e3357f01b62b0c",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/b92afe4126c344ce40ae21e117ec06d6ab8fc95279d279a9939046958ef389f3"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "b8a31d7d36134596d5457ffa61afcb32dd6f7a7759d4f6a46706b2ecc84ef12a",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "fe3bcd01734fd5e5223817b5d3f068d78cff38338e4a7e7a395998575e8ca818",
+            "axiomType": "Declaration",
+            "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14>))",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14"
+            ],
+            "annotations": [],
+            "logical": false
+          },
+          {
+            "axiomId": "2ca733bc01a2f5ed366f96815cb8cce55665d9d5fe5c5baf41ef6473323731e0",
+            "axiomType": "ObjectPropertyDomain",
+            "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "746087f4c07c7da617974922ce5af1816204a3eac1fee5c26c7072ab0e3c3e76",
+            "axiomType": "ObjectPropertyDomain",
+            "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/9468956a62bbe35b12823c90302e67a3dac2ef1e01e4b09a175075bd14d90e61"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "e157e764a875cbcf18e982a264c654a6af15a7186afbfcf4fef1aef42e7303bc",
+            "axiomType": "ObjectPropertyRange",
+            "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae> <urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/2023649e592efbe1223b2f3f80e5e60af2c64566932232480955bb22019b06ae",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/51d80f5bdab564a1a2008162d0310f25354f43896c9e9d4d1e45e491cdca2162"
+            ],
+            "annotations": [],
+            "logical": true
+          },
+          {
+            "axiomId": "248f758370b8957fd8e059939bc09bb0a7ecda3269ab790f4542c636bdb40957",
+            "axiomType": "ObjectPropertyRange",
+            "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14> <urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920>)",
+            "signatureIris": [
+              "urn:mateclaw:ontology:2098772686139604993/model-term/4ab12e958dd622eae9244c4c22fb9f03f46bc176d5e355af0ac164ceebe06a14",
+              "urn:mateclaw:ontology:2098772686139604993/model-term/d053c460368513aa653d936485610e33998d922f5e569b28c1812dd2043ff920"
+            ],
+            "annotations": [],
+            "logical": true
+          }
+        ]
+      },
+      "availableForNewBindings": true,
+      "publishedAt": "2026-09-12T14:06:47.104595Z",
+      "publishedBy": "1",
+      "publicationNote": "T12第二领域真实资料建模，22条依据已核对，三类对象四项属性关系，无额外借阅或罚款规则。",
+      "baseRevisionId": null
+    }
+  ],
+  "reviews": [
+    {
+      "id": "638c7626-ea4f-49e4-b760-d39a4e79e5ea",
+      "bindingId": "bdfc73dd-3d5d-4a77-a49f-5af35ad8ba4a",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "824887cc-2497-4d36-bfbc-fe22da054f1f",
+      "bindingId": "8231000d-12cb-4772-b347-8b44fbedd561",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "5edc78e1-d7f7-438d-8933-969c4c429733",
+      "bindingId": "560a11f4-7b78-4d02-aeab-f79c35481693",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "e90f0a18-c160-4291-a71c-d00c338ef933",
+      "bindingId": "9eec141a-52f9-4464-bf35-6d231a4459a9",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "fe273b76-e0c3-492a-96ce-7da0fdfcea5c",
+      "bindingId": "539138f7-8998-4af8-ab07-86c9310eef27",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "a8e8fd7e-c602-4200-9b39-6cfd218c576a",
+      "bindingId": "a39c4ffe-0ad5-4096-8fac-ba5531a80efb",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "419a8d20-c8d9-45b2-b02d-aaf3907d0751",
+      "bindingId": "99a921b7-2c00-4180-80cb-a9c803d7e2b8",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "def95aa7-e4c5-4445-8e09-d1eca09b4304",
+      "bindingId": "7344379f-2ffa-4c6b-b4fb-021940031f4c",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "79a9c2eb-74c7-43c6-9089-3ef0acf5f673",
+      "bindingId": "04917b1f-26df-452c-a5a5-ee4df9c07f3d",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "bf3b2cca-62b6-4479-8bae-bc8d78175d32",
+      "bindingId": "cd16d1ba-dadc-422c-bbea-393e67624336",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "c448df13-e0c0-4388-a172-5d2d44bfceca",
+      "bindingId": "ba4e67b3-b068-42a2-ae41-b81086423ac0",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "48431319-d060-461e-af0e-35e507554bfc",
+      "bindingId": "e46f7762-19eb-466b-8e91-a9d7b3104461",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "720d3bfe-9847-483d-abc6-42eae7438838",
+      "bindingId": "476ee42e-84d0-4951-b4b5-d59fcdae1608",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "73bf8386-7fcc-49f7-98fd-c9add0647bd3",
+      "bindingId": "b455af00-e6ad-4fe1-add0-a4de37ac2b4a",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "ef96bd23-c83a-4117-abc6-14cb2565ba91",
+      "bindingId": "fbaa7374-0920-447f-87bb-9b715ba80666",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "cfbfd83c-9e68-4209-a5d4-9b467eeb2309",
+      "bindingId": "8e930a20-9df8-4d21-8e26-272b45b26df0",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "f36e15d5-def8-4f5d-9746-6e1162185ad3",
+      "bindingId": "09f01b00-cc59-426a-b746-947219901446",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "11eaf555-fa73-4e16-b265-7291d2ece266",
+      "bindingId": "aa2818ee-aa81-4c0a-b90a-66d0ba70526b",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "389940b7-41cf-45ec-b0f5-7c2fb0b45fb1",
+      "bindingId": "6a129120-18ae-4684-b34f-4ba370279cd8",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "9e0dc52a-2300-4ca3-ab62-8cf0c23a49c9",
+      "bindingId": "67e59d91-3177-4603-bcb0-fe48c81f9918",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "53bc9933-248c-4de1-b186-2b7b293cb350",
+      "bindingId": "1620b4fc-aad2-4001-afed-cd6f97dff3b2",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    },
+    {
+      "id": "1760e550-7b63-450e-996b-1b2ace2a4962",
+      "bindingId": "ef3f7ddf-2cbf-420e-9332-ef88c1f77e19",
+      "observedDigest": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637",
+      "sourceState": "CURRENT",
+      "reviewState": "REVIEWED",
+      "decision": "ACKNOWLEDGE",
+      "reason": "已核对library-v1原文，定义、名称及关系范围与资料一致，无额外数量或罚款约束。",
+      "observedSnapshotId": "4202b679-a156-418a-8e43-013e2a937520"
+    }
+  ],
+  "bindings": []
+}

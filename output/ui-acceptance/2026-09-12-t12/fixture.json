@@ -1,0 +1,16 @@
+{
+  "workspaceId": "2098771185501519874",
+  "knowledgeBaseId": "2098771185526685698",
+  "materials": [
+    {
+      "file": "materials/equipment-v1.txt",
+      "sourceRef": "2098771185589600258",
+      "sha256": "7239d611b4d3bf7d9da606550d3acda82d41afcfa3881b5afc96fd53a0b7493f"
+    },
+    {
+      "file": "materials/library-v1.txt",
+      "sourceRef": "2098771185631543297",
+      "sha256": "1c9145298b25f295504480251b5d9ec3c47c6b43cf26542fd9e4e8c328b33637"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "tests": 40,
+  "testFiles": 11,
+  "failures": 0,
+  "eslint": "PASS on all seven changed frontend files",
+  "typecheck": "PASS through npm run build",
+  "snowflakePrecision": "PASS",
+  "enterpriseBuild": "PASS",
+  "warning": "Existing chunks larger than 1024 kB",
+  "testLogSha256": "cbeb748e31f25d5de6a4a6cc3afd34afc02f8c5a9861ab8f83dfd28d24d09161",
+  "buildLogSha256": "c739f4a4e0a88e185f95bead7305aedd325fd683f6ad8050196f04be7b8a2f45"
+}

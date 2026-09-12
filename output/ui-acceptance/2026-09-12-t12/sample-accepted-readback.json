@@ -1,0 +1,156 @@
+{
+  "review": {
+    "items": [
+      {
+        "id": "2098776967022428161",
+        "graphId": "2098772602979139585",
+        "revision": 2,
+        "ontologyRevisionId": "2098771602276925442",
+        "subjectId": "2098776214774005761",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765",
+            "urn:t12:equipment:P-101"
+          ],
+          "subjectIri": "urn:t12:equipment:P-101",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098776966951124994"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-12T14:15:11.466107Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20
+  },
+  "trusted": {
+    "items": [
+      {
+        "id": "2098776967022428161",
+        "graphId": "2098772602979139585",
+        "revision": 2,
+        "ontologyRevisionId": "2098771602276925442",
+        "subjectId": "2098776214774005761",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765",
+            "urn:t12:equipment:P-101"
+          ],
+          "subjectIri": "urn:t12:equipment:P-101",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098776966951124994"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-12T14:15:11.466107Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20
+  },
+  "history": {
+    "statementId": "2098776967022428161",
+    "revisions": [
+      {
+        "id": "2098776967022428161",
+        "graphId": "2098772602979139585",
+        "revision": 1,
+        "ontologyRevisionId": "2098771602276925442",
+        "subjectId": "2098776214774005761",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765",
+            "urn:t12:equipment:P-101"
+          ],
+          "subjectIri": "urn:t12:equipment:P-101",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098776966951124994"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-12T14:13:16.986731Z"
+      },
+      {
+        "id": "2098776967022428161",
+        "graphId": "2098772602979139585",
+        "revision": 2,
+        "ontologyRevisionId": "2098771602276925442",
+        "subjectId": "2098776214774005761",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765",
+            "urn:t12:equipment:P-101"
+          ],
+          "subjectIri": "urn:t12:equipment:P-101",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "ACCEPTED",
+        "supportStatus": "SUPPORTED",
+        "evidenceIds": [
+          "2098776966951124994"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-12T14:15:11.466107Z"
+      }
+    ]
+  },
+  "evidence": {
+    "id": "2098776966951124994",
+    "snapshotId": "2098776270885404674",
+    "sourceKind": "WIKI_RAW",
+    "sourceRef": "2098771185589600258",
+    "sourceTitle": "equipment-v1",
+    "exactQuote": "P-101是一台泵",
+    "startCodePoint": 97,
+    "endCodePoint": 106,
+    "textDigest": "7239d611b4d3bf7d9da606550d3acda82d41afcfa3881b5afc96fd53a0b7493f"
+  }
+}

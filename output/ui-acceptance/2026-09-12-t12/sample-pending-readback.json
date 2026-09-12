@@ -1,0 +1,46 @@
+{
+  "review": {
+    "items": [
+      {
+        "id": "2098776967022428161",
+        "graphId": "2098772602979139585",
+        "revision": 1,
+        "ontologyRevisionId": "2098771602276925442",
+        "subjectId": "2098776214774005761",
+        "assertion": {
+          "kind": "CLASS_ASSERTION",
+          "functionalSyntax": "ClassAssertion(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:t12:equipment:P-101>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765",
+            "urn:t12:equipment:P-101"
+          ],
+          "subjectIri": "urn:t12:equipment:P-101",
+          "predicateIri": null,
+          "objectIri": null,
+          "literal": null,
+          "classExpressionFunctionalSyntax": "<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>",
+          "relatedIndividualIri": null
+        },
+        "validityKind": "UNKNOWN",
+        "validFrom": null,
+        "validTo": null,
+        "reviewStatus": "PROPOSED",
+        "supportStatus": "UNREVIEWED",
+        "evidenceIds": [
+          "2098776966951124994"
+        ],
+        "proposedBy": "1",
+        "createdAt": "2026-09-12T14:13:16.986731Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20
+  },
+  "trusted": {
+    "items": [],
+    "total": 0,
+    "page": 1,
+    "pageSize": 20
+  }
+}

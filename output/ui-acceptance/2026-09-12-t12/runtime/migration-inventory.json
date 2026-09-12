@@ -1,0 +1,188 @@
+{
+  "h2": [
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V191__semantic_ontology.sql",
+      "sha256": "5472c25d42b3415fa150926a4f1a29f5e007e9d3821ad59ca501eedbf54d8173"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V192__semantic_graph.sql",
+      "sha256": "e9721ee761e37ef7d346c001f0d352c85892f46e9b35d363b0dd4d89efc2a0e2"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V193__semantic_facts_and_sources.sql",
+      "sha256": "760b75717382a3e16cdf79c776a2de74e2d0a568eafac2fcb6b0146cf338e3da"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V195__semantic_conflict_member_kind.sql",
+      "sha256": "510ef11b599710fee92e9288e762cafe162632f1400ca2c5c8b8286e4787812c"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V196__semantic_governance_events.sql",
+      "sha256": "45f2999ab42d63befdf8f222858be5e6a6f965122f2561c3db01b9f14767a365"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V197__semantic_extraction.sql",
+      "sha256": "0851ece5f567959fd3f8e85364fc2e92d645a486d3f59df54e9a5c9f4a1ae15a"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V199__semantic_owl_document.sql",
+      "sha256": "7ab8193054c93623919bcd5375d0f3be22a82d3107918c74dcbb78a4912cc619"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V200__semantic_owl_assertion.sql",
+      "sha256": "49780aa96659ea0cda8a064d1cf6ec8f4cb52e639995505c545242a9360b1bd6"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V201__semantic_ontology_sources.sql",
+      "sha256": "2354caf3e6fe25f3dbf73981ecd863501ed6a3bb9b50a336f256938f5d0fc4e0"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V204__semantic_source_review_snapshots.sql",
+      "sha256": "5190f327459722f289e50edec06b6e04afd2a68205378c74734d5c1e73191475"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V206__semantic_source_change_review.sql",
+      "sha256": "b9e3955a4d1f7bc45543ceacb3441b8b70cbea2d2dfb6cfc498e588d066dd370"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V207__semantic_graph_owl_migration.sql",
+      "sha256": "324de0d5bdf94651970337f38df8d12f087f220a9e2f020aaded574897ea0988"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V208__semantic_modeling_tasks.sql",
+      "sha256": "afe18a79e3ab500ff53864759db8b28e5ca4269101c3a2edab32c38aba9bd372"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V209__semantic_validation_reports.sql",
+      "sha256": "8a85b7a9d21cf02bfccfb6d2a145e45314db731567ef2ac536da75569c99d7fe"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/h2/V210__semantic_ontology_archive.sql",
+      "sha256": "0343230878d9023f8b5ed029ead1b55f2d3c39b3e5f824349d4d1e6186e28401"
+    }
+  ],
+  "mysql": [
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V191__semantic_ontology.sql",
+      "sha256": "8af23e6f4f99d4bf4113b65e21fc129389a3779140d036b52d3163d0de057e34"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V192__semantic_graph.sql",
+      "sha256": "c3fa8a982f699edab1db4e9f3b7ef2abd1d39053120ac05688a964fdbd045528"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V193__semantic_facts_and_sources.sql",
+      "sha256": "9991e278216ba1ac2c38f4b7a17eabfc8384b50895623ea4ada51760013f1300"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V195__semantic_conflict_member_kind.sql",
+      "sha256": "678a492dd50938fd0965d762932c38d1ecb46e1f5900b7d8653da1856a2b5473"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V196__semantic_governance_events.sql",
+      "sha256": "3c5d7c714ecbb68381e451b2d965409bfcc86c78a98dde1dce3585e1fe48fcbb"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V197__semantic_extraction.sql",
+      "sha256": "28416ee891804da6114fd769fdfcb2de65354d4bab1bd583556604459dd99f48"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V199__semantic_owl_document.sql",
+      "sha256": "4d7f4587271006f6becec93802cdbdfcb0baaf9e709f663fd3c8bbbc5025dcd1"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V200__semantic_owl_assertion.sql",
+      "sha256": "c67f8afabced292f4979dc9a80141a7c7b968da46633f9e96a7c1453b1ceebd5"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V201__semantic_ontology_sources.sql",
+      "sha256": "fb92a5cb3ee7689322527a7c79b85f60a2b678c991554a573fd74a3ad40363cf"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V204__semantic_source_review_snapshots.sql",
+      "sha256": "5190f327459722f289e50edec06b6e04afd2a68205378c74734d5c1e73191475"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V206__semantic_source_change_review.sql",
+      "sha256": "f3a2d3aa429c9d7f8940661b9c0b2417fd4362a9e854f71adec8b6aae574d32c"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V207__semantic_graph_owl_migration.sql",
+      "sha256": "27686fc627d53acfcf0fa861356ef752bc2487e818df13df8d1269d6bd3d01c4"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V208__semantic_modeling_tasks.sql",
+      "sha256": "2717708f16434cf6c791cd2c19f1973cf67f9865542b56ade6b2d128f66603fa"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V209__semantic_validation_reports.sql",
+      "sha256": "8edebab1a953ea5cddca1016d54b5aede92ed73522b04f1986c260cffb0d66e1"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/mysql/V210__semantic_ontology_archive.sql",
+      "sha256": "e83ba71200c968251620d786b71eff4b56e26e21cbea94ffdb8a5f95f0fac46f"
+    }
+  ],
+  "kingbase": [
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V191__semantic_ontology.sql",
+      "sha256": "5472c25d42b3415fa150926a4f1a29f5e007e9d3821ad59ca501eedbf54d8173"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V192__semantic_graph.sql",
+      "sha256": "e9721ee761e37ef7d346c001f0d352c85892f46e9b35d363b0dd4d89efc2a0e2"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V193__semantic_facts_and_sources.sql",
+      "sha256": "efcc2704a4c233ca2064d60931514d1956f1d55266c5eaaacd88fd1231d0fb6c"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V195__semantic_conflict_member_kind.sql",
+      "sha256": "0a0b6959e108a241d34af7a26681382ba148b40ea22aed749e6c91275a7ca487"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V196__semantic_governance_events.sql",
+      "sha256": "45f2999ab42d63befdf8f222858be5e6a6f965122f2561c3db01b9f14767a365"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V197__semantic_extraction.sql",
+      "sha256": "0851ece5f567959fd3f8e85364fc2e92d645a486d3f59df54e9a5c9f4a1ae15a"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V199__semantic_owl_document.sql",
+      "sha256": "7ab8193054c93623919bcd5375d0f3be22a82d3107918c74dcbb78a4912cc619"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V200__semantic_owl_assertion.sql",
+      "sha256": "49780aa96659ea0cda8a064d1cf6ec8f4cb52e639995505c545242a9360b1bd6"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V201__semantic_ontology_sources.sql",
+      "sha256": "2354caf3e6fe25f3dbf73981ecd863501ed6a3bb9b50a336f256938f5d0fc4e0"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V204__semantic_source_review_snapshots.sql",
+      "sha256": "5190f327459722f289e50edec06b6e04afd2a68205378c74734d5c1e73191475"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V206__semantic_source_change_review.sql",
+      "sha256": "0afe0f27c3c031867ff9724ed7c0547d90284ce917877d16475441ddc7d3acb3"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V207__semantic_graph_owl_migration.sql",
+      "sha256": "791e1108dbe1a407ada1ec5bc6b9da9d21448060edd690902b5663fdc23b36ca"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V208__semantic_modeling_tasks.sql",
+      "sha256": "84d67b201d38091558de2f8a3866f55c9a99868589ce0100aed82f1ce7f2c824"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V209__semantic_validation_reports.sql",
+      "sha256": "1137a5e68210e220a6ee05ef43da9920c691df66dafdda48ee5d83d9a579b164"
+    },
+    {
+      "file": "mateclaw-server/src/main/resources/db/migration/kingbase/V210__semantic_ontology_archive.sql",
+      "sha256": "0343230878d9023f8b5ed029ead1b55f2d3c39b3e5f824349d4d1e6186e28401"
+    }
+  ]
+}

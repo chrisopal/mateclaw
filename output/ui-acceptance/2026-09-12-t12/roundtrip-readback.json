@@ -1,0 +1,531 @@
+{
+  "published": {
+    "id": "2098771602276925442",
+    "ontologyId": "2098771602272731138",
+    "version": 1,
+    "name": "T12 自然语言设备模型",
+    "description": "",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Prefix(:=<urn:mateclaw:ontology:2098771602272731138#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098771602272731138>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>))\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>))\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> (点检设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> \"点检设备\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> (温度)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> \"温度\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)\nDataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> xsd:decimal)\n\n# Data Property: <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> (设备编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> \"设备编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\nDataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> (泵)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"设备的一种具体类别\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"泵\")\nSubClassOf(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> (点检记录)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"记录一次设备点检，通过点检设备关联一台设备，并带有数值类型的温度\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"点检记录\")\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> (设备)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"需要维护的资产\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"设备\")\n\n\n)",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:mateclaw:ontology:2098771602272731138",
+      "versionIri": null,
+      "documentDigest": "0c32ef647f7d9e6096de8bf3413d7563444aa801bdf0bb4da9169deff28f90db",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "e9f98a3deb41eab0f531a7780fa113480e701fa2a3210d4ab365f3adb3ee0fb5",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"记录一次设备点检，通过点检设备关联一台设备，并带有数值类型的温度\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "bbd573d11b849c2f233b7d12975b3d06459c6a4e9b9c3e69d8ae5e0e3a5beb24",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"需要维护的资产\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "34706c2ca2277657edba72856ff0dd7659486434cd04e0673f4d55fafac23017",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"设备的一种具体类别\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "dfe2b03266b99709965461002ede2078bbb9afa08702ec637496f5fd23f08c13",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"点检记录\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "078e38f56097e0176f0d0238230425e845c87758134a330b87c199a63f263497",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "3d00dcc45b56447b4a2b099ed2de2252378e3516f2ee32d26ad6df5cb6f7612e",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> \"点检设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "793c33543d42fc325352b55335d41b0ef5c33ce3ec810f71a6319dc54ba9bfcb",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> \"设备编号\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "0101f132e63579daa7cb70b1c541b9b88b3eaee7ff806b74608d02146e5840b4",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"泵\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "384891871ac301bc82a612c01e1d75e39270457520689cd3c892ad441fca1af1",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> \"温度\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "0a647bc05c8e66a2188de218e62314ef1e7b65104bf807be64992109e65eaa1b",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "4d1a76afb02def58d4233d69036b14c9c33d7b636fc92492650c809818105b40",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "09e2700d8102ef187b44cc88653b9c676b82b577f7ce31b514778253e860db0e",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> xsd:string)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#string",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "c0a621b56125d6439f723f9164084745231de92dc2594c6d8f1a0af781b7c60a",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> xsd:decimal)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#decimal",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "6bd2a99ac512b184ae3f79d22475a506b156f380f979e626461a162b4d1a6116",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "d747c0ee9eb7a20935b6569eb69986c053a91ef0fc83035e8b768e362f34bf0f",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "15a67b72067951215cdbc536fec1ca8f29be48ab2feb7f648c70e4d47f2d5dc8",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "505d20ff8202070ffe4cfbe90dfad743339c7a81d37ae3f076b53cf3b3823e35",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "a9bebcf9cdfb86f4bb4d028c41c6a423eb21fb1aee87af2c781324323d666f58",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "ed0f49f30f082b22ad5477f479c9444c567a2baeac108d184bf1bc2969b46968",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "9f6979b5a41381aa3afe231f4549eae29b274eb79d953e099f58303c2c61709b",
+          "axiomType": "ObjectPropertyDomain",
+          "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "9c04376fabd8505f69557b8050eb8712bba0a72b472af330c9a898e7e7b2684e",
+          "axiomType": "ObjectPropertyRange",
+          "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "bc7a34823d1b1a7f5c6b0e6a4b1fc09d5daba261c419bbb75f673ebb26a75792",
+          "axiomType": "SubClassOf",
+          "rendering": "SubClassOf(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    },
+    "availableForNewBindings": true,
+    "publishedAt": "2026-09-12T13:54:57.124730Z",
+    "publishedBy": "1",
+    "publicationNote": "T12真实自然语言建模验收：三类业务对象、两属性、一关系；样例隔离，无报警规则。",
+    "baseRevisionId": null
+  },
+  "reimportedDraft": {
+    "id": "2098772916079738882",
+    "ontologyId": "2098772916075544578",
+    "baseRevisionId": null,
+    "version": 1,
+    "draftVersion": 2,
+    "name": "T12 OWL往返验证",
+    "description": "",
+    "document": {
+      "source": {
+        "modelSchema": "owl-document-v1",
+        "syntax": "FUNCTIONAL",
+        "documentText": "Prefix(:=<urn:mateclaw:ontology:2098771602272731138#>)\nPrefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(<urn:mateclaw:ontology:2098771602272731138>\n\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>))\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>))\nDeclaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>))\nDeclaration(ObjectProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb>))\nDeclaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28>))\n\n############################\n#   Object Properties\n############################\n\n# Object Property: <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> (点检设备)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> \"点检设备\")\nObjectPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)\nObjectPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\n\n\n############################\n#   Data Properties\n############################\n\n# Data Property: <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> (温度)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> \"温度\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)\nDataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> xsd:decimal)\n\n# Data Property: <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> (设备编号)\n\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> \"设备编号\")\nDataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\nDataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> xsd:string)\n\n\n\n############################\n#   Classes\n############################\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> (泵)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"设备的一种具体类别\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"泵\")\nSubClassOf(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> (点检记录)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"记录一次设备点检，通过点检设备关联一台设备，并带有数值类型的温度\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"点检记录\")\n\n# Class: <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> (设备)\n\nAnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"需要维护的资产\")\nAnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"设备\")\n\n\n)",
+        "imports": [],
+        "policy": {
+          "version": "1",
+          "rules": []
+        }
+      },
+      "ontologyIri": "urn:mateclaw:ontology:2098771602272731138",
+      "versionIri": null,
+      "documentDigest": "0c32ef647f7d9e6096de8bf3413d7563444aa801bdf0bb4da9169deff28f90db",
+      "importLockDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "axioms": [
+        {
+          "axiomId": "9990c96e3bed9b79e22a7e366712709f9f844e406b8b3f054df9f9494745a22a",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"记录一次设备点检，通过点检设备关联一台设备，并带有数值类型的温度\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "efe2696b401ccbcc36359b2dcc51f631c51d7cb2d0159b9bac1edd40e435edc0",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"需要维护的资产\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "e5345fc44563089e80106f08af9e3d289b2626d5bef19031fea27a3343bce784",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:comment <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"设备的一种具体类别\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "ce4733d22a1e7761fbc3910630d3d083d2ee292f3324fd5ae6284a372afd51f0",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d> \"点检记录\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "71895e8a5678ed7063d6911e68b7d1e6714975d648c217f205b92732f7ab5657",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9> \"设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "194a2ac2b7b685e553dd4c34fb6326dfe4af6e16c02cddd037c01afd88ed2fdc",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> \"点检设备\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "7fd7bf8992da7f771cdc37a53503df870712403e620c121f4d1043544ce73e6e",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> \"设备编号\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "c4a365d70c5a00f881e9f0c2e00ca0656ab030144ef7adfe6ee0315d5210161a",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> \"泵\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "0ef511927521bedbdd9bfe2337d0ff8661f7f02505dc24af33c3a724b740bed8",
+          "axiomType": "AnnotationAssertion",
+          "rendering": "AnnotationAssertion(rdfs:label <urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> \"温度\")",
+          "signatureIris": [
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2001/XMLSchema#string"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "cfb8e07393f7b8b085cbadb8e9994f2c5dffafdeb391330cd32075dfd1d7ba4c",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "47d5a9ada81d453b90b82405662529fcbb6645cecb3fa355c2a74a6bbea3a488",
+          "axiomType": "DataPropertyDomain",
+          "rendering": "DataPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "e6e43b7007b1c0f05fc9bb239b874e784cabd1e5874921d61b5737162defac0d",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28> xsd:string)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#string",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "4c1bedee0e4b6ba8ea0f374e30e9cb60b060b67969dc04ee40223612f632d7f0",
+          "axiomType": "DataPropertyRange",
+          "rendering": "DataPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb> xsd:decimal)",
+          "signatureIris": [
+            "http://www.w3.org/2001/XMLSchema#decimal",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "6e94fc9687e987671c1368ef45adecd729d94adac0c50685eebbade37f49cf88",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "27ea0cbf43e1692cd363c4ca5b9a4aa1b66ada9fe8c1ca945bced6b96cdbbab5",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "2c6473285bbdcb28611a1fc25c4cf49ad7493387311a32bf2e3514f07ef9cf42",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(Class(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "14280cccd1f87b9a90144c67b3e6049558979c75ea5caf06c7693dff6559f7f4",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/9370004c027eb4a1733a9b145e81f3a732b3d53f006b5b2900e2d51441486b28"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "6a6b63b507480f4a3f63be124d79549fc1eb61e83bf3a61dc9b598f39f71d0d1",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(DataProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/fffe56904862af657a50ca4a04174fe8661f7aed141ac0ae56e8d2e036e4eddb"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "9a0123afda3b465178ad2e2834b725d81ea7a511798b3896626cbb2d07f30a46",
+          "axiomType": "Declaration",
+          "rendering": "Declaration(ObjectProperty(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9>))",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": false
+        },
+        {
+          "axiomId": "b4c8828550ce2c3fc05c3256d389ab463e34c7a9b1ff110606edca1636e3d692",
+          "axiomType": "ObjectPropertyDomain",
+          "rendering": "ObjectPropertyDomain(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/1871a239b0a918f1ac974149e351407f22b8f27677ca9ad96ac756ba67116e7d",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "9f1705a66ddd75090e983878c75451a8cd65da4697abc9fa80dbf4a862410ce7",
+          "axiomType": "ObjectPropertyRange",
+          "rendering": "ObjectPropertyRange(<urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/66eb4b9059000f79e2faa667b9ec6c8357f70c92e24463e72aae52dc875a27d9"
+          ],
+          "annotations": [],
+          "logical": true
+        },
+        {
+          "axiomId": "c606820c01be497743af388609499769f4eca356ab997697c734f2084c2af988",
+          "axiomType": "SubClassOf",
+          "rendering": "SubClassOf(<urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765> <urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9>)",
+          "signatureIris": [
+            "urn:mateclaw:ontology:2098771602272731138/model-term/5ecfe26dbb0ffcaa8c5fc60380d56c7d4a3b3e7ee557bc2bed80d1dc2971d4c9",
+            "urn:mateclaw:ontology:2098771602272731138/model-term/dcf9fc78a384e2267e0cadd0ad85f691ebae6f95b38545562b85367fc8005765"
+          ],
+          "annotations": [],
+          "logical": true
+        }
+      ]
+    }
+  }
+}

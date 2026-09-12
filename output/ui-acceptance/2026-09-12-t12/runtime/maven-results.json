@@ -1,0 +1,82 @@
+[
+  {
+    "className": "vip.mate.semantic.owl.HermitReasoningAdapterTest",
+    "tests": 19,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 19.219,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.application.extraction.SourceChunkerTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 0.04,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.OntologyModelingIntegrationTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 3.901,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.SemanticGraphMigrationIntegrationTest",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 11.822,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.SemanticOntologyIntegrationTest",
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 6.077,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.SemanticSourceChangeIntegrationTest",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 3.038,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.SemanticExtractionLeaseIntegrationTest",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 0.24,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  },
+  {
+    "className": "vip.mate.semantic.OntologyLifecycleIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsedSeconds": 0.565,
+    "timestamp": null,
+    "sourceVersion": "6272f669ab597f2855d117053b8d82bc1c3b014d"
+  }
+]

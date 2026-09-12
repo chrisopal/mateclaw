@@ -18,3 +18,9 @@ it('distinguishes named types without guessing a complex expression', () => {
  statement.assertion.classExpressionFunctionalSyntax = 'ObjectIntersectionOf(<urn:Equipment> <urn:Sensor>)'
  expect(statementLabel(statement, [])).toContain('复合类型')
 })
+
+it('uses published business labels while preserving assertion identifiers', () => {
+ const statement = { subjectId: '1', assertion: { kind: 'CLASS_ASSERTION', subjectIri: 'urn:Pump', classExpressionFunctionalSyntax: '<urn:hash>' } } as Statement
+ expect(statementLabel(statement, [], 'zh-CN', new Map([['urn:hash', '泵']]))).toBe('Pump · 类型：泵')
+ expect(statement.assertion.classExpressionFunctionalSyntax).toBe('<urn:hash>')
+})
