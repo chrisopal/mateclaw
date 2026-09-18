@@ -325,7 +325,7 @@ public class AgentService {
      */
     public String chat(Long agentId, String message, String conversationId, ChatOrigin origin) {
         clearAutoRecordedForNewTurn(conversationId);
-        memoryRecallTracker.trackRecalls(agentId, message);
+        if (!isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, message);
         if (isDshAgent(agentId)) {
             return collectChatResult(chatStructuredStream(agentId, message, conversationId,
                     "", null, origin != null ? origin : ChatOrigin.EMPTY)).content();
@@ -366,7 +366,7 @@ public class AgentService {
 
     public Flux<String> chatStream(Long agentId, String message, String conversationId, ChatOrigin origin) {
         clearAutoRecordedForNewTurn(conversationId);
-        memoryRecallTracker.trackRecalls(agentId, message);
+        if (!isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, message);
         if (isDshAgent(agentId)) {
             return chatStructuredStream(agentId, message, conversationId, "", null,
                     origin != null ? origin : ChatOrigin.EMPTY)
@@ -409,7 +409,7 @@ public class AgentService {
                                                    String requesterId, String thinkingLevel,
                                                    ChatOrigin origin) {
         clearAutoRecordedForNewTurn(conversationId);
-        memoryRecallTracker.trackRecalls(agentId, message);
+        if (!isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, message);
         if (isDshAgent(agentId)) {
             AgentEntity dshAgent = getAgent(agentId);
             return withLifecycleFlux(agentId, message, conversationId,
@@ -469,7 +469,7 @@ public class AgentService {
 
     public String execute(Long agentId, String goal, String conversationId, ChatOrigin origin) {
         clearAutoRecordedForNewTurn(conversationId);
-        memoryRecallTracker.trackRecalls(agentId, goal);
+        if (!isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, goal);
         BaseAgent agent = getOrBuildAgentForConversation(agentId, conversationId);
         ChatOriginHolder.set(origin != null ? origin : ChatOrigin.EMPTY);
         try {
@@ -677,7 +677,7 @@ public class AgentService {
                                      java.util.function.BiFunction<String, String, String> invoke) {
         safeRegister(conversationId, agentId);
         try {
-            if (!memoryProperties.isLifecycleMediatorEnabled()) {
+            if (isPresalesConversation(conversationId) || !memoryProperties.isLifecycleMediatorEnabled()) {
                 return invoke.apply(message, conversationId);
             }
             String ownerKey = memoryOwnerResolver.resolve(ChatOriginHolder.get());
@@ -720,7 +720,7 @@ public class AgentService {
         boolean goalContinuation = vip.mate.agent.context.GoalContinuationContext.active();
         safeRegister(conversationId, agentId);
         try {
-            if (!memoryProperties.isLifecycleMediatorEnabled()) {
+            if (isPresalesConversation(conversationId) || !memoryProperties.isLifecycleMediatorEnabled()) {
                 return invoke.apply(message, conversationId)
                         .doFinally(s -> safeUnregister(conversationId, goalContinuation));
             }
@@ -816,7 +816,18 @@ public class AgentService {
      * {@code "volcano::"} which {@link #getOrBuildAgent} would then try to
      * build, only to fail at provider-resolution time on every turn.
      */
+    private static boolean isPresalesConversation(String conversationId) {
+        return conversationId != null && conversationId.startsWith("presales:");
+    }
+
     private BaseAgent getOrBuildAgentForConversation(Long agentId, String conversationId) {
+        // Build using the same graph runtime but exclude unscoped durable memory/wiki/team context.
+        // Do not share the ordinary employee cache, whose prompt contains workspace memory.
+        if (isPresalesConversation(conversationId)) {
+            AgentEntity entity=getAgent(agentId);
+            if (!Boolean.TRUE.equals(entity.getEnabled())) throw new MateClawException("err.agent.disabled", "Agent 已禁用");
+            return agentGraphBuilder.build(entity,null,null,true);
+        }
         String provider = null;
         String modelName = null;
         if (conversationId != null && !conversationId.isBlank()) {

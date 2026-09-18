@@ -276,6 +276,13 @@ public class ToolExecutionExecutor {
      */
     private vip.mate.skill.runtime.SkillRuntimeService skillRuntimeService;
 
+    /** Optional server-side boundary for presales project runs. */
+    private vip.mate.presales.PresalesToolPolicy presalesToolPolicy;
+
+    public void setPresalesToolPolicy(vip.mate.presales.PresalesToolPolicy policy) {
+        this.presalesToolPolicy = policy;
+    }
+
     /** Optional recency feed for budget-driven tool-disclosure demotion. */
     private ToolUsageRecencyTracker usageRecencyTracker;
 
@@ -552,10 +559,9 @@ public class ToolExecutionExecutor {
             // functionResponse by name rather than OpenAI's call_id alone.
             String responseName = toolCall.name();
             // Hermes-style deferred tool proxy: unwrap tool_call before any
-            // policy decision so guard, approval, audit, concurrency and UI
-            // all operate on the real tool. The executor's callback map is
-            // already scoped to this agent, making it the final authority for
-            // whether the requested target may be invoked.
+            // policy decision so guard, approval, audit, concurrency and UI all
+            // operate on the real tool. The project policy is then evaluated
+            // before guard/approval and cannot be bypassed by the redirect.
             if (ProgressiveToolBridgeTool.CALL.equals(resolveToolName(toolCall.name()))) {
                 BridgeUnwrap unwrap = unwrapBridgeCall(toolCall);
                 if (unwrap.error() != null) {
@@ -577,6 +583,17 @@ public class ToolExecutionExecutor {
             String arguments = toolCall.arguments();
 
             events.add(GraphEventPublisher.toolStart(toolCall.id(), toolName, arguments));
+
+            vip.mate.presales.PresalesToolPolicy.Decision presalesDecision =
+                    presalesToolPolicy != null
+                            ? presalesToolPolicy.evaluate(toolName, arguments, safeOrigin)
+                            : vip.mate.presales.PresalesToolPolicy.failClosed(toolName, safeOrigin);
+            if (!presalesDecision.allowed()) {
+                String reason = presalesDecision.reason();
+                events.add(GraphEventPublisher.toolComplete(toolCall.id(), toolName, reason, false));
+                allResponses.add(new ToolResponseMessage.ToolResponse(toolCall.id(), responseName, reason));
+                continue;
+            }
 
             // 0. 子会话工具拦截：委派上下文中的子 Agent 禁止调用特定工具
             if (vip.mate.tool.builtin.DelegationContext.currentDepth() > 0) {
@@ -791,24 +808,51 @@ public class ToolExecutionExecutor {
             List<GraphEventPublisher.GraphEvent> events,
             String conversationId, String workspaceBasePath,
             List<DirectToolOutput> directOutputs) {
+        return executePreApproved(toolCall, storedArguments, events, conversationId,
+                workspaceBasePath, directOutputs, null, null);
+    }
+
+    /** Replay variant that preserves the originating employee identity for bound tools. */
+    public ToolResponseMessage.ToolResponse executePreApproved(
+            AssistantMessage.ToolCall toolCall, String storedArguments,
+            List<GraphEventPublisher.GraphEvent> events,
+            String conversationId, String workspaceBasePath,
+            List<DirectToolOutput> directOutputs, String agentId, ChatOrigin origin) {
         String toolName = resolveToolName(toolCall.name());
         String callArguments = storedArguments != null ? storedArguments : toolCall.arguments();
+
+        ChatOrigin replayOrigin = (origin == null ? ChatOrigin.EMPTY : origin)
+                .withConversationId(conversationId)
+                .withWorkspace(null, workspaceBasePath);
+        if (replayOrigin.agentId() == null && agentId != null && !agentId.isBlank()) {
+            try {
+                replayOrigin = replayOrigin.withAgent(Long.valueOf(agentId));
+            } catch (NumberFormatException ignored) {
+                // The policy below fails closed when an employee identity is required.
+            }
+        }
+        vip.mate.presales.PresalesToolPolicy.Decision presalesDecision =
+                presalesToolPolicy != null
+                        ? presalesToolPolicy.evaluate(toolName, callArguments, replayOrigin)
+                        : vip.mate.presales.PresalesToolPolicy.failClosed(toolName, replayOrigin);
+        if (!presalesDecision.allowed()) {
+            String reason = presalesDecision.reason();
+            events.add(GraphEventPublisher.toolComplete(toolCall.id(), toolName, reason, false));
+            return new ToolResponseMessage.ToolResponse(toolCall.id(), toolName, reason);
+        }
 
         ToolCallback callback = toolCallbackMap.get(toolName);
         if (callback == null) {
             // Same auto-redirect for pre-approved replays — a stale skill-as-tool
             // approval shouldn't dead-end the conversation either.
-            ChatOrigin replayOriginForRedirect = ChatOrigin.EMPTY
-                    .withConversationId(conversationId)
-                    .withWorkspace(null, workspaceBasePath);
-            SkillRedirect redirect = tryAutoRedirectSkillCall(toolName, callArguments, replayOriginForRedirect);
+            SkillRedirect redirect = tryAutoRedirectSkillCall(toolName, callArguments, replayOrigin);
             if (redirect != null) {
                 events.add(GraphEventPublisher.toolComplete(
                         toolCall.id(), toolName, redirect.response(), true));
                 return new ToolResponseMessage.ToolResponse(
                         toolCall.id(), toolName, redirect.response());
             }
-            String msg = skillAwareNotFoundMessage(toolName, replayOriginForRedirect);
+            String msg = skillAwareNotFoundMessage(toolName, replayOrigin);
             log.warn("[ToolExecutor] Pre-approved {}", msg);
             events.add(GraphEventPublisher.toolComplete(toolCall.id(), toolName, msg, false));
             return new ToolResponseMessage.ToolResponse(toolCall.id(), toolName, msg);
@@ -826,9 +870,6 @@ public class ToolExecutionExecutor {
             // Origin is method-local (see thread-safety note on execute());
             // the legacy ThreadLocal that used to carry it across executePreApproved
             // calls was a cross-conversation footgun and has been removed.
-            ChatOrigin replayOrigin = ChatOrigin.EMPTY
-                    .withConversationId(conversationId)
-                    .withWorkspace(null, workspaceBasePath);
             String result = callback.call(callArguments, toolContextWithScopedCatalog(replayOrigin));
             throwIfStopRequested(conversationId);
             int rawLen = result != null ? result.length() : 0;

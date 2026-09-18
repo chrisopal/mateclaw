@@ -515,6 +515,11 @@ const navGroups = computed(() => [
         requiredCapability: 'view:wiki',
       },
       {
+        path: '/presales',
+        label: t('nav.presales'),
+        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M8 6V3h8v3M3 12h18M12 10v4"/></svg>',
+      },
+      {
         path: '/semantic/ontologies',
         label: t('semantic.title'),
         requiredCapability: 'view:ontology',

@@ -1160,6 +1160,7 @@ export default {
     st_unknown: '未知',
   },
   nav: {
+    presales: '售前工作台',
     dashboard: '仪表盘',
     chat: '对话',
     control: '控制台',

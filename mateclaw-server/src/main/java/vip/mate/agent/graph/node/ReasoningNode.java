@@ -1548,6 +1548,7 @@ public class ReasoningNode implements NodeAction {
                                         String runtimeProviderId) {
         List<Message> prefix = new ArrayList<>();
         prefix.add(new SystemMessage(systemPrompt));
+        if(chatOrigin != null && chatOrigin.conversationId() != null && chatOrigin.conversationId().startsWith("presales:")) return prefix;
         prefix.add(new UserMessage(RuntimeContextInjector.buildContextMessage(
                 workspaceBasePath, null, chatOrigin, runtimeModelName, runtimeProviderId)));
         // When this turn already recalled the user's own current project from

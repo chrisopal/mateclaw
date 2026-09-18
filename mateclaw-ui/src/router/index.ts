@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import type { Capability } from '@/composables/capabilities'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { i18n } from '@/i18n'
+import { presalesRoutes } from '@/features/presales/routes'
 import { semanticRoutes } from '@/features/semantic/routes'
 import { useSemanticAvailability } from '@/features/semantic/shared/useSemanticAvailability'
 
@@ -26,6 +27,7 @@ const router = createRouter({
       redirect: '/chat',
       children: [
         ...semanticRoutes,
+        ...presalesRoutes,
         // ==================== Core ====================
         {
           path: 'chat',

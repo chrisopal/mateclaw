@@ -210,6 +210,14 @@ public class AgentGraphBuilder {
 
     private vip.mate.tool.builtin.DelegateAgentTool delegateAgentTool;
 
+    /** Server-side project tool boundary; absent only in lightweight legacy tests. */
+    private vip.mate.presales.PresalesToolPolicy presalesToolPolicy;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPresalesToolPolicy(vip.mate.presales.PresalesToolPolicy policy) {
+        this.presalesToolPolicy = policy;
+    }
+
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setDelegateAgentTool(
             @org.springframework.context.annotation.Lazy vip.mate.tool.builtin.DelegateAgentTool delegateAgentTool) {
@@ -280,6 +288,11 @@ public class AgentGraphBuilder {
      * the Agent's model override, then the global default.</p>
      */
     public BaseAgent build(AgentEntity entity, String modelProvider, String modelName) {
+        return build(entity,modelProvider,modelName,false);
+    }
+
+    public BaseAgent build(AgentEntity entity, String modelProvider, String modelName, boolean projectScoped) {
+        if(projectScoped && "plan_execute".equals(entity.getAgentType())) throw new MateClawException("err.presales.employee_type", "项目执行当前需要 react 数字员工");
         AgentToolSet toolSet = toolRegistry.getEnabledToolSet();
 
         // Move 6 — Permission flattening at build time.
@@ -314,6 +327,14 @@ public class AgentGraphBuilder {
         // global default); non-null (possibly empty) = explicit allowlist.
         Set<String> boundTools = agentBindingService.getEffectiveToolNames(entity.getId());
         toolSet = vip.mate.agent.binding.service.AgentBindingService.applyEffectiveToolScope(toolSet, boundTools); // null = global defaults, excluding opt-in authoring
+        if (projectScoped) {
+            // Project runs receive the intersection of the employee's effective
+            // bindings and this server-owned read-only allowlist. The executor
+            // repeats the decision against the project row, so this catalog
+            // filter is disclosure hygiene rather than the security boundary.
+            toolSet = toolSet.withAllowedToolsOnly(
+                    vip.mate.presales.PresalesToolPolicy.PROJECT_VISIBLE_TOOLS);
+        }
 
         // Resolve the base model with the precedence: per-conversation pin >
         // per-Agent model override > global default. resolveRuntimeBaseModel
@@ -447,7 +468,11 @@ public class AgentGraphBuilder {
                     entity.getId(), basePromptTokens, prefixBudgetPlan.effectiveMaxTokens());
         }
 
-        String enhancedPrompt = buildEnhancedPrompt(entity, builtinSearchEnabled, prefixBudgetPlan.memoryTokens());
+        if(projectScoped && builtinSearchEnabled) throw new MateClawException("err.presales.search_not_scoped", "项目执行不支持模型内置联网搜索，请为数字员工配置关闭联网搜索的模型");
+        String enhancedPrompt = projectScoped
+                ? java.util.Objects.toString(entity.getSystemPrompt(), "") + ABOUT_YOU_BLOCK
+                    + "\nThis is a project-scoped presales run. Only the supplied project snapshot and explicitly project-bound read-only tools are authorized. Wiki retrieval must pass the exact project-bound kbId and the bound employee agentId. Web search is advisory and must be cited as external context. Never read arbitrary files, use execution tools, approve or publish. Return the requested proposal JSON."
+                : buildEnhancedPrompt(entity, builtinSearchEnabled, prefixBudgetPlan.memoryTokens());
 
         // Runtime skill-catalog renderer — captures this agent's bound skills,
         // effective tool allowlist, model window and workspace; invoked each
@@ -487,7 +512,7 @@ public class AgentGraphBuilder {
                     entity.getName(), maxIter, toolSet.size(), protocol.getId());
         } else {
             agent = buildReActAgent(toolSet, runtimeModel, maxIter, entity.getId(), skillCatalogRenderer,
-                    prefixBudgetPlan, autoDemotedTools);
+                    prefixBudgetPlan, autoDemotedTools, projectScoped);
             // StateGraph 路径下工具调用由 ActionNode 控制，始终启用
             toolCallingEnabled = true;
             log.info("Built StateGraph ReAct agent: {} (maxIterations={}, tools={}, protocol={})",
@@ -580,11 +605,17 @@ public class AgentGraphBuilder {
     StateGraphReActAgent buildReActAgent(AgentToolSet toolSet, ModelConfigEntity runtimeModel,
                                          int maxIter, Long agentId, SkillCatalogRenderer skillCatalogRenderer,
                                          PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools) {
+        return buildReActAgent(toolSet,runtimeModel,maxIter,agentId,skillCatalogRenderer,prefixBudgetPlan,autoDemotedTools,false);
+    }
+
+    StateGraphReActAgent buildReActAgent(AgentToolSet toolSet, ModelConfigEntity runtimeModel,
+                                         int maxIter, Long agentId, SkillCatalogRenderer skillCatalogRenderer,
+                                         PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools, boolean projectScoped) {
         ChatModel chatModel = buildRuntimeChatModel(runtimeModel);
         ChatClient chatClient = ChatClient.create(chatModel);
         String reasoningEffort = resolveReasoningEffortForModel(runtimeModel);
         CompiledGraph compiledGraph = buildReActGraph(toolSet, chatModel, maxIter, reasoningEffort,
-                runtimeModel, agentId, skillCatalogRenderer, prefixBudgetPlan, autoDemotedTools);
+                runtimeModel, agentId, skillCatalogRenderer, prefixBudgetPlan, autoDemotedTools, projectScoped);
         StateGraphReActAgent agent = new StateGraphReActAgent(chatClient, conversationService, compiledGraph,
                 chatModel, conversationWindowManager, toolSet);
         if (reasoningRetentionProperties != null) {
@@ -679,6 +710,9 @@ public class AgentGraphBuilder {
             // the audit pipeline. Null when audit is not wired (legacy / test).
             if (auditEventService != null) {
                 executor.setAuditEventService(auditEventService);
+            }
+            if (presalesToolPolicy != null) {
+                executor.setPresalesToolPolicy(presalesToolPolicy);
             }
             PlanGenerationNode planGenerationNode = new PlanGenerationNode(chatModel, planningService, streamingHelper, conversationWindowManager, toolSet, goalService, goalProperties, agentService);
             // Team hand-off: a lead-of-team plan agent parks multi-step plans on
@@ -972,8 +1006,15 @@ public class AgentGraphBuilder {
                                    String reasoningEffort, ModelConfigEntity primaryModelConfig,
                                    Long agentId, SkillCatalogRenderer skillCatalogRenderer,
                                    PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools) {
+        return buildReActGraph(toolSet,chatModel,maxIterations,reasoningEffort,primaryModelConfig,agentId,skillCatalogRenderer,prefixBudgetPlan,autoDemotedTools,false);
+    }
+
+    CompiledGraph buildReActGraph(AgentToolSet toolSet, ChatModel chatModel, int maxIterations,
+                                   String reasoningEffort, ModelConfigEntity primaryModelConfig,
+                                   Long agentId, SkillCatalogRenderer skillCatalogRenderer,
+                                   PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools, boolean projectScoped) {
         try {
-            List<vip.mate.llm.failover.FallbackEntry> fallbackChain = buildFallbackChain(primaryModelConfig, agentId);
+            List<vip.mate.llm.failover.FallbackEntry> fallbackChain = projectScoped ? List.of() : buildFallbackChain(primaryModelConfig, agentId);
             NodeStreamingChatHelper streamingHelper = new NodeStreamingChatHelper(
                     streamTracker, fallbackChain, llmCacheMetricsAggregator, providerHealthTracker,
                     primaryModelConfig != null ? primaryModelConfig.getProvider() : null,
@@ -1002,6 +1043,9 @@ public class AgentGraphBuilder {
             // the audit pipeline. Null when audit is not wired (legacy / test).
             if (auditEventService != null) {
                 executor.setAuditEventService(auditEventService);
+            }
+            if (presalesToolPolicy != null) {
+                executor.setPresalesToolPolicy(presalesToolPolicy);
             }
             // PR-1.2 (RFC-049 L1-B): propagate the bound model's capability so ReasoningNode
             // can gate the ThinkingLevelHolder override explicitly, rather than inferring

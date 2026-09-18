@@ -8,6 +8,7 @@ import { resolve } from 'path'
 // Sub-components that Element Plus re-exports from a parent package rather than
 // shipping under their own es/components/<name> directory.
 const EP_AGGREGATE: Record<string, string> = {
+  ElDescriptionsItem: 'descriptions',
   ElDropdownItem: 'dropdown',
   ElDropdownMenu: 'dropdown',
   ElOption: 'select',

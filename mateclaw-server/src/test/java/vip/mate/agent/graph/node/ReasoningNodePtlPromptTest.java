@@ -138,6 +138,15 @@ class ReasoningNodePtlPromptTest {
         assertThat(prefix).hasSize(2);
     }
 
+    @Test
+    void presalesPrefixDoesNotReadWorkspaceWikiOrRuntimeContext() {
+        WikiContextService wiki=mock(WikiContextService.class);
+        var prefix=newNode(wiki).buildNonHistoryPrefix("employee identity","/workspace","42","project input",
+            vip.mate.agent.context.ChatOrigin.web("presales:1:p:run","9",1L,null),"","");
+        assertThat(prefix).hasSize(1);
+        org.mockito.Mockito.verifyNoInteractions(wiki);
+    }
+
     private static ReasoningNode newNode(WikiContextService wikiContextService) {
         // 9-arg constructor — explicit supportsReasoningEffort + empty
         // tool set, nulls for the streaming / conversation-window deps we

@@ -1160,6 +1160,7 @@ export default {
     st_unknown: 'Unknown',
   },
   nav: {
+    presales: 'Presales',
     dashboard: 'Dashboard',
     chat: 'Chat',
     control: 'Control',
