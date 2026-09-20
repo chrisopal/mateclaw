@@ -19,6 +19,12 @@ public class PresalesArtifactRenderer {
     public record Document(String title, String revision, boolean provisional, List<Section> sections, String appendix) {}
 
     public Map<String, byte[]> render(Document document) {
+        return render(document, true);
+    }
+
+    public Map<String, byte[]> renderWithoutSlides(Document document) { return render(document, false); }
+
+    private Map<String, byte[]> render(Document document, boolean includeSlides) {
         Objects.requireNonNull(document);
         if (document.sections() == null || document.sections().size() > 100)
             throw new IllegalArgumentException("At most 100 sections required");
@@ -28,7 +34,7 @@ public class PresalesArtifactRenderer {
             Map<String, byte[]> files = new LinkedHashMap<>();
             files.put("solution.md", markdown(document).getBytes(StandardCharsets.UTF_8));
             files.put("solution.docx", word(document));
-            files.put("solution.pptx", slides(document));
+            if (includeSlides) files.put("solution.pptx", slides(document));
             return Collections.unmodifiableMap(files);
         } catch (java.io.IOException e) {
             throw new IllegalStateException("Artifact rendering failed", e);

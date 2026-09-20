@@ -8,4 +8,6 @@ if [[ -x /usr/libexec/java_home ]]; then JAVA_BIN="$(/usr/libexec/java_home -v 2
 mkdir -p output/presales/runtime
 exec "$JAVA_BIN" -jar "$JAR" --server.port=18118 \
  '--spring.datasource.url=jdbc:h2:file:./output/presales/runtime/database;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE' \
- --mateclaw.presales.enabled=true --mateclaw.semantic.enabled=true
+ --mateclaw.presales.enabled=true --mateclaw.semantic.enabled=true \
+ --mateclaw.presales.ppt-skill-root="${PRESALES_PPT_SKILL_ROOT:-}" \
+ --mateclaw.presales.ppt-python="${PRESALES_PPT_PYTHON:-python3}"

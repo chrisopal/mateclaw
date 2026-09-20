@@ -49,3 +49,16 @@ PASS 仅表示该行所列范围完整执行。PARTIAL 表示已有实现或局�
 在工作树根目录运行 `bash scripts/presales/start.sh`，在另一终端运行 `cd mateclaw-ui && pnpm exec vite --config ../scripts/presales/vite.config.mjs --mode enterprise`。入口 http://127.0.0.1:5198/presales，后端端口 18118。
 
 AI 接入复用已有模型配置，无模型时无法完成 S1–S8 的真实内容质量验收。本次不是全规格生产验收通过。MySQL、Kingbase 迁移已提供但未执行验证。来源选择最多 200 个知识库、事实选择最多 500 条；生成上下文每库最多 100 条、总计 60000 字符，截断会提示。当前为 Workspace 级权限，没有虚假的项目私有 ACL。独立人工评审与 AI 草稿分离，正式审批由服务器执行。
+
+
+## 2026-09-19：结构化产出、后台任务与技能制稿
+
+- Java 21 定向验证：31 项通过（Presales* 与 ToolExecutionExecutorPresalesScopeTest），包含真实 ppt-master-plus 编译、引用校验、来源绑定、取消结果拒绝、刚入队任务的重启终态；Maven package 通过。
+- 真实 DeepSeek 员工 `2100819852516253697` 在虚构项目 `4093e597-bbbc-470c-972f-f9d8e5a1f028` 完成方案及制稿；首次因基线版本校验、模型长输出截断失败的记录保留，修复后成功。制稿任务 `7c3b2aec-accc-4093-9728-cc72e09f72fd`，方案版本 `a45de608-14ba-46b4-9b38-92d988afcfb5`。
+- ppt-master-plus 4.5.0 实际执行质量检查及 SVG→原生 PPTX 转换，产物 3 页、16928 字节、15 个可编辑文本节点；SHA-256 `80922db702afc46643d5a9d27972012d89ab1f21af0c898af7b7bea0600cc386`。接口下载摘要与保存清单相符，各页保留未批准草稿字样；成果未发布。
+- 浏览器刷新回读任务及方案；三个预览分别加载为 1280×720。修复了下载 Blob 的通用 MIME 导致 SVG 预览无法加载的问题。
+- 技能质量报告：0 error，三页均有语义分组/页面角色的非阻断 warning；这不等同完整交互式制稿流程或客户视觉验收通过。
+- 前端售前定向测试 20 项通过，vue-tsc、ESLint、enterprise 构建通过。
+- 全前端套件：596 通过、1 失败，失败位于未改动的 semantic/ontology/ontologyManagement.test.ts（socket hang up / ADDED 断言）；不得报告全套通过。
+- 限制：后台协调器目前支持单实例。重启将旧任务标记中断，不自动重放；运行期间项目变更会拒绝旧快照结果；取消阻止采用成果，不承诺供应商立即停止计费。S3/S4/S7 为结构与服务回归验证，本轮真实模型链路覆盖 S5/S6。
+- 本地证据：output/presales/next-delivery-evidence.json、employee-ppt-quality.json、employee-generated-solution.pptx；不纳入源码提交。

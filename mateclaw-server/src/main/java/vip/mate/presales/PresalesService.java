@@ -2,6 +2,7 @@ package vip.mate.presales;
 
 import static vip.mate.presales.PresalesDtos.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
 import java.time.LocalDateTime;
@@ -154,8 +155,10 @@ public class PresalesService {
             "clarifications",
             "baselines",
             "fitGaps",
+            "cases",
             "solutions",
             "reviews",
+            "reviewDrafts",
             "releases",
             "tasks",
             "contextCards")) summary.remove(key);
@@ -225,8 +228,10 @@ public class PresalesService {
             "clarifications",
             "baselines",
             "fitGaps",
+            "cases",
             "solutions",
             "reviews",
+            "reviewDrafts",
             "releases",
             "tasks")) p.putArray(key);
     jdbc.update(
@@ -337,27 +342,14 @@ public class PresalesService {
             .put("status", value.path("status").asText("DRAFT"))
             .put("authority", "UNTRUSTED_DRAFT");
         enumValue(value, "status", Set.of("RUNNING", "SUCCEEDED", "FAILED", "DRAFT"), "DRAFT");
+        if (employeeResult && "SUCCEEDED".equals(value.path("status").asText())) {
+          if (!(value.path("result") instanceof ObjectNode result))
+            throw PresalesModelAdapter.error(422, "MODEL_FORMAT");
+          PresalesModelAdapter.validate(result, value.path("contextSnapshot") instanceof ObjectNode snapshot ? snapshot : json.createObjectNode(), value.path("skill").asText());
+        }
         saveItem(p, "tasks", value, actor, false);
         if(employeeResult && "SUCCEEDED".equals(value.path("status").asText())) {
-          for(var item:value.path("result").path("items")) {
-            if(!"CLARIFICATION".equals(item.path("kind").asText()) && Set.of("S1","S2").contains(value.path("skill").asText())) {
-              ObjectNode draft=((ObjectNode)item).deepCopy();
-              draft.remove(List.of("id","approved","customerConfirmationStatus"));
-              draft.put("proposedByTaskId",value.path("id").asText()).put("agentId",value.path("agentId").asText())
-                .put("authority","UNTRUSTED_DRAFT");
-              if("S2".equals(value.path("skill").asText())) {
-                draft.put("scope","UNKNOWN").put("priority","MEDIUM").put("customerConfirmationStatus","UNCONFIRMED");
-                saveItem(p,"requirements",draft,actor,false);
-              } else saveItem(p,"contextCards",draft,actor,false);
-            }
-            if("CLARIFICATION".equals(item.path("kind").asText())) {
-            ObjectNode clarification=json.createObjectNode().put("question",item.path("text").asText())
-              .put("status","OPEN").put("proposedByTaskId",value.path("id").asText())
-              .put("agentId",value.path("agentId").asText()).put("authority","UNTRUSTED_DRAFT");
-            clarification.set("sourceRefs",item.path("sourceRefs").deepCopy());
-            saveItem(p,"clarifications",clarification,actor,false);
-            }
-          }
+          projectEmployeeResult(p, value, actor);
         }
       }
       case "SAVE_CONTEXT" -> {
@@ -373,7 +365,8 @@ public class PresalesService {
           enumValue(o, "severity", Set.of("BLOCKER", "WARNING", "INFO"), "WARNING");
           enumValue(o, "status", Set.of("OPEN", "RESOLVED", "ACCEPTED"), "OPEN");
         }
-        value.put("kind", "HUMAN_REVIEW");
+        value.remove("authority");
+        value.put("kind", "HUMAN_REVIEW").put("authority", "HUMAN_REVIEW");
         saveItem(p, "reviews", value, actor, true);
       }
       case "CREATE_RELEASE" -> createRelease(scope, p, value, actor);
@@ -414,24 +407,7 @@ public class PresalesService {
         }
         saveItem(p, "fitGaps", value, actor, true);
       }
-      case "SAVE_SOLUTION" -> {
-        text(value.path("title").asText(), "title", 1000);
-        if (!value.path("sections").isArray() || value.path("sections").isEmpty())
-          throw bad("Solution sections required");
-        for (var section : value.path("sections")) {
-          text(section.path("title").asText(), "section title", 1000);
-          text(section.path("text").asText(), "section text", 100000);
-        }
-        String base = value.path("baselineId").asText();
-        if (!base.isBlank()) find(p, "baselines", base);
-        value.put("provisional", base.isBlank());
-        value.set("coverage", coverage(p, value));
-        var latestFits = new LinkedHashMap<String, String>();
-        for (var fit : p.withArray("fitGaps"))
-          latestFits.put(fit.path("requirementId").asText(), fit.path("id").asText());
-        value.set("fitGapRefs", json.valueToTree(latestFits.values()));
-        saveItem(p, "solutions", value, actor, true);
-      }
+      case "SAVE_SOLUTION" -> saveSolutionDraft(p, value, actor, false);
       default -> throw bad("Unsupported command: " + action);
     }
     p.put("stage", stage(p));
@@ -452,6 +428,103 @@ public class PresalesService {
     record(p, actor, action);
     receipt(scope, actor, r.operationId(), hash, p);
     return p;
+  }
+
+  private void projectEmployeeResult(ObjectNode p, ObjectNode task, String actor) {
+    String skill = task.path("skill").asText();
+    ObjectNode result = (ObjectNode) task.path("result");
+    String taskId = task.path("id").asText();
+    String agentId = task.path("agentId").asText();
+    if (Set.of("S1", "S2").contains(skill)) {
+      for (var item : result.path("items")) {
+        if (!"CLARIFICATION".equals(item.path("kind").asText())) {
+          ObjectNode draft = ((ObjectNode) item).deepCopy();
+          draft.remove(List.of("id", "approved", "customerConfirmationStatus"));
+          draft.put("proposedByTaskId", taskId).put("agentId", agentId).put("authority", "UNTRUSTED_DRAFT");
+          if ("S2".equals(skill)) {
+            draft.put("scope", "UNKNOWN").put("priority", "MEDIUM").put("customerConfirmationStatus", "UNCONFIRMED");
+            saveItem(p, "requirements", draft, actor, false);
+          } else saveItem(p, "contextCards", draft, actor, false);
+        }
+        if ("CLARIFICATION".equals(item.path("kind").asText())) {
+          ObjectNode clarification = json.createObjectNode().put("question", item.path("text").asText())
+              .put("status", "OPEN").put("proposedByTaskId", taskId).put("agentId", agentId)
+              .put("authority", "UNTRUSTED_DRAFT");
+          clarification.set("sourceRefs", item.path("sourceRefs").deepCopy());
+          saveItem(p, "clarifications", clarification, actor, false);
+        }
+      }
+      return;
+    }
+    switch (skill) {
+      case "S3" -> {
+        for (var item : result.path("capabilityMaps")) {
+          ObjectNode draft = ((ObjectNode) item).deepCopy();
+          draft.put("proposedByTaskId", taskId).put("agentId", agentId).put("authority", "UNTRUSTED_DRAFT").put("kind", "CAPABILITY_MAP");
+          saveItem(p, "fitGaps", draft, actor, true);
+        }
+      }
+      case "S4" -> {
+        for (var item : result.path("cases")) {
+          ObjectNode draft = ((ObjectNode) item).deepCopy();
+          draft.put("proposedByTaskId", taskId).put("agentId", agentId).put("authority", "UNTRUSTED_DRAFT").put("kind", "CASE_MATCH");
+          saveItem(p, "cases", draft, actor, true);
+        }
+      }
+      case "S5", "S6" -> {
+        JsonNode node = result.has("solution") ? result.path("solution") : result.path("solutionDraft");
+        ObjectNode draft = ((ObjectNode) node).deepCopy();
+        draft.put("proposedByTaskId", taskId).put("agentId", agentId).put("authority", "UNTRUSTED_DRAFT");
+        saveSolutionDraft(p, draft, actor, true);
+      }
+      case "S7" -> {
+        JsonNode node = result.has("review") ? result.path("review") : result.path("reviewDraft");
+        ObjectNode draft = ((ObjectNode) node).deepCopy();
+        draft.put("proposedByTaskId", taskId).put("agentId", agentId).put("authority", "UNTRUSTED_DRAFT").put("kind", "AI_REVIEW_DRAFT");
+        saveItem(p, "reviewDrafts", draft, actor, true);
+      }
+      default -> { }
+    }
+  }
+
+  private void saveSolutionDraft(ObjectNode p, ObjectNode value, String actor, boolean employeeResult) {
+    text(value.path("title").asText(), "title", 1000);
+    if (!value.path("sections").isArray() || value.path("sections").isEmpty()) throw bad("Solution sections required");
+    for (var section : value.path("sections")) {
+      text(section.path("title").asText(), "section title", 1000);
+      text(section.path("text").asText(), "section text", 100000);
+    }
+    String base = value.path("baselineId").asText();
+    if (!employeeResult && value.has("presentation")) throw PresalesModelAdapter.error(422, "PRESENTATION_METADATA_UNTRUSTED");
+    ObjectNode baseline = null;
+    if (!base.isBlank()) {
+      baseline = find(p, "baselines", base);
+      if (value.has("baselineVersion") && value.path("baselineVersion").asInt() != baseline.path("version").asInt())
+        throw conflict("BASELINE_STALE", "Solution baseline version is stale");
+      value.put("baselineVersion", baseline.path("version").asInt());
+    }
+    validateProjectSourceRefs(p, value);
+    if (base.isBlank()) value.remove("baselineVersion");
+    value.put("provisional", base.isBlank());
+    value.set("coverage", coverage(p, value));
+    var latestFits = new LinkedHashMap<String, String>();
+    for (var fit : p.withArray("fitGaps")) latestFits.put(fit.path("requirementId").asText(), fit.path("id").asText());
+    value.set("fitGapRefs", json.valueToTree(latestFits.values()));
+    saveItem(p, "solutions", value, actor, true);
+  }
+
+  private void validateProjectSourceRefs(ObjectNode p, ObjectNode value) {
+    Set<String> allowed = new HashSet<>();
+    for (var task : p.withArray("tasks")) for (var source : task.path("contextSnapshot").path("sources")) allowed.add(source.path("sourceRef").asText());
+    for (var baseline : p.withArray("baselines")) for (var reference : baseline.path("references")) for (var source : reference.path("sources")) allowed.add(source.path("sourceRef").asText());
+    validateSourceRefs(value.path("sourceRefs"), allowed);
+    for (var section : value.path("sections")) validateSourceRefs(section.path("sourceRefs"), allowed);
+  }
+
+  private void validateSourceRefs(JsonNode refs, Set<String> allowed) {
+    if (refs.isMissingNode()) return;
+    if (!refs.isArray() || refs.size() > 100) throw PresalesModelAdapter.error(422, "MODEL_FORMAT");
+    for (var ref : refs) if (!ref.isTextual() || !allowed.contains(ref.asText())) throw PresalesModelAdapter.error(422, "INVALID_SOURCE_REFERENCE");
   }
 
   private void bindEmployee(String scope,ObjectNode p,String agentId) {
@@ -695,7 +768,9 @@ public class PresalesService {
     }
     boolean reviewed = false;
     for (var review : p.withArray("reviews"))
-      if (solution.path("id").asText().equals(review.path("solutionId").asText())
+      if ("HUMAN_REVIEW".equals(review.path("kind").asText())
+          && !"UNTRUSTED_DRAFT".equals(review.path("authority").asText())
+          && solution.path("id").asText().equals(review.path("solutionId").asText())
           && !solution.path("authorId").asText().equals(review.path("authorId").asText())) {
         boolean blocked = false;
         for (var issue : review.path("issues"))
@@ -714,7 +789,9 @@ public class PresalesService {
     releaseGate(scope, p, solution);
     String releaseId = id();
     for (var review : p.withArray("reviews"))
-      if (solution.path("id").asText().equals(review.path("solutionId").asText())
+      if ("HUMAN_REVIEW".equals(review.path("kind").asText())
+          && !"UNTRUSTED_DRAFT".equals(review.path("authority").asText())
+          && solution.path("id").asText().equals(review.path("solutionId").asText())
           && !solution.path("authorId").asText().equals(review.path("authorId").asText()))
         v.put("reviewId", review.path("id").asText());
     List<PresalesArtifactRenderer.Section> sections = new ArrayList<>();
@@ -723,13 +800,27 @@ public class PresalesService {
           new PresalesArtifactRenderer.Section(
               section.path("title").asText(), section.path("text").asText()));
     var files =
-        renderer.render(
+        new LinkedHashMap<>(
+            solution.path("presentation").path("artifactId").isTextual()
+                ? renderer.renderWithoutSlides(
+                    new PresalesArtifactRenderer.Document(
+                        solution.path("title").asText(),
+                        solution.path("id").asText(),
+                        false,
+                        sections,
+                        ""))
+                : renderer.render(
             new PresalesArtifactRenderer.Document(
                 solution.path("title").asText(),
                 solution.path("id").asText(),
                 false,
                 sections,
-                ""));
+                "")));
+    String presentationArtifact = solution.path("presentation").path("artifactId").asText();
+    if (!presentationArtifact.isBlank()) {
+      byte[] ppt = storedPresentationArtifact(p.path("id").asText(), presentationArtifact, "solution.pptx", solution.path("presentation").path("sha256").asText());
+      files.put("solution.pptx", ppt);
+    }
     ArrayNode manifest = v.putArray("files");
     for (var entry : files.entrySet()) {
       String digest = java.util.HexFormat.of().formatHex(sha(entry.getValue()));
@@ -848,6 +939,9 @@ public class PresalesService {
   public byte[] draftArtifact(String scope, String projectId, String solutionId, String filename) {
     var p = get(scope, projectId);
     var solution = find(p, "solutions", solutionId);
+    String presentationArtifact = solution.path("presentation").path("artifactId").asText();
+    if (!presentationArtifact.isBlank() && presentationFile(solution, filename))
+      return storedPresentationArtifact(projectId, presentationArtifact, filename, presentationDigest(solution, filename));
     List<PresalesArtifactRenderer.Section> sections = new ArrayList<>();
     for (var section : solution.path("sections"))
       sections.add(
@@ -864,6 +958,32 @@ public class PresalesService {
                     "UNAPPROVED DRAFT — internal review only"))
             .get(filename);
     if (bytes == null) throw new SemanticApiException(404, "NOT_FOUND", "Unknown artifact format");
+    return bytes;
+  }
+
+  private boolean presentationFile(ObjectNode solution, String filename) {
+    if ("solution.pptx".equals(filename)) return true;
+    for (var slide : solution.path("presentation").path("slides"))
+      if (filename.equals(slide.path("filename").asText())) return true;
+    return "quality-report.json".equals(filename);
+  }
+
+  private String presentationDigest(ObjectNode solution, String filename) {
+    if ("solution.pptx".equals(filename)) return solution.path("presentation").path("sha256").asText();
+    if ("quality-report.json".equals(filename)) return solution.path("presentation").path("qualityReportSha256").asText();
+    for (var slide : solution.path("presentation").path("slides")) if (filename.equals(slide.path("filename").asText())) return slide.path("sha256").asText();
+    return "";
+  }
+
+  private byte[] storedPresentationArtifact(String projectId, String artifactId, String filename, String expectedDigest) {
+    var rows = jdbc.queryForList(
+        "SELECT digest,content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=? AND filename=?",
+        projectId, artifactId, filename);
+    if (rows.size() != 1) throw new SemanticApiException(404, "NOT_FOUND", "Presentation artifact not found");
+    byte[] bytes = Base64.getDecoder().decode(rows.getFirst().get("content_base64").toString());
+    String digest = java.util.HexFormat.of().formatHex(sha(bytes));
+    if (!digest.equals(rows.getFirst().get("digest").toString()) || (!expectedDigest.isBlank() && !digest.equals(expectedDigest)))
+      throw conflict("ARTIFACT_DIGEST_MISMATCH", "Presentation artifact integrity failure");
     return bytes;
   }
 

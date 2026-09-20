@@ -32,7 +32,7 @@
             <el-descriptions :column="isNarrow ? 1 : 2" border><el-descriptions-item :label="l('客户', 'Customer')">{{ project.customer }}</el-descriptions-item><el-descriptions-item :label="l('目标', 'Goal')">{{ project.goal || '—' }}</el-descriptions-item><el-descriptions-item :label="l('行业', 'Industry')">{{ project.industry || '—' }}</el-descriptions-item><el-descriptions-item :label="l('本轮需求确认', 'Requirement confirmation')"><details class="baseline-details"><summary>{{ project.baselines.at(-1)?.id ? l('已确认', 'Confirmed') : l('尚未确认', 'Not confirmed') }}</summary><p v-if="project.baselines.at(-1)?.id" class="muted">{{ project.baselines.at(-1)?.id }}</p></details></el-descriptions-item></el-descriptions>
             <template v-if="project.contextCards?.length || project.context"><h3>{{ l('Context 卡', 'Context card') }}</h3><pre class="safe-content">{{ printable(project.contextCards?.at(-1) || project.context) }}</pre></template><el-empty v-else :description="l('尚未生成项目理解。', 'No project context yet.')" />
             <h3>{{ l('员工执行记录', 'Employee activity') }}</h3>
-            <article v-for="task in project.tasks || []" :key="task.id" class="solution-revision"><div class="task-heading"><strong>{{ skillNames[task.skill as keyof typeof skillNames] || task.skill }} · {{ stateLabel(task.status) }}</strong><div class="task-actions"><el-button v-if="task.status === 'RUNNING'" :disabled="!canWrite" @click="command('CANCEL_AI_TASK', { taskId: task.id })">{{ l('停止接收本次结果', 'Discard this run result') }}</el-button><el-button v-if="task.conversationId && task.agentId" type="primary" size="small" @click="router.push({ path: '/chat', query: { conversationId: task.conversationId, agentId: task.agentId } })">{{ l('查看执行过程', 'View employee execution') }}</el-button><el-button type="primary" size="small" @click="showEvidence(task.contextSnapshot || task)">{{ l('输入快照', 'Input snapshot') }}</el-button></div></div><el-alert v-if="task.contextSnapshot?.truncated" type="warning" :closable="false" :title="l('上下文已截断，关键依据可能不完整。', 'Context truncated; important evidence may be missing.')" /><p class="muted">{{ task.agentName || l('历史生成记录', 'Legacy generation') }}<span v-if="task.conversationId"> · {{ l('执行记录', 'Execution') }} {{ task.runId }}</span></p><p v-if="task.error">{{ employeeIssue(task.error) }}</p><div v-for="(item, index) in task.result?.items || []" :key="index"><h4>{{ item.title }} · {{ stateLabel(item.originKind) }}</h4><pre class="safe-content">{{ item.text }}</pre><el-button v-if="['S1', 'S5', 'S6'].includes(task.skill)" :disabled="!canWrite" @click="adopt(task.skill, item)">{{ l('查看并修订建议', 'Review proposal') }}</el-button></div><pre v-if="task.result" class="safe-content">{{ printable({ unknowns: task.result.unknowns, assumptions: task.result.assumptions }) }}</pre></article><el-table :data="project.tasks || []"><el-table-column :label="l('工作内容', 'Work')"><template #default="{ row }">{{ skillNames[row.skill as keyof typeof skillNames] || l('历史任务', 'Previous task') }}</template></el-table-column><el-table-column prop="agentName" :label="l('执行员工', 'Employee')" /><el-table-column :label="l('状态', 'Status')" ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column><el-table-column prop="error" :label="l('失败原因', 'Failure reason')" /></el-table>
+            <article v-for="task in project.tasks || []" :key="task.id" class="solution-revision"><div class="task-heading"><strong>{{ skillNames[task.skill as keyof typeof skillNames] || task.skill }} · {{ stateLabel(task.status) }}</strong><div class="task-actions"><el-button v-if="task.status === 'RUNNING'" :disabled="!canWrite" @click="cancelTask(task)">{{ l('停止接收本次结果', 'Discard this run result') }}</el-button><el-button v-if="task.conversationId && task.agentId" type="primary" size="small" @click="router.push({ path: '/chat', query: { conversationId: task.conversationId, agentId: task.agentId } })">{{ l('查看执行过程', 'View employee execution') }}</el-button><el-button type="primary" size="small" @click="showEvidence(task.contextSnapshot || task)">{{ l('输入快照', 'Input snapshot') }}</el-button></div></div><el-alert v-if="task.contextSnapshot?.truncated" type="warning" :closable="false" :title="l('上下文已截断，关键依据可能不完整。', 'Context truncated; important evidence may be missing.')" /><p class="muted">{{ task.agentName || l('历史生成记录', 'Legacy generation') }}<span v-if="task.conversationId"> · {{ l('执行记录', 'Execution') }} {{ task.runId }}</span></p><p v-if="task.queueState === 'QUEUED' && task.status === 'RUNNING'" class="muted">{{ l('已受理，等待员工执行。', 'Accepted and waiting for the employee.') }}</p><p v-if="task.error">{{ employeeIssue(task.error) }}</p><div v-for="(item, index) in task.result?.items || []" :key="index"><h4>{{ item.title }} · {{ stateLabel(item.originKind) }}</h4><pre class="safe-content">{{ item.text }}</pre><el-button v-if="['S1', 'S5', 'S6'].includes(task.skill)" :disabled="!canWrite" @click="adopt(task.skill, item)">{{ l('查看并修订建议', 'Review proposal') }}</el-button></div><div v-if="task.result?.solution?.presentation" class="presentation-result"><strong>{{ l('成果草稿', 'Output draft') }} · ppt-master-plus</strong><span class="muted">{{ task.result.solution.presentation.skill }} · {{ task.result.solution.presentation.skillVersion }} · {{ task.result.solution.presentation.pageCount }} {{ l('页', 'pages') }}</span><div class="task-actions"><el-button v-for="slide in task.result.solution.presentation.slides || []" :key="slide.filename" type="primary" size="small" @click="previewPresentation(task.result.solution.presentation, slide.filename)">{{ l('预览', 'Preview') }} {{ slide.title || slide.filename }}</el-button></div></div><pre v-if="task.result" class="safe-content">{{ printable({ unknowns: task.result.unknowns, assumptions: task.result.assumptions }) }}</pre></article><el-table :data="project.tasks || []"><el-table-column :label="l('工作内容', 'Work')"><template #default="{ row }">{{ skillNames[row.skill as keyof typeof skillNames] || l('历史任务', 'Previous task') }}</template></el-table-column><el-table-column prop="agentName" :label="l('执行员工', 'Employee')" /><el-table-column :label="l('状态', 'Status')" ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column><el-table-column prop="error" :label="l('失败原因', 'Failure reason')" /></el-table>
           </el-tab-pane>
           <el-tab-pane :label="l('资料与证据', 'Materials & evidence')" name="materials">
             <section class="section-heading"><h2>{{ l('授权来源', 'Authorized sources') }}</h2><el-button :disabled="!canWrite" @click="openEditor('material')">{{ l('绑定资料', 'Bind material') }}</el-button></section>
@@ -68,7 +68,7 @@
         </el-tabs>
       </template>
     </template>
-    <el-drawer v-model="evidenceOpen" :title="l('证据与引用链', 'Evidence and references')" size="min(560px, 95vw)"><details class="inline-help"><summary>{{ l('查看展示边界', 'About displayed evidence') }}</summary><p>{{ l('仅展示服务端授权返回的内容；外部图片与脚本不执行。原文与快照以知识库和语义证据记录为准。', 'Only authorized server content is shown; external images and scripts are not executed. Wiki and semantic evidence records are authoritative for source text and snapshots.') }}</p></details><el-descriptions v-if="evidence" :column="1" border><el-descriptions-item v-for="(value, key) in evidence" :key="key" :label="String(key)"><pre class="safe-content">{{ printable(value) }}</pre></el-descriptions-item></el-descriptions></el-drawer>
+    <el-drawer v-model="evidenceOpen" :title="l('证据与引用链', 'Evidence and references')" size="min(560px, 95vw)"><details class="inline-help"><summary>{{ l('查看展示边界', 'About displayed evidence') }}</summary><p>{{ l('仅展示服务端授权返回的内容；外部图片与脚本不执行。原文与快照以知识库和语义证据记录为准。', 'Only authorized server content is shown; external images and scripts are not executed. Wiki and semantic evidence records are authoritative for source text and snapshots.') }}</p></details><el-descriptions v-if="evidence" :column="1" border><el-descriptions-item v-for="(value, key) in evidence" :key="key" :label="String(key)"><pre class="safe-content">{{ printable(value) }}</pre></el-descriptions-item></el-descriptions></el-drawer><el-dialog v-model="presentationPreview.open" :title="presentationPreview.title" width="min(1100px, 95vw)" @closed="!presentationPreview.open && clearPresentationPreview()"><img v-if="presentationPreview.url" :src="presentationPreview.url" :alt="presentationPreview.title" class="presentation-preview" /></el-dialog>
     <el-dialog v-model="editorOpen" :title="editorTitle" width="min(720px, 95vw)" :close-on-click-modal="false" :before-close="closeEditor">
       <el-form label-position="top" @submit.prevent="save">
         <template v-if="editorKind === 'project'"><el-form-item :label="l('项目名称', 'Project name')" required><el-input v-model="form.name" maxlength="200" /></el-form-item><el-form-item :label="l('客户', 'Customer')" required><el-input v-model="form.customer" maxlength="200" /></el-form-item><el-form-item :label="l('负责人', 'Owner')"><el-select v-model="form.ownerId" filterable :loading="membersLoading" :disabled="membersLoading || !!membersError" :aria-label="l('负责人', 'Owner')" :placeholder="l('选择真实员工', 'Select a workspace member')"><el-option v-if="form.ownerId && !members.some(member => member.userId === form.ownerId)" :value="form.ownerId" :label="ownerName(form.ownerId)" disabled /><el-option v-for="member in members" :key="member.userId" :value="member.userId" :label="memberName(member)" /></el-select><span v-if="membersError" role="alert">{{ membersError }}</span></el-form-item><el-form-item :label="l('售前解决方案员工', 'Presales solution employee')"><el-select v-model="form.agentId" clearable :loading="employeesLoading" :placeholder="l('选择本工作区已配置的数字员工', 'Select a configured workspace employee')"><el-option v-for="employee in employees" :key="employee.id" :value="employee.id" :label="employee.name" :disabled="employee.enabled === false" /></el-select><el-button type="primary" size="small" @click="router.push('/agents')">{{ l('管理员工配置', 'Manage employees') }}</el-button></el-form-item><el-alert v-if="employeeError" :title="employeeError" type="warning" :closable="false" /><p v-if="!employeesLoading && !employees.length" class="muted">{{ l('当前工作区没有可绑定的员工，请先在员工管理中配置并启用售前解决方案员工。', 'No eligible employee in this workspace. Configure and enable a presales employee in employee management.') }}</p><el-form-item :label="l('行业', 'Industry')"><el-input v-model="form.industry" /></el-form-item><el-form-item :label="l('目标', 'Goal')"><el-input v-model="form.goal" type="textarea" :rows="3" /></el-form-item></template>
@@ -151,6 +151,21 @@ const stages = ['DISCOVERY', 'REQUIREMENTS', 'BASELINED', 'SOLUTION', 'RELEASE',
 const canWrite = computed(() => !!capabilities.value?.enabled && !!capabilities.value?.canWrite && project.value?.status !== 'ARCHIVED')
 const canApprove = computed(() => canWrite.value && !!capabilities.value?.canApprove && !!capabilities.value?.semanticEnabled)
 const evidenceOpen = ref(false), evidence = ref<PresalesRecord>()
+const presentationPreview = ref({ open: false, url: '', title: '' })
+async function previewPresentation(presentation: PresalesRecord, filename: string) {
+  const ws = workspace.currentWorkspaceId, id = projectId.value, artifactId = String(presentation.artifactId || '')
+  const solutionId = project.value?.solutions?.find((solution: PresalesRecord) => solution.presentation?.artifactId === artifactId)?.id
+  if (!ws || !id || !solutionId || !filename) return
+  try {
+    const blob = await presalesApi.file(ws, id, solutionId, filename, 'draft')
+    if (presentationPreview.value.url) URL.revokeObjectURL(presentationPreview.value.url)
+    presentationPreview.value = { open: true, url: URL.createObjectURL(new Blob([blob], { type: 'image/svg+xml' })), title: filename }
+  } catch (e) { error.value = presalesError(e).message }
+}
+function clearPresentationPreview() {
+  if (presentationPreview.value.url) URL.revokeObjectURL(presentationPreview.value.url)
+  presentationPreview.value = { open: false, url: '', title: '' }
+}
 async function showEvidence(record: PresalesRecord) {
   evidence.value = record; evidenceOpen.value = true
   const ws = workspace.currentWorkspaceId, id = projectId.value
@@ -166,6 +181,10 @@ function employeeIssue(code: string): string {
     EMPLOYEE_UNAVAILABLE: ['负责员工不可用，请检查绑定、工作区与启用状态。', 'Assigned employee unavailable. Check assignment, workspace and enabled state.'],
     EMPLOYEE_RUNTIME_FAILED: ['员工执行失败，请查看执行过程并检查员工的模型配置后重试。', 'Employee execution failed. Check the execution and model configuration before retrying.'],
     EMPLOYEE_RUNTIME_UNAVAILABLE: ['员工运行服务暂不可用。', 'Employee runtime is unavailable.'],
+    PRESENTATION_UNAVAILABLE: ['成果编译服务暂不可用，本次执行未完成。', 'Presentation compiler is unavailable; this run did not complete.'],
+    PRESENTATION_FAILED: ['成果草稿编译失败，请检查页面内容后重试。', 'Presentation draft compilation failed; review the content and retry.'],
+    PPT_GENERATION_FAILED: ['成果草稿生成失败，请检查 PPT 技能配置后重试。', 'Output draft generation failed; check the PPT skill configuration and retry.'],
+    PPT_GENERATION_TIMEOUT: ['成果草稿生成超时，请稍后重试。', 'Output draft generation timed out; retry later.'],
     PROJECT_CHANGED_DURING_GENERATION: ['执行期间项目已变化，本次结果未采纳。请重新执行。', 'Project changed during execution. Results were not applied; run again.'],
   }
   const message = messages[code]; return message ? l(...message) : code
@@ -173,9 +192,36 @@ function employeeIssue(code: string): string {
 function stateLabel(state: string): string { const labels: Record<string, [string, string]> = { DISCOVERY: ['项目理解', 'Discovery'], REQUIREMENTS: ['需求梳理', 'Requirements'], BASELINED: ['需求已基线', 'Baselined'], SOLUTION: ['方案设计', 'Solution'], RELEASE: ['成果发布', 'Release'], ARCHIVED: ['已归档', 'Archived'], ACTIVE: ['进行中', 'Active'], FULL: ['完整响应', 'Full'], PARTIAL: ['部分响应', 'Partial'], CONDITIONAL: ['条件响应', 'Conditional'], EXCLUDED: ['排除范围', 'Excluded'], UNHANDLED: ['未处理', 'Unhandled'] }; Object.assign(labels, { HIGH: ['高', 'High'], MEDIUM: ['中', 'Medium'], LOW: ['低', 'Low'], IN: ['范围内', 'In scope'], OUT: ['范围外', 'Out of scope'], UNKNOWN: ['待核实', 'Unknown'], UNCONFIRMED: ['未确认', 'Unconfirmed'], OPEN: ['待处理', 'Open'], ANSWERED: ['已答复', 'Answered'], RESOLVED: ['已解决', 'Resolved'], ACCEPTED: ['已接受', 'Accepted'], PENDING: ['待批准', 'Awaiting approval'], APPROVED: ['已批准', 'Approved'], PUBLISHED: ['已发布', 'Published'], DRAFT: ['草稿', 'Draft'], SUCCEEDED: ['已完成', 'Succeeded'], RUNNING: ['运行中', 'Running'], FAILED: ['失败', 'Failed'], CANCELLED: ['已停止接收', 'Result discarded'], PROJECT: ['项目资料', 'Project material'], PRODUCT: ['产品资料', 'Product material'], CASE: ['案例资料', 'Case material'], CUSTOMER_SOURCE: ['客户来源', 'Customer source'], PRODUCT_SOURCE: ['产品来源', 'Product source'], INTERNAL_JUDGMENT: ['内部判断', 'Internal judgment'], ASSUMPTION: ['假设', 'Assumption'], AI_SUGGESTION: ['AI 建议', 'AI suggestion'], FIT: ['直接满足', 'Fit'], CONFIG: ['配置后满足', 'Configuration'], EXTEND: ['需要开发', 'Extension'], PARTNER: ['依赖合作方', 'Partner'], GAP: ['暂不支持', 'Gap'], BLOCKER: ['阻断', 'Blocker'], WARNING: ['需关注', 'Warning'], INFO: ['提示', 'Information'] }); const pair = labels[state]; return pair ? l(pair[0], pair[1]) : state || '—' }
 function printable(value: unknown): string { return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—' }
 let controller: AbortController | undefined
+const polling = new Map<string, AbortSignal>()
+let pollController: AbortController | undefined
+function waitForPoll(ms: number): Promise<void> { return new Promise(resolve => window.setTimeout(resolve, ms)) }
+function pollTask(operationId: string) {
+  const pollWs = workspace.currentWorkspaceId, pollId = projectId.value, pollSignal = pollController?.signal
+  if (!pollWs || !pollId || !pollSignal) return
+  const pollKey = `${pollWs}/${pollId}/${operationId}`
+  const previousSignal = polling.get(pollKey)
+  if (previousSignal && !previousSignal.aborted) return
+  polling.set(pollKey, pollSignal)
+  void (async () => {
+    try {
+      for (let attempt = 0; attempt < 600; attempt++) {
+        await waitForPoll(1000)
+        if (pollSignal.aborted) return
+        const detail = await presalesApi.get(pollWs, pollId, pollSignal)
+        if (!isCurrentRequest(pollWs, workspace.currentWorkspaceId, pollId, projectId.value)) return
+        project.value = detail
+        const task = (detail.tasks || []).find((item: PresalesRecord) => item.operationId === operationId)
+        if (!task || task.status !== 'RUNNING') return
+      }
+    } catch (e) {
+      if (!pollSignal.aborted) error.value = presalesError(e).message
+    } finally { if (polling.get(pollKey) === pollSignal) polling.delete(pollKey) }
+  })()
+}
 async function load() {
   if (dirty.value) return
   controller?.abort(); controller = new AbortController()
+  pollController?.abort(); pollController = new AbortController()
   const ws = workspace.currentWorkspaceId, id = projectId.value, signal = controller.signal
   members.value = []; membersError.value = ''; membersLoading.value = false
   portfolioController?.abort(); portfolio.value = []; portfolioError.value = false; portfolioLoading.value = false; project.value = undefined; projects.value = []; capabilities.value = undefined; evidence.value = undefined; evidenceOpen.value = false; compareId.value = ''
@@ -190,7 +236,7 @@ async function load() {
     if (!id) void refreshPortfolio()
     if (id) {
       const detail = await presalesApi.get(ws, id, signal)
-      if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) && !signal.aborted) project.value = detail
+      if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) && !signal.aborted) { project.value = detail; (detail.tasks || []).filter((task: PresalesRecord) => task.status === 'RUNNING' && task.operationId).forEach((task: PresalesRecord) => pollTask(task.operationId)) }
     } else {
       const result = await presalesApi.list(ws, { q: query.value, ownerId: ownerFilter.value, stage: statusFilter.value, page: page.value, pageSize: 20 }, signal)
       if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) && !signal.aborted) { projects.value = result.items; total.value = result.total }
@@ -315,15 +361,27 @@ async function generate() {
   const ws = workspace.currentWorkspaceId, current = project.value
   if (!ws || !current || dirty.value || saving.value || !canWrite.value) return
   saving.value = true
+  const operationId = receipt({ ws, id: current.id, version: current.version, generation: generation.value })
   try {
-    const result = await presalesApi.generate(ws, current.id, { ...generation.value, expectedVersion: current.version, operationId: receipt({ ws, id: current.id, version: current.version, generation: generation.value }) })
+    const result = await presalesApi.generate(ws, current.id, { ...generation.value, expectedVersion: current.version, operationId })
     if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value)) project.value = result
     generationOpen.value = false
+    pollTask(operationId)
+  } catch (e) { const issue = presalesError(e); error.value = employeeError.value = employeeIssue(issue.message); conflict.value = issue.conflict }
+  finally { saving.value = false }
+}
+async function cancelTask(task: PresalesRecord) {
+  const ws = workspace.currentWorkspaceId, id = projectId.value
+  if (!ws || !id || !canWrite.value || task.status !== 'RUNNING') return
+  saving.value = true
+  try {
+    const result = await presalesApi.cancelTask(ws, id, task.id, { operationId: receipt({ ws, id, taskId: task.id, action: 'cancel' }) })
+    if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)) project.value = result
   } catch (e) { const issue = presalesError(e); error.value = employeeError.value = employeeIssue(issue.message); conflict.value = issue.conflict }
   finally { saving.value = false }
 }
 watch([() => workspace.currentWorkspaceId, projectId], () => { editorOpen.value = false; generationOpen.value = false; page.value = 1; void load() }, { immediate: true })
-onBeforeUnmount(() => { portfolioController?.abort(); controller?.abort(); unregister(); narrowQuery.removeEventListener('change', updateViewport); window.removeEventListener('beforeunload', beforeUnload) })
+onBeforeUnmount(() => { portfolioController?.abort(); controller?.abort(); pollController?.abort(); clearPresentationPreview(); unregister(); narrowQuery.removeEventListener('change', updateViewport); window.removeEventListener('beforeunload', beforeUnload) })
 </script>
 <style scoped>
 .presales-workbench { padding: 24px 32px; color: var(--el-text-color-primary); min-width: 0; max-width: 100%; box-sizing: border-box; height: 100%; overflow: auto; background: var(--el-fill-color-lighter); }
@@ -354,6 +412,9 @@ h1 { font-size: 24px; margin: 8px 0; font-weight: 600; } h2 { font-size: 16px; f
 .task-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
 .task-actions .el-button + .el-button { margin-left:0; }
 .presales-workbench :deep(.el-button:focus-visible) { outline:2px solid var(--el-color-primary); outline-offset:3px; }
+.presentation-result { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0; padding:12px 14px; border:1px solid var(--el-border-color-lighter); background:var(--el-fill-color-lighter); }
+.presentation-result .task-actions { width:100%; justify-content:flex-start; }
+.presentation-preview { display:block; width:100%; max-height:75vh; object-fit:contain; background:#fff; }
 .navigation-link { text-decoration:underline; text-underline-offset:3px; }
 .project-pulse button>span::after { content:' ↗'; color:var(--el-color-primary); }
 @media(max-width:768px) { .task-actions { justify-content:flex-start; width:100%; } }

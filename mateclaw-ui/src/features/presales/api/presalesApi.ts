@@ -8,6 +8,9 @@ export interface PresalesProject extends PresalesRecord {
   baselines: PresalesRecord[]; fitGaps: PresalesRecord[]; solutions: PresalesRecord[]
   reviews: PresalesRecord[]; releases: PresalesRecord[]
 }
+export interface PresalesTask extends PresalesRecord {
+  operationId: string; status: 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | string
+}
 export interface PresalesCapabilities { enabled: boolean; semanticEnabled: boolean; canWrite: boolean; canApprove: boolean; modelConfigured?: boolean }
 export interface ProjectPage { items: PresalesProject[]; total: number; page: number; pageSize: number }
 async function request<T>(workspaceId: string, config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
@@ -29,5 +32,6 @@ export const presalesApi = {
   command: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/commands`, method: 'POST', data }),
   evidence: (ws: string, id: string, graphId: string, evidenceId: string) => request<PresalesRecord>(ws, { url: `${projectPath(id)}/evidence`, params: { graphId, evidenceId } }),
   employees: (ws: string, signal?: AbortSignal) => request<PresalesRecord[]>(ws, { url: '/presales/employees' }, signal),
-  generate: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/generate`, method: 'POST', data, timeout: 180000 }),
+  generate: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/generate`, method: 'POST', data }),
+  cancelTask: (ws: string, id: string, taskId: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`, method: 'POST', data }),
 }

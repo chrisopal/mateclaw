@@ -19,11 +19,12 @@ public class PresalesContextProvider {
                 .put("taskGoal",goal).put("skillVersion","1.0.0").put("schemaVersion",1);
         ObjectNode records=out.putObject("operational_record");
         for(String key:List.of("name","customer","industry","goal"))records.set(key,project.path(key));
-        for(String key:List.of("requirements","clarifications","baselines","fitGaps","solutions"))out.set(key,project.path(key).deepCopy());
-        if("S7".equals(skill)) {
+        for(String key:List.of("requirements","clarifications","baselines","fitGaps","cases","solutions"))out.set(key,project.path(key).deepCopy());
+        if("S6".equals(skill) || "S7".equals(skill)) {
             var solutions=project.path("solutions");
             if(!solutions.isArray()||solutions.isEmpty())throw PresalesModelAdapter.error(409,"SOLUTION_REQUIRED");
             var target=solutions.get(solutions.size()-1).deepCopy();
+            out.remove("solutions");
             out.putArray("solutions").add(target);
             out.put("targetSolutionId",target.path("id").asText());
         }
