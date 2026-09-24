@@ -70,7 +70,9 @@ class BiddingProjectTest extends BiddingHttpFixture {
             Map.of("operationId","outside","name","非法负责人","lotName","一标段","ownerId",outsider.getId().toString()),400);
         assertTrue(outside.toString().contains("INVALID_OWNER"));
         UserEntity disabledOwner=new UserEntity(); disabledOwner.setUsername("bidding_disabled_owner_"+java.util.UUID.randomUUID());
-        disabledOwner.setPassword("unused"); disabledOwner.setRole("user"); disabledOwner.setDeleted(0); auth.createUser(disabledOwner);
+        disabledOwner.setPassword("unused"); disabledOwner.setRole("user"); disabledOwner.setDeleted(0); disabledOwner.setEnabled(true); auth.createUser(disabledOwner);
+        workspaces.addMember(Long.valueOf(workspace),disabledOwner.getId(),"member");
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_workspace_member m JOIN mate_user u ON u.id=m.user_id WHERE m.workspace_id=? AND m.user_id=? AND m.role='member' AND m.deleted=0 AND u.enabled=TRUE AND u.deleted=0",Integer.class,Long.valueOf(workspace),disabledOwner.getId()));
         jdbc.update("UPDATE mate_user SET enabled=FALSE WHERE id=?",disabledOwner.getId());
         var disabled=api("POST","/projects","owner",workspace,
             Map.of("operationId","disabled-owner","name","禁用负责人","lotName","一标段","ownerId",disabledOwner.getId().toString()),400);

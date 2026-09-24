@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.env.MockEnvironment;
 
 class BiddingMigrationTest {
     @Test void biddingIsDisabledByDefaultInApplicationConfiguration() throws Exception {
-        StandardEnvironment environment=new StandardEnvironment();
+        MockEnvironment environment=new MockEnvironment();
         var sources=new YamlPropertySourceLoader().load("app",new ClassPathResource("application.yml"));
         sources.forEach(environment.getPropertySources()::addFirst);
         assertFalse(Binder.get(environment).bind("mateclaw.bidding",Bindable.of(BiddingProperties.class)).get().isEnabled());
