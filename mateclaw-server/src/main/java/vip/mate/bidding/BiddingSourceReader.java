@@ -8,7 +8,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BiddingSourceReader {
     private static final int MAX_TEXT_CODE_POINTS = 1_000_000;
-    private static final Pattern URL = Pattern.compile("(?i)https?://\\S+");
 
     public BiddingTypes.Extraction read(byte[] bytes, String filename) {
         if (bytes == null || bytes.length == 0) throw invalid("SOURCE_EMPTY", "Source file is empty");
@@ -54,28 +52,20 @@ public class BiddingSourceReader {
     private BiddingTypes.Extraction readDocx(byte[] bytes, String digest) throws Exception {
         List<BiddingTypes.ReadBlock> blocks = new ArrayList<>(); List<String> problems = new ArrayList<>();
         try (var document = new XWPFDocument(new ByteArrayInputStream(bytes))) {
-            int para = 0, table = 0;
-            for (IBodyElement element : document.getBodyElements()) {
-                if (element instanceof XWPFParagraph paragraph) {
-                    add(blocks, digest, null, "body/paragraph:" + para++, paragraph.getText(), "TEXT", "READABLE");
-                } else if (element instanceof XWPFTable xwpfTable) {
-                    int tableNo = table++;
-                    for (int rowNo = 0; rowNo < xwpfTable.getRows().size(); rowNo++) {
-                        var row = xwpfTable.getRow(rowNo);
-                        if (row.getTableCells().size() != row.getCtRow().getTcList().size()) {
-                            problems.add("UNRESOLVED_TABLE_CELLS:" + tableNo + ":" + rowNo); continue;
-                        }
-                        for (int cellNo = 0; cellNo < row.getTableCells().size(); cellNo++) {
-                            XWPFTableCell cell = row.getCell(cellNo);
-                            if (cell.getCTTc().getTcPr() != null && (cell.getCTTc().getTcPr().getGridSpan() != null || cell.getCTTc().getTcPr().getVMerge() != null)) {
-                                problems.add("MERGED_TABLE_CELL:" + tableNo + ":" + rowNo + ":" + cellNo);
-                            }
-                            if(cell.getBodyElements().stream().anyMatch(body -> body instanceof XWPFTable))
-                                problems.add("NESTED_TABLE_REQUIRES_REVIEW:"+tableNo+":"+rowNo+":"+cellNo);
-                            add(blocks, digest, null, "body/table:" + tableNo + "/row:" + rowNo + "/cell:" + cellNo,
-                                cell.getText(), "TABLE_CELL", "READABLE");
-                        }
-                    }
+            readBody(document.getBodyElements(),"body",digest,blocks,problems);
+            for(int i=0;i<document.getHeaderList().size();i++) readBody(document.getHeaderList().get(i).getBodyElements(),"header:"+i,digest,blocks,problems);
+            for(int i=0;i<document.getFooterList().size();i++) readBody(document.getFooterList().get(i).getBodyElements(),"footer:"+i,digest,blocks,problems);
+            for(var part:document.getPackage().getParts()) {
+                String name=part.getPartName().getName();
+                if(!name.matches("/word/(document|header[0-9]*|footer[0-9]*|footnotes|endnotes)\\.xml")) continue;
+                String xml;
+                try(var input=part.getInputStream()) { xml=new String(input.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8); }
+                var textbox=java.util.regex.Pattern.compile("<(?:[A-Za-z0-9]+:)?txbxContent\\b").matcher(xml);
+                int number=0;
+                while(textbox.find()) {
+                    String locator="package"+name+"/textbox:"+(number++);
+                    addSpecial(blocks,digest,null,locator,"TEXT_BOX","NEEDS_REVIEW");
+                    problems.add("TEXT_BOX_REQUIRES_REVIEW:"+locator);
                 }
             }
             if (!document.getAllPictures().isEmpty()) problems.add("EMBEDDED_IMAGE_REQUIRES_REVIEW");
@@ -92,6 +82,34 @@ public class BiddingSourceReader {
         validateTotal(blocks);
         boolean complete = problems.isEmpty();
         return new BiddingTypes.Extraction(List.copyOf(blocks), complete, List.copyOf(problems));
+    }
+
+    private static void readBody(List<IBodyElement> elements,String prefix,String digest,
+        List<BiddingTypes.ReadBlock> blocks,List<String> problems) {
+            int para = 0, table = 0;
+            for (IBodyElement element : elements) {
+                if (element instanceof XWPFParagraph paragraph) {
+                    add(blocks, digest, null, prefix+"/paragraph:" + para++, paragraph.getText(), "TEXT", "READABLE");
+                } else if (element instanceof XWPFTable xwpfTable) {
+                    int tableNo = table++;
+                    for (int rowNo = 0; rowNo < xwpfTable.getRows().size(); rowNo++) {
+                        var row = xwpfTable.getRow(rowNo);
+                        if (row.getTableCells().size() != row.getCtRow().getTcList().size()) {
+                            problems.add("UNRESOLVED_TABLE_CELLS:" + tableNo + ":" + rowNo); continue;
+                        }
+                        for (int cellNo = 0; cellNo < row.getTableCells().size(); cellNo++) {
+                            XWPFTableCell cell = row.getCell(cellNo);
+                            if (cell.getCTTc().getTcPr() != null && (cell.getCTTc().getTcPr().getGridSpan() != null || cell.getCTTc().getTcPr().getVMerge() != null)) {
+                                problems.add("MERGED_TABLE_CELL:" + tableNo + ":" + rowNo + ":" + cellNo);
+                            }
+                            if(cell.getBodyElements().stream().anyMatch(body -> body instanceof XWPFTable))
+                                problems.add("NESTED_TABLE_REQUIRES_REVIEW:"+tableNo+":"+rowNo+":"+cellNo);
+                            add(blocks, digest, null, prefix+"/table:" + tableNo + "/row:" + rowNo + "/cell:" + cellNo,
+                                cell.getText(), "TABLE_CELL", "READABLE");
+                        }
+                    }
+                }
+            }
     }
 
     private BiddingTypes.Extraction readPdf(byte[] bytes, String digest) throws Exception {
@@ -147,7 +165,6 @@ public class BiddingSourceReader {
                             String text, String kind, String quality) {
         if (text == null || text.isBlank()) return;
         if (text.codePointCount(0, text.length()) > MAX_TEXT_CODE_POINTS) throw new BiddingApiException(413, "SOURCE_TEXT_LIMIT", "文件内容超出读取上限");
-        text = URL.matcher(text).replaceAll("[URL]");
         String id = sha256((digest + "\n" + locator + "\n" + text).getBytes(java.nio.charset.StandardCharsets.UTF_8));
         blocks.add(new BiddingTypes.ReadBlock(id, page, locator, text, kind, quality));
     }

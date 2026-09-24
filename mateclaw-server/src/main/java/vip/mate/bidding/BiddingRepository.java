@@ -51,9 +51,23 @@ public class BiddingRepository {
         List<ObjectNode> items=jdbc.query("SELECT body_json FROM mate_bidding_project"+where+" ORDER BY updated_at DESC,id LIMIT :limit OFFSET :offset",params,(rs,n)->readObject(rs,"body_json"));
         return new BiddingTypes.Page<>(items,total,page,pageSize);
     }
-    public long sourceBytes(String workspace,String project) {
-        Long value=jdbc.queryForObject("SELECT COALESCE(SUM(OCTET_LENGTH(s.content)),0) FROM mate_bidding_source s WHERE s.workspace_id=:w AND s.project_id=:p AND s.version=(SELECT MAX(v.version) FROM mate_bidding_source v WHERE v.workspace_id=s.workspace_id AND v.project_id=s.project_id AND v.source_id=s.source_id)",Map.of("w",workspace,"p",project),Long.class);
-        return value==null?0:value;
+    public BiddingTypes.Ref sourceSetHead(BiddingTypes.Scope scope) {
+        try { return json.convertValue(parseObject(jdbc.queryForObject("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current'",Map.of("w",scope.workspaceId(),"p",scope.projectId()),String.class)),BiddingTypes.Ref.class); }
+        catch(org.springframework.dao.EmptyResultDataAccessException e) { return null; }
+    }
+    public boolean advanceSourceSetHead(BiddingTypes.Scope scope,BiddingTypes.Ref expected,BiddingTypes.Ref next,String refJson) {
+        var args=new MapSqlParameterSource().addValue("w",scope.workspaceId()).addValue("p",scope.projectId()).addValue("v",next.version()).addValue("ref",refJson);
+        if(expected==null) {
+            try { jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(:w,:p,'sourceSet','current',:v,:ref)",args); return true; }
+            catch(org.springframework.dao.DuplicateKeyException conflict) { return false; }
+        }
+        args.addValue("expectedVersion",expected.version());
+        return jdbc.update("UPDATE mate_bidding_head SET version=:v,selected_ref_json=:ref WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current' AND version=:expectedVersion",args)==1;
+    }
+    public boolean sourceWasConfirmed(BiddingTypes.Scope scope,BiddingTypes.Ref sourceRef) {
+        Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND input_refs_json LIKE :needle",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"needle","%\"id\":\""+sourceRef.id()+"\"%"),Integer.class);
+        return count!=null && count>0;
     }
     public int insertSource(String id,String workspace,String project,String sourceId,long version,String kind,String digest,byte[] content,
         String filename,java.sql.Timestamp now) {

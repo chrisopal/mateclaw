@@ -36,6 +36,36 @@ class BiddingSourceReaderTest {
             reader.read(bytes, "tender.docx").blocks().stream().map(BiddingTypes.ReadBlock::id).toList());
     }
 
+    @Test void docxExtractsHeadersFootersAndFlagsTextBoxesForReview() throws Exception {
+        byte[] bytes;
+        try (var d = new XWPFDocument(); var out = new ByteArrayOutputStream()) {
+            d.createParagraph().createRun().setText("Body https://example.test/tender");
+            var header=d.createHeader(org.apache.poi.wp.usermodel.HeaderFooterType.DEFAULT);
+            header.createParagraph().createRun().setText("Header tender notice");
+            var footer=d.createFooter(org.apache.poi.wp.usermodel.HeaderFooterType.DEFAULT);
+            footer.createParagraph().createRun().setText("Footer page reference");
+            d.write(out); bytes=out.toByteArray();
+        }
+        bytes=injectTextBox(bytes);
+        var extraction=reader.read(bytes,"header-footer.docx");
+        assertFalse(extraction.complete());
+        assertTrue(extraction.blocks().stream().anyMatch(b->b.locator().startsWith("header:0/") && b.text().contains("Header tender notice")));
+        assertTrue(extraction.blocks().stream().anyMatch(b->b.locator().startsWith("footer:0/") && b.text().contains("Footer page reference")));
+        assertTrue(extraction.problems().stream().anyMatch(p->p.startsWith("TEXT_BOX_REQUIRES_REVIEW:")));
+        assertTrue(extraction.blocks().stream().anyMatch(b->"TEXT_BOX".equals(b.kind()) && "NEEDS_REVIEW".equals(b.quality())));
+    }
+
+    @Test void storedEvidencePreservesUrlsWithoutResolvingThem() throws Exception {
+        String url="https://example.test/path?q=1";
+        byte[] bytes;
+        try(var d=new XWPFDocument();var out=new ByteArrayOutputStream()) {
+            d.createParagraph().createRun().setText("See "+url+" for reference"); d.write(out); bytes=out.toByteArray();
+        }
+        var extraction=reader.read(bytes,"url.docx");
+        assertTrue(extraction.complete());
+        assertTrue(extraction.blocks().stream().anyMatch(b->b.text().contains(url)));
+    }
+
     @Test void pdfUsesActualPageNumbersAndFlagsImageOnlyPage() throws Exception {
         byte[] bytes = pdf(List.of("First page amount 12.50", "", "Third page amount 7"), false);
         var extraction = reader.read(bytes, "tender.pdf");
@@ -113,5 +143,23 @@ class BiddingSourceReaderTest {
             if (encrypt) doc.protect(new StandardProtectionPolicy("owner", "user", new AccessPermission()));
             doc.save(out); return out.toByteArray();
         }
+    }
+
+    private byte[] injectTextBox(byte[] docx) throws Exception {
+        var out=new ByteArrayOutputStream();
+        try(var zip=new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(docx));
+            var result=new java.util.zip.ZipOutputStream(out)) {
+            for(var entry=zip.getNextEntry();entry!=null;entry=zip.getNextEntry()) {
+                byte[] content=zip.readAllBytes();
+                if("word/document.xml".equals(entry.getName())) {
+                    String xml=new String(content,java.nio.charset.StandardCharsets.UTF_8);
+                    String textbox="<w:txbxContent><w:p><w:r><w:t>Hidden tender terms</w:t></w:r></w:p></w:txbxContent>";
+                    xml=xml.replace("</w:body>","<w:p><w:r><w:drawing>"+textbox+"</w:drawing></w:r></w:p></w:body>");
+                    content=xml.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                }
+                result.putNextEntry(new java.util.zip.ZipEntry(entry.getName())); result.write(content); result.closeEntry();
+            }
+        }
+        return out.toByteArray();
     }
 }

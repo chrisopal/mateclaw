@@ -13,12 +13,35 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+@Import(BiddingSourceTest.SchedulingTestConfig.class)
 class BiddingSourceTest extends BiddingHttpFixture {
+    @Configuration @EnableScheduling static class SchedulingTestConfig {}
     @org.springframework.beans.factory.annotation.Autowired BiddingSourceService sources;
     @org.springframework.beans.factory.annotation.Autowired BiddingDependencies dependencies;
+    @org.springframework.beans.factory.annotation.Autowired BiddingProperties biddingProperties;
+
+    @Test void uploadIsReadByProductionSchedulerWithoutManualReadCall() throws Exception {
+        var project=project();
+        biddingProperties.setSchedulerEnabled(true);
+        try {
+            var source=upload(project,UUID.randomUUID().toString(),"scheduled.pdf",readablePdf("Scheduled tender"),workspace,"member",200);
+            long deadline=System.nanoTime()+java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
+            String status="PENDING";
+            while(System.nanoTime()<deadline && !"READY".equals(status)) {
+                Thread.sleep(100);
+                var listed=api("GET","/projects/"+project.path("id").asText()+"/sources","viewer",workspace,null,200);
+                status="UNKNOWN";
+                for(JsonNode item:listed) if(source.path("id").asText().equals(item.path("id").asText())) status=item.path("readStatus").asText();
+            }
+            assertEquals("READY",status,"source "+source.path("id").asText()+" must be consumed by scheduled worker");
+        } finally { biddingProperties.setSchedulerEnabled(false); }
+    }
 
     @Test void projectSourceCapacityHasExactHundredMibBoundary() {
         assertDoesNotThrow(()->BiddingSourceService.ensureProjectCapacity(100L*1024*1024-1,1));
@@ -26,7 +49,22 @@ class BiddingSourceTest extends BiddingHttpFixture {
         assertEquals(413,error.status()); assertEquals("PROJECT_SOURCE_LIMIT",error.code());
     }
 
-    @Test void uploadRejectsExistingHundredMibWithoutPersistingAnotherSource() {
+    @Test void scheduledReaderAndStartupRecoveryDoNotTouchDatabaseWhenDisabled() {
+        var repository=org.mockito.Mockito.mock(BiddingRepository.class);
+        var properties=new BiddingProperties();
+        var tx=org.mockito.Mockito.mock(org.springframework.transaction.PlatformTransactionManager.class);
+        var service=new BiddingSourceService(repository,org.mockito.Mockito.mock(BiddingAccess.class),org.mockito.Mockito.mock(BiddingSourceReader.class),
+            org.mockito.Mockito.mock(BiddingDependencies.class),new com.fasterxml.jackson.databind.ObjectMapper(),tx,properties);
+        service.scheduledReadPending(); service.recoverInterruptedReaders();
+        org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).pendingSources(org.mockito.ArgumentMatchers.anyInt());
+        org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).recoverReadingSources(org.mockito.ArgumentMatchers.any());
+        properties.setEnabled(true); // module on, worker deliberately disabled
+        service.scheduledReadPending(); service.recoverInterruptedReaders();
+        org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).pendingSources(org.mockito.ArgumentMatchers.anyInt());
+        org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).recoverReadingSources(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test void uploadDoesNotRejectUnselectedLibraryBytesAtEffectiveCapacity() {
         var repository=org.mockito.Mockito.mock(BiddingRepository.class);
         var access=org.mockito.Mockito.mock(BiddingAccess.class);
         var reader=org.mockito.Mockito.mock(BiddingSourceReader.class);
@@ -36,11 +74,11 @@ class BiddingSourceTest extends BiddingHttpFixture {
         var jsonMapper=new com.fasterxml.jackson.databind.ObjectMapper();
         org.mockito.Mockito.when(repository.findProject("7","p")).thenReturn(jsonMapper.createObjectNode());
         org.mockito.Mockito.when(repository.lockProject("7","p")).thenReturn(true);
-        org.mockito.Mockito.when(repository.sourceBytes("7","p")).thenReturn(100L*1024*1024);
-        var service=new BiddingSourceService(repository,access,reader,dependencies,jsonMapper,tx,null);
-        var error=assertThrows(BiddingApiException.class,()->service.upload(new BiddingTypes.Scope("7","9","p"),"op","TENDER",null,new byte[]{1},"tender.pdf"));
-        assertEquals("PROJECT_SOURCE_LIMIT",error.code());
-        org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).insertSource(org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString(),
+        org.mockito.Mockito.when(repository.findOperation("7","9","op")).thenReturn(null);
+        org.mockito.Mockito.when(repository.insertSourceHead(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyLong(),org.mockito.ArgumentMatchers.anyString())).thenReturn(1);
+        var service=new BiddingSourceService(repository,access,reader,dependencies,jsonMapper,tx,new BiddingProperties());
+        assertDoesNotThrow(()->service.upload(new BiddingTypes.Scope("7","9","p"),"op","TENDER",null,new byte[]{1},"tender.pdf"));
+        org.mockito.Mockito.verify(repository).insertSource(org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.anyLong(),org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString(),org.mockito.ArgumentMatchers.any());
     }
@@ -90,6 +128,71 @@ class BiddingSourceTest extends BiddingHttpFixture {
             "exclusions",List.of(Map.of("sourceRef",refFrom(blank.path("ref")),"blockId",emptyBlock,"reason","此页为空白页")));
         command(blankProject,ref(blankProject),"CONFIRM_SOURCE_SET",payload,"viewer",403);
         command(blankProject,ref(blankProject),"CONFIRM_SOURCE_SET",payload,"owner",200);
+    }
+
+    @Test void confirmationRequiresExpectedSourceSetHeadAndRejectsStaleWriter() throws Exception {
+        var project=project(); var one=upload(project,UUID.randomUUID().toString(),"one.pdf",readablePdf("one"),workspace,"member",200); sources.readPending(2);
+        var two=upload(project,UUID.randomUUID().toString(),"two.pdf",readablePdf("two"),workspace,"member",200); sources.readPending(2);
+        var first=confirm(project,null,List.of(refFrom(one.path("ref"))));
+        assertTrue(first.path("ref").path("version").asLong()>0);
+        var stale=confirm(project,null,List.of(refFrom(two.path("ref"))),409);
+        assertEquals("SOURCE_SET_HEAD_CONFLICT",stale.path("data").path("code").asText());
+        var next=confirm(project,refFrom(first.path("ref")),List.of(refFrom(two.path("ref"))));
+        assertEquals(first.path("ref").path("version").asLong()+1,next.path("ref").path("version").asLong());
+    }
+
+    @Test void concurrentConfirmationsWithSameHeadAllowOnlyOneWriter() throws Exception {
+        var project=project(); var one=upload(project,UUID.randomUUID().toString(),"race-1.pdf",readablePdf("race one"),workspace,"member",200); sources.readPending(2);
+        var two=upload(project,UUID.randomUUID().toString(),"race-2.pdf",readablePdf("race two"),workspace,"member",200); sources.readPending(2);
+        var scope=new BiddingTypes.Scope(workspace,project.path("ownerId").asText(),project.path("id").asText());
+        var gate=new java.util.concurrent.CountDownLatch(1);
+        var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var futures=List.of(one,two).stream().map(source->pool.submit(()->{
+                var payload=new java.util.LinkedHashMap<String,Object>(); payload.put("sourceRefs",List.of(refFrom(source.path("ref")))); payload.put("exclusions",List.of()); payload.put("expectedSourceSetRef",null);
+                try { gate.await(); sources.confirmSet(scope,new BiddingTypes.Command(UUID.randomUUID().toString(),ref(project),"CONFIRM_SOURCE_SET",json.valueToTree(payload))); return "CONFIRMED"; }
+                catch(BiddingApiException conflict) { return conflict.code(); }
+            })).toList();
+            gate.countDown();
+            var outcomes=List.of(futures.get(0).get(10,java.util.concurrent.TimeUnit.SECONDS),futures.get(1).get(10,java.util.concurrent.TimeUnit.SECONDS));
+            assertEquals(1,outcomes.stream().filter("CONFIRMED"::equals).count(),outcomes.toString());
+            assertEquals(1,outcomes.stream().filter("SOURCE_SET_HEAD_CONFLICT"::equals).count(),outcomes.toString());
+        } finally { pool.shutdownNow(); }
+    }
+
+    @Test void selectedSourceBytesExcludeUnselectedAndSupersededVersions() throws Exception {
+        var project=project(); var source=upload(project,UUID.randomUUID().toString(),"version-1.pdf",readablePdf("old version"),workspace,"member",200); sources.readPending(2);
+        var unused=upload(project,UUID.randomUUID().toString(),"unused.pdf",readablePdf("not selected"),workspace,"member",200); sources.readPending(2);
+        var updated=uploadSuperseding(project,UUID.randomUUID().toString(),"version-2.pdf",readablePdf("new version"),refFrom(source.path("ref")),workspace,"member",200); sources.readPending(2);
+        var scope=new BiddingTypes.Scope(workspace,project.path("ownerId").asText(),project.path("id").asText());
+        long selected=sources.effectiveSourceBytes(scope,List.of(refFrom(updated.path("ref"))));
+        assertEquals(readablePdf("new version").length,selected);
+        assertTrue(sources.effectiveSourceBytes(scope,List.of(refFrom(unused.path("ref")),refFrom(updated.path("ref"))))>selected);
+        assertEquals("SOURCE_SET_DUPLICATE",assertThrows(BiddingApiException.class,
+            ()->sources.effectiveSourceBytes(scope,List.of(refFrom(source.path("ref")),refFrom(updated.path("ref"))))).code());
+        assertTrue(selected<100L*1024*1024);
+        assertNotEquals(source.path("ref").path("version").asLong(),updated.path("ref").path("version").asLong());
+        assertNotNull(unused.path("ref"));
+        confirm(project,null,List.of(refFrom(updated.path("ref"))));
+    }
+
+    @Test void retryCannotEraseEvidenceFromPreviouslyConfirmedSourceSet() throws Exception {
+        var project=project(); var source=upload(project,UUID.randomUUID().toString(),"fixed.pdf",pdfWithBlankPage(),workspace,"member",200); sources.readPending(2);
+        var listed=api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200);
+        String blockId=listed.get(0).path("blocks").findValues("id").getFirst().asText();
+        // The only reviewable block is a pure empty page; confirm with an explicit reason.
+        var blocks=listed.get(0).path("blocks");
+        for(JsonNode block:blocks) if("EMPTY_PAGE".equals(block.path("kind").asText())) blockId=block.path("id").asText();
+        var originalSet=confirm(project,null,List.of(refFrom(source.path("ref"))),List.of(Map.of("sourceRef",refFrom(source.path("ref")),"blockId",blockId,"reason","空白页")));
+        var later=upload(project,UUID.randomUUID().toString(),"later.pdf",readablePdf("later source"),workspace,"member",200); sources.readPending(2);
+        confirm(project,refFrom(originalSet.path("ref")),List.of(refFrom(later.path("ref"))));
+        var payload=json.createObjectNode(); payload.set("sourceRef",json.valueToTree(refFrom(source.path("ref"))));
+        var error=api("POST","/projects/"+project.path("id").asText()+"/commands","member",workspace,
+            Map.of("operationId",UUID.randomUUID().toString(),"expected",ref(project),"action","RETRY_SOURCE_READ","payload",payload),409);
+        assertEquals("SOURCE_ALREADY_CONFIRMED",error.path("data").path("code").asText());
+        assertEquals("NEEDS_REVIEW",api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200).get(0).path("readStatus").asText());
+        var evidence=api("GET","/projects/"+project.path("id").asText()+"/evidence?sourceId="+source.path("id").asText()+"&version=1&blockId="+blockId,"viewer",workspace,null,200);
+        assertEquals(blockId,evidence.path("id").asText());
     }
 
     @Test void uploadAndConfirmationRejectLimitsAndMissingReadCompletion() throws Exception {
@@ -155,6 +258,30 @@ class BiddingSourceTest extends BiddingHttpFixture {
             .header("Authorization",tokens.get(role)).header("X-Workspace-Id",ws)).andReturn().getResponse();
         assertEquals(status,response.getStatus(),response.getContentAsString());
         return status>=400?json.readTree(response.getContentAsString()):json.readTree(response.getContentAsString()).path("data");
+    }
+    private JsonNode uploadSuperseding(JsonNode project,String operationId,String filename,byte[] bytes,BiddingTypes.Ref supersedes,String ws,String role,int status) throws Exception {
+        var file=new MockMultipartFile("file",filename,"application/pdf",bytes);
+        var response=mvc.perform(MockMvcRequestBuilders.multipart("/api/v1/bidding/projects/{id}/sources",project.path("id").asText())
+            .file(file).param("operationId",operationId).param("sourceKind","TENDER").param("supersedesRef",json.writeValueAsString(supersedes))
+            .header("Authorization",tokens.get(role)).header("X-Workspace-Id",ws)).andReturn().getResponse();
+        assertEquals(status,response.getStatus(),response.getContentAsString());
+        return json.readTree(response.getContentAsString()).path("data");
+    }
+    @Override protected JsonNode command(JsonNode project,BiddingTypes.Ref expected,String action,Map<String,?> payload,String role,int expectedStatus) throws Exception {
+        if(!"CONFIRM_SOURCE_SET".equals(action)) return super.command(project,expected,action,payload,role,expectedStatus);
+        var expanded=new java.util.LinkedHashMap<String,Object>(); expanded.putAll(payload); expanded.putIfAbsent("expectedSourceSetRef",null);
+        return super.command(project,expected,action,expanded,role,expectedStatus);
+    }
+    private JsonNode confirm(JsonNode project,BiddingTypes.Ref expectedSourceSet,List<BiddingTypes.Ref> refs) throws Exception {
+        return confirm(project,expectedSourceSet,refs,List.of());
+    }
+    private JsonNode confirm(JsonNode project,BiddingTypes.Ref expectedSourceSet,List<BiddingTypes.Ref> refs,int status) throws Exception {
+        var payload=new java.util.LinkedHashMap<String,Object>(); payload.put("sourceRefs",refs); payload.put("exclusions",List.of()); payload.put("expectedSourceSetRef",expectedSourceSet);
+        return super.command(project,ref(project),"CONFIRM_SOURCE_SET",payload,"owner",status);
+    }
+    private JsonNode confirm(JsonNode project,BiddingTypes.Ref expectedSourceSet,List<BiddingTypes.Ref> refs,List<? extends Map<String,?>> exclusions) throws Exception {
+        var payload=new java.util.LinkedHashMap<String,Object>(); payload.put("sourceRefs",refs); payload.put("exclusions",exclusions); payload.put("expectedSourceSetRef",expectedSourceSet);
+        return super.command(project,ref(project),"CONFIRM_SOURCE_SET",payload,"owner",200);
     }
     private BiddingTypes.Ref refFrom(JsonNode node) { return json.convertValue(node,BiddingTypes.Ref.class); }
     private byte[] readablePdf(String text) throws Exception { return pdf(List.of(text),false); }

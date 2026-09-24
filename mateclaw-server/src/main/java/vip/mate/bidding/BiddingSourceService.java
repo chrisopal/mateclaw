@@ -7,13 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.*;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 public class BiddingSourceService {
@@ -24,11 +24,11 @@ public class BiddingSourceService {
     private final BiddingDependencies dependencies;
     private final ObjectMapper json;
     private final TransactionTemplate transactions;
-    private final NamedParameterJdbcTemplate jdbc;
+    private final BiddingProperties properties;
 
     public BiddingSourceService(BiddingRepository repository,BiddingAccess access,BiddingSourceReader reader,BiddingDependencies dependencies,
-        ObjectMapper json,PlatformTransactionManager transactionManager,NamedParameterJdbcTemplate jdbc) {
-        this.repository=repository; this.access=access; this.reader=reader; this.dependencies=dependencies; this.json=json; this.jdbc=jdbc;
+        ObjectMapper json,PlatformTransactionManager transactionManager,BiddingProperties properties) {
+        this.repository=repository; this.access=access; this.reader=reader; this.dependencies=dependencies; this.json=json; this.properties=properties;
         this.transactions=new TransactionTemplate(transactionManager);
     }
 
@@ -60,7 +60,6 @@ public class BiddingSourceService {
             if(!previous.digest().equals(requestDigest)) throw BiddingAccess.error(409,"OPERATION_CONFLICT","operationId was already used with a different source");
             return previous.result();
         }
-        ensureProjectCapacity(repository.sourceBytes(scope.workspaceId(),scope.projectId()),bytes.length);
         String sourceId; long version;
         if(supersedes==null) { sourceId=UUID.randomUUID().toString(); version=1; }
         else {
@@ -135,9 +134,15 @@ public class BiddingSourceService {
         return completed;
     }
 
+    /** Production poller; both module and worker switches must be enabled. */
+    @Scheduled(fixedDelayString="${mateclaw.bidding.source-read-delay-ms:1000}")
+    public void scheduledReadPending() {
+        if(properties.isEnabled() && properties.isSchedulerEnabled()) readPending(2);
+    }
+
     public int recoverReading() { return repository.recoverReadingSources(now()); }
     @EventListener(ApplicationReadyEvent.class)
-    public void recoverInterruptedReaders() { recoverReading(); }
+    public void recoverInterruptedReaders() { if(properties.isEnabled() && properties.isSchedulerEnabled()) recoverReading(); }
 
     @Transactional
     public ObjectNode retryRead(BiddingTypes.Scope scope,BiddingTypes.Command command) {
@@ -149,6 +154,7 @@ public class BiddingSourceService {
         var ref=sourceRefFrom(command.payload().path("sourceRef"));
         var row=repository.source(scope.workspaceId(),scope.projectId(),ref.id(),ref.version());
         if(row==null || !row.digest().equals(ref.digest())) throw BiddingAccess.error(404,"NOT_FOUND","Source not found");
+        if(repository.sourceWasConfirmed(scope,ref)) throw BiddingAccess.error(409,"SOURCE_ALREADY_CONFIRMED","A source referenced by a confirmed source set cannot be reread");
         repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),digest,"{}",now());
         if(repository.retrySource(scope.workspaceId(),scope.projectId(),ref.id(),ref.version())!=1) throw BiddingAccess.error(409,"SOURCE_NOT_RETRYABLE","Only failed or review-needed sources can be retried");
         ObjectNode result=json.createObjectNode(); result.set("sourceRef",json.valueToTree(ref)); result.put("readStatus","PENDING");
@@ -165,9 +171,17 @@ public class BiddingSourceService {
         if(previous!=null) return replay(previous,commandDigest);
         JsonNode refsNode=command.payload().path("sourceRefs"), exclusionsNode=command.payload().path("exclusions");
         if(!refsNode.isArray() || refsNode.isEmpty() || !exclusionsNode.isArray()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","sourceRefs and exclusions are required");
+        if(!command.payload().has("expectedSourceSetRef")) throw BiddingAccess.error(400,"SOURCE_SET_HEAD_REQUIRED","expectedSourceSetRef must be supplied, using null when no set is current");
+        JsonNode expectedHeadNode=command.payload().path("expectedSourceSetRef");
+        BiddingTypes.Ref expectedHead=expectedHeadNode.isNull()?null:json.convertValue(expectedHeadNode,BiddingTypes.Ref.class);
+        if(expectedHead!=null && (!"sourceSet".equals(expectedHead.kind()) || !"current".equals(expectedHead.id()) || expectedHead.version()<1 || expectedHead.digest()==null))
+            throw BiddingAccess.error(400,"SOURCE_SET_HEAD_INVALID","expectedSourceSetRef is invalid");
+        var currentHead=repository.sourceSetHead(scope);
+        if(!Objects.equals(currentHead,expectedHead)) throw BiddingAccess.error(409,"SOURCE_SET_HEAD_CONFLICT","The confirmed source set changed; reload before confirming");
         if(!exclusionsNode.isEmpty()) access.requireApprover(scope);
         List<BiddingTypes.Ref> refs=new ArrayList<>(); Set<String> refKeys=new HashSet<>();
-        refsNode.forEach(node -> { var ref=sourceRefFrom(node); String key=ref.id()+":"+ref.version(); if(!refKeys.add(key)) throw BiddingAccess.error(422,"SOURCE_SET_DUPLICATE","A source version can appear only once"); refs.add(ref); });
+        refsNode.forEach(node -> { var ref=sourceRefFrom(node); String key=ref.id(); if(!refKeys.add(key)) throw BiddingAccess.error(422,"SOURCE_SET_DUPLICATE","Select only one version of each source"); refs.add(ref); });
+        ensureProjectCapacity(effectiveSourceBytes(scope,refs),0);
         Set<String> excluded=new HashSet<>(); ObjectNode payload=json.createObjectNode(); payload.set("sourceRefs",json.valueToTree(refs));
         var exclusions=json.createArrayNode();
         for(JsonNode item:exclusionsNode) {
@@ -207,8 +221,8 @@ public class BiddingSourceService {
         repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),commandDigest,"{}",now);
         repository.insertRevision(id,scope.workspaceId(),scope.projectId(),"sourceSet","current",version,canonical,write(refs),"CONFIRMED",digest,now);
         ObjectNode sourceSetRef=json.createObjectNode(); sourceSetRef.put("kind","sourceSet"); sourceSetRef.put("id","current"); sourceSetRef.put("version",version); sourceSetRef.put("digest",digest);
-        jdbc.update("DELETE FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current'",Map.of("w",scope.workspaceId(),"p",scope.projectId()));
-        jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(:w,:p,'sourceSet','current',:v,:ref)",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"v",version,"ref",write(sourceSetRef)));
+        if(!repository.advanceSourceSetHead(scope,expectedHead,json.convertValue(sourceSetRef,BiddingTypes.Ref.class),write(sourceSetRef)))
+            throw BiddingAccess.error(409,"SOURCE_SET_HEAD_CONFLICT","The confirmed source set changed; reload before confirming");
         for(var ref:refs) dependencies.validate(scope,List.of(ref));
         repository.invalidateSourceSet(scope);
         ObjectNode result=json.createObjectNode(); result.set("ref",sourceSetRef); result.set("sourceSet",payload);
@@ -251,7 +265,18 @@ public class BiddingSourceService {
     private static java.sql.Timestamp now() { return java.sql.Timestamp.from(Instant.now()); }
     public record SourceContent(byte[] bytes,String filename) {}
     static void ensureProjectCapacity(long activeBytes,long incomingBytes) {
-        if(activeBytes<0 || incomingBytes<0 || activeBytes+incomingBytes>MAX_PROJECT) throw new BiddingApiException(413,"PROJECT_SOURCE_LIMIT","项目来源总量超过100MiB上限");
+        if(activeBytes<0 || incomingBytes<0 || activeBytes>MAX_PROJECT-incomingBytes) throw new BiddingApiException(413,"PROJECT_SOURCE_LIMIT","项目来源总量超过100MiB上限");
+    }
+    long effectiveSourceBytes(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
+        if(refs==null) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Selected source references are required");
+        Set<String> ids=new HashSet<>(); long total=0;
+        for(var ref:refs) {
+            if(ref==null || !ids.add(ref.id())) throw BiddingAccess.error(422,"SOURCE_SET_DUPLICATE","Select only one version of each source");
+            var source=repository.source(scope.workspaceId(),scope.projectId(),ref.id(),ref.version());
+            if(source==null || !source.digest().equals(ref.digest())) throw BiddingAccess.error(404,"NOT_FOUND","Source not found");
+            total=Math.addExact(total,source.content().length);
+        }
+        return total;
     }
     private static String sha256(byte[] bytes) { try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); } catch(Exception e) { throw new IllegalStateException(e); } }
 }
