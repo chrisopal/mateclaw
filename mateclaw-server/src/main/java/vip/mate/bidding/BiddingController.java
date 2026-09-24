@@ -74,6 +74,10 @@ public class BiddingController {
     public R<?> listSources(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
         String actor=access.require(workspace,"viewer"); return R.ok(sources.list(new BiddingTypes.Scope(workspace,actor,id)));
     }
+    @GetMapping("/projects/{id}/source-set/head")
+    public R<?> sourceSetHead(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
+        String actor=access.require(workspace,"viewer"); return R.ok(sources.sourceSetHead(new BiddingTypes.Scope(workspace,actor,id)));
+    }
     @GetMapping("/projects/{id}/sources/{sourceId}/versions/{version}/content")
     public ResponseEntity<byte[]> sourceContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
         @PathVariable String sourceId,@PathVariable long version) {

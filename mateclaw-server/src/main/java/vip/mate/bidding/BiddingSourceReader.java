@@ -55,6 +55,10 @@ public class BiddingSourceReader {
             readBody(document.getBodyElements(),"body",digest,blocks,problems);
             for(int i=0;i<document.getHeaderList().size();i++) readBody(document.getHeaderList().get(i).getBodyElements(),"header:"+i,digest,blocks,problems);
             for(int i=0;i<document.getFooterList().size();i++) readBody(document.getFooterList().get(i).getBodyElements(),"footer:"+i,digest,blocks,problems);
+            for(var footnote:document.getFootnotes()) if(footnote.getId()!=null && footnote.getId().signum()>0)
+                readBody(footnote.getBodyElements(),"footnote:"+footnote.getId(),digest,blocks,problems);
+            for(var endnote:document.getEndnotes()) if(endnote.getId()!=null && endnote.getId().signum()>0)
+                readBody(endnote.getBodyElements(),"endnote:"+endnote.getId(),digest,blocks,problems);
             for(var part:document.getPackage().getParts()) {
                 String name=part.getPartName().getName();
                 if(!name.matches("/word/(document|header[0-9]*|footer[0-9]*|footnotes|endnotes)\\.xml")) continue;

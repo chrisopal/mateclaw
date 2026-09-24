@@ -65,9 +65,15 @@ public class BiddingRepository {
         return jdbc.update("UPDATE mate_bidding_head SET version=:v,selected_ref_json=:ref WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current' AND version=:expectedVersion",args)==1;
     }
     public boolean sourceWasConfirmed(BiddingTypes.Scope scope,BiddingTypes.Ref sourceRef) {
-        Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND input_refs_json LIKE :needle",
-            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"needle","%\"id\":\""+sourceRef.id()+"\"%"),Integer.class);
-        return count!=null && count>0;
+        List<String> histories=jdbc.query("SELECT input_refs_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet'",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId()),(rs,n)->rs.getString(1));
+        for(String history:histories) {
+            try {
+                JsonNode refs=json.readTree(history);
+                if(refs.isArray()) for(JsonNode node:refs) if(sourceRef.equals(json.convertValue(node,BiddingTypes.Ref.class))) return true;
+            } catch(Exception e) { throw new IllegalStateException("Invalid persisted source-set references",e); }
+        }
+        return false;
     }
     public int insertSource(String id,String workspace,String project,String sourceId,long version,String kind,String digest,byte[] content,
         String filename,java.sql.Timestamp now) {

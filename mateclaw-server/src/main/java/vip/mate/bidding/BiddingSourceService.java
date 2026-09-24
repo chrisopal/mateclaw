@@ -112,6 +112,18 @@ public class BiddingSourceService {
         }).toList();
     }
 
+    public ObjectNode sourceSetHead(BiddingTypes.Scope scope) {
+        requireReader(scope);
+        if(repository.findProject(scope.workspaceId(),scope.projectId())==null) throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+        ObjectNode result=json.createObjectNode();
+        var head=repository.sourceSetHead(scope);
+        if(head==null) result.putNull("ref"); else {
+            ObjectNode ref=json.createObjectNode(); ref.put("kind",head.kind()); ref.put("id",head.id()); ref.put("version",head.version()); ref.put("digest",head.digest());
+            result.set("ref",ref);
+        }
+        return result;
+    }
+
     /** Claims at most two rows atomically, then parses outside each claim transaction. */
     public int readPending(int limit) {
         int max=Math.min(2,Math.max(0,limit)), completed=0;

@@ -195,6 +195,49 @@ class BiddingSourceTest extends BiddingHttpFixture {
         assertEquals(blockId,evidence.path("id").asText());
     }
 
+    @Test void confirmedVersionIsImmutableButFailedSupersedingVersionCanBeRetried() throws Exception {
+        var project=project(); var v1=upload(project,UUID.randomUUID().toString(),"v1.pdf",readablePdf("confirmed v1"),workspace,"member",200); sources.readPending(2);
+        confirm(project,null,List.of(refFrom(v1.path("ref"))));
+        byte[] corrupt=new byte[]{'%', 'P', 'D', 'F', '-', 'x'};
+        var v2=uploadSuperseding(project,UUID.randomUUID().toString(),"v2.pdf",corrupt,refFrom(v1.path("ref")),workspace,"member",200);
+        sources.readPending(2);
+        assertEquals("FAILED",api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200).get(1).path("readStatus").asText());
+        var v2Retry=json.createObjectNode(); v2Retry.set("sourceRef",json.valueToTree(refFrom(v2.path("ref"))));
+        api("POST","/projects/"+project.path("id").asText()+"/commands","member",workspace,
+            Map.of("operationId",UUID.randomUUID().toString(),"expected",ref(project),"action","RETRY_SOURCE_READ","payload",v2Retry),200);
+        var afterRetry=api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200);
+        assertEquals("PENDING",afterRetry.get(1).path("readStatus").asText());
+        for(int attempt=0;attempt<100 && "PENDING".equals(afterRetry.get(1).path("readStatus").asText());attempt++) {
+            sources.readPending(2);
+            afterRetry=api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200);
+        }
+        assertEquals("FAILED",afterRetry.get(1).path("readStatus").asText());
+        var v1Retry=json.createObjectNode(); v1Retry.set("sourceRef",json.valueToTree(refFrom(v1.path("ref"))));
+        var denied=api("POST","/projects/"+project.path("id").asText()+"/commands","member",workspace,
+            Map.of("operationId",UUID.randomUUID().toString(),"expected",ref(project),"action","RETRY_SOURCE_READ","payload",v1Retry),409);
+        assertEquals("SOURCE_ALREADY_CONFIRMED",denied.path("data").path("code").asText());
+        var afterV1Retry=api("GET","/projects/"+project.path("id").asText()+"/sources","member",workspace,null,200);
+        assertEquals("READY",afterV1Retry.get(0).path("readStatus").asText());
+    }
+
+    @Test void freshClientReadsCurrentSourceSetHeadAndRecoversFromConflict() throws Exception {
+        var project=project();
+        var initial=api("GET","/projects/"+project.path("id").asText()+"/source-set/head","viewer",workspace,null,200);
+        assertTrue(initial.path("ref").isNull());
+        var first=upload(project,UUID.randomUUID().toString(),"first.pdf",readablePdf("first"),workspace,"member",200); sources.readPending(2);
+        var confirmed=confirm(project,null,List.of(refFrom(first.path("ref"))));
+        var head=api("GET","/projects/"+project.path("id").asText()+"/source-set/head","viewer",workspace,null,200);
+        assertEquals(confirmed.path("ref"),head.path("ref"));
+
+        var second=upload(project,UUID.randomUUID().toString(),"second.pdf",readablePdf("second"),workspace,"member",200); sources.readPending(2);
+        var stale=confirm(project,null,List.of(refFrom(second.path("ref"))),409);
+        assertEquals("SOURCE_SET_HEAD_CONFLICT",stale.path("data").path("code").asText());
+        var current=api("GET","/projects/"+project.path("id").asText()+"/source-set/head","viewer",workspace,null,200);
+        var recovered=confirm(project,refFrom(current.path("ref")),List.of(refFrom(second.path("ref"))));
+        assertEquals(current.path("ref").path("version").asLong()+1,recovered.path("ref").path("version").asLong());
+        api("GET","/projects/"+project.path("id").asText()+"/source-set/head","owner",otherWorkspace,null,404);
+    }
+
     @Test void uploadAndConfirmationRejectLimitsAndMissingReadCompletion() throws Exception {
         var project=project();
         upload(project,UUID.randomUUID().toString(),"large.pdf",new byte[25*1024*1024+1],workspace,"member",413);

@@ -66,6 +66,21 @@ class BiddingSourceReaderTest {
         assertTrue(extraction.blocks().stream().anyMatch(b->b.text().contains(url)));
     }
 
+    @Test void docxExtractsFootnotesAndEndnotesWithStableLocators() throws Exception {
+        byte[] bytes;
+        try(var d=new XWPFDocument();var out=new ByteArrayOutputStream()) {
+            d.createParagraph().createRun().setText("Body reference");
+            var footnote=d.createFootnote(); footnote.createParagraph().createRun().setText("Footnote clause 8.2");
+            var endnote=d.createEndnote(); endnote.createParagraph().createRun().setText("Endnote amendment A");
+            d.write(out); bytes=out.toByteArray();
+        }
+        var extraction=reader.read(bytes,"notes.docx");
+        assertTrue(extraction.complete(),extraction.problems().toString());
+        assertTrue(extraction.blocks().stream().anyMatch(b->b.locator().startsWith("footnote:") && b.text().contains("Footnote clause 8.2")));
+        assertTrue(extraction.blocks().stream().anyMatch(b->b.locator().startsWith("endnote:") && b.text().contains("Endnote amendment A")));
+        assertEquals(extraction.blocks().stream().map(BiddingTypes.ReadBlock::id).toList(),reader.read(bytes,"notes.docx").blocks().stream().map(BiddingTypes.ReadBlock::id).toList());
+    }
+
     @Test void pdfUsesActualPageNumbersAndFlagsImageOnlyPage() throws Exception {
         byte[] bytes = pdf(List.of("First page amount 12.50", "", "Third page amount 7"), false);
         var extraction = reader.read(bytes, "tender.pdf");

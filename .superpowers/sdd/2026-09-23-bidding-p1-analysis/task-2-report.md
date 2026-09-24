@@ -44,3 +44,20 @@ All six review findings were addressed within Task 2 ownership:
 - MySQL and Kingbase migration/runtime verification remains NOT_RUN; no migration changes were made in this fix round. Browser, model and OCR integration remain NOT_RUN.
 
 API contract note: source-set confirmation callers must now send `expectedSourceSetRef`, using explicit `null` when no source set is current and the last returned source-set ref thereafter. This is required for stale-write rejection.
+
+## Fix round 2 — Sol re-review findings
+
+Both round-2 findings are addressed, and the previously noted ordinary DOCX footnote/endnote coverage gap is closed:
+
+- Historical confirmation checks now compare the full source reference (`sourceId`, version, and digest where present). A confirmed v1 no longer blocks retry of an unconfirmed failed v2; the exact confirmed v1 remains immutable. Regression tests cover both sides.
+- Added workspace/project-authorized `GET /api/v1/bidding/projects/{id}/source-set/head`. A fresh client can obtain an explicit empty head before first confirmation, and can re-read the new head after a stale confirmation conflict. Tests verify this recovery path and reject a project from another workspace with 404.
+- DOCX ordinary footnotes and endnotes are extracted in document order with stable `footnote:<id>/...` and `endnote:<id>/...` locators. A generated DOCX fixture verifies text, completeness, locators, and deterministic IDs on reread.
+
+### Fix-round TDD and verification
+
+- RED: Java 21 source tests first failed on the v2 retry returning `SOURCE_ALREADY_CONFIRMED` and the missing source-set-head endpoint (404). A reader regression also failed because substantive footnote/endnote text was omitted while extraction reported complete. A retry test initially left a pending row that affected a later assertion; the fixture now drains it to FAILED before continuing.
+- GREEN: `JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home PATH=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home/bin:$PATH mvn -pl mateclaw-server -am -Dmaven.compiler.proc=full -Dtest='Bidding*Test' -Dsurefire.failIfNoSpecifiedTests=false test -q` — 36 tests passed, 0 failures/errors: Project 7, SourceReader 10, Migration 2, Source 17.
+- `git diff --check` — PASS.
+- MySQL and Kingbase runtime/migration checks remain NOT_RUN. Browser, model, and OCR integration remain NOT_RUN.
+
+No unresolved DOCX header/footer/textbox/footnote/endnote content omission is known within the supported parser coverage; ambiguous or unsupported structures remain flagged NEEDS_REVIEW rather than reported complete.
