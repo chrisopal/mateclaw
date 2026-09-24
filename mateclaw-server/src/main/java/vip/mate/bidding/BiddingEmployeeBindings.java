@@ -22,6 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import vip.mate.agent.AgentService;
 import vip.mate.agent.binding.service.AgentBindingService;
 import vip.mate.agent.model.AgentEntity;
+import vip.mate.llm.model.ModelConfigEntity;
+import vip.mate.llm.model.ModelProviderEntity;
+import vip.mate.llm.routing.ProviderRouter;
+import vip.mate.llm.service.ModelConfigService;
+import vip.mate.llm.service.ModelProviderService;
 import vip.mate.skill.runtime.SkillRuntimeService;
 import vip.mate.skill.runtime.model.ResolvedSkill;
 
@@ -29,6 +34,10 @@ import vip.mate.skill.runtime.model.ResolvedSkill;
 @Lazy
 public class BiddingEmployeeBindings {
     private static final List<String> ROLES = List.of("analyst", "writer", "reviewer");
+    private static final Map<String, List<String>> REQUIRED_SKILLS = Map.of(
+            "analyst", List.of("bidding-tender-profile", "bidding-elimination-analysis", "bidding-requirement-analysis", "bidding-scoring-analysis"),
+            "writer", List.of("bidding-outline-planning", "bidding-technical-writing", "bidding-document-export"),
+            "reviewer", List.of("bidding-technical-review"));
     private final AgentService agents;
     private final AgentBindingService agentBindings;
     private final SkillRuntimeService skills;
@@ -36,12 +45,17 @@ public class BiddingEmployeeBindings {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final BiddingAccess access;
+    private final ModelConfigService modelConfigs;
+    private final ModelProviderService modelProviders;
+    private final ProviderRouter providerRouter;
 
     public BiddingEmployeeBindings(AgentService agents, AgentBindingService agentBindings,
             SkillRuntimeService skills, BiddingSkillPackages packages,
-            JdbcTemplate jdbc, ObjectMapper json, BiddingAccess access) {
+            JdbcTemplate jdbc, ObjectMapper json, BiddingAccess access,
+            ModelConfigService modelConfigs, ModelProviderService modelProviders, ProviderRouter providerRouter) {
         this.agents = agents; this.agentBindings = agentBindings; this.skills = skills;
         this.packages = packages; this.jdbc = jdbc; this.json = json; this.access = access;
+        this.modelConfigs = modelConfigs; this.modelProviders = modelProviders; this.providerRouter = providerRouter;
     }
 
     @Transactional
@@ -62,29 +76,38 @@ public class BiddingEmployeeBindings {
             catch (Exception e) { throw new IllegalStateException("Invalid stored employee assignment operation", e); }
         }
         ObjectNode project = project(scope);
+        if ("ARCHIVED".equals(project.path("stage").asText()))
+            throw BiddingAccess.error(409, "PROJECT_ARCHIVED", "已归档项目不能新增岗位绑定");
         BiddingTypes.Ref expected = command.expected();
         if (!matches(project, expected)) throw BiddingAccess.error(409, "VERSION_CONFLICT", "项目已更新，请刷新后重试");
         ObjectNode payload = command.payload();
         Map<String, Long> selected = new LinkedHashMap<>();
         for (String role : ROLES) {
             String field = role + "AgentId";
-            long id = identifier(payload.path(field).asText(null), "INVALID_EMPLOYEE");
+            if (!payload.has(field)) throw BiddingAccess.error(400, "INVALID_REQUEST", "岗位绑定请求缺少" + field);
+            JsonNode requested = payload.get(field);
+            if (requested == null || requested.isNull()) { selected.put(role, null); continue; }
+            long id = identifier(requested.asText(null), "INVALID_EMPLOYEE");
             AgentEntity employee = requireEmployee(id, BiddingAccess.parse(scope.workspaceId(), "WORKSPACE_REQUIRED"));
             requireModel(id, employee);
-            List<ResolvedSkill> authorized = authorizedActiveSkills(id, BiddingAccess.parse(scope.workspaceId(), "WORKSPACE_REQUIRED"));
-            if (authorized.isEmpty()) throw BiddingAccess.error(422, "EMPLOYEE_SKILL_UNAVAILABLE", "数字员工缺少已授权且可用的技能");
+            requiredRoleSkills(role, id, BiddingAccess.parse(scope.workspaceId(), "WORKSPACE_REQUIRED"));
             selected.put(role, id);
         }
-        if (selected.get("writer").equals(selected.get("reviewer")))
+        if (selected.get("writer") != null && selected.get("writer").equals(selected.get("reviewer")))
             throw BiddingAccess.error(422, "REVIEWER_MUST_DIFFER", "审核员工必须与编写员工不同");
 
         ObjectNode assigned = json.createObjectNode();
         for (String role : ROLES) {
-            long id = selected.get(role);
             ObjectNode binding = assigned.putObject(role);
-            binding.put("agentId", Long.toString(id));
             ArrayNode pins = binding.putArray("skillPins");
-            for (ResolvedSkill skill : authorizedActiveSkills(id, Long.parseLong(scope.workspaceId()))) {
+            Long assignedId = selected.get(role);
+            if (assignedId == null) {
+                binding.putNull("agentId"); binding.putNull("configDigest"); binding.putNull("modelConfigId");
+                continue;
+            }
+            long id = assignedId;
+            binding.put("agentId", Long.toString(id));
+            for (ResolvedSkill skill : requiredRoleSkills(role, id, Long.parseLong(scope.workspaceId()))) {
                 BiddingTypes.SkillPin pin = packages.pin(scope, Long.toString(id), Long.toString(skill.getId()));
                 ObjectNode ref = pins.addObject(); ref.put("skillId", pin.skillId()); ref.put("digest", pin.digest());
             }
@@ -116,8 +139,8 @@ public class BiddingEmployeeBindings {
 
     public String modelConfigId(BiddingTypes.Scope scope, String agentId) {
         AgentEntity employee = requireEmployee(identifier(agentId, "INVALID_EMPLOYEE"), BiddingAccess.parse(scope.workspaceId(), "WORKSPACE_REQUIRED"));
-        Long modelId = resolveModelId(employee);
-        return modelId == null ? null : Long.toString(modelId);
+        ModelRow model = modelRow(employee);
+        return model == null ? null : Long.toString(model.id());
     }
 
     public String configDigest(BiddingTypes.Scope scope, String agentId) {
@@ -131,6 +154,8 @@ public class BiddingEmployeeBindings {
         config.put("modelConfigId", model == null ? null : model.id());
         config.put("modelUpdatedAt", model == null ? null : model.updatedAt());
         config.put("modelName", model == null ? null : model.modelName());
+        config.put("modelProvider", model == null ? null : model.providerId());
+        config.put("providerUpdatedAt", model == null ? null : model.providerUpdatedAt());
         config.put("runtimeType", employee.getRuntimeType());
         config.put("tools", tools == null ? null : tools.stream().sorted().toList());
         config.put("skillIds", boundSkills == null ? null : boundSkills.stream().sorted().toList());
@@ -151,13 +176,35 @@ public class BiddingEmployeeBindings {
         ArrayNode result = json.createArrayNode();
         for (AgentEntity agent : agents.listAgentsByWorkspace(workspace, null)) {
             ObjectNode row = result.addObject(); row.put("id", Long.toString(agent.getId())); row.put("name", agent.getName());
-            ArrayNode reasons = row.putArray("unavailableReasons");
+            ArrayNode visibleSkills = row.putArray("skills");
+            List<ResolvedSkill> employeeSkills = availableGrantedSkills(agent.getId(), workspace);
+            for (ResolvedSkill skill : employeeSkills) {
+                ObjectNode item = visibleSkills.addObject(); item.put("id", Long.toString(skill.getId())); item.put("name", skill.getName());
+            }
+            ObjectNode roles = row.putObject("roles");
+            Set<String> allReasons = new java.util.LinkedHashSet<>();
+            boolean employeeReady = true;
             try {
                 requireEmployee(agent.getId(), workspace);
-                requireModel(agent.getId(), agent);
-                if (authorizedActiveSkills(agent.getId(), workspace).isEmpty()) reasons.add("缺少已授权且可用的技能");
-            } catch (BiddingApiException e) { reasons.add(e.getMessage()); }
-            row.put("available", reasons.isEmpty());
+                if (modelRow(agent) == null) throw BiddingAccess.error(422, "MODEL_CONFIG_MISSING", "未配置可用的对话模型");
+            } catch (BiddingApiException e) { employeeReady = false; allReasons.add(e.getMessage()); }
+            boolean anyRoleReady = false;
+            for (String role : ROLES) {
+                ObjectNode status = roles.putObject(role); ArrayNode missing = status.putArray("missingSkills");
+                if (!employeeReady) { status.put("available", false); status.put("reason", String.join("；", allReasons)); continue; }
+                for (String requiredName : REQUIRED_SKILLS.get(role)) {
+                    ResolvedSkill skill = skills.findActiveSkill(requiredName, workspace);
+                    if (skill == null || skill.getId() == null || !SkillRuntimeService.passesActiveGate(skill)
+                            || !isGranted(agent.getId(), skill.getId())) {
+                        missing.add(requiredName); allReasons.add("缺少技能 " + requiredName);
+                    }
+                }
+                boolean ready = missing.isEmpty(); status.put("available", ready);
+                if (!ready) status.put("reason", "岗位必需技能未就绪");
+                else anyRoleReady = true;
+            }
+            row.put("available", employeeReady && anyRoleReady);
+            ArrayNode reasons = row.putArray("unavailableReasons"); allReasons.forEach(reasons::add);
         }
         return result;
     }
@@ -172,33 +219,57 @@ public class BiddingEmployeeBindings {
         return agent;
     }
 
-    private List<ResolvedSkill> authorizedActiveSkills(long agentId, long workspace) {
+    private List<ResolvedSkill> requiredRoleSkills(String role, long agentId, long workspace) {
+        List<ResolvedSkill> found = new ArrayList<>();
+        for (String name : REQUIRED_SKILLS.get(role)) {
+            ResolvedSkill skill = skills.findActiveSkill(name, workspace);
+            if (skill == null || skill.getId() == null || !SkillRuntimeService.passesActiveGate(skill) || !isGranted(agentId, skill.getId()))
+                throw BiddingAccess.error(422, "EMPLOYEE_SKILL_UNAVAILABLE", "岗位缺少已授权且可用的必需技能: " + name);
+            found.add(skill);
+        }
+        return List.copyOf(found);
+    }
+
+    private boolean isGranted(long agentId, long skillId) { Set<Long> allowed = agentBindings.getBoundSkillIds(agentId); return allowed == null || allowed.contains(skillId); }
+    private List<ResolvedSkill> availableGrantedSkills(long agentId, long workspace) {
         Set<Long> allowed = agentBindings.getBoundSkillIds(agentId);
-        return skills.getActiveSkills(workspace).stream()
-                .filter(skill -> skill.getId() != null && (allowed == null || allowed.contains(skill.getId())))
-                .filter(skill -> {
-                    ResolvedSkill current = skills.findActiveSkill(skill.getName(), workspace);
-                    return current != null && current.getId() != null && current.getId().equals(skill.getId()) && SkillRuntimeService.passesActiveGate(current);
-                }).toList();
+        return skills.getActiveSkills(workspace).stream().filter(s -> s.getId() != null && (allowed == null || allowed.contains(s.getId())))
+                .filter(s -> SkillRuntimeService.passesActiveGate(s)).toList();
     }
 
     private void requireModel(long agentId, AgentEntity employee) {
         if (modelRow(employee) == null) throw BiddingAccess.error(422, "MODEL_CONFIG_MISSING", "数字员工未配置可用的对话模型");
     }
 
-    private Long resolveModelId(AgentEntity employee) { ModelRow row = modelRow(employee); return row == null ? null : row.id(); }
     private ModelRow modelRow(AgentEntity employee) {
-        String modelName = employee.getModelName();
-        if (modelName == null || modelName.isBlank()) {
-            return jdbc.query("SELECT id,model_name,update_time FROM mate_model_config WHERE is_default=TRUE AND enabled=TRUE AND deleted=0 AND (model_type IS NULL OR model_type='chat') ORDER BY id LIMIT 1",
-                    (rs, n) -> new ModelRow(rs.getLong(1), rs.getString(2), rs.getTimestamp(3) == null ? null : rs.getTimestamp(3).toInstant().toString())).stream().findFirst().orElse(null);
+        ModelConfigEntity resolved;
+        try { resolved = modelConfigs.resolveModel(employee.getModelName()); }
+        catch (RuntimeException unavailable) { return null; }
+        if (resolved == null) return null;
+        boolean explicitAgentModel = employee.getModelName() != null && employee.getModelName().equalsIgnoreCase(resolved.getModelName());
+        ModelConfigEntity selected = resolved;
+        if (!explicitAgentModel) {
+            try { ModelConfigEntity routed = providerRouter.selectPrimary(employee.getId(), resolved); if (routed != null) selected = routed; }
+            catch (RuntimeException ignored) { selected = resolved; }
         }
-        return jdbc.query("SELECT id,model_name,update_time FROM mate_model_config WHERE model_name=? AND enabled=TRUE AND deleted=0 AND (model_type IS NULL OR model_type='chat') ORDER BY id LIMIT 1",
-                (rs, n) -> new ModelRow(rs.getLong(1), rs.getString(2), rs.getTimestamp(3) == null ? null : rs.getTimestamp(3).toInstant().toString()), modelName).stream().findFirst().orElse(null);
+        try {
+            if (!modelProviders.isProviderConfigured(selected.getProvider())) {
+                selected = modelConfigs.listByType("chat").stream()
+                        .filter(m -> Boolean.TRUE.equals(m.getEnabled()))
+                        .filter(m -> { try { return modelProviders.isProviderConfigured(m.getProvider()); } catch (RuntimeException e) { return false; } })
+                        .findFirst().orElse(null);
+            }
+        } catch (RuntimeException unavailable) { return null; }
+        if (selected == null) return null;
+        ModelProviderEntity provider;
+        try { provider = modelProviders.getProviderConfig(selected.getProvider()); }
+        catch (RuntimeException unavailable) { return null; }
+        return new ModelRow(selected.getId(), selected.getModelName(), selected.getUpdateTime() == null ? null : selected.getUpdateTime().toString(),
+                selected.getProvider(), provider.getUpdateTime() == null ? null : provider.getUpdateTime().toString());
     }
 
     private List<String> packageDigests(BiddingTypes.Scope scope, long agentId, Set<Long> allowedSkills) {
-        List<ResolvedSkill> active = authorizedActiveSkills(agentId, Long.parseLong(scope.workspaceId())).stream()
+        List<ResolvedSkill> active = availableGrantedSkills(agentId, Long.parseLong(scope.workspaceId())).stream()
                 .filter(skill -> allowedSkills == null || allowedSkills.contains(skill.getId())).toList();
         List<String> ids = active.stream().map(s -> Long.toString(s.getId())).toList();
         if (ids.isEmpty()) return List.of();
@@ -243,5 +314,5 @@ public class BiddingEmployeeBindings {
         if (node.isArray()) { var array = json.createArrayNode(); node.forEach(item -> array.add(canonical(item))); return array; }
         return node;
     }
-    private record ModelRow(long id, String modelName, String updatedAt) { }
+    private record ModelRow(long id, String modelName, String updatedAt, String providerId, String providerUpdatedAt) { }
 }
