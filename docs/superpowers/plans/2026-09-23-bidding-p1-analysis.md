@@ -164,9 +164,11 @@ if (points > 1_000_000) {
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProjectService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/skill/runtime/SkillRuntimeService.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSkillPackagesTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java`
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingProjectTest.java`
 
 **Interfaces:**
 - Consumes: `AgentService.getAgent(Long)`、`listAgentsByWorkspace(Long,Boolean)`；`AgentBindingService.getBoundSkillIds(Long)` / `getEffectiveToolNames(Long)`；`SkillRuntimeService.findActiveSkill(String,Long)`。
