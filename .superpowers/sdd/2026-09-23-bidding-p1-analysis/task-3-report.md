@@ -23,6 +23,17 @@ Implementation commit: `8ffe5dd9a7e059806d44776bdcb7bec1cd25582f`
   `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='Bidding*Test' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — EXIT_CODE=0, BUILD SUCCESS; 52 tests, 0 failures, 0 errors.
 - `git diff --check` — PASS.
 
+## Sol review fix round 2
+
+- Implementation commit: `0b84e1298765214497822809f146d95beb246f67`
+- Added real H2 regression for a single agent assigned as both analyst and writer; before the fix it failed because each role recorded a different digest as its role skill pins were added sequentially.
+- Assignment now pins required packages for all selected roles before calculating any stored model/config snapshot, so a shared employee's role bindings agree with the final project pin set and validate immediately.
+- Focused command:
+  `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='BiddingEmployeeBindingsTest,BiddingSkillPackagesTest,BiddingProjectTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — EXIT_CODE=0, BUILD SUCCESS; 24 tests, 0 failures, 0 errors.
+- All bidding test command:
+  `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='Bidding*Test' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — EXIT_CODE=0, BUILD SUCCESS; 53 tests, 0 failures, 0 errors.
+- `git diff --check` — PASS.
+
 ## Coverage
 
 - Skill package digest is independent of map insertion order and changes with schema content.
@@ -38,5 +49,5 @@ Implementation commit: `8ffe5dd9a7e059806d44776bdcb7bec1cd25582f`
 
 ## NOT_RUN
 
-- Full server/repository Maven test suites were not run; verification covered all 52 `Bidding*Test` cases.
+- Full server/repository Maven test suites were not run; the latest verification covered all 53 `Bidding*Test` cases.
 - Live HTTP/E2E against a running application was not run.
