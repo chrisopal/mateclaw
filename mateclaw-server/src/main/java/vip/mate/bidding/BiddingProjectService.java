@@ -97,6 +97,10 @@ public class BiddingProjectService {
             validateText(name,"name"); validateText(lot,"lotName"); access.requireOwner(scope.workspaceId(),owner);
         } else stage="ARCHIVED";
         ObjectNode updated=project(scope.projectId(),scope.workspaceId(),owner,name.trim(),lot.trim(),Math.toIntExact(expected.version()+1),stage);
+        // Project edits own the descriptive fields; employee bindings and selected
+        // revision pointers are independent selections and must survive the edit.
+        updated.set("bindings",current.path("bindings").deepCopy());
+        updated.set("selectedRefs",current.path("selectedRefs").deepCopy());
         int count=repository.updateProject(scope.workspaceId(),scope.projectId(),owner,name.trim(),lot.trim(),stage,write(updated),Math.toIntExact(expected.version()),now());
         if(count!=1) throw BiddingAccess.error(409,"VERSION_CONFLICT","Project has changed; reload before saving");
         ObjectNode result=json.createObjectNode(); result.set("ref",updated.path("ref")); result.set("result",updated);

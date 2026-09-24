@@ -355,6 +355,17 @@ public class SkillRuntimeService {
             .orElse(null);
     }
 
+    /** Workspace-scoped active lookup by the persisted skill row id. */
+    public ResolvedSkill findActiveSkillById(Long skillId, Long workspaceId) {
+        if (skillId == null) return null;
+        return getActiveSkills().stream()
+            .filter(s -> skillId.equals(s.getId()))
+            .filter(s -> matchesWorkspace(s, workspaceId))
+            .filter(SkillRuntimeService::passesActiveGate)
+            .findFirst()
+            .orElse(null);
+    }
+
     /**
      * 构建技能 prompt 增强片段（全局，向后兼容）
      */

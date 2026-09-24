@@ -8,25 +8,40 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ContentDisposition;
 import org.springframework.web.multipart.MultipartFile;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.*;
 import vip.mate.common.result.R;
 
 @RestController
 @RequestMapping("/api/v1/bidding")
-@RequiredArgsConstructor
 public class BiddingController {
     private final BiddingAccess access;
     private final BiddingProjectService projects;
     private final BiddingCommandService commands;
     private final BiddingSourceService sources;
+    private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectMapper json;
+
+    public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
+            BiddingSourceService sources, ObjectProvider<BiddingEmployeeBindings> employees, ObjectMapper json) {
+        this.access = access;
+        this.projects = projects;
+        this.commands = commands;
+        this.sources = sources;
+        this.employees = employees;
+        this.json = json;
+    }
 
     @GetMapping("/capabilities")
     public R<?> capabilities(@RequestHeader("X-Workspace-Id") String workspace) {
         String actor=access.require(workspace,"viewer"); boolean canWrite=hasRole(workspace,"member");
         boolean canApprove=hasRole(workspace,"admin");
         return R.ok(java.util.Map.of("enabled",true,"canWrite",canWrite,"canApprove",canApprove));
+    }
+    @GetMapping("/employees")
+    public R<?> employees(@RequestHeader(value="X-Workspace-Id",required=false) String workspace) {
+        String actor=access.require(workspace,"viewer");
+        return R.ok(employees.getObject().employees(new BiddingTypes.Scope(workspace,actor,null)));
     }
     @GetMapping("/projects")
     public R<?> list(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,

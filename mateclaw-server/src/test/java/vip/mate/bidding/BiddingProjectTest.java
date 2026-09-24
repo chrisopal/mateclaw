@@ -38,6 +38,26 @@ class BiddingProjectTest extends BiddingHttpFixture {
         command(p,ref(p),"UPDATE_PROJECT",Map.of("name","过期修改"),"member",409);
     }
 
+    @Test void projectUpdatesPreserveEmployeeBindingsAndKeepReferenceUsable() throws Exception {
+        JsonNode created = project();
+        String id = created.path("id").asText();
+        var stored = (com.fasterxml.jackson.databind.node.ObjectNode) created.deepCopy();
+        var writer = stored.putObject("bindings").putObject("writer");
+        writer.put("agentId", "412"); writer.put("configDigest", "a".repeat(64));
+        stored.putObject("selectedRefs").putObject("outline").put("version", 3);
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE workspace_id=? AND id=?", json.writeValueAsString(stored), workspace, id);
+
+        JsonNode updated = command(stored, ref(stored), "UPDATE_PROJECT", Map.of("name", "更新员工绑定后的项目"), "member", 200);
+        JsonNode result = updated.path("result");
+        assertEquals("412", result.path("bindings").path("writer").path("agentId").asText());
+        assertEquals("a".repeat(64), result.path("bindings").path("writer").path("configDigest").asText());
+        assertEquals(3, result.path("selectedRefs").path("outline").path("version").asInt());
+
+        JsonNode second = command(result, ref(result), "UPDATE_PROJECT", Map.of("lotName", "二标段"), "member", 200);
+        assertEquals("412", second.path("result").path("bindings").path("writer").path("agentId").asText());
+        assertEquals(3, second.path("result").path("version").asInt());
+    }
+
     @Test void archiveRejectsNewMutationsButReplaysTheSameOperation() throws Exception {
         JsonNode p=project();
         Map<String,Object> archive=Map.of("operationId","archive-op","expected",ref(p),"action","ARCHIVE_PROJECT","payload",Map.of());
