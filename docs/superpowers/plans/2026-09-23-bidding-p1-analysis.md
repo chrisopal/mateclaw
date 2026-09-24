@@ -40,13 +40,25 @@
 | P1-07 | `mateclaw-ui/src/features/bidding/` 下 api/types/routes、列表/工作台、文件/解析/概览组件、任务/证据抽屉、shared/state | 现有 router、MainLayout、zh-CN/en-US locales |
 | P1-08 | `scripts/bidding/check-runtime.py`, `docs/bidding/runtime.md`, `docs/bidding/acceptance/2026-09-23-p1.md` | 只补验收发现的当前范围缺陷 |
 
-### Task P1-01：建立隔离的项目和持久化基础
+### Task 1: P1-01 建立隔离的项目和持久化基础
 
 **Files:**
-- Create: 上表 P1-01 的 10 个 J 文件。
-- Create: `mateclaw-server/src/main/resources/db/migration/h2/V212__bidding_foundation.sql`、`mysql/V212__bidding_foundation.sql`、`kingbase/V212__bidding_foundation.sql`（后两者使用同一 migration 父目录）。
-- Modify: `mateclaw-server/src/main/resources/application.yml`（`mateclaw.bidding.enabled=false`，其他默认值见总计划）。
-- Test: T`BiddingHttpFixture.java`, `BiddingProjectTest.java`, `BiddingMigrationTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTypes.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingApiException.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingExceptionHandler.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAccess.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProjectService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProperties.java`
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V212__bidding_foundation.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V212__bidding_foundation.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V212__bidding_foundation.sql`
+- Modify: `mateclaw-server/src/main/resources/application.yml`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingProjectTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`
 
 **Interfaces:**
 - Consumes: 现有 `AuthService.findByUsername(String)` / `findById(Long)`，WorkspaceMapper/WorkspaceMemberMapper；总计划 BiddingTypes。
@@ -89,12 +101,18 @@ WHERE id=:projectId AND workspace_id=:workspaceId AND version=:expectedVersion;
 - [ ] Run：同前命令 `-Dtest='BiddingProjectTest,BiddingMigrationTest'`。Expected：全部 PASS，读取两次返回同一业务对象，无关联原数据变化。
 - [ ] Commit：仅 stage 本任务文件及对应测试；`git commit -m "Prevent bidding operations from crossing workspace and revision boundaries" -m "Constraint: Preserve existing presales and semantic data" -m "Tested: Bidding project and migration tests"`。
 
-### Task P1-02：持久原文、完整读取和稳定证据定位
+### Task 2: P1-02 持久原文、完整读取和稳定证据定位
 
 **Files:**
-- Create: J`BiddingSourceReader.java`, `BiddingSourceService.java`, `BiddingDependencies.java`。
-- Modify: J`BiddingRepository.java`, `BiddingController.java`, `BiddingCommandService.java`。
-- Test: T`BiddingSourceReaderTest.java`, `BiddingSourceTest.java`；`mateclaw-server/src/test/resources/bidding/reader/expected.json`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceReader.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSourceReaderTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSourceTest.java`
+- Test: `mateclaw-server/src/test/resources/bidding/reader/expected.json`
 
 **Interfaces:**
 - Consumes: `BiddingAccess.requireActor(Scope,String)`；既有 PDFBox Loader、POI XWPFDocument。
@@ -135,12 +153,16 @@ if (points > 1_000_000) {
 - [ ] 增加 BiddingSourceTest：文件重复上传幂等、原字节 SHA-256 读回、跨项目证据404、混合扫描不能确认、纯空白页有理由可排除、超过限额413、缺失抽取页不能标完成。Run：Maven `-Dtest='BiddingSourceReaderTest,BiddingSourceTest'`，Expected PASS。
 - [ ] Commit：显式 stage 本任务文件；`git commit -m "Keep every tender finding traceable to complete immutable source content" -m "Rejected: Silent extractor truncation | loses tender clauses" -m "Tested: Reader and source boundary tests"`。
 
-### Task P1-03：岗位绑定与不可变技能包
+### Task 3: P1-03 岗位绑定与不可变技能包
 
 **Files:**
-- Create: J`BiddingSkillPackages.java`, `BiddingEmployeeBindings.java`。
-- Modify: J`BiddingController.java`, `BiddingCommandService.java`；`mateclaw-server/src/main/java/vip/mate/skill/runtime/SkillRuntimeService.java`（仅必要的包内文件读取，不改变活动技能解析语义）。
-- Test: T`BiddingSkillPackagesTest.java`, `BiddingEmployeeBindingsTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillPackages.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/skill/runtime/SkillRuntimeService.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSkillPackagesTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java`
 
 **Interfaces:**
 - Consumes: `AgentService.getAgent(Long)`、`listAgentsByWorkspace(Long,Boolean)`；`AgentBindingService.getBoundSkillIds(Long)` / `getEffectiveToolNames(Long)`；`SkillRuntimeService.findActiveSkill(String,Long)`。
@@ -174,12 +196,23 @@ if (java.nio.file.Path.of(relativePath).isAbsolute() || normalized.startsWith(".
 - [ ] 测试 pin 后更新活动文件仍读原包；包中 schema 变更导致新 digest；绑定跨 workspace/disabled/未授技能均拒绝；null 工具授权表示继承、空集合表示全部禁用，不能把空集当继承。Run：同前测试，Expected PASS。
 - [ ] Commit：`git commit -m "Make bidding retries execute the same authorized skill package" -m "Tested: Skill pinning and employee scope tests"`，只包含本任务列出的文件。
 
-### Task P1-04：补强平台任务执行接口，保留隔离与错误类型
+### Task 4: P1-04 补强平台任务执行接口，保留隔离与错误类型
 
 **Files:**
-- Create: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectExecutionOptions.java`, `ProjectToolPolicy.java`（同目录）；J`BiddingEmployeeRuntime.java`, `BiddingToolScope.java`, `BiddingReadTool.java`。
-- Modify: `mateclaw-server/src/main/java/vip/mate/agent/AgentService.java`, `agent/AgentGraphBuilder.java`, `agent/graph/NodeStreamingChatHelper.java`, `agent/graph/node/ReasoningNode.java`, `agent/graph/executor/ToolExecutionExecutor.java`, `tool/builtin/SkillLoadTool.java`, `tool/builtin/SkillFileTool.java`（均同一 `vip/mate/` 根）。
-- Test: T`BiddingEmployeeRuntimeTest.java`, `BiddingRuntimeIsolationTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingToolScope.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingReadTool.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectExecutionOptions.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectToolPolicy.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/AgentService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/AgentGraphBuilder.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/NodeStreamingChatHelper.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ReasoningNode.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolExecutionExecutor.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/tool/builtin/SkillLoadTool.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/tool/builtin/SkillFileTool.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRuntimeIsolationTest.java`
 
 **Interfaces:**
 - Consumes: Claim / Execution / Failure；P1-03 fixed package、config validation；现有 `vip.mate.agent.context.ChatOrigin` 输入。
@@ -235,12 +268,20 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - [ ] Run：前两测试加现有 `SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest`；检查 streaming helper/fallback 相关现有测试。Expected PASS；另断言 model一次失败只请求一次、普通聊天策略保持既有行为。未跑 graph 整条链路不能标本任务完成。
 - [ ] Commit：`git commit -m "Keep project task execution isolated and retry accounting observable" -m "Directive: Preserve ordinary chat and presales behavior when options are absent" -m "Tested: Bidding isolation and existing runtime regressions"`。
 
-### Task P1-05：数据库驱动执行、失败重试与中断恢复
+### Task 5: P1-05 数据库驱动执行、失败重试与中断恢复
 
 **Files:**
-- Create: J`BiddingTaskService.java`, `BiddingScheduler.java`, `BiddingRetryPolicy.java`, `BiddingResultHandler.java`。
-- Modify: J`BiddingRepository.java`, `BiddingCommandService.java`, `BiddingController.java`。
-- Test: T`BiddingTaskTest.java`, `BiddingRecoveryTest.java`, `BiddingRetryPolicyTest.java`, `BiddingFakeRuntime.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingScheduler.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRetryPolicy.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingResultHandler.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingTaskTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRecoveryTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRetryPolicyTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingFakeRuntime.java`
 
 **Interfaces:**
 - Consumes: EmployeeBindings.resolve/configDigest/validate、SkillPackages.pin、Dependencies.validate/isCurrent、EmployeeRuntime.execute。
@@ -280,13 +321,20 @@ return OptionalLong.of(delay);
 - [ ] 测试：三次临时错误用 fake clock/显式 now 推进（不实际睡30秒），每次attempt入库；第四次不调用；人工重试总序号递增；取消前后/撤权后迟到提交拒绝；成功接收后DB故障只重提本地；进程启动标中断；一次评分失败不动兄弟task。日志只task/error类，不打印快照/密钥。
 - [ ] Run：同前三测试，Expected PASS；增加线程争用重复运行只在观察到竞态后需要重复验证。Commit：`git commit -m "Make bidding execution recoverable without duplicating accepted results" -m "Constraint: Two automatic retries per manual execution cycle" -m "Tested: Persistent attempts, CAS, cancellation and recovery"`。
 
-### Task P1-06：四项分析技能、契约校验与人工解析基线
+### Task 6: P1-06 四项分析技能、契约校验与人工解析基线
 
 **Files:**
-- Create: J`BiddingSkillValidator.java`, `BiddingAnalysisService.java`。
-- Create: `mateclaw-server/src/main/resources/skills/bidding-tender-profile/`, `bidding-elimination-analysis/`, `bidding-requirement-analysis/`, `bidding-scoring-analysis/`（同一 skills 父目录）；**每个目录创建** `SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`。
-- Modify: J`BiddingTaskService.java`, `BiddingCommandService.java`。
-- Test: T`BiddingSkillValidatorTest.java`, `BiddingAnalysisTest.java`；`mateclaw-server/src/test/resources/bidding/analysis/golden.json`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-tender-profile/`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-elimination-analysis/`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-requirement-analysis/`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-scoring-analysis/`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSkillValidatorTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java`
+- Test: `mateclaw-server/src/test/resources/bidding/analysis/golden.json`
 
 **Interfaces:**
 - Consumes: TaskService.enqueue、SourceService.evidence、Dependencies.validate。
@@ -318,13 +366,30 @@ return OptionalLong.of(delay);
 - [ ] 通过黄金fixture验证每条废标/需求/分值与定位；空列表仅可在全读且明确无匹配时通过；跨项目引用、无quote、伪造actor、漏区块、NaN分数全拒绝。确认前再次validate，重复确认幂等，数据库回读必须保存每个skill payload、attempt及基线。
 - [ ] Run：同前测试，加 P1-05 任务回归，Expected PASS。Commit：`git commit -m "Require complete evidence-backed analysis before a bidding baseline is confirmed" -m "Tested: Four skill contracts and analysis confirmation gates"`。
 
-### Task P1-07：接通企业风格投标入口、文件与解析页面
+### Task 7: P1-07 接通企业风格投标入口、文件与解析页面
 
 **Files:**
-- Create: `mateclaw-ui/src/features/bidding/routes.ts`, `api/biddingApi.ts`, `api/types.ts`, `shared/state.ts`, `pages/BiddingProjects.vue`, `pages/BiddingWorkbench.vue`, `components/BiddingOverview.vue`, `BiddingSources.vue`, `BiddingAnalysis.vue`, `BiddingTaskDrawer.vue`, `BiddingEvidenceDrawer.vue`（后五个同一 components 目录）。
-- Modify: `mateclaw-ui/src/router/index.ts`, `src/views/layout/MainLayout.vue`, `src/i18n/locales/zh-CN.ts`, `src/i18n/locales/en-US.ts`（后三者同一 UI 根）。
-- Modify: J`BiddingController.java`, `BiddingProjectService.java`（dashboard查询）。
-- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingProjects.test.ts`, `biddingWorkbench.test.ts`, `biddingTasks.test.ts`（同目录）；T`BiddingDashboardTest.java`。
+- Create: `mateclaw-ui/src/features/bidding/routes.ts`
+- Create: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`
+- Create: `mateclaw-ui/src/features/bidding/api/types.ts`
+- Create: `mateclaw-ui/src/features/bidding/shared/state.ts`
+- Create: `mateclaw-ui/src/features/bidding/pages/BiddingProjects.vue`
+- Create: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingOverview.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingSources.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingAnalysis.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingTaskDrawer.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingEvidenceDrawer.vue`
+- Modify: `mateclaw-ui/src/router/index.ts`
+- Modify: `mateclaw-ui/src/views/layout/MainLayout.vue`
+- Modify: `mateclaw-ui/src/i18n/locales/zh-CN.ts`
+- Modify: `mateclaw-ui/src/i18n/locales/en-US.ts`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProjectService.java`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingProjects.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDashboardTest.java`
 
 **Interfaces:**
 - Consumes: 总计划HTTP API；`http` + `scopedConfig(workspaceId,signal)`；useWorkspaceStore.registerBeforeSwitch；members.userId/nickname/username。
@@ -358,11 +423,14 @@ export const isCurrentRequest = (w: string, id: string, activeW: string, activeI
 - [ ] Run：UI范围测试、直接eslint、precision、vue-tsc、临时outDir构建（总计划完整命令）；Java `BiddingDashboardTest`。Expected PASS；数字员工配置缺失、只读/撤权、部分解析失败、空数据、刷新回读都必须有交互断言。
 - [ ] Commit：`git commit -m "Expose bidding progress and recovery through clear workspace-scoped actions" -m "Tested: Bidding UI states, typecheck and scoped dashboard queries"`，只stage源文件和测试，不stage编译static。
 
-### Task P1-08：验证解析闭环与持久数据启动边界
+### Task 8: P1-08 验证解析闭环与持久数据启动边界
 
 **Files:**
-- Create: `scripts/bidding/check-runtime.py`, `docs/bidding/runtime.md`, `docs/bidding/acceptance/2026-09-23-p1.md`。
-- Test: `scripts/bidding/test_check_runtime.py`；T`BiddingRecoveryTest.java` 补集成恢复用例。
+- Create: `scripts/bidding/check-runtime.py`
+- Create: `docs/bidding/runtime.md`
+- Create: `docs/bidding/acceptance/2026-09-23-p1.md`
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRecoveryTest.java`
+- Test: `scripts/bidding/test_check_runtime.py`
 
 **Interfaces:**
 - Consumes: P1 HTTP路径、任务状态、attempt/skill pin/来源Refs。
