@@ -104,6 +104,9 @@ WHERE id=:projectId AND workspace_id=:workspaceId AND version=:expectedVersion;
 ### Task 2: P1-02 持久原文、完整读取和稳定证据定位
 
 **Files:**
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V213__bidding_source_read_state.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V213__bidding_source_read_state.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V213__bidding_source_read_state.sql`
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceReader.java`
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceService.java`
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
@@ -112,6 +115,7 @@ WHERE id=:projectId AND workspace_id=:workspaceId AND version=:expectedVersion;
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSourceReaderTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSourceTest.java`
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`
 - Test: `mateclaw-server/src/test/resources/bidding/reader/expected.json`
 
 **Interfaces:**
