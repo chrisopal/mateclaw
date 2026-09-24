@@ -2,8 +2,11 @@ package vip.mate.bidding;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
+import vip.mate.auth.model.UserEntity;
 
 class BiddingProjectTest extends BiddingHttpFixture {
     @Test void cannotReadAnotherWorkspaceOrCreateAsViewer() throws Exception {
@@ -35,10 +38,43 @@ class BiddingProjectTest extends BiddingHttpFixture {
         command(p,ref(p),"UPDATE_PROJECT",Map.of("name","过期修改"),"member",409);
     }
 
+    @Test void archiveRejectsNewMutationsButReplaysTheSameOperation() throws Exception {
+        JsonNode p=project();
+        Map<String,Object> archive=Map.of("operationId","archive-op","expected",ref(p),"action","ARCHIVE_PROJECT","payload",Map.of());
+        String path="/projects/"+p.path("id").asText()+"/commands";
+        JsonNode first=api("POST",path,"member",workspace,archive,200);
+        assertEquals("ARCHIVED",first.path("result").path("stage").asText());
+        assertEquals(first,api("POST",path,"member",workspace,archive,200));
+        Map<String,Object> update=Map.of("operationId","new-after-archive","expected",ref(first.path("result")),"action","UPDATE_PROJECT","payload",Map.of("name","不应发生"));
+        var error=api("POST",path,"member",workspace,update,409);
+        assertTrue(error.toString().contains("PROJECT_ARCHIVED"));
+    }
+
+    @Test void concurrentSameOperationCreatesOnlyOneProject() throws Exception {
+        String op="parallel-"+java.util.UUID.randomUUID();
+        Map<String,String> body=Map.of("operationId",op,"name","并发项目","lotName","一标段");
+        CountDownLatch start=new CountDownLatch(1);
+        try(var pool=Executors.newFixedThreadPool(2)) {
+            var one=pool.submit(()->{ start.await(); return api("POST","/projects","member",workspace,body,200); });
+            var two=pool.submit(()->{ start.await(); return api("POST","/projects","member",workspace,body,200); });
+            start.countDown(); JsonNode p1=one.get(),p2=two.get();
+            assertEquals(p1,p2);
+            assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_project WHERE workspace_id=?",Integer.class,workspace));
+        }
+    }
+
     @Test void ownerMustBeEnabledWorkspaceMember() throws Exception {
+        UserEntity outsider=new UserEntity(); outsider.setUsername("bidding_outsider_"+java.util.UUID.randomUUID());
+        outsider.setPassword("unused"); outsider.setRole("user"); outsider.setDeleted(0); auth.createUser(outsider);
         var outside=api("POST","/projects","owner",workspace,
-            Map.of("operationId","outside","name","非法负责人","lotName","一标段","ownerId","999999999999"),400);
+            Map.of("operationId","outside","name","非法负责人","lotName","一标段","ownerId",outsider.getId().toString()),400);
         assertTrue(outside.toString().contains("INVALID_OWNER"));
+        UserEntity disabledOwner=new UserEntity(); disabledOwner.setUsername("bidding_disabled_owner_"+java.util.UUID.randomUUID());
+        disabledOwner.setPassword("unused"); disabledOwner.setRole("user"); disabledOwner.setDeleted(0); auth.createUser(disabledOwner);
+        jdbc.update("UPDATE mate_user SET enabled=FALSE WHERE id=?",disabledOwner.getId());
+        var disabled=api("POST","/projects","owner",workspace,
+            Map.of("operationId","disabled-owner","name","禁用负责人","lotName","一标段","ownerId",disabledOwner.getId().toString()),400);
+        assertTrue(disabled.toString().contains("INVALID_OWNER"));
         String username=auth.parseToken(tokens.get("member").substring(7));
         jdbc.update("UPDATE mate_user SET enabled=FALSE WHERE username=?",username);
         api("POST","/projects","member",workspace,Map.of("operationId","disabled","name","禁用","lotName","一标段"),401);

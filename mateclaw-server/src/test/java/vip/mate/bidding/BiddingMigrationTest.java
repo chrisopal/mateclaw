@@ -5,8 +5,20 @@ import java.sql.DriverManager;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ClassPathResource;
 
 class BiddingMigrationTest {
+    @Test void biddingIsDisabledByDefaultInApplicationConfiguration() throws Exception {
+        StandardEnvironment environment=new StandardEnvironment();
+        var sources=new YamlPropertySourceLoader().load("app",new ClassPathResource("application.yml"));
+        sources.forEach(environment.getPropertySources()::addFirst);
+        assertFalse(Binder.get(environment).bind("mateclaw.bidding",Bindable.of(BiddingProperties.class)).get().isEnabled());
+    }
+
     @Test void v212PreservesPreexistingPresalesAndSemanticRowsAndCreatesIsolatedTables() throws Exception {
         String url="jdbc:h2:mem:bidding_migration_"+System.nanoTime()+";MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
         Flyway flyway=Flyway.configure().dataSource(url,"sa","").locations("classpath:db/migration/h2")

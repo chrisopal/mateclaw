@@ -132,7 +132,7 @@ springdoc:
 # MateClaw 自定义配置
 mateclaw:
   bidding:
-    enabled: ${MATECLAW_BIDDING_ENABLED:true}
+    enabled: ${MATECLAW_BIDDING_ENABLED:false}
     scheduler-enabled: ${MATECLAW_BIDDING_SCHEDULER_ENABLED:false}
   a2a:
     enabled: ${MATECLAW_A2A_ENABLED:false}
