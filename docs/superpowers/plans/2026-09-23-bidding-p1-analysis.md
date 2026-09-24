@@ -197,7 +197,7 @@ if (java.nio.file.Path.of(relativePath).isAbsolute() || normalized.startsWith(".
 }
 ```
 
-- [ ] `ASSIGN_EMPLOYEES` payload `{analystAgentId,writerAgentId,reviewerAgentId}`，校验 enabled/未删除/当前 workspace/native 且不是 plan_execute；reviewer!=writer；技能须在有效授权范围而不是全局“存在”。缺模型/技能用可读配置错误，不自动创建有密钥的配置。GET employees 返回可用性原因，不返回内部模型密钥。
+- [ ] `ASSIGN_EMPLOYEES` payload `{analystAgentId,writerAgentId,reviewerAgentId}` 三字段均出现，值可为 `null` 表示当前阶段未绑定该岗位；非空岗位校验 enabled/未删除/当前 workspace/native 且不是 plan_execute，reviewer!=writer。P1 只要求分析员的四项解析技能就绪才能派发解析；编写员与审核员可未绑定，P2/P3 技能尚未提供时不得凭空固定其包或标记为可执行。后续阶段绑定非空岗位时须在有效授权范围固定该岗位所需技能，不是只检查全局“存在”。缺模型/技能用可读配置错误，不自动创建有密钥的配置。GET employees 返回各岗位可用性与缺失原因，不返回内部模型密钥。
 - [ ] 配置指纹只含配置 ID、修改版本、模型名、运行模式、有效工具集合、技能 pin digest；凭据值不入 hash。若现有模型配置没有 revision，使用更新时刻/安全持久化版本，不解析密钥。默认初始化只提供三个岗位所需技能清单，绑定/创建员工通过现有平台配置路径完成并回读。
 - [ ] 测试 pin 后更新活动文件仍读原包；包中 schema 变更导致新 digest；绑定跨 workspace/disabled/未授技能均拒绝；null 工具授权表示继承、空集合表示全部禁用，不能把空集当继承。Run：同前测试，Expected PASS。
 - [ ] Commit：`git commit -m "Make bidding retries execute the same authorized skill package" -m "Tested: Skill pinning and employee scope tests"`，只包含本任务列出的文件。
