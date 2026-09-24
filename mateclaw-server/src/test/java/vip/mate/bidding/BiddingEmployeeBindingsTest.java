@@ -134,6 +134,25 @@ class BiddingEmployeeBindingsTest {
                 .path("result").path("version").asInt());
     }
 
+    @Test void oneEmployeeCanFillAnalystAndWriterWithoutImmediateConfigDrift() throws Exception {
+        agentBindings.setSkillBindings(analyst.getId(), java.util.stream.Stream.concat(
+                roleSkillIds("analyst").stream(), roleSkillIds("writer").stream()).toList());
+        JsonNode created = newProject();
+        BiddingTypes.Scope projectScope = scopeFor(created);
+        var payload = json.createObjectNode().put("analystAgentId", analyst.getId().toString())
+                .put("writerAgentId", analyst.getId().toString()).putNull("reviewerAgentId");
+        var command = new BiddingTypes.Command("shared-role-employee-" + UUID.randomUUID(),
+                json.convertValue(created.path("ref"), BiddingTypes.Ref.class), "ASSIGN_EMPLOYEES", payload);
+
+        var assigned = employeeBindings.assign(projectScope, command).path("result");
+        String analystDigest = assigned.path("bindings").path("analyst").path("configDigest").asText();
+        String writerDigest = assigned.path("bindings").path("writer").path("configDigest").asText();
+        assertEquals(analystDigest, writerDigest);
+        assertEquals(employeeBindings.configDigest(projectScope, analyst.getId().toString()), analystDigest);
+        assertDoesNotThrow(() -> employeeBindings.validate(projectScope, analyst.getId().toString(), analystDigest));
+        assertDoesNotThrow(() -> employeeBindings.validate(projectScope, analyst.getId().toString(), writerDigest));
+    }
+
     @Test void pinKeepsOldSchemaAfterActiveFilesChangeAndNewPinGetsNewDigest() throws Exception {
         BiddingTypes.Scope packageScope = new BiddingTypes.Scope("1", "44", "immutable-package-test");
         long skillId = skillIds.get("bidding-tender-profile");

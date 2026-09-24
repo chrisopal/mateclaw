@@ -111,8 +111,15 @@ public class BiddingEmployeeBindings {
                 BiddingTypes.SkillPin pin = packages.pin(scope, Long.toString(id), Long.toString(skill.getId()));
                 ObjectNode ref = pins.addObject(); ref.put("skillId", pin.skillId()); ref.put("digest", pin.digest());
             }
-            binding.put("configDigest", configDigest(scope, Long.toString(id)));
-            binding.put("modelConfigId", modelConfigId(scope, Long.toString(id)));
+        }
+        // A single employee may occupy multiple roles. Pin every role's required packages
+        // before snapshotting any employee digest, since the digest covers project pins.
+        for (String role : ROLES) {
+            Long assignedId = selected.get(role);
+            if (assignedId == null) continue;
+            ObjectNode binding = (ObjectNode) assigned.path(role);
+            binding.put("configDigest", configDigest(scope, Long.toString(assignedId)));
+            binding.put("modelConfigId", modelConfigId(scope, Long.toString(assignedId)));
         }
         project.set("bindings", assigned);
         long nextVersion = project.path("version").asLong() + 1;
