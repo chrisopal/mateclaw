@@ -1,0 +1,7 @@
+{
+  "docxCellLocator": "body/table:0/row:0/cell:1",
+  "docxCellValue": "12.50 分",
+  "completeForSimpleDocx": true,
+  "mixedEmptyPdfPageProblem": "EMPTY_PDF_PAGE:2",
+  "scanPageProblem": "IMAGE_ONLY_PDF_PAGE:1"
+}
