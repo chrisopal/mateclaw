@@ -212,6 +212,10 @@ if (java.nio.file.Path.of(relativePath).isAbsolute() || normalized.startsWith(".
 - Create: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectToolPolicy.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/AgentService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/AgentGraphBuilder.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/StateGraphReActAgent.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/state/MateClawStateAccessor.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/state/MateClawStateKeys.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ActionNode.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/NodeStreamingChatHelper.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ReasoningNode.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolExecutionExecutor.java`
