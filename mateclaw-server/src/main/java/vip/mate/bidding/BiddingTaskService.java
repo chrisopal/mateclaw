@@ -146,10 +146,13 @@ public class BiddingTaskService {
         if(page<1 || pageSize<1 || pageSize>100) throw BiddingAccess.error(400,"INVALID_PAGINATION","Task pagination must be page >= 1 and pageSize between 1 and 100");
         requireVisibleProject(scope);
         long total=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=?",Long.class,scope.workspaceId(),scope.projectId());
-        List<ObjectNode> items=jdbc.query("SELECT id,status,cycle_no,cycle_attempt,attempt_count,created_at,updated_at FROM mate_bidding_task "
-                + "WHERE workspace_id=? AND project_id=? ORDER BY created_at DESC,id LIMIT ? OFFSET ?",
+        List<ObjectNode> items=jdbc.query("SELECT t.id,t.status,t.cycle_no,t.cycle_attempt,t.attempt_count,t.created_at,t.updated_at,s.name AS skill_name "
+                + "FROM mate_bidding_task t LEFT JOIN mate_bidding_skill_package sp ON sp.id=t.skill_package_id AND sp.workspace_id=t.workspace_id AND sp.project_id=t.project_id "
+                + "LEFT JOIN mate_skill s ON CAST(s.id AS VARCHAR(64))=sp.skill_id AND CAST(s.workspace_id AS VARCHAR(64))=t.workspace_id AND s.deleted=0 "
+                + "WHERE t.workspace_id=? AND t.project_id=? ORDER BY t.created_at DESC,t.id LIMIT ? OFFSET ?",
             (rs,n)->{
                 ObjectNode item=json.createObjectNode(); item.put("taskId",rs.getString("id")); item.put("status",rs.getString("status"));
+                String skillName=rs.getString("skill_name"); if(skillName==null)item.putNull("skillId");else item.put("skillId",skillName);
                 item.put("cycleNo",rs.getInt("cycle_no")); item.put("cycleAttempt",rs.getInt("cycle_attempt")); item.put("attemptCount",rs.getInt("attempt_count"));
                 timestamp(item,"createdAt",rs.getTimestamp("created_at")); timestamp(item,"updatedAt",rs.getTimestamp("updated_at")); return item;
             },scope.workspaceId(),scope.projectId(),pageSize,(long)(page-1)*pageSize);

@@ -346,6 +346,36 @@ class BiddingTaskTest extends BiddingHttpFixture {
         finally { factory.destroySingleton("duplicateBiddingResultHandler"); }
     }
 
+    @Test void authorizedTaskListIncludesSkillNamesFromWorkspaceAndProjectScopedPackages() throws Exception {
+        var project=project(); String projectId=project.path("id").asText(), actor=actorId("member");
+        long skillId=95_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000);
+        long otherSkillId=skillId+2_000_000L;
+        jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",skillId,"bidding-tender-profile",Long.valueOf(workspace));
+        jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",otherSkillId,"private-other-project-skill",Long.valueOf(workspace));
+        String validPackage=UUID.randomUUID().toString(),wrongProjectPackage=UUID.randomUUID().toString(),wrongWorkspacePackage=UUID.randomUUID().toString();
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",validPackage,workspace,projectId,Long.toString(skillId),"v1","a".repeat(64),"{}");
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",wrongProjectPackage,workspace,UUID.randomUUID().toString(),Long.toString(otherSkillId),"v1","b".repeat(64),"{}");
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",wrongWorkspacePackage,otherWorkspace,projectId,Long.toString(skillId),"v1","c".repeat(64),"{}");
+        String validTask=listedTask(projectId,actor,validPackage),wrongProjectTask=listedTask(projectId,actor,wrongProjectPackage),wrongWorkspaceTask=listedTask(projectId,actor,wrongWorkspacePackage);
+
+        var page=api("GET","/projects/"+projectId+"/tasks?page=1&pageSize=10","viewer",workspace,null,200);
+        var items=page.path("items");
+        assertEquals("bidding-tender-profile",listedSkill(items,validTask));
+        assertTrue(listedSkill(items,wrongProjectTask)==null || listedSkill(items,wrongProjectTask).isBlank());
+        assertTrue(listedSkill(items,wrongWorkspaceTask)==null || listedSkill(items,wrongWorkspaceTask).isBlank());
+    }
+
+    private String listedTask(String project,String actor,String packageId) {
+        String task=UUID.randomUUID().toString();
+        jdbc.update("INSERT INTO mate_bidding_task(id,workspace_id,project_id,actor_id,agent_id,skill_package_id,config_digest,input_json,input_refs_json,status,cycle_no,cycle_attempt,attempt_count,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,'QUEUED',0,1,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",task,workspace,project,actor,"employee",packageId,"d".repeat(64),"{\"input\":{\"prompt\":\"fixed\"}}","[]");
+        return task;
+    }
+
+    private String listedSkill(com.fasterxml.jackson.databind.JsonNode items,String taskId) {
+        for(var item:items) if(taskId.equals(item.path("taskId").asText())) return item.path("skillId").isNull()?null:item.path("skillId").asText();
+        return null;
+    }
+
     @Test void taskListAndDetailAreScopedAndExposeSnapshotAttemptsWithoutClaimSecrets() throws Exception {
         var project=project(); String projectId=project.path("id").asText(), task=queuedTaskInProject(projectId,actorId("member"));
         var claim=repository.claimDue(Instant.now(),"readback-boot",1).getFirst();

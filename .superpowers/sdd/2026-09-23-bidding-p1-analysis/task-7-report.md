@@ -42,3 +42,15 @@ TDD evidence:
 - `pnpm exec eslint src/features/bidding/pages/BiddingWorkbench.vue src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS.
 - `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
 - `git diff --check` — PASS.
+
+Post-browser acceptance fix: Authorized task-list rows now resolve `skillId` with one left join from the task to its pinned package and workspace skill name; the package join is constrained by both task workspace and project. The task drawer presents localized names for all four analysis skills, user-facing Chinese/English task states and common failure reasons, while raw diagnostic codes remain inside the collapsed diagnostics. The overview localizes project stage names and uses concise unavailable-capability labels without exposing `P2/P3` markers.
+
+TDD evidence:
+
+- RED: `pnpm exec vitest run src/features/bidding/__tests__/biddingTasks.test.ts` — failed because the drawer showed raw `bidding-*` skill IDs, raw statuses/failure codes, and `SETUP`/`P2/P3` labels.
+- RED: Java focused `BiddingTaskTest` — failed `authorizedTaskListIncludesSkillNamesFromWorkspaceAndProjectScopedPackages` because the authorized task-list response had no `skillId`.
+- GREEN UI: `pnpm exec vitest run src/features/bidding/__tests__/biddingProjects.test.ts src/features/bidding/__tests__/biddingTasks.test.ts src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS, 3 files / 20 tests, including English and Chinese labels and mounted overview states.
+- GREEN Java: `MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME=$MATE_JAVA21 PATH=$MATE_JAVA21/bin:$PATH mvn -q -pl mateclaw-server -am -Dmaven.compiler.proc=full -Dtest=BiddingTaskTest -Dsurefire.failIfNoSpecifiedTests=false test` — PASS, 21 tests / 0 failures.
+- `pnpm exec eslint src/features/bidding/components/BiddingTaskDrawer.vue src/features/bidding/components/BiddingOverview.vue src/features/bidding/__tests__/biddingTasks.test.ts` — PASS.
+- `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
+- `git diff --check` — PASS.

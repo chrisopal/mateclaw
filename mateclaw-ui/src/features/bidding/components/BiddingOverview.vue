@@ -1,6 +1,6 @@
 <template>
   <section class="overview">
-    <div class="facts"><div><span>{{ l('标段', 'Lot') }}</span><strong>{{ project.lotName }}</strong></div><div><span>{{ l('负责人', 'Owner') }}</span><strong>{{ ownerName }}</strong></div><div><span>{{ l('阶段', 'Stage') }}</span><strong>{{ project.stage }}</strong></div></div>
+    <div class="facts"><div><span>{{ l('标段', 'Lot') }}</span><strong>{{ project.lotName }}</strong></div><div><span>{{ l('负责人', 'Owner') }}</span><strong>{{ ownerName }}</strong></div><div><span>{{ l('阶段', 'Stage') }}</span><strong>{{ stageLabel(project.stage) }}</strong></div></div>
     <section class="panel"><header><h2>{{ l('数字员工岗位', 'Employee roles') }}</h2><el-button v-if="canApprove" type="primary" plain size="small" :disabled="!dirty || saving || !employees.length" :loading="saving" @click="save">{{ l('保存岗位', 'Save roles') }}</el-button></header>
       <el-form label-position="right" label-width="130px">
         <el-form-item v-for="role in roles" :key="role.key" :label="role.label">
@@ -14,7 +14,7 @@
       <el-alert v-if="!canApprove" type="info" :title="l('只读访问：岗位配置需要项目负责人或工作区管理员。', 'Read-only: role assignment requires the project owner or workspace admin.')" :closable="false" />
       <el-empty v-if="!employees.length" :description="l('没有可用的数字员工配置', 'No available employee configuration')" />
     </section>
-    <section class="panel unavailable"><h2>{{ l('后续阶段', 'Later stages') }}</h2><el-tag effect="plain">{{ l('目录规划：P2 配置待办', 'Outline: P2 configuration required') }}</el-tag><el-tag effect="plain">{{ l('写作、审核与导出：P2/P3', 'Writing, review and export: P2/P3') }}</el-tag></section>
+    <section class="panel unavailable"><h2>{{ l('后续能力', 'Later capabilities') }}</h2><el-tag effect="plain">{{ l('目录规划暂未开放', 'Outline planning is not available yet') }}</el-tag><el-tag effect="plain">{{ l('写作、审核与导出暂未开放', 'Writing, review and export are not available yet') }}</el-tag></section>
   </section>
 </template>
 <script setup lang="ts">
@@ -25,6 +25,8 @@ const props = defineProps<{ project: Project; members: { userId: string | number
 const emit = defineEmits<{ save: [value: Record<string, string | null>] }>()
 const { locale } = useI18n(), l = (zh: string, en: string) => String(locale.value).startsWith('zh') ? zh : en
 const roles = [ { key: 'analyst', label: l('招标分析员', 'Analysis employee') }, { key: 'writer', label: l('标书编写员', 'Writing employee') }, { key: 'reviewer', label: l('标书审核员', 'Review employee') } ] as const
+const stageLabels:Record<string,[string,string]>={SETUP:['准备中','Setup'],ANALYSIS:['招标解析','Analysis'],OUTLINE:['目录规划','Outline'],WRITING:['技术标写作','Technical writing'],REVIEW:['审核','Review'],ARCHIVED:['已归档','Archived']}
+function stageLabel(stage:string){const pair=stageLabels[stage];return pair?l(pair[0],pair[1]):l('其他阶段','Other stage')}
 const form = reactive<Record<string, string | null>>({ analyst: null, writer: null, reviewer: null })
 function sync() { for (const role of ['analyst', 'writer', 'reviewer']) form[role] = props.project.bindings?.[role]?.agentId ? String(props.project.bindings[role]!.agentId) : null }
 watch(() => props.project, sync, { immediate: true, deep: true })
