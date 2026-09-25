@@ -104,6 +104,131 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE project_id=?", Integer.class, project.path("id").asText()));
     }
 
+    @Test void confirmationRejectsAnyShardWithUnprocessedAssignedBlocks() throws Exception {
+        AnalysisRun run = startAnalysis("DataHub deadline 2026-10-01. Late bids invalid. HTTPS required. Technical score 12.50; total 12.50.");
+        completeAnalysis(run, true, false);
+
+        JsonNode rejected = confirmAnalysis(run, 409);
+        assertEquals("ANALYSIS_INCOMPLETE", rejected.path("data").path("code").asText());
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE project_id=? AND kind='analysisBaseline' AND object_id='current'",
+                Integer.class, run.project().path("id").asText()));
+    }
+
+    @Test void confirmationRejectsAGroupMissingOneAssignedSkillShard() throws Exception {
+        AnalysisRun run = startAnalysis("DataHub deadline 2026-10-01. Late bids invalid. HTTPS required. Technical score 12.50; total 12.50.");
+        String missingTask = jdbc.queryForObject("SELECT id FROM mate_bidding_task WHERE project_id=? AND status='QUEUED' ORDER BY created_at,id FETCH FIRST 1 ROW ONLY",
+                String.class, run.project().path("id").asText());
+        jdbc.update("DELETE FROM mate_bidding_task WHERE id=?", missingTask);
+        completeAnalysis(run, false, false);
+
+        JsonNode rejected = confirmAnalysis(run, 409);
+        assertEquals("ANALYSIS_INCOMPLETE", rejected.path("data").path("code").asText());
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE project_id=? AND kind='analysisBaseline' AND object_id='current'",
+                Integer.class, run.project().path("id").asText()));
+    }
+
+    @Test void conflictEditsResolveOnlyTheirExplicitPersistedConflictIds() throws Exception {
+        AnalysisRun run = startAnalysis("DataHub deadline 2026-10-01. Late bids invalid. HTTPS required. Technical score 12.50; total 12.50.");
+        ObjectNode conflicting = completeAnalysis(run, false, true);
+
+        JsonNode firstRejection = confirmAnalysis(run, 422);
+        assertEquals("ANALYSIS_CONFLICTS", firstRejection.path("data").path("code").asText());
+        List<String> conflictIds = conflictIds(firstRejection.path("msg").asText());
+        assertEquals(2, conflictIds.size());
+
+        ObjectNode replacement = conflicting.deepCopy();
+        ArrayNode chosen = json.createArrayNode();
+        chosen.add(replacement.path("items").get(0).deepCopy());
+        chosen.add(replacement.path("items").get(2).deepCopy());
+        replacement.set("items", chosen);
+        saveAnalysisEdit(run, replacement, List.of(conflictResolution(conflictIds.getFirst())));
+
+        JsonNode stillRejected = confirmAnalysis(run, 422);
+        assertEquals("ANALYSIS_CONFLICTS", stillRejected.path("data").path("code").asText());
+        assertTrue(stillRejected.path("msg").asText().contains(conflictIds.get(1)));
+
+        saveAnalysisEdit(run, replacement, conflictIds.stream().map(this::conflictResolution).toList());
+        JsonNode confirmed = confirmAnalysis(run, 200);
+        assertEquals(2, confirmed.path("baseline").path("conflictResolutions").size());
+        assertEquals(2, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE project_id=? AND kind='analysisEdit_bidding-elimination-analysis' AND object_id=?",
+                Integer.class, run.project().path("id").asText(), run.groupId()));
+        String editJson = jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE project_id=? AND kind='analysisEdit_bidding-elimination-analysis' AND object_id=? ORDER BY version DESC LIMIT 1",
+                String.class, run.project().path("id").asText(), run.groupId());
+        assertEquals(2, json.readTree(editJson).path("conflictResolutions").size());
+    }
+
+    private AnalysisRun startAnalysis(String text) throws Exception {
+        doNothing().when(employees).validate(any(), anyString(), anyString());
+        when(employees.modelConfigId(any(), anyString())).thenReturn("model-config");
+        JsonNode project = project();
+        JsonNode source = upload(project, text); sources.readPending(2);
+        BiddingTypes.Ref sourceRef = json.convertValue(source.path("ref"), BiddingTypes.Ref.class);
+        BiddingTypes.Ref sourceSet = ref(confirmSet(project, sourceRef));
+        installPinnedAnalysisSkills(project);
+        JsonNode dispatched = command(project, ref(project), "DISPATCH_ANALYSIS", Map.of("sourceSetRef", sourceSet), "member", 200);
+        return new AnalysisRun(project, dispatched.path("taskGroupId").asText());
+    }
+
+    private ObjectNode completeAnalysis(AnalysisRun run, boolean leaveUnprocessed, boolean createConflicts) throws Exception {
+        Map<String, JsonNode> golden = goldenOutputs(); ObjectNode elimination = null;
+        int taskCount = jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE project_id=? AND input_json LIKE ?",
+                Integer.class, run.project().path("id").asText(), "%" + run.groupId() + "%");
+        for (int index = 0; index < taskCount; index++) {
+            BiddingTypes.Claim claim = repository.claimDue(Instant.now(), "analysis-review-test", 1).getFirst();
+            String skill = jdbc.queryForObject("SELECT name FROM mate_skill WHERE id=?", String.class, Long.valueOf(claim.skill().skillId()));
+            String blockId = claim.input().path("blocks").get(0).path("id").asText();
+            String sourceId = claim.input().path("blocks").get(0).path("sourceId").asText();
+            long version = claim.input().path("blocks").get(0).path("version").asLong();
+            var options = new ProjectExecutionOptions(claim.attemptId(), claim.modelConfigId(), claim.configDigest(), skill,
+                    claim.skill().digest(), claim.skill().files(), Set.of("bidding_read_source"), new BiddingToolScope(claim), 0, false, false, 12);
+            when(runtime.claim(any())).thenReturn(claim);
+            doNothing().when(runtime).requireActive(any(BiddingTypes.Claim.class));
+            readTool.readSource(sourceId, version, blockId, new org.springframework.ai.chat.model.ToolContext(Map.of(ProjectExecutionOptions.TOOL_CONTEXT_KEY, options)));
+            ObjectNode output = ((ObjectNode) golden.get(skill)).deepCopy();
+            rewriteCoverageAndEvidence(output, blockId, sourceId, version, claim.input().path("blocks").get(0).path("text").asText());
+            if (leaveUnprocessed && index == 0) {
+                ((ObjectNode) output.path("coverage")).putArray("processedBlockIds");
+                ((ObjectNode) output.path("coverage")).putArray("unprocessedBlockIds").add(blockId);
+            }
+            if (createConflicts && "bidding-elimination-analysis".equals(skill)) {
+                ArrayNode items = json.createArrayNode(); ObjectNode template = (ObjectNode) output.path("items").get(0);
+                for (int i = 0; i < 4; i++) {
+                    ObjectNode item = template.deepCopy(); item.put("id", "conflict-" + i);
+                    item.put("text", i < 2 ? "截止条款" : "保证金条款");
+                    item.put("trigger", "版本" + i);
+                    items.add(item);
+                }
+                output.set("items", items); elimination = output.deepCopy();
+            }
+            tasks.complete(claim, new BiddingTypes.Execution(output, null, claim.skill().digest(), claim.configDigest(), null));
+        }
+        return elimination;
+    }
+
+    private JsonNode confirmAnalysis(AnalysisRun run, int status) throws Exception {
+        Map<String, Object> body = Map.of("operationId", UUID.randomUUID().toString(), "expected", ref(run.project()),
+                "action", "CONFIRM_ANALYSIS", "payload", Map.of("taskGroupId", run.groupId(), "reason", "人工复核"));
+        return api("POST", "/projects/" + run.project().path("id").asText() + "/commands", "owner", workspace, body, status);
+    }
+
+    private void saveAnalysisEdit(AnalysisRun run, ObjectNode payload, List<Map<String, String>> resolutions) throws Exception {
+        Map<String, Object> body = Map.of("operationId", UUID.randomUUID().toString(), "expected", ref(run.project()), "action", "EDIT_ANALYSIS_ITEM",
+                "payload", Map.of("taskGroupId", run.groupId(), "skillId", "bidding-elimination-analysis", "reason", "人工逐项裁决",
+                        "payload", payload, "conflictResolutions", resolutions));
+        api("POST", "/projects/" + run.project().path("id").asText() + "/commands", "owner", workspace, body, 200);
+    }
+
+    private Map<String, String> conflictResolution(String id) { return Map.of("conflictId", id, "disposition", "MANUAL_REPLACEMENT", "reason", "依据原始证据人工合并"); }
+
+    private List<String> conflictIds(String message) {
+        int marker = message.indexOf("unresolved conflict IDs:");
+        if (marker < 0) return List.of();
+        return Arrays.stream(message.substring(marker + "unresolved conflict IDs:".length()).trim().split(","))
+                .map(String::trim).filter(id -> !id.isBlank()).toList();
+    }
+
+    private record AnalysisRun(JsonNode project, String groupId) {}
+
     private JsonNode upload(JsonNode project, String text) throws Exception {
         byte[] bytes = pdf(text);
         var response = mvc.perform(MockMvcRequestBuilders.multipart("/api/v1/bidding/projects/{id}/sources", project.path("id").asText())

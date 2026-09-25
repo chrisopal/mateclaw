@@ -76,6 +76,68 @@ class BiddingSkillValidatorTest {
         assertEquals("OUTPUT_SCHEMA_INVALID", error.code());
     }
 
+    @Test void rejectsTotalDifferenceThatDoesNotEqualStatedMinusCalculated() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"技术方案12.50分，总分12.50分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = scoringPayload("10", "0");
+        var error = assertThrows(BiddingApiException.class,
+                () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_MISMATCH", error.code());
+        assertTrue(error.getMessage().contains("/totalChecks/0/difference"));
+    }
+
+    @Test void rejectsCalculatedTotalThatDoesNotMatchApplicableLeafCriteria() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"技术方案12.50分，总分12.50分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = scoringPayload("10", "2.50");
+        var error = assertThrows(BiddingApiException.class,
+                () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_CRITERIA_MISMATCH", error.code());
+        assertTrue(error.getMessage().contains("/totalChecks/0/calculatedTotal"));
+    }
+
+    @Test void calculatesTotalFromLeafCriteriaWithoutDoubleCountingParentAggregate() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"综合项20分，技术12.50分，商务7.50分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = object("""
+            {"schemaVersion":"1","criteria":[
+              {"id":"p1","parentId":null,"title":"综合项","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]},
+              {"id":"c1","parentId":"p1","title":"技术","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术12.50分"}]},
+              {"id":"c2","parentId":"p1","title":"商务","score":"7.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务7.50分"}]}],
+             "totalChecks":[{"name":"综合总分","statedTotal":"20","calculatedTotal":"20.00","difference":"0.00","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
+             "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
+            """);
+        assertDoesNotThrow(() -> validator.validate("bidding-scoring-analysis", payload, input));
+    }
+
+    @Test void leavesCalculatedTotalUnknownWhenAnApplicableLeafScoreIsUnknown() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"综合项20分，技术12.50分，商务分值待定","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = object("""
+            {"schemaVersion":"1","criteria":[
+              {"id":"p1","parentId":null,"title":"综合项","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]},
+              {"id":"c1","parentId":"p1","title":"技术","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术12.50分"}]},
+              {"id":"c2","parentId":"p1","title":"商务","score":null,"unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务分值待定"}]}],
+             "totalChecks":[{"name":"综合总分","statedTotal":"20","calculatedTotal":"12.50","difference":"7.50","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
+             "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
+            """);
+        var error = assertThrows(BiddingApiException.class,
+                () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_CRITERIA_UNKNOWN", error.code());
+    }
+
+    private ObjectNode scoringPayload(String calculatedTotal, String difference) throws Exception {
+        return object("""
+            {"schemaVersion":"1","criteria":[{"id":"c1","parentId":null,"title":"技术方案","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术方案12.50分"}]}],
+             "totalChecks":[{"name":"总分","statedTotal":"12.50","calculatedTotal":"%s","difference":"%s","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"总分12.50分"}]}],
+             "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
+            """.formatted(calculatedTotal, difference));
+    }
+
     @Test void bundledGoldenExamplesAgreeWithJavaAndPinnedJsonSchemaChecks() throws Exception {
         JsonNode fixture;
         try (var stream = getClass().getResourceAsStream("/bidding/analysis/golden.json")) {

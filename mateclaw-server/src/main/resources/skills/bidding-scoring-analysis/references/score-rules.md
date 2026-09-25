@@ -1,3 +1,3 @@
 # Score rules
 
-Store numeric score claims as decimal strings. `null` means the source does not provide a calculable value. Sum child scores only when the full applicable group is present; compare with a separately quoted stated total. Keep parent headings distinct from additive child criteria unless the source says the parent itself scores.
+Store numeric score claims as decimal strings. `null` means the source does not provide a calculable value. A calculated total is the exact decimal sum of all applicable terminal (leaf) criteria; criteria with children are aggregate headings and are not added again. If any applicable leaf score is unknown or the criteria cannot be assigned to one total, leave the calculated total and difference `null`. Compare a complete sum with a separately quoted stated total using `difference = statedTotal - calculatedTotal`. Keep parent headings distinct from additive child criteria unless the source says the parent itself scores.

@@ -135,7 +135,9 @@ public class BiddingAnalysisService implements BiddingResultHandler {
             if (!SKILLS.contains(skill)) throw BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "Task group contains an unsupported skill");
             int declaredCount = task.input().path("shardCount").asInt(0);
             int shardIndex = task.input().path("shardIndex").asInt(-1);
-            shardCounts.merge(skill, declaredCount, Math::max);
+            Integer priorCount = shardCounts.putIfAbsent(skill, declaredCount);
+            if (priorCount != null && priorCount != declaredCount)
+                throw BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "Task group has inconsistent shard counts");
             if (declaredCount < 1 || shardIndex < 0 || shardIndex >= declaredCount
                     || !shardIndexes.computeIfAbsent(skill, ignored -> new HashSet<>()).add(shardIndex))
                 throw BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "Task group has inconsistent or duplicate shard assignments");
@@ -156,19 +158,36 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         dependencies.validate(scope, List.of(sourceSet));
         ObjectNode baseline = json.createObjectNode(); baseline.put("schemaVersion", "1"); baseline.put("taskGroupId", groupId);
         baseline.set("sourceSetRef", json.valueToTree(sourceSet)); ObjectNode analyses = baseline.putObject("analyses");
-        ArrayNode conflicts = baseline.putArray("conflicts");
+        ArrayNode conflicts = baseline.putArray("conflicts"), resolutions = baseline.putArray("conflictResolutions");
         for (String skill : SKILLS) {
             ArrayNode skillConflicts = json.createArrayNode();
             ObjectNode merged = merge(skill, shardPayloads.get(skill), skillConflicts);
-            // An approved manual replacement supersedes machine shard merging for that skill.
             ObjectNode edited = latestEdit(scope, groupId, skill);
-            if (edited != null) merged = (ObjectNode) edited.path("payload").deepCopy();
-            else conflicts.addAll(skillConflicts);
+            if (edited != null) {
+                ObjectNode replacement = (ObjectNode) edited.path("payload").deepCopy();
+                ArrayNode replacementConflicts = json.createArrayNode();
+                merge(skill, List.of(wrapperFor(replacement)), replacementConflicts);
+                Set<String> selfConflictIds = conflictIds(replacementConflicts);
+                Map<String, ObjectNode> recorded = editResolutions(edited);
+                for (JsonNode conflict : skillConflicts) {
+                    ObjectNode disposition = recorded.get(conflict.path("id").asText());
+                    if (disposition == null || !"MANUAL_REPLACEMENT".equals(disposition.path("disposition").asText())
+                            || selfConflictIds.contains(conflict.path("id").asText())) conflicts.add(conflict);
+                    else {
+                        ObjectNode audit = disposition.deepCopy(); audit.put("skillId", skill); resolutions.add(audit);
+                    }
+                }
+                merged = replacement;
+            } else conflicts.addAll(skillConflicts);
             ObjectNode trusted = fullSourceInput(scope, sourceSet, skill);
             validator.validate(skill, merged, trusted);
+            requireCompleteCoverage(skill, merged, group);
             analyses.set(skill, merged);
         }
-        if (!conflicts.isEmpty()) throw BiddingAccess.error(422, "ANALYSIS_CONFLICTS", "Resolve every conflicting clause or score with EDIT_ANALYSIS_ITEM before confirmation");
+        if (!conflicts.isEmpty()) {
+            String unresolved = conflictIds(conflicts).stream().sorted().reduce((left, right) -> left + "," + right).orElse("");
+            throw BiddingAccess.error(422, "ANALYSIS_CONFLICTS", "Resolve every conflicting clause or score with EDIT_ANALYSIS_ITEM; unresolved conflict IDs: " + unresolved);
+        }
         baseline.put("decision", "CONFIRMED");
         baseline.put("nextStageState", "CONFIGURATION_REQUIRED"); baseline.put("nextStageSkillId", "bidding-outline-planning");
         String canonical = canonical(baseline), kind = "analysisBaseline", objectId = "current";
@@ -208,6 +227,31 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         ObjectNode revision = json.createObjectNode(); revision.put("skillId", skill); revision.put("taskGroupId", groupId);
         revision.put("actorId", scope.actorId()); revision.put("reason", command.payload().path("reason").asText("人工修订"));
         revision.set("payload", payload.deepCopy()); revision.set("sourceSetRef", json.valueToTree(sourceSet));
+        ArrayNode requestedResolutions = json.createArrayNode(); JsonNode rawResolutions = command.payload().path("conflictResolutions");
+        if (!rawResolutions.isMissingNode() && !rawResolutions.isArray())
+            throw BiddingAccess.error(400, "INVALID_REQUEST", "conflictResolutions must be an array");
+        Set<String> currentIds = conflictIds(detectCandidateConflicts(scope, groupId, skill));
+        Set<String> seen = new HashSet<>(); Map<String, ObjectNode> requestedById = new LinkedHashMap<>();
+        if (rawResolutions.isArray()) for (int i = 0; i < rawResolutions.size(); i++) {
+            JsonNode resolution = rawResolutions.get(i);
+            if (!resolution.isObject() || !"MANUAL_REPLACEMENT".equals(resolution.path("disposition").asText()))
+                throw BiddingAccess.error(422, "ANALYSIS_RESOLUTION_INVALID", "Each conflict resolution must explicitly use MANUAL_REPLACEMENT");
+            String conflictId = resolution.path("conflictId").asText();
+            String reason = resolution.path("reason").asText();
+            if (!currentIds.contains(conflictId) || !seen.add(conflictId) || reason.isBlank() || reason.length() > 1000)
+                throw BiddingAccess.error(422, "ANALYSIS_RESOLUTION_INVALID", "Conflict resolution must identify one current conflict and include a reason");
+            ObjectNode item = requestedResolutions.addObject(); item.put("conflictId", conflictId);
+            item.put("disposition", "MANUAL_REPLACEMENT"); item.put("reason", reason);
+            requestedById.put(conflictId, item);
+        }
+        revision.set("conflictResolutions", requestedResolutions);
+        ArrayNode ledger = revision.putArray("conflictDispositions");
+        for (String conflictId : new TreeSet<>(currentIds)) {
+            ObjectNode disposition = ledger.addObject(); disposition.put("conflictId", conflictId);
+            ObjectNode resolved = requestedById.get(conflictId);
+            disposition.put("disposition", resolved == null ? "UNRESOLVED" : "MANUAL_REPLACEMENT");
+            disposition.put("reason", resolved == null ? "尚未逐项处置" : resolved.path("reason").asText());
+        }
         String canonical = canonical(revision); String digest = sha256(canonical); Timestamp now = Timestamp.from(Instant.now());
         jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                 UUID.randomUUID().toString(), scope.workspaceId(), scope.projectId(), kind, groupId, version, canonical, write(List.of(sourceSet)), "CANDIDATE", digest, now);
@@ -344,6 +388,48 @@ public class BiddingAnalysisService implements BiddingResultHandler {
             }
         }
         merged.set("coverage", mergeCoverage(payloads)); merged.set("warnings", mergeArray(payloads, "warnings")); return merged;
+    }
+
+    private ObjectNode wrapperFor(ObjectNode payload) {
+        ObjectNode wrapper = json.createObjectNode(); wrapper.put("shardIndex", 0); wrapper.set("payload", payload); return wrapper;
+    }
+
+    private Set<String> conflictIds(ArrayNode conflicts) {
+        Set<String> ids = new LinkedHashSet<>();
+        conflicts.forEach(conflict -> ids.add(conflict.path("id").asText()));
+        return ids;
+    }
+
+    private Map<String, ObjectNode> editResolutions(ObjectNode edit) {
+        Map<String, ObjectNode> result = new HashMap<>();
+        for (JsonNode item : edit.path("conflictDispositions"))
+            if (item.isObject() && item.path("conflictId").isTextual()) result.put(item.path("conflictId").asText(), (ObjectNode) item);
+        return result;
+    }
+
+    private void requireCompleteCoverage(String skill, ObjectNode payload, List<TaskRow> group) {
+        Set<String> assigned = new TreeSet<>(), processed = new TreeSet<>(), unprocessed = new TreeSet<>();
+        for (TaskRow task : group) if (skill.equals(task.input().path("skillId").asText()))
+            task.input().path("blocks").forEach(block -> assigned.add(block.path("id").asText()));
+        payload.path("coverage").path("processedBlockIds").forEach(block -> processed.add(block.asText()));
+        payload.path("coverage").path("unprocessedBlockIds").forEach(block -> unprocessed.add(block.asText()));
+        if (!unprocessed.isEmpty() || !assigned.equals(processed))
+            throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "Every assigned source block must be processed for " + skill);
+    }
+
+    private ArrayNode detectCandidateConflicts(BiddingTypes.Scope scope, String groupId, String skill) {
+        ArrayNode conflicts = json.createArrayNode(); List<ObjectNode> wrappers = new ArrayList<>();
+        for (TaskRow task : taskGroup(scope, groupId)) {
+            if (!skill.equals(task.input().path("skillId").asText())) continue;
+            if (!"SUCCEEDED".equals(task.status())) throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "Analysis tasks must succeed before conflicts can be edited");
+            BiddingTypes.Ref ref = new BiddingTypes.Ref(candidateKind(skill), groupId, task.input().path("shardIndex").asLong() + 1, "");
+            ObjectNode candidate = candidatePayload(scope, ref);
+            if (candidate == null || !task.id().equals(candidate.path("taskId").asText()))
+                throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "A matching candidate is required before conflict resolutions can be recorded");
+            wrappers.add(candidate);
+        }
+        if (wrappers.isEmpty()) throw BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "No task exists for the edited skill");
+        merge(skill, wrappers, conflicts); return conflicts;
     }
 
     /** Report inconsistent repeated facts instead of letting shard order choose one. */

@@ -132,8 +132,46 @@ public final class BiddingSkillValidator {
             only(check, Set.of("name", "statedTotal", "calculatedTotal", "difference", "evidenceRefs"), at);
             text(check, "name", at, 300);
             for (String field : List.of("statedTotal", "calculatedTotal", "difference")) decimalOrNull(check.get(field), at + "/" + field);
+            BigDecimal stated = decimal(check.get("statedTotal"));
+            BigDecimal calculated = decimal(check.get("calculatedTotal"));
+            BigDecimal difference = decimal(check.get("difference"));
+            if (stated != null && calculated != null) {
+                BigDecimal expectedDifference = stated.subtract(calculated);
+                if (difference == null || difference.compareTo(expectedDifference) != 0)
+                    fail("TOTAL_CHECK_MISMATCH", at + "/difference", "Difference must equal statedTotal minus calculatedTotal");
+            } else if (difference != null) {
+                fail("TOTAL_CHECK_MISMATCH", at + "/difference", "Difference must be unknown when either total is unknown");
+            }
+            if (calculated != null) {
+                BigDecimal applicable = applicableLeafTotal(criteria);
+                if (applicable == null)
+                    fail("TOTAL_CHECK_CRITERIA_UNKNOWN", at + "/calculatedTotal", "Calculated total cannot be verified while applicable leaf scores are unknown");
+                if (calculated.compareTo(applicable) != 0)
+                    fail("TOTAL_CHECK_CRITERIA_MISMATCH", at + "/calculatedTotal", "Calculated total does not equal the sum of applicable leaf criteria");
+            }
             validateEvidence(check.path("evidenceRefs"), blocks, at + "/evidenceRefs");
         }
+    }
+
+    /** Parent criteria are aggregate headings; sum only terminal criteria to avoid double-counting. */
+    private BigDecimal applicableLeafTotal(JsonNode criteria) {
+        if (!criteria.isArray() || criteria.isEmpty()) return null;
+        Set<String> parentIds = new HashSet<>();
+        for (JsonNode criterion : criteria) if (criterion.path("parentId").isTextual()) parentIds.add(criterion.path("parentId").asText());
+        BigDecimal sum = BigDecimal.ZERO; int leaves = 0;
+        for (JsonNode criterion : criteria) {
+            if (parentIds.contains(criterion.path("id").asText())) continue;
+            BigDecimal score = decimal(criterion.get("score"));
+            if (score == null) return null;
+            sum = sum.add(score); leaves++;
+        }
+        return leaves == 0 ? null : sum;
+    }
+
+    private BigDecimal decimal(JsonNode value) {
+        if (value == null || value.isNull()) return null;
+        try { return new BigDecimal(value.asText()); }
+        catch (NumberFormatException e) { return null; }
     }
 
     private void validateEvidence(JsonNode refs, Map<String, JsonNode> blocks, String path) {
