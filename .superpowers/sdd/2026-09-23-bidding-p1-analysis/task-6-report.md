@@ -15,14 +15,14 @@ Plan deviations: none
 
 - Ran the validator test before implementation; it failed at test compilation with the expected missing `BiddingSkillValidator` class.
 - The first end-to-end run exposed a worker-context authorization failure (`UNAUTHENTICATED`) from calling the interactive source evidence API during result acceptance. The implementation now reads the same immutable, digest-pinned source snapshot through the repository under the verified task claim while still requiring persisted server read receipts.
-- Focused Task 6 suite after review fixes: `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='BiddingSkillValidatorTest,BiddingAnalysisTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — 15 tests, 0 failures, 0 errors. Regression coverage includes full assigned-shard and processed-block coverage, explicit per-conflict resolution, BigDecimal stated/calculated/difference validation, leaf-criteria reconciliation, and unknown score preservation.
+- Focused Task 6 suite after review fixes: `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='BiddingSkillValidatorTest,BiddingAnalysisTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — 18 tests, 0 failures, 0 errors. Regression coverage includes original shard read receipts and processed-block coverage before edit/confirm, explicit per-conflict resolution, BigDecimal stated/calculated/difference validation, criterion-ID subtotal reconciliation, hierarchy overlap rejection, and unknown score preservation.
 
 ## Verification
 
 All Maven commands used Temurin Java 21.0.7 and `-Dmaven.compiler.proc=full`.
 
-- Bidding + Task 4 compatibility suite: `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='Bidding*Test,SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — 122 tests, 0 failures, 0 errors.
-- After review fixes: focused Task 6 suite above — 15 tests, 0 failures, 0 errors.
+- Bidding + Task 4 compatibility suite: `JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -pl mateclaw-server -am -Dtest='Bidding*Test,SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — 125 tests, 0 failures, 0 errors.
+- After round 2 review fixes: focused Task 6 suite above — 18 tests, 0 failures, 0 errors.
 - `git diff --check` — PASS.
 - JSON syntax validation for all new skill schemas and the golden fixture — PASS.
 

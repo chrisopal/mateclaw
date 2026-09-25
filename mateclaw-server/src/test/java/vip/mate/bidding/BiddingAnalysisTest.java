@@ -114,6 +114,28 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
                 Integer.class, run.project().path("id").asText()));
     }
 
+    @Test void incompleteCandidateCannotBeLaunderedByACompleteManualEdit() throws Exception {
+        AnalysisRun run = startAnalysis("DataHub deadline 2026-10-01. Late bids invalid. HTTPS required. Technical score 12.50; total 12.50.");
+        completeAnalysis(run, true, false);
+        String raw = jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE project_id=? AND kind LIKE 'analysisCandidate_%' AND payload_json LIKE '%\"unprocessedBlockIds\":[\"%' FETCH FIRST 1 ROW ONLY",
+                String.class, run.project().path("id").asText());
+        ObjectNode candidate = (ObjectNode) json.readTree(raw);
+        String skill = candidate.path("skillId").asText();
+        ObjectNode replacement = ((ObjectNode) candidate.path("payload")).deepCopy();
+        ArrayNode processed = json.createArrayNode();
+        replacement.path("coverage").path("processedBlockIds").forEach(processed::add);
+        replacement.path("coverage").path("unprocessedBlockIds").forEach(processed::add);
+        ((ObjectNode) replacement.path("coverage")).set("processedBlockIds", processed);
+        ((ObjectNode) replacement.path("coverage")).putArray("unprocessedBlockIds");
+
+        JsonNode editRejected = saveAnalysisEdit(run, skill, replacement, List.of(), 409);
+        assertEquals("ANALYSIS_INCOMPLETE", editRejected.path("data").path("code").asText());
+        JsonNode confirmRejected = confirmAnalysis(run, 409);
+        assertEquals("ANALYSIS_INCOMPLETE", confirmRejected.path("data").path("code").asText());
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE project_id=? AND kind='analysisBaseline' AND object_id='current'",
+                Integer.class, run.project().path("id").asText()));
+    }
+
     @Test void confirmationRejectsAGroupMissingOneAssignedSkillShard() throws Exception {
         AnalysisRun run = startAnalysis("DataHub deadline 2026-10-01. Late bids invalid. HTTPS required. Technical score 12.50; total 12.50.");
         String missingTask = jdbc.queryForObject("SELECT id FROM mate_bidding_task WHERE project_id=? AND status='QUEUED' ORDER BY created_at,id FETCH FIRST 1 ROW ONLY",
@@ -212,10 +234,14 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
     }
 
     private void saveAnalysisEdit(AnalysisRun run, ObjectNode payload, List<Map<String, String>> resolutions) throws Exception {
+        saveAnalysisEdit(run, "bidding-elimination-analysis", payload, resolutions, 200);
+    }
+
+    private JsonNode saveAnalysisEdit(AnalysisRun run, String skill, ObjectNode payload, List<Map<String, String>> resolutions, int status) throws Exception {
         Map<String, Object> body = Map.of("operationId", UUID.randomUUID().toString(), "expected", ref(run.project()), "action", "EDIT_ANALYSIS_ITEM",
-                "payload", Map.of("taskGroupId", run.groupId(), "skillId", "bidding-elimination-analysis", "reason", "人工逐项裁决",
+                "payload", Map.of("taskGroupId", run.groupId(), "skillId", skill, "reason", "人工逐项裁决",
                         "payload", payload, "conflictResolutions", resolutions));
-        api("POST", "/projects/" + run.project().path("id").asText() + "/commands", "owner", workspace, body, 200);
+        return api("POST", "/projects/" + run.project().path("id").asText() + "/commands", "owner", workspace, body, status);
     }
 
     private Map<String, String> conflictResolution(String id) { return Map.of("conflictId", id, "disposition", "MANUAL_REPLACEMENT", "reason", "依据原始证据人工合并"); }

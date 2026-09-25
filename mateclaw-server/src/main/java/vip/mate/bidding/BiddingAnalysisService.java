@@ -127,6 +127,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         if (group.isEmpty()) throw BiddingAccess.error(404, "NOT_FOUND", "Analysis task group not found");
         if (group.stream().anyMatch(t -> !"SUCCEEDED".equals(t.status())))
             throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "All analysis tasks must finish successfully before confirmation");
+        for (String skill : SKILLS) requireOriginalCoverage(scope, skill, group);
         Map<String, List<ObjectNode>> shardPayloads = new LinkedHashMap<>();
         Map<String, Integer> shardCounts = new LinkedHashMap<>();
         Map<String, Set<Integer>> shardIndexes = new LinkedHashMap<>();
@@ -218,6 +219,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         ObjectNode prior = operation(scope, command.operationId(), requestDigest); if (prior != null) return prior;
         List<TaskRow> group = taskGroup(scope, groupId);
         if (group.isEmpty()) throw BiddingAccess.error(404, "NOT_FOUND", "Analysis task group not found");
+        requireOriginalCoverage(scope, skill, group);
         BiddingTypes.Ref sourceSet = group.getFirst().refs().stream().filter(r -> "sourceSet".equals(r.kind())).findFirst()
                 .orElseThrow(() -> BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "Confirmed source set is missing"));
         dependencies.validate(scope, List.of(sourceSet));
@@ -383,7 +385,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
             else detectConflicts(skill, field, payloads, "title", List.of("parentId", "score", "unit", "rule", "requiredProof"), conflicts);
             merged.set(field, mergeArray(payloads, field));
             if (skill.equals("bidding-scoring-analysis")) {
-                detectConflicts(skill, "totalChecks", payloads, "name", List.of("statedTotal", "calculatedTotal", "difference"), conflicts);
+                detectConflicts(skill, "totalChecks", payloads, "name", List.of("criterionIds", "statedTotal", "calculatedTotal", "difference"), conflicts);
                 merged.set("totalChecks", mergeArray(payloads, "totalChecks"));
             }
         }
@@ -415,6 +417,31 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         payload.path("coverage").path("unprocessedBlockIds").forEach(block -> unprocessed.add(block.asText()));
         if (!unprocessed.isEmpty() || !assigned.equals(processed))
             throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "Every assigned source block must be processed for " + skill);
+    }
+
+    /** Manual revisions may refine a complete candidate, but can never replace evidence that an original shard was actually read and processed. */
+    private void requireOriginalCoverage(BiddingTypes.Scope scope, String skill, List<TaskRow> group) {
+        int expectedShards = -1; Set<Integer> indexes = new HashSet<>();
+        for (TaskRow task : group) {
+            if (!skill.equals(task.input().path("skillId").asText())) continue;
+            int count = task.input().path("shardCount").asInt(0), index = task.input().path("shardIndex").asInt(-1);
+            if (count < 1 || index < 0 || index >= count || expectedShards >= 0 && expectedShards != count || !indexes.add(index))
+                throw BiddingAccess.error(409, "ANALYSIS_GROUP_INVALID", "Original analysis shard assignments are inconsistent for " + skill);
+            expectedShards = count;
+            ObjectNode candidate = candidatePayload(scope, new BiddingTypes.Ref(candidateKind(skill),
+                    task.input().path("taskGroupId").asText(), index + 1L, ""));
+            if (candidate == null || !task.id().equals(candidate.path("taskId").asText()))
+                throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "An original shard has no matching stored candidate for " + skill);
+            Set<String> assigned = new TreeSet<>(), read = new TreeSet<>(), processed = new TreeSet<>(), unprocessed = new TreeSet<>();
+            task.input().path("blocks").forEach(block -> assigned.add(block.path("id").asText()));
+            candidate.path("readBlockIds").forEach(block -> read.add(block.asText()));
+            candidate.path("payload").path("coverage").path("processedBlockIds").forEach(block -> processed.add(block.asText()));
+            candidate.path("payload").path("coverage").path("unprocessedBlockIds").forEach(block -> unprocessed.add(block.asText()));
+            if (assigned.isEmpty() || !assigned.equals(read) || !assigned.equals(processed) || !unprocessed.isEmpty())
+                throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "Every original shard block must have a server read receipt and be processed for " + skill);
+        }
+        if (expectedShards < 1 || indexes.size() != expectedShards)
+            throw BiddingAccess.error(409, "ANALYSIS_INCOMPLETE", "Every original shard must exist for " + skill);
     }
 
     private ArrayNode detectCandidateConflicts(BiddingTypes.Scope scope, String groupId, String skill) {

@@ -31,7 +31,7 @@
     "bidding-scoring-analysis": {
       "schemaVersion": "1",
       "criteria": [{"id": "c1", "parentId": null, "title": "技术方案", "score": "12.50", "unit": "分", "rule": null, "requiredProof": null, "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "技术方案得12.50分"}]}],
-      "totalChecks": [{"name": "技术评分", "statedTotal": "12.50", "calculatedTotal": "12.50", "difference": "0.00", "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "总分12.50分"}]}],
+      "totalChecks": [{"name": "技术评分", "criterionIds": ["c1"], "statedTotal": "12.50", "calculatedTotal": "12.50", "difference": "0.00", "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "总分12.50分"}]}],
       "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []
     }
   },

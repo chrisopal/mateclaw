@@ -111,10 +111,12 @@ public final class BiddingSkillValidator {
     private void validateScoring(JsonNode p, Map<String, JsonNode> blocks) {
         JsonNode criteria = p.path("criteria");
         if (!criteria.isArray()) invalid("/criteria", "Expected an array");
+        Map<String, JsonNode> byId = new LinkedHashMap<>();
         for (int i = 0; i < criteria.size(); i++) {
             String at = "/criteria/" + i; JsonNode criterion = criteria.get(i);
             only(criterion, Set.of("id", "parentId", "title", "score", "unit", "rule", "requiredProof", "evidenceRefs"), at);
-            text(criterion, "id", at, 128); nullableText(criterion.get("parentId"), at + "/parentId", 128);
+            String id = text(criterion, "id", at, 128); nullableText(criterion.get("parentId"), at + "/parentId", 128);
+            if (byId.putIfAbsent(id, criterion) != null) invalid(at + "/id", "Criterion IDs must be unique");
             text(criterion, "title", at, 500); nullableText(criterion.get("unit"), at + "/unit", 100);
             nullableText(criterion.get("rule"), at + "/rule", 2000); nullableText(criterion.get("requiredProof"), at + "/requiredProof", 1000);
             JsonNode score = criterion.get("score");
@@ -125,12 +127,24 @@ public final class BiddingSkillValidator {
             }
             validateEvidence(criterion.path("evidenceRefs"), blocks, at + "/evidenceRefs");
         }
+        validateCriterionHierarchy(byId);
         JsonNode checks = p.path("totalChecks");
         if (!checks.isArray()) invalid("/totalChecks", "Expected an array");
         for (int i = 0; i < checks.size(); i++) {
             String at = "/totalChecks/" + i; JsonNode check = checks.get(i);
-            only(check, Set.of("name", "statedTotal", "calculatedTotal", "difference", "evidenceRefs"), at);
+            only(check, Set.of("name", "criterionIds", "statedTotal", "calculatedTotal", "difference", "evidenceRefs"), at);
             text(check, "name", at, 300);
+            JsonNode selected = check.path("criterionIds");
+            if (!selected.isArray() || selected.isEmpty()) invalid(at + "/criterionIds", "At least one applicable criterion ID is required");
+            Set<String> selectedIds = new LinkedHashSet<>();
+            for (int j = 0; j < selected.size(); j++) {
+                String id = text(selected.get(j), at + "/criterionIds/" + j, 128);
+                if (!selectedIds.add(id)) fail("TOTAL_CHECK_CRITERION_DUPLICATE", at + "/criterionIds/" + j, "Criterion ID is repeated");
+                if (!byId.containsKey(id)) fail("TOTAL_CHECK_CRITERION_UNKNOWN", at + "/criterionIds/" + j, "Criterion ID is not declared in criteria");
+            }
+            for (String ancestor : selectedIds) for (String descendant : selectedIds)
+                if (!ancestor.equals(descendant) && isAncestor(ancestor, descendant, byId))
+                    fail("TOTAL_CHECK_CRITERIA_OVERLAP", at + "/criterionIds", "A parent and its descendant cannot both contribute to one total");
             for (String field : List.of("statedTotal", "calculatedTotal", "difference")) decimalOrNull(check.get(field), at + "/" + field);
             BigDecimal stated = decimal(check.get("statedTotal"));
             BigDecimal calculated = decimal(check.get("calculatedTotal"));
@@ -143,29 +157,51 @@ public final class BiddingSkillValidator {
                 fail("TOTAL_CHECK_MISMATCH", at + "/difference", "Difference must be unknown when either total is unknown");
             }
             if (calculated != null) {
-                BigDecimal applicable = applicableLeafTotal(criteria);
+                BigDecimal applicable = applicableCriteriaTotal(selectedIds, byId);
                 if (applicable == null)
-                    fail("TOTAL_CHECK_CRITERIA_UNKNOWN", at + "/calculatedTotal", "Calculated total cannot be verified while applicable leaf scores are unknown");
+                    fail("TOTAL_CHECK_CRITERIA_UNKNOWN", at + "/calculatedTotal", "Calculated total cannot be verified while an applicable criterion score is unknown");
                 if (calculated.compareTo(applicable) != 0)
-                    fail("TOTAL_CHECK_CRITERIA_MISMATCH", at + "/calculatedTotal", "Calculated total does not equal the sum of applicable leaf criteria");
+                    fail("TOTAL_CHECK_CRITERIA_MISMATCH", at + "/calculatedTotal", "Calculated total does not equal the sum of its declared applicable criteria");
+            } else if (applicableCriteriaTotal(selectedIds, byId) != null) {
+                fail("TOTAL_CHECK_CALCULATED_REQUIRED", at + "/calculatedTotal", "Calculated total is required when every applicable criterion score is known");
             }
             validateEvidence(check.path("evidenceRefs"), blocks, at + "/evidenceRefs");
         }
     }
 
-    /** Parent criteria are aggregate headings; sum only terminal criteria to avoid double-counting. */
-    private BigDecimal applicableLeafTotal(JsonNode criteria) {
-        if (!criteria.isArray() || criteria.isEmpty()) return null;
-        Set<String> parentIds = new HashSet<>();
-        for (JsonNode criterion : criteria) if (criterion.path("parentId").isTextual()) parentIds.add(criterion.path("parentId").asText());
-        BigDecimal sum = BigDecimal.ZERO; int leaves = 0;
-        for (JsonNode criterion : criteria) {
-            if (parentIds.contains(criterion.path("id").asText())) continue;
-            BigDecimal score = decimal(criterion.get("score"));
-            if (score == null) return null;
-            sum = sum.add(score); leaves++;
+    private void validateCriterionHierarchy(Map<String, JsonNode> byId) {
+        for (Map.Entry<String, JsonNode> entry : byId.entrySet()) {
+            JsonNode parent = entry.getValue().path("parentId");
+            if (parent.isTextual() && !byId.containsKey(parent.asText()))
+                invalid("/criteria", "Unknown parent criterion ID: " + parent.asText());
+            Set<String> path = new HashSet<>(); String current = entry.getKey();
+            while (current != null) {
+                if (!path.add(current)) invalid("/criteria", "Criterion hierarchy contains a cycle");
+                JsonNode node = byId.get(current);
+                JsonNode parentId = node == null ? null : node.path("parentId");
+                current = parentId != null && parentId.isTextual() ? parentId.asText() : null;
+            }
         }
-        return leaves == 0 ? null : sum;
+    }
+
+    private boolean isAncestor(String ancestor, String descendant, Map<String, JsonNode> byId) {
+        JsonNode parentId = byId.get(descendant).path("parentId");
+        while (parentId.isTextual()) {
+            if (ancestor.equals(parentId.asText())) return true;
+            parentId = byId.get(parentId.asText()).path("parentId");
+        }
+        return false;
+    }
+
+    private BigDecimal applicableCriteriaTotal(Set<String> selectedIds, Map<String, JsonNode> byId) {
+        if (selectedIds.isEmpty()) return null;
+        BigDecimal sum = BigDecimal.ZERO;
+        for (String id : selectedIds) {
+            BigDecimal score = decimal(byId.get(id).get("score"));
+            if (score == null) return null;
+            sum = sum.add(score);
+        }
+        return sum;
     }
 
     private BigDecimal decimal(JsonNode value) {

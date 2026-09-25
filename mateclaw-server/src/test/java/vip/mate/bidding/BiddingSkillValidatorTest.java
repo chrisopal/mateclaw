@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -107,7 +108,7 @@ class BiddingSkillValidatorTest {
               {"id":"p1","parentId":null,"title":"综合项","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]},
               {"id":"c1","parentId":"p1","title":"技术","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术12.50分"}]},
               {"id":"c2","parentId":"p1","title":"商务","score":"7.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务7.50分"}]}],
-             "totalChecks":[{"name":"综合总分","statedTotal":"20","calculatedTotal":"20.00","difference":"0.00","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
+             "totalChecks":[{"name":"综合总分","criterionIds":["c1","c2"],"statedTotal":"20","calculatedTotal":"20.00","difference":"0.00","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
              "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
             """);
         assertDoesNotThrow(() -> validator.validate("bidding-scoring-analysis", payload, input));
@@ -122,7 +123,7 @@ class BiddingSkillValidatorTest {
               {"id":"p1","parentId":null,"title":"综合项","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]},
               {"id":"c1","parentId":"p1","title":"技术","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术12.50分"}]},
               {"id":"c2","parentId":"p1","title":"商务","score":null,"unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务分值待定"}]}],
-             "totalChecks":[{"name":"综合总分","statedTotal":"20","calculatedTotal":"12.50","difference":"7.50","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
+             "totalChecks":[{"name":"综合总分","criterionIds":["c1","c2"],"statedTotal":"20","calculatedTotal":"12.50","difference":"7.50","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"综合项20分"}]}],
              "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
             """);
         var error = assertThrows(BiddingApiException.class,
@@ -130,10 +131,54 @@ class BiddingSkillValidatorTest {
         assertEquals("TOTAL_CHECK_CRITERIA_UNKNOWN", error.code());
     }
 
+    @Test void validatesMultipleSectionSubtotalsAndAnIndependentlyScoredParent() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"技术总分50分，研发20分，实施30分；商务总分50分，价格30分，服务20分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = object("""
+            {"schemaVersion":"1","criteria":[
+              {"id":"tech","parentId":null,"title":"技术评分","score":"50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术总分50分"}]},
+              {"id":"dev","parentId":"tech","title":"研发","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"研发20分"}]},
+              {"id":"impl","parentId":"tech","title":"实施","score":"30","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"实施30分"}]},
+              {"id":"commercial","parentId":null,"title":"商务评分","score":"50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务总分50分"}]},
+              {"id":"price","parentId":"commercial","title":"价格","score":"30","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"价格30分"}]},
+              {"id":"service","parentId":"commercial","title":"服务","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"服务20分"}]}],
+             "totalChecks":[
+              {"name":"技术小计","criterionIds":["tech"],"statedTotal":"50","calculatedTotal":"50.00","difference":"0.00","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术总分50分"}]},
+              {"name":"研发实施合计","criterionIds":["dev","impl"],"statedTotal":"50","calculatedTotal":"50","difference":"0","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"研发20分"}]},
+              {"name":"商务小计","criterionIds":["commercial"],"statedTotal":"50","calculatedTotal":"50","difference":"0","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"商务总分50分"}]},
+              {"name":"价格服务合计","criterionIds":["price","service"],"statedTotal":"50","calculatedTotal":"50","difference":"0","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"价格30分"}]}],
+             "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
+            """);
+        assertDoesNotThrow(() -> validator.validate("bidding-scoring-analysis", payload, input));
+    }
+
+    @Test void rejectsUnknownDuplicateAndHierarchicallyOverlappingApplicableCriteria() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"技术总分20分，研发20分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}
+            """);
+        ObjectNode payload = object("""
+            {"schemaVersion":"1","criteria":[
+              {"id":"parent","parentId":null,"title":"技术","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术总分20分"}]},
+              {"id":"child","parentId":"parent","title":"研发","score":"20","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"研发20分"}]}],
+             "totalChecks":[{"name":"合计","criterionIds":["parent","child"],"statedTotal":"40","calculatedTotal":"40","difference":"0","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术总分20分"}]}],
+             "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
+            """);
+        var overlap = assertThrows(BiddingApiException.class, () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_CRITERIA_OVERLAP", overlap.code());
+        ArrayNode selected = (ArrayNode) payload.path("totalChecks").get(0).path("criterionIds");
+        selected.removeAll().add("missing");
+        var unknown = assertThrows(BiddingApiException.class, () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_CRITERION_UNKNOWN", unknown.code());
+        selected.removeAll().add("child").add("child");
+        var duplicate = assertThrows(BiddingApiException.class, () -> validator.validate("bidding-scoring-analysis", payload, input));
+        assertEquals("TOTAL_CHECK_CRITERION_DUPLICATE", duplicate.code());
+    }
+
     private ObjectNode scoringPayload(String calculatedTotal, String difference) throws Exception {
         return object("""
             {"schemaVersion":"1","criteria":[{"id":"c1","parentId":null,"title":"技术方案","score":"12.50","unit":"分","rule":null,"requiredProof":null,"evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"技术方案12.50分"}]}],
-             "totalChecks":[{"name":"总分","statedTotal":"12.50","calculatedTotal":"%s","difference":"%s","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"总分12.50分"}]}],
+             "totalChecks":[{"name":"总分","criterionIds":["c1"],"statedTotal":"12.50","calculatedTotal":"%s","difference":"%s","evidenceRefs":[{"sourceId":"s1","version":1,"blockId":"b1","quote":"总分12.50分"}]}],
              "coverage":{"processedBlockIds":["b1"],"unprocessedBlockIds":[]},"warnings":[]}
             """.formatted(calculatedTotal, difference));
     }
