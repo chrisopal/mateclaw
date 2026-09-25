@@ -73,11 +73,11 @@ public class BiddingTaskService {
         if(prior!=null) return replay(prior,digest);
         if(refs==null || refs.isEmpty()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
         Binding selected=findBinding(project,skillId);
-        handler(skillId); // Do not spend a model call on a skill with no unique result writer.
+        BiddingTypes.SkillPin pin=loadPinnedPackage(scope,skillId,selected.skillDigest());
+        handler(skillId,pin.files()); // Do not spend a model call on a skill with no unique result writer.
         dependencies.validate(scope,refs);
         employees.getObject().validate(scope,selected.agentId(),selected.configDigest());
         String modelConfigId=employees.getObject().modelConfigId(scope,selected.agentId());
-        BiddingTypes.SkillPin pin=loadPinnedPackage(scope,skillId,selected.skillDigest());
         ObjectNode snapshot=json.createObjectNode(); ObjectNode metadata=snapshot.putObject("_bidding");
         metadata.put("skillId",skillId); metadata.put("targetId",targetId); metadata.put("modelConfigId",modelConfigId);
         snapshot.set("input",input.deepCopy());
@@ -222,7 +222,7 @@ public class BiddingTaskService {
         revalidate(claim);
         if(!Objects.equals(claim.skill().digest(),execution.loadedSkillDigest()) || !Objects.equals(claim.configDigest(),execution.configDigest()))
             throw BiddingAccess.error(409,"EXECUTION_FINGERPRINT_MISMATCH","Execution fingerprint does not match the claimed snapshot");
-        BiddingResultHandler handler=handler(claim.skill().skillId());
+        BiddingResultHandler handler=handler(claim.skill().skillId(),claim.skill().files());
         BiddingTypes.Ref accepted;
         try { accepted=handler.accept(claim,execution.payload()); }
         catch(DataAccessException|TransactionException persistenceFailure) { throw persistenceFailure; }
@@ -278,8 +278,22 @@ public class BiddingTaskService {
         return jdbc.query("SELECT a.state FROM mate_bidding_attempt a JOIN mate_bidding_task t ON t.id=a.task_id WHERE a.id=? AND a.token=? AND a.task_id=? AND a.state='RUNNING' AND t.status='RUNNING' AND t.active_attempt_id=a.id",
             rs->rs.next()?new AttemptRow(rs.getString(1)):null,claim.attemptId(),claim.token(),claim.taskId());
     }
-    private BiddingResultHandler handler(String skillId) {
-        List<BiddingResultHandler> matches=handlers.orderedStream().filter(h->h.skillIds().contains(skillId)).toList();
+    private BiddingResultHandler handler(String skillId,Map<String,String> files) {
+        List<BiddingResultHandler> exact=handlers.orderedStream().filter(h->h.skillIds().contains(skillId)).toList();
+        if(exact.size()==1) return exact.getFirst();
+        if(exact.size()>1) throw BiddingAccess.error(422,"SKILL_HANDLER_AMBIGUOUS","Task result handler is unavailable");
+        String name;
+        try { name=jdbc.queryForObject("SELECT name FROM mate_skill WHERE id=?",String.class,Long.valueOf(skillId)); }
+        catch(NumberFormatException|org.springframework.dao.EmptyResultDataAccessException ignored) { name=skillId; }
+        // New bundled bidding skills expose their stable name as the handler
+        // key. Only permit that fallback when the immutable package itself
+        // declares the same skill and supplies the schemas required at runtime.
+        boolean bundled=files!=null && files.containsKey("SKILL.md") && files.containsKey("input.schema.json")
+                && files.containsKey("output.schema.json")
+                && files.get("SKILL.md").matches("(?s).*?\\bname:\\s*"+java.util.regex.Pattern.quote(name)+"\\s*(?:\\R|$).*");
+        if(!bundled) throw BiddingAccess.error(422,"SKILL_HANDLER_MISSING","Task result handler is unavailable");
+        final String resolvedName=name;
+        List<BiddingResultHandler> matches=handlers.orderedStream().filter(h->h.skillIds().contains(resolvedName)).toList();
         if(matches.size()!=1) throw BiddingAccess.error(422,matches.isEmpty()?"SKILL_HANDLER_MISSING":"SKILL_HANDLER_AMBIGUOUS","Task result handler is unavailable");
         return matches.getFirst();
     }

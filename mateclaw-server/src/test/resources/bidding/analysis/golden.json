@@ -1,0 +1,44 @@
+{
+  "input": {
+    "schemaVersion": "1",
+    "blocks": [{
+      "id": "b1",
+      "sourceId": "s1",
+      "version": 1,
+      "locator": "page 1",
+      "text": "项目名称：数据中台。招标人：某市。标段：一标段。投标截止时间：2026-10-01。逾期投标无效。系统需支持HTTPS，验收为全部接口加密。技术方案得12.50分，总分12.50分。"
+    }],
+    "readBlockIds": ["b1"]
+  },
+  "valid": {
+    "bidding-tender-profile": {
+      "schemaVersion": "1",
+      "basicInfo": {"project": "数据中台", "tenderer": "某市", "lot": "一标段"},
+      "deadlines": [{"name": "投标截止时间", "value": "2026-10-01", "reason": null, "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "投标截止时间：2026-10-01"}]}],
+      "deliveryConditions": [], "mandatoryOutline": [], "formatRequirements": [], "unknowns": [],
+      "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []
+    },
+    "bidding-elimination-analysis": {
+      "schemaVersion": "1",
+      "items": [{"id": "e1", "text": "逾期投标无效", "scope": "全部投标人", "trigger": "提交时间晚于截止时间", "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "逾期投标无效"}], "unknowns": []}],
+      "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []
+    },
+    "bidding-requirement-analysis": {
+      "schemaVersion": "1",
+      "requirements": [{"id": "r1", "text": "系统需支持HTTPS", "category": "TECHNICAL", "constraints": ["全部接口使用HTTPS"], "acceptance": "全部接口加密", "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "系统需支持HTTPS"}], "unknowns": []}],
+      "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []
+    },
+    "bidding-scoring-analysis": {
+      "schemaVersion": "1",
+      "criteria": [{"id": "c1", "parentId": null, "title": "技术方案", "score": "12.50", "unit": "分", "rule": null, "requiredProof": null, "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "技术方案得12.50分"}]}],
+      "totalChecks": [{"name": "技术评分", "statedTotal": "12.50", "calculatedTotal": "12.50", "difference": "0.00", "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "总分12.50分"}]}],
+      "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []
+    }
+  },
+  "invalid": {
+    "bidding-tender-profile": {"schemaVersion": "1", "basicInfo": {"project": null, "tenderer": "某市", "lot": "一标段"}, "deadlines": [], "deliveryConditions": [], "mandatoryOutline": [], "formatRequirements": [], "unknowns": [], "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": [], "extra": true},
+    "bidding-elimination-analysis": {"schemaVersion": "1", "items": [], "extra": true, "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": []},
+    "bidding-requirement-analysis": {"schemaVersion": "1", "requirements": [], "coverage": {"processedBlockIds": [], "unprocessedBlockIds": []}, "warnings": [], "extra": true},
+    "bidding-scoring-analysis": {"schemaVersion": "1", "criteria": [{"id": "c1", "parentId": null, "title": "技术方案", "score": "NaN", "unit": "分", "rule": null, "requiredProof": null, "evidenceRefs": [{"sourceId": "s1", "version": 1, "blockId": "b1", "quote": "技术方案得12.50分"}]}], "totalChecks": [], "coverage": {"processedBlockIds": ["b1"], "unprocessedBlockIds": []}, "warnings": [], "extra": true}
+  }
+}

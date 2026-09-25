@@ -10,7 +10,11 @@ public class BiddingCommandService {
     private final BiddingSourceService sources;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectProvider<BiddingTaskService> tasks;
-    public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,ObjectProvider<BiddingEmployeeBindings> employees,ObjectProvider<BiddingTaskService> tasks) { this.projects=projects; this.sources=sources; this.employees=employees; this.tasks=tasks; }
+    private final ObjectProvider<BiddingAnalysisService> analysis;
+    public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,ObjectProvider<BiddingEmployeeBindings> employees,
+            ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis) {
+        this.projects=projects; this.sources=sources; this.employees=employees; this.tasks=tasks; this.analysis=analysis;
+    }
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
         return switch(command.action()) {
@@ -19,6 +23,9 @@ public class BiddingCommandService {
             case "ASSIGN_EMPLOYEES" -> employees.getObject().assign(scope,command);
             case "RETRY_TASK" -> tasks.getObject().retry(scope,command);
             case "CANCEL_TASK" -> tasks.getObject().cancel(scope,command);
+            case "DISPATCH_ANALYSIS" -> analysis.getObject().dispatch(scope,command);
+            case "EDIT_ANALYSIS_ITEM" -> analysis.getObject().edit(scope,command);
+            case "CONFIRM_ANALYSIS" -> analysis.getObject().confirm(scope,command);
             default -> projects.execute(scope,command);
         };
     }
