@@ -1,8 +1,10 @@
 export interface Ref { kind: string; id: string; version: number; digest: string }
 export interface Project {
   id: string; workspaceId: string; name: string; lotName: string; ownerId: string
-  version: number; stage: string; ref: Ref; bindings: Record<string, EmployeeBinding>; selectedRefs: Record<string, Ref>
+  version: number; stage: string; ref: Ref; capabilities?: ProjectCapabilities
+  bindings: Record<string, EmployeeBinding>; selectedRefs: Record<string, Ref>
 }
+export interface ProjectCapabilities { canApprove: boolean }
 export interface EmployeeBinding { agentId?: string | null; skillPins?: unknown[]; available?: boolean; issue?: string }
 export interface ProjectPage { items: Project[]; total: number; page: number; pageSize: number }
 export interface Capabilities { enabled: boolean; canWrite: boolean; canApprove: boolean }

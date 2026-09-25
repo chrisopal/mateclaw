@@ -42,7 +42,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
     /** Returns only current, authorized analysis state. A withdrawn source invalidates read access to its derived results. */
     @Transactional(readOnly = true)
     public ObjectNode read(BiddingTypes.Scope scope) {
-        access.requireActor(scope, scope.actorId());
+        access.requireReaderActor(scope, scope.actorId());
         if (projects.get(scope) == null) throw BiddingAccess.error(404, "NOT_FOUND", "Project not found");
         ObjectNode result = json.createObjectNode();
         ObjectNode baseline = jdbc.query("SELECT r.id,r.kind,r.object_id,r.version,r.digest,r.status,r.payload_json,r.input_refs_json FROM mate_bidding_head h JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version WHERE h.workspace_id=? AND h.project_id=? AND h.kind='analysisBaseline' AND h.object_id='current'",
@@ -65,7 +65,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
             List<TaskRow> group = taskGroup(scope, groupId); if (group.isEmpty()) continue;
             BiddingTypes.Ref sourceSet = group.getFirst().refs().stream().filter(r -> "sourceSet".equals(r.kind())).findFirst().orElse(null);
             if (sourceSet == null) continue;
-            try { dependencies.validate(scope, List.of(sourceSet)); }
+            try { dependencies.validateForRead(scope, List.of(sourceSet)); }
             catch (BiddingApiException stale) { if (stale.status()==404 || stale.status()==409 || stale.status()==422) continue; throw stale; }
             ObjectNode item = groups.addObject(); item.put("taskGroupId", groupId);
             boolean allSucceeded = group.stream().allMatch(task -> "SUCCEEDED".equals(task.status()));
@@ -91,7 +91,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
 
     @Transactional(readOnly = true)
     public ObjectNode readRevision(BiddingTypes.Scope scope, String revisionId) {
-        access.requireActor(scope, scope.actorId()); projects.get(scope);
+        access.requireReaderActor(scope, scope.actorId()); projects.get(scope);
         ObjectNode revision = jdbc.query("SELECT id,kind,object_id,version,digest,status,payload_json,input_refs_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND id=?",
                 rs -> rs.next() ? revisionRow(rs) : null, scope.workspaceId(), scope.projectId(), revisionId);
         if (revision == null) throw BiddingAccess.error(404,"NOT_FOUND","Revision not found");
@@ -108,7 +108,7 @@ public class BiddingAnalysisService implements BiddingResultHandler {
     private void validateRevisionDependencies(BiddingTypes.Scope scope,ObjectNode revision) {
         try {
             List<BiddingTypes.Ref> refs=json.convertValue(revision.path("inputRefs"),new TypeReference<List<BiddingTypes.Ref>>(){});
-            if(!refs.isEmpty()) dependencies.validate(scope,refs);
+            if(!refs.isEmpty()) dependencies.validateForRead(scope,refs);
         } catch(BiddingApiException e) { throw e; }
         catch(Exception e) { throw new IllegalStateException("Invalid stored revision references",e); }
     }

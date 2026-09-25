@@ -16,7 +16,7 @@ let app:App|undefined,host:HTMLElement|undefined
 const flush=async()=>{await new Promise(resolve=>setTimeout(resolve,0));await nextTick()}
 afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;vi.clearAllMocks()})
 it('retains project settings through a real 409 and refreshes the expected revision before retry',async()=>{
-  const project=(version:number,name:string)=>({id:'p1',workspaceId:'ws-1',name,lotName:'Lot A',ownerId:'7',version,stage:'SETUP',ref:{kind:'project',id:'p1',version,digest:`d${version}`},bindings:{},selectedRefs:{}})
+  const project=(version:number,name:string)=>({id:'p1',workspaceId:'ws-1',name,lotName:'Lot A',ownerId:'7',version,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version,digest:`d${version}`},bindings:{},selectedRefs:{}})
   vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
   vi.mocked(biddingApi.get).mockResolvedValueOnce(project(2,'Tender')).mockResolvedValueOnce(project(3,'Server update')).mockResolvedValue(project(4,'Edited in dialog'))
   vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
@@ -42,6 +42,26 @@ it('retains project settings through a real 409 and refreshes the expected revis
   ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.trim()==='Save') as HTMLButtonElement).click();await flush()
   expect(biddingApi.command).toHaveBeenCalledTimes(2)
   expect(biddingApi.command).toHaveBeenLastCalledWith('ws-1','p1',expect.objectContaining({expected:expect.objectContaining({version:3}),payload:expect.objectContaining({name:'Edited in dialog',lotName:'Lot B'})}))
+})
+
+it.each([{actor:'project owner',canApprove:true},{actor:'another member',canApprove:false},{actor:'viewer',canApprove:false}])('uses the server project capability for $actor approval controls',async({actor,canApprove})=>{
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove},ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:actor!=='viewer',canApprove:false})
+  vi.mocked(biddingApi.get).mockResolvedValue(project as never)
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockResolvedValue([])
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  const settings=[...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Project settings')) as HTMLButtonElement|undefined
+  expect(!!settings).toBe(canApprove)
+  if(canApprove){
+    settings!.click();await flush()
+    ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.trim()==='Save') as HTMLButtonElement).click();await flush()
+    expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'UPDATE_PROJECT'}))
+  }else expect(biddingApi.command).not.toHaveBeenCalled()
 })
 
 it.each([401,403,404,410])('hides stale project and analysis data after a %s reload response',async status=>{

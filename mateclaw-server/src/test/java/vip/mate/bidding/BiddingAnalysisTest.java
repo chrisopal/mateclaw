@@ -43,6 +43,10 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         BiddingTypes.Ref sourceSetRef = ref(sourceSet);
         installPinnedAnalysisSkills(project);
 
+        api("POST", "/projects/" + project.path("id").asText() + "/commands", "viewer", workspace,
+                Map.of("operationId", "viewer-dispatch", "expected", ref(project), "action", "DISPATCH_ANALYSIS",
+                        "payload", Map.of("sourceSetRef", sourceSetRef)), 403);
+
         var dispatched = command(project, ref(project), "DISPATCH_ANALYSIS", Map.of("sourceSetRef", sourceSetRef), "member", 200);
         String groupId = dispatched.path("taskGroupId").asText();
         assertEquals(4, dispatched.path("taskIds").size());
@@ -97,6 +101,16 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         assertEquals(baselineRef.digest(), readback.path("baseline").path("ref").path("digest").asText());
         assertEquals("1", readback.path("baseline").path("payload").path("analyses").path("bidding-scoring-analysis").path("schemaVersion").asText());
         assertEquals(revisionId, api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId, "owner", workspace, null, 200).path("id").asText());
+        JsonNode viewerReadback = api("GET", "/projects/" + project.path("id").asText() + "/analysis", "viewer", workspace, null, 200);
+        assertEquals(baselineRef.digest(), viewerReadback.path("baseline").path("ref").path("digest").asText());
+        assertEquals(revisionId, api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId,
+                "viewer", workspace, null, 200).path("id").asText());
+        api("POST", "/projects/" + project.path("id").asText() + "/commands", "viewer", workspace,
+                Map.of("operationId", "viewer-confirm", "expected", ref(project), "action", "CONFIRM_ANALYSIS",
+                        "payload", Map.of("taskGroupId", groupId)), 403);
+        api("POST", "/projects/" + project.path("id").asText() + "/commands", "viewer", workspace,
+                Map.of("operationId", "viewer-edit", "expected", ref(project), "action", "EDIT_ANALYSIS_ITEM",
+                        "payload", Map.of("taskGroupId", groupId)), 403);
         api("GET", "/projects/" + project.path("id").asText() + "/analysis", "owner", otherWorkspace, null, 404);
         api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId, "owner", otherWorkspace, null, 404);
         JsonNode replay = api("POST", "/projects/" + project.path("id").asText() + "/commands", "owner", workspace, confirmBody, 200);
@@ -113,6 +127,13 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         JsonNode refreshedAnalysis=api("GET","/projects/"+project.path("id").asText()+"/analysis","owner",workspace,null,200);
         assertFalse(refreshedAnalysis.has("baseline"),"stale baseline must not be displayed after the selected source set changes");
         assertTrue(refreshedAnalysis.path("groups").isArray());
+        JsonNode viewerAfterSourceChange=api("GET","/projects/"+project.path("id").asText()+"/analysis","viewer",workspace,null,200);
+        assertFalse(viewerAfterSourceChange.has("baseline"),"viewer reads must hide results whose source set is no longer current");
+        api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId, "viewer", workspace, null, 404);
+        String viewerUsername=auth.parseToken(tokens.get("viewer").substring(7));
+        jdbc.update("UPDATE mate_workspace_member SET deleted=1 WHERE workspace_id=? AND user_id=(SELECT id FROM mate_user WHERE username=?)",
+                Long.valueOf(workspace), viewerUsername);
+        api("GET", "/projects/" + project.path("id").asText() + "/analysis", "viewer", workspace, null, 403);
     }
 
     @Test void refusesDispatchWithUnpinnedSkillAndPreventsPartialSourceCoverageFromConfirmation() throws Exception {

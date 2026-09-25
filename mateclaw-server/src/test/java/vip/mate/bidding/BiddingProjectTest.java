@@ -9,6 +9,40 @@ import com.fasterxml.jackson.databind.JsonNode;
 import vip.mate.auth.model.UserEntity;
 
 class BiddingProjectTest extends BiddingHttpFixture {
+    @Test void projectOwnerApprovalCapabilityIsScopedToAuthorizedProject() throws Exception {
+        JsonNode project = project();
+        String path = "/projects/" + project.path("id").asText();
+        JsonNode ownerView = api("GET", path, "member", workspace, null, 200);
+        assertTrue(ownerView.path("capabilities").path("canApprove").asBoolean());
+
+        UserEntity secondMember = new UserEntity();
+        String username = "bidding_second_member_" + java.util.UUID.randomUUID();
+        String password = java.util.UUID.randomUUID().toString();
+        secondMember.setUsername(username); secondMember.setPassword(password); secondMember.setRole("user"); secondMember.setDeleted(0);
+        auth.createUser(secondMember);
+        workspaces.addMember(Long.valueOf(workspace), secondMember.getId(), "member");
+        var login = mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/auth/login")
+                .contentType("application/json").content(json.writeValueAsString(Map.of("username", username, "password", password))))
+                .andReturn().getResponse();
+        assertEquals(200, login.getStatus(), login.getContentAsString());
+        tokens.put("secondMember", "Bearer " + json.readTree(login.getContentAsString()).path("data").path("token").asText());
+
+        JsonNode otherMemberView = api("GET", path, "secondMember", workspace, null, 200);
+        assertFalse(otherMemberView.path("capabilities").path("canApprove").asBoolean());
+        JsonNode viewerView = api("GET", path, "viewer", workspace, null, 200);
+        assertFalse(viewerView.path("capabilities").path("canApprove").asBoolean());
+
+        Map<String,Object> update = Map.of("operationId", "owner-approval", "expected", ref(project), "action", "UPDATE_PROJECT",
+                "payload", Map.of("name", "负责人已批准"));
+        api("POST", path + "/commands", "secondMember", workspace, update, 403);
+        api("POST", path + "/commands", "viewer", workspace, update, 403);
+        JsonNode accepted = api("POST", path + "/commands", "member", workspace, update, 200);
+        assertEquals("负责人已批准", accepted.path("result").path("name").asText());
+
+        JsonNode coarse = api("GET", "/capabilities", "member", workspace, null, 200);
+        assertFalse(coarse.path("canApprove").asBoolean(), "workspace capability remains coarse and does not infer project ownership");
+    }
+
     @Test void cannotReadAnotherWorkspaceOrCreateAsViewer() throws Exception {
         var p = project();
         api("GET", "/projects/" + p.path("id").asText(), "owner", otherWorkspace, null, 404);
@@ -34,7 +68,8 @@ class BiddingProjectTest extends BiddingHttpFixture {
         var conflict=new java.util.HashMap<>(body); conflict.put("payload",Map.of("name","冲突内容"));
         api("POST","/projects/"+p.path("id").asText()+"/commands","member",workspace,conflict,409);
         JsonNode reread=api("GET","/projects/"+p.path("id").asText(),"member",workspace,null,200);
-        assertEquals(first.path("result"),reread);
+        assertEquals(first.path("result").path("ref"),reread.path("ref"));
+        assertEquals(first.path("result").path("name"),reread.path("name"));
         command(p,ref(p),"UPDATE_PROJECT",Map.of("name","过期修改"),"member",409);
     }
 

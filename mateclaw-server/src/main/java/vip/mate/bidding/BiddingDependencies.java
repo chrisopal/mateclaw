@@ -12,6 +12,15 @@ public class BiddingDependencies {
 
     public void validate(BiddingTypes.Scope scope, List<BiddingTypes.Ref> refs) {
         access.requireActor(scope, scope.actorId());
+        validateRefs(scope,refs);
+    }
+
+    public void validateForRead(BiddingTypes.Scope scope, List<BiddingTypes.Ref> refs) {
+        access.requireReaderActor(scope, scope.actorId());
+        validateRefs(scope,refs);
+    }
+
+    private void validateRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
         if (refs == null || refs.isEmpty()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
         for (var ref : refs) {
             if (ref == null || ref.id() == null || ref.version() < 1) throw BiddingAccess.error(422,"SOURCE_REF_INVALID","A source reference is invalid");

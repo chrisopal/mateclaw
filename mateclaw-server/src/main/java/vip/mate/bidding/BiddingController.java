@@ -68,7 +68,10 @@ public class BiddingController {
     @GetMapping("/projects/{id}")
     public R<?> get(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
         String actor=access.require(workspace,"viewer");
-        return R.ok(projects.get(new BiddingTypes.Scope(workspace,actor,id)));
+        var scope=new BiddingTypes.Scope(workspace,actor,id);
+        var project=projects.get(scope);
+        project.putObject("capabilities").put("canApprove",access.canApproveProject(scope,project));
+        return R.ok(project);
     }
     @GetMapping("/projects/{id}/tasks")
     public R<?> tasks(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,

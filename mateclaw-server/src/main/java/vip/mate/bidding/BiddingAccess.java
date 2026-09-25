@@ -33,10 +33,34 @@ public class BiddingAccess {
     }
 
     public void requireActor(BiddingTypes.Scope scope,String actorId) {
+        requireActor(scope,actorId,"member");
+    }
+
+    public void requireReaderActor(BiddingTypes.Scope scope,String actorId) {
+        requireActor(scope,actorId,"viewer");
+    }
+
+    private void requireActor(BiddingTypes.Scope scope,String actorId,String minimumRole) {
         UserEntity actor=auth.findById(parse(actorId,"UNAUTHENTICATED")); validateEnabled(actor); checkFeature();
         long ws=parse(scope.workspaceId(),"WORKSPACE_REQUIRED"); WorkspaceEntity row=workspaces.selectById(ws);
         if(row==null || deleted(row.getDeleted())) throw error(404,"NOT_FOUND","Workspace not found");
-        requireWorkspaceRole(row,actor,"member");
+        requireWorkspaceRole(row,actor,minimumRole);
+    }
+
+    public boolean canApproveProject(BiddingTypes.Scope scope,com.fasterxml.jackson.databind.JsonNode project) {
+        requireReaderActor(scope,scope.actorId());
+        if(project==null || project.isNull() || !scope.workspaceId().equals(project.path("workspaceId").asText())
+                || !scope.projectId().equals(project.path("id").asText()))
+            throw error(404,"NOT_FOUND","Project not found");
+        long workspaceId=parse(scope.workspaceId(),"WORKSPACE_REQUIRED");
+        long actorId=parse(scope.actorId(),"UNAUTHENTICATED");
+        WorkspaceEntity workspace=workspaces.selectById(workspaceId);
+        if(workspace.getOwnerId()!=null && workspace.getOwnerId()==actorId) return true;
+        UserEntity actor=auth.findById(actorId);
+        if(actor!=null && "admin".equalsIgnoreCase(actor.getRole())) return true;
+        WorkspaceMemberEntity member=membership(workspaceId,actorId);
+        if(member!=null && ("admin".equals(member.getRole()) || "owner".equals(member.getRole()))) return true;
+        return Long.toString(actorId).equals(project.path("ownerId").asText());
     }
 
     public void requireApprover(BiddingTypes.Scope scope) {
