@@ -31,3 +31,14 @@ TDD evidence:
 - Focused regression set: `pnpm exec vitest run src/features/bidding/__tests__/biddingProjects.test.ts src/features/bidding/__tests__/biddingTasks.test.ts src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS, 3 files / 13 tests.
 - `pnpm exec eslint src/features/bidding/pages/BiddingWorkbench.vue src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS.
 - `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
+
+Round-3 review fix: Same-project refresh continues to retain project content for transient failures, but a 401/403/404/410 or disabled capability now clears the project, capabilities, sources, analysis, and open project-scoped drawers before rendering the unavailable/access state. Late source/analysis readbacks cannot repopulate cleared content. The mounted regression checks each status and asserts both project and analysis data disappear; the earlier 409 draft test still covers transient 5xx retention and successful readback.
+
+TDD evidence:
+
+- RED: `pnpm exec vitest run src/features/bidding/__tests__/biddingWorkbench.test.ts` — failed the mounted stale-content assertions for 401/403/404/410 while the previous project and analysis remained visible.
+- GREEN: same command — PASS, 9 tests.
+- Focused bidding UI set: `pnpm exec vitest run src/features/bidding/__tests__/biddingProjects.test.ts src/features/bidding/__tests__/biddingTasks.test.ts src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS, 3 files / 17 tests.
+- `pnpm exec eslint src/features/bidding/pages/BiddingWorkbench.vue src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS.
+- `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
+- `git diff --check` — PASS.
