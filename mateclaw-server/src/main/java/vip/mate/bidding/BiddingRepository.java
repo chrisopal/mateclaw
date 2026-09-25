@@ -178,13 +178,71 @@ public class BiddingRepository {
     }
     public BiddingTypes.Page<ObjectNode> list(String workspaceId,String query,String stage,String ownerId,int page,int pageSize) {
         String q= query==null?"":query.trim();
+        String selectedStage=stage==null||stage.isBlank()?null:stage.trim(), selectedOwner=ownerId==null||ownerId.isBlank()?null:ownerId.trim();
         var params=new MapSqlParameterSource().addValue("workspace",workspaceId).addValue("q","%"+q+"%")
-            .addValue("stage",stage).addValue("owner",ownerId).addValue("limit",pageSize).addValue("offset",(long)(page-1)*pageSize);
+            .addValue("stage",selectedStage).addValue("owner",selectedOwner).addValue("limit",pageSize).addValue("offset",(long)(page-1)*pageSize);
         String where=" WHERE workspace_id=:workspace AND (:q='%%' OR LOWER(name) LIKE LOWER(:q) OR LOWER(lot_name) LIKE LOWER(:q)) AND (:stage IS NULL OR stage=:stage) AND (:owner IS NULL OR owner_id=:owner)";
         long total=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_project"+where,params,Long.class);
         List<ObjectNode> items=jdbc.query("SELECT body_json FROM mate_bidding_project"+where+" ORDER BY updated_at DESC,id LIMIT :limit OFFSET :offset",params,(rs,n)->readObject(rs,"body_json"));
         return new BiddingTypes.Page<>(items,total,page,pageSize);
     }
+    public ObjectNode dashboard(String workspaceId,String query,String stage,String ownerId) {
+        String q=query==null?"":query.trim(), selectedStage=stage==null||stage.isBlank()?null:stage.trim(), selectedOwner=ownerId==null||ownerId.isBlank()?null:ownerId.trim();
+        var params=new MapSqlParameterSource().addValue("workspace",workspaceId).addValue("q","%"+q+"%").addValue("stage",selectedStage).addValue("owner",selectedOwner);
+        String where=" WHERE workspace_id=:workspace AND (:q='%%' OR LOWER(name) LIKE LOWER(:q) OR LOWER(lot_name) LIKE LOWER(:q)) AND (:stage IS NULL OR stage=:stage) AND (:owner IS NULL OR owner_id=:owner)";
+        ObjectNode result=json.createObjectNode();
+        Long inProgress=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_project"+where+" AND stage<>'ARCHIVED'",params,Long.class);
+        Long failed=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task t WHERE t.workspace_id=:workspace AND t.status IN ('FAILED','STALE') AND EXISTS (SELECT 1 FROM mate_bidding_project p"+where+" AND p.id=t.project_id)",params,Long.class);
+        Long pending=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_head h WHERE h.workspace_id=:workspace AND h.kind='sourceSet' AND h.object_id='current' AND EXISTS (SELECT 1 FROM mate_bidding_project p"+where+" AND p.id=h.project_id) AND NOT EXISTS (SELECT 1 FROM mate_bidding_head b JOIN mate_bidding_revision br ON br.workspace_id=b.workspace_id AND br.project_id=b.project_id AND br.kind=b.kind AND br.object_id=b.object_id AND br.version=b.version WHERE b.workspace_id=h.workspace_id AND b.project_id=h.project_id AND b.kind='analysisBaseline' AND b.object_id='current' AND br.status='CONFIRMED')",params,Long.class);
+        result.put("inProgress",inProgress==null?0:inProgress); result.put("failedTasks",failed==null?0:failed); result.put("pendingConfirmation",pending==null?0:pending);
+        String whereP=" WHERE p.workspace_id=:workspace AND (:q='%%' OR LOWER(p.name) LIKE LOWER(:q) OR LOWER(p.lot_name) LIKE LOWER(:q)) AND (:stage IS NULL OR p.stage=:stage) AND (:owner IS NULL OR p.owner_id=:owner)";
+        List<DeadlineProject> projects=jdbc.query("SELECT p.id,p.stage,r.status,r.payload_json FROM mate_bidding_project p LEFT JOIN mate_bidding_head h ON h.workspace_id=p.workspace_id AND h.project_id=p.id AND h.kind='analysisBaseline' AND h.object_id='current' LEFT JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version"+whereP,
+                params,(rs,n)->new DeadlineProject(rs.getString("id"),rs.getString("stage"),rs.getString("status"),rs.getString("payload_json")));
+        int due=0, overdue=0, unknown=0; java.time.Instant now=java.time.Instant.now(), limit=now.plus(java.time.Duration.ofDays(7));
+        for(DeadlineProject project:projects) {
+            if("ARCHIVED".equals(project.stage())) continue;
+            List<java.time.Instant> dates=deadlineInstants(workspaceId,project);
+            if(dates.isEmpty()) { unknown++; continue; }
+            if(dates.stream().anyMatch(date->date.isBefore(now))) overdue++;
+            if(dates.stream().anyMatch(date->!date.isBefore(now)&&!date.isAfter(limit))) due++;
+        }
+        result.put("dueWithin7Days",due); result.put("overdueDeadlines",overdue); result.put("unknownDeadlines",unknown); return result;
+    }
+    private List<java.time.Instant> deadlineInstants(String workspaceId,DeadlineProject project) {
+        if(!"CONFIRMED".equals(project.baselineStatus())||project.payload()==null)return List.of();
+        try {
+            JsonNode baseline=json.readTree(project.payload()), sourceSetNode=baseline.path("sourceSetRef");
+            BiddingTypes.Ref sourceSet=json.treeToValue(sourceSetNode,BiddingTypes.Ref.class);
+            BiddingTypes.Scope scope=new BiddingTypes.Scope(workspaceId,"",project.id());
+            if(!isSelectedSourceSet(scope,sourceSet))return List.of();
+            JsonNode deadlines=baseline.path("analyses").path("bidding-tender-profile").path("deadlines"); List<java.time.Instant> found=new ArrayList<>();
+            if(!deadlines.isArray())return List.of();
+            for(JsonNode deadline:deadlines) {
+                String value=deadline.path("value").asText(""); if(value.isBlank())continue;
+                java.time.Instant instant=parseOffsetInstant(value); if(instant==null)continue;
+                boolean backed=false; JsonNode evidenceRefs=deadline.path("evidenceRefs");
+                if(evidenceRefs.isArray())for(JsonNode evidence:evidenceRefs) {
+                    String sourceId=evidence.path("sourceId").asText(""),blockId=evidence.path("blockId").asText(""),quote=evidence.path("quote").asText(""); long version=evidence.path("version").asLong(0);
+                    if(sourceId.isBlank()||blockId.isBlank()||version<1||!hasExplicitTimezone(quote))continue;
+                    BiddingRepository.SourceRow source=source(workspaceId,project.id(),sourceId,version);
+                    if(source==null||!"READY".equals(source.status()))continue;
+                    BiddingTypes.Ref sourceRef=new BiddingTypes.Ref("source",sourceId,version,source.digest());
+                    if(!sourceSetContains(scope,sourceRef))continue;
+                    try { JsonNode blocks=json.readTree(source.blocks()); for(JsonNode block:blocks)if(block.path("id").asText().equals(blockId)&&block.path("text").asText("").contains(quote)){backed=true;break;} }
+                    catch(Exception ignored) { }
+                    if(backed)break;
+                }
+                if(backed)found.add(instant);
+            }
+            return found;
+        } catch(Exception ignored) { return List.of(); }
+    }
+    private java.time.Instant parseOffsetInstant(String value) {
+        try { return java.time.OffsetDateTime.parse(value.trim()).toInstant(); }
+        catch(Exception ignored) { try { return java.time.ZonedDateTime.parse(value.trim()).toInstant(); } catch(Exception alsoIgnored) { return null; } }
+    }
+    private boolean hasExplicitTimezone(String quote) { return quote.matches("(?s).*(?:\\bUTC\\b|\\bGMT\\b|北京时间|中国标准时间|[+-](?:0[0-9]|1[0-4]):?[0-5][0-9]\\b|[0-2][0-9]:[0-5][0-9]Z\\b).*"); }
+    private record DeadlineProject(String id,String stage,String baselineStatus,String payload) {}
     public BiddingTypes.Ref sourceSetHead(BiddingTypes.Scope scope) {
         try { return json.convertValue(parseObject(jdbc.queryForObject("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current'",Map.of("w",scope.workspaceId(),"p",scope.projectId()),String.class)),BiddingTypes.Ref.class); }
         catch(org.springframework.dao.EmptyResultDataAccessException e) { return null; }

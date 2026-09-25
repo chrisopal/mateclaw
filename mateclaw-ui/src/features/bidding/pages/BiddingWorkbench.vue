@@ -1,0 +1,72 @@
+<template>
+  <main class="bidding-workbench" v-loading="loading">
+    <header class="page-heading"><div><el-button link type="primary" @click="router.push('/bidding')">← {{ l('项目列表','Projects') }}</el-button><h1>{{ project?.name || l('投标工作台','Bidding workbench') }}</h1></div><div class="heading-actions"><el-button v-if="project" type="primary" plain @click="taskDrawer=true">{{ l('任务记录','Task records') }}</el-button><el-button v-if="project && capabilities?.canApprove" @click="ownerDialog=true">{{ l('项目档案','Project settings') }}</el-button><el-button @click="load">{{ l('刷新','Refresh') }}</el-button></div></header>
+    <el-alert v-if="unavailable" :title="l('投标模块尚未启用。','Bidding is not enabled.')" type="info" :closable="false" />
+    <el-alert v-if="error" :title="error" type="error" show-icon :closable="false"><template #default><p v-if="conflict">{{ l('版本已变化，当前草稿已保留。刷新并核对后再提交。','The record changed. Your draft is retained. Refresh and compare before submitting.') }}</p><el-button type="primary" size="small" @click="load">{{ l('重新加载','Reload') }}</el-button></template></el-alert>
+    <el-alert v-if="capabilities && !capabilities.canWrite" :title="l('只读访问：您可以查看项目和证据。','Read only: you can view the project and evidence.')" type="info" :closable="false" />
+    <template v-if="project && capabilities?.enabled">
+      <el-tabs v-model="tab" class="workbench-tabs">
+        <el-tab-pane :label="l('概览','Overview')" name="overview"><BiddingOverview :project="project" :members="members" :employees="employees" :can-approve="!!capabilities.canApprove" :saving="saving" :error="employeeError" @save="assignEmployees" /></el-tab-pane>
+        <el-tab-pane :label="l('文件与来源','Sources')" name="sources"><BiddingSources :project="project" :sources="sources" :source-set="sourceSet" :loading="sourcesLoading" :can-write="!!capabilities.canWrite" :can-approve="!!capabilities.canApprove" :analyst-ready="analystReady" :active-analysis="activeAnalysis" :dispatching="dispatching" @changed="refreshSources" @preview="preview" @tasks="taskDrawer=true" @dispatch="dispatchAnalysis" @retry-read="retrySource" /></el-tab-pane>
+        <el-tab-pane :label="l('解析结果','Analysis')" name="analysis"><BiddingAnalysis :analysis="analysis" :can-write="!!capabilities.canWrite" :can-approve="!!capabilities.canApprove" @evidence="openEvidence" @edit="editAnalysis" @confirm="confirmAnalysis" /></el-tab-pane>
+        <el-tab-pane :label="l('目录规划','Outline')" name="outline"><UnavailableStage :title="l('目录规划','Outline planning')" :stage="l('P2 配置待办','P2 configuration required')" /></el-tab-pane>
+        <el-tab-pane :label="l('技术标写作','Writing')" name="writing"><UnavailableStage :title="l('技术标写作','Technical writing')" :stage="l('P2 尚未启用','Not available in P2 scope')" /></el-tab-pane>
+        <el-tab-pane :label="l('审核与导出','Review')" name="review"><UnavailableStage :title="l('审核与导出','Review and export')" :stage="l('P3 尚未启用','Not available in P3 scope')" /></el-tab-pane>
+      </el-tabs>
+    </template>
+    <el-dialog v-model="ownerDialog" :title="l('项目档案','Project settings')" width="min(560px,94vw)" :close-on-click-modal="false">
+      <el-form label-position="right" label-width="110px"><el-form-item :label="l('项目名称','Project name')"><el-input v-model="projectDraft.name" maxlength="200" /></el-form-item><el-form-item :label="l('标段','Lot')"><el-input v-model="projectDraft.lotName" maxlength="200" /></el-form-item><el-form-item :label="l('负责人','Owner')"><el-select v-model="projectDraft.ownerId" filterable :loading="membersLoading" :disabled="membersLoading || !members.length"><el-option v-for="member in members" :key="String(member.userId)" :label="memberLabel(member)" :value="String(member.userId)" /></el-select></el-form-item></el-form>
+      <template #footer><el-button @click="ownerDialog=false">{{ l('取消','Cancel') }}</el-button><el-button type="primary" :loading="saving" :disabled="!projectDraft.name.trim()||!projectDraft.lotName.trim()" @click="saveProject">{{ l('保存','Save') }}</el-button></template>
+    </el-dialog>
+    <el-dialog v-model="previewOpen" :title="previewSource?.filename || l('来源文本','Source text')" width="min(900px,95vw)"><el-table :data="previewSource?.blocks || []" max-height="65vh"><el-table-column prop="locator" :label="l('位置','Location')" min-width="180"/><el-table-column prop="text" :label="l('原文','Source text')" min-width="420" show-overflow-tooltip/></el-table></el-dialog>
+    <BiddingTaskDrawer v-model="taskDrawer" :workspace-id="workspace.currentWorkspaceId || ''" :project="project!" v-if="project" @changed="refreshAll" />
+    <BiddingEvidenceDrawer v-model="evidenceOpen" :workspace-id="workspace.currentWorkspaceId || ''" :project-id="project?.id || ''" :source-ref="evidenceRef" />
+  </main>
+</template>
+<script setup lang="ts">
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { ElEmpty, ElTag } from 'element-plus'
+import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
+import { biddingApi } from '../api/biddingApi'
+import type { AnalysisView, Capabilities, Employee, Member, Project, Source } from '../api/types'
+import { apiUnavailable, isConflict, isCurrentRequest, operationId } from '../shared/state'
+import BiddingOverview from '../components/BiddingOverview.vue'
+import BiddingSources from '../components/BiddingSources.vue'
+import BiddingAnalysis from '../components/BiddingAnalysis.vue'
+import BiddingTaskDrawer from '../components/BiddingTaskDrawer.vue'
+import BiddingEvidenceDrawer from '../components/BiddingEvidenceDrawer.vue'
+const UnavailableStage=defineComponent({props:{title:{type:String,required:true},stage:{type:String,required:true}},setup(p){return()=>h('section',{class:'unavailable-stage'},[h('h2',p.title),h(ElTag,{effect:'plain'},()=>p.stage),h(ElEmpty,{description:'—'})])}})
+const route=useRoute(),router=useRouter(),workspace=useWorkspaceStore(),{locale}=useI18n(),l=(zh:string,en:string)=>String(locale.value).startsWith('zh')?zh:en
+const projectId=computed(()=>String(route.params.id||'')),project=ref<Project>(),capabilities=ref<Capabilities>(),members=ref<Member[]>([]),employees=ref<Employee[]>([]),sources=ref<Source[]>([]),sourceSet=ref<{ref?:Project['ref']}|null>(null),analysis=ref<AnalysisView>({groups:[]})
+const loading=ref(false),sourcesLoading=ref(false),membersLoading=ref(false),saving=ref(false),dispatching=ref(false),error=ref(''),employeeError=ref(''),conflict=ref(false),unavailable=ref(false),tab=ref('overview'),taskDrawer=ref(false),ownerDialog=ref(false),previewOpen=ref(false),previewSource=ref<Source>(),evidenceOpen=ref(false),evidenceRef=ref<Record<string,unknown>>()
+const projectDraft=reactive({name:'',lotName:'',ownerId:''})
+let controller:AbortController|undefined,unregister:(()=>void)|undefined
+const analystReady=computed(()=>!!project.value?.bindings?.analyst?.agentId&&!!project.value.bindings.analyst.skillPins?.length)
+const activeAnalysis=computed(()=>analysis.value.groups.some(group=>['QUEUED','RUNNING'].includes(group.status)))
+function memberLabel(member:Member){return member.nickname||member.username||l('成员不可用','Member unavailable')}
+function assertCurrent(ws:string,id:string,signal:AbortSignal){return !signal.aborted&&isCurrentRequest(ws,id,workspace.currentWorkspaceId||'',projectId.value)}
+async function load(){controller?.abort();controller=new AbortController();const current=controller,signal=current.signal,ws=workspace.currentWorkspaceId||'',id=projectId.value;project.value=undefined;sources.value=[];analysis.value={groups:[]};error.value='';conflict.value=false;unavailable.value=false;if(!ws){error.value=l('请选择工作区。','Select a workspace.');return}loading.value=true
+try{const caps=await biddingApi.capabilities(ws,signal);if(!assertCurrent(ws,id,signal))return;capabilities.value=caps;if(!caps.enabled){unavailable.value=true;return}const [detail,memberRows,employeeRows]=await Promise.all([biddingApi.get(ws,id,signal),biddingApi.members(ws,signal),biddingApi.employees(ws,signal)]);if(!assertCurrent(ws,id,signal))return;project.value=detail;members.value=memberRows.map(m=>({...m,userId:String(m.userId)}));employees.value=employeeRows.map(e=>({...e,id:String(e.id)}));projectDraft.name=detail.name;projectDraft.lotName=detail.lotName;projectDraft.ownerId=String(detail.ownerId);employeeError.value='';await Promise.all([refreshSources(),refreshAnalysis()])}
+catch(cause){if(!signal.aborted){unavailable.value=apiUnavailable(cause);error.value=unavailable.value?'':l('项目加载失败。','Could not load project.')}}finally{if(!signal.aborted)loading.value=false}}
+async function refreshSources(){const ws=workspace.currentWorkspaceId||'',id=projectId.value;if(!ws||!id)return;sourcesLoading.value=true;const signal=controller?.signal;try{const [rows,head]=await Promise.all([biddingApi.sources(ws,id,signal),biddingApi.sourceSetHead(ws,id,signal)]);if(!signal?.aborted&&isCurrentRequest(ws,id,workspace.currentWorkspaceId||'',projectId.value)){sources.value=rows;sourceSet.value=head}}catch(cause){if(!signal?.aborted)error.value=l('文件来源读取失败。','Could not load sources.')}finally{if(!signal?.aborted)sourcesLoading.value=false}}
+async function refreshAnalysis(){const ws=workspace.currentWorkspaceId||'',id=projectId.value;if(!ws||!id)return;const signal=controller?.signal;try{const result=await biddingApi.analysis(ws,id,signal);if(!signal?.aborted&&isCurrentRequest(ws,id,workspace.currentWorkspaceId||'',projectId.value))analysis.value=result}catch(cause){if(!signal?.aborted)error.value=l('解析结果无法读取，来源可能已变化或撤权。','Analysis is unavailable; a source may have changed or access may have been withdrawn.')}}
+async function refreshAll(){await load()}
+function commandError(cause:unknown){conflict.value=isConflict(cause);error.value=conflict.value?l('版本冲突：当前编辑内容已保留，请刷新核对后再提交。','Version conflict: your edits are retained. Refresh and compare before submitting.'):l('操作失败，请检查当前项目状态后重试。','Action failed. Check the current project state and retry.')}
+async function assignEmployees(binding:Record<string,string|null>){if(!project.value||!capabilities.value?.canApprove)return;saving.value=true;error.value='';try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'ASSIGN_EMPLOYEES',payload:binding});await load()}catch(cause){commandError(cause)}finally{saving.value=false}}
+async function saveProject(){if(!project.value||!capabilities.value?.canApprove)return;saving.value=true;try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'UPDATE_PROJECT',payload:{name:projectDraft.name.trim(),lotName:projectDraft.lotName.trim(),ownerId:projectDraft.ownerId}});ownerDialog.value=false;await load()}catch(cause){commandError(cause)}finally{saving.value=false}}
+async function dispatchAnalysis(){if(!project.value||!sourceSet.value?.ref)return;dispatching.value=true;try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'DISPATCH_ANALYSIS',payload:{sourceSetRef:sourceSet.value.ref}});tab.value='analysis';taskDrawer.value=true;await refreshAll()}catch(cause){commandError(cause)}finally{dispatching.value=false}}
+async function retrySource(source:Source){if(!project.value)return;try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'RETRY_SOURCE_READ',payload:{sourceRef:{kind:'source',id:source.sourceId,version:source.version,digest:source.digest}}});await refreshSources()}catch(cause){commandError(cause)}}
+async function editAnalysis(body:{taskGroupId:string;skillId:string;payload:Record<string,unknown>;reason:string}){if(!project.value)return;try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'EDIT_ANALYSIS_ITEM',payload:body});await refreshAnalysis()}catch(cause){commandError(cause)}}
+async function confirmAnalysis(groupId:string){if(!project.value||!capabilities.value?.canApprove)return;try{await biddingApi.command(workspace.currentWorkspaceId!,project.value.id,{operationId:operationId(),expected:project.value.ref,action:'CONFIRM_ANALYSIS',payload:{taskGroupId:groupId}});await refreshAll()}catch(cause){commandError(cause)}}
+function preview(source:Source){previewSource.value=source;previewOpen.value=true}
+function openEvidence(value:Record<string,unknown>){evidenceRef.value=value;evidenceOpen.value=true}
+watch(()=>workspace.currentWorkspaceId,()=>{taskDrawer.value=false;previewOpen.value=false;void load()})
+watch(projectId,()=>void load())
+onMounted(()=>{unregister=workspace.registerBeforeSwitch(()=>{controller?.abort();return true});void load()})
+onBeforeUnmount(()=>{controller?.abort();unregister?.()})
+</script>
+<style scoped>
+.bidding-workbench { padding:24px 32px 32px; min-width:0; color:var(--mc-text-primary); }.page-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }.page-heading>div:first-child { min-width:0; }.page-heading h1 { margin:4px 0 0; font-size:24px; font-weight:600; }.heading-actions { display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }.workbench-tabs { min-width:0; }.unavailable-stage { display:flex; align-items:center; gap:12px; min-height:220px; padding:18px 20px; border:1px solid var(--mc-border); border-radius:6px; background:var(--mc-bg-elevated); }.unavailable-stage h2 { margin:0 8px 0 0; font-size:16px; }.unavailable-stage .el-empty { margin-left:auto; }.el-button:focus-visible { outline:2px solid var(--mc-primary); outline-offset:2px; }@media(max-width:768px){.bidding-workbench{padding:16px}.page-heading{align-items:flex-start}.heading-actions{flex-wrap:wrap;justify-content:flex-start}.unavailable-stage{align-items:flex-start;flex-direction:column}.unavailable-stage .el-empty{margin:0}}
+</style>

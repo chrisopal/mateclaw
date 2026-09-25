@@ -58,6 +58,7 @@ public class BiddingProjectService {
         if(pageSize<1) pageSize=20; if(pageSize>100) pageSize=100;
         return repository.list(scope.workspaceId(),query,stage,ownerId,page,pageSize);
     }
+    public ObjectNode dashboard(BiddingTypes.Scope scope,String query,String stage,String ownerId) { return repository.dashboard(scope.workspaceId(),query,stage,ownerId); }
 
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.operationId()==null || command.operationId().isBlank() || command.expected()==null)

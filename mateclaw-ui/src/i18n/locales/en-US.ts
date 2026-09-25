@@ -1161,6 +1161,7 @@ export default {
   },
   nav: {
     presales: 'Presales',
+    bidding: 'Bidding',
     dashboard: 'Dashboard',
     chat: 'Chat',
     control: 'Control',

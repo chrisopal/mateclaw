@@ -89,6 +89,14 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         String persisted = jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id='current'",
                 String.class, workspace, project.path("id").asText());
         assertEquals("1", json.readTree(persisted).path("analyses").path("bidding-scoring-analysis").path("schemaVersion").asText());
+        String revisionId = jdbc.queryForObject("SELECT id FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id='current'",
+                String.class, workspace, project.path("id").asText());
+        JsonNode readback = api("GET", "/projects/" + project.path("id").asText() + "/analysis", "owner", workspace, null, 200);
+        assertEquals(baselineRef.digest(), readback.path("baseline").path("ref").path("digest").asText());
+        assertEquals("1", readback.path("baseline").path("payload").path("analyses").path("bidding-scoring-analysis").path("schemaVersion").asText());
+        assertEquals(revisionId, api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId, "owner", workspace, null, 200).path("id").asText());
+        api("GET", "/projects/" + project.path("id").asText() + "/analysis", "owner", otherWorkspace, null, 404);
+        api("GET", "/projects/" + project.path("id").asText() + "/revisions/" + revisionId, "owner", otherWorkspace, null, 404);
         JsonNode replay = api("POST", "/projects/" + project.path("id").asText() + "/commands", "owner", workspace, confirmBody, 200);
         assertEquals(confirmed.path("ref"), replay.path("ref"));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_decision WHERE workspace_id=? AND project_id=? AND decision='CONFIRM_ANALYSIS'",

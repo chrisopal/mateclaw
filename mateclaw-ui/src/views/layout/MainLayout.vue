@@ -520,6 +520,11 @@ const navGroups = computed(() => [
         icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M8 6V3h8v3M3 12h18M12 10v4"/></svg>',
       },
       {
+        path: '/bidding',
+        label: t('nav.bidding'),
+        icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M7 16l9-9 2 2-9 9H7zM14 6l2-2 4 4-2 2"/><path d="M5 5h5M5 9h3"/></svg>',
+      },
+      {
         path: '/semantic/ontologies',
         label: t('semantic.title'),
         requiredCapability: 'view:ontology',
@@ -611,6 +616,7 @@ function toggleSidebar() {
 }
 
 function isNavItemActive(item: { path: string; label: string }) {
+  if (item.path === '/bidding') return route.path.startsWith('/bidding')
   if (item.path === '/semantic/ontologies') {
     return route.path.startsWith('/semantic/ontologies')
   }

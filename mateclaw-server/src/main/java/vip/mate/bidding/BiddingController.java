@@ -21,16 +21,18 @@ public class BiddingController {
     private final BiddingSourceService sources;
     private final ObjectProvider<BiddingTaskService> tasks;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
+    private final ObjectProvider<BiddingAnalysisService> analysis;
     private final ObjectMapper json;
 
     public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
-            BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectMapper json) {
+            BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis, ObjectMapper json) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
         this.sources = sources;
         this.tasks = tasks;
         this.employees = employees;
+        this.analysis = analysis;
         this.json = json;
     }
 
@@ -53,6 +55,10 @@ public class BiddingController {
         String actor=access.require(workspace,"viewer");
         return R.ok(projects.list(new BiddingTypes.Scope(workspace,actor,null),name,stage,ownerId,page,pageSize));
     }
+    @GetMapping("/dashboard")
+    public R<?> dashboard(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@RequestParam(required=false) String name,@RequestParam(required=false) String stage,@RequestParam(required=false) String ownerId) {
+        String actor=access.require(workspace,"viewer"); return R.ok(projects.dashboard(new BiddingTypes.Scope(workspace,actor,null),name,stage,ownerId));
+    }
     @PostMapping("/projects")
     public R<?> create(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,
         @RequestBody BiddingTypes.NewProject request) {
@@ -69,6 +75,14 @@ public class BiddingController {
         @RequestParam(defaultValue="1") int page,@RequestParam(defaultValue="20") int pageSize) {
         String actor=access.require(workspace,"viewer");
         return R.ok(tasks.getObject().listTasks(new BiddingTypes.Scope(workspace,actor,id),page,pageSize));
+    }
+    @GetMapping("/projects/{id}/analysis")
+    public R<?> analysis(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
+        String actor=access.require(workspace,"viewer"); return R.ok(analysis.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    }
+    @GetMapping("/projects/{id}/revisions/{revisionId}")
+    public R<?> revision(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String revisionId) {
+        String actor=access.require(workspace,"viewer"); return R.ok(analysis.getObject().readRevision(new BiddingTypes.Scope(workspace,actor,id),revisionId));
     }
     @GetMapping("/tasks/{taskId}")
     public R<?> task(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String taskId) {

@@ -39,6 +39,77 @@ public class BiddingAnalysisService implements BiddingResultHandler {
 
     @Override public Set<String> skillIds() { return Set.copyOf(SKILLS); }
 
+    /** Returns only current, authorized analysis state. A withdrawn source invalidates read access to its derived results. */
+    @Transactional(readOnly = true)
+    public ObjectNode read(BiddingTypes.Scope scope) {
+        access.requireActor(scope, scope.actorId());
+        if (projects.get(scope) == null) throw BiddingAccess.error(404, "NOT_FOUND", "Project not found");
+        ObjectNode result = json.createObjectNode();
+        ObjectNode baseline = jdbc.query("SELECT r.id,r.kind,r.object_id,r.version,r.digest,r.status,r.payload_json,r.input_refs_json FROM mate_bidding_head h JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version WHERE h.workspace_id=? AND h.project_id=? AND h.kind='analysisBaseline' AND h.object_id='current'",
+                rs -> rs.next() ? revisionRow(rs) : null, scope.workspaceId(), scope.projectId());
+        if (baseline != null) {
+            validateRevisionDependencies(scope, baseline);
+            ObjectNode envelope = result.putObject("baseline"); envelope.set("ref", ref("analysisBaseline", "current", baseline.path("version").asLong(), baseline.path("digest").asText()));
+            envelope.put("status", baseline.path("status").asText()); envelope.set("payload", baseline.path("payload").deepCopy());
+        }
+        ArrayNode groups = result.putArray("groups");
+        List<String> groupIds = jdbc.query("SELECT input_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? ORDER BY created_at DESC,id",
+                (rs,n) -> { try { return parseObject(rs.getString(1)).path("input").path("taskGroupId").asText(""); } catch(Exception e) { throw new IllegalStateException("Invalid analysis task snapshot",e); } }, scope.workspaceId(), scope.projectId());
+        LinkedHashSet<String> unique = new LinkedHashSet<>(groupIds); int emitted=0;
+        for (String groupId : unique) {
+            if (groupId.isBlank() || emitted++ >= 20) continue;
+            List<TaskRow> group = taskGroup(scope, groupId); if (group.isEmpty()) continue;
+            BiddingTypes.Ref sourceSet = group.getFirst().refs().stream().filter(r -> "sourceSet".equals(r.kind())).findFirst().orElse(null);
+            if (sourceSet == null) continue;
+            try { dependencies.validate(scope, List.of(sourceSet)); }
+            catch (BiddingApiException stale) { if (stale.status()==404 || stale.status()==409 || stale.status()==422) continue; throw stale; }
+            ObjectNode item = groups.addObject(); item.put("taskGroupId", groupId);
+            boolean allSucceeded = group.stream().allMatch(task -> "SUCCEEDED".equals(task.status()));
+            item.put("status", allSucceeded ? "SUCCEEDED" : group.stream().anyMatch(task -> Set.of("FAILED","STALE","CANCELLED").contains(task.status())) ? "PARTIAL" : "RUNNING");
+            ObjectNode skills = item.putObject("skills"); ArrayNode conflicts = item.putArray("conflicts"); boolean complete = allSucceeded;
+            int expectedShards = group.stream().mapToInt(task -> task.input().path("shardCount").asInt(0)).max().orElse(0);
+            for (String skill : SKILLS) {
+                List<ObjectNode> candidates = new ArrayList<>();
+                for (int shard=0; shard<expectedShards; shard++) {
+                    ObjectNode candidate = candidatePayload(scope, new BiddingTypes.Ref(candidateKind(skill), groupId, shard+1L, ""));
+                    if (candidate == null) { complete=false; continue; }
+                    candidates.add(candidate);
+                }
+                if (candidates.size()!=expectedShards || expectedShards<1) { complete=false; continue; }
+                ArrayNode skillConflicts=json.createArrayNode(); ObjectNode payload=merge(skill,candidates,skillConflicts);
+                ObjectNode edited=latestEdit(scope,groupId,skill); if(edited!=null) payload=(ObjectNode)edited.path("payload").deepCopy();
+                skills.set(skill,payload); conflicts.addAll(skillConflicts);
+            }
+            item.put("complete", complete && skills.size()==SKILLS.size());
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public ObjectNode readRevision(BiddingTypes.Scope scope, String revisionId) {
+        access.requireActor(scope, scope.actorId()); projects.get(scope);
+        ObjectNode revision = jdbc.query("SELECT id,kind,object_id,version,digest,status,payload_json,input_refs_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND id=?",
+                rs -> rs.next() ? revisionRow(rs) : null, scope.workspaceId(), scope.projectId(), revisionId);
+        if (revision == null) throw BiddingAccess.error(404,"NOT_FOUND","Revision not found");
+        validateRevisionDependencies(scope, revision);
+        return revision;
+    }
+
+    private ObjectNode revisionRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+        ObjectNode value=json.createObjectNode(); value.put("id",rs.getString("id")); value.put("kind",rs.getString("kind")); value.put("objectId",rs.getString("object_id"));
+        value.put("version",rs.getLong("version")); value.put("digest",rs.getString("digest")); value.put("status",rs.getString("status"));
+        value.set("payload",parseObject(rs.getString("payload_json"))); try { value.set("inputRefs",json.readTree(rs.getString("input_refs_json"))); } catch(Exception e) { throw new IllegalStateException("Invalid revision dependencies",e); }
+        return value;
+    }
+    private void validateRevisionDependencies(BiddingTypes.Scope scope,ObjectNode revision) {
+        try {
+            List<BiddingTypes.Ref> refs=json.convertValue(revision.path("inputRefs"),new TypeReference<List<BiddingTypes.Ref>>(){});
+            if(!refs.isEmpty()) dependencies.validate(scope,refs);
+        } catch(BiddingApiException e) { throw e; }
+        catch(Exception e) { throw new IllegalStateException("Invalid stored revision references",e); }
+    }
+    private ObjectNode ref(String kind,String id,long version,String digest) { ObjectNode node=json.createObjectNode(); node.put("kind",kind); node.put("id",id); node.put("version",version); node.put("digest",digest); return node; }
+
     /** Enqueues the four pinned skills against stable whole-block shards in one transaction. */
     @Transactional
     public ObjectNode dispatch(BiddingTypes.Scope scope, BiddingTypes.Command command) {
