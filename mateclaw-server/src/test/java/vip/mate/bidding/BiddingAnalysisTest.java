@@ -47,6 +47,7 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         String groupId = dispatched.path("taskGroupId").asText();
         assertEquals(4, dispatched.path("taskIds").size());
         assertEquals(4, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE project_id=? AND status='QUEUED'", Integer.class, project.path("id").asText()));
+        assertEquals(0,api("GET","/dashboard?name=测试项目&stage=SETUP","owner",workspace,null,200).path("pendingConfirmation").asInt(),"queued analysis is not pending human confirmation");
 
         Map<String, JsonNode> golden = goldenOutputs();
         for (int index = 0; index < 4; index++) {
@@ -74,6 +75,7 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
                         + " revisions=" + jdbc.queryForList("SELECT kind,object_id,version,status FROM mate_bidding_revision WHERE project_id=?", project.path("id").asText()));
         assertEquals(4, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_attempt a JOIN mate_bidding_task t ON t.id=a.task_id WHERE t.project_id=? AND a.state='SUCCEEDED' AND a.tool_receipts_json LIKE '%bidding_read_source%'",
                 Integer.class, project.path("id").asText()));
+        assertEquals(1,api("GET","/dashboard?name=测试项目&stage=SETUP","owner",workspace,null,200).path("pendingConfirmation").asInt(),"a current complete analysis group awaits approval");
 
         String confirmOp = UUID.randomUUID().toString();
         Map<String, Object> confirmBody = Map.of("operationId", confirmOp, "expected", ref(project), "action", "CONFIRM_ANALYSIS",
@@ -101,6 +103,16 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
         assertEquals(confirmed.path("ref"), replay.path("ref"));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_decision WHERE workspace_id=? AND project_id=? AND decision='CONFIRM_ANALYSIS'",
                 Integer.class, workspace, project.path("id").asText()));
+        assertEquals(0,api("GET","/dashboard?name=测试项目&stage=SETUP","owner",workspace,null,200).path("pendingConfirmation").asInt(),"a confirmed analysis baseline no longer awaits confirmation");
+
+        JsonNode replacementSource=upload(project,"Replacement tender source. New deadline 2026-10-08."); sources.readPending(2);
+        BiddingTypes.Ref replacementSourceRef=json.convertValue(replacementSource.path("ref"),BiddingTypes.Ref.class);
+        BiddingTypes.Ref currentSourceSet=json.convertValue(api("GET","/projects/"+project.path("id").asText()+"/source-set/head","owner",workspace,null,200).path("ref"),BiddingTypes.Ref.class);
+        Map<String,Object> replacementSet=Map.of("sourceRefs",List.of(replacementSourceRef),"exclusions",List.of(),"expectedSourceSetRef",currentSourceSet);
+        command(project,ref(project),"CONFIRM_SOURCE_SET",replacementSet,"owner",200);
+        JsonNode refreshedAnalysis=api("GET","/projects/"+project.path("id").asText()+"/analysis","owner",workspace,null,200);
+        assertFalse(refreshedAnalysis.has("baseline"),"stale baseline must not be displayed after the selected source set changes");
+        assertTrue(refreshedAnalysis.path("groups").isArray());
     }
 
     @Test void refusesDispatchWithUnpinnedSkillAndPreventsPartialSourceCoverageFromConfirmation() throws Exception {

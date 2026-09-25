@@ -48,9 +48,13 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         ObjectNode baseline = jdbc.query("SELECT r.id,r.kind,r.object_id,r.version,r.digest,r.status,r.payload_json,r.input_refs_json FROM mate_bidding_head h JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version WHERE h.workspace_id=? AND h.project_id=? AND h.kind='analysisBaseline' AND h.object_id='current'",
                 rs -> rs.next() ? revisionRow(rs) : null, scope.workspaceId(), scope.projectId());
         if (baseline != null) {
-            validateRevisionDependencies(scope, baseline);
-            ObjectNode envelope = result.putObject("baseline"); envelope.set("ref", ref("analysisBaseline", "current", baseline.path("version").asLong(), baseline.path("digest").asText()));
-            envelope.put("status", baseline.path("status").asText()); envelope.set("payload", baseline.path("payload").deepCopy());
+            try {
+                validateRevisionDependencies(scope, baseline);
+                ObjectNode envelope = result.putObject("baseline"); envelope.set("ref", ref("analysisBaseline", "current", baseline.path("version").asLong(), baseline.path("digest").asText()));
+                envelope.put("status", baseline.path("status").asText()); envelope.set("payload", baseline.path("payload").deepCopy());
+            } catch (BiddingApiException stale) {
+                if (stale.status() != 404 && stale.status() != 409 && stale.status() != 422) throw stale;
+            }
         }
         ArrayNode groups = result.putArray("groups");
         List<String> groupIds = jdbc.query("SELECT input_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? ORDER BY created_at DESC,id",

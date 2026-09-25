@@ -5,16 +5,18 @@ import ElementPlus from 'element-plus'
 import en from '@/i18n/locales/en-US'
 import BiddingProjects from '../pages/BiddingProjects.vue'
 import { biddingApi } from '../api/biddingApi'
-import { isCurrentRequest } from '../shared/state'
 
 const push = vi.fn()
+const workspaceHarness=vi.hoisted(()=>({initialWorkspace:'ws-1'}))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }))
-vi.mock('@/stores/useWorkspaceStore', () => ({ useWorkspaceStore: () => ({ currentWorkspaceId: 'ws-1', registerBeforeSwitch: () => () => {} }) }))
+vi.mock('@/stores/useWorkspaceStore', async () => { const {reactive}=await import('vue'); const state=reactive({currentWorkspaceId:workspaceHarness.initialWorkspace}); (globalThis as typeof globalThis & {__biddingWorkspaceState?:typeof state}).__biddingWorkspaceState=state; return { useWorkspaceStore: () => ({ get currentWorkspaceId(){return state.currentWorkspaceId}, registerBeforeSwitch: () => () => {} }) } })
 vi.mock('../api/biddingApi', () => ({ biddingApi: { capabilities: vi.fn(), members: vi.fn(), dashboard: vi.fn(), list: vi.fn(), create: vi.fn() } }))
 let app: App | undefined, host: HTMLElement | undefined
 const flush = async () => { await new Promise(resolve => setTimeout(resolve, 0)); await nextTick() }
 const unavailable = Object.assign(new Error('404'), { response: { status: 404 } })
-afterEach(() => { app?.unmount(); host?.remove(); app=undefined; host=undefined; vi.clearAllMocks() })
+const workspaceState=()=>((globalThis as typeof globalThis & {__biddingWorkspaceState?:{currentWorkspaceId:string}}).__biddingWorkspaceState!)
+function deferred<T>() { let resolve!: (value:T)=>void; let reject!: (reason?:unknown)=>void; const promise=new Promise<T>((yes,no)=>{resolve=yes;reject=no}); return {promise,resolve,reject} }
+afterEach(() => { app?.unmount(); host?.remove(); app=undefined; host=undefined; workspaceState().currentWorkspaceId='ws-1'; vi.clearAllMocks() })
 async function mount() {
   host=document.createElement('div'); document.body.append(host); app=createApp(BiddingProjects)
   app.use(ElementPlus).use(createI18n({ legacy:false, locale:'en-US', messages:{'en-US':en} })).mount(host)
@@ -30,8 +32,6 @@ describe('bidding projects', () => {
   })
 
   it('keeps responses owned by the captured workspace and submits the real member userId', async () => {
-    expect(isCurrentRequest('ws-1','', 'ws-2','')).toBe(false)
-    expect(isCurrentRequest('ws-1','', 'ws-1','')).toBe(true)
     vi.mocked(biddingApi.capabilities).mockResolvedValue({ enabled:true, canWrite:true, canApprove:true })
     vi.mocked(biddingApi.members).mockResolvedValue([{ userId:'90071992547409999', nickname:'Lin', username:'lin' }])
     vi.mocked(biddingApi.dashboard).mockResolvedValue({ inProgress:0, dueWithin7Days:0, overdueDeadlines:0, unknownDeadlines:0, pendingConfirmation:0, failedTasks:0 })
@@ -51,9 +51,55 @@ describe('bidding projects', () => {
     expect(push).toHaveBeenCalledWith('/bidding/project-1')
   })
 
-  it('does not apply a late response from a different workspace', () => {
-    expect(isCurrentRequest('ws-1', 'project-1', 'ws-2', 'project-1')).toBe(false)
-    expect(isCurrentRequest('ws-1', 'project-1', 'ws-1', 'project-1')).toBe(true)
+  it('does not let a late same-workspace filter response replace the newer results', async () => {
+    const oldResult=deferred<{items:never[];total:number;page:number;pageSize:number}>()
+    vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+    vi.mocked(biddingApi.members).mockResolvedValue([])
+    vi.mocked(biddingApi.dashboard).mockResolvedValue({inProgress:0,dueWithin7Days:0,overdueDeadlines:0,unknownDeadlines:0,pendingConfirmation:0,failedTasks:0})
+    vi.mocked(biddingApi.list).mockImplementation((_ws,params)=>params.name==='alpha'?oldResult.promise:Promise.resolve({items:[],total:0,page:1,pageSize:20}))
+    await mount()
+    const input=host!.querySelector('.filters input') as HTMLInputElement
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'alpha');input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'alpha'}));await flush()
+    ;[...host!.querySelectorAll('button')].find(button=>button.textContent?.trim()==='Filter')!.click();await flush()
+    const alphaCall=vi.mocked(biddingApi.list).mock.calls.find(([,params])=>params.name==='alpha')!
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'beta');input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'beta'}));await flush()
+    ;[...host!.querySelectorAll('button')].find(button=>button.textContent?.trim()==='Filter')!.click();await flush()
+    oldResult.resolve({items:[{id:'old',workspaceId:'ws-1',name:'Alpha old result'}] as never[],total:1,page:1,pageSize:20});await flush()
+    expect(alphaCall[2]?.aborted).toBe(true)
+    expect(host!.textContent).not.toContain('Alpha old result')
+  })
+
+  it('ignores late owner-member results after a workspace switch', async () => {
+    const oldMembers=deferred<{userId:string;nickname:string}[]>()
+    let memberCall=0
+    vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+    vi.mocked(biddingApi.members).mockImplementation(()=>memberCall++===1?oldMembers.promise:Promise.resolve([]))
+    vi.mocked(biddingApi.dashboard).mockResolvedValue({inProgress:0,dueWithin7Days:0,overdueDeadlines:0,unknownDeadlines:0,pendingConfirmation:0,failedTasks:0})
+    vi.mocked(biddingApi.list).mockResolvedValue({items:[],total:0,page:1,pageSize:20})
+    await mount()
+    ;[...host!.querySelectorAll('button')].find(button=>button.textContent?.includes('New project'))!.click();await flush()
+    workspaceState().currentWorkspaceId='ws-2';await flush()
+    oldMembers.resolve([{userId:'old-owner',nickname:'Old workspace member'}]);await flush()
+    expect(host!.textContent).not.toContain('Old workspace member')
+    expect(document.body.textContent).not.toContain('Old workspace member')
+  })
+
+  it('does not navigate to a project created in the previous workspace', async () => {
+    const oldCreate=deferred<{id:string}>()
+    vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+    vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}])
+    vi.mocked(biddingApi.dashboard).mockResolvedValue({inProgress:0,dueWithin7Days:0,overdueDeadlines:0,unknownDeadlines:0,pendingConfirmation:0,failedTasks:0})
+    vi.mocked(biddingApi.list).mockResolvedValue({items:[],total:0,page:1,pageSize:20})
+    vi.mocked(biddingApi.create).mockReturnValue(oldCreate.promise as never)
+    await mount()
+    ;[...host!.querySelectorAll('button')].find(button=>button.textContent?.includes('New project'))!.click();await flush()
+    const inputs=host!.querySelectorAll('.el-dialog input[type="text"]')
+    for(const [index,value] of ['Create old','Lot old'].entries()){const input=inputs[index] as HTMLInputElement;Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,value);input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:value}));await flush()}
+    ;([...host!.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.trim()==='Create') as HTMLButtonElement).click();await flush()
+    expect(biddingApi.create).toHaveBeenCalledWith('ws-1',expect.any(Object))
+    workspaceState().currentWorkspaceId='ws-3';await flush()
+    oldCreate.resolve({id:'stale-project'});await flush()
+    expect(push).not.toHaveBeenCalled()
   })
 
   it('keeps a read-only project list view-only', async () => {

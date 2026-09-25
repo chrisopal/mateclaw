@@ -66,7 +66,7 @@ const projects = ref<Project[]>([]), members = ref<Member[]>([]), dashboard = re
 const capabilities = ref<Capabilities>(), loading = ref(false), membersLoading = ref(false), saving = ref(false), error = ref(''), formError = ref(''), unavailable = ref(false)
 const query = ref(''), ownerId = ref(''), stage = ref(''), page = ref(1), total = ref(0), pageSize = 20, createOpen = ref(false)
 const form = reactive({ name: '', lotName: '', ownerId: '' })
-let controller: AbortController | undefined, unregister: (() => void) | undefined
+let controller: AbortController | undefined, unregister: (() => void) | undefined, requestGeneration = 0, workspaceGeneration = 0, createMembersGeneration = 0
 const stages = ['SETUP', 'ANALYSIS', 'OUTLINE', 'WRITING', 'REVIEW', 'ARCHIVED']
 const metricRows = computed(() => [
   { key: 'inProgress', label: l('在办项目', 'In progress'), value: dashboard.value.inProgress },
@@ -78,18 +78,21 @@ function memberLabel(member: Member) { return member.nickname || member.username
 function ownerName(id: string) { return memberLabel(members.value.find(member => String(member.userId) === String(id)) || { userId: id }) }
 function stageLabel(value: string) { const labels: Record<string, [string, string]> = { SETUP: ['准备中', 'Setup'], ANALYSIS: ['招标解析', 'Analysis'], OUTLINE: ['目录规划', 'Outline'], WRITING: ['技术标写作', 'Writing'], REVIEW: ['审核', 'Review'], ARCHIVED: ['已归档', 'Archived'] }; return labels[value]?.[String(locale.value).startsWith('zh') ? 0 : 1] || value || '—' }
 async function load() {
-  controller?.abort(); controller = new AbortController(); const signal = controller.signal, ws = workspace.currentWorkspaceId || '', projectId = ''
+  controller?.abort(); controller = new AbortController(); const signal = controller.signal, generation = ++requestGeneration, ws = workspace.currentWorkspaceId || '', projectId = ''
+  const captured = { name: query.value, ownerId: ownerId.value, stage: stage.value, page: page.value }
+  const current = () => !signal.aborted && generation === requestGeneration && isCurrentRequest(ws, projectId, workspace.currentWorkspaceId || '', '')
+    && captured.name === query.value && captured.ownerId === ownerId.value && captured.stage === stage.value && captured.page === page.value
   projects.value = []; error.value = ''; unavailable.value = false
   if (!ws) { error.value = l('请选择工作区。', 'Select a workspace.'); return }
   loading.value = true
   try {
     const caps = await biddingApi.capabilities(ws, signal)
-    if (!isCurrentRequest(ws, projectId, workspace.currentWorkspaceId || '', '')) return
+    if (!current()) return
     capabilities.value = caps
     if (!caps.enabled) { unavailable.value = true; return }
-    const filters = { name: query.value, ownerId: ownerId.value, stage: stage.value }
-    const [memberRows, stats, result] = await Promise.all([biddingApi.members(ws, signal), biddingApi.dashboard(ws, filters, signal), biddingApi.list(ws, { name: query.value, ownerId: ownerId.value, stage: stage.value, page: page.value, pageSize }, signal)])
-    if (!isCurrentRequest(ws, projectId, workspace.currentWorkspaceId || '', '')) return
+    const filters = { name: captured.name, ownerId: captured.ownerId, stage: captured.stage }
+    const [memberRows, stats, result] = await Promise.all([biddingApi.members(ws, signal), biddingApi.dashboard(ws, filters, signal), biddingApi.list(ws, { ...filters, page: captured.page, pageSize }, signal)])
+    if (!current()) return
     members.value = memberRows.map(member => ({ ...member, userId: String(member.userId) })); dashboard.value = stats; projects.value = result.items; total.value = result.total
   } catch (cause) { if (!signal.aborted) { unavailable.value = apiUnavailable(cause); if (!unavailable.value) error.value = l('投标项目加载失败。', 'Could not load bidding projects.') } }
   finally { if (!signal.aborted) loading.value = false }
@@ -97,20 +100,20 @@ async function load() {
 function search() { page.value = 1; void load() }
 async function openCreate() {
   form.name = ''; form.lotName = ''; form.ownerId = ''; formError.value = ''; createOpen.value = true
-  const ws = workspace.currentWorkspaceId; if (!ws) return
+  const ws = workspace.currentWorkspaceId, generation = ++createMembersGeneration; if (!ws) return
   membersLoading.value = true
-  try { members.value = (await biddingApi.members(ws)).map(member => ({ ...member, userId: String(member.userId) })); if (!form.ownerId) form.ownerId = members.value[0] ? String(members.value[0].userId) : '' }
-  catch { formError.value = l('工作区成员加载失败。', 'Could not load workspace members.') }
-  finally { membersLoading.value = false }
+  try { const rows = await biddingApi.members(ws); if (generation !== createMembersGeneration || ws !== workspace.currentWorkspaceId || !createOpen.value) return; members.value = rows.map(member => ({ ...member, userId: String(member.userId) })); if (!form.ownerId) form.ownerId = members.value[0] ? String(members.value[0].userId) : '' }
+  catch { if (generation === createMembersGeneration && ws === workspace.currentWorkspaceId) formError.value = l('工作区成员加载失败。', 'Could not load workspace members.') }
+  finally { if (generation === createMembersGeneration) membersLoading.value = false }
 }
 async function create() {
-  const ws = workspace.currentWorkspaceId; if (!ws || !capabilities.value?.canWrite) return
+  const ws = workspace.currentWorkspaceId, generation = workspaceGeneration; if (!ws || !capabilities.value?.canWrite) return
   saving.value = true; formError.value = ''
-  try { const project = await biddingApi.create(ws, { operationId: operationId(), name: form.name.trim(), lotName: form.lotName.trim(), ownerId: form.ownerId }); createOpen.value = false; await router.push(`/bidding/${project.id}`) }
-  catch { formError.value = l('创建失败。请检查负责人和项目字段后重试。', 'Creation failed. Check the owner and project fields, then retry.') }
+  try { const project = await biddingApi.create(ws, { operationId: operationId(), name: form.name.trim(), lotName: form.lotName.trim(), ownerId: form.ownerId }); if(generation !== workspaceGeneration || ws !== workspace.currentWorkspaceId) return; createOpen.value = false; await router.push(`/bidding/${project.id}`) }
+  catch { if(generation === workspaceGeneration && ws === workspace.currentWorkspaceId) formError.value = l('创建失败。请检查负责人和项目字段后重试。', 'Creation failed. Check the owner and project fields, then retry.') }
   finally { saving.value = false }
 }
-watch(() => workspace.currentWorkspaceId, () => { createOpen.value = false; void load() })
+watch(() => workspace.currentWorkspaceId, () => { workspaceGeneration++; createMembersGeneration++; createOpen.value = false; membersLoading.value = false; members.value=[]; void load() })
 onMounted(() => { unregister = workspace.registerBeforeSwitch(() => { controller?.abort(); return true }); void load() })
 onBeforeUnmount(() => { controller?.abort(); unregister?.() })
 </script>

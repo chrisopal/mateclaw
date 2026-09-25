@@ -4,12 +4,13 @@
       <el-select v-model="sourceKind" :disabled="!canWrite" size="small"><el-option label="招标文件" value="TENDER" /><el-option label="附件" value="ATTACHMENT" /><el-option label="补遗" value="ADDENDUM" /></el-select>
       <input ref="fileInput" class="file-input" type="file" accept=".pdf,.docx" :disabled="!canWrite || uploading" @change="chooseFile" />
       <el-button type="primary" :loading="uploading" :disabled="!canWrite || uploading" @click="fileInput?.click()">{{ l('上传文件', 'Upload file') }}</el-button>
-      <el-button type="primary" plain :disabled="!canApprove || !latestSources.length || !!confirmationBlocked || confirming" :loading="confirming" @click="confirmSet">{{ l('确认来源', 'Confirm sources') }}</el-button>
+      <el-button type="primary" plain :disabled="!canApprove || !selectedSources.length || !!confirmationBlocked || confirming" :loading="confirming" @click="confirmSet">{{ l('确认来源', 'Confirm sources') }}</el-button>
       <el-button type="primary" plain :disabled="!canWrite || !sourceSet?.ref || !analystReady || activeAnalysis" :loading="dispatching" @click="dispatch">{{ l('开始解析', 'Start analysis') }}</el-button>
       <el-button type="primary" plain size="small" @click="$emit('tasks')">{{ l('任务记录', 'Task records') }}</el-button>
     </div></header>
     <el-alert v-if="notice" :title="notice" :type="noticeType" :closable="false" />
-    <div class="table-scroll"><el-table :data="sources" row-key="sourceId" v-loading="loading" empty-text="">
+    <div class="table-scroll"><el-table :data="sources" :row-key="sourceRowKey" v-loading="loading" empty-text="">
+      <el-table-column :label="l('选入来源', 'Select version')" width="120"><template #default="{ row }"><el-checkbox v-model="selectionState(row).selected" :disabled="!canApprove || selectionDisabled(row)">{{ l('选用', 'Use') }}</el-checkbox></template></el-table-column>
       <el-table-column :label="l('文件 / 版本', 'File / version')" min-width="220"><template #default="{ row }"><strong>{{ row.filename || row.sourceId }}</strong><small>{{ row.sourceId }} · V{{ row.version }}</small></template></el-table-column>
       <el-table-column :label="l('类型', 'Type')" width="130"><template #default="{ row }">{{ kindLabel(row.kind) }}</template></el-table-column>
       <el-table-column :label="l('读取状态', 'Read status')" width="155"><template #default="{ row }"><el-tag :type="statusType(row.readStatus)" effect="plain">{{ statusLabel(row.readStatus) }}</el-tag></template></el-table-column>
@@ -33,29 +34,28 @@ const props = defineProps<{ sources: Source[]; project: Project; sourceSet: { re
 const emit = defineEmits<{ preview:[Source]; tasks:[]; dispatch:[]; 'retry-read':[Source]; changed:[] }>()
 const { locale } = useI18n(), l = (zh:string,en:string) => String(locale.value).startsWith('zh') ? zh : en
 const sourceKind = ref('TENDER'), fileInput = ref<HTMLInputElement>(), uploading = ref(false), confirming = ref(false), notice = ref(''), noticeType = ref<'success'|'warning'|'error'>('success')
-const latestSources = computed(() => {
-  const latest = new Map<string, Source>()
-  for (const source of props.sources) {
-    const current = latest.get(source.sourceId)
-    if (!current || source.version > current.version) latest.set(source.sourceId, source)
-  }
-  return [...latest.values()]
-})
+const selectedSources = computed(() => props.sources.filter(source => selectionState(source).selected))
+const sourceSelections = reactive<Record<string,{ selected:boolean }>>({})
 const exclusionChoices = reactive<Record<string,{ selected:boolean; reason:string }>>({})
-const sourceExclusions = computed(() => latestSources.value.flatMap(source => emptyPages(source).filter(block => exclusionState(source,block).selected && exclusionState(source,block).reason.trim()).map(block => ({ sourceRef:{ kind:'source',id:source.sourceId,version:source.version,digest:source.digest },blockId:block.id,reason:exclusionState(source,block).reason.trim() }))))
+const sourceExclusions = computed(() => selectedSources.value.flatMap(source => emptyPages(source).filter(block => exclusionState(source,block).selected && exclusionState(source,block).reason.trim()).map(block => ({ sourceRef:{ kind:'source',id:source.sourceId,version:source.version,digest:source.digest },blockId:block.id,reason:exclusionState(source,block).reason.trim() }))))
 const confirmationBlocked = computed(() => {
-  const blocked = latestSources.value.filter(source => source.readStatus !== 'READY' && source.readStatus !== 'NEEDS_REVIEW' || source.readStatus === 'NEEDS_REVIEW' && (!reviewSupported(source) || emptyPages(source).some(block => !exclusionState(source,block).selected || !exclusionState(source,block).reason.trim())))
-  return blocked.length ? l('存在未就绪或未核实文件。仅可在负责人明确排除每个空白页并填写原因后确认；不可排除的读取问题须先修复。', 'Some files are not ready or need review. Confirm only after the owner explicitly excludes every blank page with a reason; other read issues must be fixed first.') : ''
+  const selectedIds=new Set<string>(); const duplicate=selectedSources.value.some(source=>selectedIds.has(source.sourceId)||!selectedIds.add(source.sourceId))
+  if (duplicate) return l('同一文件只能选一个版本。','Select only one version of each file.')
+  const blocked = selectedSources.value.filter(source => source.readStatus !== 'READY' && source.readStatus !== 'NEEDS_REVIEW' || source.readStatus === 'NEEDS_REVIEW' && (!reviewSupported(source) || emptyPages(source).some(block => !exclusionState(source,block).selected || !exclusionState(source,block).reason.trim())))
+  return blocked.length ? l('所选文件未就绪或未核实。仅可排除明确标示的空白页并填写原因；不可排除的读取问题请取消选中并先修复。', 'Selected files are not ready or need review. Only marked blank pages may be excluded, with reasons; unselect and fix other read issues first.') : ''
 })
 function kindLabel(kind:string) { return ({ TENDER:l('招标文件','Tender'), ATTACHMENT:l('附件','Attachment'), ADDENDUM:l('补遗','Addendum') } as Record<string,string>)[kind] || kind }
 function statusLabel(status:string) { return ({ READY:l('可读取','Ready'), NEEDS_REVIEW:l('待核实','Review needed'), PENDING:l('等待读取','Queued'), READING:l('读取中','Reading'), FAILED:l('读取失败','Read failed') } as Record<string,string>)[status] || status }
 function statusType(status:string) { return status === 'READY' ? 'success' : ['FAILED','NEEDS_REVIEW'].includes(status) ? 'warning' : 'info' }
+function sourceRowKey(source:Source) { return `${source.sourceId}:${source.version}` }
+function selectionState(source:Source) { return sourceSelections[sourceRowKey(source)] ||= { selected:false } }
+function selectionDisabled(source:Source) { return !selectionState(source).selected && selectedSources.value.some(item=>item.sourceId===source.sourceId) }
 function chooseFile(event: Event) { const input=event.target as HTMLInputElement; const file=input.files?.[0]; if(file) void emitUpload(file); input.value='' }
 async function emitUpload(file: File) { uploading.value=true; notice.value=''; try { emit('changed'); await biddingApi.upload(props.project.workspaceId, props.project.id, file, sourceKind.value, operationId()); emit('changed') } catch { noticeType.value='error'; notice.value=l('文件上传失败。', 'File upload failed.') } finally { uploading.value=false } }
 function emptyPages(source:Source) { return (source.blocks || []).filter(block => block.kind === 'EMPTY_PAGE') }
 function reviewSupported(source:Source) { return emptyPages(source).length > 0 && (source.problems || []).every(problem => problem.startsWith('EMPTY_PDF_PAGE:')) && (source.blocks || []).every(block => ['TEXT','EMPTY_PAGE'].includes(block.kind)) }
 function exclusionState(source:Source,block:{ id:string }) { const key=`${source.sourceId}:${source.version}:${block.id}`; return exclusionChoices[key] ||= { selected:false,reason:'' } }
-async function confirmSet() { if (confirmationBlocked.value || !latestSources.value.length) return; confirming.value=true; notice.value=''; try { await biddingApi.command(props.project.workspaceId, props.project.id, { operationId: operationId(), expected: props.project.ref, action:'CONFIRM_SOURCE_SET', payload:{ expectedSourceSetRef: props.sourceSet?.ref || null, sourceRefs: latestSources.value.map(source => ({ kind:'source', id:source.sourceId, version:source.version, digest:source.digest })), exclusions:sourceExclusions.value } }); emit('changed') } catch { noticeType.value='error'; notice.value=l('来源未确认。请检查读取状态和排除原因。', 'Sources were not confirmed. Check read status and exclusion reasons.') } finally { confirming.value=false } }
+async function confirmSet() { if (confirmationBlocked.value || !selectedSources.value.length) return; confirming.value=true; notice.value=''; try { await biddingApi.command(props.project.workspaceId, props.project.id, { operationId: operationId(), expected: props.project.ref, action:'CONFIRM_SOURCE_SET', payload:{ expectedSourceSetRef: props.sourceSet?.ref || null, sourceRefs: selectedSources.value.map(source => ({ kind:'source', id:source.sourceId, version:source.version, digest:source.digest })), exclusions:sourceExclusions.value } }); emit('changed') } catch { noticeType.value='error'; notice.value=l('来源未确认。请检查读取状态和排除原因。', 'Sources were not confirmed. Check read status and exclusion reasons.') } finally { confirming.value=false } }
 function dispatch() { emit('dispatch') }
 </script>
 <style scoped>

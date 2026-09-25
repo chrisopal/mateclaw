@@ -17,11 +17,22 @@ it('shows a failed attempt and sends one explicit retry command',async()=>{
   vi.mocked(biddingApi.command).mockResolvedValue({status:'QUEUED'})
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
   host=document.createElement('div');document.body.append(host)
-  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project})
+  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project,canWrite:true})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   ;[...document.querySelectorAll('tr')].find(row=>row.textContent?.includes('FAILED'))?.dispatchEvent(new MouseEvent('click',{bubbles:true}));await flush()
   expect(document.body.textContent).toContain('MODEL_TIMEOUT')
   ;[...document.querySelectorAll('button')].find(button=>button.textContent?.includes('Retry'))!.click();await flush()
   expect(biddingApi.command).toHaveBeenCalledTimes(1)
   expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'RETRY_TASK',payload:{taskId:'task-1'}}))
+})
+
+it('keeps retry and cancel actions unavailable to a workspace viewer',async()=>{
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items:[{taskId:'task-2',status:'FAILED',attemptCount:1}],total:1,page:1,pageSize:100})
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project,canWrite:false})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  expect(document.body.textContent).toContain('Read-only access')
+  expect([...document.querySelectorAll('button')].some(button=>['Retry','Cancel'].includes(button.textContent?.trim()||''))).toBe(false)
+  expect(biddingApi.command).not.toHaveBeenCalled()
 })

@@ -19,6 +19,7 @@ class BiddingDashboardTest extends BiddingHttpFixture {
         assertEquals(0,dashboard.path("dueWithin7Days").asInt());
         assertEquals(0,dashboard.path("overdueDeadlines").asInt());
         assertEquals(0,dashboard.path("failedTasks").asInt());
+        assertEquals(0,dashboard.path("pendingConfirmation").asInt(),"a source set without a dispatched analysis is not awaiting analysis confirmation");
         assertEquals(0,api("GET","/dashboard?name=missing&stage=SETUP","member",workspace,null,200).path("inProgress").asInt());
         assertNotEquals(alpha.path("ownerId").asText(),beta.path("ownerId").asText());
     }

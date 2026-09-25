@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class BiddingRepository {
+    private static final List<String> ANALYSIS_SKILLS = List.of("bidding-tender-profile", "bidding-elimination-analysis",
+            "bidding-requirement-analysis", "bidding-scoring-analysis");
     private final NamedParameterJdbcTemplate jdbc;
     private final ObjectMapper json;
     public BiddingRepository(NamedParameterJdbcTemplate jdbc,ObjectMapper json) { this.jdbc=jdbc; this.json=json; }
@@ -193,9 +195,10 @@ public class BiddingRepository {
         ObjectNode result=json.createObjectNode();
         Long inProgress=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_project"+where+" AND stage<>'ARCHIVED'",params,Long.class);
         Long failed=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task t WHERE t.workspace_id=:workspace AND t.status IN ('FAILED','STALE') AND EXISTS (SELECT 1 FROM mate_bidding_project p"+where+" AND p.id=t.project_id)",params,Long.class);
-        Long pending=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_head h WHERE h.workspace_id=:workspace AND h.kind='sourceSet' AND h.object_id='current' AND EXISTS (SELECT 1 FROM mate_bidding_project p"+where+" AND p.id=h.project_id) AND NOT EXISTS (SELECT 1 FROM mate_bidding_head b JOIN mate_bidding_revision br ON br.workspace_id=b.workspace_id AND br.project_id=b.project_id AND br.kind=b.kind AND br.object_id=b.object_id AND br.version=b.version WHERE b.workspace_id=h.workspace_id AND b.project_id=h.project_id AND b.kind='analysisBaseline' AND b.object_id='current' AND br.status='CONFIRMED')",params,Long.class);
-        result.put("inProgress",inProgress==null?0:inProgress); result.put("failedTasks",failed==null?0:failed); result.put("pendingConfirmation",pending==null?0:pending);
         String whereP=" WHERE p.workspace_id=:workspace AND (:q='%%' OR LOWER(p.name) LIKE LOWER(:q) OR LOWER(p.lot_name) LIKE LOWER(:q)) AND (:stage IS NULL OR p.stage=:stage) AND (:owner IS NULL OR p.owner_id=:owner)";
+        List<String> visibleProjects=jdbc.query("SELECT id FROM mate_bidding_project"+where,params,(rs,n)->rs.getString(1));
+        int pending=0; for(String projectId:visibleProjects) if(awaitingAnalysisConfirmation(workspaceId,projectId)) pending++;
+        result.put("inProgress",inProgress==null?0:inProgress); result.put("failedTasks",failed==null?0:failed); result.put("pendingConfirmation",pending);
         List<DeadlineProject> projects=jdbc.query("SELECT p.id,p.stage,r.status,r.payload_json FROM mate_bidding_project p LEFT JOIN mate_bidding_head h ON h.workspace_id=p.workspace_id AND h.project_id=p.id AND h.kind='analysisBaseline' AND h.object_id='current' LEFT JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version"+whereP,
                 params,(rs,n)->new DeadlineProject(rs.getString("id"),rs.getString("stage"),rs.getString("status"),rs.getString("payload_json")));
         int due=0, overdue=0, unknown=0; java.time.Instant now=java.time.Instant.now(), limit=now.plus(java.time.Duration.ofDays(7));
@@ -208,6 +211,57 @@ public class BiddingRepository {
         }
         result.put("dueWithin7Days",due); result.put("overdueDeadlines",overdue); result.put("unknownDeadlines",unknown); return result;
     }
+    private boolean awaitingAnalysisConfirmation(String workspaceId,String projectId) {
+        BiddingTypes.Scope scope=new BiddingTypes.Scope(workspaceId,"",projectId);
+        String currentGroup="";
+        try {
+            var baseline=jdbc.getJdbcTemplate().query("SELECT r.status,r.payload_json FROM mate_bidding_head h JOIN mate_bidding_revision r ON r.workspace_id=h.workspace_id AND r.project_id=h.project_id AND r.kind=h.kind AND r.object_id=h.object_id AND r.version=h.version WHERE h.workspace_id=? AND h.project_id=? AND h.kind='analysisBaseline' AND h.object_id='current'",
+                    rs->rs.next()?new AbstractMap.SimpleImmutableEntry<>(rs.getString(1),rs.getString(2)):null,workspaceId,projectId);
+            if(baseline!=null && "CONFIRMED".equals(baseline.getKey())) currentGroup=parseObject(baseline.getValue()).path("taskGroupId").asText("");
+        } catch(org.springframework.dao.EmptyResultDataAccessException ignored) { }
+        List<DashboardTask> rows=jdbc.getJdbcTemplate().query("SELECT id,status,input_json,input_refs_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? ORDER BY created_at,id",
+                (rs,n)->new DashboardTask(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4)),workspaceId,projectId);
+        Map<String,List<DashboardTask>> groups=new LinkedHashMap<>();
+        for(DashboardTask row:rows) {
+            try { String group=parseObject(row.inputJson()).path("input").path("taskGroupId").asText(""); if(!group.isBlank()) groups.computeIfAbsent(group,key->new ArrayList<>()).add(row); }
+            catch(RuntimeException ignored) { }
+        }
+        for(var entry:groups.entrySet()) {
+            String groupId=entry.getKey(); List<DashboardTask> group=entry.getValue();
+            if(groupId.equals(currentGroup) || group.stream().anyMatch(task->!"SUCCEEDED".equals(task.status()))) continue;
+            try {
+                JsonNode refs=json.readTree(group.getFirst().inputRefsJson()); BiddingTypes.Ref sourceSet=null;
+                for(JsonNode ref:refs) if("sourceSet".equals(ref.path("kind").asText())) { sourceSet=json.treeToValue(ref,BiddingTypes.Ref.class); break; }
+                if(sourceSet==null || !isSelectedSourceSet(scope,sourceSet)) continue;
+                int shards=0; Set<String> expected=new HashSet<>(); Map<String,DashboardTask> bySkillShard=new HashMap<>();
+                for(DashboardTask task:group) {
+                    JsonNode input=parseObject(task.inputJson()).path("input"); String skill=input.path("skillId").asText(); int index=input.path("shardIndex").asInt(-1), count=input.path("shardCount").asInt(0);
+                    if(!ANALYSIS_SKILLS.contains(skill)||index<0||count<1||!sourceSet.equals(sourceSetRef(task.inputRefsJson()))) { expected.clear(); break; }
+                    shards=Math.max(shards,count); String key=skill+":"+index; if(bySkillShard.putIfAbsent(key,task)!=null){expected.clear();break;} expected.add(key);
+                }
+                if(shards<1 || group.size()!=ANALYSIS_SKILLS.size()*shards || expected.size()!=group.size()) continue;
+                boolean complete=true;
+                for(String skill:ANALYSIS_SKILLS) for(int shard=0;shard<shards;shard++) {
+                    DashboardTask task=bySkillShard.get(skill+":"+shard); if(task==null){complete=false;break;}
+                    String raw=jdbc.getJdbcTemplate().query("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND version=? AND status='CANDIDATE'",
+                            rs->rs.next()?rs.getString(1):null,workspaceId,projectId,"analysisCandidate_"+skill,groupId,(long)shard+1);
+                    if(raw==null){complete=false;break;}
+                    ObjectNode candidate=parseObject(raw); JsonNode output=candidate.path("payload"), read=candidate.path("readBlockIds"), coverage=output.path("coverage");
+                    Set<String> assigned=new HashSet<>(),processed=new HashSet<>(); read.forEach(item->assigned.add(item.asText())); coverage.path("processedBlockIds").forEach(item->processed.add(item.asText()));
+                    if(!task.id().equals(candidate.path("taskId").asText()) || !groupId.equals(candidate.path("taskGroupId").asText())
+                            || !skill.equals(candidate.path("skillId").asText()) || candidate.path("shardIndex").asInt(-1)!=shard
+                            || !coverage.path("unprocessedBlockIds").isArray() || !coverage.path("unprocessedBlockIds").isEmpty()
+                            || !assigned.equals(processed)) { complete=false;break; }
+                }
+                if(complete)return true;
+            } catch(Exception ignored) { }
+        }
+        return false;
+    }
+    private BiddingTypes.Ref sourceSetRef(String refsJson) throws Exception {
+        JsonNode refs=json.readTree(refsJson); for(JsonNode ref:refs) if("sourceSet".equals(ref.path("kind").asText())) return json.treeToValue(ref,BiddingTypes.Ref.class); return null;
+    }
+    private record DashboardTask(String id,String status,String inputJson,String inputRefsJson) {}
     private List<java.time.Instant> deadlineInstants(String workspaceId,DeadlineProject project) {
         if(!"CONFIRMED".equals(project.baselineStatus())||project.payload()==null)return List.of();
         try {
