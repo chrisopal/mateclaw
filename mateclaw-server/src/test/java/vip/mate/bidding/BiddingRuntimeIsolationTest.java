@@ -29,7 +29,9 @@ class BiddingRuntimeIsolationTest {
     private BiddingEmployeeRuntime runtime;
     private BiddingTypes.Claim claim;
 
-    @BeforeEach void setUp() {
+    @BeforeEach void setUp(org.junit.jupiter.api.TestInfo testInfo) {
+        if (testInfo.getTestMethod().map(method -> method.getName()
+                .equals("runtimeBeanStartsWithoutOptionalAgentExecutionGraph")).orElse(false)) return;
         db = new EmbeddedDatabaseBuilder().setName("bidding-runtime-" + java.util.UUID.randomUUID())
                 .setType(org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2).build();
         jdbc = new JdbcTemplate(db);
@@ -52,7 +54,21 @@ class BiddingRuntimeIsolationTest {
                 "7", "config-digest", List.of(), new ObjectMapper().createObjectNode());
     }
 
-    @AfterEach void tearDown() { db.shutdown(); }
+    @AfterEach void tearDown() { if (db != null) db.shutdown(); }
+
+    @Test void runtimeBeanStartsWithoutOptionalAgentExecutionGraph() {
+        try (var context = new org.springframework.context.annotation.AnnotationConfigApplicationContext()) {
+            context.registerBean(BiddingAccess.class, () -> mock(BiddingAccess.class));
+            context.registerBean(BiddingDependencies.class, () -> mock(BiddingDependencies.class));
+            context.registerBean(JdbcTemplate.class, () -> mock(JdbcTemplate.class));
+            context.register(BiddingEmployeeRuntime.class);
+            context.refresh();
+
+            assertNotNull(context.getBean(BiddingEmployeeRuntime.class));
+            assertFalse(context.containsBean("biddingEmployeeBindings"));
+            assertFalse(context.containsBean("agentService"));
+        }
+    }
 
     @Test void acceptsOnlyDatabaseBackedActiveAttemptAndTrustedOptions() {
         ToolContext context = context(claim);

@@ -18,3 +18,15 @@ Result: BUILD SUCCESS; 41 tests passed (4 runtime, 4 isolation, 4 skill-load, 11
 Not run: Task 5 queue/dispatch integration (out of scope and not present); actual external model/network behavior. The production-entry test mocks `BiddingAccess` at the host authorization seam and uses the configured fake provider; H2 claim/attempt, source-set, employee-config, skill-pin, callback, and receipt checks remain real. No full production dispatch claim is made.
 
 Plan deviations: none
+
+Independent gate follow-up: the broader `Bidding*Test` suite initially exposed a Spring startup regression in `BiddingHttpFixture.App`: `BiddingEmployeeRuntime` eagerly required `BiddingEmployeeBindings`, whose graph requires `AgentService`, although that fixture intentionally has no agent graph. The runtime now lazily resolves execution-only agent dependencies, so host startup does not require the optional graph; the normal `execute` path still resolves these dependencies when invoked. Added a minimal Spring-context regression that constructs the runtime without `AgentService` and skips the unrelated H2 setup.
+
+Verification after the fix (Temurin Java 21.0.7, compiler annotation processing `full`):
+
+```sh
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -version
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest='Bidding*Test,SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest,NodeStreamingChatHelperFallbackChainTest,NodeStreamingChatHelperFailoverTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+git diff --check
+```
+
+Result: BUILD SUCCESS; 95 tests passed across the 8 `Bidding*Test` classes (62 tests) and six existing Skill/Presales/fallback classes (33 tests), with zero failures or errors. The startup regression test ran as part of `BiddingRuntimeIsolationTest` (5 tests total, 0.16s). No Task 5 queue/dispatch integration was run; this remains out of scope.

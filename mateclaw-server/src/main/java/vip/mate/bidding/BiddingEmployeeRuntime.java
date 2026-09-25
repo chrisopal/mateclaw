@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
 import java.util.Map;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import vip.mate.agent.AgentService;
@@ -24,10 +25,10 @@ public class BiddingEmployeeRuntime {
     private final vip.mate.agent.repository.AgentMapper agentMapper;
 
     public BiddingEmployeeRuntime(BiddingAccess access, BiddingDependencies dependencies,
-            BiddingEmployeeBindings employeeBindings,
-            org.springframework.jdbc.core.JdbcTemplate jdbc, vip.mate.agent.AgentService agents,
-            vip.mate.workspace.conversation.ConversationService conversations,
-            vip.mate.agent.repository.AgentMapper agentMapper) {
+            @Lazy BiddingEmployeeBindings employeeBindings,
+            org.springframework.jdbc.core.JdbcTemplate jdbc, @Lazy vip.mate.agent.AgentService agents,
+            @Lazy vip.mate.workspace.conversation.ConversationService conversations,
+            @Lazy vip.mate.agent.repository.AgentMapper agentMapper) {
         this.access = access;
         this.dependencies = dependencies;
         this.employeeBindings = employeeBindings;
