@@ -1,5 +1,9 @@
 # Task 9 report: project owner and viewer permissions
 
+Status: DONE
+Verification: PASS
+Plan deviations: none
+
 ## Result
 
 Project GET now includes a server-computed `capabilities.canApprove` value after the project has been authorized in the requested workspace. It is true for workspace owners/admins and the active project owner; it is false for other members and viewers. The workspace `/capabilities` response remains coarse. Approval and mutation endpoints continue to enforce permissions server-side.
