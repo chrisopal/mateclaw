@@ -55,26 +55,32 @@ public class BiddingAccess {
         long workspaceId=parse(scope.workspaceId(),"WORKSPACE_REQUIRED");
         long actorId=parse(scope.actorId(),"UNAUTHENTICATED");
         WorkspaceEntity workspace=workspaces.selectById(workspaceId);
-        if(workspace.getOwnerId()!=null && workspace.getOwnerId()==actorId) return true;
-        UserEntity actor=auth.findById(actorId);
-        if(actor!=null && "admin".equalsIgnoreCase(actor.getRole())) return true;
+        if(isWorkspaceApprover(workspace,workspaceId,actorId)) return true;
         WorkspaceMemberEntity member=membership(workspaceId,actorId);
-        if(member!=null && ("admin".equals(member.getRole()) || "owner".equals(member.getRole()))) return true;
-        return Long.toString(actorId).equals(project.path("ownerId").asText());
+        return member!=null && rank(member.getRole())>=rank("member")
+                && Long.toString(actorId).equals(project.path("ownerId").asText());
     }
 
     public void requireApprover(BiddingTypes.Scope scope) {
         requireActor(scope,scope.actorId());
         long workspaceId=parse(scope.workspaceId(),"WORKSPACE_REQUIRED"), actorId=parse(scope.actorId(),"UNAUTHENTICATED");
         WorkspaceEntity workspace=workspaces.selectById(workspaceId);
-        if(workspace.getOwnerId()!=null && workspace.getOwnerId()==actorId) return;
-        WorkspaceMemberEntity member=membership(workspaceId,actorId);
-        if(member!=null && ("admin".equals(member.getRole()) || "owner".equals(member.getRole()))) return;
+        if(isWorkspaceApprover(workspace,workspaceId,actorId)) return;
         if(scope.projectId()!=null) {
             var project=repository.findProject(scope.workspaceId(),scope.projectId());
-            if(project!=null && actorId==parse(project.get("ownerId").asText(),"NOT_FOUND")) return;
+            WorkspaceMemberEntity member=membership(workspaceId,actorId);
+            if(member!=null && rank(member.getRole())>=rank("member") && project!=null
+                    && actorId==parse(project.get("ownerId").asText(),"NOT_FOUND")) return;
         }
         throw error(403,"FORBIDDEN","Project owner or workspace administrator required");
+    }
+
+    private boolean isWorkspaceApprover(WorkspaceEntity workspace,long workspaceId,long actorId) {
+        if(workspace.getOwnerId()!=null && workspace.getOwnerId()==actorId) return true;
+        UserEntity actor=auth.findById(actorId);
+        if(actor!=null && "admin".equalsIgnoreCase(actor.getRole())) return true;
+        WorkspaceMemberEntity member=membership(workspaceId,actorId);
+        return member!=null && ("admin".equals(member.getRole()) || "owner".equals(member.getRole()));
     }
 
     public void requireOwner(String workspaceId,String ownerId) {

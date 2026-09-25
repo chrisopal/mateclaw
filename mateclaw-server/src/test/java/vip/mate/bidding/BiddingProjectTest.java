@@ -43,6 +43,36 @@ class BiddingProjectTest extends BiddingHttpFixture {
         assertFalse(coarse.path("canApprove").asBoolean(), "workspace capability remains coarse and does not infer project ownership");
     }
 
+    @Test void viewerProjectOwnerDoesNotReceiveApprovalCapability() throws Exception {
+        String viewerUsername=auth.parseToken(tokens.get("viewer").substring(7));
+        String viewerId=jdbc.queryForObject("SELECT id FROM mate_user WHERE username=?",String.class,viewerUsername);
+        JsonNode project=api("POST","/projects","member",workspace,
+                Map.of("operationId","viewer-owned","name","Viewer owned","lotName","Lot A","ownerId",viewerId),200);
+        JsonNode viewerView=api("GET","/projects/"+project.path("id").asText(),"viewer",workspace,null,200);
+        assertFalse(viewerView.path("capabilities").path("canApprove").asBoolean());
+    }
+
+    @Test void globalAdminApprovalCapabilityMatchesCommandAuthorization() throws Exception {
+        JsonNode project=project();
+        String username="bidding_global_admin_"+java.util.UUID.randomUUID();
+        String password=java.util.UUID.randomUUID().toString();
+        UserEntity admin=new UserEntity(); admin.setUsername(username); admin.setPassword(password); admin.setRole("admin"); admin.setDeleted(0);
+        auth.createUser(admin);
+        var login=mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/v1/auth/login")
+                .contentType("application/json").content(json.writeValueAsString(Map.of("username",username,"password",password))))
+                .andReturn().getResponse();
+        assertEquals(200,login.getStatus(),login.getContentAsString());
+        tokens.put("globalAdmin","Bearer "+json.readTree(login.getContentAsString()).path("data").path("token").asText());
+
+        JsonNode adminView=api("GET","/projects/"+project.path("id").asText(),"globalAdmin",workspace,null,200);
+        assertTrue(adminView.path("capabilities").path("canApprove").asBoolean());
+        assertTrue(api("GET","/capabilities","globalAdmin",workspace,null,200).path("canApprove").asBoolean());
+        JsonNode updated=api("POST","/projects/"+project.path("id").asText()+"/commands","globalAdmin",workspace,
+                Map.of("operationId","global-admin-approval","expected",ref(project),"action","UPDATE_PROJECT",
+                        "payload",Map.of("name","Admin approved")),200);
+        assertEquals("Admin approved",updated.path("result").path("name").asText());
+    }
+
     @Test void cannotReadAnotherWorkspaceOrCreateAsViewer() throws Exception {
         var p = project();
         api("GET", "/projects/" + p.path("id").asText(), "owner", otherWorkspace, null, 404);
