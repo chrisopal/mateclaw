@@ -12,8 +12,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
@@ -206,8 +208,10 @@ public class BiddingTaskService {
         for(long delay:delays) {
             if(delay>0) sleep(delay);
             try { transactions.execute(tx->{completeSuccess(claim,execution); return null;}); return; }
-            catch(BiddingApiException rejected) { persistRejected(claim,execution,rejected); return; }
-            catch(RuntimeException dbFailure) { last=dbFailure; }
+            catch(BiddingApiException rejected) { persistRejected(claim,execution,rejected.code(),"VALIDATION"); return; }
+            catch(ResultHandlerFailure rejected) { persistRejected(claim,execution,"RESULT_HANDLER_FAILURE","HANDLER"); return; }
+            catch(DataAccessException|TransactionException persistenceFailure) { last=persistenceFailure; }
+            catch(RuntimeException programmingFailure) { persistRejected(claim,execution,"COMPLETE_FAILURE","INTERNAL"); return; }
         }
         if(last!=null) throw last;
     }
@@ -219,7 +223,11 @@ public class BiddingTaskService {
         if(!Objects.equals(claim.skill().digest(),execution.loadedSkillDigest()) || !Objects.equals(claim.configDigest(),execution.configDigest()))
             throw BiddingAccess.error(409,"EXECUTION_FINGERPRINT_MISMATCH","Execution fingerprint does not match the claimed snapshot");
         BiddingResultHandler handler=handler(claim.skill().skillId());
-        BiddingTypes.Ref accepted=handler.accept(claim,execution.payload());
+        BiddingTypes.Ref accepted;
+        try { accepted=handler.accept(claim,execution.payload()); }
+        catch(DataAccessException|TransactionException persistenceFailure) { throw persistenceFailure; }
+        catch(BiddingApiException rejected) { throw rejected; }
+        catch(RuntimeException programmingFailure) { throw new ResultHandlerFailure(programmingFailure); }
         if(accepted==null) throw BiddingAccess.error(422,"RESULT_NOT_ACCEPTED","Task result handler did not create an accepted result");
         ObjectNode output=json.createObjectNode(); output.set("ref",json.valueToTree(accepted)); output.set("payload",execution.payload());
         Timestamp now=Timestamp.from(Instant.now());
@@ -252,10 +260,10 @@ public class BiddingTaskService {
         });
     }
 
-    private void persistRejected(BiddingTypes.Claim claim,BiddingTypes.Execution execution,BiddingApiException rejected) {
+    private void persistRejected(BiddingTypes.Claim claim,BiddingTypes.Execution execution,String code,String category) {
         transactions.execute(tx->{
             if(activeAttempt(claim)==null) return null;
-            Timestamp now=Timestamp.from(Instant.now()); ObjectNode error=json.createObjectNode(); error.put("code",rejected.code()); error.put("category","VALIDATION");
+            Timestamp now=Timestamp.from(Instant.now()); ObjectNode error=json.createObjectNode(); error.put("code",code); error.put("category",category);
             jdbc.update("UPDATE mate_bidding_attempt SET state='FAILED',error_json=?,rejected_output=?,finished_at=? WHERE id=? AND token=? AND state='RUNNING'",
                 write(error),execution.rejectedOutput()==null?write(execution.payload()):execution.rejectedOutput(),now,claim.attemptId(),claim.token());
             jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,next_run_at=NULL,updated_at=? WHERE id=? AND status='RUNNING' AND active_attempt_id=?",now,claim.taskId(),claim.attemptId());
@@ -315,7 +323,20 @@ public class BiddingTaskService {
     public int recoverInterrupted(String newBootId,Instant now) { return repository.recoverInterrupted(newBootId,now); }
     public boolean isTaskRunning(String taskId) { return repository.isTaskRunning(taskId); }
     public List<BiddingTypes.Claim> claimDue(Instant now,String bootId,int limit) { return repository.claimDue(now,bootId,limit); }
-    public void run(BiddingTypes.Claim claim) { BiddingTypes.Execution execution; try { revalidate(claim); execution=runtime.getObject().execute(claim); } catch(BiddingApiException e) { execution=new BiddingTypes.Execution(null,new BiddingTypes.Failure(e.code(),"STALE",null,false,false,false),null,null,null); } complete(claim,execution); }
+    public void run(BiddingTypes.Claim claim) {
+        try { revalidate(claim); }
+        catch(BiddingApiException e) { complete(claim,failed(e.code(),"STALE",false)); return; }
+        catch(RuntimeException e) { complete(claim,failed("AUTHORIZATION_REVALIDATION_FAILED","PERMANENT",false)); return; }
+        BiddingTypes.Execution execution;
+        try { execution=runtime.getObject().execute(claim); }
+        catch(RuntimeException e) { execution=failed("EXECUTION_RUNTIME_FAILURE","PERMANENT",true); }
+        if(execution==null) execution=failed("EXECUTION_RUNTIME_FAILURE","PERMANENT",true);
+        complete(claim,execution);
+    }
+
+    private BiddingTypes.Execution failed(String code,String category,boolean resultUnknown) {
+        return new BiddingTypes.Execution(null,new BiddingTypes.Failure(code,category,null,resultUnknown,false,false),null,null,null);
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void validateResultHandlers() {
@@ -328,5 +349,8 @@ public class BiddingTaskService {
     private record Binding(String agentId,String configDigest,String skillDigest) {}
     private record TaskRow(String id,String actorId,String agentId,String configDigest,String refsJson,String status,String activeAttemptId) {}
     private record AttemptRow(String state) {}
+    private static final class ResultHandlerFailure extends RuntimeException {
+        ResultHandlerFailure(RuntimeException cause) { super("Bidding result handler failed",cause); }
+    }
     private record TaskView(String id,String projectId,String inputJson,String refsJson,String status,int cycleNo,int cycleAttempt,int attemptCount,Timestamp createdAt,Timestamp updatedAt) {}
 }

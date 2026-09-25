@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,14 @@ class BiddingTaskTest extends BiddingHttpFixture {
     @MockBean BiddingDependencies dependencies;
     @MockBean BiddingSourceService sources;
     @Autowired TestResultHandler resultHandler;
+    @Autowired BiddingFakeRuntime fakeRuntime;
     @Autowired ConfigurableApplicationContext context;
 
     @BeforeEach void clearStaleTestClaims() {
         biddingProperties.setEnabled(true); biddingProperties.setSchedulerEnabled(false);
+        fakeRuntime.reset();
+        Mockito.doNothing().when(fakeRuntime.bindings()).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(fakeRuntime.bindings().modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
         jdbc.update("DELETE FROM mate_bidding_attempt");
         jdbc.update("DELETE FROM mate_bidding_task");
     }
@@ -52,6 +57,95 @@ class BiddingTaskTest extends BiddingHttpFixture {
         }
         assertEquals(3,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_attempt WHERE task_id=?",Integer.class,id));
         assertFalse(repository.claimDue(Instant.now().plusSeconds(3600),"retry-boot",2).stream().anyMatch(c->c.taskId().equals(id)));
+    }
+
+    @Test void schedulerFakeRuntimePersistsThreeTransientAttemptsThenManualRetryStartsNewCycle() throws Exception {
+        var project=project(); String actor=actorId("member"), projectId=project.path("id").asText();
+        String task=queuedTaskInProject(projectId,actor);
+        Mockito.doNothing().when(employees).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(employees.modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
+        Mockito.doNothing().when(fakeRuntime.bindings()).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(fakeRuntime.bindings().modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
+        Mockito.doNothing().when(dependencies).validate(Mockito.any(),Mockito.anyList());
+        fakeRuntime.enqueue(failure("TRANSIENT")); fakeRuntime.enqueue(failure("TRANSIENT")); fakeRuntime.enqueue(failure("TRANSIENT"));
+        biddingProperties.setSchedulerEnabled(true);
+        AtomicReference<Instant> now=new AtomicReference<>(Instant.now());
+        var scheduler=new BiddingScheduler(tasks,sources,biddingProperties,Runnable::run,"fake-runtime-boot");
+
+        for(int attempt=1;attempt<=3;attempt++) {
+            assertEquals(1,scheduler.dispatchDue(now.get()));
+            assertEquals(attempt,fakeRuntime.calls());
+            assertEquals(attempt,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_attempt WHERE task_id=?",Integer.class,task));
+            if(attempt<3) now.set(now.get().plusSeconds(40));
+        }
+        assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,task));
+        assertEquals(0,scheduler.dispatchDue(now.get().plusSeconds(3600)));
+        assertEquals(3,fakeRuntime.calls());
+
+        var scope=new BiddingTypes.Scope(workspace,actor,projectId);
+        assertEquals("QUEUED",tasks.retry(scope,taskCommand("fake-manual-retry",task)).path("status").asText());
+        fakeRuntime.enqueue(new BiddingTypes.Execution(json.createObjectNode().put("accepted",true),null,"a".repeat(64),"b".repeat(64),null));
+        assertEquals(1,scheduler.dispatchDue(now.get()));
+        assertEquals(4,fakeRuntime.calls());
+        assertEquals("SUCCEEDED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,task));
+        assertEquals(4,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_attempt WHERE task_id=?",Integer.class,task));
+        assertEquals(4,jdbc.queryForObject("SELECT MAX(attempt_no) FROM mate_bidding_attempt WHERE task_id=?",Integer.class,task));
+        assertEquals(1,jdbc.queryForObject("SELECT cycle_no FROM mate_bidding_task WHERE id=?",Integer.class,task));
+    }
+
+    @Test void schedulerPersistsUncheckedRuntimeFailureImmediatelyWithoutRetryingModel() throws Exception {
+        var project=project(); String actor=actorId("member"), task=queuedTaskInProject(project.path("id").asText(),actor);
+        Mockito.doNothing().when(employees).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(employees.modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
+        Mockito.doNothing().when(fakeRuntime.bindings()).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(fakeRuntime.bindings().modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
+        Mockito.doNothing().when(dependencies).validate(Mockito.any(),Mockito.anyList());
+        biddingProperties.setSchedulerEnabled(true);
+        var scheduler=new BiddingScheduler(tasks,sources,biddingProperties,Runnable::run,"runtime-failure-boot");
+
+        assertEquals(1,scheduler.dispatchDue(Instant.now()));
+
+        assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,task));
+        assertEquals(1,fakeRuntime.calls());
+        String error=jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE task_id=?",String.class,task);
+        var diagnostic=json.readTree(error);
+        assertTrue(diagnostic.path("resultUnknown").asBoolean());
+        assertFalse(diagnostic.path("stopped").asBoolean());
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE status='WAITING_RETRY' AND id=?",Integer.class,task));
+    }
+
+    @Test void malformedEarliestCandidateFailsWithDiagnosticAndDoesNotPoisonValidCandidate() {
+        String malformed=queuedTask("42"), missingPackage=queuedTask("42"), valid=queuedTask("42");
+        jdbc.update("UPDATE mate_bidding_task SET input_json='not-json',created_at=DATEADD('SECOND',-5,CURRENT_TIMESTAMP) WHERE id=?",malformed);
+        jdbc.update("UPDATE mate_bidding_task SET skill_package_id='missing-pinned-package',created_at=DATEADD('SECOND',-4,CURRENT_TIMESTAMP) WHERE id=?",missingPackage);
+
+        var claims=repository.claimDue(Instant.now(),"malformed-candidate-boot",2);
+
+        assertEquals(1,claims.size()); assertEquals(valid,claims.getFirst().taskId());
+        assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,malformed));
+        assertTrue(jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE task_id=?",String.class,malformed).contains("TASK_SNAPSHOT_INVALID"));
+        assertEquals(1,jdbc.queryForObject("SELECT attempt_count FROM mate_bidding_task WHERE id=?",Integer.class,malformed));
+        assertEquals(1,jdbc.queryForObject("SELECT attempt_no FROM mate_bidding_attempt WHERE task_id=?",Integer.class,malformed));
+        assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,missingPackage));
+        assertTrue(jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE task_id=?",String.class,missingPackage).contains("TASK_SNAPSHOT_INVALID"));
+        assertEquals(1,jdbc.queryForObject("SELECT attempt_count FROM mate_bidding_task WHERE id=?",Integer.class,missingPackage));
+    }
+
+    @Test void uncheckedResultHandlerProgrammingFailureIsPersistedAsRejectionWithoutHandlerRetry() throws Exception {
+        var project=project(); String actor=actorId("member"), task=queuedTaskInProject(project.path("id").asText(),actor);
+        Mockito.doNothing().when(employees).validate(Mockito.any(),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(employees.modelConfigId(Mockito.any(),Mockito.anyString())).thenReturn("model");
+        Mockito.doNothing().when(dependencies).validate(Mockito.any(),Mockito.anyList());
+        resultHandler.throwProgrammingFailure();
+        var claim=repository.claimDue(Instant.now(),"handler-runtime-boot",1).getFirst();
+
+        tasks.complete(claim,new BiddingTypes.Execution(json.createObjectNode().put("accepted",true),null,"a".repeat(64),"b".repeat(64),null));
+
+        assertEquals(1,resultHandler.calls());
+        assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,task));
+        String diagnostic=jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE id=?",String.class,claim.attemptId());
+        assertTrue(diagnostic.contains("RESULT_HANDLER_FAILURE"));
+        assertTrue(jdbc.queryForObject("SELECT rejected_output FROM mate_bidding_attempt WHERE id=?",String.class,claim.attemptId()).contains("accepted"));
     }
 
     @Test void completionDatabaseRetriesReuseAcceptedExecutionWithoutCallingModelAgain() throws Exception {
@@ -207,6 +301,7 @@ class BiddingTaskTest extends BiddingHttpFixture {
         String id=queuedTask(null);
         assertTrue(repository.claimDue(Instant.now(),"boot",1).isEmpty());
         assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,id));
+        assertEquals(1,jdbc.queryForObject("SELECT attempt_count FROM mate_bidding_task WHERE id=?",Integer.class,id));
         assertTrue(jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE task_id=?",String.class,id).contains("TASK_ACTOR_MISSING"));
     }
 
@@ -216,6 +311,7 @@ class BiddingTaskTest extends BiddingHttpFixture {
         jdbc.update("UPDATE mate_bidding_task SET workspace_id=? WHERE id=?",invalidWorkspace,id);
         assertTrue(repository.claimDue(Instant.now(),"boot",1).isEmpty());
         assertEquals("FAILED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,id));
+        assertEquals(1,jdbc.queryForObject("SELECT attempt_count FROM mate_bidding_task WHERE id=?",Integer.class,id));
         assertTrue(jdbc.queryForObject("SELECT error_json FROM mate_bidding_attempt WHERE task_id=?",String.class,id).contains("TASK_WORKSPACE_MISSING"));
     }
 
@@ -308,18 +404,26 @@ class BiddingTaskTest extends BiddingHttpFixture {
     @org.springframework.boot.test.context.TestConfiguration
     static class HandlerConfig {
         @Bean TestResultHandler testResultHandler() { return new TestResultHandler(); }
+        @Bean @org.springframework.context.annotation.Primary BiddingFakeRuntime fakeRuntime(BiddingAccess access,BiddingDependencies dependencies,
+                org.springframework.jdbc.core.JdbcTemplate jdbc) {
+            return new BiddingFakeRuntime(access,dependencies,Mockito.mock(BiddingEmployeeBindings.class),jdbc,Mockito.mock(vip.mate.agent.AgentService.class),
+                Mockito.mock(vip.mate.workspace.conversation.ConversationService.class),Mockito.mock(vip.mate.agent.repository.AgentMapper.class));
+        }
     }
 
     static final class TestResultHandler implements BiddingResultHandler {
         private final java.util.concurrent.atomic.AtomicInteger calls=new java.util.concurrent.atomic.AtomicInteger();
         private final java.util.concurrent.atomic.AtomicInteger failingCalls=new java.util.concurrent.atomic.AtomicInteger();
+        private final java.util.concurrent.atomic.AtomicBoolean programmingFailure=new java.util.concurrent.atomic.AtomicBoolean();
         void failBeforeAccept(int count) { failingCalls.set(count); calls.set(0); }
+        void throwProgrammingFailure() { calls.set(0); programmingFailure.set(true); }
         int calls() { return calls.get(); }
         private final java.util.Set<String> registered=new java.util.concurrent.ConcurrentSkipListSet<>(java.util.Set.of("skill-1"));
         void registerSkill(String id) { registered.add(id); }
         @Override public java.util.Set<String> skillIds() { return java.util.Set.copyOf(registered); }
         @Override public BiddingTypes.Ref accept(BiddingTypes.Claim claim,com.fasterxml.jackson.databind.node.ObjectNode payload) {
             calls.incrementAndGet();
+            if(programmingFailure.getAndSet(false)) throw new IllegalStateException("controlled handler programming failure");
             if(failingCalls.getAndUpdate(value->Math.max(0,value-1))>0)
                 throw new org.springframework.dao.TransientDataAccessResourceException("controlled database retry");
             return new BiddingTypes.Ref("candidate",claim.input().path("_biddingTargetId").asText("target"),1,"e".repeat(64));

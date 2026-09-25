@@ -28,7 +28,7 @@ public class BiddingRepository {
                 + "WHERE (actor_id IS NULL OR TRIM(actor_id)='') AND status IN ('QUEUED','WAITING_RETRY')",
             Map.of(),(rs,n)->new LegacyTask(rs.getString(1),rs.getString(2),rs.getString(3),rs.getInt(4)));
         for(LegacyTask task:legacy) {
-            int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,updated_at=:now "
+            int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,attempt_count=attempt_count+1,updated_at=:now "
                     + "WHERE id=:id AND (actor_id IS NULL OR TRIM(actor_id)='') AND status IN ('QUEUED','WAITING_RETRY')",
                 Map.of("now",at,"id",task.id()));
             if(changed==1) jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,error_json,started_at,finished_at) "
@@ -41,7 +41,7 @@ public class BiddingRepository {
         if(available==0) return List.of();
         List<TaskCandidate> candidates=jdbc.query("SELECT t.id,t.workspace_id,t.project_id,t.actor_id,t.agent_id,t.skill_package_id,"
                 + "t.config_digest,t.input_json,t.input_refs_json,t.attempt_count,t.cycle_attempt,t.deadline_at,p.skill_id,p.version,p.digest,p.files_json "
-                + "FROM mate_bidding_task t JOIN mate_bidding_skill_package p ON p.id=t.skill_package_id "
+                + "FROM mate_bidding_task t LEFT JOIN mate_bidding_skill_package p ON p.id=t.skill_package_id "
                 + "WHERE t.status IN ('QUEUED','WAITING_RETRY') AND (t.next_run_at IS NULL OR t.next_run_at<=:now) "
                 + "AND t.actor_id IS NOT NULL AND TRIM(t.actor_id)<>'' "
                 + "AND NOT EXISTS (SELECT 1 FROM mate_bidding_task r WHERE r.workspace_id=t.workspace_id AND r.status='RUNNING') "
@@ -54,6 +54,12 @@ public class BiddingRepository {
         for(TaskCandidate task:candidates) {
             if(claims.size()>=available) break;
             if(claimedWorkspaces.contains(task.workspaceId())) continue;
+            PreparedTask prepared;
+            try { prepared=prepareTask(task); }
+            catch(RuntimeException invalidSnapshot) {
+                failInvalidCandidate(task,at,"TASK_SNAPSHOT_INVALID");
+                continue;
+            }
             // Workspace row lock makes the no-running-task invariant hold across repository calls.
             if(!lockWorkspace(task.workspaceId())) {
                 failInvalidWorkspace(task,at);
@@ -71,17 +77,9 @@ public class BiddingRepository {
             jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,started_at) "
                     + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'RUNNING','[]',:now)",
                 Map.of("id",attemptId,"workspace",task.workspaceId(),"project",task.projectId(),"task",task.id(),"attempt",nextAttempt,"token",token,"now",at));
-            ObjectNode stored=parseObject(task.inputJson()); ObjectNode input=stored.path("input").isObject()?(ObjectNode)stored.path("input").deepCopy():json.createObjectNode();
-            if(stored.path("_bidding").hasNonNull("targetId")) input.put("_biddingTargetId",stored.path("_bidding").path("targetId").asText());
-            List<BiddingTypes.Ref> refs=readRefs(task.refsJson());
-            Map<String,String> files;
-            try { files=json.readValue(task.filesJson(),new com.fasterxml.jackson.core.type.TypeReference<Map<String,String>>() {}); }
-            catch(Exception e) { throw new IllegalStateException("Invalid pinned bidding skill package",e); }
             var scope=new BiddingTypes.Scope(task.workspaceId(),task.actorId(),task.projectId());
-            var pin=new BiddingTypes.SkillPin(task.skillId(),task.skillVersion(),task.skillDigest(),Map.copyOf(files));
-            String modelConfigId=stored.path("_bidding").path("modelConfigId").asText(null);
             claims.add(new BiddingTypes.Claim(scope,task.id(),attemptId,token,nextAttempt,task.cycleAttempt(),
-                now.plusSeconds(300),task.agentId(),pin,modelConfigId,task.configDigest(),refs,input));
+                now.plusSeconds(300),task.agentId(),prepared.pin(),prepared.modelConfigId(),task.configDigest(),prepared.refs(),prepared.input()));
         }
         return List.copyOf(claims);
     }
@@ -103,8 +101,32 @@ public class BiddingRepository {
     }
 
     private List<BiddingTypes.Ref> readRefs(String raw) {
-        try { return json.readValue(raw,new com.fasterxml.jackson.core.type.TypeReference<List<BiddingTypes.Ref>>() {}); }
+        try { return Objects.requireNonNull(json.readValue(raw,new com.fasterxml.jackson.core.type.TypeReference<List<BiddingTypes.Ref>>() {})); }
         catch(Exception e) { throw new IllegalStateException("Invalid persisted bidding references",e); }
+    }
+    private PreparedTask prepareTask(TaskCandidate task) {
+        if(task.packageId()==null || task.skillId()==null || task.skillVersion()==null || task.skillDigest()==null || task.filesJson()==null)
+            throw new IllegalStateException("Pinned skill package is missing");
+        ObjectNode stored=parseObject(task.inputJson());
+        if(!stored.path("input").isObject()) throw new IllegalStateException("Task input is not an object");
+        ObjectNode input=(ObjectNode)stored.path("input").deepCopy();
+        if(stored.path("_bidding").hasNonNull("targetId")) input.put("_biddingTargetId",stored.path("_bidding").path("targetId").asText());
+        List<BiddingTypes.Ref> refs=readRefs(task.refsJson());
+        Map<String,String> files;
+        try { files=json.readValue(task.filesJson(),new com.fasterxml.jackson.core.type.TypeReference<Map<String,String>>() {}); }
+        catch(Exception e) { throw new IllegalStateException("Invalid pinned skill package",e); }
+        if(files==null) throw new IllegalStateException("Pinned skill package files are missing");
+        var pin=new BiddingTypes.SkillPin(task.skillId(),task.skillVersion(),task.skillDigest(),Map.copyOf(files));
+        return new PreparedTask(input,refs,pin,stored.path("_bidding").path("modelConfigId").asText(null));
+    }
+    private void failInvalidCandidate(TaskCandidate task,Timestamp now,String code) {
+        int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,attempt_count=attempt_count+1,next_run_at=NULL,deadline_at=NULL,updated_at=:now WHERE id=:id AND status IN ('QUEUED','WAITING_RETRY') AND active_attempt_id IS NULL",
+            Map.of("id",task.id(),"now",now));
+        if(changed==1) jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,error_json,started_at,finished_at) "
+                + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'FAILED','[]',:error,:now,:now)",
+            Map.of("id",UUID.randomUUID().toString(),"workspace",task.workspaceId(),"project",task.projectId(),"task",task.id(),
+                "attempt",task.attemptCount()+1,"token",UUID.randomUUID()+"."+UUID.randomUUID(),
+                "error","{\"code\":\""+code+"\",\"category\":\"PERMANENT\",\"resultUnknown\":false}","now",now));
     }
     private boolean lockWorkspace(String workspaceId) {
         try {
@@ -115,7 +137,7 @@ public class BiddingRepository {
         }
     }
     private void failInvalidWorkspace(TaskCandidate task,Timestamp now) {
-        int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,updated_at=:now WHERE id=:id AND status IN ('QUEUED','WAITING_RETRY') AND active_attempt_id IS NULL",
+        int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,attempt_count=attempt_count+1,updated_at=:now WHERE id=:id AND status IN ('QUEUED','WAITING_RETRY') AND active_attempt_id IS NULL",
             Map.of("id",task.id(),"now",now));
         if(changed==1) jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,error_json,started_at,finished_at) "
                 + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'FAILED','[]',:error,:now,:now)",
@@ -124,6 +146,7 @@ public class BiddingRepository {
     }
     private record TaskCandidate(String id,String workspaceId,String projectId,String actorId,String agentId,String packageId,String configDigest,
         String inputJson,String refsJson,int attemptCount,int cycleAttempt,Timestamp deadline,String skillId,String skillVersion,String skillDigest,String filesJson) {}
+    private record PreparedTask(ObjectNode input,List<BiddingTypes.Ref> refs,BiddingTypes.SkillPin pin,String modelConfigId) {}
     private record LegacyTask(String id,String workspaceId,String projectId,int attemptCount) {}
 
     public ObjectNode findProject(String workspaceId,String projectId) {
