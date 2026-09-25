@@ -9,8 +9,43 @@ import { biddingApi } from '../api/biddingApi'
 
 vi.mock('../api/biddingApi',()=>({biddingApi:{tasks:vi.fn(),task:vi.fn(),command:vi.fn()}}))
 let app:App|undefined,host:HTMLElement|undefined
+const originalWindowWidth=window.innerWidth
 const flush=async()=>{await new Promise(resolve=>setTimeout(resolve,0));await nextTick()}
-afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;vi.clearAllMocks()})
+afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;Object.defineProperty(window,'innerWidth',{configurable:true,value:originalWindowWidth});vi.clearAllMocks()})
+it('renders a complete compact task list at 390px and keeps retry, cancel, and attempt details operable',async()=>{
+  Object.defineProperty(window,'innerWidth',{configurable:true,value:390})
+  const items=[
+    {taskId:'task-profile',skillId:'bidding-tender-profile',status:'FAILED',attemptCount:2},
+    {taskId:'task-elimination',skillId:'bidding-elimination-analysis',status:'RUNNING',attemptCount:1},
+    {taskId:'task-requirements',skillId:'bidding-requirement-analysis',status:'QUEUED',attemptCount:0},
+    {taskId:'task-scoring',skillId:'bidding-scoring-analysis',status:'SUCCEEDED',attemptCount:1},
+  ]
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items,total:items.length,page:1,pageSize:100})
+  vi.mocked(biddingApi.task).mockResolvedValue({taskId:'task-profile',status:'FAILED',attemptCount:2,attempts:[{attemptNo:1,state:'SUCCEEDED',result:{accepted:true}},{attemptNo:2,state:'FAILED',rejection:{code:'MODEL_TIMEOUT'}}]} as never)
+  vi.mocked(biddingApi.command).mockResolvedValue({status:'QUEUED'})
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project,canWrite:true})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'zh-CN',messages:{'zh-CN':{}}})).mount(host);await flush()
+  const cards=[...document.querySelectorAll('.mobile-task-card')]
+  expect(cards).toHaveLength(4)
+  expect(cards.map(card=>card.textContent).join(' ')).toContain('招标文件基本信息')
+  expect(cards.map(card=>card.textContent).join(' ')).toContain('废标条款')
+  expect(cards.map(card=>card.textContent).join(' ')).toContain('技术与商务要求')
+  expect(cards.map(card=>card.textContent).join(' ')).toContain('评分标准')
+  expect(cards[0]?.textContent).toContain('2')
+  expect(cards[0]?.querySelector('button')?.textContent).toContain('重试')
+  expect(cards[1]?.querySelector('button')?.textContent).toContain('取消')
+  ;(cards[0]?.querySelector('.task-card-main') as HTMLElement).click();await flush()
+  const attempts=[...document.querySelectorAll('.mobile-attempt-card')]
+  expect(attempts).toHaveLength(2)
+  expect(attempts[1]?.textContent).toContain('模型响应超时')
+  ;(cards[0]?.querySelector('button') as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'RETRY_TASK',payload:{taskId:'task-profile'}}))
+  ;(cards[1]?.querySelector('button') as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenLastCalledWith('ws-1','p1',expect.objectContaining({action:'CANCEL_TASK',payload:{taskId:'task-elimination'}}))
+})
+
 it('shows a failed attempt and sends one explicit retry command',async()=>{
   const task={taskId:'task-1',skillId:'bidding-tender-profile',status:'FAILED',attemptCount:1}
   vi.mocked(biddingApi.tasks).mockResolvedValue({items:[task],total:1,page:1,pageSize:100})

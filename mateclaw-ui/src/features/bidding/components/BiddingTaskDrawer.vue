@@ -1,13 +1,29 @@
 <template>
   <el-drawer v-model="open" :title="l('解析任务','Analysis tasks')" size="min(720px, 96vw)" @closed="stop">
     <el-alert v-if="error" :title="error" type="error" :closable="false" />
-    <el-table v-loading="loading" :data="tasks" row-key="taskId" @row-click="select">
-      <el-table-column :label="l('解析项','Analysis')" min-width="180"><template #default="{row}">{{ taskSkill(row) }}</template></el-table-column>
-      <el-table-column :label="l('状态','Status')" width="140"><template #default="{row}">{{ statusLabel(row.status) }}</template></el-table-column>
-      <el-table-column prop="attemptCount" :label="l('尝试次数','Attempts')" width="110" />
-      <el-table-column :label="l('操作','Actions')" width="180"><template #default="{row}"><div class="actions"><el-button v-if="canWrite && retryable(row.status)" type="primary" plain size="small" @click.stop="mutate(row,'RETRY_TASK')">{{ l('重试','Retry') }}</el-button><el-button v-if="canWrite && cancellable(row.status)" type="danger" plain size="small" @click.stop="mutate(row,'CANCEL_TASK')">{{ l('取消','Cancel') }}</el-button><span v-if="!canWrite && (retryable(row.status)||cancellable(row.status))" class="read-only">{{ l('只读访问','Read-only access') }}</span></div></template></el-table-column>
-    </el-table>
-    <section v-if="detail" class="task-detail"><h3>{{ taskSkill(detail) || detail.taskId }}</h3><el-alert v-if="failure(detail)" :title="failure(detail)" type="error" :closable="false" /><h4>{{ l('执行尝试','Attempts') }}</h4><el-table :data="detail.attempts || []" size="small"><el-table-column prop="attemptNo" label="#" width="60"/><el-table-column :label="l('状态','State')" width="120"><template #default="{row}">{{ statusLabel(row.state) }}</template></el-table-column><el-table-column :label="l('原因','Failure')" min-width="180"><template #default="{row}">{{ failureLabel(row.rejection?.code || row.failureCode) }}</template></el-table-column></el-table><details v-if="detail.attempts?.length"><summary>{{ l('诊断信息','Diagnostics') }}</summary><pre>{{ JSON.stringify(detail.attempts.map(item=>item.rejection||item.result),null,2) }}</pre></details></section>
+    <div v-loading="loading" class="task-list">
+      <el-table class="desktop-task-table" :data="tasks" row-key="taskId" @row-click="select">
+        <el-table-column :label="l('解析项','Analysis')" min-width="180"><template #default="{row}">{{ taskSkill(row) }}</template></el-table-column>
+        <el-table-column :label="l('状态','Status')" width="140"><template #default="{row}">{{ statusLabel(row.status) }}</template></el-table-column>
+        <el-table-column prop="attemptCount" :label="l('尝试次数','Attempts')" width="110" />
+        <el-table-column :label="l('操作','Actions')" width="180"><template #default="{row}"><div class="actions"><el-button v-if="canWrite && retryable(row.status)" type="primary" plain size="small" @click.stop="mutate(row,'RETRY_TASK')">{{ l('重试','Retry') }}</el-button><el-button v-if="canWrite && cancellable(row.status)" type="danger" plain size="small" @click.stop="mutate(row,'CANCEL_TASK')">{{ l('取消','Cancel') }}</el-button><span v-if="!canWrite && (retryable(row.status)||cancellable(row.status))" class="read-only">{{ l('只读访问','Read-only access') }}</span></div></template></el-table-column>
+      </el-table>
+      <div class="mobile-task-list">
+        <el-empty v-if="!tasks.length && !loading" :description="l('暂无任务','No tasks')" />
+        <article v-for="row in tasks" :key="row.taskId" class="mobile-task-card">
+          <div class="task-card-main" role="button" tabindex="0" :aria-label="`${taskSkill(row)} · ${statusLabel(row.status)}`" @click="select(row)" @keydown.enter.prevent="select(row)" @keydown.space.prevent="select(row)">
+            <strong class="task-name">{{ taskSkill(row) }}</strong>
+            <div class="task-meta"><el-tag effect="plain" size="small">{{ statusLabel(row.status) }}</el-tag><span>{{ l('尝试次数','Attempts') }}: {{ row.attemptCount }}</span></div>
+          </div>
+          <div class="actions" @click.stop>
+            <el-button v-if="canWrite && retryable(row.status)" type="primary" plain size="small" @click="mutate(row,'RETRY_TASK')">{{ l('重试','Retry') }}</el-button>
+            <el-button v-if="canWrite && cancellable(row.status)" type="danger" plain size="small" @click="mutate(row,'CANCEL_TASK')">{{ l('取消','Cancel') }}</el-button>
+            <span v-if="!canWrite && (retryable(row.status)||cancellable(row.status))" class="read-only">{{ l('只读访问','Read-only access') }}</span>
+          </div>
+        </article>
+      </div>
+    </div>
+    <section v-if="detail" class="task-detail"><h3>{{ taskSkill(detail) || detail.taskId }}</h3><el-alert v-if="failure(detail)" :title="failure(detail)" type="error" :closable="false" /><h4>{{ l('执行尝试','Attempts') }}</h4><el-table class="desktop-attempt-table" :data="detail.attempts || []" size="small"><el-table-column prop="attemptNo" label="#" width="60"/><el-table-column :label="l('状态','State')" width="120"><template #default="{row}">{{ statusLabel(row.state) }}</template></el-table-column><el-table-column :label="l('原因','Failure')" min-width="180"><template #default="{row}">{{ failureLabel(attemptFailureCode(row)) }}</template></el-table-column></el-table><div class="mobile-attempt-list"><article v-for="attempt in detail.attempts || []" :key="attempt.attemptNo" class="mobile-attempt-card"><div><strong>#{{ attempt.attemptNo }}</strong><el-tag effect="plain" size="small">{{ statusLabel(attempt.state) }}</el-tag></div><p>{{ l('原因','Failure') }}: {{ failureLabel(attemptFailureCode(attempt)) }}</p></article></div><details v-if="detail.attempts?.length"><summary>{{ l('诊断信息','Diagnostics') }}</summary><pre>{{ JSON.stringify(detail.attempts.map(item=>item.rejection||item.result),null,2) }}</pre></details></section>
   </el-drawer>
 </template>
 <script setup lang="ts">
@@ -49,9 +65,13 @@ function statusLabel(value:string){return label(statusLabels,value,['其他状�
 function failureLabel(value:string|undefined){return value?label(failureLabels,value,['其他错误','Other failure']):'—'}
 function skillLabel(value:string|undefined){return label(skillLabels,value,['其他任务','Other task'])}
 function taskSkill(value:Task|TaskDetails){const detail=value as TaskDetails;const listed=tasks.value.find(task=>task.taskId===value.taskId)?.skillId;const snapshot=(detail.snapshot as {_bidding?:{skillId?:string}}|undefined)?._bidding?.skillId;return skillLabel(value.skillId||listed||snapshot)}
-function failure(value:TaskDetails){const last=(value.attempts||[]).at(-1);const rejection=last?.rejection as {code?:string}|undefined;const code=rejection?.code||last?.failureCode;return code?failureLabel(code):''}
+function attemptFailureCode(attempt:{failureCode?:string;rejection?:unknown}){const rejection=attempt.rejection as {code?:string}|undefined;return rejection?.code||attempt.failureCode}
+function failure(value:TaskDetails){const last=(value.attempts||[]).at(-1);const code=last?attemptFailureCode(last):undefined;return code?failureLabel(code):''}
 function retryable(status:string){return ['FAILED','CANCELLED','STALE'].includes(status)}
 function cancellable(status:string){return ['QUEUED','RUNNING','WAITING_RETRY'].includes(status)}
 onBeforeUnmount(stop)
 </script>
-<style scoped>.actions{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}.read-only{color:var(--mc-text-secondary);font-size:12px}.task-detail{border-top:1px solid var(--mc-border-light);margin-top:18px;padding-top:16px}.task-detail h3{font-size:16px}.task-detail h4{font-size:13px;color:var(--mc-text-secondary)}pre{max-height:280px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.task-detail details{margin-top:12px}.task-detail summary{cursor:pointer;color:var(--mc-primary)}@media(max-width:600px){.actions{flex-wrap:wrap}}</style>
+<style scoped>
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}.read-only{color:var(--mc-text-secondary);font-size:12px}.task-detail{border-top:1px solid var(--mc-border-light);margin-top:18px;padding-top:16px}.task-detail h3{font-size:16px;overflow-wrap:anywhere}.task-detail h4{font-size:13px;color:var(--mc-text-secondary)}pre{max-height:280px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.task-detail details{margin-top:12px}.task-detail summary{cursor:pointer;color:var(--mc-primary)}.mobile-task-list,.mobile-attempt-list{display:none}
+@media(max-width:600px){:deep(.el-drawer__body){padding:12px;overflow-x:hidden}.desktop-task-table,.desktop-attempt-table{display:none}.mobile-task-list,.mobile-attempt-list{display:grid;gap:10px;min-width:0}.mobile-task-card,.mobile-attempt-card{display:grid;gap:10px;min-width:0;padding:12px;border:1px solid var(--mc-border);border-radius:6px;background:var(--mc-bg-elevated)}.task-card-main{display:grid;gap:8px;min-width:0;cursor:pointer}.task-card-main:focus-visible{outline:2px solid var(--mc-primary);outline-offset:2px}.task-name{overflow-wrap:anywhere}.task-meta,.mobile-attempt-card>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--mc-text-secondary);font-size:12px}.mobile-task-card .actions{flex-wrap:wrap;justify-content:flex-start}.mobile-attempt-card p{margin:0;overflow-wrap:anywhere;color:var(--mc-text-secondary);font-size:13px}}
+</style>
