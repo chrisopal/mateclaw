@@ -285,6 +285,9 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingScheduler.java`
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRetryPolicy.java`
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingResultHandler.java`
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V214__bidding_task_actor.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V214__bidding_task_actor.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V214__bidding_task_actor.sql`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
@@ -292,6 +295,7 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRecoveryTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRetryPolicyTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingFakeRuntime.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`
 
 **Interfaces:**
 - Consumes: EmployeeBindings.resolve/configDigest/validate、SkillPackages.pin、Dependencies.validate/isCurrent、EmployeeRuntime.execute。
@@ -316,6 +320,7 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 
 - [ ] Run：Maven `-Dtest='BiddingRetryPolicyTest,BiddingTaskTest,BiddingRecoveryTest'`，Expected 缺领取/策略实现 FAIL。
 - [ ] 实现事务 enqueue：验证 skill→岗位白名单、输入/员工/权限，固定包、指纹及快照；同业务操作写 task 和 operation；提交后扫描兜底，无必须成功的内存入队。task QUEUED、attempt_count=0。定时器最多2工作线程、每workspace1；容量满时不领取，不先将大量任务设 RUNNING。测试只注入测试用ResultHandler，不绕过令牌/权限/事务逻辑；四个分析skill的正式handler在P1-06注册。
+- [ ] V212 的 task 表没有 actor_id，后台领取不能从项目负责人或模型输入推断原操作人。三方言 V214 只追加 actor_id 列，不修改已应用的 V212/V213；enqueue 将经服务端鉴权的真实 actorId 存入 task，claim/retry/recover 始终从该列构造 Scope 并重查权限。迁移前遗留 actor_id 为空的待执行任务必须 fail closed，不能借用 owner 身份执行；迁移测试验证旧表/既有行保留及新列可读写。
 - [ ] claim 原子 CAS task.status+active_attempt_id，创建 attempt 和不可猜 token；事务提交后调用模型。领取时校验权限和输入；发现变化转STALE/FAILED，不调用模型。输入只包含实际授权 refs，不读取 latest。产生 Claim 后不持有数据库事务。
 
 ```java
