@@ -16,3 +16,5 @@ git diff --check
 Result: BUILD SUCCESS; 41 tests passed (4 runtime, 4 isolation, 4 skill-load, 11 skill-file, 1 Presales runtime, 3 Presales coordinator, 8 fallback-chain, 6 failover). Surefire XML confirms `java.version=21.0.7` and `java.home=.../temurin-21/Contents/Home`.
 
 Not run: Task 5 queue/dispatch integration (out of scope and not present); actual external model/network behavior. The production-entry test mocks `BiddingAccess` at the host authorization seam and uses the configured fake provider; H2 claim/attempt, source-set, employee-config, skill-pin, callback, and receipt checks remain real. No full production dispatch claim is made.
+
+Plan deviations: none
