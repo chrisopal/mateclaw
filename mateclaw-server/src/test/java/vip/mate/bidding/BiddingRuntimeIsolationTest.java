@@ -97,6 +97,8 @@ class BiddingRuntimeIsolationTest {
         SkillFileTool fileTool = new SkillFileTool(skillRuntime, mock(SkillFileAccessPolicy.class),
                 mock(SkillUsageService.class), resolver);
         SkillLoadTool loadTool = new SkillLoadTool(skillRuntime, fileTool, resolver);
+        org.springframework.test.util.ReflectionTestUtils.setField(fileTool, "projectExecutionRevalidator", runtime);
+        org.springframework.test.util.ReflectionTestUtils.setField(loadTool, "projectExecutionRevalidator", runtime);
         var options = new vip.mate.agent.execution.ProjectExecutionOptions("attempt-1", "7", "config-digest",
                 "pinned", "skill-digest", Map.of("SKILL.md", "# pinned original", "output.schema.json", "{}"),
                 java.util.Set.of("load_skill", "readSkillFile"), new BiddingToolScope(claim),
@@ -108,6 +110,11 @@ class BiddingRuntimeIsolationTest {
         assertEquals("{}", fileTool.readSkillFile("pinned", "output.schema.json", null, null, context));
         assertTrue(loadTool.loadSkill("pinned", "references/new-active.md", context).startsWith("Error:"));
         verify(skillRuntime, never()).findActiveSkill(any(), any());
+
+        jdbc.update("UPDATE mate_bidding_task SET active_attempt_id='attempt-revoked' WHERE id='task-1'");
+        assertThrows(BiddingApiException.class, () -> fileTool.readSkillFile(
+                "pinned", "SKILL.md", null, null, context));
+        assertThrows(BiddingApiException.class, () -> loadTool.loadSkill("pinned", null, context));
     }
 
     @Test void authorizedSourceBlockIsReadAndReceiptedAgainstTheActiveAttempt() {

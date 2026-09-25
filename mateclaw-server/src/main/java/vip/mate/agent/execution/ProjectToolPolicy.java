@@ -4,4 +4,10 @@ package vip.mate.agent.execution;
 @FunctionalInterface
 public interface ProjectToolPolicy extends java.io.Serializable {
     void require(String toolName, String arguments);
+
+    /** Service-side revalidation hook; never store its implementation in graph state. */
+    @FunctionalInterface
+    interface Revalidator {
+        void requireActive(ProjectExecutionOptions options);
+    }
 }

@@ -30,3 +30,22 @@ git diff --check
 ```
 
 Result: BUILD SUCCESS; 95 tests passed across the 8 `Bidding*Test` classes (62 tests) and six existing Skill/Presales/fallback classes (33 tests), with zero failures or errors. The startup regression test ran as part of `BiddingRuntimeIsolationTest` (5 tests total, 0.16s). No Task 5 queue/dispatch integration was run; this remains out of scope.
+
+## Review Fix Round 1 (2026-09-25)
+
+Addressed the three Important review findings within the Task 4 ownership set. Added a server-side `ProjectToolPolicy.Revalidator` hook in the existing execution policy file; `BiddingEmployeeRuntime` implements it and the real graph builder supplies it to `ToolExecutionExecutor`. Executor pre-callback and post-callback checks now revalidate actor membership, active attempt/token, employee/model config, pinned skill package, and input references. `SkillLoadTool` and `SkillFileTool` also revalidate immediately before reading and before returning pinned bytes, so a revoked task receives no skill content and cannot trigger the post-callback skill-loaded receipt.
+
+The production execution path now passes the pinned `output.schema.json` to the schema-aware `readResult` overload. Missing or malformed schemas fail closed; accepted outputs must be JSON objects matching the supported schema subset. The validator supports type, required, properties, additionalProperties boolean, items, enum, const, string bounds/pattern, numeric bounds, and array bounds. It rejects unknown or unsupported keywords (including `$ref`, `format`, and composition keywords such as `oneOf`) and malformed schema structures. The existing three-argument overload remains source-compatible for previous collector tests and enforces object output; production always uses the pinned-schema overload.
+
+Added regression coverage for skill reads after attempt revocation, valid/invalid pinned-schema outputs, missing/unsupported schemas, first specific execution failure surviving a later generic failure, and invalid output against the same fixed package schema used by the production-entry test.
+
+Verification ran with Temurin Java 21.0.7 and `-Dmaven.compiler.proc=full`:
+
+```sh
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest=BiddingEmployeeRuntimeTest,BiddingRuntimeIsolationTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest='Bidding*Test,SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest,NodeStreamingChatHelperFallbackChainTest,NodeStreamingChatHelperFailoverTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest=BiddingEmployeeRuntimeTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+git diff --check
+```
+
+Results: focused initial run passed 10/10 tests; combined requested suite passed 96/96 tests with BUILD SUCCESS; final `BiddingEmployeeRuntimeTest` rerun passed 5/5 after adding specific-failure precedence and fixed-package schema assertions. `git diff --check` passed. No live provider, browser, MySQL, or Kingbase validation was performed.

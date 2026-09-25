@@ -68,6 +68,15 @@ class BiddingEmployeeRuntimeTest {
         var result = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest");
         assertNull(result.payload());
         assertTrue(result.failure().partial());
+
+        var preservesSpecificFailure = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_execution_failed", Map.of(
+                        "code", "OUTPUT_INVALID", "category", "VALIDATION", "resultUnknown", false,
+                        "partial", false, "stopped", false)),
+                AgentService.StreamDelta.event("project_execution_failed", Map.of(
+                        "code", "STREAM_INCOMPLETE", "category", "TRANSIENT", "resultUnknown", true,
+                        "partial", true, "stopped", false))), "skill-digest", "model-digest");
+        assertEquals("OUTPUT_INVALID", preservesSpecificFailure.failure().code());
     }
 
     @Test void acceptsOnlyPinnedSkillAndExplicitNormalCompletion() {
@@ -85,6 +94,37 @@ class BiddingEmployeeRuntimeTest {
                 AgentService.StreamDelta.finalAnswer("{\"items\":[]}", false)), "skill-digest", "model-digest");
         assertNull(incomplete.payload());
         assertEquals("EXECUTION_NOT_COMPLETED", incomplete.failure().code());
+    }
+
+    @Test void validatesFinalObjectAgainstThePinnedOutputSchema() {
+        var stream = Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("{\"items\":[]}", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest")));
+        var accepted = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest",
+                "{\"type\":\"object\",\"required\":[\"items\"],\"properties\":{\"items\":{\"type\":\"array\"}},\"additionalProperties\":false}");
+        assertNotNull(accepted.payload());
+        assertNull(accepted.failure());
+
+        var rejected = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("{\"items\":\"not-an-array\",\"extra\":true}", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest",
+                "{\"type\":\"object\",\"required\":[\"items\"],\"properties\":{\"items\":{\"type\":\"array\"}},\"additionalProperties\":false}");
+        assertNull(rejected.payload());
+        assertEquals("OUTPUT_INVALID", rejected.failure().code());
+
+        var missingSchema = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest", null);
+        assertNull(missingSchema.payload());
+        assertEquals("OUTPUT_SCHEMA_MISSING", missingSchema.failure().code());
+
+        var unsupportedSchema = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest",
+                "{\"type\":\"object\",\"oneOf\":[{\"required\":[\"items\"]}]}");
+        assertNull(unsupportedSchema.payload());
+        assertEquals("OUTPUT_INVALID", unsupportedSchema.failure().code());
     }
 
     @Test void realGraphNodeEmitsFailureAfterPartialJsonWithExactlyOneProviderCall() throws Exception {
@@ -115,7 +155,7 @@ class BiddingEmployeeRuntimeTest {
                 new BiddingTypes.SkillPin("1", "v1", "skill-digest", Map.of("SKILL.md", "# skill")),
                 "7", "cfg", List.of(), new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode());
         var options = new vip.mate.agent.execution.ProjectExecutionOptions("attempt", "7", "cfg", "skill",
-                "skill-digest", Map.of("SKILL.md", "# skill"), java.util.Set.of(), new BiddingToolScope(claim),
+                "skill-digest", Map.of("SKILL.md", "# skill", "output.schema.json", "{\"type\":\"object\"}"), java.util.Set.of(), new BiddingToolScope(claim),
                 0, false, false, 12);
         Map<String, Object> input = new HashMap<>();
         input.put(MateClawStateKeys.USER_MESSAGE, "produce JSON");
@@ -159,7 +199,8 @@ class BiddingEmployeeRuntimeTest {
 
         String projectId = "project-" + modelId, taskId = "task-" + modelId, attemptId = "attempt-" + modelId;
         String token = "token-" + modelId;
-        Map<String, String> skillFiles = Map.of("SKILL.md", "---\nname: bidding-test\ndescription: test\n---\n# pinned skill\n");
+        Map<String, String> skillFiles = Map.of("SKILL.md", "---\nname: bidding-test\ndescription: test\n---\n# pinned skill\n",
+                "output.schema.json", "{\"type\":\"object\",\"required\":[\"items\"],\"properties\":{\"items\":{\"type\":\"array\"}},\"additionalProperties\":false}");
         String skillDigest = "digest-" + modelId;
         String configDigest = bindings.configDigest(new BiddingTypes.Scope("1", "actor", projectId), agent.getId().toString());
         String filesJson;
@@ -181,6 +222,15 @@ class BiddingEmployeeRuntimeTest {
                 attemptId, token, 1, 0, java.time.Instant.now().plusSeconds(60), agent.getId().toString(),
                 new BiddingTypes.SkillPin("skill-" + modelId, "v1", skillDigest, skillFiles),
                 Long.toString(modelId), configDigest, List.of(sourceSet), mapper.createObjectNode().put("task", "run"));
+
+        var fixedContractCheck = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", skillDigest)),
+                AgentService.StreamDelta.finalAnswer("{\"items\":\"wrong type\"}", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", configDigest, "skillDigest", skillDigest))),
+                skillDigest, configDigest, skillFiles.get("output.schema.json"));
+        assertNull(fixedContractCheck.payload());
+        assertEquals("OUTPUT_INVALID", fixedContractCheck.failure().code());
 
         AtomicInteger calls = new AtomicInteger();
         ChatModel fake = mock(ChatModel.class);

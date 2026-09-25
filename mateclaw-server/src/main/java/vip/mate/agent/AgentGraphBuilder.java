@@ -98,6 +98,10 @@ public class AgentGraphBuilder {
     private final vip.mate.tool.disclosure.ToolDisclosureService toolDisclosureService;
     private final vip.mate.agent.progress.ProgressLedgerService progressLedgerService;
 
+    @org.springframework.context.annotation.Lazy
+    @Autowired
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
     /** Escape hatch: when false, the load_skill meta tool is not advertised. */
     @org.springframework.beans.factory.annotation.Value(
             "${mateclaw.skill.disclosure.load-skill-tool.enabled:true}")
@@ -748,6 +752,7 @@ public class AgentGraphBuilder {
                     toolSet, toolGuardService, approvalService, streamTracker,
                     toolTimeoutProperties, toolResultStorage, toolConcurrencyRegistry,
                     workspaceLookupCache, approvalGrantResolver);
+            executor.setProjectExecutionRevalidator(projectExecutionRevalidator);
             // Issue #46: enable skill-aware "Tool not found" hint so when the
             // LLM mis-calls a skill name as a tool, the response tells it
             // the right invocation pattern instead of a dead-end error.
@@ -1092,6 +1097,7 @@ public class AgentGraphBuilder {
                     toolSet, toolGuardService, approvalService, streamTracker,
                     toolTimeoutProperties, toolResultStorage, toolConcurrencyRegistry,
                     workspaceLookupCache, approvalGrantResolver);
+            executor.setProjectExecutionRevalidator(projectExecutionRevalidator);
             // Issue #46: enable skill-aware "Tool not found" hint so when the
             // LLM mis-calls a skill name as a tool, the response tells it
             // the right invocation pattern instead of a dead-end error.

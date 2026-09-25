@@ -64,6 +64,10 @@ public class SkillFileTool {
     @Autowired
     private AgentBindingResolver agentBindingResolver;
 
+    @Lazy
+    @Autowired
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
     @Tool(description = """
         Read a file from a skill's directory (SKILL.md, references/, scripts/, or templates/).
         Use this when you need to access skill documentation or reference files.
@@ -103,12 +107,16 @@ public class SkillFileTool {
         Object execution = ctx == null || ctx.getContext() == null ? null
                 : ctx.getContext().get(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY);
         if (execution instanceof vip.mate.agent.execution.ProjectExecutionOptions options) {
-            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
             String path = filePath == null || filePath.isBlank() ? "SKILL.md" : filePath;
+            options.toolPolicy().require("readSkillFile", skillName + ":" + path);
+            projectExecutionRevalidator.requireActive(options);
+            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
             if (path.startsWith("/") || path.contains("..") || path.contains("\\")
                     || !options.skillFiles().containsKey(path)) return "Error: File is outside the pinned task package";
             String pinned = options.skillFiles().get(path);
             if (pinned == null) return "Error: File is not present in the pinned task package";
+            options.toolPolicy().require("readSkillFile", skillName + ":" + path);
+            projectExecutionRevalidator.requireActive(options);
             recordProjectSkillLoaded(skillName, path, pinned, ctx);
             return pinned;
         }

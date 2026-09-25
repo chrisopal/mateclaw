@@ -1,5 +1,6 @@
 package vip.mate.bidding;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
@@ -11,8 +12,12 @@ import vip.mate.agent.AgentService;
 
 /** Project employee execution boundary and strict stream result collector. */
 @Service
-public class BiddingEmployeeRuntime {
+public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectToolPolicy.Revalidator {
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final java.util.Set<String> SCHEMA_KEYS = java.util.Set.of(
+            "$schema", "$id", "$comment", "title", "description", "default", "examples",
+            "type", "required", "properties", "additionalProperties", "items", "enum", "const",
+            "minLength", "maxLength", "pattern", "minimum", "maximum", "minItems", "maxItems");
     private static final int MAX_OUTPUT_BYTES = 2 * 1024 * 1024;
     private static final Duration EXECUTION_TIMEOUT = Duration.ofSeconds(300);
 
@@ -61,6 +66,12 @@ public class BiddingEmployeeRuntime {
         dependencies.validate(claim.scope(), claim.inputRefs());
     }
 
+    @Override public void requireActive(vip.mate.agent.execution.ProjectExecutionOptions options) {
+        if (options == null || !(options.toolPolicy() instanceof BiddingToolScope scope))
+            throw BiddingAccess.error(403, "CLAIM_REQUIRED", "Trusted active task claim is required");
+        requireActive(scope.claim());
+    }
+
     private void validatePinnedSkill(BiddingTypes.Claim claim) {
         String stored = jdbc.query("SELECT files_json FROM mate_bidding_skill_package WHERE workspace_id=? AND project_id=? AND skill_id=? AND version=? AND digest=?",
                 rs -> rs.next() ? rs.getString(1) : null, claim.scope().workspaceId(), claim.scope().projectId(),
@@ -104,7 +115,7 @@ public class BiddingEmployeeRuntime {
         try {
             BiddingTypes.Execution result = readResult(agents.chatStructuredStream(agentId, prompt, conversationId,
                     claim.scope().actorId(), null, origin, options).timeout(EXECUTION_TIMEOUT),
-                    claim.skill().digest(), claim.configDigest());
+                    claim.skill().digest(), claim.configDigest(), claim.skill().files().get("output.schema.json"));
             try { requireActive(claim); }
             catch (BiddingApiException revoked) {
                 return failure(revoked.code(), "PERMANENT", true, result.failure() == null, false);
@@ -119,6 +130,11 @@ public class BiddingEmployeeRuntime {
 
     public static BiddingTypes.Execution readResult(Flux<AgentService.StreamDelta> stream,
             String expectedSkillDigest, String expectedConfigDigest) {
+        return readResult(stream, expectedSkillDigest, expectedConfigDigest, "{\"type\":\"object\"}");
+    }
+
+    public static BiddingTypes.Execution readResult(Flux<AgentService.StreamDelta> stream,
+            String expectedSkillDigest, String expectedConfigDigest, String pinnedOutputSchema) {
         final Object[] state = new Object[5];
         final StringBuilder output = new StringBuilder();
         try {
@@ -163,12 +179,125 @@ public class BiddingEmployeeRuntime {
         try {
             if (output.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > MAX_OUTPUT_BYTES)
                 return failure("OUTPUT_LIMIT", "VALIDATION", true, true, false);
-            ObjectNode payload = (ObjectNode) JSON.readTree(output.toString());
-            if (payload == null) throw new IllegalArgumentException("empty output");
+            if (pinnedOutputSchema == null || pinnedOutputSchema.isBlank())
+                return failure("OUTPUT_SCHEMA_MISSING", "VALIDATION", false, false, false);
+            var schema = JSON.readTree(pinnedOutputSchema);
+            JsonNode parsed = JSON.readTree(output.toString());
+            if (parsed == null || !parsed.isObject() || !validSchema(schema)
+                    || !validAgainstSchema(parsed, schema))
+                return failure("OUTPUT_INVALID", "VALIDATION", false, false, false);
+            ObjectNode payload = (ObjectNode) parsed;
             return new BiddingTypes.Execution(payload, null, skillDigest, expectedConfigDigest, null);
         } catch (Exception e) {
             return failure("OUTPUT_INVALID", "VALIDATION", false, false, false);
         }
+    }
+
+    private static boolean validAgainstSchema(JsonNode value, JsonNode schema) {
+        JsonNode type = schema.get("type");
+        if (type != null && !matchesType(value, type)) return false;
+        JsonNode required = schema.get("required");
+        if (required != null) {
+            if (!required.isArray() || !value.isObject()) return false;
+            for (JsonNode field : required) if (!field.isTextual() || !value.has(field.asText())) return false;
+        }
+        JsonNode properties = schema.get("properties");
+        if (properties != null) {
+            if (!properties.isObject() || !value.isObject()) return false;
+            var fields = properties.fields();
+            while (fields.hasNext()) {
+                var field = fields.next();
+                if (value.has(field.getKey()) && !validAgainstSchema(value.get(field.getKey()), field.getValue())) return false;
+            }
+        }
+        JsonNode additional = schema.get("additionalProperties");
+        if (additional != null && !additional.isBoolean()) return false;
+        if (Boolean.FALSE.equals(additional == null ? null : additional.booleanValue()) && value.isObject()) {
+            var names = value.fieldNames();
+            while (names.hasNext()) if (properties == null || !properties.has(names.next())) return false;
+        }
+        JsonNode items = schema.get("items");
+        if (items != null && value.isArray()) for (JsonNode item : value)
+            if (!validAgainstSchema(item, items)) return false;
+        JsonNode choices = schema.get("enum");
+        if (choices != null && (!choices.isArray() || !contains(choices, value))) return false;
+        JsonNode constant = schema.get("const");
+        if (constant != null && !constant.equals(value)) return false;
+        if (value.isTextual()) {
+            int length = value.textValue().codePointCount(0, value.textValue().length());
+            if (schema.has("minLength") && length < schema.path("minLength").asInt()) return false;
+            if (schema.has("maxLength") && length > schema.path("maxLength").asInt()) return false;
+            if (schema.has("pattern") && !value.asText().matches("(?s).*" + schema.path("pattern").asText() + ".*")) return false;
+        }
+        if (value.isNumber()) {
+            if (schema.has("minimum") && value.decimalValue().compareTo(schema.path("minimum").decimalValue()) < 0) return false;
+            if (schema.has("maximum") && value.decimalValue().compareTo(schema.path("maximum").decimalValue()) > 0) return false;
+        }
+        if (value.isArray()) {
+            if (schema.has("minItems") && value.size() < schema.path("minItems").asInt()) return false;
+            if (schema.has("maxItems") && value.size() > schema.path("maxItems").asInt()) return false;
+        }
+        return true;
+    }
+
+    private static boolean validSchema(JsonNode schema) {
+        if (schema == null || !schema.isObject()) return false;
+        var keys = schema.fieldNames();
+        while (keys.hasNext()) if (!SCHEMA_KEYS.contains(keys.next())) return false;
+        JsonNode type = schema.get("type");
+        if (type != null) {
+            if (type.isTextual()) {
+                if (!isSchemaType(type.asText())) return false;
+            } else if (type.isArray() && !type.isEmpty()) {
+                for (JsonNode candidate : type) if (!candidate.isTextual() || !isSchemaType(candidate.asText())) return false;
+            } else return false;
+        }
+        JsonNode required = schema.get("required");
+        if (required != null) {
+            if (!required.isArray()) return false;
+            for (JsonNode field : required) if (!field.isTextual()) return false;
+        }
+        JsonNode properties = schema.get("properties");
+        if (properties != null) {
+            if (!properties.isObject()) return false;
+            var fields = properties.elements();
+            while (fields.hasNext()) if (!validSchema(fields.next())) return false;
+        }
+        JsonNode additional = schema.get("additionalProperties");
+        if (additional != null && !additional.isBoolean()) return false;
+        JsonNode items = schema.get("items");
+        if (items != null && !validSchema(items)) return false;
+        JsonNode choices = schema.get("enum");
+        if (choices != null && !choices.isArray()) return false;
+        for (String key : java.util.List.of("minLength", "maxLength", "minItems", "maxItems"))
+            if (schema.has(key) && (!schema.path(key).isIntegralNumber() || schema.path(key).asInt() < 0)) return false;
+        for (String key : java.util.List.of("minimum", "maximum"))
+            if (schema.has(key) && !schema.path(key).isNumber()) return false;
+        if (schema.has("pattern")) {
+            if (!schema.path("pattern").isTextual()) return false;
+            try { java.util.regex.Pattern.compile(schema.path("pattern").asText()); }
+            catch (java.util.regex.PatternSyntaxException invalid) { return false; }
+        }
+        return true;
+    }
+
+    private static boolean isSchemaType(String type) {
+        return java.util.Set.of("object", "array", "string", "number", "integer", "boolean", "null").contains(type);
+    }
+
+    private static boolean matchesType(JsonNode value, JsonNode type) {
+        if (type.isArray()) { for (JsonNode candidate : type) if (matchesType(value, candidate)) return true; return false; }
+        if (!type.isTextual()) return false;
+        return switch (type.asText()) {
+            case "object" -> value.isObject(); case "array" -> value.isArray(); case "string" -> value.isTextual();
+            case "number" -> value.isNumber(); case "integer" -> value.isIntegralNumber();
+            case "boolean" -> value.isBoolean(); case "null" -> value.isNull(); default -> false;
+        };
+    }
+
+    private static boolean contains(JsonNode array, JsonNode value) {
+        for (JsonNode candidate : array) if (candidate.equals(value)) return true;
+        return false;
     }
 
     private static BiddingTypes.Execution failure(String code, String category, boolean unknown,

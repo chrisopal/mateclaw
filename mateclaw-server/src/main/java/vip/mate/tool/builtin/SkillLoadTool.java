@@ -44,6 +44,10 @@ public class SkillLoadTool {
     @Autowired
     private AgentBindingResolver agentBindingResolver;
 
+    @Lazy
+    @Autowired
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
     @Tool(name = "load_skill", description = """
         Load a skill package's SKILL.md into the conversation.
         Call this when a skill in the catalog matches the task.
@@ -74,10 +78,14 @@ public class SkillLoadTool {
         Object execution = ctx == null || ctx.getContext() == null ? null
                 : ctx.getContext().get(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY);
         if (execution instanceof vip.mate.agent.execution.ProjectExecutionOptions options) {
-            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
             String path = (filePath == null || filePath.isBlank()) ? "SKILL.md" : filePath;
+            options.toolPolicy().require("load_skill", skillName + ":" + path);
+            projectExecutionRevalidator.requireActive(options);
+            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
             if (!options.skillFiles().containsKey(path)) return "Error: File is outside the pinned task package";
-            return skillFileTool.readSkillFile(skillName, path, null, null, ctx);
+            String result = skillFileTool.readSkillFile(skillName, path, null, null, ctx);
+            projectExecutionRevalidator.requireActive(options);
+            return result;
         }
         ChatOrigin origin = ChatOrigin.from(ctx);
         // Resolve only within the conversation's workspace (+ builtin/global), so

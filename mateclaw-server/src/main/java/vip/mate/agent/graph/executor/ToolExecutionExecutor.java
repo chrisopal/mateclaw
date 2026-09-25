@@ -326,6 +326,12 @@ public class ToolExecutionExecutor {
 
     /** Auto-grant resolver. Optional; see {@link #workspaceLookupCache} note. */
     private ApprovalGrantResolver approvalGrantResolver;
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
+    public void setProjectExecutionRevalidator(
+            vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator) {
+        this.projectExecutionRevalidator = projectExecutionRevalidator;
+    }
 
     /**
      * Constructor used by {@code AgentGraphBuilder} after PR-1: takes the auto-grant
@@ -595,6 +601,7 @@ public class ToolExecutionExecutor {
                     if (!projectOptions.allowedTools().contains(toolName))
                         throw new SecurityException("Tool outside project execution allowlist");
                     projectOptions.toolPolicy().require(toolName, arguments);
+                    requireProjectExecutionActive(projectOptions);
                 } catch (RuntimeException denied) {
                     String message = "Tool is not authorized for this task";
                     events.add(GraphEventPublisher.toolComplete(toolCall.id(), toolName, message, false));
@@ -1149,6 +1156,7 @@ public class ToolExecutionExecutor {
                     // A tool may complete after its task was revoked; do not expose
                     // that result to the model or accept a receipt after revocation.
                     pc.projectOptions.toolPolicy().require(toolName, pc.arguments);
+                    requireProjectExecutionActive(pc.projectOptions);
                 }
                 if (pc.projectOptions != null && result != null && !result.startsWith("Error:")
                         && isPinnedSkillContractRead(toolName, pc.arguments)) {
@@ -1276,6 +1284,12 @@ public class ToolExecutionExecutor {
                 Thread.interrupted();
             }
         }
+    }
+
+    private void requireProjectExecutionActive(vip.mate.agent.execution.ProjectExecutionOptions options) {
+        if (projectExecutionRevalidator == null)
+            throw new IllegalStateException("Project execution revalidator is unavailable");
+        projectExecutionRevalidator.requireActive(options);
     }
 
     private void throwIfStopRequested(String conversationId) {
