@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import logging
+import os
 import re
 import sys
 import tempfile
@@ -46,12 +47,17 @@ def _as_absolute_path(raw: Any) -> Path | None:
 
 
 def _is_unsafe_data_path(path: Path) -> bool:
-    temp_root = Path(tempfile.gettempdir()).resolve()
-    try:
-        path.relative_to(temp_root)
-        return True
-    except ValueError:
-        pass
+    temp_roots = [Path(tempfile.gettempdir()), Path("/tmp"), Path("/var/tmp")]
+    if os.name == "nt":
+        temp_roots.append(Path(os.environ.get("WINDIR", r"C:\Windows")) / "Temp")
+    for raw_root in temp_roots:
+        try:
+            path.relative_to(raw_root.resolve())
+            return True
+        except ValueError:
+            continue
+        except (OSError, RuntimeError):
+            continue
     try:
         path.relative_to(REPO_ROOT)
         return True
@@ -95,7 +101,12 @@ def _verify_backup(raw_manifest: Any) -> bool:
         raw_path = entry.get("path")
         path = _as_absolute_path(raw_path)
         if path is None and isinstance(raw_path, str) and raw_path.strip():
-            path = (manifest_path.parent / raw_path).resolve(strict=False)
+            try:
+                path = (manifest_path.parent / raw_path).resolve(strict=False)
+            except (OSError, RuntimeError, ValueError):
+                _problem("BACKUP_PATH_INVALID", manifest_path)
+                valid = False
+                continue
         expected = entry.get("sha256")
         if path is None or not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
             valid = False

@@ -48,6 +48,36 @@ class RuntimeCheckTest(unittest.TestCase):
                     ),
                 )
 
+    def test_canonical_tmp_paths_are_rejected(self):
+        for raw_path in ("/tmp/mateclaw-business", "/var/tmp/mateclaw-business"):
+            with self.subTest(path=raw_path):
+                self.assertTrue(module._is_unsafe_data_path(pathlib.Path(raw_path).resolve()))
+
+    def test_nul_in_relative_backup_path_returns_error_code(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            data = root / "data"
+            data.mkdir()
+            db = data / "business.mv.db"
+            db.write_bytes(b"db")
+            backup = root / "backup.json"
+            backup.write_text(
+                json.dumps({"complete": True, "files": [{"path": "bad\u0000path", "sha256": "0" * 64}]}),
+                encoding="utf-8",
+            )
+            with patch.object(module, "_is_unsafe_data_path", return_value=False):
+                self.assertEqual(
+                    2,
+                    module.check(
+                        {
+                            "mode": "existing",
+                            "dataDirectory": str(data),
+                            "expectedDatabaseFiles": [str(db)],
+                            "backupManifest": str(backup),
+                        }
+                    ),
+                )
+
     def test_worktree_paths_are_rejected(self):
         worktrees_parent = module.REPO_ROOT.parent
         self.assertTrue(module._is_unsafe_data_path(worktrees_parent / "sibling-worktree" / "data"))
