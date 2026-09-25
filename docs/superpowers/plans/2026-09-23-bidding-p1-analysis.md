@@ -490,6 +490,40 @@ class RuntimeCheckTest(unittest.TestCase):
 - [ ] 报告按总计划格式分开静态/集成/浏览器/真实模型/方言迁移/恢复。Run脚本单测与P1范围回归，仅对新增修改补必要复验。Expected：本阶段范围没有FAIL，NOT_RUN原因清楚；模型完整证据缺失时不得称首阶段实跑完成。
 - [ ] Commit：`git commit -m "Make bidding acceptance reproducible without losing existing business data" -m "Related: docs/bidding/acceptance/2026-09-23-p1.md"`。提交前报告必须记录实际状态，不凭计划声称通过。
 
+### Task 9: P1-09 修复项目负责人和只读成员的跨层权限衔接
+
+**Files:**
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAccess.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-ui/src/features/bidding/api/types.ts`
+- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingProjectTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`
+
+**Interfaces:**
+- Consumes: server-side project owner/workspace role authorization and authorized project GET.
+- Produces: project-scoped approval capability for the active project; viewer-authorized analysis/revision read dependency check; member-only execution dependency check unchanged.
+
+- [ ] RED: ordinary workspace member who owns project sees and can submit approval controls; another member and viewer cannot. Project-scoped capability is computed by server after authorized GET, never trusted from client. Workspace-wide `/capabilities` remains a coarse feature/workspace capability.
+- [ ] RED: viewer may read the current authorized analysis and revision while source dependencies remain valid, and cannot dispatch/edit/confirm. Revoked source or workspace membership still fails closed. Do not weaken task execution revalidation.
+- [ ] GREEN: implement minimum permission split, preserve workspace/project scoping, run Java `BiddingProjectTest,BiddingAnalysisTest` and mounted workbench tests, ESLint/vue-tsc, diff check. Commit only owned files with Lore message.
+
+### Task 10: P1-10 修复 390px 解析任务抽屉裁列
+
+**Files:**
+- Modify: `mateclaw-ui/src/features/bidding/components/BiddingTaskDrawer.vue`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`
+
+**Interfaces:**
+- Consumes: existing authorized task list/details and actions.
+- Produces: all four task names, state, attempt count and retry/cancel actions visible and operable at 390px without horizontal page clipping; desktop table unchanged.
+
+- [ ] RED: narrow layout renders task summary and action per item; successful attempt has no false failure alert. Preserve task selection, polling and project/workspace cancellation behavior.
+- [ ] GREEN: use a compact responsive list/card or equivalent explicit horizontal navigation with visible action affordance. Verify mounted interaction plus real 390px and 1280px browser screenshots, no clipped action buttons or overlapping text; run focused Vitest, ESLint/vue-tsc and diff check. Commit only owned files with Lore message.
+
 ## P1 完成判定
 
 从真实界面完成解析基线且DB可回读；A01/A03/A04/A06～09/A14在此阶段适用范围通过；A02只证明4项分析skill，其余4项到P2/P3验证。P1不得宣称已具备目录编制、正文、审核或导出。
