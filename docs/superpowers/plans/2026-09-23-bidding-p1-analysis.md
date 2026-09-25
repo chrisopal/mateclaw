@@ -289,6 +289,7 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - Create: `mateclaw-server/src/main/resources/db/migration/mysql/V214__bidding_task_actor.sql`
 - Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V214__bidding_task_actor.sql`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingTaskTest.java`
@@ -296,6 +297,7 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRetryPolicyTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingFakeRuntime.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSourceTest.java`
 
 **Interfaces:**
 - Consumes: EmployeeBindings.resolve/configDigest/validate、SkillPackages.pin、Dependencies.validate/isCurrent、EmployeeRuntime.execute。
@@ -303,6 +305,7 @@ return AgentService.StreamDelta.event("project_execution_failed", Map.of(
 - Produces: `BiddingResultHandler.skillIds():Set<String>` / `accept(Claim,ObjectNode):Ref`；各业务服务实现这两个方法，TaskService通过ObjectProvider惰性读取handler列表以避免与enqueue的构造依赖循环；未知技能拒绝，重复注册启动失败。
 - Produces: `BiddingRepository.claimDue(Instant now,String bootId,int limit): List<Claim>`；`BiddingScheduler.dispatchDue(Instant): int`；`recoverInterrupted(String newBootId): int`；`BiddingRetryPolicy.nextDelayMs(Failure,int cycleAttempt,long jitterMs): OptionalLong`。
 - Test-only: `BiddingFakeRuntime extends BiddingEmployeeRuntime`（测试构造器注入必要依赖）提供 `enqueue(Execution):void`、`calls():int`，override execute 消费队列；不得用于运行 profile。测试调度执行器用 Runnable::run，生产有界线程池。扫描器同时调用SourceService.readPending(2)，来源读取与AI执行分别有界，不占模型重试额度。
+- P1-02 已在 SourceService 设置独立 `@Scheduled` 轮询。Task5 接通 BiddingScheduler 时移除来源读取的第二个定时入口，保留 SourceService.readPending(2) 与启动中断恢复；由 BiddingScheduler 每轮调用一次 readPending(2)，即使模型 worker 容量为 0 也照常扫描。用测试证明没有双轮询且来源读取不消耗模型 slot。
 
 - [ ] 写明确重试策略测试与真实 DB CAS 竞争测试（两个线程领取同一待执行 task，只有一个 Claim），避免只测内存状态。
 
