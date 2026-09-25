@@ -54,3 +54,14 @@ TDD evidence:
 - `pnpm exec eslint src/features/bidding/components/BiddingTaskDrawer.vue src/features/bidding/components/BiddingOverview.vue src/features/bidding/__tests__/biddingTasks.test.ts` — PASS.
 - `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
 - `git diff --check` — PASS.
+
+Sol review MEDIUM fix: Missing rejection codes no longer use the generic failure fallback. Successful attempts render an em dash in the reason column, and the red failure alert is omitted when there is no actual failure code.
+
+TDD evidence:
+
+- RED: `pnpm exec vitest run src/features/bidding/__tests__/biddingTasks.test.ts` — mounted successful-attempt case failed because a red alert showed “Task did not complete”.
+- GREEN: same command — PASS, 6 tests.
+- Focused bidding UI: `pnpm exec vitest run src/features/bidding/__tests__/biddingProjects.test.ts src/features/bidding/__tests__/biddingTasks.test.ts src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS, 3 files / 21 tests.
+- `pnpm exec eslint src/features/bidding/components/BiddingTaskDrawer.vue src/features/bidding/__tests__/biddingTasks.test.ts` — PASS.
+- `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.
+- `git diff --check` — PASS.

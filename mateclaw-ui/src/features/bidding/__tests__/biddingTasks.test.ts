@@ -56,6 +56,20 @@ it('renders localized analysis skill names, task states, and readable failures w
   expect(document.querySelector('.task-detail')?.querySelector('.el-alert')?.textContent).not.toContain('SKILL_NOT_LOADED')
 })
 
+it('does not show a failure alert or reason for a successful task attempt',async()=>{
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items:[{taskId:'task-ok',skillId:'bidding-scoring-analysis',status:'SUCCEEDED',attemptCount:1}],total:1,page:1,pageSize:100})
+  vi.mocked(biddingApi.task).mockResolvedValue({taskId:'task-ok',skillId:'bidding-scoring-analysis',status:'SUCCEEDED',attemptCount:1,attempts:[{attemptNo:1,state:'SUCCEEDED',result:{accepted:true}}]} as never)
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'ANALYSIS',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project,canWrite:true})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;[...document.querySelectorAll('tr')].find(row=>row.textContent?.includes('Scoring criteria'))?.dispatchEvent(new MouseEvent('click',{bubbles:true}));await flush()
+  expect(document.querySelector('.task-detail .el-alert')).toBeNull()
+  const attemptRow=document.querySelector('.task-detail .el-table__row')
+  expect(attemptRow?.textContent).toContain('—')
+  expect(attemptRow?.textContent).not.toContain('Task did not complete')
+})
+
 it('uses Chinese task skill, status, and failure labels for Chinese workspaces',async()=>{
   vi.mocked(biddingApi.tasks).mockResolvedValue({items:[{taskId:'task-zh',skillId:'bidding-tender-profile',status:'FAILED',attemptCount:1}],total:1,page:1,pageSize:100})
   vi.mocked(biddingApi.task).mockResolvedValue({taskId:'task-zh',status:'FAILED',attemptCount:1,attempts:[{attemptNo:1,state:'FAILED',rejection:{code:'SKILL_NOT_LOADED'}}]} as never)

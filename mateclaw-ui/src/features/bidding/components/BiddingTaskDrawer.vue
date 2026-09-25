@@ -46,10 +46,10 @@ const failureLabels:Record<string,[string,string]>={
 }
 function label(map:Record<string,[string,string]>,key:string|undefined,fallback:[string,string]){const pair=key?map[key]:undefined;return pair?l(pair[0],pair[1]):l(fallback[0],fallback[1])}
 function statusLabel(value:string){return label(statusLabels,value,['其他状态','Other status'])}
-function failureLabel(value:string|undefined){return label(failureLabels,value,['任务未完成','Task did not complete'])}
+function failureLabel(value:string|undefined){return value?label(failureLabels,value,['其他错误','Other failure']):'—'}
 function skillLabel(value:string|undefined){return label(skillLabels,value,['其他任务','Other task'])}
 function taskSkill(value:Task|TaskDetails){const detail=value as TaskDetails;const listed=tasks.value.find(task=>task.taskId===value.taskId)?.skillId;const snapshot=(detail.snapshot as {_bidding?:{skillId?:string}}|undefined)?._bidding?.skillId;return skillLabel(value.skillId||listed||snapshot)}
-function failure(value:TaskDetails){const last=(value.attempts||[]).at(-1);const rejection=last?.rejection as {code?:string}|undefined;return failureLabel(rejection?.code||last?.failureCode)}
+function failure(value:TaskDetails){const last=(value.attempts||[]).at(-1);const rejection=last?.rejection as {code?:string}|undefined;const code=rejection?.code||last?.failureCode;return code?failureLabel(code):''}
 function retryable(status:string){return ['FAILED','CANCELLED','STALE'].includes(status)}
 function cancellable(status:string){return ['QUEUED','RUNNING','WAITING_RETRY'].includes(status)}
 onBeforeUnmount(stop)
