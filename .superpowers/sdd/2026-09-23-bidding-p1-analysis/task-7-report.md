@@ -21,3 +21,13 @@ Verification run:
 - `git diff --check` — PASS.
 
 NOT_RUN: interactive browser acceptance at 1440px/390px in light and dark themes; live workspace business E2E; full repository test suite. Vite reported existing large-chunk size warnings, with a successful production build.
+
+Round-2 review fix: A same-project refresh keeps the existing project subtree mounted while the request is pending, so analysis edit text/reason survive a 409 reload and a failed project read. Scope changes still clear old project data immediately. The mounted regression performs `EDIT_ANALYSIS_ITEM` -> 409 -> failed Reload -> verifies both draft fields -> successful Reload -> verifies both fields again -> resubmits against the refreshed expected project ref.
+
+TDD evidence:
+
+- RED: `pnpm exec vitest run src/features/bidding/__tests__/biddingWorkbench.test.ts` — failed at the post-Reload textarea assertion (`expected null not to be null`), proving the dialog was unmounted.
+- GREEN: same command — PASS, 5 tests.
+- Focused regression set: `pnpm exec vitest run src/features/bidding/__tests__/biddingProjects.test.ts src/features/bidding/__tests__/biddingTasks.test.ts src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS, 3 files / 13 tests.
+- `pnpm exec eslint src/features/bidding/pages/BiddingWorkbench.vue src/features/bidding/__tests__/biddingWorkbench.test.ts` — PASS.
+- `node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit` from `mateclaw-ui` — PASS.

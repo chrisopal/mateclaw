@@ -44,6 +44,37 @@ it('retains project settings through a real 409 and refreshes the expected revis
   expect(biddingApi.command).toHaveBeenLastCalledWith('ws-1','p1',expect.objectContaining({expected:expect.objectContaining({version:3}),payload:expect.objectContaining({name:'Edited in dialog',lotName:'Lot B'})}))
 })
 
+it('keeps the analysis revision draft open after an edit conflict and failed reload',async()=>{
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+  vi.mocked(biddingApi.get).mockResolvedValueOnce(project).mockRejectedValueOnce(Object.assign(new Error('network'),{response:{status:503}})).mockResolvedValueOnce({...project,version:3,ref:{kind:'project',id:'p1',version:3,digest:'d3'}})
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockResolvedValue([])
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[{taskGroupId:'g1',status:'SUCCEEDED',complete:true,conflicts:[],skills:{'bidding-tender-profile':{basicInfo:{project:'Tender'}}}}]} as never)
+  vi.mocked(biddingApi.command).mockRejectedValueOnce(Object.assign(new Error('Conflict'),{response:{status:409}}))
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Analysis')) as HTMLElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Edit result')) as HTMLButtonElement).click();await flush()
+  const reason=host.querySelector('.el-dialog input') as HTMLInputElement
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(reason,'Check the source clause');reason.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Check the source clause'}));await flush()
+  const content=host.querySelector('.el-dialog textarea') as HTMLTextAreaElement
+  Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!.call(content,'{\n  "basicInfo": { "project": "Locally revised" }\n}');content.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Locally revised'}));await flush()
+  ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.includes('Save revision')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'EDIT_ANALYSIS_ITEM',expected:project.ref}))
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.trim()==='Reload') as HTMLButtonElement).click();await flush()
+  expect(host.querySelector('.el-dialog textarea')).not.toBeNull()
+  expect((host.querySelector('.el-dialog input') as HTMLInputElement).value).toBe('Check the source clause')
+  expect((host.querySelector('.el-dialog textarea') as HTMLTextAreaElement).value).toContain('Locally revised')
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.trim()==='Reload') as HTMLButtonElement).click();await flush()
+  expect((host.querySelector('.el-dialog input') as HTMLInputElement).value).toBe('Check the source clause')
+  expect((host.querySelector('.el-dialog textarea') as HTMLTextAreaElement).value).toContain('Locally revised')
+  ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.includes('Save revision')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenLastCalledWith('ws-1','p1',expect.objectContaining({action:'EDIT_ANALYSIS_ITEM',expected:expect.objectContaining({version:3,digest:'d3'})}))
+})
+
 it('requires an explicit reason to exclude each blank page before confirming a review-needed source',async()=>{
   vi.mocked(biddingApi.command).mockResolvedValue({} as never)
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
