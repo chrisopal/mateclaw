@@ -832,6 +832,7 @@ public class ReasoningNode implements NodeAction {
         String userMsg = state.value(MateClawStateKeys.USER_MESSAGE, "");
         String runtimeModelName = state.value(MateClawStateKeys.RUNTIME_MODEL_NAME, "");
         String runtimeProviderId = state.value(MateClawStateKeys.RUNTIME_PROVIDER_ID, "");
+        vip.mate.agent.execution.ProjectExecutionOptions projectOptions = accessor.projectExecutionOptions();
 
         // Build the non-history prefix ONCE. The PTL retry branch below
         // reuses this list verbatim so the retried prompt has exactly the
@@ -839,8 +840,10 @@ public class ReasoningNode implements NodeAction {
         // the previous tail-only retry path silently dropped the wiki
         // segment which led to "answer regressed after compaction"
         // complaints on long sessions.
-        List<Message> nonHistoryPrefix = buildNonHistoryPrefix(systemPrompt, workspaceBasePath, agentIdStr, userMsg,
-                accessor.chatOrigin(), runtimeModelName, runtimeProviderId);
+        List<Message> nonHistoryPrefix = projectOptions != null
+                ? new ArrayList<>(List.of(new SystemMessage(systemPrompt)))
+                : buildNonHistoryPrefix(systemPrompt, workspaceBasePath, agentIdStr, userMsg,
+                        accessor.chatOrigin(), runtimeModelName, runtimeProviderId);
 
         // Append the skill catalog as a SEPARATE SystemMessage right after the
         // skeleton system prompt. Rendered with an empty loadedThisRun set so
@@ -850,7 +853,7 @@ public class ReasoningNode implements NodeAction {
         // "skills loaded this run" hint is injected separately as a volatile
         // suffix (after RuntimeContext) so it never invalidates the cached
         // prefix. Reused verbatim by the PTL retry branch.
-        if (skillCatalogRenderer != null) {
+        if (projectOptions == null && skillCatalogRenderer != null) {
             String staticCatalog = skillCatalogRenderer.render(java.util.Set.of());
             if (staticCatalog != null && !staticCatalog.isBlank()) {
                 nonHistoryPrefix.add(1, new SystemMessage(staticCatalog));
@@ -871,7 +874,7 @@ public class ReasoningNode implements NodeAction {
         // ledger discipline before it drifts into the "I'm doing the work
         // but never marking it" failure mode observed in round-4 of the
         // LLM-review smoke test.
-        if (progressLedgerService != null && conversationId != null && !conversationId.isBlank()) {
+        if (projectOptions == null && progressLedgerService != null && conversationId != null && !conversationId.isBlank()) {
             try {
                 vip.mate.agent.progress.ProgressLedger ledger =
                         progressLedgerService.load(conversationId);
@@ -899,7 +902,7 @@ public class ReasoningNode implements NodeAction {
         // delivered at most once — drain() empties the queue. Skipped when
         // the registry is absent (tests / legacy paths) or the conversation
         // has no pending notifications.
-        if (runningConversationRegistry != null && conversationId != null && !conversationId.isBlank()) {
+        if (projectOptions == null && runningConversationRegistry != null && conversationId != null && !conversationId.isBlank()) {
             try {
                 List<vip.mate.agent.runtime.EnvironmentNotification> notes =
                         runningConversationRegistry.drain(conversationId);
@@ -924,7 +927,7 @@ public class ReasoningNode implements NodeAction {
         // via load_skill this run, without invalidating the cached
         // system+catalog SystemMessage prefix.
         java.util.Set<String> loadedThisRun = accessor.loadedSkills();
-        if (loadedThisRun != null && !loadedThisRun.isEmpty()) {
+        if (projectOptions == null && loadedThisRun != null && !loadedThisRun.isEmpty()) {
             String hint = renderLoadedSkillsHint(loadedThisRun);
             if (hint != null) {
                 nonHistoryPrefix.add(new SystemMessage(hint));
@@ -1037,7 +1040,7 @@ public class ReasoningNode implements NodeAction {
             // PTL 处理：结构化压缩后重试。复用 nonHistoryPrefix 保证重试
             // Prompt 仍带 wiki / runtime context；早期的 tail-only 路径会把
             // wiki 段一起丢掉，重试后的 prompt 比原始更短少一层信息。
-            if (result.isPromptTooLong() && conversationWindowManager != null) {
+            if (projectOptions == null && result.isPromptTooLong() && conversationWindowManager != null) {
                 log.warn("[ReasoningNode] Prompt too long, attempting STRUCTURED compaction and retry");
 
                 // MateClawStateAccessor.agentId() returns String per state
@@ -1094,7 +1097,7 @@ public class ReasoningNode implements NodeAction {
             // answer-anchored nudge recovers the user-facing reply in the same run.
             int emptyRetries = 0;
             for (ContinuationIntent intent = classifyContinuation(result);
-                    emptyRetries < MAX_EMPTY_COMPLETION_RETRIES && intent != ContinuationIntent.FINAL;
+                    projectOptions == null && emptyRetries < MAX_EMPTY_COMPLETION_RETRIES && intent != ContinuationIntent.FINAL;
                     intent = classifyContinuation(result)) {
                 emptyRetries++;
                 boolean afterTool = lastTurnIsToolResponse(promptMessages);
@@ -1119,18 +1122,43 @@ public class ReasoningNode implements NodeAction {
             // 必须显式清零 needsToolCall/shouldSummarize，防止前一轮残留标志导致误路由。
             log.info("[ReasoningNode] CancellationException during LLM call (user stopped before first token), " +
                     "returning empty answer with STOPPED, llmCallCount={}", nextLlmCallCount);
-            return reasonOutput()
+            var stopped = reasonOutput()
                     .finalAnswer("")
                     .needsToolCall(false)
                     .shouldSummarize(false)
                     .llmCallCount(nextLlmCallCount)
                     .finishReason(FinishReason.STOPPED)
                     .contentStreamed(true)
-                    .thinkingStreamed(true)
-                    .build();
+                    .thinkingStreamed(true);
+            if (accessor.projectExecutionOptions() != null) {
+                stopped.events(List.of(projectExecutionFailure("EXECUTION_STOPPED", "CANCELLED",
+                        false, false, true)));
+            }
+            return stopped.build();
         }
 
         // ======= 处理 StreamResult =======
+
+        if (accessor.projectExecutionOptions() != null
+                && (result.partial() || result.stopped() || result.hasFatalError() || result.isPromptTooLong())) {
+            String code = result.stopped() ? "EXECUTION_STOPPED"
+                    : result.isPromptTooLong() ? "PROMPT_TOO_LONG"
+                    : result.partial() ? "STREAM_INCOMPLETE" : "MODEL_REQUEST_FAILED";
+            String category = result.stopped() ? "CANCELLED"
+                    : result.isPromptTooLong() ? "VALIDATION"
+                    : result.partial() || result.errorType() == NodeStreamingChatHelper.ErrorType.SERVER_ERROR
+                        || result.errorType() == NodeStreamingChatHelper.ErrorType.RATE_LIMIT
+                        || result.errorType() == NodeStreamingChatHelper.ErrorType.EMPTY_RESPONSE
+                            ? "TRANSIENT" : "PERMANENT";
+            boolean unknown = result.partial() || result.stopped() || category.equals("TRANSIENT");
+            return reasonOutput().needsToolCall(false).shouldSummarize(false).finalAnswer("")
+                    .finishReason(result.stopped() ? FinishReason.STOPPED : FinishReason.ERROR_FALLBACK)
+                    .llmCallCount(nextLlmCallCount).contentStreamed(true).thinkingStreamed(true)
+                    .mergeUsage(state, result)
+                    .events(List.of(projectExecutionFailure(code, category, unknown,
+                            result.partial(), result.stopped())))
+                    .build();
+        }
 
         // 用户主动停止且有部分内容
         if (result.stopped() && result.hasAnyContent()) {
@@ -1427,6 +1455,13 @@ public class ReasoningNode implements NodeAction {
                     .events(buildEvents(phaseEvent, iterStartEvent, iterEndEvent))
                     .build();
         }
+    }
+
+    private static GraphEventPublisher.GraphEvent projectExecutionFailure(String code, String category,
+            boolean resultUnknown, boolean partial, boolean stopped) {
+        return new GraphEventPublisher.GraphEvent("project_execution_failed", Map.of(
+                "code", code, "category", category, "retryAfterMs", 0L, "resultUnknown", resultUnknown,
+                "partial", partial, "stopped", stopped), System.currentTimeMillis());
     }
 
     private static String evidenceWarning(List<String> unsupportedReferences) {

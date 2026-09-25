@@ -489,6 +489,14 @@ public class ToolExecutionExecutor {
                                         String workspaceBasePath,
                                         ChatOrigin origin,
                                         Set<String> loadedSkills) {
+        return execute(toolCalls, conversationId, agentId, isReplay, requesterId,
+                workspaceBasePath, origin, loadedSkills, null);
+    }
+
+    public ToolExecutionResult execute(List<AssistantMessage.ToolCall> toolCalls,
+            String conversationId, String agentId, boolean isReplay, String requesterId,
+            String workspaceBasePath, ChatOrigin origin, Set<String> loadedSkills,
+            vip.mate.agent.execution.ProjectExecutionOptions projectOptions) {
         ChatOrigin safeOrigin = origin != null ? origin : ChatOrigin.EMPTY;
         if (isBlank(safeOrigin.conversationId()) && !isBlank(conversationId)) {
             safeOrigin = safeOrigin.withConversationId(conversationId);
@@ -581,6 +589,19 @@ public class ToolExecutionExecutor {
             // bypass guard rules keyed on the canonical name.
             String toolName = resolveToolName(toolCall.name());
             String arguments = toolCall.arguments();
+
+            if (projectOptions != null) {
+                try {
+                    if (!projectOptions.allowedTools().contains(toolName))
+                        throw new SecurityException("Tool outside project execution allowlist");
+                    projectOptions.toolPolicy().require(toolName, arguments);
+                } catch (RuntimeException denied) {
+                    String message = "Tool is not authorized for this task";
+                    events.add(GraphEventPublisher.toolComplete(toolCall.id(), toolName, message, false));
+                    allResponses.add(new ToolResponseMessage.ToolResponse(toolCall.id(), responseName, message));
+                    continue;
+                }
+            }
 
             events.add(GraphEventPublisher.toolStart(toolCall.id(), toolName, arguments));
 
@@ -718,7 +739,7 @@ public class ToolExecutionExecutor {
             // 4. 分类: concurrencySafe
             boolean safe = isConcurrencySafe(toolName);
             preparedCalls.add(new PreparedToolCall(toolCall, responseName, callback, arguments, safe, allResponses.size(),
-                    conversationId, requesterId, workspaceBasePath, safeOrigin, rawEvidenceRef));
+                    conversationId, requesterId, workspaceBasePath, safeOrigin, projectOptions, rawEvidenceRef));
             // 占位，Phase 2 填充
             allResponses.add(null);
         }
@@ -1106,6 +1127,11 @@ public class ToolExecutionExecutor {
                         .withConversationId(pc.conversationId)
                         .withWorkspace(runtimeOrigin.workspaceId(), pc.workspaceBasePath);
                 ToolContext toolContext = toolContextWithScopedCatalog(runtimeOrigin);
+                if (pc.projectOptions != null) {
+                    Map<String, Object> scoped = new HashMap<>(toolContext.getContext());
+                    scoped.put(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY, pc.projectOptions);
+                    toolContext = new ToolContext(scoped);
+                }
 
                 // MCP progress: generate progressToken and inject into ToolContext
                 // so ProgressAwareMcpToolCallback can include it in tools/call _meta.
@@ -1119,6 +1145,16 @@ public class ToolExecutionExecutor {
                 }
 
                 result = pc.callback.call(pc.arguments, toolContext);
+                if (pc.projectOptions != null) {
+                    // A tool may complete after its task was revoked; do not expose
+                    // that result to the model or accept a receipt after revocation.
+                    pc.projectOptions.toolPolicy().require(toolName, pc.arguments);
+                }
+                if (pc.projectOptions != null && result != null && !result.startsWith("Error:")
+                        && isPinnedSkillContractRead(toolName, pc.arguments)) {
+                    events.add(new GraphEventPublisher.GraphEvent("project_skill_loaded",
+                            Map.of("digest", pc.projectOptions.skillDigest()), System.currentTimeMillis()));
+                }
                 throwIfStopRequested(pc.conversationId);
             } finally {
                 if (progressToken != null) {
@@ -1813,6 +1849,21 @@ public class ToolExecutionExecutor {
         return new ToolContext(context);
     }
 
+    private static boolean isPinnedSkillContractRead(String toolName, String arguments) {
+        if ("load_skill".equals(toolName)) {
+            try {
+                var args = OBJECT_MAPPER.readTree(arguments);
+                String path = args.path("filePath").asText("SKILL.md");
+                return path.isBlank() || "SKILL.md".equals(path);
+            } catch (Exception ignored) { return false; }
+        }
+        if ("readSkillFile".equals(toolName)) {
+            try { return "SKILL.md".equals(OBJECT_MAPPER.readTree(arguments).path("filePath").asText()); }
+            catch (Exception ignored) { return false; }
+        }
+        return false;
+    }
+
     // ==================== 内部数据类 ====================
 
     private record PreparedToolCall(
@@ -1826,6 +1877,7 @@ public class ToolExecutionExecutor {
             String requesterId,
             String workspaceBasePath,
             ChatOrigin origin,
+            vip.mate.agent.execution.ProjectExecutionOptions projectOptions,
             /**
              * Shared reference (one per execute() invocation) where each
              * concurrent {@code executeSingleTool} merges a {@link SourceEvidenceLedger}

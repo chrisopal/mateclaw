@@ -71,6 +71,14 @@ public class SkillLoadTool {
         if (skillName == null || skillName.isBlank()) {
             return "Error: skillName is required. Call listAvailableSkills() to see loadable skills.";
         }
+        Object execution = ctx == null || ctx.getContext() == null ? null
+                : ctx.getContext().get(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY);
+        if (execution instanceof vip.mate.agent.execution.ProjectExecutionOptions options) {
+            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
+            String path = (filePath == null || filePath.isBlank()) ? "SKILL.md" : filePath;
+            if (!options.skillFiles().containsKey(path)) return "Error: File is outside the pinned task package";
+            return skillFileTool.readSkillFile(skillName, path, null, null, ctx);
+        }
         ChatOrigin origin = ChatOrigin.from(ctx);
         // Resolve only within the conversation's workspace (+ builtin/global), so
         // an agent can never load another workspace's same-named skill.

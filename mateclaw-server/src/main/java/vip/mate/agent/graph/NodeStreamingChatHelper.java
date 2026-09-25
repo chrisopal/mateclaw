@@ -114,6 +114,7 @@ public class NodeStreamingChatHelper {
      */
     private long streamIdleTimeoutSec =
             vip.mate.llm.chatmodel.HttpTimeouts.DEFAULT_STREAM_IDLE_TIMEOUT.toSeconds();
+    private boolean retryDisabled;
 
     public NodeStreamingChatHelper(ChatStreamTracker streamTracker) {
         this(streamTracker, List.of(), null, null, null, null);
@@ -480,6 +481,9 @@ public class NodeStreamingChatHelper {
         this.streamIdleTimeoutSec = seconds;
     }
 
+    /** Disable helper-level same-provider retries for fixed project attempts. */
+    public void setRetryDisabled(boolean disabled) { this.retryDisabled = disabled; }
+
     private static final ObjectMapper TOOL_ARG_JSON_MAPPER = new ObjectMapper();
 
     /**
@@ -840,7 +844,7 @@ public class NodeStreamingChatHelper {
 
         // 主模型重试循环
         StreamResult lastResult = null;
-        if (!primarySkipped) for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (!primarySkipped) for (int attempt = 0; attempt <= (retryDisabled ? 0 : MAX_RETRIES); attempt++) {
             // Time budget check: prevent retries from stalling a single
             // conversation turn indefinitely (e.g., a provider that stays
             // at 503 for minutes). Aligned with Wiki's maxTotalDurationMs.
@@ -875,6 +879,7 @@ public class NodeStreamingChatHelper {
                 // explicit branch because the generic path cannot mutate the
                 // outgoing prompt.
                 if (errType == ErrorType.THINKING_BLOCK_ERROR) {
+                    if (retryDisabled) return lastResult;
                     if (attempt == 0) {
                         log.warn("[{}] Thinking block error detected, stripping old thinking and retrying once", phase);
                         prompt = stripThinkingFromPrompt(prompt);
@@ -886,7 +891,7 @@ public class NodeStreamingChatHelper {
                 // result (HTTP 200 with an empty body), not an exception, so
                 // the inner retry gate never sees it. Same-model retry often
                 // resolves the transient gateway blip.
-                if (errType == ErrorType.EMPTY_RESPONSE && attempt < errType.retryBudget()) {
+                if (!retryDisabled && errType == ErrorType.EMPTY_RESPONSE && attempt < errType.retryBudget()) {
                     log.warn("[{}] Primary returned empty response (attempt {}/{}), retrying same model...",
                             phase, attempt + 1, errType.retryBudget() + 1);
                     retryType.set(ErrorType.EMPTY_RESPONSE);
@@ -1549,7 +1554,7 @@ public class NodeStreamingChatHelper {
             // THINKING_BLOCK_ERROR is excluded: its retry needs the prompt
             // mutation (strip thinking) that only the outer loop can do, so it
             // always surfaces immediately despite a non-zero budget.
-            if (errorType != ErrorType.THINKING_BLOCK_ERROR && attempt < errorType.retryBudget()) {
+            if (!retryDisabled && errorType != ErrorType.THINKING_BLOCK_ERROR && attempt < errorType.retryBudget()) {
                 log.warn("[{}] Retryable error (attempt {}/{}, type={}): {}",
                         phase, attempt, errorType.retryBudget(), errorType, error.getMessage());
                 retryTypeRef.set(errorType);

@@ -220,6 +220,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             AtomicReference<String> finalProviderId = new AtomicReference<>("");
             // 防重保护：同 chatStructuredStream
             AtomicBoolean finalAnswerEmitted = new AtomicBoolean(false);
+            AtomicBoolean projectTerminalEventEmitted = new AtomicBoolean(false);
             AtomicBoolean finalThinkingEmitted = new AtomicBoolean(false);
             AtomicReference<String> lastEmittedStreamedContent = new AtomicReference<>("");
             AtomicReference<String> lastEmittedIterationThinking = new AtomicReference<>("");
@@ -330,6 +331,28 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
                             }
                         }
 
+                        Object projectOptions = inputs.get(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS);
+                        String terminalReason = output.state().<String>value(FINISH_REASON).orElse("");
+                        if (projectOptions instanceof vip.mate.agent.execution.ProjectExecutionOptions projectExecution
+                                && !terminalReason.isBlank() && projectTerminalEventEmitted.compareAndSet(false, true)) {
+                            String answer = extractFinalAnswer(output);
+                            if (("normal".equals(terminalReason) || "summarized".equals(terminalReason))
+                                    && answer != null && !answer.isEmpty()) {
+                                deltas.add(AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                                        "attemptId", projectExecution.attemptId(),
+                                        "configDigest", projectExecution.configDigest(),
+                                        "skillDigest", projectExecution.skillDigest())));
+                            } else {
+                                deltas.add(AgentService.StreamDelta.event("project_execution_failed", Map.of(
+                                        "code", "EXECUTION_NOT_COMPLETED",
+                                        "category", "TRANSIENT",
+                                        "retryAfterMs", 0L,
+                                        "resultUnknown", true,
+                                        "partial", answer != null && !answer.isEmpty(),
+                                        "stopped", "stopped".equals(terminalReason))));
+                            }
+                        }
+
                         finalPromptTokens.set(output.state().value(PROMPT_TOKENS, 0));
                         finalCompletionTokens.set(output.state().value(COMPLETION_TOKENS, 0));
                         finalCacheReadTokens.set(output.state().value(CACHE_READ_TOKENS, 0));
@@ -403,12 +426,18 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     @Override
     public Flux<AgentService.StreamDelta> chatStructuredStream(String userMessage, String conversationId,
                                                                 String requesterId) {
+        return chatStructuredStream(userMessage, conversationId, requesterId, null);
+    }
+
+    public Flux<AgentService.StreamDelta> chatStructuredStream(String userMessage, String conversationId,
+            String requesterId, vip.mate.agent.execution.ProjectExecutionOptions options) {
         setState(AgentState.RUNNING);
         try {
             log.info("[{}] StateGraph structured stream: conversationId={}", agentName, conversationId);
 
             Map<String, Object> inputs = buildInitialState(userMessage, conversationId);
             inputs.put(REQUESTER_ID, requesterId != null ? requesterId : "");
+            if (options != null) inputs.put(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS, options);
             String threadId = UUID.randomUUID().toString();
             RunnableConfig config = RunnableConfig.builder().threadId(threadId).build();
 
@@ -425,6 +454,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             // 防重保护：StateGraph 对每个节点都 emit NodeOutput，FINAL_ANSWER 一旦写入后续节点都携带，
             // 用 compareAndSet 保证只取第一次，避免 content/thinking 被重复追加
             AtomicBoolean finalAnswerEmitted = new AtomicBoolean(false);
+            AtomicBoolean structuredProjectTerminalEventEmitted = new AtomicBoolean(false);
             AtomicBoolean finalThinkingEmitted = new AtomicBoolean(false);
             // 同 STREAMED_CONTENT：STREAMED_THINKING 也是 REPLACE，用独立游标
             // 跟踪已持久化的每轮 thinking，避免后续节点的 NodeOutput 重复发送。
@@ -527,6 +557,28 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
                             String answer = extractFinalAnswer(output);
                             if (answer != null && !answer.isEmpty()) {
                                 addWithKindEvent(deltas, AgentService.StreamDelta.finalAnswer(answer, contentAlreadyStreamed));
+                            }
+                        }
+                        Object projectOptions = inputs.get(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS);
+                        String terminalReason = output.state().<String>value(FINISH_REASON).orElse("");
+                        if (projectOptions instanceof vip.mate.agent.execution.ProjectExecutionOptions projectExecution
+                                && !terminalReason.isBlank()
+                                && structuredProjectTerminalEventEmitted.compareAndSet(false, true)) {
+                            String answer = extractFinalAnswer(output);
+                            if (("normal".equals(terminalReason) || "summarized".equals(terminalReason))
+                                    && answer != null && !answer.isEmpty()) {
+                                deltas.add(AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                                        "attemptId", projectExecution.attemptId(),
+                                        "configDigest", projectExecution.configDigest(),
+                                        "skillDigest", projectExecution.skillDigest())));
+                            } else {
+                                deltas.add(AgentService.StreamDelta.event("project_execution_failed", Map.of(
+                                        "code", "EXECUTION_NOT_COMPLETED",
+                                        "category", "TRANSIENT",
+                                        "retryAfterMs", 0L,
+                                        "resultUnknown", true,
+                                        "partial", answer != null && !answer.isEmpty(),
+                                        "stopped", "stopped".equals(terminalReason))));
                             }
                         }
 

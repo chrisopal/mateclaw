@@ -292,6 +292,25 @@ public class AgentGraphBuilder {
     }
 
     public BaseAgent build(AgentEntity entity, String modelProvider, String modelName, boolean projectScoped) {
+        return build(entity, modelProvider, modelName, projectScoped, null);
+    }
+
+    public BaseAgent build(AgentEntity entity, vip.mate.agent.execution.ProjectExecutionOptions options) {
+        try {
+            long id = Long.parseLong(options.modelConfigId());
+            ModelConfigEntity fixed = modelConfigService.getModel(id);
+            if (fixed == null || !Boolean.TRUE.equals(fixed.getEnabled())
+                    || !modelProviderService.isProviderConfigured(fixed.getProvider()))
+                throw new IllegalStateException("Pinned model unavailable");
+            return build(entity, fixed.getProvider(), fixed.getModelName(), true, options);
+        } catch (Exception e) {
+            throw new MateClawException("err.agent.project_model_unsupported", 422,
+                    "Pinned project execution model is unavailable");
+        }
+    }
+
+    private BaseAgent build(AgentEntity entity, String modelProvider, String modelName, boolean projectScoped,
+            vip.mate.agent.execution.ProjectExecutionOptions projectOptions) {
         if(projectScoped && "plan_execute".equals(entity.getAgentType())) throw new MateClawException("err.presales.employee_type", "项目执行当前需要 react 数字员工");
         AgentToolSet toolSet = toolRegistry.getEnabledToolSet();
 
@@ -327,7 +346,9 @@ public class AgentGraphBuilder {
         // global default); non-null (possibly empty) = explicit allowlist.
         Set<String> boundTools = agentBindingService.getEffectiveToolNames(entity.getId());
         toolSet = vip.mate.agent.binding.service.AgentBindingService.applyEffectiveToolScope(toolSet, boundTools); // null = global defaults, excluding opt-in authoring
-        if (projectScoped) {
+        if (projectScoped && projectOptions != null) {
+            toolSet = toolSet.withAllowedToolsOnly(projectOptions.allowedTools());
+        } else if (projectScoped) {
             // Project runs receive the intersection of the employee's effective
             // bindings and this server-owned read-only allowlist. The executor
             // repeats the decision against the project row, so this catalog
@@ -373,6 +394,14 @@ public class AgentGraphBuilder {
                 runtimeModel = globalDefault;
             }
         }
+        if (projectOptions != null) {
+            runtimeModel = modelConfigService.getModel(Long.parseLong(projectOptions.modelConfigId()));
+            if (runtimeModel == null || !Boolean.TRUE.equals(runtimeModel.getEnabled())
+                    || !runtimeModel.getProvider().equals(modelProvider)
+                    || !runtimeModel.getModelName().equals(modelName))
+                throw new MateClawException("err.agent.project_model_unsupported", 422,
+                        "Pinned project execution model changed");
+        }
         // Even after the upgrade, log a WARN when the chosen primary
         // still doesn't satisfy needs (e.g. no preferred provider was
         // capable). The diagnostic is observability-only.
@@ -393,6 +422,8 @@ public class AgentGraphBuilder {
         // Safety net: getDefaultModel() already skips unconfigured providers, but guard here
         // too so a stale cached model doesn't silently proceed to a broken API call.
         if (!modelProviderService.isProviderConfigured(provider.getProviderId())) {
+            if (projectOptions != null) throw new MateClawException("err.agent.project_model_unsupported", 422,
+                    "Pinned project execution provider is unavailable");
             String reason = modelProviderService.getProviderUnavailableReason(provider.getProviderId());
             log.warn("Runtime model {}/{} provider not configured ({}); trying fallback",
                     runtimeModel.getProvider(), runtimeModel.getModelName(), reason);
@@ -412,6 +443,11 @@ public class AgentGraphBuilder {
         }
 
         ModelProtocol protocol = ModelProtocol.fromChatModel(provider.getChatModel());
+        if (projectOptions != null && protocol != ModelProtocol.OPENAI_COMPATIBLE
+                && protocol != ModelProtocol.ANTHROPIC_MESSAGES) {
+            throw new MateClawException("err.agent.project_model_unsupported", 422,
+                    "Pinned provider cannot guarantee a single request per project execution");
+        }
 
         // Effective context window: explicit config > local-server probe > null
         // (downstream keeps its global-default fallback). Without probing, a
@@ -439,7 +475,8 @@ public class AgentGraphBuilder {
         // emits a final answer (or returnDirect short-circuits). Positive values
         // are clamped to the hard ceiling so a misconfigured row can't skip the
         // safety net unintentionally.
-        int rawMaxIter = entity.getMaxIterations() != null ? entity.getMaxIterations() : 100;
+        int rawMaxIter = projectOptions != null ? projectOptions.maxIterations()
+                : entity.getMaxIterations() != null ? entity.getMaxIterations() : 100;
         int maxIter;
         if (rawMaxIter <= 0) {
             maxIter = 0;
@@ -512,7 +549,7 @@ public class AgentGraphBuilder {
                     entity.getName(), maxIter, toolSet.size(), protocol.getId());
         } else {
             agent = buildReActAgent(toolSet, runtimeModel, maxIter, entity.getId(), skillCatalogRenderer,
-                    prefixBudgetPlan, autoDemotedTools, projectScoped);
+                    prefixBudgetPlan, autoDemotedTools, projectScoped, projectOptions);
             // StateGraph 路径下工具调用由 ActionNode 控制，始终启用
             toolCallingEnabled = true;
             log.info("Built StateGraph ReAct agent: {} (maxIterations={}, tools={}, protocol={})",
@@ -611,11 +648,22 @@ public class AgentGraphBuilder {
     StateGraphReActAgent buildReActAgent(AgentToolSet toolSet, ModelConfigEntity runtimeModel,
                                          int maxIter, Long agentId, SkillCatalogRenderer skillCatalogRenderer,
                                          PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools, boolean projectScoped) {
-        ChatModel chatModel = buildRuntimeChatModel(runtimeModel);
+        return buildReActAgent(toolSet, runtimeModel, maxIter, agentId, skillCatalogRenderer,
+                prefixBudgetPlan, autoDemotedTools, projectScoped, null);
+    }
+
+    StateGraphReActAgent buildReActAgent(AgentToolSet toolSet, ModelConfigEntity runtimeModel,
+            int maxIter, Long agentId, SkillCatalogRenderer skillCatalogRenderer,
+            PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools, boolean projectScoped,
+            vip.mate.agent.execution.ProjectExecutionOptions projectOptions) {
+        ChatModel chatModel = projectOptions == null
+                ? buildRuntimeChatModel(runtimeModel)
+                : buildRuntimeChatModel(runtimeModel, RetryTemplate.builder().maxAttempts(1).build());
         ChatClient chatClient = ChatClient.create(chatModel);
         String reasoningEffort = resolveReasoningEffortForModel(runtimeModel);
         CompiledGraph compiledGraph = buildReActGraph(toolSet, chatModel, maxIter, reasoningEffort,
-                runtimeModel, agentId, skillCatalogRenderer, prefixBudgetPlan, autoDemotedTools, projectScoped);
+                runtimeModel, agentId, skillCatalogRenderer, prefixBudgetPlan, autoDemotedTools, projectScoped,
+                projectOptions);
         StateGraphReActAgent agent = new StateGraphReActAgent(chatClient, conversationService, compiledGraph,
                 chatModel, conversationWindowManager, toolSet);
         if (reasoningRetentionProperties != null) {
@@ -739,6 +787,7 @@ public class AgentGraphBuilder {
                     .addStrategy(MateClawStateKeys.CONVERSATION_ID, KeyStrategy.REPLACE)
                     .addStrategy(MateClawStateKeys.TRACE_ID, KeyStrategy.REPLACE)
                     .addStrategy(MateClawStateKeys.AGENT_ID, KeyStrategy.REPLACE)
+                    .addStrategy(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS, KeyStrategy.REPLACE)
                     // 会话消息（复用 ReAct 的 MESSAGES key，APPEND 策略）
                     .addStrategy(MateClawStateKeys.MESSAGES, KeyStrategy.APPEND)
                     // Plan 特有键
@@ -1013,12 +1062,22 @@ public class AgentGraphBuilder {
                                    String reasoningEffort, ModelConfigEntity primaryModelConfig,
                                    Long agentId, SkillCatalogRenderer skillCatalogRenderer,
                                    PrefixBudgetPlan prefixBudgetPlan, Set<String> autoDemotedTools, boolean projectScoped) {
+        return buildReActGraph(toolSet, chatModel, maxIterations, reasoningEffort, primaryModelConfig,
+                agentId, skillCatalogRenderer, prefixBudgetPlan, autoDemotedTools, projectScoped, null);
+    }
+
+    CompiledGraph buildReActGraph(AgentToolSet toolSet, ChatModel chatModel, int maxIterations,
+            String reasoningEffort, ModelConfigEntity primaryModelConfig, Long agentId,
+            SkillCatalogRenderer skillCatalogRenderer, PrefixBudgetPlan prefixBudgetPlan,
+            Set<String> autoDemotedTools, boolean projectScoped,
+            vip.mate.agent.execution.ProjectExecutionOptions projectOptions) {
         try {
             List<vip.mate.llm.failover.FallbackEntry> fallbackChain = projectScoped ? List.of() : buildFallbackChain(primaryModelConfig, agentId);
             NodeStreamingChatHelper streamingHelper = new NodeStreamingChatHelper(
                     streamTracker, fallbackChain, llmCacheMetricsAggregator, providerHealthTracker,
                     primaryModelConfig != null ? primaryModelConfig.getProvider() : null,
                     providerPool);
+            if (projectOptions != null) streamingHelper.setRetryDisabled(true);
             if (primaryModelConfig != null) {
                 // Feed "prompt too long" rejections back into the window resolver
                 // so the next turn budgets against the server-reported limit.

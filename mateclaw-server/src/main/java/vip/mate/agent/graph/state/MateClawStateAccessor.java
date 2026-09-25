@@ -253,6 +253,11 @@ public final class MateClawStateAccessor {
         return state.<ChatOrigin>value(CHAT_ORIGIN).orElse(ChatOrigin.EMPTY);
     }
 
+    public vip.mate.agent.execution.ProjectExecutionOptions projectExecutionOptions() {
+        return state.<vip.mate.agent.execution.ProjectExecutionOptions>value(
+                MateClawStateKeys.PROJECT_EXECUTION_OPTIONS).orElse(null);
+    }
+
     // ===== Skill progressive disclosure =====
 
     /**

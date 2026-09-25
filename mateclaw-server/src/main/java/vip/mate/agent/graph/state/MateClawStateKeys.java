@@ -288,6 +288,8 @@ public final class MateClawStateKeys {
      * workspace context.
      */
     public static final String CHAT_ORIGIN = "chat_origin";
+    /** Trusted, immutable server options for an isolated project execution. */
+    public static final String PROJECT_EXECUTION_OPTIONS = "project_execution_options";
 
     // ===== Skill progressive disclosure (REPLACE strategy) =====
 

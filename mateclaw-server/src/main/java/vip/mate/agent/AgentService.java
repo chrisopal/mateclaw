@@ -408,8 +408,18 @@ public class AgentService {
     public Flux<StreamDelta> chatStructuredStream(Long agentId, String message, String conversationId,
                                                    String requesterId, String thinkingLevel,
                                                    ChatOrigin origin) {
+        return chatStructuredStream(agentId, message, conversationId, requesterId, thinkingLevel, origin, null);
+    }
+
+    public Flux<StreamDelta> chatStructuredStream(Long agentId, String message, String conversationId,
+            String requesterId, String thinkingLevel, ChatOrigin origin,
+            vip.mate.agent.execution.ProjectExecutionOptions options) {
         clearAutoRecordedForNewTurn(conversationId);
-        if (!isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, message);
+        if (options == null && !isPresalesConversation(conversationId)) memoryRecallTracker.trackRecalls(agentId, message);
+        if (options != null && isDshAgent(agentId)) {
+            throw new MateClawException("err.agent.project_execution_unsupported", 422,
+                    "Runtime does not support isolated project execution");
+        }
         if (isDshAgent(agentId)) {
             AgentEntity dshAgent = getAgent(agentId);
             return withLifecycleFlux(agentId, message, conversationId,
@@ -423,10 +433,22 @@ public class AgentService {
                     StreamDelta::content)
                     .doFinally(signal -> ThinkingLevelHolder.clear());
         }
-        BaseAgent agent = getOrBuildAgentForConversation(agentId, conversationId);
+        BaseAgent agent;
+        if (options != null) {
+            AgentEntity entity = getAgent(agentId);
+            if (!Boolean.TRUE.equals(entity.getEnabled()) || !"native".equalsIgnoreCase(entity.getRuntimeType())
+                    || "plan_execute".equals(entity.getAgentType()))
+                throw new MateClawException("err.agent.project_execution_unsupported", 422,
+                        "Project execution requires an enabled native ReAct employee");
+            agent = agentGraphBuilder.build(entity, options);
+        } else {
+            agent = getOrBuildAgentForConversation(agentId, conversationId);
+        }
 
         // 设置请求级思考深度（通过 ThreadLocal 传递到 StateGraph 执行）
-        if (thinkingLevel != null && !thinkingLevel.isBlank()) {
+        if (options != null) {
+            ThinkingLevelHolder.clear();
+        } else if (thinkingLevel != null && !thinkingLevel.isBlank()) {
             ThinkingLevelHolder.set(thinkingLevel);
         } else {
             // 尝试从 Agent 默认配置读取
@@ -443,10 +465,16 @@ public class AgentService {
             return Flux.defer(() -> {
                         ChatOriginHolder.set(captured);
                         return withLifecycleFlux(agentId, message, conversationId,
-                                (msg, convId) -> capable.chatStructuredStream(msg, convId,
-                                                requesterId != null ? requesterId : "")
-                                        .doFinally(signal -> ThinkingLevelHolder.clear()),
-                                StreamDelta::content);
+                                (msg, convId) -> {
+                                    if (options != null && capable instanceof vip.mate.agent.graph.StateGraphReActAgent react) {
+                                        return react.chatStructuredStream(msg, convId,
+                                                requesterId != null ? requesterId : "", options);
+                                    }
+                                    if (options != null) return Flux.error(new MateClawException(
+                                            "err.agent.project_execution_unsupported", 422,
+                                            "Runtime does not support isolated project execution"));
+                                    return capable.chatStructuredStream(msg, convId, requesterId != null ? requesterId : "");
+                                }, StreamDelta::content).doFinally(signal -> ThinkingLevelHolder.clear());
                     })
                     .doFinally(signal -> ChatOriginHolder.clear());
         }

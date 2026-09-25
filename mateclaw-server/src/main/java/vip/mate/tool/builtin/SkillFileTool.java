@@ -100,6 +100,19 @@ public class SkillFileTool {
     ) {
         log.info("Reading skill file: skill={}, path={}", skillName, filePath);
 
+        Object execution = ctx == null || ctx.getContext() == null ? null
+                : ctx.getContext().get(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY);
+        if (execution instanceof vip.mate.agent.execution.ProjectExecutionOptions options) {
+            if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
+            String path = filePath == null || filePath.isBlank() ? "SKILL.md" : filePath;
+            if (path.startsWith("/") || path.contains("..") || path.contains("\\")
+                    || !options.skillFiles().containsKey(path)) return "Error: File is outside the pinned task package";
+            String pinned = options.skillFiles().get(path);
+            if (pinned == null) return "Error: File is not present in the pinned task package";
+            recordProjectSkillLoaded(skillName, path, pinned, ctx);
+            return pinned;
+        }
+
         // 查找 active skill
         ResolvedSkill skill = runtimeService.findActiveSkill(skillName, workspaceResolver.resolve(ChatOrigin.from(ctx)));
         if (skill == null) {
@@ -168,6 +181,13 @@ public class SkillFileTool {
             log.error("Failed to read skill file {}/{}: {}", skillName, filePath, e.getMessage());
             return "Error: Failed to read file: " + e.getMessage();
         }
+    }
+
+    private static void recordProjectSkillLoaded(String skillName, String path, String content,
+            @Nullable ToolContext ctx) {
+        // Task runs use the exact persisted package bytes. No active skill lookup or
+        // usage write is performed here, so an edited live package cannot substitute.
+        log.info("Pinned project skill file loaded: skill={}, path={}, chars={}", skillName, path, content.length());
     }
 
     private String paginateSkillContent(String skillName, String filePath, String content,
