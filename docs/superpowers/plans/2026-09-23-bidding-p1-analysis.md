@@ -407,11 +407,13 @@ return OptionalLong.of(delay);
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProjectService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingProjects.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDashboardTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingTaskTest.java`
 
 **Interfaces:**
 - Consumes: 总计划HTTP API；`http` + `scopedConfig(workspaceId,signal)`；useWorkspaceStore.registerBeforeSwitch；members.userId/nickname/username。
@@ -443,6 +445,7 @@ export const isCurrentRequest = (w: string, id: string, activeW: string, activeI
 - [ ] 列表4指标：在办、7天内截止、待确认、失败task；与分页相同授权/过滤条件，过期和未知日期分别显示。表格真实成员姓名，缺成员保留“成员不可用”；创建编辑无裸ID输入。概览清晰区分“负责人”和3个员工岗位。
 - [ ] `/dashboard` 聚合可落在既有 BiddingRepository，但须沿用列表 workspace 与 name/stage/owner 过滤谓词，截止时间仅在原文能确定日期和时区时计入未来7天；日期不完整或时区不明确显示未知，不从字符串前10位猜测。
 - [ ] 文件页显式版本/读取问题/查看原文/确认来源/开始解析；解析分4子面板，业务结果表格、证据抽屉、人工修订/确认。统一task抽屉展示尝试历史、失败原因、重试/取消；诊断JSON折叠。禁用状态有简短业务原因，不堆叠教学文字。
+- [ ] 真实浏览器验收时，解析任务列表的“解析项”必须显示四类业务名称，状态及常见失败原因显示可理解的中文（原始代码留在折叠诊断中）；概览阶段和未开放能力不得暴露 `SETUP`、`P2/P3` 等内部阶段代号。任务列表的 skillId 由后端授权列表返回并做回归，不依赖逐行补查详情。
 - [ ] 按钮使用 `<el-button type="primary" plain size="small">查看记录</el-button>`；动作组 `display:flex;gap:8px;align-items:center;flex-wrap:nowrap`，表格操作列明确 min-width，窄屏横向滚动或整组折叠，不错位换行。表单标签对齐，正文编辑不挤在统计卡旁；未完成的后三页签显示阶段依赖，避免假操作。
 - [ ] Run：UI范围测试、直接eslint、precision、vue-tsc、临时outDir构建（总计划完整命令）；Java `BiddingDashboardTest`。Expected PASS；数字员工配置缺失、只读/撤权、部分解析失败、空数据、刷新回读都必须有交互断言。
 - [ ] Commit：`git commit -m "Expose bidding progress and recovery through clear workspace-scoped actions" -m "Tested: Bidding UI states, typecheck and scoped dashboard queries"`，只stage源文件和测试，不stage编译static。
