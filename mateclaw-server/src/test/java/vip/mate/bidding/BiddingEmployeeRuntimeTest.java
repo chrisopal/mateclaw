@@ -77,6 +77,15 @@ class BiddingEmployeeRuntimeTest {
                         "code", "STREAM_INCOMPLETE", "category", "TRANSIENT", "resultUnknown", true,
                         "partial", true, "stopped", false))), "skill-digest", "model-digest");
         assertEquals("OUTPUT_INVALID", preservesSpecificFailure.failure().code());
+
+        var preservesFailureBeforeTransportError = BiddingEmployeeRuntime.readResult(Flux.concat(
+                Flux.just(AgentService.StreamDelta.event("project_execution_failed", Map.of(
+                        "code", "MODEL_AUTH_REJECTED", "category", "AUTHENTICATION", "resultUnknown", false,
+                        "partial", false, "stopped", false))),
+                Flux.error(new IllegalStateException("transport closed after failure event"))),
+                "skill-digest", "model-digest");
+        assertEquals("MODEL_AUTH_REJECTED", preservesFailureBeforeTransportError.failure().code());
+        assertEquals("AUTHENTICATION", preservesFailureBeforeTransportError.failure().category());
     }
 
     @Test void acceptsOnlyPinnedSkillAndExplicitNormalCompletion() {
@@ -125,6 +134,18 @@ class BiddingEmployeeRuntimeTest {
                 "{\"type\":\"object\",\"oneOf\":[{\"required\":[\"items\"]}]}");
         assertNull(unsupportedSchema.payload());
         assertEquals("OUTPUT_INVALID", unsupportedSchema.failure().code());
+    }
+
+    @Test void regexPatternUsesFindSemanticsWithAnchoredAlternatives() {
+        String schema = "{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\",\"pattern\":\"^a|z$\"}}}";
+        var result = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("{\"label\":\"abc\"}", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertNotNull(result.payload());
+        assertNull(result.failure());
     }
 
     @Test void realGraphNodeEmitsFailureAfterPartialJsonWithExactlyOneProviderCall() throws Exception {

@@ -49,3 +49,19 @@ git diff --check
 ```
 
 Results: focused initial run passed 10/10 tests; combined requested suite passed 96/96 tests with BUILD SUCCESS; final `BiddingEmployeeRuntimeTest` rerun passed 5/5 after adding specific-failure precedence and fixed-package schema assertions. `git diff --check` passed. No live provider, browser, MySQL, or Kingbase validation was performed.
+
+## Review Fix Round 2 (2026-09-25)
+
+After `appendReceipt` locks the active attempt row, it now reruns the full active-claim validation before modifying `tool_receipts_json`. The isolation regression revokes actor membership at that receipt boundary and confirms the call fails while the persisted receipt array remains empty.
+
+`readResult` now returns an already captured `project_execution_failed` event from its Flux-error path before applying generic transport classification. A regression emits an authentication failure event and then `Flux.error`, and confirms the authentication code/category survive. Schema `pattern` validation now uses `Pattern.matcher(value).find()` directly, preserving anchors and alternation semantics; the regression covers `^a|z$` matching `abc` through its anchored first alternative.
+
+Verification ran with Temurin Java 21.0.7 and `-Dmaven.compiler.proc=full`:
+
+```sh
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest=BiddingEmployeeRuntimeTest,BiddingRuntimeIsolationTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+MATE_JAVA21=$(/usr/libexec/java_home -v 21); JAVA_HOME="$MATE_JAVA21" PATH="$MATE_JAVA21/bin:$PATH" mvn -pl mateclaw-server -am -Dtest='Bidding*Test,SkillLoadToolTest,SkillFileToolTest,PresalesEmployeeRuntimeTest,PresalesGenerationCoordinatorTest,NodeStreamingChatHelperFallbackChainTest,NodeStreamingChatHelperFailoverTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+git diff --check
+```
+
+Results: focused tests passed 11/11; combined suite passed 97/97 with BUILD SUCCESS; `git diff --check` passed. No live provider, browser, MySQL, or Kingbase validation was performed.

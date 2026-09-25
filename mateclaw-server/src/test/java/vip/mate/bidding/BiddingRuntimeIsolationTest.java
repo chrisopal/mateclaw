@@ -139,6 +139,18 @@ class BiddingRuntimeIsolationTest {
         assertTrue(receipts.contains("block-1"));
         assertTrue(receipts.contains("source-digest"));
         assertThrows(BiddingApiException.class, () -> tool.readSource("source-2", 3, "block-1", context));
+
+        jdbc.update("UPDATE mate_bidding_attempt SET tool_receipts_json='[]' WHERE id='attempt-1'");
+        org.mockito.Mockito.clearInvocations(access);
+        java.util.concurrent.atomic.AtomicInteger actorChecks = new java.util.concurrent.atomic.AtomicInteger();
+        doAnswer(invocation -> {
+            if (actorChecks.incrementAndGet() == 3)
+                throw BiddingAccess.error(403, "ACTOR_REVOKED", "Actor membership was revoked");
+            return null;
+        }).when(access).requireActor(any(), any());
+        assertThrows(BiddingApiException.class, () -> tool.readSource("source-1", 3, "block-1", context));
+        assertEquals("[]", jdbc.queryForObject(
+                "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class));
     }
 
     private ToolContext context(BiddingTypes.Claim value) { return context(value, value.scope().workspaceId()); }

@@ -77,6 +77,10 @@ public class BiddingReadTool {
                 rs -> rs.next() ? rs.getString(1) : null, claim.attemptId(), claim.taskId(), claim.token(),
                 claim.scope().workspaceId(), claim.scope().projectId());
         if (raw == null) throw BiddingAccess.error(409, "ATTEMPT_STALE", "Task attempt is no longer active");
+        // The row lock prevents attempt replacement while we append. Recheck the
+        // full authorization after taking it so actor/config/input revocation
+        // between source read and receipt persistence cannot be accepted.
+        runtime.requireActive(claim);
         try {
             var receipts = json.readValue(raw, new TypeReference<ArrayList<Map<String, Object>>>() {});
             receipts.add(receipt);

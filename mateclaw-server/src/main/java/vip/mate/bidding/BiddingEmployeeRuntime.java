@@ -161,14 +161,12 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         } catch (Exception e) {
             if (hasCause(e, OutputLimitException.class))
                 return failure("OUTPUT_LIMIT", "VALIDATION", true, true, false);
+            if (state[1] instanceof Map<?, ?> failed) return failureFromEvent(failed);
             return failure(hasCause(e, java.util.concurrent.TimeoutException.class) ? "EXECUTION_TIMEOUT" : "STREAM_INCOMPLETE",
                     "TRANSIENT", true, output.length() > 0, false);
         }
         if (state[1] instanceof Map<?, ?> failed) {
-            return failure(String.valueOf(failed.containsKey("code") ? failed.get("code") : "STREAM_INCOMPLETE"),
-                    String.valueOf(failed.containsKey("category") ? failed.get("category") : "TRANSIENT"),
-                    Boolean.TRUE.equals(failed.get("resultUnknown")), Boolean.TRUE.equals(failed.get("partial")),
-                    Boolean.TRUE.equals(failed.get("stopped")));
+            return failureFromEvent(failed);
         }
         if (!(state[0] instanceof String skillDigest) || !skillDigest.equals(expectedSkillDigest))
             return failure("SKILL_NOT_LOADED", "PERMANENT", false, false, false);
@@ -227,7 +225,8 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
             int length = value.textValue().codePointCount(0, value.textValue().length());
             if (schema.has("minLength") && length < schema.path("minLength").asInt()) return false;
             if (schema.has("maxLength") && length > schema.path("maxLength").asInt()) return false;
-            if (schema.has("pattern") && !value.asText().matches("(?s).*" + schema.path("pattern").asText() + ".*")) return false;
+            if (schema.has("pattern") && !java.util.regex.Pattern.compile(schema.path("pattern").asText())
+                    .matcher(value.asText()).find()) return false;
         }
         if (value.isNumber()) {
             if (schema.has("minimum") && value.decimalValue().compareTo(schema.path("minimum").decimalValue()) < 0) return false;
@@ -304,6 +303,13 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
             boolean partial, boolean stopped) {
         return new BiddingTypes.Execution(null, new BiddingTypes.Failure(code, category, null, unknown, partial, stopped),
                 null, null, null);
+    }
+
+    private static BiddingTypes.Execution failureFromEvent(Map<?, ?> failed) {
+        return failure(String.valueOf(failed.containsKey("code") ? failed.get("code") : "STREAM_INCOMPLETE"),
+                String.valueOf(failed.containsKey("category") ? failed.get("category") : "TRANSIENT"),
+                Boolean.TRUE.equals(failed.get("resultUnknown")), Boolean.TRUE.equals(failed.get("partial")),
+                Boolean.TRUE.equals(failed.get("stopped")));
     }
 
     private static boolean hasCause(Throwable error, Class<? extends Throwable> type) {
