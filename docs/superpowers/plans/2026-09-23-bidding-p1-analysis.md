@@ -387,6 +387,7 @@ return OptionalLong.of(delay);
 ### Task 7: P1-07 接通企业风格投标入口、文件与解析页面
 
 **Files:**
+- Create: `docs/superpowers/specs/2026-09-25-bidding-p1-ui-blueprint.md`
 - Create: `mateclaw-ui/src/features/bidding/routes.ts`
 - Create: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`
 - Create: `mateclaw-ui/src/features/bidding/api/types.ts`
@@ -404,16 +405,19 @@ return OptionalLong.of(delay);
 - Modify: `mateclaw-ui/src/i18n/locales/en-US.ts`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingProjectService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingProjects.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDashboardTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java`
 
 **Interfaces:**
 - Consumes: 总计划HTTP API；`http` + `scopedConfig(workspaceId,signal)`；useWorkspaceStore.registerBeforeSwitch；members.userId/nickname/username。
 - Produces: `biddingApi.get(ws:string,id:string,signal?:AbortSignal):Promise<Project>`；`command(ws:string,id:string,body:Command):Promise<CommandResult>`；list/sources/tasks/evidence同HTTP词典；`isCurrentRequest(capturedWs:string,capturedId:string,currentWs:string,currentId:string):boolean`。TS字段照总计划与Jackson，以字符串 ID 处理。
 
 - [ ] 使用已有 Vitest + createApp + memory router + Element Plus（参考 presalesWorkbench.test.ts，无 Vue Test Utils 新依赖）。先写 workspace 请求代次测试，并写组件测试：请求404显示未启用而非空台账、owner下拉提交userId、切workspace后旧请求不覆盖、409保留编辑内容。
+- [ ] 先按 enterprise-ui-design 的 Create 模式写 UI Blueprint：明确真实操作路径、页面职责、空/加载/部分失败/无权限状态、主题映射、桌面/窄屏验收；不增加解释性常驻文案或假按钮。现有 `BiddingAnalysisService` 只有派发/修订/确认写入口，Task 7 须提供经授权与来源依赖重检的解析修订及当前基线读取，支持刷新回读；GET revision 和解析页读取不可跨 Workspace 或绕过来源撤权。由本任务拥有该服务及其测试，避免 Controller 直接查询表或页面从任务逐个拼接业务状态。
 
 ```ts
 import { describe, expect, it } from 'vitest'
