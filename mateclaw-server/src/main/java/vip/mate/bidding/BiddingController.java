@@ -19,15 +19,17 @@ public class BiddingController {
     private final BiddingProjectService projects;
     private final BiddingCommandService commands;
     private final BiddingSourceService sources;
+    private final ObjectProvider<BiddingTaskService> tasks;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectMapper json;
 
     public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
-            BiddingSourceService sources, ObjectProvider<BiddingEmployeeBindings> employees, ObjectMapper json) {
+            BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectMapper json) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
         this.sources = sources;
+        this.tasks = tasks;
         this.employees = employees;
         this.json = json;
     }
@@ -61,6 +63,17 @@ public class BiddingController {
     public R<?> get(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
         String actor=access.require(workspace,"viewer");
         return R.ok(projects.get(new BiddingTypes.Scope(workspace,actor,id)));
+    }
+    @GetMapping("/projects/{id}/tasks")
+    public R<?> tasks(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
+        @RequestParam(defaultValue="1") int page,@RequestParam(defaultValue="20") int pageSize) {
+        String actor=access.require(workspace,"viewer");
+        return R.ok(tasks.getObject().listTasks(new BiddingTypes.Scope(workspace,actor,id),page,pageSize));
+    }
+    @GetMapping("/tasks/{taskId}")
+    public R<?> task(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String taskId) {
+        String actor=access.require(workspace,"viewer");
+        return R.ok(tasks.getObject().taskDetails(new BiddingTypes.Scope(workspace,actor,null),taskId));
     }
     @PostMapping("/projects/{id}/commands")
     public R<?> command(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,

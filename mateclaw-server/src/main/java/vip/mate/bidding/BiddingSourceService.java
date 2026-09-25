@@ -13,7 +13,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 public class BiddingSourceService {
@@ -144,12 +143,6 @@ public class BiddingSourceService {
             transactions.execute(tx -> repository.finishSource(rowId,token,finalStatus,blocksJson,finalQuality,problemsJson,now())); completed++;
         }
         return completed;
-    }
-
-    /** Production poller; both module and worker switches must be enabled. */
-    @Scheduled(fixedDelayString="${mateclaw.bidding.source-read-delay-ms:1000}")
-    public void scheduledReadPending() {
-        if(properties.isEnabled() && properties.isSchedulerEnabled()) readPending(2);
     }
 
     public int recoverReading() { return repository.recoverReadingSources(now()); }

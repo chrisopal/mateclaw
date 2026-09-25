@@ -49,19 +49,21 @@ class BiddingSourceTest extends BiddingHttpFixture {
         assertEquals(413,error.status()); assertEquals("PROJECT_SOURCE_LIMIT",error.code());
     }
 
-    @Test void scheduledReaderAndStartupRecoveryDoNotTouchDatabaseWhenDisabled() {
+    @Test void sourceReaderHasNoIndependentPollerAndStartupRecoveryHonorsBothSwitches() {
         var repository=org.mockito.Mockito.mock(BiddingRepository.class);
         var properties=new BiddingProperties();
         var tx=org.mockito.Mockito.mock(org.springframework.transaction.PlatformTransactionManager.class);
         var service=new BiddingSourceService(repository,org.mockito.Mockito.mock(BiddingAccess.class),org.mockito.Mockito.mock(BiddingSourceReader.class),
             org.mockito.Mockito.mock(BiddingDependencies.class),new com.fasterxml.jackson.databind.ObjectMapper(),tx,properties);
-        service.scheduledReadPending(); service.recoverInterruptedReaders();
+        service.recoverInterruptedReaders();
         org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).pendingSources(org.mockito.ArgumentMatchers.anyInt());
         org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).recoverReadingSources(org.mockito.ArgumentMatchers.any());
         properties.setEnabled(true); // module on, worker deliberately disabled
-        service.scheduledReadPending(); service.recoverInterruptedReaders();
+        service.recoverInterruptedReaders();
         org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).pendingSources(org.mockito.ArgumentMatchers.anyInt());
         org.mockito.Mockito.verify(repository,org.mockito.Mockito.never()).recoverReadingSources(org.mockito.ArgumentMatchers.any());
+        service.readPending(2);
+        org.mockito.Mockito.verify(repository).pendingSources(2);
     }
 
     @Test void uploadDoesNotRejectUnselectedLibraryBytesAtEffectiveCapacity() {

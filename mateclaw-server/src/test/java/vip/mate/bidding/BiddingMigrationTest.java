@@ -36,6 +36,10 @@ class BiddingMigrationTest {
             "INSERT INTO mate_bidding_source(id,workspace_id,project_id,source_id,version,kind,digest,content,blocks_json,quality,created_at) VALUES('legacy-source','7','project','legacy-source-id',1,'TENDER','sha',?,'[]','PENDING',CURRENT_TIMESTAMP)")) {
             insert.setBytes(1,legacySource); insert.executeUpdate();
         }
+        try(var connection=DriverManager.getConnection(url,"sa",""); var insert=connection.prepareStatement(
+            "INSERT INTO mate_bidding_task(id,workspace_id,project_id,agent_id,skill_package_id,config_digest,input_json,input_refs_json,status,cycle_no,cycle_attempt,attempt_count,created_at,updated_at) VALUES('legacy-task','7','project','11','22','config','{}','[]','QUEUED',0,0,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)")) {
+            insert.executeUpdate();
+        }
         flyway=Flyway.configure().dataSource(url,"sa","").locations("classpath:db/migration/h2").placeholderReplacement(false).load();
         flyway.migrate();
         try(var connection=DriverManager.getConnection(url,"sa",""); var statement=connection.createStatement()) {
@@ -51,6 +55,9 @@ class BiddingMigrationTest {
                 assertTrue(rows.next()); assertArrayEquals(legacySource,rows.getBytes("content"));
                 assertEquals("PENDING",rows.getString("read_status")); assertEquals("[]",rows.getString("problems_json"));
             }
+            assertEquals(1,scalar(statement,"SELECT COUNT(*) FROM mate_bidding_task WHERE id='legacy-task' AND actor_id IS NULL AND status='QUEUED'"));
+            statement.executeUpdate("INSERT INTO mate_bidding_task(id,workspace_id,project_id,agent_id,skill_package_id,config_digest,input_json,input_refs_json,status,cycle_no,cycle_attempt,attempt_count,actor_id,created_at,updated_at) VALUES('new-task','7','project','11','22','config','{}','[]','QUEUED',0,0,0,'42',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+            assertEquals(1,scalar(statement,"SELECT COUNT(*) FROM mate_bidding_task WHERE id='new-task' AND actor_id='42'"));
             byte[] largeContent=new byte[512*1024]; new java.util.Random(17).nextBytes(largeContent);
             try(var insert=connection.prepareStatement("INSERT INTO mate_bidding_source(id,workspace_id,project_id,source_id,version,kind,digest,content,blocks_json,quality,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)")) {
                 insert.setString(1,"source-row"); insert.setString(2,"7"); insert.setString(3,"project"); insert.setString(4,"source");

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -14,6 +16,115 @@ public class BiddingRepository {
     private final NamedParameterJdbcTemplate jdbc;
     private final ObjectMapper json;
     public BiddingRepository(NamedParameterJdbcTemplate jdbc,ObjectMapper json) { this.jdbc=jdbc; this.json=json; }
+
+    /** Claims at most the available worker capacity using persistent compare-and-set state. */
+    @org.springframework.transaction.annotation.Transactional
+    public synchronized List<BiddingTypes.Claim> claimDue(Instant now,String bootId,int limit) {
+        int capacity=Math.min(2,Math.max(0,limit));
+        if(capacity==0) return List.of();
+        Timestamp at=Timestamp.from(now);
+        // A V212-era row has no trustworthy actor. Fail it closed and retain a diagnostic attempt.
+        List<LegacyTask> legacy=jdbc.query("SELECT id,workspace_id,project_id,attempt_count FROM mate_bidding_task "
+                + "WHERE (actor_id IS NULL OR TRIM(actor_id)='') AND status IN ('QUEUED','WAITING_RETRY')",
+            Map.of(),(rs,n)->new LegacyTask(rs.getString(1),rs.getString(2),rs.getString(3),rs.getInt(4)));
+        for(LegacyTask task:legacy) {
+            int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,updated_at=:now "
+                    + "WHERE id=:id AND (actor_id IS NULL OR TRIM(actor_id)='') AND status IN ('QUEUED','WAITING_RETRY')",
+                Map.of("now",at,"id",task.id()));
+            if(changed==1) jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,error_json,started_at,finished_at) "
+                    + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'FAILED','[]',:error,:now,:now)",
+                Map.of("id",UUID.randomUUID().toString(),"workspace",task.workspaceId(),"project",task.projectId(),"task",task.id(),
+                    "attempt",task.attemptCount()+1,"token",UUID.randomUUID()+"."+UUID.randomUUID(),"error","{\"code\":\"TASK_ACTOR_MISSING\",\"category\":\"PERMANENT\",\"resultUnknown\":false}","now",at));
+        }
+        Integer running=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE status='RUNNING'",Map.of(),Integer.class);
+        int available=Math.min(capacity,Math.max(0,2-(running==null?0:running)));
+        if(available==0) return List.of();
+        List<TaskCandidate> candidates=jdbc.query("SELECT t.id,t.workspace_id,t.project_id,t.actor_id,t.agent_id,t.skill_package_id,"
+                + "t.config_digest,t.input_json,t.input_refs_json,t.attempt_count,t.cycle_attempt,t.deadline_at,p.skill_id,p.version,p.digest,p.files_json "
+                + "FROM mate_bidding_task t JOIN mate_bidding_skill_package p ON p.id=t.skill_package_id "
+                + "WHERE t.status IN ('QUEUED','WAITING_RETRY') AND (t.next_run_at IS NULL OR t.next_run_at<=:now) "
+                + "AND t.actor_id IS NOT NULL AND TRIM(t.actor_id)<>'' "
+                + "AND NOT EXISTS (SELECT 1 FROM mate_bidding_task r WHERE r.workspace_id=t.workspace_id AND r.status='RUNNING') "
+                + "ORDER BY COALESCE(t.next_run_at,t.created_at),t.created_at,t.id LIMIT :limit",
+            Map.of("now",at,"limit",Math.min(100,available*10)),(rs,n)->new TaskCandidate(rs.getString("id"),rs.getString("workspace_id"),rs.getString("project_id"),rs.getString("actor_id"),
+                rs.getString("agent_id"),rs.getString("skill_package_id"),rs.getString("config_digest"),rs.getString("input_json"),rs.getString("input_refs_json"),
+                rs.getInt("attempt_count"),rs.getInt("cycle_attempt"),rs.getTimestamp("deadline_at"),rs.getString("skill_id"),rs.getString("version"),rs.getString("digest"),rs.getString("files_json")));
+        List<BiddingTypes.Claim> claims=new ArrayList<>();
+        Set<String> claimedWorkspaces=new HashSet<>();
+        for(TaskCandidate task:candidates) {
+            if(claims.size()>=available) break;
+            if(claimedWorkspaces.contains(task.workspaceId())) continue;
+            // Workspace row lock makes the no-running-task invariant hold across repository calls.
+            if(!lockWorkspace(task.workspaceId())) {
+                failInvalidWorkspace(task,at);
+                continue;
+            }
+            String attemptId=UUID.randomUUID().toString(),token=UUID.randomUUID()+"."+UUID.randomUUID();
+            int nextAttempt=task.attemptCount()+1;
+            int changed=jdbc.update("UPDATE mate_bidding_task SET status='RUNNING',active_attempt_id=:attempt,attempt_count=:count,boot_id=:boot,"
+                    + "deadline_at=:deadline,updated_at=:now WHERE id=:id AND status IN ('QUEUED','WAITING_RETRY') AND (next_run_at IS NULL OR next_run_at<=:now) AND active_attempt_id IS NULL "
+                    + "AND NOT EXISTS (SELECT 1 FROM mate_bidding_task r WHERE r.workspace_id=:workspace AND r.status='RUNNING' AND r.id<>:id)",
+                new MapSqlParameterSource().addValue("attempt",attemptId).addValue("count",nextAttempt).addValue("boot",bootId)
+                    .addValue("deadline",Timestamp.from(now.plusSeconds(300))).addValue("now",at).addValue("id",task.id()).addValue("workspace",task.workspaceId()));
+            if(changed!=1) continue;
+            claimedWorkspaces.add(task.workspaceId());
+            jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,started_at) "
+                    + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'RUNNING','[]',:now)",
+                Map.of("id",attemptId,"workspace",task.workspaceId(),"project",task.projectId(),"task",task.id(),"attempt",nextAttempt,"token",token,"now",at));
+            ObjectNode stored=parseObject(task.inputJson()); ObjectNode input=stored.path("input").isObject()?(ObjectNode)stored.path("input").deepCopy():json.createObjectNode();
+            if(stored.path("_bidding").hasNonNull("targetId")) input.put("_biddingTargetId",stored.path("_bidding").path("targetId").asText());
+            List<BiddingTypes.Ref> refs=readRefs(task.refsJson());
+            Map<String,String> files;
+            try { files=json.readValue(task.filesJson(),new com.fasterxml.jackson.core.type.TypeReference<Map<String,String>>() {}); }
+            catch(Exception e) { throw new IllegalStateException("Invalid pinned bidding skill package",e); }
+            var scope=new BiddingTypes.Scope(task.workspaceId(),task.actorId(),task.projectId());
+            var pin=new BiddingTypes.SkillPin(task.skillId(),task.skillVersion(),task.skillDigest(),Map.copyOf(files));
+            String modelConfigId=stored.path("_bidding").path("modelConfigId").asText(null);
+            claims.add(new BiddingTypes.Claim(scope,task.id(),attemptId,token,nextAttempt,task.cycleAttempt(),
+                now.plusSeconds(300),task.agentId(),pin,modelConfigId,task.configDigest(),refs,input));
+        }
+        return List.copyOf(claims);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public int recoverInterrupted(String bootId,Instant now) {
+        Timestamp at=Timestamp.from(now);
+        List<String> expired=jdbc.query("SELECT active_attempt_id FROM mate_bidding_task WHERE status='RUNNING' AND (boot_id IS NULL OR boot_id<>:boot OR deadline_at<=:now) AND active_attempt_id IS NOT NULL",
+            Map.of("boot",bootId,"now",at),(rs,n)->rs.getString(1));
+        int count=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,next_run_at=NULL,deadline_at=NULL,updated_at=:now WHERE status='RUNNING' AND (boot_id IS NULL OR boot_id<>:boot OR deadline_at<=:now)",Map.of("boot",bootId,"now",at));
+        for(String attempt:expired) jdbc.update("UPDATE mate_bidding_attempt SET state='FAILED',error_json=:error,finished_at=:now WHERE id=:id AND state='RUNNING'",
+            Map.of("error","{\"code\":\"EXECUTION_INTERRUPTED\",\"category\":\"PERMANENT\",\"resultUnknown\":true}","now",at,"id",attempt));
+        return count;
+    }
+
+    public boolean isTaskRunning(String taskId) {
+        Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE id=:id AND status='RUNNING'",Map.of("id",taskId),Integer.class);
+        return count!=null && count>0;
+    }
+
+    private List<BiddingTypes.Ref> readRefs(String raw) {
+        try { return json.readValue(raw,new com.fasterxml.jackson.core.type.TypeReference<List<BiddingTypes.Ref>>() {}); }
+        catch(Exception e) { throw new IllegalStateException("Invalid persisted bidding references",e); }
+    }
+    private boolean lockWorkspace(String workspaceId) {
+        try {
+            long id=Long.parseLong(workspaceId);
+            return !jdbc.query("SELECT id FROM mate_workspace WHERE id=:workspace FOR UPDATE",Map.of("workspace",id),(rs,n)->rs.getLong(1)).isEmpty();
+        } catch(NumberFormatException ignored) {
+            return false;
+        }
+    }
+    private void failInvalidWorkspace(TaskCandidate task,Timestamp now) {
+        int changed=jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,updated_at=:now WHERE id=:id AND status IN ('QUEUED','WAITING_RETRY') AND active_attempt_id IS NULL",
+            Map.of("id",task.id(),"now",now));
+        if(changed==1) jdbc.update("INSERT INTO mate_bidding_attempt(id,workspace_id,project_id,task_id,attempt_no,token,state,tool_receipts_json,error_json,started_at,finished_at) "
+                + "VALUES(:id,:workspace,:project,:task,:attempt,:token,'FAILED','[]',:error,:now,:now)",
+            Map.of("id",UUID.randomUUID().toString(),"workspace",task.workspaceId(),"project",task.projectId(),"task",task.id(),
+                "attempt",task.attemptCount()+1,"token",UUID.randomUUID()+"."+UUID.randomUUID(),"error","{\"code\":\"TASK_WORKSPACE_MISSING\",\"category\":\"PERMANENT\",\"resultUnknown\":false}","now",now));
+    }
+    private record TaskCandidate(String id,String workspaceId,String projectId,String actorId,String agentId,String packageId,String configDigest,
+        String inputJson,String refsJson,int attemptCount,int cycleAttempt,Timestamp deadline,String skillId,String skillVersion,String skillDigest,String filesJson) {}
+    private record LegacyTask(String id,String workspaceId,String projectId,int attemptCount) {}
 
     public ObjectNode findProject(String workspaceId,String projectId) {
         List<ObjectNode> rows=jdbc.query("SELECT body_json FROM mate_bidding_project WHERE workspace_id=:workspaceId AND id=:id",
