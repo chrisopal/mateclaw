@@ -130,6 +130,14 @@ public class PresalesController {
     return R.ok(service.handoff(scope, id));
   }
 
+  @GetMapping("/projects/{id}/releases/{releaseId}/handoff")
+  public R<?> handoffRelease(
+      @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
+      @PathVariable String id,
+      @PathVariable String releaseId) {
+    return R.ok(service.handoff(scope, id, releaseId));
+  }
+
   @GetMapping("/sources")
   public R<?> sources(@RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
     return R.ok(service.sources(scope));

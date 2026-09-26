@@ -388,7 +388,19 @@ public class PresalesService {
           throw conflict("RELEASE_STATE", "Exact release must be approved");
         releaseGate(scope, p, find(p, "solutions", release.path("solutionId").asText()));
         verifyArtifacts(p.path("id").asText(), release);
-        release.put("status", "PUBLISHED").put("publishedBy", actor);
+        release.put("status", "PUBLISHED").put("publishedBy", actor)
+            .put("publishedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
+        if (release.path("handoffSnapshot").path("release").isObject()) {
+          ObjectNode frozenRelease = (ObjectNode) release.path("handoffSnapshot").path("release");
+          frozenRelease.put("status", "PUBLISHED").put("publishedBy", actor)
+              .put("publishedAt", release.path("publishedAt").asText());
+          ObjectNode snapshot = (ObjectNode) release.path("handoffSnapshot");
+          snapshot.set("clarifications", p.path("clarifications").deepCopy());
+          ArrayNode refs = json.createArrayNode();
+          for (var ref : snapshot.path("sourceRefs")) refs.add(ref.deepCopy());
+          for (var ref : publicationClarificationRefs(p)) refs.add(ref.deepCopy());
+          snapshot.set("sourceRefs", refs);
+        }
       }
       case "APPROVE_BASELINE" -> baseline(scope, p, value, actor);
       case "SAVE_FIT_GAP" -> {
@@ -727,6 +739,24 @@ public class PresalesService {
     return out;
   }
 
+  /** Returns the immutable handoff captured when this exact release was published. */
+  public ObjectNode handoff(String scope, String projectId, String releaseId) {
+    var p = get(scope, projectId);
+    ObjectNode release = null;
+    for (var item : p.withArray("releases"))
+      if (releaseId.equals(item.path("id").asText())) release = (ObjectNode) item;
+    if (release == null) throw new SemanticApiException(404, "NOT_FOUND", "发布版本不存在");
+    if (!"PUBLISHED".equals(release.path("status").asText()))
+      throw new SemanticApiException(409, "PUBLISHED_RELEASE_REQUIRED", "请选择已发布版本");
+    verifyArtifacts(projectId, release);
+    JsonNode snapshot = release.path("handoffSnapshot");
+    if (!snapshot.isObject())
+      throw new SemanticApiException(409, "HISTORICAL_SNAPSHOT_UNAVAILABLE", "该历史发布缺少可验证的冻结快照");
+    ObjectNode result = ((ObjectNode) snapshot).deepCopy();
+    result.put("releaseId", releaseId);
+    return result;
+  }
+
   private void releaseGate(String scope, ObjectNode p, ObjectNode solution) {
     requireSemantic();
     if (solution.path("provisional").asBoolean(true))
@@ -842,7 +872,40 @@ public class PresalesService {
         .put("baselineId", solution.path("baselineId").asText())
         .put("templateVersion", PresalesArtifactRenderer.TEMPLATE_VERSION);
     saveItem(p, "releases", v, actor, true);
-    v.put("id", releaseId);
+    String storedReleaseId = v.path("id").asText();
+    if (!releaseId.equals(storedReleaseId)) {
+      jdbc.update("UPDATE mate_presales_artifact SET release_id=? WHERE project_id=? AND release_id=?",
+          storedReleaseId, p.path("id").asText(), releaseId);
+      releaseId = storedReleaseId;
+    }
+    ObjectNode handoff = json.createObjectNode().put("schemaVersion", 1)
+        .put("engagementId", p.path("id").asText()).put("caseRef", p.path("id").asText())
+        .put("workspaceId", scope).put("historicalClarificationsAvailable", true)
+        .put("customerConfirmationStatus", "UNCONFIRMED").put("accessPolicy", "WORKSPACE_REAUTHORIZE_ON_READ");
+    handoff.set("baseline", find(p, "baselines", v.path("baselineId").asText()).deepCopy());
+    handoff.set("solution", solution.deepCopy());
+    handoff.set("release", v.deepCopy());
+    ArrayNode chosenFits = handoff.putArray("fitGaps");
+    for (var fitId : solution.path("fitGapRefs")) chosenFits.add(find(p, "fitGaps", fitId.asText()).deepCopy());
+    // The published release freezes the clarification state and its source references.
+    handoff.set("clarifications", p.path("clarifications").deepCopy());
+    handoff.put("historicalClarificationsAvailable", true);
+    handoff.set("sourceRefs", find(p, "baselines", v.path("baselineId").asText()).path("references").deepCopy());
+    handoff.set("materials", p.path("materials").deepCopy());
+    ArrayNode risks = handoff.putArray("risksAndUnknowns");
+    for (var fit : chosenFits)
+      if (Set.of("UNKNOWN", "GAP", "EXTEND", "PARTNER").contains(fit.path("status").asText())) risks.add(fit.deepCopy());
+    for (var response : solution.path("coverage").path("responses"))
+      if (!"FULL".equals(response.path("status").asText())) risks.add(response.deepCopy());
+    v.set("handoffSnapshot", handoff);
+  }
+
+  private ArrayNode publicationClarificationRefs(ObjectNode project) {
+    ArrayNode refs = json.createArrayNode();
+    for (var clarification : project.withArray("clarifications"))
+      if (clarification.path("sourceRefs").isArray())
+        for (var ref : clarification.path("sourceRefs")) refs.add(ref.deepCopy());
+    return refs;
   }
 
   private void authorizeMaterials(String scope, ObjectNode p) {

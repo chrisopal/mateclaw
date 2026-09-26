@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 public class BiddingDependencies {
     private final BiddingAccess access;
     private final BiddingRepository repository;
-    public BiddingDependencies(BiddingAccess access, BiddingRepository repository) { this.access=access; this.repository=repository; }
+    private final BiddingMaterials materials;
+    public BiddingDependencies(BiddingAccess access, BiddingRepository repository, BiddingMaterials materials) { this.access=access; this.repository=repository; this.materials=materials; }
 
     public void validate(BiddingTypes.Scope scope, List<BiddingTypes.Ref> refs) {
         access.requireActor(scope, scope.actorId());
@@ -32,6 +33,10 @@ public class BiddingDependencies {
             } else if ("sourceSet".equals(ref.kind())) {
                 if (!repository.revisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
                 if (!repository.isSelectedSourceSet(scope,ref)) throw BiddingAccess.error(409,"DEPENDENCY_STALE","Source set is no longer current");
+            } else if ("material".equals(ref.kind())) {
+                var project=repository.findProject(scope.workspaceId(),scope.projectId());
+                String agentId=project==null?"":project.path("bindings").path("writer").path("agentId").asText("");
+                materials.requireReadable(scope,agentId,ref);
             } else throw BiddingAccess.error(422,"SOURCE_REF_INVALID","Unsupported fixed reference kind");
         }
     }

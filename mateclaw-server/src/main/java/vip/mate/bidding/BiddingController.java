@@ -22,10 +22,14 @@ public class BiddingController {
     private final ObjectProvider<BiddingTaskService> tasks;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectProvider<BiddingAnalysisService> analysis;
+    private final ObjectProvider<BiddingHandoffService> handoffs;
+    private final ObjectProvider<BiddingMaterials> materials;
     private final ObjectMapper json;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
-            BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis, ObjectMapper json) {
+            BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis,
+            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
@@ -33,7 +37,10 @@ public class BiddingController {
         this.tasks = tasks;
         this.employees = employees;
         this.analysis = analysis;
+        this.handoffs = handoffs;
+        this.materials = materials;
         this.json = json;
+        this.jdbc = jdbc;
     }
 
     @GetMapping("/capabilities")
@@ -41,6 +48,12 @@ public class BiddingController {
         String actor=access.require(workspace,"viewer"); boolean canWrite=hasRole(workspace,"member");
         boolean canApprove=hasRole(workspace,"admin");
         return R.ok(java.util.Map.of("enabled",true,"canWrite",canWrite,"canApprove",canApprove));
+    }
+    @GetMapping("/handoff-options")
+    public R<?> handoffOptions(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,
+            @RequestParam String presalesProjectId) {
+        String actor=access.require(workspace,"viewer");
+        return R.ok(handoffs.getObject().options(new BiddingTypes.Scope(workspace,actor,null),presalesProjectId));
     }
     @GetMapping("/employees")
     public R<?> employees(@RequestHeader(value="X-Workspace-Id",required=false) String workspace) {
@@ -73,6 +86,11 @@ public class BiddingController {
         project.putObject("capabilities").put("canApprove",access.canApproveProject(scope,project));
         return R.ok(project);
     }
+    @GetMapping("/projects/{id}/materials")
+    public R<?> materials(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
+        String actor=access.require(workspace,"viewer");
+        return R.ok(materials.getObject().list(new BiddingTypes.Scope(workspace,actor,id)));
+    }
     @GetMapping("/projects/{id}/tasks")
     public R<?> tasks(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
         @RequestParam(defaultValue="1") int page,@RequestParam(defaultValue="20") int pageSize) {
@@ -90,7 +108,13 @@ public class BiddingController {
     @GetMapping("/tasks/{taskId}")
     public R<?> task(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String taskId) {
         String actor=access.require(workspace,"viewer");
-        return R.ok(tasks.getObject().taskDetails(new BiddingTypes.Scope(workspace,actor,null),taskId));
+        var details=tasks.getObject().taskDetails(new BiddingTypes.Scope(workspace,actor,null),taskId);
+        String projectId=details.path("projectId").asText();
+        String agentId=jdbc.query("SELECT agent_id FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND id=?",
+                rs->rs.next()?rs.getString(1):null,workspace,projectId,taskId);
+        materials.getObject().requireReadable(new BiddingTypes.Scope(workspace,actor,projectId),agentId,
+                details.path("snapshot").path("inputRefs"));
+        return R.ok(details);
     }
     @PostMapping("/projects/{id}/commands")
     public R<?> command(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,

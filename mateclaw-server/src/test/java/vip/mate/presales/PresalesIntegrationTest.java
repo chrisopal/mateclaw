@@ -353,7 +353,15 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
             Map.of("releaseId", release, "reason", "approved exact bytes"),
             "owner",
             200);
+    p = cmd(p, "SAVE_CLARIFICATION", Map.of("question", "Before publication", "impact", "Confirm boundary"), "member", 200);
     p = cmd(p, "PUBLISH_RELEASE", Map.of("releaseId", release), "owner", 200);
+    var frozenHandoff = api("GET", "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff", "viewer", workspace, null, 200);
+    assertEquals(release, frozenHandoff.path("releaseId").asText());
+    assertTrue(frozenHandoff.path("historicalClarificationsAvailable").asBoolean());
+    assertEquals(1, frozenHandoff.path("clarifications").size());
+    assertEquals("Before publication", frozenHandoff.path("clarifications").get(0).path("question").asText());
+    p = cmd(p, "SAVE_CLARIFICATION", Map.of("question", "New after publication", "impact", "Scope"), "member", 200);
+    assertEquals(1, api("GET", "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff", "viewer", workspace, null, 200).path("clarifications").size());
     assertEquals(
         original,
         jdbc.queryForObject(
