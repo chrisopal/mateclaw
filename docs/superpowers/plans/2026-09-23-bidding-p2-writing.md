@@ -108,7 +108,7 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 
 **Interfaces:**
 - Consumes: confirmed ANALYSIS_BASELINE Ref、Materials.snapshot、TaskService.enqueue。
-- Produces: authorized GET `/projects/{id}/outline` → `{baselineRef,confirmed?,candidates:[]}`；confirmed/candidate 每项为 `{ref,status,payload,inputRefs}`，只返回当前可读且属于本项目的修订，失权不得返回正文。
+- Produces: authorized GET `/projects/{id}/outline` → `{baselineRef,editExpectedRef,confirmed?,candidates:[]}`；confirmed/candidate 每项为 `{ref,status,payload,inputRefs}`，只返回当前可读且属于本项目的修订，失权不得返回正文。
 - Produces: `BiddingOutlineService` implements `BiddingResultHandler`，skillIds返回目录技能ID；`BiddingOutlineService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`save(Scope,Command):ObjectNode`；`confirm(Scope,Command):ObjectNode`；`static requireAcyclic(Map<String,String> parentById):void`。
 
 - [ ] 写目录循环和未确认baseline越级测试，建立真实baseline fixture后测强制技术条款/强制目录未映射不能确认。
@@ -140,6 +140,7 @@ for (String start : parentById.keySet()) {
 - [ ] 先补 Dependencies 对固定业务修订 Ref 的校验：workspace/project/kind/id/version/digest 精确匹配，baseline/outline 必须是当前选定且已确认，递归检查 input_refs_json 的来源/材料授权，禁止循环/缺失/未知引用；读路径保持 reader 授权，执行路径保留 actor 授权。不得只把业务 Ref 省掉来绕开验证。沿用 Task1 已实现的材料重授权，避免依赖环。
 - [ ] P2 编写岗位只要求目录和正文技能，不要求 P3 才交付的导出技能。更改岗位要求不静默重写旧固定包，项目必须显式重新绑定才能固定新增技能；P3 再补导出要求。Task2 单独工程验证可用明确 fixture 包；在 Task3 交付正文技能前不得宣称实跑岗位配置已完成。
 - [ ] 强制目录项没有既有 ID：由已确认 baseline 的 mandatoryOutline 数组顺序和该条规范化内容摘要生成稳定键 `mandatory-outline-<index>-<sha256>`，随输入 baselineRef 固定。不得给 P1 原结果补造 ID 或用标题作唯一键。该版全部 TECHNICAL requirement ID 必须被落叶章节覆盖；COMMERCIAL 只作待办，不能凭不存在的 mandatory 字段筛选。投影从 baseline.payload.analyses[四个稳定技能名] 取实际字段，引用和覆盖校验必须使用同一投影。
+- [ ] GET outline 的 editExpectedRef 由服务器提供，首次无 head 返回限定本 workspace/project 的 version=0 空 head token，客户端不得计算。SAVE_OUTLINE 比较该 token 并推进人工编辑 head，员工候选只追加不可变 revision 不改人工 head；CONFIRM_OUTLINE 比较当前编辑 head 与 payload.outlineRef 精确候选，保存候选不能解锁写作。
 - [ ] 注册 `DISPATCH_OUTLINE`、`SAVE_OUTLINE`、`CONFIRM_OUTLINE`。SAVE payload为完整目录候选，比较outline ref；CONFIRM payload `{outlineRef}`，真实approver且baseline当前有效，事务写decision/选定ref。模型返回的approve/status字段由additionalProperties=false拒绝。人工目录改动生成新revision，不覆盖skill原结果。
 - [ ] 在P1的CONFIRM_ANALYSIS事务接通目录自动派发（operationId派生于decision ID，唯一）；仅 CONFIRM_ANALYSIS 的显式 payload.autoPlanOutline=true 才表示用户本次确认后编写目录的意图，并把该意图随 decision 持久化；员工/技能配置可用时创建QUEUED，缺配置存可见待办。旧确认与未勾选默认不自动派发。重放确认不重复dispatch；目录确认后不越过人工意图自动重写已有正文。
 - [ ] 测试：未确认baseline不派发、目录候选不解锁批量写作、空目录/循环/跨项目refs拒绝、角色不足403、强制覆盖缺失422、同decision重放只有一组任务。Run前两测试+P1 analysis回归，Expected PASS。
@@ -160,7 +161,7 @@ for (String start : parentById.keySet()) {
 
 **Interfaces:**
 - Consumes: confirmed outlineRef、baselineRef、Materials.snapshot、TaskService.enqueue、Dependencies.isCurrent。
-- Produces: authorized GET `/projects/{id}/writing` → `{outlineRef,chapters:[{chapterId,title,selected?,candidates:[]}],manuscript?}`；修订各项为 `{ref,status,payload,inputRefs}`，服务器算候选当前有效性，STALE仍仅在来源可读时允许对比；失权清空/拒绝正文。
+- Produces: authorized GET `/projects/{id}/writing` → `{outlineRef,chapters:[{chapterId,title,editExpectedRef,selected?,candidates:[],tasks:[{taskId,status,attemptCount}]}],manuscript?}`；修订各项为 `{ref,status,payload,inputRefs}`，服务器算候选当前有效性，STALE仍仅在来源可读时允许对比；失权清空/拒绝正文。
 - Produces: `BiddingWritingService` implements `BiddingResultHandler`，skillIds返回写作技能ID；`BiddingWritingService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`edit(Scope,Command):ObjectNode`；`adopt(Scope,Command):ObjectNode`；`assemble(Scope,Command):ObjectNode`。
 - Produces: `BiddingContentBlocks.validate(ObjectNode chapter,List<Ref> allowedMaterials):void`。
 
@@ -180,6 +181,7 @@ for (String start : parentById.keySet()) {
 - [ ] 写作skill输入 `{baselineRef,outlineRef,chapterId,requirements,criteria,materials,previousChapterRef?,selectedFindingRefs?}`；输出 `{schemaVersion,chapter:{chapterId,blocks},responses,citations,missingMaterials,unresolvedItems,warnings}`。禁止补造证书、案例、性能承诺；缺依据返回missingMaterials/unresolvedItems，不藏在流畅正文中。
 - [ ] 内容块有限类型：heading `{level:1..6,text}`、paragraph `{text}`、list `{ordered,items:[text]}`、table `{columns:[text],rows:[[text]]}`、image `{materialRef,caption,alt}`。无任意HTML/脚本/路径/URL；每表行列一致；每块文本按2MiB总限检查。image必须为显式授权图片material，表格尺寸超模板可排版范围时标格式问题，不能悄悄裁列。
 - [ ] `DISPATCH_WRITING` payload `{outlineRef,chapterIds,materialRefs,retryOfTaskId?}`，每落叶章节一个task；去重 chapterIds，比较该章targetRef及已确认outline。批量任务一章失败不影响成功兄弟。派发时已选正文Ref入input，不使用当前project.version作为全部章并发锁。
+- [ ] GET writing 每章 editExpectedRef 为服务器提供的当前章 head 或限定作用域的空 head token；tasks 按服务端持久化 targetId/chapterId 关联返回，客户端不猜任务归属。任务按创建时间排序，失败项可单独重试。
 - [ ] `EDIT_CHAPTER` payload `{chapterId,blocks,responses,citations,missingMaterials,unresolvedItems}` 存人工revision，ref CAS；人工编辑操作更新该章节head；`ADOPT_CHAPTER` payload `{chapterId,candidateRef}` 比较当前章及candidate.inputRefs，STALE不可采用。skill成功只创建candidate，不改变selectedChapterRef；编辑或采用后触发依赖失效而不改其他章正文。
 
 ```sql

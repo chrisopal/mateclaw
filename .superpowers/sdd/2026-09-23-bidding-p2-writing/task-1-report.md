@@ -2,7 +2,9 @@
 
 Status: DONE
 Verification: PASS
-Plan deviations: Added an immutable `kind=material` reference for each received presales release after downstream integration review showed the handoff could otherwise only be displayed, not selected as a task input. The reference is stored in the existing material table and reauthorizes the exact published release and its associated knowledge bases on read.
+Plan deviations: none
+
+Controller-approved implementation detail: Added an immutable `kind=material` reference for each received presales release after downstream integration review showed the handoff could otherwise only be displayed, not selected as a task input. The reference is stored in the existing material table and reauthorizes the exact published release and its associated knowledge bases on read.
 
 ## Delivered
 
