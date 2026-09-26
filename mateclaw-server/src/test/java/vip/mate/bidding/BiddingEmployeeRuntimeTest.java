@@ -248,7 +248,7 @@ class BiddingEmployeeRuntimeTest {
         assertNull(rejected.payload());
     }
 
-    @Test void executeUsesProductionAgentGraphAndDoesNotRetryBrokenProviderStream() {
+    @Test void executeUsesProductionAgentGraphAndDoesNotRetryBrokenProviderStream() throws Exception {
         org.mockito.Mockito.doNothing().when(access).requireActor(any(), any());
         jdbc.update("UPDATE mate_model_provider SET api_key='test-key', enabled=TRUE, chat_model='OpenAIChatModel' WHERE provider_id='openai'");
         providerPool.add("openai");
@@ -300,9 +300,11 @@ class BiddingEmployeeRuntimeTest {
         assertEquals("OUTPUT_INVALID", fixedContractCheck.failure().code());
 
         AtomicInteger calls = new AtomicInteger();
+        java.util.concurrent.atomic.AtomicReference<Prompt> capturedPrompt = new java.util.concurrent.atomic.AtomicReference<>();
         ChatModel fake = mock(ChatModel.class);
         when(fake.stream(any(Prompt.class))).thenAnswer(invocation -> {
             calls.incrementAndGet();
+            capturedPrompt.set(invocation.getArgument(0));
             return Flux.concat(Flux.just(new ChatResponse(List.of(new Generation(new AssistantMessage("{\"items\":[]}"))))),
                     Flux.error(new IllegalStateException("controlled provider disconnect")));
         });
@@ -312,5 +314,16 @@ class BiddingEmployeeRuntimeTest {
         assertNull(result.payload());
         assertEquals("STREAM_INCOMPLETE", result.failure().code());
         assertEquals(1, calls.get());
+        Prompt actualPrompt = capturedPrompt.get();
+        String supplied = actualPrompt.getInstructions().stream().filter(UserMessage.class::isInstance)
+                .map(message -> ((UserMessage) message).getText())
+                .filter(text -> text.contains("\"references\"")).findFirst().orElseThrow();
+        var suppliedTask = mapper.readTree(supplied);
+        assertEquals("bidding-test", suppliedTask.path("execution").path("skillName").asText());
+        assertEquals("bidding-test", suppliedTask.path("execution").path("loadSkillArgs").path("skillName").asText());
+        assertEquals("SKILL.md", suppliedTask.path("execution").path("loadSkillArgs").path("filePath").asText());
+        assertEquals("output.schema.json", suppliedTask.path("execution").path("readOutputSchemaArgs").path("filePath").asText());
+        assertEquals("run", suppliedTask.path("task").path("task").asText());
+        assertTrue(actualPrompt.getSystemMessage().getText().contains("project-scoped execution"));
     }
 }

@@ -512,7 +512,7 @@ public class AgentGraphBuilder {
         if(projectScoped && builtinSearchEnabled) throw new MateClawException("err.presales.search_not_scoped", "项目执行不支持模型内置联网搜索，请为数字员工配置关闭联网搜索的模型");
         String enhancedPrompt = projectScoped
                 ? java.util.Objects.toString(entity.getSystemPrompt(), "") + ABOUT_YOU_BLOCK
-                    + "\nThis is a project-scoped presales run. Only the supplied project snapshot and explicitly project-bound read-only tools are authorized. Wiki retrieval must pass the exact project-bound kbId and the bound employee agentId. Web search is advisory and must be cited as external context. Never read arbitrary files, use execution tools, approve or publish. Return the requested proposal JSON."
+                    + "\nThis is a project-scoped execution. Only the supplied project snapshot and explicitly project-bound read-only tools are authorized. Wiki retrieval must pass the exact project-bound kbId and the bound employee agentId. Web search is advisory and must be cited as external context. Never read arbitrary files, use execution tools, approve or publish. Return the structured JSON required by the supplied task contract."
                 : buildEnhancedPrompt(entity, builtinSearchEnabled, prefixBudgetPlan.memoryTokens());
 
         // Runtime skill-catalog renderer — captures this agent's bound skills,

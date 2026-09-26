@@ -110,7 +110,19 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
                 BiddingAccess.parse(claim.scope().workspaceId(), "WORKSPACE_REQUIRED"), null, null, null,
                 false, null, null, null, null, null);
         String prompt;
-        try { prompt = JSON.writeValueAsString(Map.of("task", claim.input(), "references", claim.inputRefs())); }
+        try {
+            String pinnedSkillName = skillName(files);
+            prompt = JSON.writeValueAsString(Map.of(
+                    "task", claim.input(), "references", claim.inputRefs(),
+                    "execution", Map.of(
+                            "skillName", pinnedSkillName, "skillId", claim.skill().skillId(),
+                            "loadSkillArgs", Map.of("skillName", pinnedSkillName, "filePath", "SKILL.md"),
+                            "readOutputSchemaArgs", Map.of("skillName", pinnedSkillName, "filePath", "output.schema.json"),
+                            "instructions", "First call load_skill with loadSkillArgs to read the pinned skill. "
+                                    + "Then call readSkillFile with readOutputSchemaArgs and follow that JSON contract. "
+                                    + "Use the exact supplied skillName; do not guess names or discover other packages. "
+                                    + "Return only the requested structured JSON. Do not approve or publish.")));
+        }
         catch (Exception e) { return failure("VALIDATION_FAILED", "VALIDATION", false, false, false); }
         try {
             BiddingTypes.Execution result = readResult(agents.chatStructuredStream(agentId, prompt, conversationId,
