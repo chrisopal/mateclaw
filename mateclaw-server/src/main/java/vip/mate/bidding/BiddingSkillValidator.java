@@ -233,7 +233,11 @@ public final class BiddingSkillValidator {
     }
 
     private static boolean hasUnknown(JsonNode unknowns, String field) {
-        for (JsonNode item : unknowns) if (field.equals(item.path("field").asText())) return true;
+        String qualified = "basicInfo." + field;
+        for (JsonNode item : unknowns) {
+            String candidate = item.path("field").asText();
+            if (field.equals(candidate) || qualified.equals(candidate)) return true;
+        }
         return false;
     }
 

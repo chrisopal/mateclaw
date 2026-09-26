@@ -9,7 +9,7 @@ import vip.mate.agent.execution.ProjectToolPolicy;
 public final class BiddingToolScope implements ProjectToolPolicy {
     private static final long serialVersionUID = 1L;
     private static final Set<String> TOOL_NAMES = Set.of("load_skill", "readSkillFile",
-            "bidding_read_source", "bidding_read_material", "bidding_export_document");
+            "bidding_read_source", "bidding_read_sources", "bidding_read_material", "bidding_export_document");
     private final BiddingTypes.Claim claim;
     public BiddingToolScope(BiddingTypes.Claim claim) {
         this.claim = claim;

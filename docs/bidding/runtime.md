@@ -33,3 +33,7 @@ An optional `backupManifest` is a JSON file with a nonempty `files` array. It mu
 The checker verifies that each backup file exists, is nonempty, and matches its digest. This does not establish that a backup can be restored. Restore readiness requires a separate isolated restore rehearsal and a readback of representative records. Never rehearse against the source database or a directory shared with another worktree.
 
 The checker prints only a success marker or problem code and relevant filesystem path. It does not print manifest contents or environment values. A local or remote preflight does not prove browser behavior, model availability, analysis quality, or production readiness.
+
+## Enterprise UI preview
+
+Run `scripts/presales/start-ui.sh` from the active checkout. It explicitly selects `--mode enterprise`, serves the shared presales/bidding UI at port 5198, and proxies the existing preview backend at port 18118. Equivalent command from `mateclaw-ui`: `node node_modules/vite/bin/vite.js --config ../scripts/presales/vite.config.mjs --mode enterprise`. Omitting the mode selects the classic theme by design. Production builds must likewise use `--mode enterprise`; launching UI never selects or creates a database.

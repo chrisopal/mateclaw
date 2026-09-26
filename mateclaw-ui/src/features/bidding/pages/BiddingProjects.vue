@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { vLoading } from 'element-plus/es/components/loading/index.mjs'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

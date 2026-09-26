@@ -125,6 +125,7 @@ class BiddingEmployeeRuntimeTest {
                 "{\"type\":\"object\",\"required\":[\"items\"],\"properties\":{\"items\":{\"type\":\"array\"}},\"additionalProperties\":false}");
         assertNull(rejected.payload());
         assertEquals("OUTPUT_INVALID", rejected.failure().code());
+        assertEquals("{\"items\":\"not-an-array\",\"extra\":true}", rejected.rejectedOutput());
 
         var missingSchema = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest", null);
         assertNull(missingSchema.payload());
@@ -134,6 +135,51 @@ class BiddingEmployeeRuntimeTest {
                 "{\"type\":\"object\",\"oneOf\":[{\"required\":[\"items\"]}]}");
         assertNull(unsupportedSchema.payload());
         assertEquals("OUTPUT_INVALID", unsupportedSchema.failure().code());
+    }
+
+    @Test void acceptsProseAroundOneJsonFenceButRejectsAmbiguousOrInvalidFences() {
+        String schema = "{\"type\":\"object\",\"required\":[\"items\"],\"properties\":{\"items\":{\"type\":\"array\"}},\"additionalProperties\":false}";
+        var accepted = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("结果如下：\n```json\n{\"items\":[]}\n```\n以上为结构化结果。", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertNotNull(accepted.payload());
+        assertNull(accepted.failure());
+
+        var multiple = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("```json\n{\"items\":[]}\n```\n```json\n{\"items\":[]}\n```", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertEquals("OUTPUT_INVALID", multiple.failure().code());
+
+        var invalidFence = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("说明\n```json\n{\"items\":\"wrong\"}\n```", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertEquals("OUTPUT_INVALID", invalidFence.failure().code());
+        assertEquals("说明\n```json\n{\"items\":\"wrong\"}\n```", invalidFence.rejectedOutput());
+
+        var malformedFence = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("说明\n```json\n{\"items\":\n```", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertEquals("OUTPUT_INVALID", malformedFence.failure().code());
+
+        var nonJsonFence = BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
+                AgentService.StreamDelta.finalAnswer("说明\n```text\n{\"items\":[]}\n```", false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of(
+                        "configDigest", "model-digest", "skillDigest", "skill-digest"))),
+                "skill-digest", "model-digest", schema);
+        assertEquals("OUTPUT_INVALID", nonJsonFence.failure().code());
     }
 
     @Test void regexPatternUsesFindSemanticsWithAnchoredAlternatives() {

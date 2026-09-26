@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -175,7 +176,8 @@ public class ToolRegistry {
             String beanName = entry.getKey();
             Object bean = entry.getValue();
 
-            boolean hasToolMethod = java.util.Arrays.stream(bean.getClass().getMethods())
+            Class<?> targetClass = AopUtils.getTargetClass(bean);
+            boolean hasToolMethod = java.util.Arrays.stream(targetClass.getMethods())
                     .anyMatch(m -> m.isAnnotationPresent(Tool.class));
 
             if (!hasToolMethod) {

@@ -104,7 +104,7 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         var files = claim.skill().files();
         var options = new vip.mate.agent.execution.ProjectExecutionOptions(claim.attemptId(), claim.modelConfigId(),
                 claim.configDigest(), skillName(files), claim.skill().digest(), files,
-                java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source"),
+                java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources"),
                 new BiddingToolScope(claim), 0, false, false, 12);
         var origin = new vip.mate.agent.context.ChatOrigin(agentId, conversationId, claim.scope().actorId(),
                 BiddingAccess.parse(claim.scope().workspaceId(), "WORKSPACE_REQUIRED"), null, null, null,
@@ -161,12 +161,12 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         } catch (Exception e) {
             if (hasCause(e, OutputLimitException.class))
                 return failure("OUTPUT_LIMIT", "VALIDATION", true, true, false);
-            if (state[1] instanceof Map<?, ?> failed) return failureFromEvent(failed);
+            if (state[1] instanceof Map<?, ?> failed) return failureFromEvent(failed, output.toString());
             return failure(hasCause(e, java.util.concurrent.TimeoutException.class) ? "EXECUTION_TIMEOUT" : "STREAM_INCOMPLETE",
                     "TRANSIENT", true, output.length() > 0, false);
         }
         if (state[1] instanceof Map<?, ?> failed) {
-            return failureFromEvent(failed);
+            return failureFromEvent(failed, output.toString());
         }
         if (!(state[0] instanceof String skillDigest) || !skillDigest.equals(expectedSkillDigest))
             return failure("SKILL_NOT_LOADED", "PERMANENT", false, false, false);
@@ -180,14 +180,50 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
             if (pinnedOutputSchema == null || pinnedOutputSchema.isBlank())
                 return failure("OUTPUT_SCHEMA_MISSING", "VALIDATION", false, false, false);
             var schema = JSON.readTree(pinnedOutputSchema);
-            JsonNode parsed = JSON.readTree(output.toString());
+            JsonNode parsed = parseOutputJson(output.toString());
             if (parsed == null || !parsed.isObject() || !validSchema(schema)
                     || !validAgainstSchema(parsed, schema))
-                return failure("OUTPUT_INVALID", "VALIDATION", false, false, false);
+                return failure("OUTPUT_INVALID", "VALIDATION", false, false, false,
+                        rejectedOutput(output.toString()));
             ObjectNode payload = (ObjectNode) parsed;
             return new BiddingTypes.Execution(payload, null, skillDigest, expectedConfigDigest, null);
         } catch (Exception e) {
-            return failure("OUTPUT_INVALID", "VALIDATION", false, false, false);
+            return failure("OUTPUT_INVALID", "VALIDATION", false, false, false,
+                    rejectedOutput(output.toString()));
+        }
+    }
+
+    /**
+     * Accept the model's contract JSON as-is, with one conservative recovery
+     * for prose-wrapped responses: exactly one {@code ```json} fenced block.
+     * The surrounding prose is ignored, but multiple, unclosed, or non-json
+     * fences remain invalid so an ambiguous answer can never pass validation.
+     */
+    private static JsonNode parseOutputJson(String raw) throws Exception {
+        try {
+            return readStrictJson(raw);
+        } catch (Exception ignored) {
+            // Fall through only when the complete answer is not JSON. A valid
+            // scalar/array is still rejected by the existing object check.
+        }
+
+        int opening = raw.indexOf("```");
+        if (opening < 0) return null;
+        int closing = raw.indexOf("```", opening + 3);
+        if (closing < 0 || raw.indexOf("```", closing + 3) >= 0) return null;
+
+        int headerEnd = raw.indexOf('\n', opening + 3);
+        if (headerEnd < 0 || !"json".equals(raw.substring(opening + 3, headerEnd).trim())) return null;
+        String fencedJson = raw.substring(headerEnd + 1, closing).trim();
+        JsonNode parsed = readStrictJson(fencedJson);
+        return parsed != null && parsed.isObject() ? parsed : null;
+    }
+
+    private static JsonNode readStrictJson(String value) throws Exception {
+        try (var parser = JSON.getFactory().createParser(value)) {
+            JsonNode parsed = JSON.readTree(parser);
+            if (parser.nextToken() != null) throw new IllegalArgumentException("Trailing JSON content");
+            return parsed;
         }
     }
 
@@ -301,15 +337,27 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
 
     private static BiddingTypes.Execution failure(String code, String category, boolean unknown,
             boolean partial, boolean stopped) {
-        return new BiddingTypes.Execution(null, new BiddingTypes.Failure(code, category, null, unknown, partial, stopped),
-                null, null, null);
+        return failure(code, category, unknown, partial, stopped, null);
     }
 
-    private static BiddingTypes.Execution failureFromEvent(Map<?, ?> failed) {
-        return failure(String.valueOf(failed.containsKey("code") ? failed.get("code") : "STREAM_INCOMPLETE"),
+    private static BiddingTypes.Execution failure(String code, String category, boolean unknown,
+            boolean partial, boolean stopped, String rejectedOutput) {
+        return new BiddingTypes.Execution(null, new BiddingTypes.Failure(code, category, null, unknown, partial, stopped),
+                null, null, rejectedOutput);
+    }
+
+    private static BiddingTypes.Execution failureFromEvent(Map<?, ?> failed, String output) {
+        String code = String.valueOf(failed.containsKey("code") ? failed.get("code") : "STREAM_INCOMPLETE");
+        return failure(code,
                 String.valueOf(failed.containsKey("category") ? failed.get("category") : "TRANSIENT"),
                 Boolean.TRUE.equals(failed.get("resultUnknown")), Boolean.TRUE.equals(failed.get("partial")),
-                Boolean.TRUE.equals(failed.get("stopped")));
+                Boolean.TRUE.equals(failed.get("stopped")),
+                "OUTPUT_INVALID".equals(code) ? rejectedOutput(output) : null);
+    }
+
+    private static String rejectedOutput(String output) {
+        if (output == null || output.isEmpty()) return null;
+        return output.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= MAX_OUTPUT_BYTES ? output : null;
     }
 
     private static boolean hasCause(Throwable error, Class<? extends Throwable> type) {

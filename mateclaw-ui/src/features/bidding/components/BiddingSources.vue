@@ -25,6 +25,7 @@
   </section>
 </template>
 <script setup lang="ts">
+import { vLoading } from 'element-plus/es/components/loading/index.mjs'
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Project, Source } from '../api/types'

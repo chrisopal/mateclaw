@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.test.util.ReflectionTestUtils;
+import vip.mate.agent.execution.ProjectExecutionOptions;
+import vip.mate.agent.execution.ProjectToolPolicy;
 import vip.mate.agent.context.AgentWorkspaceResolver;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.llm.routing.AgentBindingResolver;
@@ -13,6 +15,7 @@ import vip.mate.skill.runtime.model.ResolvedSkill;
 import vip.mate.skill.usage.SkillUsageService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -276,6 +280,28 @@ class SkillFileToolTest {
         assertTrue(content.contains("FINAL_MANDATORY_SECTION"),
                 "the trailing mandatory section must survive — losing it is what caused fabrication");
         assertFalse(content.contains("truncated"), "no truncation banner may be injected");
+    }
+
+    @Test
+    @DisplayName("pinned project accepts the legacy schema alias only for the root schema file")
+    void pinnedProjectResolvesLegacyOutputSchemaAliasAndRejectsUnassignedPath() {
+        SkillFileTool tool = new SkillFileTool(mock(SkillRuntimeService.class), mock(SkillFileAccessPolicy.class),
+                mock(SkillUsageService.class), mock(AgentWorkspaceResolver.class));
+        ProjectToolPolicy policy = mock(ProjectToolPolicy.class);
+        ProjectToolPolicy.Revalidator revalidator = mock(ProjectToolPolicy.Revalidator.class);
+        ReflectionTestUtils.setField(tool, "projectExecutionRevalidator", revalidator);
+        var options = new ProjectExecutionOptions("attempt", "model", "config", "bidding-tender-profile",
+                "skill-digest", Map.of("SKILL.md", "# pinned", "output.schema.json", "{\"type\":\"object\"}"),
+                Set.of("readSkillFile"), policy, 0, false, false, 12);
+        ToolContext context = new ToolContext(Map.of(ProjectExecutionOptions.TOOL_CONTEXT_KEY, options));
+
+        assertEquals("{\"type\":\"object\"}", tool.readSkillFile("bidding-tender-profile",
+                "references/output.schema.json", null, null, context));
+        verify(policy, times(2)).require("readSkillFile", "bidding-tender-profile:output.schema.json");
+
+        String rejected = tool.readSkillFile("bidding-tender-profile", "references/not-assigned.json",
+                null, null, context);
+        assertTrue(rejected.contains("outside the pinned task package"));
     }
 
     @Test

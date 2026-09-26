@@ -78,10 +78,13 @@ public class SkillFileTool {
                     or "templates/" (e.g., "references/config.md", "scripts/helper.py",
                     "templates/template.html")
                     To read SKILL.md itself, use "SKILL.md" as filePath
+                    For pinned project packages, use the root-level "output.schema.json" path.
+                    A legacy "references/output.schema.json" request is accepted only as a
+                    compatibility alias when that root file exists and the alias is absent.
 
         Returns: File content as string, or error message if file not found or access denied.
 
-        Security: Only files under references/, scripts/, and templates/ can be accessed. Path traversal is blocked.
+        Security: Non-pinned filesystem reads are limited to references/, scripts/, and templates/. Pinned project packages use the server-owned exact file map; the root output.schema.json compatibility path does not broaden filesystem access. Path traversal is blocked.
         """)
     public String readSkillFile(
         @JsonProperty(required = true)
@@ -107,11 +110,13 @@ public class SkillFileTool {
         Object execution = ctx == null || ctx.getContext() == null ? null
                 : ctx.getContext().get(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY);
         if (execution instanceof vip.mate.agent.execution.ProjectExecutionOptions options) {
-            String path = filePath == null || filePath.isBlank() ? "SKILL.md" : filePath;
-            options.toolPolicy().require("readSkillFile", skillName + ":" + path);
+            String requestedPath = filePath == null || filePath.isBlank() ? "SKILL.md" : filePath;
+            String path = resolvePinnedProjectPath(options, requestedPath);
+            String policyPath = path == null ? requestedPath : path;
+            options.toolPolicy().require("readSkillFile", skillName + ":" + policyPath);
             projectExecutionRevalidator.requireActive(options);
             if (!options.skillName().equals(skillName)) return "Error: Skill is outside the pinned task package";
-            if (path.startsWith("/") || path.contains("..") || path.contains("\\")
+            if (path == null || path.startsWith("/") || path.contains("..") || path.contains("\\")
                     || !options.skillFiles().containsKey(path)) return "Error: File is outside the pinned task package";
             String pinned = options.skillFiles().get(path);
             if (pinned == null) return "Error: File is not present in the pinned task package";
@@ -189,6 +194,16 @@ public class SkillFileTool {
             log.error("Failed to read skill file {}/{}: {}", skillName, filePath, e.getMessage());
             return "Error: Failed to read file: " + e.getMessage();
         }
+    }
+
+    private static String resolvePinnedProjectPath(
+            vip.mate.agent.execution.ProjectExecutionOptions options, String requestedPath) {
+        if ("references/output.schema.json".equals(requestedPath)
+                && !options.skillFiles().containsKey(requestedPath)
+                && options.skillFiles().containsKey("output.schema.json")) {
+            return "output.schema.json";
+        }
+        return requestedPath;
     }
 
     private static void recordProjectSkillLoaded(String skillName, String path, String content,

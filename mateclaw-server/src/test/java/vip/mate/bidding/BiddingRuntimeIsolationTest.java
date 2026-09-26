@@ -117,11 +117,13 @@ class BiddingRuntimeIsolationTest {
         assertThrows(BiddingApiException.class, () -> loadTool.loadSkill("pinned", null, context));
     }
 
-    @Test void authorizedSourceBlockIsReadAndReceiptedAgainstTheActiveAttempt() {
+    @Test void authorizedSourceBlockIsReadAndReceiptedAgainstTheActiveAttempt() throws Exception {
         BiddingTypes.Ref ref = new BiddingTypes.Ref("source", "source-1", 3, "source-digest");
+        var input = new ObjectMapper().createObjectNode();
+        input.putArray("blocks").addObject().put("id", "block-1").put("sourceId", "source-1").put("version", 3);
         BiddingTypes.Claim sourceClaim = new BiddingTypes.Claim(claim.scope(), claim.taskId(), claim.attemptId(),
                 claim.token(), claim.attemptNo(), claim.cycleAttempt(), claim.deadlineAt(), claim.agentId(), claim.skill(),
-                claim.modelConfigId(), claim.configDigest(), List.of(ref), claim.input());
+                claim.modelConfigId(), claim.configDigest(), List.of(ref), input);
         BiddingRepository repository = mock(BiddingRepository.class);
         when(repository.source("workspace-1", "project-1", "source-1", 3)).thenReturn(
                 new BiddingRepository.SourceRow("row-1", "source-1", 3, "pdf", "source-digest", null,
@@ -139,6 +141,11 @@ class BiddingRuntimeIsolationTest {
         assertTrue(receipts.contains("block-1"));
         assertTrue(receipts.contains("source-digest"));
         assertThrows(BiddingApiException.class, () -> tool.readSource("source-2", 3, "block-1", context));
+        BiddingApiException unassigned = assertThrows(BiddingApiException.class,
+                () -> tool.readSource("source-1", 3, "block-2", context));
+        assertEquals("BLOCK_NOT_ASSIGNED", unassigned.code());
+        assertEquals(1, new ObjectMapper().readTree(jdbc.queryForObject(
+                "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class)).size());
 
         jdbc.update("UPDATE mate_bidding_attempt SET tool_receipts_json='[]' WHERE id='attempt-1'");
         org.mockito.Mockito.clearInvocations(access);
@@ -149,6 +156,88 @@ class BiddingRuntimeIsolationTest {
             return null;
         }).when(access).requireActor(any(), any());
         assertThrows(BiddingApiException.class, () -> tool.readSource("source-1", 3, "block-1", context));
+        assertEquals("[]", jdbc.queryForObject(
+                "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class));
+    }
+
+    @Test void batchReadsOnlyAssignedBlocksAndWritesOneReceiptPerBlock() throws Exception {
+        BiddingTypes.Ref ref = new BiddingTypes.Ref("source", "source-1", 3, "source-digest");
+        var input = new ObjectMapper().createObjectNode();
+        var assigned = input.putArray("blocks");
+        assigned.addObject().put("id", "block-1").put("sourceId", "source-1").put("version", 3);
+        assigned.addObject().put("id", "block-2").put("sourceId", "source-1").put("version", 3);
+        BiddingTypes.Claim sourceClaim = new BiddingTypes.Claim(claim.scope(), claim.taskId(), claim.attemptId(),
+                claim.token(), claim.attemptNo(), claim.cycleAttempt(), claim.deadlineAt(), claim.agentId(), claim.skill(),
+                claim.modelConfigId(), claim.configDigest(), List.of(ref), input);
+        BiddingRepository repository = mock(BiddingRepository.class);
+        when(repository.source("workspace-1", "project-1", "source-1", 3)).thenReturn(
+                new BiddingRepository.SourceRow("row-1", "source-1", 3, "pdf", "source-digest", null,
+                        "bid.pdf", "[{\"id\":\"block-1\",\"text\":\"first clause\",\"quality\":\"READABLE\"},"
+                                + "{\"id\":\"block-2\",\"text\":\"second clause\",\"quality\":\"READABLE\"}]",
+                        "READY", "DONE", "[]", null));
+        BiddingReadTool tool = new BiddingReadTool(runtime, repository, dependencies, jdbc, new ObjectMapper());
+        var options = new vip.mate.agent.execution.ProjectExecutionOptions("attempt-1", "7", "config-digest",
+                "pinned", "skill-digest", sourceClaim.skill().files(), java.util.Set.of("bidding_read_sources"),
+                new BiddingToolScope(sourceClaim), 0, false, false, 12);
+        ToolContext context = new ToolContext(Map.of(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY,
+                options));
+
+        String result = tool.readSources("[{\"sourceId\":\"source-1\",\"version\":3,\"blockId\":\"block-1\"},"
+                + "{\"sourceId\":\"source-1\",\"version\":3,\"blockId\":\"block-2\"}]", context);
+        var parsed = new ObjectMapper().readTree(result);
+        assertEquals(2, parsed.path("count").asInt());
+        assertEquals("first clause", parsed.path("blocks").get(0).path("text").asText());
+        assertEquals("second clause", parsed.path("blocks").get(1).path("text").asText());
+        var receipts = new ObjectMapper().readTree(jdbc.queryForObject(
+                "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class));
+        assertEquals(2, receipts.size());
+        assertTrue(receipts.findValuesAsText("tool").stream().allMatch("bidding_read_source"::equals));
+        assertEquals(List.of("block-1", "block-2"), receipts.findValuesAsText("blockId"));
+
+        BiddingApiException error = assertThrows(BiddingApiException.class, () -> tool.readSources(
+                "[{\"sourceId\":\"source-1\",\"version\":3,\"blockId\":\"not-assigned\"}]", context));
+        assertEquals("BLOCK_NOT_ASSIGNED", error.code());
+        assertEquals(2, new ObjectMapper().readTree(jdbc.queryForObject(
+                "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class)).size());
+        verify(repository, times(1)).source("workspace-1", "project-1", "source-1", 3);
+    }
+
+    @Test void batchReceiptFailureRollsBackEarlierReceipts() throws Exception {
+        BiddingTypes.Ref ref = new BiddingTypes.Ref("source", "source-1", 3, "source-digest");
+        var input = new ObjectMapper().createObjectNode();
+        var assigned = input.putArray("blocks");
+        assigned.addObject().put("id", "block-1").put("sourceId", "source-1").put("version", 3);
+        assigned.addObject().put("id", "block-2").put("sourceId", "source-1").put("version", 3);
+        BiddingTypes.Claim sourceClaim = new BiddingTypes.Claim(claim.scope(), claim.taskId(), claim.attemptId(),
+                claim.token(), claim.attemptNo(), claim.cycleAttempt(), claim.deadlineAt(), claim.agentId(), claim.skill(),
+                claim.modelConfigId(), claim.configDigest(), List.of(ref), input);
+        BiddingRepository repository = mock(BiddingRepository.class);
+        when(repository.source("workspace-1", "project-1", "source-1", 3)).thenReturn(
+                new BiddingRepository.SourceRow("row-1", "source-1", 3, "pdf", "source-digest", null,
+                        "bid.pdf", "[{\"id\":\"block-1\",\"text\":\"first clause\",\"quality\":\"READABLE\"},"
+                                + "{\"id\":\"block-2\",\"text\":\"second clause\",\"quality\":\"READABLE\"}]",
+                        "READY", "DONE", "[]", null));
+        BiddingReadTool tool = spy(new BiddingReadTool(runtime, repository, dependencies, jdbc, new ObjectMapper()));
+        var receiptCalls = new java.util.concurrent.atomic.AtomicInteger();
+        doAnswer(invocation -> {
+            if (receiptCalls.incrementAndGet() == 2)
+                throw BiddingAccess.error(409, "ATTEMPT_STALE", "Task attempt is no longer active");
+            return invocation.callRealMethod();
+        }).when(tool).appendReceipt(any(BiddingTypes.Claim.class),
+                org.mockito.ArgumentMatchers.<String, Object>anyMap());
+        var options = new vip.mate.agent.execution.ProjectExecutionOptions("attempt-1", "7", "config-digest",
+                "pinned", "skill-digest", sourceClaim.skill().files(), java.util.Set.of("bidding_read_sources"),
+                new BiddingToolScope(sourceClaim), 0, false, false, 12);
+        ToolContext context = new ToolContext(Map.of(vip.mate.agent.execution.ProjectExecutionOptions.TOOL_CONTEXT_KEY,
+                options));
+
+        BiddingApiException error = assertThrows(BiddingApiException.class, () ->
+                new org.springframework.transaction.support.TransactionTemplate(
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(db))
+                        .executeWithoutResult(status -> tool.readSources(
+                                "[{\"sourceId\":\"source-1\",\"version\":3,\"blockId\":\"block-1\"},"
+                                        + "{\"sourceId\":\"source-1\",\"version\":3,\"blockId\":\"block-2\"}]", context)));
+        assertEquals("ATTEMPT_STALE", error.code());
         assertEquals("[]", jdbc.queryForObject(
                 "SELECT tool_receipts_json FROM mate_bidding_attempt WHERE id='attempt-1'", String.class));
     }

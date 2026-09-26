@@ -26,6 +26,28 @@ class BiddingSkillValidatorTest {
         assertDoesNotThrow(() -> validator.validate("bidding-tender-profile", payload, input));
     }
 
+    @Test void acceptsLeafOrQualifiedUnknownForMissingBasicInfoAndRejectsNearMiss() throws Exception {
+        ObjectNode input = object("""
+            {"schemaVersion":"1","blocks":[{"id":"b1","text":"招标文件","sourceId":"s1","version":1}],"readBlockIds":[]}
+            """);
+        String template = """
+            {"schemaVersion":"1","basicInfo":{"project":"项目","tenderer":"招标人","lot":null},
+             "deadlines":[],"deliveryConditions":[],"mandatoryOutline":[],"formatRequirements":[],
+             "unknowns":[{"field":"%s","reason":"未提供标段"}],
+             "coverage":{"processedBlockIds":[],"unprocessedBlockIds":["b1"]},"warnings":[]}
+            """;
+        for (String field : java.util.List.of("lot", "basicInfo.lot")) {
+            ObjectNode payload = object(template.formatted(field));
+            assertDoesNotThrow(() -> validator.validate("bidding-tender-profile", payload, input), field);
+        }
+
+        ObjectNode nearMiss = object(template.formatted("basicInfo.lotName"));
+        var error = assertThrows(BiddingApiException.class,
+                () -> validator.validate("bidding-tender-profile", nearMiss, input));
+        assertEquals("OUTPUT_SCHEMA_INVALID", error.code());
+        assertTrue(error.getMessage().contains("lot"));
+    }
+
     @Test void rejectsMissingCoverageForScoring() throws Exception {
         ObjectNode input = object("""
             {"schemaVersion":"1","blocks":[{"id":"b1","text":"技术项10分","sourceId":"s1","version":1}],"readBlockIds":["b1"]}

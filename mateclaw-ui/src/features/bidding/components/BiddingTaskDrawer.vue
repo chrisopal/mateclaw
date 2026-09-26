@@ -27,6 +27,7 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
+import { vLoading } from 'element-plus/es/components/loading/index.mjs'
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { biddingApi } from '../api/biddingApi'

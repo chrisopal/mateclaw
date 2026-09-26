@@ -23,7 +23,7 @@ export interface AnalysisView { baseline?: { ref: Ref; status: string; payload: 
 export interface AnalysisBaseline { schemaVersion: string; taskGroupId: string; analyses: Record<string, AnalysisPayload>; conflicts: unknown[]; [key: string]: unknown }
 export interface AnalysisPayload { [key: string]: unknown }
 export interface AnalysisGroup { taskGroupId: string; status: string; skills: Record<string, AnalysisPayload>; conflicts: unknown[]; complete: boolean }
-export interface Evidence { sourceId: string; version: number; blockId: string; text: string; locator: string; pdfPage?: number }
+export interface Evidence { id: string; locator: string; text: string; pdfPage?: number }
 export interface Command { operationId: string; expected: Ref; action: string; payload: Record<string, unknown> }
 export interface CommandResult { ref?: Ref; result?: unknown; taskGroupId?: string; taskIds?: string[]; [key: string]: unknown }
 export interface Dashboard { inProgress: number; dueWithin7Days: number; overdueDeadlines: number; unknownDeadlines: number; pendingConfirmation: number; failedTasks: number }
