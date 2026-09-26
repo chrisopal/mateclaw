@@ -9,7 +9,8 @@ Controller-approved implementation detail: Added an immutable `kind=material` re
 ## Delivered
 
 - Added optional-Presales handoff options and exact published-release receive flow. Receive checks the preview digest and expected bidding project ref, locks the project before idempotency replay/version allocation, persists the immutable receipt and material ref, and leaves customer confirmation `UNCONFIRMED`.
-- Added fixed wiki-page material bindings. The active project writer must be a live employee in the current workspace; binding and every later read recheck the employee, workspace, page/KB relationship, and current KB visibility. Revoked entries remain recorded but their title/content is suppressed.
+- Added fixed wiki-page material bindings. The active project writer must be a live employee in the current workspace; binding and every later read recheck the employee, workspace, page/KB relationship, current KB visibility, and `WikiPageTypePermissionService.canRead(agentId,kbId,pageType)`. Page-type denial is checked before idempotent replay too. Disabled, deleted, or cross-workspace employees cannot read snapshots. Revoked entries remain recorded but their title/content is suppressed.
+- Receiving the same published release again under a different operation id returns controlled `409 HANDOFF_ALREADY_RECEIVED` under the project lock; reusing the original operation remains idempotent.
 - Received presales releases use `kind=material`, `id=presales:<presalesProjectId>:<releaseId>`, `version=1`, and the exact release digest. Snapshot reads return the stored frozen handoff only after validating the employee, origin release, source availability, and visibility for each associated KB.
 - Presales handoff snapshots freeze clarifications and their references inside the successful `PUBLISH_RELEASE` transaction. Later clarification edits do not alter the published snapshot; solution, baseline, artifact summaries, and release identity remain pinned to that exact release.
 - Project body stores only handoff metadata, not the copied presales snapshot, so ordinary project reads do not bypass material authorization. Independent bidding project creation remains available if Presales is disabled.
@@ -31,8 +32,10 @@ A material snapshot returns `{ "items": [{"ref":...,"source":"PRESALES_RELEASE",
 ## Verification
 
 - Java: Temurin 21.0.7 at `/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home`.
-- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='BiddingHandoffTest,BiddingMaterialsTest,PresalesIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 9 tests, 0 failures/errors.
+- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='BiddingHandoffTest,BiddingMaterialsTest,BiddingMigrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 6 tests, 0 failures/errors.
+- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='Bidding*Test,PresalesIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 125 tests, 0 failures/errors; includes bidding runtime, migration/isolation, materials, handoff, and presales integration coverage.
 - `JAVA_HOME=... mvn -pl mateclaw-server -am -DskipTests -Dmaven.compiler.proc=full compile` — PASS.
 - `git diff --check` — PASS.
+- V215 migration assertion now verifies the exact 11 bidding tables while retaining historical Presales/Semantic row preservation and bidding data-isolation assertions.
 - The presales integration regression now adds a clarification after approval but before publication, confirms that clarification is in the published handoff, then adds a later clarification and confirms the published handoff remains unchanged.
 - Not tested: migration execution against live MySQL/Kingbase databases; no runtime DB or external tender data was used. Red-before-implementation TDD evidence was not captured; tests were run during implementation and the final targeted set passes.

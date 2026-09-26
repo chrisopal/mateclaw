@@ -17,6 +17,7 @@ import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
 import vip.mate.wiki.model.WikiPageEntity;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
 import vip.mate.wiki.service.WikiPageService;
+import vip.mate.wiki.service.WikiPageTypePermissionService;
 
 @Service
 public class BiddingMaterials {
@@ -28,11 +29,12 @@ public class BiddingMaterials {
     private final ObjectProvider<WikiPageService> pages;
     private final AgentMapper agents;
     private final ObjectProvider<PresalesService> presales;
+    private final ObjectProvider<WikiPageTypePermissionService> pageTypePermissions;
 
     public BiddingMaterials(BiddingAccess access, BiddingRepository repository, JdbcTemplate jdbc, ObjectMapper json,
             ObjectProvider<WikiKnowledgeBaseService> knowledgeBases, ObjectProvider<WikiPageService> pages,
-            AgentMapper agents,ObjectProvider<PresalesService> presales) {
-        this.access=access; this.repository=repository; this.jdbc=jdbc; this.json=json; this.knowledgeBases=knowledgeBases; this.pages=pages; this.agents=agents; this.presales=presales;
+            AgentMapper agents,ObjectProvider<PresalesService> presales, ObjectProvider<WikiPageTypePermissionService> pageTypePermissions) {
+        this.access=access; this.repository=repository; this.jdbc=jdbc; this.json=json; this.knowledgeBases=knowledgeBases; this.pages=pages; this.agents=agents; this.presales=presales; this.pageTypePermissions=pageTypePermissions;
     }
 
     @Transactional
@@ -55,6 +57,7 @@ public class BiddingMaterials {
         WikiPageEntity page=pageService.getById(pageId);
         if(page==null || !active(page.getDeleted()) || page.getKbId()==null || page.getKbId()!=kbId)
             throw BiddingAccess.error(404,"NOT_FOUND","Knowledge page not found");
+        requirePageTypeReadable(employee.getId(),kbId,page.getPageType());
         String requestDigest=requestDigest(scope,command);
         var replay=repository.findOperation(scope.workspaceId(),scope.actorId(),command.operationId());
         if(replay!=null) {
@@ -169,9 +172,9 @@ public class BiddingMaterials {
         if(rows.isEmpty()) throw BiddingAccess.error(404,"NOT_FOUND","Material not found");
         var material=rows.getFirst();
         if(!"VALID".equals(material.validity())) throw BiddingAccess.error(403,"MATERIAL_UNAVAILABLE","Material is no longer valid");
+        AgentEntity employee=requireAgent(scope,agentId);
         ObjectNode link=read(material.accessRef());
         if("PRESALES_RELEASE".equals(material.sourceKind())) {
-            AgentEntity employee=requireAgent(scope,agentId);
             var service=presales.getIfAvailable();
             if(service==null) throw BiddingAccess.error(403,"MATERIAL_UNAVAILABLE","Presales authorization cannot be rechecked");
             ObjectNode current;
@@ -197,6 +200,7 @@ public class BiddingMaterials {
         if(knowledgeBase==null || !scope.workspaceId().equals(String.valueOf(knowledgeBase.getWorkspaceId())) || !active(knowledgeBase.getDeleted())
                 || page==null || !active(page.getDeleted()) || page.getKbId()==null || page.getKbId()!=kbId)
             throw BiddingAccess.error(403,"MATERIAL_UNAVAILABLE","Material access was revoked");
+        requirePageTypeReadable(employee.getId(),kbId,page.getPageType());
     }
 
     public void requireReadable(BiddingTypes.Scope scope,String agentId,com.fasterxml.jackson.databind.JsonNode refs) {
@@ -211,6 +215,11 @@ public class BiddingMaterials {
                 || employee.getWorkspaceId()==null || !scope.workspaceId().equals(employee.getWorkspaceId().toString()))
             throw BiddingAccess.error(403,"MATERIAL_UNAVAILABLE","Selected employee is unavailable in this workspace");
         return employee;
+    }
+    private void requirePageTypeReadable(Long agentId,long kbId,String pageType) {
+        WikiPageTypePermissionService permissions=pageTypePermissions.getIfAvailable();
+        if(permissions==null || !permissions.canRead(agentId,kbId,pageType))
+            throw BiddingAccess.error(403,"MATERIAL_UNAVAILABLE","Employee cannot read this wiki page type");
     }
     private long parseId(String value){ try { long id=Long.parseLong(value); if(id>0)return id; } catch(Exception ignored){} throw BiddingAccess.error(404,"NOT_FOUND","Knowledge source not found"); }
     private String sha(String value){try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}catch(Exception e){throw new IllegalStateException(e);}}

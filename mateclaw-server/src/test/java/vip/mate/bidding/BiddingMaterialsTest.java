@@ -15,11 +15,13 @@ import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
 import vip.mate.wiki.model.WikiPageEntity;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
 import vip.mate.wiki.service.WikiPageService;
+import vip.mate.wiki.service.WikiPageTypePermissionService;
 
 class BiddingMaterialsTest extends BiddingHttpFixture {
     @Autowired WikiKnowledgeBaseService knowledgeBases;
     @Autowired BiddingMaterials materials;
     @MockBean WikiPageService pages;
+    @MockBean WikiPageTypePermissionService pageTypePermissions;
 
     @Test void bindsFixedWikiRevisionAndRechecksOriginAuthorization() throws Exception {
         var project=project();
@@ -38,20 +40,45 @@ class BiddingMaterialsTest extends BiddingHttpFixture {
         request.put("payload",Map.of("kind","WIKI_PAGE","knowledgeBaseId",kbId,"pageId",pageId,"expectedDigest",digest,"applicability","作为本项目能力参考"));
         request.put("expected",ref(project));
         String commandPath="/projects/"+project.path("id").asText()+"/commands";
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(false);
+        api("POST",commandPath,"member",workspace,request,403);
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(true);
         JsonNode result=api("POST",commandPath,"member",workspace,request,200);
         assertEquals(digest,result.path("ref").path("digest").asText());
         assertEquals("固定内容 v1",result.path("content").path("content").asText());
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(false);
+        api("POST",commandPath,"member",workspace,request,403);
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(true);
         assertEquals(result,api("POST",commandPath,"member",workspace,request,200));
         String actorId=jdbc.queryForObject("SELECT id FROM mate_user WHERE username=?",String.class,auth.parseToken(tokens.get("member").substring(7)));
         var stored=materials.snapshot(new BiddingTypes.Scope(workspace,actorId,project.path("id").asText()),Long.toString(agentId),
                 java.util.List.of(json.treeToValue(result.path("ref"),BiddingTypes.Ref.class)));
         assertEquals("固定内容 v1",stored.path("items").get(0).path("content").path("content").asText());
 
-        when(knowledgeBases.findVisibleById(agentId,kbId)).thenReturn(null);
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(false);
+        assertThrows(BiddingApiException.class,()->materials.snapshot(new BiddingTypes.Scope(workspace,actorId,project.path("id").asText()),Long.toString(agentId),
+                java.util.List.of(json.treeToValue(result.path("ref"),BiddingTypes.Ref.class))));
         var rows=api("GET","/projects/"+project.path("id").asText()+"/materials","member",workspace,null,200).path("items");
+        assertEquals("UNAVAILABLE",rows.get(0).path("validity").asText());
+        assertFalse(rows.get(0).has("title"));
+
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(true);
+        when(knowledgeBases.findVisibleById(agentId,kbId)).thenReturn(null);
+        rows=api("GET","/projects/"+project.path("id").asText()+"/materials","member",workspace,null,200).path("items");
         assertEquals("UNAVAILABLE",rows.get(0).path("validity").asText());
         assertFalse(rows.get(0).has("title"),"revoked material metadata must not leak through a copied snapshot");
         assertThrows(BiddingApiException.class,()->materials.snapshot(new BiddingTypes.Scope(workspace,actorId,project.path("id").asText()),Long.toString(agentId),
                 java.util.List.of(json.treeToValue(result.path("ref"),BiddingTypes.Ref.class))));
+
+        when(knowledgeBases.findVisibleById(agentId,kbId)).thenReturn(kb);
+        for (String invalidState : java.util.List.of("disabled", "deleted", "moved")) {
+            switch (invalidState) {
+                case "disabled" -> jdbc.update("UPDATE mate_agent SET enabled=FALSE WHERE id=?",agentId);
+                case "deleted" -> jdbc.update("UPDATE mate_agent SET enabled=TRUE,deleted=1 WHERE id=?",agentId);
+                case "moved" -> jdbc.update("UPDATE mate_agent SET enabled=TRUE,deleted=0,workspace_id=? WHERE id=?",Long.valueOf(workspace)+1,agentId);
+            }
+            assertThrows(BiddingApiException.class,()->materials.snapshot(new BiddingTypes.Scope(workspace,actorId,project.path("id").asText()),Long.toString(agentId),
+                    java.util.List.of(json.treeToValue(result.path("ref"),BiddingTypes.Ref.class))),invalidState);
+        }
     }
 }

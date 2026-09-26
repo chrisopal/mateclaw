@@ -94,6 +94,10 @@ public class BiddingHandoffService {
                 || command.expected().version()!=project.path("version").asLong()
                 || !command.expected().digest().equals(project.path("ref").path("digest").asText()))
             throw BiddingAccess.error(409,"VERSION_CONFLICT","Project has changed; reload before receiving this release");
+        Integer received=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_handoff WHERE workspace_id=? AND project_id=? AND presales_project_id=? AND release_id=?",Integer.class,
+                scope.workspaceId(),scope.projectId(),presalesId,releaseId);
+        if(received!=null && received>0)
+            throw BiddingAccess.error(409,"HANDOFF_ALREADY_RECEIVED","This published release is already received by the project");
         ObjectNode metadata=json.createObjectNode().put("presalesProjectId",presalesId).put("releaseId",releaseId)
                 .put("digest",actual).put("receivedAt",accepted.path("receivedAt").asText()).put("customerConfirmationStatus","UNCONFIRMED");
         ObjectNode selected=project.with("selectedRefs"); selected.set("handoff",metadata);

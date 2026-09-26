@@ -50,7 +50,7 @@ class BiddingMigrationTest {
                 assertTrue(rows.next()); assertEquals("保留本体",rows.getString("name"));
             }
             assertEquals(0,scalar(statement,"SELECT COUNT(*) FROM mate_bidding_project"));
-            assertEquals(9,scalar(statement,"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) LIKE 'mate_bidding_%'"));
+            assertEquals(11,scalar(statement,"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) LIKE 'mate_bidding_%'"));
             try(var rows=statement.executeQuery("SELECT content,read_status,problems_json FROM mate_bidding_source WHERE id='legacy-source'")) {
                 assertTrue(rows.next()); assertArrayEquals(legacySource,rows.getBytes("content"));
                 assertEquals("PENDING",rows.getString("read_status")); assertEquals("[]",rows.getString("problems_json"));

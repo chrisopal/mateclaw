@@ -52,6 +52,10 @@ class BiddingHandoffTest extends BiddingHttpFixture {
         var replayResult=(com.fasterxml.jackson.databind.node.ObjectNode)mapper.readTree(resultCaptor.getValue());
         when(repository.findOperation("22","99","same-op")).thenReturn(new BiddingRepository.StoredOperation(digestCaptor.getValue(),replayResult));
         assertEquals(accepted,service.receive(scope,command));
+        var nextExpected=new BiddingTypes.Ref("project","bid-1",2,project.path("ref").path("digest").asText());
+        when(jdbc.queryForObject(anyString(),eq(Integer.class),any(Object[].class))).thenReturn(1);
+        var repeatError=assertThrows(BiddingApiException.class,()->service.receive(scope,new BiddingTypes.Command("new-operation",nextExpected,"RECEIVE_HANDOFF",payload)));
+        assertEquals("HANDOFF_ALREADY_RECEIVED",repeatError.code());
         var changed=payload.deepCopy().put("expectedDigest","another-digest");
         assertEquals("HANDOFF_DIGEST_MISMATCH",assertThrows(BiddingApiException.class,
                 ()->service.receive(scope,new BiddingTypes.Command("new-op",expected,"RECEIVE_HANDOFF",changed))).code());
