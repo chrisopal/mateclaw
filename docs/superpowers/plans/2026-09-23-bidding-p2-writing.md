@@ -87,11 +87,12 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 **Files:**
 - Create: J`BiddingOutlineService.java`。
 - Create: `mateclaw-server/src/main/resources/skills/bidding-outline-planning/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingSkillValidator.java`, `BiddingCommandService.java`, `BiddingTaskService.java`, `BiddingDependencies.java`, `BiddingAnalysisService.java`, `BiddingEmployeeBindings.java`。
+- Modify: J`BiddingSkillValidator.java`, `BiddingCommandService.java`, `BiddingTaskService.java`, `BiddingDependencies.java`, `BiddingAnalysisService.java`, `BiddingEmployeeBindings.java`, `BiddingController.java`。
 - Test: T`BiddingOutlineTest.java`, `BiddingOutlineValidatorTest.java`。
 
 **Interfaces:**
 - Consumes: confirmed ANALYSIS_BASELINE Ref、Materials.snapshot、TaskService.enqueue。
+- Produces: authorized GET `/projects/{id}/outline` → `{baselineRef,confirmed?,candidates:[]}`；confirmed/candidate 每项为 `{ref,status,payload,inputRefs}`，只返回当前可读且属于本项目的修订，失权不得返回正文。
 - Produces: `BiddingOutlineService` implements `BiddingResultHandler`，skillIds返回目录技能ID；`BiddingOutlineService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`save(Scope,Command):ObjectNode`；`confirm(Scope,Command):ObjectNode`；`static requireAcyclic(Map<String,String> parentById):void`。
 
 - [ ] 写目录循环和未确认baseline越级测试，建立真实baseline fixture后测强制技术条款/强制目录未映射不能确认。
@@ -133,11 +134,12 @@ for (String start : parentById.keySet()) {
 **Files:**
 - Create: J`BiddingWritingService.java`, `BiddingContentBlocks.java`。
 - Create: `mateclaw-server/src/main/resources/skills/bidding-technical-writing/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingSkillValidator.java`, `BiddingTaskService.java`, `BiddingCommandService.java`。
+- Modify: J`BiddingSkillValidator.java`, `BiddingTaskService.java`, `BiddingCommandService.java`, `BiddingController.java`。
 - Test: T`BiddingWritingTest.java`, `BiddingContentBlocksTest.java`。
 
 **Interfaces:**
 - Consumes: confirmed outlineRef、baselineRef、Materials.snapshot、TaskService.enqueue、Dependencies.isCurrent。
+- Produces: authorized GET `/projects/{id}/writing` → `{outlineRef,chapters:[{chapterId,title,selected?,candidates:[]}],manuscript?}`；修订各项为 `{ref,status,payload,inputRefs}`，服务器算候选当前有效性，STALE仍仅在来源可读时允许对比；失权清空/拒绝正文。
 - Produces: `BiddingWritingService` implements `BiddingResultHandler`，skillIds返回写作技能ID；`BiddingWritingService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`edit(Scope,Command):ObjectNode`；`adopt(Scope,Command):ObjectNode`；`assemble(Scope,Command):ObjectNode`。
 - Produces: `BiddingContentBlocks.validate(ObjectNode chapter,List<Ref> allowedMaterials):void`。
 
@@ -174,7 +176,7 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 ### Task 4: P2-04 补遗、材料变更与局部重新确认
 
 **Files:**
-- Modify: J`BiddingDependencies.java`, `BiddingSourceService.java`, `BiddingAnalysisService.java`, `BiddingOutlineService.java`, `BiddingWritingService.java`, `BiddingCommandService.java`。
+- Modify: J`BiddingDependencies.java`, `BiddingSourceService.java`, `BiddingAnalysisService.java`, `BiddingOutlineService.java`, `BiddingWritingService.java`, `BiddingCommandService.java`, `BiddingRepository.java`。
 - Test: T`BiddingChangeImpactTest.java`。
 
 **Interfaces:**
