@@ -107,6 +107,7 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingOutlineTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingOutlineValidatorTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java`
 
 **Interfaces:**
 - Consumes: confirmed ANALYSIS_BASELINE Ref、Materials.snapshot、TaskService.enqueue。
