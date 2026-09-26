@@ -261,6 +261,9 @@ while (!queue.isEmpty()) {
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingOutline.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWriting.test.ts`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingHandoff.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingMaterials.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`
+- Modify: `mateclaw-ui/src/types/components.d.ts`
 
 Required blueprint: `docs/superpowers/specs/2026-09-26-bidding-p2-ui-blueprint.md`.
 
