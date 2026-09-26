@@ -18,3 +18,15 @@ Independent bidding remains a MateClaw module with no bid-agent dependency. Pres
 - Preserve the task snapshot and digest, authorization and tool-read receipts. Make shared scoped system text domain-neutral while retaining read-only scope and no approval/publication constraints.
 - Regression captures the actual production-graph ChatModel prompt, rather than testing an unused template. Run focused red test before implementation, then BiddingEmployeeRuntimeTest, BiddingTaskTest and available presales runtime regressions.
 - Read-back/retry the existing failed synthetic outline task after reviewed deployment. Record actual model success/failure separately from engineering gates.
+
+### Task 2: Validate the actual P2 fixed output schemas
+
+**Files:**
+- Modify: `docs/superpowers/plans/2026-09-27-bidding-runtime-skill-dispatch.md`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java`
+
+**Interfaces:**
+- Support the local $defs/$ref, exactly-one oneOf and uniqueItems constructs present in the approved outline/writing schema files, preserving all current strict checks.
+- External, missing and cyclic references, unknown keywords, invalid variants and duplicates remain rejected. Bounded recursion prevents cyclic schemas from exhausting the runtime.
+- Red/green regressions use both bundled output schemas and malformed variants. No schema-file edits, dependencies, receipt changes or frozen-input changes.

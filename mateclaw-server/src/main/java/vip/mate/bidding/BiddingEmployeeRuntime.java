@@ -17,7 +17,8 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
     private static final java.util.Set<String> SCHEMA_KEYS = java.util.Set.of(
             "$schema", "$id", "$comment", "title", "description", "default", "examples",
             "type", "required", "properties", "additionalProperties", "items", "enum", "const",
-            "minLength", "maxLength", "pattern", "minimum", "maximum", "minItems", "maxItems");
+            "minLength", "maxLength", "pattern", "minimum", "maximum", "minItems", "maxItems",
+            "$defs", "$ref", "oneOf", "uniqueItems");
     private static final int MAX_OUTPUT_BYTES = 2 * 1024 * 1024;
     private static final Duration EXECUTION_TIMEOUT = Duration.ofSeconds(300);
 
@@ -240,6 +241,21 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
     }
 
     private static boolean validAgainstSchema(JsonNode value, JsonNode schema) {
+        return validAgainstSchema(value, schema, schema, 0);
+    }
+
+    private static boolean validAgainstSchema(JsonNode value, JsonNode schema, JsonNode root, int depth) {
+        if (depth > 32) return false;
+        if (schema.has("$ref")) {
+            JsonNode target = localDefinition(root, schema.get("$ref"));
+            if (target == null || !validAgainstSchema(value, target, root, depth + 1)) return false;
+        }
+        if (schema.has("oneOf")) {
+            int matches = 0;
+            for (JsonNode branch : schema.path("oneOf"))
+                if (validAgainstSchema(value, branch, root, depth + 1)) matches++;
+            if (matches != 1) return false;
+        }
         JsonNode type = schema.get("type");
         if (type != null && !matchesType(value, type)) return false;
         JsonNode required = schema.get("required");
@@ -253,7 +269,7 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
             var fields = properties.fields();
             while (fields.hasNext()) {
                 var field = fields.next();
-                if (value.has(field.getKey()) && !validAgainstSchema(value.get(field.getKey()), field.getValue())) return false;
+                if (value.has(field.getKey()) && !validAgainstSchema(value.get(field.getKey()), field.getValue(), root, depth + 1)) return false;
             }
         }
         JsonNode additional = schema.get("additionalProperties");
@@ -264,7 +280,7 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         }
         JsonNode items = schema.get("items");
         if (items != null && value.isArray()) for (JsonNode item : value)
-            if (!validAgainstSchema(item, items)) return false;
+            if (!validAgainstSchema(item, items, root, depth + 1)) return false;
         JsonNode choices = schema.get("enum");
         if (choices != null && (!choices.isArray() || !contains(choices, value))) return false;
         JsonNode constant = schema.get("const");
@@ -283,14 +299,37 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         if (value.isArray()) {
             if (schema.has("minItems") && value.size() < schema.path("minItems").asInt()) return false;
             if (schema.has("maxItems") && value.size() > schema.path("maxItems").asInt()) return false;
+            if (schema.path("uniqueItems").asBoolean(false)) {
+                java.util.Set<JsonNode> seen = new java.util.HashSet<>();
+                for (JsonNode item : value) if (!seen.add(item)) return false;
+            }
         }
         return true;
     }
 
     private static boolean validSchema(JsonNode schema) {
-        if (schema == null || !schema.isObject()) return false;
+        return validSchema(schema, schema, 0, new int[1]);
+    }
+
+    private static boolean validSchema(JsonNode schema, JsonNode root, int depth, int[] visited) {
+        if (++visited[0] > 8192 || depth > 32 || schema == null || !schema.isObject()) return false;
         var keys = schema.fieldNames();
         while (keys.hasNext()) if (!SCHEMA_KEYS.contains(keys.next())) return false;
+        if (schema.has("$defs")) {
+            if (!schema.path("$defs").isObject()) return false;
+            for (JsonNode definition : schema.path("$defs"))
+                if (!validSchema(definition, root, depth + 1, visited)) return false;
+        }
+        if (schema.has("$ref")) {
+            JsonNode target = localDefinition(root, schema.get("$ref"));
+            if (target == null || !validSchema(target, root, depth + 1, visited)) return false;
+        }
+        if (schema.has("oneOf")) {
+            if (!schema.path("oneOf").isArray() || schema.path("oneOf").isEmpty()) return false;
+            for (JsonNode branch : schema.path("oneOf"))
+                if (!validSchema(branch, root, depth + 1, visited)) return false;
+        }
+        if (schema.has("uniqueItems") && !schema.path("uniqueItems").isBoolean()) return false;
         JsonNode type = schema.get("type");
         if (type != null) {
             if (type.isTextual()) {
@@ -308,12 +347,12 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         if (properties != null) {
             if (!properties.isObject()) return false;
             var fields = properties.elements();
-            while (fields.hasNext()) if (!validSchema(fields.next())) return false;
+            while (fields.hasNext()) if (!validSchema(fields.next(), root, depth + 1, visited)) return false;
         }
         JsonNode additional = schema.get("additionalProperties");
         if (additional != null && !additional.isBoolean()) return false;
         JsonNode items = schema.get("items");
-        if (items != null && !validSchema(items)) return false;
+        if (items != null && !validSchema(items, root, depth + 1, visited)) return false;
         JsonNode choices = schema.get("enum");
         if (choices != null && !choices.isArray()) return false;
         for (String key : java.util.List.of("minLength", "maxLength", "minItems", "maxItems"))
@@ -326,6 +365,17 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
             catch (java.util.regex.PatternSyntaxException invalid) { return false; }
         }
         return true;
+    }
+
+    /** Only fixed-package local definitions are allowed; external and cyclic refs fail closed. */
+    private static JsonNode localDefinition(JsonNode root, JsonNode reference) {
+        if (reference == null || !reference.isTextual()) return null;
+        String path = reference.asText();
+        if (!path.startsWith("#/$defs/") || path.length() <= 8) return null;
+        String name = path.substring(8);
+        if (name.contains("/") || name.contains("~")) return null;
+        JsonNode definition = root.path("$defs").get(name);
+        return definition != null && definition.isObject() ? definition : null;
     }
 
     private static boolean isSchemaType(String type) {

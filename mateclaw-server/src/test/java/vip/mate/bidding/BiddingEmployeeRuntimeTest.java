@@ -58,6 +58,49 @@ class BiddingEmployeeRuntimeTest {
     @Autowired com.fasterxml.jackson.databind.ObjectMapper mapper;
     @MockBean ProviderChatModelFactory providerFactory;
     @MockBean BiddingAccess access;
+    @Test void validatesBundledP2OutputSchemasAndRejectsInvalidVariants() throws Exception {
+        String outlineSchema = resourceSchema("bidding-outline-planning");
+        String outline = """
+                {"schemaVersion":"1","chapters":[{"id":"c1","parentId":null,"order":0,"title":"Technical",
+                "instructions":"","mandatoryOutlineRefs":[],"requirementRefs":["r1"],"scoringRefs":[],"materialRefs":[]}],
+                "unmappedItems":[],"warnings":[]}
+                """;
+        assertNotNull(completedOutput(outline, outlineSchema).payload());
+        assertEquals("OUTPUT_INVALID", completedOutput(outline.replace("[\"r1\"]", "[\"r1\",\"r1\"]"), outlineSchema).failure().code());
+        assertEquals("OUTPUT_INVALID", completedOutput(outline.replace("\"order\":0", "\"order\":-1"), outlineSchema).failure().code());
+        String writingSchema = resourceSchema("bidding-technical-writing");
+        String writing = """
+                {"schemaVersion":"1","chapter":{"chapterId":"c1","blocks":[{"type":"paragraph","text":"Evidence unavailable"}]},
+                "responses":[],"citations":[],"missingMaterials":[],"unresolvedItems":[],"warnings":[]}
+                """;
+        assertNotNull(completedOutput(writing, writingSchema).payload());
+        assertEquals("OUTPUT_INVALID", completedOutput(writing.replace("\"paragraph\"", "\"script\""), writingSchema).failure().code());
+        assertEquals("OUTPUT_INVALID", completedOutput(writing.replace("\"text\":\"Evidence unavailable\"", "\"text\":\"\""), writingSchema).failure().code());
+        for (String schema : List.of(
+                "{\"$ref\":\"https://invalid.example/schema\"}",
+                "{\"$ref\":\"#/$defs/missing\"}",
+                "{\"$defs\":{\"loop\":{\"$ref\":\"#/$defs/loop\"}},\"$ref\":\"#/$defs/loop\"}",
+                "{\"oneOf\":[{\"type\":\"object\"},{\"type\":\"object\"}]}",
+                "{\"unknownKeyword\":true}")) {
+            assertEquals("OUTPUT_INVALID", completedOutput("{}", schema).failure().code());
+        }
+    }
+
+    private String resourceSchema(String skill) throws Exception {
+        try (var stream = getClass().getResourceAsStream("/skills/" + skill + "/output.schema.json")) {
+            assertNotNull(stream);
+            return new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+    }
+
+    private BiddingTypes.Execution completedOutput(String output, String schema) {
+        return BiddingEmployeeRuntime.readResult(Flux.just(
+                AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill")),
+                AgentService.StreamDelta.finalAnswer(output, false),
+                AgentService.StreamDelta.event("project_execution_completed", Map.of("configDigest", "config", "skillDigest", "skill"))),
+                "skill", "config", schema);
+    }
+
     @Test void rejectsPartialFinalAnswerEvenWhenItIsValidJson() {
         var stream = Flux.just(
                 AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", "skill-digest")),
@@ -132,7 +175,7 @@ class BiddingEmployeeRuntimeTest {
         assertEquals("OUTPUT_SCHEMA_MISSING", missingSchema.failure().code());
 
         var unsupportedSchema = BiddingEmployeeRuntime.readResult(stream, "skill-digest", "model-digest",
-                "{\"type\":\"object\",\"oneOf\":[{\"required\":[\"items\"]}]}");
+                "{\"type\":\"object\",\"anyOf\":[{\"required\":[\"items\"]}]}");
         assertNull(unsupportedSchema.payload());
         assertEquals("OUTPUT_INVALID", unsupportedSchema.failure().code());
     }
