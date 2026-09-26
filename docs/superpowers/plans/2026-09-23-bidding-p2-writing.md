@@ -50,6 +50,7 @@
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java`
 
 **Interfaces:**
