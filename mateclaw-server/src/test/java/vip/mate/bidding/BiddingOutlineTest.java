@@ -91,6 +91,40 @@ class BiddingOutlineTest extends BiddingHttpFixture {
         assertEquals(candidate,json.convertValue(api("GET","/projects/"+id+"/outline","owner",workspace,null,200).path("editExpectedRef"),BiddingTypes.Ref.class));
     }
 
+    @Test void oldFreeTextAndNullAnalysisReasonsRemainReadableWithoutOptingIntoDispatch() throws Exception {
+        var oldReasonProject=project(); var nullReasonProject=project();
+        insertAnalysisDecision(oldReasonProject,"legacy-free-text","确认无误");
+        insertAnalysisDecision(nullReasonProject,"legacy-null-reason",null);
+        var oldRead=api("GET","/projects/"+oldReasonProject.path("id").asText()+"/outline","owner",workspace,null,200);
+        var nullRead=api("GET","/projects/"+nullReasonProject.path("id").asText()+"/outline","owner",workspace,null,200);
+        assertFalse(oldRead.has("dispatchTodo")); assertFalse(nullRead.has("dispatchTodo"));
+    }
+
+    @Test void malformedAndEmptyOutlinePayloadsReturnValidationErrorsInsteadOfServerErrors() throws Exception {
+        var project=project(); String id=project.path("id").asText(); seedBaseline(project,false);
+        var expected=api("GET","/projects/"+id+"/outline","owner",workspace,null,200).path("editExpectedRef");
+        var missingPayload=api("POST","/projects/"+id+"/commands","member",workspace,
+                Map.of("operationId","outline-missing-payload","expected",expected,"action","SAVE_OUTLINE","payload",Map.of()),422);
+        assertTrue(missingPayload.toString().contains("OUTLINE_SCHEMA"));
+        var empty=json.createObjectNode().put("schemaVersion","1"); empty.putArray("chapters"); empty.putArray("unmappedItems"); empty.putArray("warnings");
+        var emptyResult=api("POST","/projects/"+id+"/commands","member",workspace,
+                Map.of("operationId","outline-empty-chapters","expected",expected,"action","SAVE_OUTLINE","payload",Map.of("payload",empty)),422);
+        assertTrue(emptyResult.toString().contains("OUTLINE_SCHEMA"));
+        var malformed=json.createObjectNode().put("schemaVersion","1"); var chapter=malformed.putArray("chapters").addObject();
+        chapter.put("id","chapter-1").put("order",0).put("title",7).put("instructions","respond");
+        chapter.putArray("mandatoryOutlineRefs"); chapter.putArray("requirementRefs"); chapter.putArray("scoringRefs"); chapter.putArray("materialRefs");
+        malformed.putArray("unmappedItems"); malformed.putArray("warnings");
+        var malformedResult=api("POST","/projects/"+id+"/commands","member",workspace,
+                Map.of("operationId","outline-malformed-chapter","expected",expected,"action","SAVE_OUTLINE","payload",Map.of("payload",malformed)),422);
+        assertTrue(malformedResult.toString().contains("OUTLINE_SCHEMA"));
+        assertEquals(expected,api("GET","/projects/"+id+"/outline","owner",workspace,null,200).path("editExpectedRef"));
+    }
+
+    private void insertAnalysisDecision(com.fasterxml.jackson.databind.JsonNode project,String decisionId,String reason) throws Exception {
+        jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
+                decisionId,workspace,project.path("id").asText(),"{}","CONFIRM_ANALYSIS",reason,project.path("ownerId").asText(),Timestamp.from(Instant.now()));
+    }
+
     private BaselineFixture seedBaseline(com.fasterxml.jackson.databind.JsonNode project,boolean autoPlan) throws Exception {
         String id=project.path("id").asText(); var sourceSet=new BiddingTypes.Ref("sourceSet","current",1,"source-digest");
         jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",

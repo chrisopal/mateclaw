@@ -53,14 +53,36 @@ public final class BiddingSkillValidator {
 
     /** Rejects model supplied approval state and unknown fields in outline candidates. */
     public void validateOutline(ObjectNode payload) {
-        if(payload==null || !"1".equals(payload.path("schemaVersion").asText()) || !payload.path("chapters").isArray())
+        if(payload==null || !payload.path("schemaVersion").isTextual() || !"1".equals(payload.path("schemaVersion").asText()) || !payload.path("chapters").isArray())
             throw BiddingAccess.error(422,"OUTLINE_SCHEMA","Outline schema is invalid");
         only(payload,Set.of("schemaVersion","chapters","unmappedItems","warnings"),"");
+        for(String required:List.of("schemaVersion","chapters","unmappedItems","warnings"))
+            if(!payload.has(required)) throw BiddingAccess.error(422,"OUTLINE_SCHEMA","Missing outline field: "+required);
+        if(payload.path("chapters").isEmpty()) throw BiddingAccess.error(422,"OUTLINE_SCHEMA","Outline must contain at least one chapter");
+        if(!payload.path("unmappedItems").isArray()||!payload.path("warnings").isArray())
+            throw BiddingAccess.error(422,"OUTLINE_SCHEMA","unmappedItems and warnings must be arrays");
+        for(int i=0;i<payload.path("unmappedItems").size();i++) if(!payload.path("unmappedItems").get(i).isObject())
+            throw BiddingAccess.error(422,"OUTLINE_SCHEMA","/unmappedItems/"+i+" must be an object");
+        for(int i=0;i<payload.path("warnings").size();i++) if(!payload.path("warnings").get(i).isTextual())
+            throw BiddingAccess.error(422,"OUTLINE_SCHEMA","/warnings/"+i+" must be a string");
         for(int i=0;i<payload.path("chapters").size();i++) {
             JsonNode chapter=payload.path("chapters").get(i); String at="/chapters/"+i;
+            if(!chapter.isObject()) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+" must be an object");
             only(chapter,Set.of("id","parentId","order","title","instructions","mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs"),at);
+            for(String required:List.of("id","parentId","order","title","instructions","mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs"))
+                if(!chapter.has(required)) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+" is missing "+required);
+            JsonNode id=chapter.path("id"),parent=chapter.path("parentId"),order=chapter.path("order"),title=chapter.path("title"),instructions=chapter.path("instructions");
+            if(!id.isTextual()||id.asText().isBlank()||id.asText().length()>128) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/id must be a nonempty string up to 128 characters");
+            if(!parent.isNull()&&(!parent.isTextual()||parent.asText().isBlank()||parent.asText().length()>128)) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/parentId must be null or a nonempty string up to 128 characters");
+            if(!order.isIntegralNumber()||order.asInt()<0) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/order must be a nonnegative integer");
+            if(!title.isTextual()||title.asText().isBlank()||title.asText().length()>500) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/title must be a nonempty string up to 500 characters");
+            if(!instructions.isTextual()||instructions.asText().length()>4000) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/instructions must be a string up to 4000 characters");
             for(String field:List.of("mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs"))
                 if(!chapter.path(field).isArray()) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/"+field+" must be an array");
+            for(String field:List.of("mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs")) {
+                Set<String> ids=new java.util.HashSet<>(); JsonNode values=chapter.path(field);
+                for(int j=0;j<values.size();j++) { JsonNode value=values.get(j); if(!value.isTextual()||value.asText().isBlank()||value.asText().length()>128||!ids.add(value.asText())) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/"+field+"/"+j+" must be a unique nonempty string up to 128 characters"); }
+            }
         }
     }
 

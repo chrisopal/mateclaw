@@ -29,7 +29,7 @@ public class BiddingOutlineService implements BiddingResultHandler {
     }
     @Override public Set<String> skillIds(){ return Set.of(SKILL); }
 
-    @Transactional(readOnly=true)
+    @Transactional
     public ObjectNode dispatch(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         access.requireActor(scope,scope.actorId());
         if(command==null || command.payload()==null || command.expected()==null) throw BiddingAccess.error(400,"INVALID_REQUEST","Outline dispatch needs a baseline reference");
@@ -71,7 +71,9 @@ public class BiddingOutlineService implements BiddingResultHandler {
         String requestDigest=requestDigest(command); ObjectNode replay=operation(scope,command,requestDigest); if(replay!=null)return replay;
         BiddingTypes.Ref expected=command.expected(); BiddingTypes.Ref head=head(scope); if(head==null) head=emptyHead(scope);
         if(!same(expected,head)) throw BiddingAccess.error(409,"OUTLINE_VERSION_CONFLICT","Outline changed; reload before saving");
-        ObjectNode payload=(ObjectNode)command.payload().path("payload");
+        JsonNode rawPayload=command.payload().path("payload");
+        if(!rawPayload.isObject()) throw BiddingAccess.error(422,"OUTLINE_SCHEMA","Outline payload must be an object");
+        ObjectNode payload=(ObjectNode)rawPayload;
         BiddingTypes.Ref baseline=baselineRef(scope); if(baseline==null) throw BiddingAccess.error(409,"BASELINE_NOT_CONFIRMED","Confirm analysis before editing the outline");
         List<BiddingTypes.Ref> materialRefs=selectedMaterialRefs(scope); List<BiddingTypes.Ref> inputRefs=new ArrayList<>();inputRefs.add(baseline);inputRefs.addAll(materialRefs);
         dependencies.validate(scope,inputRefs); validatePayload(payload,outlineInput(scope,baseline,materialRefs),false);
@@ -186,8 +188,10 @@ public class BiddingOutlineService implements BiddingResultHandler {
     private ObjectNode dispatchTodo(BiddingTypes.Scope scope) {
         List<ObjectNode> rows=jdbc.query("SELECT id,target_ref_json,reason FROM mate_bidding_decision WHERE workspace_id=? AND project_id=? AND decision='CONFIRM_ANALYSIS' ORDER BY created_at DESC,id DESC",
                 (rs,n)->{ObjectNode r=json.createObjectNode();r.put("decisionId",rs.getString(1));r.set("baselineRef",read(rs.getString(2)));r.put("reason",rs.getString(3));return r;},scope.workspaceId(),scope.projectId());
-        if(rows.isEmpty()) return null; ObjectNode row=rows.getFirst(); JsonNode reason=read(row.path("reason").asText("{}"));
-        if(!reason.path("autoPlanOutline").asBoolean(false)) return null;
+        if(rows.isEmpty()) return null; ObjectNode row=rows.getFirst(); String rawReason=row.path("reason").asText(null);
+        if(rawReason==null||rawReason.isBlank()) return null;
+        JsonNode reason; try{reason=json.readTree(rawReason);}catch(Exception malformedLegacyReason){return null;}
+        if(!reason.isObject()||!reason.path("autoPlanOutline").isBoolean()||!reason.path("autoPlanOutline").asBoolean()) return null;
         BiddingTypes.Ref baseline=readRef(row.path("baselineRef")); if(baseline==null) return null;
         Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND input_refs_json LIKE ?",Integer.class,
                 scope.workspaceId(),scope.projectId(),"%"+baseline.digest()+"%");

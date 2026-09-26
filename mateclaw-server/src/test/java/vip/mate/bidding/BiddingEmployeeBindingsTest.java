@@ -158,6 +158,7 @@ class BiddingEmployeeBindingsTest {
         assertEquals("QUEUED",dispatched.path("status").asText());
         String taskId=dispatched.path("taskId").asText();
         assertEquals("QUEUED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,taskId));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_operation WHERE workspace_id=? AND actor_id=? AND operation_id=?",Integer.class,scope.workspaceId(),scope.actorId(),"dispatch-outline-numeric-pin"));
         String taskSnapshot=jdbc.queryForObject("SELECT input_json FROM mate_bidding_task WHERE id=?",String.class,taskId);
         var taskInput=json.readTree(taskSnapshot);
         var frozenInput=taskInput.path("input");
