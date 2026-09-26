@@ -87,7 +87,7 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 **Files:**
 - Create: J`BiddingOutlineService.java`。
 - Create: `mateclaw-server/src/main/resources/skills/bidding-outline-planning/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingSkillValidator.java`, `BiddingCommandService.java`, `BiddingTaskService.java`。
+- Modify: J`BiddingSkillValidator.java`, `BiddingCommandService.java`, `BiddingTaskService.java`, `BiddingDependencies.java`, `BiddingAnalysisService.java`, `BiddingEmployeeBindings.java`。
 - Test: T`BiddingOutlineTest.java`, `BiddingOutlineValidatorTest.java`。
 
 **Interfaces:**
@@ -120,8 +120,11 @@ for (String start : parentById.keySet()) {
 }
 ```
 
+- [ ] 先补 Dependencies 对固定业务修订 Ref 的校验：workspace/project/kind/id/version/digest 精确匹配，baseline/outline 必须是当前选定且已确认，递归检查 input_refs_json 的来源/材料授权，禁止循环/缺失/未知引用；读路径保持 reader 授权，执行路径保留 actor 授权。不得只把业务 Ref 省掉来绕开验证。沿用 Task1 已实现的材料重授权，避免依赖环。
+- [ ] P2 编写岗位只要求目录和正文技能，不要求 P3 才交付的导出技能。更改岗位要求不静默重写旧固定包，项目必须显式重新绑定才能固定新增技能；P3 再补导出要求。Task2 单独工程验证可用明确 fixture 包；在 Task3 交付正文技能前不得宣称实跑岗位配置已完成。
+- [ ] 强制目录项没有既有 ID：由已确认 baseline 的 mandatoryOutline 数组顺序和该条规范化内容摘要生成稳定键 `mandatory-outline-<index>-<sha256>`，随输入 baselineRef 固定。不得给 P1 原结果补造 ID 或用标题作唯一键。该版全部 TECHNICAL requirement ID 必须被落叶章节覆盖；COMMERCIAL 只作待办，不能凭不存在的 mandatory 字段筛选。投影从 baseline.payload.analyses[四个稳定技能名] 取实际字段，引用和覆盖校验必须使用同一投影。
 - [ ] 注册 `DISPATCH_OUTLINE`、`SAVE_OUTLINE`、`CONFIRM_OUTLINE`。SAVE payload为完整目录候选，比较outline ref；CONFIRM payload `{outlineRef}`，真实approver且baseline当前有效，事务写decision/选定ref。模型返回的approve/status字段由additionalProperties=false拒绝。人工目录改动生成新revision，不覆盖skill原结果。
-- [ ] 在P1的CONFIRM_ANALYSIS事务接通目录自动派发（operationId派生于decision ID，唯一）；仅员工/技能配置可用且用户已确认该固定流程时创建QUEUED，缺配置存可见待办。重放确认不重复dispatch；目录确认后不越过人工意图自动重写已有正文。
+- [ ] 在P1的CONFIRM_ANALYSIS事务接通目录自动派发（operationId派生于decision ID，唯一）；仅 CONFIRM_ANALYSIS 的显式 payload.autoPlanOutline=true 才表示用户本次确认后编写目录的意图，并把该意图随 decision 持久化；员工/技能配置可用时创建QUEUED，缺配置存可见待办。旧确认与未勾选默认不自动派发。重放确认不重复dispatch；目录确认后不越过人工意图自动重写已有正文。
 - [ ] 测试：未确认baseline不派发、目录候选不解锁批量写作、空目录/循环/跨项目refs拒绝、角色不足403、强制覆盖缺失422、同decision重放只有一组任务。Run前两测试+P1 analysis回归，Expected PASS。
 - [ ] Commit：`git commit -m "Require an approved and traceable technical outline before writing" -m "Tested: Outline structure, coverage and confirmation gates"`。
 
@@ -213,9 +216,10 @@ while (!queue.isEmpty()) {
 
 **Files:**
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`, `BiddingMaterials.vue`, `BiddingOutline.vue`, `BiddingWriting.vue`, `BiddingCandidateCompare.vue`（同 components 根）。
-- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`, `api/biddingApi.ts`, `api/types.ts`（同 bidding 根）。
+- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`, `api/biddingApi.ts`, `api/types.ts`, `shared/state.ts`（同 bidding 根）；`components/BiddingAnalysis.vue` 增加明确的确认后编写目录选项。
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingOutline.test.ts`, `biddingWriting.test.ts`, `biddingHandoff.test.ts`。
 - Create: `docs/bidding/acceptance/2026-09-23-p2.md`。
+- Required blueprint: `docs/superpowers/specs/2026-09-26-bidding-p2-ui-blueprint.md`。
 
 **Interfaces:**
 - Consumes: P2全部已定义Commands与精确Ref；P1 TaskDrawer/EvidenceDrawer；共用成员/员工列表。
