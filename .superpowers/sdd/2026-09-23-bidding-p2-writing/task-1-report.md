@@ -27,15 +27,17 @@ Fields such as `solutionVersion` and `publishedAt` are omitted when absent in th
 
 `GET /api/v1/bidding/projects/{id}/materials` returns `{ "items": [...] }`. A readable presales entry includes `source:"PRESALES_RELEASE"`, `releaseId`, `receivedAt`, `digest`, `validity:"VALID"`, `ref:{"kind":"material","id":"presales:pre-1:release-1","version":1,"digest":"<sha256>"}`, `title`, and stored optional version/date metadata. A readable wiki entry includes its same fixed ref, title, applicability, and selection time. For revoked/unavailable origins, entries retain ref/status metadata with `validity:"UNAVAILABLE"`; title/applicability/content are omitted.
 
-A material snapshot returns `{ "items": [{"ref":...,"source":"PRESALES_RELEASE","content":<frozen handoff>,"validity":"VALID"}] }` for a selected presales ref. Task inputs therefore use the same fixed-ref form for wiki and presales materials.
+A material snapshot returns `{ "items": [{"ref":...,"source":"PRESALES_RELEASE","title":"Example solution","applicability":"已发布售前版本的冻结交接资料","selectedAt":"<receipt timestamp>","content":<frozen handoff>,"validity":"VALID"}] }` for a selected presales ref. Task inputs therefore use the same fixed-ref form for wiki and presales materials.
 
 ## Verification
 
 - Java: Temurin 21.0.7 at `/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home`.
 - `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='BiddingHandoffTest,BiddingMaterialsTest,BiddingMigrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 6 tests, 0 failures/errors.
-- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='Bidding*Test,PresalesIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 125 tests, 0 failures/errors; includes bidding runtime, migration/isolation, materials, handoff, and presales integration coverage.
+- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='BiddingHandoffReceiptTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 1 real HTTP/H2 receipt regression.
+- `JAVA_HOME=... mvn -pl mateclaw-server -am -Dtest='Bidding*Test,PresalesIntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 126 tests, 0 failures/errors; includes bidding runtime, migration/isolation, materials, handoff, receipt persistence, and presales integration coverage.
 - `JAVA_HOME=... mvn -pl mateclaw-server -am -DskipTests -Dmaven.compiler.proc=full compile` — PASS.
 - `git diff --check` — PASS.
 - V215 migration assertion now verifies the exact 11 bidding tables while retaining historical Presales/Semantic row preservation and bidding data-isolation assertions.
+- Real receipt regression asserts first HTTP receipt persistence (one handoff and one presales material), same-operation HTTP replay, different-operation HTTP 409 with a fresh ref, and unchanged project ref/table counts after rejection. The disabled-Presales test now only claims independent project/material-list behavior.
 - The presales integration regression now adds a clarification after approval but before publication, confirms that clarification is in the published handoff, then adds a later clarification and confirms the published handoff remains unchanged.
 - Not tested: migration execution against live MySQL/Kingbase databases; no runtime DB or external tender data was used. Red-before-implementation TDD evidence was not captured; tests were run during implementation and the final targeted set passes.

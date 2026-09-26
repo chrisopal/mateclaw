@@ -61,9 +61,7 @@ class BiddingHandoffTest extends BiddingHttpFixture {
                 ()->service.receive(scope,new BiddingTypes.Command("new-op",expected,"RECEIVE_HANDOFF",changed))).code());
     }
 
-    @Test void sameReleaseCanBeReceivedOnlyOnceAndDifferentOperationConflicts() throws Exception {
-        // This fixture deliberately disables presales. The endpoint proves the independent path remains live;
-        // versioned receipt behavior is covered by PresalesIntegrationTest's frozen-revision contract.
+    @Test void materialsListingWorksForIndependentProjectWithPresalesDisabled() throws Exception {
         var p=project();
         assertEquals("SETUP",p.path("stage").asText());
         assertTrue(api("GET","/projects/"+p.path("id").asText()+"/materials","member",workspace,null,200).path("items").isArray());
