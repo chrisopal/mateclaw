@@ -218,7 +218,7 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 
 **Interfaces:**
 - Consumes: P1 Dependencies.validate/isCurrent/invalidate、所有业务revision.inputRefs及当前head。
-- Produces: authenticated GET `/api/v1/bidding/projects/{id}/change-impact` returns `{events:[{eventId,changedRef,replacementRef,status,impact:{affectedRefs,unaffectedRefs,unknownRefs,formalBlocked}}],formalBlocked}`. Persist old-to-new transitions; expose every pending event, recheck origin authorization, and never mutate during a read. Confirmation uses scoped project expected Ref and operation idempotency.
+- Produces: authenticated GET `/api/v1/bidding/projects/{id}/change-impact` returns `{events:[{eventId,changedRef,replacementRef,status,impact:{affectedRefs,unaffectedRefs,unknownRefs,formalBlocked}}],formalBlocked}`. Persist old-to-new transitions; expose every pending event, recheck origin authorization, and never mutate during a read. Optional event.refLabels supplies business titles. Optional event.confirmation={ready:true,payload:{eventId,changedRef,unchangedRefs,resolutions}} is issued only from current server semantic proof; UI may submit this exact envelope with scoped project expected Ref and operation idempotency. Confirmation selectively creates new associations for proven unaffected chapters and never clears affected/unknown content by caller assertion.
 - Produces: `BiddingDependencies.impact(Scope,Ref changed):ObjectNode` 返回 `{affectedRefs,unaffectedRefs,unknownRefs,formalBlocked}`；`reconfirm(Scope,Command):ObjectNode`，action `CONFIRM_CHANGE_IMPACT`。
 
 - [ ] 为真实DB构造source→baseline→outline→两chapter→manuscript引用链；source变更仅直接引用一章，另一章有可证明未影响的refs。测试最初两章都不能绕过未知影响直接导出，确认影响后只恢复未受影响部分。
@@ -255,6 +255,8 @@ while (!queue.isEmpty()) {
 ### Task 5: P2-05 接通版本接收、目录与正文工作区
 
 **Files:**
+- Modify: `mateclaw-ui/src/features/bidding/components/BiddingOverview.vue`
+- Modify: `mateclaw-ui/src/main.ts`
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingChangeImpact.vue`
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingChangeImpact.test.ts`
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`
