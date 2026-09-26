@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Dispatches fixed analysis packages and owns candidate and confirmed baseline revisions. */
@@ -29,12 +30,13 @@ public class BiddingAnalysisService implements BiddingResultHandler {
     private final BiddingAccess access;
     private final BiddingProjectService projects;
     private final BiddingSkillValidator validator;
+    private final ObjectProvider<BiddingOutlineService> outlines;
 
     public BiddingAnalysisService(JdbcTemplate jdbc, ObjectMapper json, BiddingTaskService tasks,
             BiddingRepository repository, BiddingSourceService sources, BiddingDependencies dependencies, BiddingAccess access,
-            BiddingProjectService projects, BiddingSkillValidator validator) {
+            BiddingProjectService projects, BiddingSkillValidator validator,ObjectProvider<BiddingOutlineService> outlines) {
         this.jdbc = jdbc; this.json = json; this.tasks = tasks; this.repository = repository; this.sources = sources;
-        this.dependencies = dependencies; this.access = access; this.projects = projects; this.validator = validator;
+        this.dependencies = dependencies; this.access = access; this.projects = projects; this.validator = validator; this.outlines=outlines;
     }
 
     @Override public Set<String> skillIds() { return Set.copyOf(SKILLS); }
@@ -274,11 +276,17 @@ public class BiddingAnalysisService implements BiddingResultHandler {
         if (inserted != 1) throw BiddingAccess.error(409, "ANALYSIS_BASELINE_CONFLICT", "Baseline could not be stored");
         BiddingTypes.Ref baselineRef = new BiddingTypes.Ref(kind, objectId, version, digest);
         replaceHead(scope, baselineRef);
+        String decisionId=UUID.randomUUID().toString(); boolean autoPlan=command.payload().path("autoPlanOutline").asBoolean(false);
         jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
-                UUID.randomUUID().toString(), scope.workspaceId(), scope.projectId(), write(baselineRef), "CONFIRM_ANALYSIS",
-                command.payload().path("reason").asText(null), scope.actorId(), now);
+                decisionId, scope.workspaceId(), scope.projectId(), write(baselineRef), "CONFIRM_ANALYSIS",
+                write(Map.of("reason",command.payload().path("reason").asText(""),"autoPlanOutline",autoPlan)), scope.actorId(), now);
         ObjectNode result = json.createObjectNode(); result.set("ref", json.valueToTree(baselineRef)); result.set("baseline", baseline);
         result.put("nextStageState", "CONFIGURATION_REQUIRED");
+        if(autoPlan) {
+            ObjectNode dispatchPayload=json.createObjectNode(); dispatchPayload.set("baselineRef",json.valueToTree(baselineRef));
+            ObjectNode dispatched=outlines.getObject().dispatch(scope,new BiddingTypes.Command("outline-auto:"+decisionId,baselineRef,"DISPATCH_OUTLINE",dispatchPayload));
+            result.set("outlineDispatch",dispatched);
+        }
         saveOperation(scope, command.operationId(), requestDigest, result); return result;
     }
 

@@ -2,6 +2,7 @@ package vip.mate.bidding;
 
 import java.util.List;
 import java.util.Set;
+import java.util.LinkedHashSet;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,10 +22,48 @@ public class BiddingDependencies {
         validateRefs(scope,refs);
     }
 
+    /** Allows readable historical revisions to be compared after their selected heads move. */
+    public void validateForComparisonRead(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
+        access.requireReaderActor(scope,scope.actorId());
+        validateHistoricalRefs(scope,refs,new LinkedHashSet<>());
+    }
+
+    private void validateHistoricalRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs,Set<String> visiting) {
+        if(refs==null||refs.isEmpty()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
+        for(var ref:refs) {
+            if(ref==null||ref.id()==null||ref.version()<1) throw BiddingAccess.error(422,"SOURCE_REF_INVALID","A source reference is invalid");
+            String key=ref.kind()+":"+ref.id()+":"+ref.version()+":"+ref.digest();
+            if(!visiting.add(key)) throw BiddingAccess.error(422,"DEPENDENCY_CYCLE","Revision dependencies contain a cycle");
+            if("source".equals(ref.kind())) {
+                var source=repository.source(scope.workspaceId(),scope.projectId(),ref.id(),ref.version());
+                if(source==null||!source.digest().equals(ref.digest())) throw BiddingAccess.error(404,"NOT_FOUND","Source not found");
+                if(!Set.of("READY","NEEDS_REVIEW").contains(source.status())) throw BiddingAccess.error(422,"SOURCE_NOT_READY","Source reading is incomplete");
+            } else if("material".equals(ref.kind())) {
+                var project=repository.findProject(scope.workspaceId(),scope.projectId());
+                String agent=project==null?"":project.path("bindings").path("writer").path("agentId").asText("");
+                materials.requireReadable(scope,agent,ref);
+            } else if("sourceSet".equals(ref.kind())) {
+                if(!repository.revisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
+            } else if(Set.of("analysisBaseline","outline").contains(ref.kind())) {
+                var row=repository.businessRevision(scope,ref);
+                if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Business revision not found");
+                Set<String> permitted=Set.of("CONFIRMED","NEEDS_RECONFIRMATION","CANDIDATE");
+                if(!permitted.contains(row.path("status").asText())) throw BiddingAccess.error(422,"DEPENDENCY_NOT_CONFIRMED","Historical revision is not readable");
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
+            } else throw BiddingAccess.error(422,"SOURCE_REF_INVALID","Unsupported fixed reference kind");
+            visiting.remove(key);
+        }
+    }
+
     private void validateRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
+        validateRefs(scope,refs,new LinkedHashSet<>());
+    }
+    private void validateRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs,Set<String> visiting) {
         if (refs == null || refs.isEmpty()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
         for (var ref : refs) {
             if (ref == null || ref.id() == null || ref.version() < 1) throw BiddingAccess.error(422,"SOURCE_REF_INVALID","A source reference is invalid");
+            String key=ref.kind()+":"+ref.id()+":"+ref.version()+":"+ref.digest();
+            if(!visiting.add(key)) throw BiddingAccess.error(422,"DEPENDENCY_CYCLE","Revision dependencies contain a cycle");
             if ("source".equals(ref.kind())) {
                 var source=repository.source(scope.workspaceId(),scope.projectId(),ref.id(),ref.version());
                 if (source == null || !source.digest().equals(ref.digest())) throw BiddingAccess.error(404,"NOT_FOUND","Source not found");
@@ -37,7 +76,14 @@ public class BiddingDependencies {
                 var project=repository.findProject(scope.workspaceId(),scope.projectId());
                 String agentId=project==null?"":project.path("bindings").path("writer").path("agentId").asText("");
                 materials.requireReadable(scope,agentId,ref);
+            } else if (Set.of("analysisBaseline","outline").contains(ref.kind())) {
+                var row=repository.businessRevision(scope,ref);
+                if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Business revision not found");
+                if(!"CONFIRMED".equals(row.path("status").asText())) throw BiddingAccess.error(422,"DEPENDENCY_NOT_CONFIRMED","Business revision is not confirmed");
+                if(!repository.isSelectedBusinessRevision(scope,ref)) throw BiddingAccess.error(409,"DEPENDENCY_STALE","Business revision is no longer selected");
+                validateRefs(scope,repository.businessRefs(row),visiting);
             } else throw BiddingAccess.error(422,"SOURCE_REF_INVALID","Unsupported fixed reference kind");
+            visiting.remove(key);
         }
     }
     public boolean isCurrent(BiddingTypes.Scope scope, List<BiddingTypes.Ref> refs) { try { validate(scope,refs); return true; } catch(BiddingApiException e) { if (e.status()==404 || e.status()==409 || e.status()==422) return false; throw e; } }

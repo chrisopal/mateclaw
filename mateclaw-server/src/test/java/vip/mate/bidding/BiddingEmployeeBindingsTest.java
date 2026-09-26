@@ -48,6 +48,7 @@ class BiddingEmployeeBindingsTest {
     @Autowired BiddingSkillPackages packages;
     @Autowired BiddingEmployeeBindings employeeBindings;
     @Autowired BiddingProjectService projects;
+    @Autowired BiddingOutlineService outlines;
     @Autowired BiddingController controller;
     @Autowired ModelConfigService modelConfigs;
     @Autowired ModelProviderService modelProviders;
@@ -56,7 +57,7 @@ class BiddingEmployeeBindingsTest {
 
     private static final Map<String, List<String>> ROLE_SKILLS = Map.of(
             "analyst", List.of("bidding-tender-profile", "bidding-elimination-analysis", "bidding-requirement-analysis", "bidding-scoring-analysis"),
-            "writer", List.of("bidding-outline-planning", "bidding-technical-writing", "bidding-document-export"),
+            "writer", List.of("bidding-outline-planning", "bidding-technical-writing"),
             "reviewer", List.of("bidding-technical-review"));
     private final Map<String, Long> skillIds = new java.util.LinkedHashMap<>();
     private final Map<Long, Path> skillDirectories = new java.util.HashMap<>();
@@ -132,6 +133,36 @@ class BiddingEmployeeBindingsTest {
         assertEquals(4, projects.execute(scope, new BiddingTypes.Command("edit-again-" + UUID.randomUUID(),
                 json.convertValue(updated.path("result").path("ref"), BiddingTypes.Ref.class), "UPDATE_PROJECT", json.createObjectNode().put("lotName", "next")))
                 .path("result").path("version").asInt());
+    }
+
+    @Test void outlineDispatchResolvesTheWriterPinByNumericSkillIdAndStoresFrozenInput() throws Exception {
+        var created=newProject(); var initialScope=scopeFor(created);
+        var assignment=employeeBindings.assign(initialScope,assignCommand(created)).path("result");
+        var projectScope=new BiddingTypes.Scope(scope.workspaceId(),scope.actorId(),created.path("id").asText());
+        String projectId=projectScope.projectId(); String outlineSkill=Long.toString(skillIds.get("bidding-outline-planning"));
+        String outlineDigest=null;
+        for(JsonNode pin:assignment.path("bindings").path("writer").path("skillPins")) if(outlineSkill.equals(pin.path("skillId").asText())) outlineDigest=pin.path("digest").asText();
+        assertNotNull(outlineDigest,"assigned writer must have a numeric pinned id for the outline skill");
+        var sourceSet=new BiddingTypes.Ref("sourceSet","current",1,"source-set-outline");
+        jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                UUID.randomUUID().toString(),scope.workspaceId(),projectId,"sourceSet","current",1,"{\"sourceRefs\":[]}","[]","CONFIRMED",sourceSet.digest(),java.sql.Timestamp.from(java.time.Instant.now()));
+        jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",scope.workspaceId(),projectId,"sourceSet","current",1,json.writeValueAsString(sourceSet));
+        var baselinePayload=json.createObjectNode().put("schemaVersion","1"); var analyses=baselinePayload.putObject("analyses");
+        var profile=analyses.putObject("bidding-tender-profile"); profile.set("basicInfo",json.createObjectNode()); profile.putArray("mandatoryOutline").addObject().put("name","mandatory test").put("value","include");
+        analyses.putObject("bidding-requirement-analysis").putArray("requirements"); analyses.putObject("bidding-scoring-analysis").putArray("criteria"); analyses.putObject("bidding-elimination-analysis").putArray("items");
+        var baseline=new BiddingTypes.Ref("analysisBaseline","current",1,"analysis-baseline-outline");
+        jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                UUID.randomUUID().toString(),scope.workspaceId(),projectId,"analysisBaseline","current",1,json.writeValueAsString(baselinePayload),json.writeValueAsString(List.of(sourceSet)),"CONFIRMED",baseline.digest(),java.sql.Timestamp.from(java.time.Instant.now()));
+        jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",scope.workspaceId(),projectId,"analysisBaseline","current",1,json.writeValueAsString(baseline));
+        var dispatched=outlines.dispatch(projectScope,new BiddingTypes.Command("dispatch-outline-numeric-pin",baseline,"DISPATCH_OUTLINE",json.createObjectNode()));
+        assertEquals("QUEUED",dispatched.path("status").asText());
+        String taskId=dispatched.path("taskId").asText();
+        assertEquals("QUEUED",jdbc.queryForObject("SELECT status FROM mate_bidding_task WHERE id=?",String.class,taskId));
+        String taskSnapshot=jdbc.queryForObject("SELECT input_json FROM mate_bidding_task WHERE id=?",String.class,taskId);
+        var taskInput=json.readTree(taskSnapshot);
+        var frozenInput=taskInput.path("input");
+        assertTrue(frozenInput.has("baselineRef"),taskSnapshot); assertTrue(frozenInput.path("profile").path("mandatoryOutline").isArray(),taskSnapshot); assertTrue(frozenInput.path("materials").path("items").isArray(),taskSnapshot);
+        assertEquals(outlineSkill,jdbc.queryForObject("SELECT skill_id FROM mate_bidding_skill_package WHERE workspace_id=? AND project_id=? AND digest=?",String.class,scope.workspaceId(),projectId,outlineDigest));
     }
 
     @Test void oneEmployeeCanFillAnalystAndWriterWithoutImmediateConfigDrift() throws Exception {
@@ -323,6 +354,7 @@ class BiddingEmployeeBindingsTest {
         Path directory = Files.createDirectory(temp.resolve("skill-" + id));
         Files.writeString(directory.resolve("SKILL.md"), "---\nname: " + name + "\ndescription: test\n---\n" + content);
         Files.writeString(directory.resolve("input.schema.json"), "{\"version\":1}");
+        if("bidding-outline-planning".equals(name)) Files.writeString(directory.resolve("output.schema.json"),"{\"type\":\"object\",\"additionalProperties\":false}");
         skillIds.put(name, id); skillDirectories.put(id, directory);
         jdbc.update("INSERT INTO mate_skill(id,name,skill_type,version,skill_content,config_json,enabled,builtin,workspace_id,create_time,update_time,deleted) VALUES(?,?,'custom','1.0.0',?,?,TRUE,FALSE,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
                 id, name, Files.readString(directory.resolve("SKILL.md")), json.writeValueAsString(Map.of("skillDir", directory.toString())));

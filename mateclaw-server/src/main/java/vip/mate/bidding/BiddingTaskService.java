@@ -23,7 +23,7 @@ public class BiddingTaskService {
     private static final int MAX_INPUT_BYTES=2*1024*1024;
     private static final Map<String,Set<String>> ROLE_SKILLS=Map.of(
         "analyst",Set.of("bidding-tender-profile","bidding-elimination-analysis","bidding-requirement-analysis","bidding-scoring-analysis"),
-        "writer",Set.of("bidding-outline-planning","bidding-technical-writing","bidding-document-export"),
+        "writer",Set.of("bidding-outline-planning","bidding-technical-writing"),
         "reviewer",Set.of("bidding-technical-review"));
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;

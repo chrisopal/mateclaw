@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "chapters", "unmappedItems", "warnings"],
+  "properties": {
+    "schemaVersion": { "const": "1" },
+    "chapters": { "type": "array", "maxItems": 300, "items": { "$ref": "#/$defs/chapter" } },
+    "unmappedItems": { "type": "array", "items": { "type": "object" } },
+    "warnings": { "type": "array", "items": { "type": "string", "maxLength": 1000 } }
+  },
+  "$defs": {
+    "chapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "parentId", "order", "title", "instructions", "mandatoryOutlineRefs", "requirementRefs", "scoringRefs", "materialRefs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "parentId": { "type": ["string", "null"], "maxLength": 128 },
+        "order": { "type": "integer", "minimum": 0 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "instructions": { "type": "string", "maxLength": 4000 },
+        "mandatoryOutlineRefs": { "$ref": "#/$defs/ids" },
+        "requirementRefs": { "$ref": "#/$defs/ids" },
+        "scoringRefs": { "$ref": "#/$defs/ids" },
+        "materialRefs": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 128 } }
+  }
+}

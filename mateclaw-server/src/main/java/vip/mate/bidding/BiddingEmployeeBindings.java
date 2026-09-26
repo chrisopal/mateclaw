@@ -36,7 +36,7 @@ public class BiddingEmployeeBindings {
     private static final List<String> ROLES = List.of("analyst", "writer", "reviewer");
     private static final Map<String, List<String>> REQUIRED_SKILLS = Map.of(
             "analyst", List.of("bidding-tender-profile", "bidding-elimination-analysis", "bidding-requirement-analysis", "bidding-scoring-analysis"),
-            "writer", List.of("bidding-outline-planning", "bidding-technical-writing", "bidding-document-export"),
+            "writer", List.of("bidding-outline-planning", "bidding-technical-writing"),
             "reviewer", List.of("bidding-technical-review"));
     private final AgentService agents;
     private final AgentBindingService agentBindings;

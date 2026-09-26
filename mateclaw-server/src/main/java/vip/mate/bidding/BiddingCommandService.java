@@ -13,10 +13,11 @@ public class BiddingCommandService {
     private final ObjectProvider<BiddingAnalysisService> analysis;
     private final ObjectProvider<BiddingHandoffService> handoffs;
     private final ObjectProvider<BiddingMaterials> materials;
+    private final ObjectProvider<BiddingOutlineService> outlines;
     public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,ObjectProvider<BiddingEmployeeBindings> employees,
             ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials) {
-        this.projects=projects; this.sources=sources; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials;
+            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines) {
+        this.projects=projects; this.sources=sources; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines;
     }
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
@@ -31,6 +32,9 @@ public class BiddingCommandService {
             case "CONFIRM_ANALYSIS" -> analysis.getObject().confirm(scope,command);
             case "RECEIVE_HANDOFF" -> handoffs.getObject().receive(scope,command);
             case "BIND_MATERIAL" -> materials.getObject().bind(scope,command);
+            case "DISPATCH_OUTLINE" -> outlines.getObject().dispatch(scope,command);
+            case "SAVE_OUTLINE" -> outlines.getObject().save(scope,command);
+            case "CONFIRM_OUTLINE" -> outlines.getObject().confirm(scope,command);
             default -> projects.execute(scope,command);
         };
     }

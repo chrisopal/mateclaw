@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "baselineRef", "profile", "requirements", "criteria", "eliminationItems", "materials"],
+  "properties": {
+    "schemaVersion": { "const": "1" },
+    "baselineRef": { "$ref": "#/$defs/ref" },
+    "profile": { "type": "object" },
+    "requirements": { "type": "array", "items": { "type": "object", "required": ["id", "category"], "properties": { "id": { "type": "string", "minLength": 1 }, "category": { "enum": ["TECHNICAL", "COMMERCIAL"] } } } },
+    "criteria": { "type": "array", "items": { "type": "object", "required": ["id"], "properties": { "id": { "type": "string", "minLength": 1 } } } },
+    "eliminationItems": { "type": "array", "items": { "type": "object" } },
+    "materials": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": { "type": "array", "items": { "type": "object", "required": ["ref", "content", "source", "validity"], "properties": { "ref": { "$ref": "#/$defs/ref" }, "content": {}, "source": { "type": "string" }, "validity": { "const": "VALID" } } } }
+      }
+    }
+  },
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "version", "digest"],
+      "properties": { "kind": { "type": "string" }, "id": { "type": "string" }, "version": { "type": "integer", "minimum": 1 }, "digest": { "type": "string", "minLength": 1 } }
+    }
+  }
+}

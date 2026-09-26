@@ -24,12 +24,13 @@ public class BiddingController {
     private final ObjectProvider<BiddingAnalysisService> analysis;
     private final ObjectProvider<BiddingHandoffService> handoffs;
     private final ObjectProvider<BiddingMaterials> materials;
+    private final ObjectProvider<BiddingOutlineService> outlines;
     private final ObjectMapper json;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
             BiddingSourceService sources, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectProvider<BiddingOutlineService> outlines, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
@@ -39,6 +40,7 @@ public class BiddingController {
         this.analysis = analysis;
         this.handoffs = handoffs;
         this.materials = materials;
+        this.outlines = outlines;
         this.json = json;
         this.jdbc = jdbc;
     }
@@ -100,6 +102,10 @@ public class BiddingController {
     @GetMapping("/projects/{id}/analysis")
     public R<?> analysis(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
         String actor=access.require(workspace,"viewer"); return R.ok(analysis.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    }
+    @GetMapping("/projects/{id}/outline")
+    public R<?> outline(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
+        String actor=access.require(workspace,"viewer"); return R.ok(outlines.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
     }
     @GetMapping("/projects/{id}/revisions/{revisionId}")
     public R<?> revision(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String revisionId) {

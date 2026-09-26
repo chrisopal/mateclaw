@@ -51,6 +51,19 @@ public final class BiddingSkillValidator {
         }
     }
 
+    /** Rejects model supplied approval state and unknown fields in outline candidates. */
+    public void validateOutline(ObjectNode payload) {
+        if(payload==null || !"1".equals(payload.path("schemaVersion").asText()) || !payload.path("chapters").isArray())
+            throw BiddingAccess.error(422,"OUTLINE_SCHEMA","Outline schema is invalid");
+        only(payload,Set.of("schemaVersion","chapters","unmappedItems","warnings"),"");
+        for(int i=0;i<payload.path("chapters").size();i++) {
+            JsonNode chapter=payload.path("chapters").get(i); String at="/chapters/"+i;
+            only(chapter,Set.of("id","parentId","order","title","instructions","mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs"),at);
+            for(String field:List.of("mandatoryOutlineRefs","requirementRefs","scoringRefs","materialRefs"))
+                if(!chapter.path(field).isArray()) throw BiddingAccess.error(422,"OUTLINE_SCHEMA",at+"/"+field+" must be an array");
+        }
+    }
+
     private static Set<String> rootKeys(String skill) {
         Set<String> keys = new HashSet<>(Set.of("schemaVersion", "coverage", "warnings"));
         keys.add(switch (skill) {

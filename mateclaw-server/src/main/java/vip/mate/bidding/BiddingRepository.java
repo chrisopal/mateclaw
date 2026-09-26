@@ -368,6 +368,19 @@ public class BiddingRepository {
             Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),Integer.class);
         return count!=null && count==1;
     }
+    public ObjectNode businessRevision(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        try {
+            String payload=jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object AND version=:version AND digest=:digest",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),String.class);
+            String status=jdbc.queryForObject("SELECT status FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object AND version=:version AND digest=:digest",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),String.class);
+            String refs=jdbc.queryForObject("SELECT input_refs_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object AND version=:version AND digest=:digest",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),String.class);
+            ObjectNode result=parseObject(payload); result.put("status",status); result.set("refs",json.valueToTree(readRefs(refs))); return result;
+        } catch(org.springframework.dao.EmptyResultDataAccessException absent) { return null; }
+    }
+    public List<BiddingTypes.Ref> businessRefs(ObjectNode revision) { try { return json.convertValue(revision.path("refs"),new com.fasterxml.jackson.core.type.TypeReference<List<BiddingTypes.Ref>>(){}); } catch(Exception e) { throw BiddingAccess.error(422,"DEPENDENCY_INVALID","Business revision references are invalid"); } }
+    public boolean isSelectedBusinessRevision(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        try { String selected=jdbc.queryForObject("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id()),String.class); ObjectNode node=parseObject(selected); return node.path("version").asLong()==ref.version()&&node.path("digest").asText().equals(ref.digest()); }
+        catch(org.springframework.dao.EmptyResultDataAccessException absent){return false;}
+    }
     public boolean dependenciesCurrent(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
         try { var head=jdbc.queryForObject("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current'",Map.of("w",scope.workspaceId(),"p",scope.projectId()),String.class);
             return refs.stream().anyMatch(ref -> ref.kind().equals("sourceSet") && ref.digest().equals(parseObject(head).path("digest").asText()));
