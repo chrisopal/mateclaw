@@ -171,7 +171,7 @@ for (String start : parentById.keySet()) {
 - Produces: `BiddingWritingService` implements `BiddingResultHandler`，skillIds返回写作技能ID；`BiddingWritingService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`edit(Scope,Command):ObjectNode`；`adopt(Scope,Command):ObjectNode`；`assemble(Scope,Command):ObjectNode`。
 - Produces: `BiddingContentBlocks.validate(ObjectNode chapter,List<Ref> allowedMaterials):void`。
 
-- [ ] 写不可信内容块拒绝测试、真实DB的迟到候选/两章节并行测试。恶意路径不应走到渲染器。
+- [ ] 写不可信内容块拒绝测试、真实DB的迟到候选/两章节独立任务测试（沿用P1每工作区同时一项、全局最多两项的调度约束）。恶意路径不应走到渲染器。
 
 ```java
 @Test void writingCannotEmbedLocalFilesOrRawHtml() throws Exception {
@@ -200,12 +200,13 @@ WHERE workspace_id=:workspaceId AND project_id=:projectId
 
 head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有历史 revision 内容不可变。0行则409，同一operation重放返回已保存结果，不重复递增版本。
 - [ ] `ASSEMBLE_MANUSCRIPT` payload `{outlineRef,chapterRefs}`，按确认目录顺序创建不可变MANUSCRIPT，所有选定章节与引用精确包含；有缺材料可存草稿但不能伪装审定。相同refs摘要去重。整本写作完成后自动派发审核接线在P3-01实现，P2显示“待审核”业务状态。
-- [ ] 测试：并行两章均能完成；人工改章后旧任务标STALE且不更新指针；重复采用不双增版本；空章/未映射技术需求不能组装完整稿；跨项目材料拒绝；输出超限明确失败，JSON成功不代表有材料依据。
+- [ ] 测试：两章独立持久化、均能完成，工作区容量限制不允许越过；人工改章后旧任务标STALE且不更新指针；重复采用不双增版本；空章/未映射技术需求不能组装完整稿；跨项目材料拒绝；输出超限明确失败，JSON成功不代表有材料依据。
 - [ ] Run前两测试+P1 Task/Retry回归，Expected PASS。Commit：`git commit -m "Protect human chapter revisions while digital employees write independently" -m "Tested: Chapter CAS, batch isolation and explicit candidate adoption"`。
 
 ### Task 4: P2-04 补遗、材料变更与局部重新确认
 
 **Files:**
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
@@ -217,6 +218,7 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 
 **Interfaces:**
 - Consumes: P1 Dependencies.validate/isCurrent/invalidate、所有业务revision.inputRefs及当前head。
+- Produces: authenticated GET `/api/v1/bidding/projects/{id}/change-impact` returns `{events:[{eventId,changedRef,replacementRef,status,impact:{affectedRefs,unaffectedRefs,unknownRefs,formalBlocked}}],formalBlocked}`. Persist old-to-new transitions; expose every pending event, recheck origin authorization, and never mutate during a read. Confirmation uses scoped project expected Ref and operation idempotency.
 - Produces: `BiddingDependencies.impact(Scope,Ref changed):ObjectNode` 返回 `{affectedRefs,unaffectedRefs,unknownRefs,formalBlocked}`；`reconfirm(Scope,Command):ObjectNode`，action `CONFIRM_CHANGE_IMPACT`。
 
 - [ ] 为真实DB构造source→baseline→outline→两chapter→manuscript引用链；source变更仅直接引用一章，另一章有可证明未影响的refs。测试最初两章都不能绕过未知影响直接导出，确认影响后只恢复未受影响部分。
@@ -253,6 +255,8 @@ while (!queue.isEmpty()) {
 ### Task 5: P2-05 接通版本接收、目录与正文工作区
 
 **Files:**
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingChangeImpact.vue`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingChangeImpact.test.ts`
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingMaterials.vue`
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingOutline.vue`
