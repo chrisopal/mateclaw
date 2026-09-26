@@ -30,3 +30,14 @@ Independent bidding remains a MateClaw module with no bid-agent dependency. Pres
 - Support the local $defs/$ref, exactly-one oneOf and uniqueItems constructs present in the approved outline/writing schema files, preserving all current strict checks.
 - External, missing and cyclic references, unknown keywords, invalid variants and duplicates remain rejected. Bounded recursion prevents cyclic schemas from exhausting the runtime.
 - Red/green regressions use both bundled output schemas and malformed variants. No schema-file edits, dependencies, receipt changes or frozen-input changes.
+
+### Task 3: Clarify requirement response identity for chapter execution
+
+**Files:**
+- Modify: `docs/superpowers/plans/2026-09-27-bidding-runtime-skill-dispatch.md`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java`
+
+**Interfaces:**
+- Actual chapter generation/retry exposed criterion IDs incorrectly placed in responses[].requirementRef. Supply explicit runtime instructions reflecting existing fixed business validation: responses only identify assigned requirements[].id, empty assigned requirements means empty responses; criteria IDs remain criterionRef citations and unresolvedItems when needed.
+- Preserve schemas, service validation, task/skill snapshots and all receipt/security boundaries. Verify this instruction reaches the captured actual model request, then retry the same failed task and compare sibling heads/results.

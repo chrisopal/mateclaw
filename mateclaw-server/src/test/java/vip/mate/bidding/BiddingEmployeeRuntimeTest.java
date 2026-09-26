@@ -367,6 +367,7 @@ class BiddingEmployeeRuntimeTest {
         assertEquals("SKILL.md", suppliedTask.path("execution").path("loadSkillArgs").path("filePath").asText());
         assertEquals("output.schema.json", suppliedTask.path("execution").path("readOutputSchemaArgs").path("filePath").asText());
         assertEquals("run", suppliedTask.path("task").path("task").asText());
+        assertTrue(suppliedTask.path("execution").path("instructions").asText().contains("If requirements is empty, responses must be []"));
         assertTrue(actualPrompt.getSystemMessage().getText().contains("project-scoped execution"));
     }
 }

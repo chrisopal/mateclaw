@@ -122,6 +122,9 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
                             "instructions", "First call load_skill with loadSkillArgs to read the pinned skill. "
                                     + "Then call readSkillFile with readOutputSchemaArgs and follow that JSON contract. "
                                     + "Use the exact supplied skillName; do not guess names or discover other packages. "
+                                    + "For chapter tasks, responses[].requirementRef must identify only an assigned requirements[].id. "
+                                    + "If requirements is empty, responses must be []. Scoring criteria IDs are not requirement IDs; "
+                                    + "use criterionRef citations and unresolvedItems for scoring-only issues. "
                                     + "Return only the requested structured JSON. Do not approve or publish.")));
         }
         catch (Exception e) { return failure("VALIDATION_FAILED", "VALIDATION", false, false, false); }
