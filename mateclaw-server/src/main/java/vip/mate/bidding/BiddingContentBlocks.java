@@ -10,6 +10,11 @@ public final class BiddingContentBlocks {
     private static final int MAX_BYTES = 2 * 1024 * 1024;
 
     public void validate(ObjectNode chapter, List<BiddingTypes.Ref> allowedMaterials) {
+        validate(chapter, allowedMaterials, null);
+    }
+
+    /** Image blocks require both an authorized ref and an explicit image asset descriptor in the server snapshot. */
+    public void validate(ObjectNode chapter, List<BiddingTypes.Ref> allowedMaterials, JsonNode materialSnapshot) {
         if (chapter == null || !chapter.isObject()) invalid("Chapter must be an object");
         only(chapter, Set.of("chapterId", "blocks"));
         if (!chapter.path("chapterId").isTextual() || chapter.path("chapterId").asText().isBlank()) invalid("chapterId is required");
@@ -18,6 +23,18 @@ public final class BiddingContentBlocks {
         Set<String> materials = new HashSet<>();
         if (allowedMaterials != null) for (BiddingTypes.Ref ref : allowedMaterials) {
             if (ref != null && "material".equals(ref.kind())) materials.add(ref.id()+":"+ref.version()+":"+ref.digest());
+        }
+        Set<String> images = new HashSet<>();
+        JsonNode items = materialSnapshot == null ? null : materialSnapshot.path("items");
+        if (items != null && items.isArray()) for (JsonNode item : items) {
+            JsonNode ref = item.path("ref");
+            String source = item.path("source").asText();
+            String mediaType = item.path("mediaType").asText();
+            String key = ref.path("id").asText() + ":" + ref.path("version").asLong(-1) + ":" + ref.path("digest").asText();
+            // Current snapshot producers expose WIKI_PAGE and PRESALES_RELEASE text only.
+            // IMAGE_ASSET must be introduced by an authorized server source before it can be used.
+            if ("VALID".equals(item.path("validity").asText()) && "IMAGE_ASSET".equals(source)
+                    && mediaType.matches("(?i)^image/[a-z0-9.+-]+$") && materials.contains(key)) images.add(key);
         }
         long bytes = chapter.toString().getBytes(StandardCharsets.UTF_8).length;
         if (bytes > MAX_BYTES) throw BiddingAccess.error(413,"WRITING_OUTPUT_LIMIT","Chapter content exceeds 2 MiB");
@@ -42,7 +59,7 @@ public final class BiddingContentBlocks {
                     JsonNode ref=block.path("materialRef");
                     if (!ref.isObject() || !"material".equals(ref.path("kind").asText())) invalid("Images must reference an authorized image material");
                     String key=ref.path("id").asText()+":"+ref.path("version").asLong(-1)+":"+ref.path("digest").asText();
-                    if(!materials.contains(key)) invalid("Image material is not in the authorized input snapshot");
+                    if(!images.contains(key)) invalid("Image material is not an explicitly authorized image in the server snapshot");
                     text(block.path("caption")); text(block.path("alt"));
                 }
                 default -> invalid("Unsupported content block type");

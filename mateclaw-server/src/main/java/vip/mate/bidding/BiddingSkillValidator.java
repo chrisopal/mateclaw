@@ -13,9 +13,13 @@ public final class BiddingSkillValidator {
             "bidding-requirement-analysis", "bidding-scoring-analysis");
 
     public void validateWriting(ObjectNode payload, List<BiddingTypes.Ref> allowedMaterials) {
+        validateWriting(payload, allowedMaterials, null);
+    }
+
+    public void validateWriting(ObjectNode payload, List<BiddingTypes.Ref> allowedMaterials, JsonNode materialSnapshot) {
         if (payload == null || !"1".equals(payload.path("schemaVersion").asText())) invalid("/schemaVersion", "Expected writing schema version 1");
         only(payload, Set.of("schemaVersion", "chapter", "responses", "citations", "missingMaterials", "unresolvedItems", "warnings"), "");
-        new BiddingContentBlocks().validate(payload.path("chapter").isObject()?(ObjectNode)payload.path("chapter"):null, allowedMaterials);
+        new BiddingContentBlocks().validate(payload.path("chapter").isObject()?(ObjectNode)payload.path("chapter"):null, allowedMaterials, materialSnapshot);
         for (String key : List.of("responses", "citations", "missingMaterials", "unresolvedItems", "warnings")) {
             if (!payload.path(key).isArray()) invalid("/" + key, "Expected an array");
         }

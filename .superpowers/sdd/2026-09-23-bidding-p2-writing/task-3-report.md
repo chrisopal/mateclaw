@@ -1,4 +1,6 @@
-Status:DONE Verification:PASS Plan deviations:none
+Status: DONE
+Verification: PASS
+Plan deviations: none
 
 # Task 3 — P2-03 分章写作、批量任务与候选采用
 
@@ -8,13 +10,14 @@ The writer skill now has complete `SKILL.md`, input schema, and output schema. C
 
 ## Verification
 
-- `mvn -pl mateclaw-server -am -DskipTests -Dmaven.compiler.proc=full compile` — PASS, Java 21 reactor compile.
-- `mvn -pl mateclaw-server -am -Dtest='BiddingWritingTest,BiddingContentBlocksTest,BiddingTaskTest,BiddingRetryPolicyTest,BiddingOutlineTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 32 tests: Writing 1, ContentBlocks 3, Task 21, RetryPolicy 2, Outline 5; zero failures/errors/skips.
+- `mvn -pl mateclaw-server -am -Dtest='BiddingWritingTest,BiddingContentBlocksTest,BiddingTaskTest,BiddingRetryPolicyTest,BiddingOutlineTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, fresh Java 21 reactor compile and 36 tests: Writing 3, ContentBlocks 5, Task 21, RetryPolicy 2, Outline 5; zero failures/errors/skips.
 - `python3 -m json.tool` for both writer schemas — PASS.
 - `git diff --check` — PASS.
 
-The writing integration test exercises independent completion of two chapter candidates, then edits one chapter and proves the old candidate cannot complete or be adopted over the new head. Content-block tests reject local file paths and raw HTML, ragged tables, and oversized content.
+The persisted writing workflow enqueues two chapter tasks, claims and completes them through `BiddingTaskService`, adopts both candidates, then rewrites one chapter. It verifies prior-chapter provenance stays in the frozen task/private revision snapshot but is excluded from current dependency refs, while the versioned head guard remains visible in the GET candidate envelope and still rejects a late task as `STALE`. It then reads back the adopted ref, assembles the selected chapter together with a `HUMAN_EDIT` chapter, and replays adoption and assembly without incrementing or duplicating revisions. Repository policy allows only one running task per workspace, so the two chapter tasks are completed sequentially; simultaneous execution in one workspace is not claimed. Additional regressions cover complete-envelope size limits and the image authorization metadata check.
+
+Prior-chapter references are historical provenance, not current revision dependencies. Candidate currentness and adoption continue to validate current outline/baseline/material refs, and the separately persisted `headGuard` still requires the exact original chapter head. This avoids making a rewritten candidate stale immediately after its own adoption without weakening current-source or late-result checks.
 
 ## Limits
 
-No live model execution, customer bid file, browser acceptance, or P3 review/export flow was run. Those remain outside this engineering slice. Task retry reuses the frozen task snapshot, so a changed outline, selected chapter, material permission, or head guard must be freshly dispatched rather than silently refreshing old input.
+No live model execution, customer bid file, browser acceptance, or P3 review/export flow was run. Those remain outside this engineering slice. Current authorized material snapshots contain `WIKI_PAGE` or `PRESALES_RELEASE` text sources; no server-side `IMAGE_ASSET` source exists, so image blocks remain rejected until a trusted image-material snapshot producer is implemented. Task retry reuses the frozen task snapshot, so a changed outline, selected chapter, material permission, or head guard must be freshly dispatched rather than silently refreshing old input.

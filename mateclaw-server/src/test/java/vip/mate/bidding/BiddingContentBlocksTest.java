@@ -45,4 +45,29 @@ class BiddingContentBlocksTest {
             """));
         assertDoesNotThrow(()->validator.validateWritingEvidence(output,input));
     }
+
+    @Test void imageRequiresExplicitAuthorizedServerImageMetadata() throws Exception {
+        ObjectNode chapter=(ObjectNode)json.readTree("""
+            {"chapterId":"c1","blocks":[{"type":"image","materialRef":{"kind":"material","id":"m1","version":1,"digest":"digest"},"caption":"diagram","alt":"system diagram"}]}
+            """);
+        var ref=new BiddingTypes.Ref("material","m1",1,"digest");
+        ObjectNode textSnapshot=(ObjectNode)json.readTree("""
+            {"items":[{"ref":{"kind":"material","id":"m1","version":1,"digest":"digest"},"source":"WIKI_PAGE","validity":"VALID","mediaType":"image/png"}]}
+            """);
+        assertThrows(BiddingApiException.class,()->validator.validate(chapter,List.of(ref),textSnapshot));
+        textSnapshot.withArray("items").set(0,json.readTree("""
+            {"ref":{"kind":"material","id":"m1","version":1,"digest":"digest"},"source":"IMAGE_ASSET","validity":"VALID","mediaType":"image/png"}
+            """));
+        assertDoesNotThrow(()->validator.validate(chapter,List.of(ref),textSnapshot));
+    }
+
+    @Test void writingEnvelopeLimitIncludesEvidenceAndWarningArrays() throws Exception {
+        ObjectNode output=(ObjectNode)json.readTree("""
+            {"schemaVersion":"1","chapter":{"chapterId":"c1","blocks":[{"type":"paragraph","text":"small"}]},"responses":[],"citations":[],"missingMaterials":[],"unresolvedItems":[],"warnings":[]}
+            """);
+        output.withArray("unresolvedItems").add("x".repeat(2*1024*1024));
+        BiddingApiException error=assertThrows(BiddingApiException.class,()->new BiddingSkillValidator().validateWriting(output,List.of()));
+        assertEquals(413,error.status());
+        assertEquals("WRITING_OUTPUT_LIMIT",error.code());
+    }
 }
