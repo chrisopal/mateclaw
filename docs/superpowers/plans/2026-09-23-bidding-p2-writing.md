@@ -102,6 +102,7 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
@@ -157,6 +158,8 @@ for (String start : parentById.keySet()) {
 - Create: `mateclaw-server/src/main/resources/skills/bidding-technical-writing/`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingWritingTest.java`
@@ -184,6 +187,7 @@ for (String start : parentById.keySet()) {
 - [ ] 写作skill输入 `{baselineRef,outlineRef,chapterId,requirements,criteria,materials,previousChapterRef?,selectedFindingRefs?}`；输出 `{schemaVersion,chapter:{chapterId,blocks},responses,citations,missingMaterials,unresolvedItems,warnings}`。禁止补造证书、案例、性能承诺；缺依据返回missingMaterials/unresolvedItems，不藏在流畅正文中。
 - [ ] 内容块有限类型：heading `{level:1..6,text}`、paragraph `{text}`、list `{ordered,items:[text]}`、table `{columns:[text],rows:[[text]]}`、image `{materialRef,caption,alt}`。无任意HTML/脚本/路径/URL；每表行列一致；每块文本按2MiB总限检查。image必须为显式授权图片material，表格尺寸超模板可排版范围时标格式问题，不能悄悄裁列。
 - [ ] `DISPATCH_WRITING` payload `{outlineRef,chapterIds,materialRefs,retryOfTaskId?}`，每落叶章节一个task；去重 chapterIds，比较该章targetRef及已确认outline。批量任务一章失败不影响成功兄弟。派发时已选正文Ref入input，不使用当前project.version作为全部章并发锁。
+- [ ] 首次未有章节 head 时也固定 task target 的 version=0 head guard；员工结果返回/采用时比较该 guard，人工创建首个 head 后旧候选必须 STALE。空 head sentinel 不进入只接受真实固定修订的通用 inputRefs 校验。
 - [ ] GET writing 每章 editExpectedRef 为服务器提供的当前章 head 或限定作用域的空 head token；tasks 按服务端持久化 targetId/chapterId 关联返回，客户端不猜任务归属。任务按创建时间排序，失败项可单独重试。
 - [ ] `EDIT_CHAPTER` payload `{chapterId,blocks,responses,citations,missingMaterials,unresolvedItems}` 存人工revision，ref CAS；人工编辑操作更新该章节head；`ADOPT_CHAPTER` payload `{chapterId,candidateRef}` 比较当前章及candidate.inputRefs，STALE不可采用。skill成功只创建candidate，不改变selectedChapterRef；编辑或采用后触发依赖失效而不改其他章正文。
 
