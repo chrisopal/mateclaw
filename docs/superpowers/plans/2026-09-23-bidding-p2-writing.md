@@ -25,21 +25,21 @@
 
 ## 阶段交付与文件边界
 
-前置：P1 的真实解析链路、持久任务与权限检查已验收；沿用总计划全部公共类型。Java 根 J=`mateclaw-server/src/main/java/vip/mate/bidding/`，测试根 T=`mateclaw-server/src/test/java/vip/mate/bidding/`。
+前置：P1 的真实模型解析、持久任务与权限工程链路已通过隔离样例验证。2026-09-26 用户要求继续 P2；允许工程实现推进，P1 真实脱敏文件的质量验收仍待完成，不能据此宣称真实投标业务已验收；沿用总计划全部公共类型。Java 根 J=`mateclaw-server/src/main/java/vip/mate/bidding/`，测试根 T=`mateclaw-server/src/test/java/vip/mate/bidding/`。
 
 | 任务 | 单一职责文件 |
 | --- | --- |
-| P2-01 | J`BiddingHandoffService.java`, `BiddingMaterials.java`；现有售前服务加显式历史版本读取；V213 两张表 |
+| P2-01 | J`BiddingHandoffService.java`, `BiddingMaterials.java`；现有售前服务加显式历史版本读取；V215 两张表 |
 | P2-02 | J`BiddingOutlineService.java`；目录技能与覆盖校验 |
 | P2-03 | J`BiddingWritingService.java`, `BiddingContentBlocks.java`；写作技能、章节候选与采用 |
 | P2-04 | J`BiddingDependencies.java` 增补变更影响与重新确认 |
 | P2-05 | UI 中独立的交接、材料、目录、写作组件；共用任务/证据抽屉 |
 
-### Task P2-01：显式接收售前发布版本与授权材料
+### Task 1: P2-01 显式接收售前发布版本与授权材料
 
 **Files:**
 - Create: J`BiddingHandoffService.java`, `BiddingMaterials.java`。
-- Create: `mateclaw-server/src/main/resources/db/migration/h2/V213__bidding_materials.sql`、`mysql/V213__bidding_materials.sql`、`kingbase/V213__bidding_materials.sql`（同 migration 根）。
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V215__bidding_materials.sql`、`mysql/V215__bidding_materials.sql`、`kingbase/V215__bidding_materials.sql`（同 migration 根）。
 - Modify: `mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java`, `PresalesController.java`（同 presales 目录）；J`BiddingController.java`, `BiddingCommandService.java`, `BiddingDependencies.java`。
 - Test: T`BiddingHandoffTest.java`, `BiddingMaterialsTest.java`；`mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java`。
 
@@ -61,7 +61,7 @@
 ```
 
 - [ ] Run：Maven `-Dtest='BiddingHandoffTest,BiddingMaterialsTest'`，Expected 未实现显式版本/独立开关路径 FAIL。
-- [ ] V213 handoff表：workspace_id/project_id/presales_project_id/release_id/baseline_ref/solution_ref/snapshot_json/digest/actor_id/received_at；material表：workspace_id/project_id/source_kind/external_id/version/digest/content_json/access_ref_json/validity。接收幂等仍用operation表，允许同售前不同标段建不同项目，不把 release_id 设全局唯一。
+- [ ] V215 handoff表：workspace_id/project_id/presales_project_id/release_id/baseline_ref/solution_ref/snapshot_json/digest/actor_id/received_at；material表：workspace_id/project_id/source_kind/external_id/version/digest/content_json/access_ref_json/validity。接收幂等仍用operation表，允许同售前不同标段建不同项目，不把 release_id 设全局唯一。
 - [ ] 新handoff精确定位PUBLISHED release、该版solution/baseline与已保存的原始artifact摘要；不要调用要求“最新baseline”的现有releaseGate。复核该发布自己的decision与来源引用；历史发布缺少可证明快照时返回409 `HISTORICAL_SNAPSHOT_UNAVAILABLE`，不能从当前数组拼造过去。
 - [ ] 历史发布时的澄清只从其冻结引用读取；没有冻结澄清可返回 `historicalClarificationsAvailable:false` 和空历史列表，不能宣称“当时没有未决项”。接收当时新增事项放独立 `receivedNotes`，标时间与来源。对今后发布，在发布事务里持久化handoffSnapshot（含release当时的refs），不改既有批准规则；售前回归覆盖发布文件摘要和snapshot。
 
@@ -82,7 +82,7 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 - [ ] 测试：重复接收同operation一条、不同请求409、接收旧版后源发布更新不覆盖、撤权后材料/任务快照/派生成果403、伪KB/page关联404；售前关闭独立建项通过。Run：上述2测试+PresalesIntegrationTest，Expected PASS。
 - [ ] Commit：`git commit -m "Preserve the exact presales context accepted by each bidding project" -m "Rejected: Reading latest mutable clarifications | changes historical facts" -m "Tested: Versioned handoff, material authorization and presales regression"`。
 
-### Task P2-02：目录技能、覆盖关系与人工确认
+### Task 2: P2-02 目录技能、覆盖关系与人工确认
 
 **Files:**
 - Create: J`BiddingOutlineService.java`。
@@ -125,7 +125,7 @@ for (String start : parentById.keySet()) {
 - [ ] 测试：未确认baseline不派发、目录候选不解锁批量写作、空目录/循环/跨项目refs拒绝、角色不足403、强制覆盖缺失422、同decision重放只有一组任务。Run前两测试+P1 analysis回归，Expected PASS。
 - [ ] Commit：`git commit -m "Require an approved and traceable technical outline before writing" -m "Tested: Outline structure, coverage and confirmation gates"`。
 
-### Task P2-03：分章写作、批量任务与候选采用
+### Task 3: P2-03 分章写作、批量任务与候选采用
 
 **Files:**
 - Create: J`BiddingWritingService.java`, `BiddingContentBlocks.java`。
@@ -168,7 +168,7 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 - [ ] 测试：并行两章均能完成；人工改章后旧任务标STALE且不更新指针；重复采用不双增版本；空章/未映射技术需求不能组装完整稿；跨项目材料拒绝；输出超限明确失败，JSON成功不代表有材料依据。
 - [ ] Run前两测试+P1 Task/Retry回归，Expected PASS。Commit：`git commit -m "Protect human chapter revisions while digital employees write independently" -m "Tested: Chapter CAS, batch isolation and explicit candidate adoption"`。
 
-### Task P2-04：补遗、材料变更与局部重新确认
+### Task 4: P2-04 补遗、材料变更与局部重新确认
 
 **Files:**
 - Modify: J`BiddingDependencies.java`, `BiddingSourceService.java`, `BiddingAnalysisService.java`, `BiddingOutlineService.java`, `BiddingWritingService.java`, `BiddingCommandService.java`。
@@ -209,7 +209,7 @@ while (!queue.isEmpty()) {
 - [ ] 测试：只改截止时间无需全章重写，但文件批准失效；改变强制技术指标影响命中章；未知引用先阻断；材料撤权后拒绝快照读取；新旧版本并存可追溯；晚到candidate不覆盖人工选择。
 - [ ] Run本测试和Source/Analysis/Outline/Writing范围回归，Expected PASS。Commit：`git commit -m "Invalidate only provably affected bidding work when source versions change" -m "Tested: Supplement impact, authorization changes and stale results"`。
 
-### Task P2-05：接通版本接收、目录与正文工作区
+### Task 5: P2-05 接通版本接收、目录与正文工作区
 
 **Files:**
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`, `BiddingMaterials.vue`, `BiddingOutline.vue`, `BiddingWriting.vue`, `BiddingCandidateCompare.vue`（同 components 根）。
