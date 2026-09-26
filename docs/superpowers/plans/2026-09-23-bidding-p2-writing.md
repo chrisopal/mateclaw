@@ -38,10 +38,19 @@
 ### Task 1: P2-01 显式接收售前发布版本与授权材料
 
 **Files:**
-- Create: J`BiddingHandoffService.java`, `BiddingMaterials.java`。
-- Create: `mateclaw-server/src/main/resources/db/migration/h2/V215__bidding_materials.sql`、`mysql/V215__bidding_materials.sql`、`kingbase/V215__bidding_materials.sql`（同 migration 根）。
-- Modify: `mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java`, `PresalesController.java`（同 presales 目录）；J`BiddingController.java`, `BiddingCommandService.java`, `BiddingDependencies.java`。
-- Test: T`BiddingHandoffTest.java`, `BiddingMaterialsTest.java`；`mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingHandoffService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingMaterials.java`
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V215__bidding_materials.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V215__bidding_materials.sql`
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V215__bidding_materials.sql`
+- Modify: `mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/presales/PresalesController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java`
 
 **Interfaces:**
 - Consumes: P1 Access/Dependencies/Ref；现有 `PresalesService.get(String scope,String projectId):ObjectNode`；`WikiKnowledgeBaseService.getById(Long)` / `findVisibleById(Long agentId,Long kbId)`；`WikiPageService.getById(Long)`。
@@ -85,10 +94,17 @@ if (!"PUBLISHED".equals(release.path("status").asText())) {
 ### Task 2: P2-02 目录技能、覆盖关系与人工确认
 
 **Files:**
-- Create: J`BiddingOutlineService.java`。
-- Create: `mateclaw-server/src/main/resources/skills/bidding-outline-planning/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingSkillValidator.java`, `BiddingCommandService.java`, `BiddingTaskService.java`, `BiddingDependencies.java`, `BiddingAnalysisService.java`, `BiddingEmployeeBindings.java`, `BiddingController.java`。
-- Test: T`BiddingOutlineTest.java`, `BiddingOutlineValidatorTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingOutlineService.java`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-outline-planning/`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingOutlineTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingOutlineValidatorTest.java`
 
 **Interfaces:**
 - Consumes: confirmed ANALYSIS_BASELINE Ref、Materials.snapshot、TaskService.enqueue。
@@ -132,10 +148,15 @@ for (String start : parentById.keySet()) {
 ### Task 3: P2-03 分章写作、批量任务与候选采用
 
 **Files:**
-- Create: J`BiddingWritingService.java`, `BiddingContentBlocks.java`。
-- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-writing/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingSkillValidator.java`, `BiddingTaskService.java`, `BiddingCommandService.java`, `BiddingController.java`。
-- Test: T`BiddingWritingTest.java`, `BiddingContentBlocksTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingWritingService.java`
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingContentBlocks.java`
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-writing/`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingWritingTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingContentBlocksTest.java`
 
 **Interfaces:**
 - Consumes: confirmed outlineRef、baselineRef、Materials.snapshot、TaskService.enqueue、Dependencies.isCurrent。
@@ -176,8 +197,14 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 ### Task 4: P2-04 补遗、材料变更与局部重新确认
 
 **Files:**
-- Modify: J`BiddingDependencies.java`, `BiddingSourceService.java`, `BiddingAnalysisService.java`, `BiddingOutlineService.java`, `BiddingWritingService.java`, `BiddingCommandService.java`, `BiddingRepository.java`。
-- Test: T`BiddingChangeImpactTest.java`。
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSourceService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingOutlineService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingWritingService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java`
 
 **Interfaces:**
 - Consumes: P1 Dependencies.validate/isCurrent/invalidate、所有业务revision.inputRefs及当前head。
@@ -217,11 +244,22 @@ while (!queue.isEmpty()) {
 ### Task 5: P2-05 接通版本接收、目录与正文工作区
 
 **Files:**
-- Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`, `BiddingMaterials.vue`, `BiddingOutline.vue`, `BiddingWriting.vue`, `BiddingCandidateCompare.vue`（同 components 根）。
-- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`, `api/biddingApi.ts`, `api/types.ts`, `shared/state.ts`（同 bidding 根）；`components/BiddingAnalysis.vue` 增加明确的确认后编写目录选项。
-- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingOutline.test.ts`, `biddingWriting.test.ts`, `biddingHandoff.test.ts`。
-- Create: `docs/bidding/acceptance/2026-09-23-p2.md`。
-- Required blueprint: `docs/superpowers/specs/2026-09-26-bidding-p2-ui-blueprint.md`。
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingHandoffDialog.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingMaterials.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingOutline.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingWriting.vue`
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingCandidateCompare.vue`
+- Create: `docs/bidding/acceptance/2026-09-23-p2.md`
+- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`
+- Modify: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`
+- Modify: `mateclaw-ui/src/features/bidding/api/types.ts`
+- Modify: `mateclaw-ui/src/features/bidding/shared/state.ts`
+- Modify: `mateclaw-ui/src/features/bidding/components/BiddingAnalysis.vue`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingOutline.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWriting.test.ts`
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingHandoff.test.ts`
+
+Required blueprint: `docs/superpowers/specs/2026-09-26-bidding-p2-ui-blueprint.md`.
 
 **Interfaces:**
 - Consumes: P2全部已定义Commands与精确Ref；P1 TaskDrawer/EvidenceDrawer；共用成员/员工列表。
