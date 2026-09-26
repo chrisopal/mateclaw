@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["baselineRef", "outlineRef", "chapterId", "requirements", "criteria", "materials", "selectedFindingRefs"],
+  "properties": {
+    "baselineRef": {"$ref": "#/$defs/ref"},
+    "outlineRef": {"$ref": "#/$defs/ref"},
+    "chapterId": {"type": "string", "minLength": 1, "maxLength": 128},
+    "requirements": {"type": "array", "items": {"type": "object"}},
+    "criteria": {"type": "array", "items": {"type": "object"}},
+    "materials": {"type": "object", "required": ["items"], "properties": {"items": {"type": "array", "items": {"type": "object", "required": ["ref", "content", "source", "validity"], "properties": {"ref": {"$ref": "#/$defs/ref"}, "content": {}, "source": {"type": "string"}, "validity": {"type": "string"}}}}}},
+    "previousChapterRef": {"$ref": "#/$defs/ref"},
+    "selectedFindingRefs": {"type": "array"},
+    "_biddingHeadGuard": {"$ref": "#/$defs/ref", "description": "Server-only immutable chapter version-zero or selected-head guard; never echo in output."},
+    "_biddingTargetId": {"type": "string", "description": "Server-only task target metadata."}
+  },
+  "additionalProperties": false,
+  "$defs": {"ref": {"type": "object", "required": ["kind", "id", "version", "digest"], "properties": {"kind": {"type": "string"}, "id": {"type": "string"}, "version": {"type": ["integer", "string"]}, "digest": {"type": "string"}}, "additionalProperties": false}}
+}

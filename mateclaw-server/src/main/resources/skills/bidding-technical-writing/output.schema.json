@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "chapter", "responses", "citations", "missingMaterials", "unresolvedItems", "warnings"],
+  "properties": {
+    "schemaVersion": {"const": "1"},
+    "chapter": {
+      "type": "object",
+      "required": ["chapterId", "blocks"],
+      "properties": {
+        "chapterId": {"type": "string"},
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {"type": "object", "required": ["type", "level", "text"], "properties": {"type": {"const": "heading"}, "level": {"type": "integer", "minimum": 1, "maximum": 6}, "text": {"type": "string", "minLength": 1}}, "additionalProperties": false},
+              {"type": "object", "required": ["type", "text"], "properties": {"type": {"const": "paragraph"}, "text": {"type": "string", "minLength": 1}}, "additionalProperties": false},
+              {"type": "object", "required": ["type", "ordered", "items"], "properties": {"type": {"const": "list"}, "ordered": {"type": "boolean"}, "items": {"type": "array", "minItems": 1, "items": {"type": "string"}}}, "additionalProperties": false},
+              {"type": "object", "required": ["type", "columns", "rows"], "properties": {"type": {"const": "table"}, "columns": {"type": "array", "minItems": 1, "maxItems": 20, "items": {"type": "string"}}, "rows": {"type": "array", "minItems": 1, "items": {"type": "array", "items": {"type": "string"}}}}, "additionalProperties": false},
+              {"type": "object", "required": ["type", "materialRef", "caption", "alt"], "properties": {"type": {"const": "image"}, "materialRef": {"$ref": "#/$defs/ref"}, "caption": {"type": "string"}, "alt": {"type": "string"}}, "additionalProperties": false}
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["requirementRef", "status"],
+        "properties": {
+          "requirementRef": {"type": "string"},
+          "status": {"enum": ["RESPONDED", "MISSING_MATERIAL", "UNRESOLVED"]},
+          "text": {"type": "string"},
+          "citationRefs": {"type": "array", "items": {"type": "string"}},
+          "criteriaRefs": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"type": "object", "required": ["requirementRef", "sourceId", "version", "blockId", "quote"], "properties": {"requirementRef": {"type": "string"}, "sourceId": {"type": "string"}, "version": {"type": ["integer", "string"]}, "blockId": {"type": "string"}, "quote": {"type": "string"}}, "additionalProperties": false},
+          {"type": "object", "required": ["criterionRef", "sourceId", "version", "blockId", "quote"], "properties": {"criterionRef": {"type": "string"}, "sourceId": {"type": "string"}, "version": {"type": ["integer", "string"]}, "blockId": {"type": "string"}, "quote": {"type": "string"}}, "additionalProperties": false},
+          {"type": "object", "required": ["requirementRef", "materialRef", "quote"], "properties": {"requirementRef": {"type": "string"}, "materialRef": {"$ref": "#/$defs/ref"}, "quote": {"type": "string"}}, "additionalProperties": false},
+          {"type": "object", "required": ["criterionRef", "materialRef", "quote"], "properties": {"criterionRef": {"type": "string"}, "materialRef": {"$ref": "#/$defs/ref"}, "quote": {"type": "string"}}, "additionalProperties": false}
+        ]
+      }
+    },
+    "missingMaterials": {"type": "array"},
+    "unresolvedItems": {"type": "array"},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ref": {"type": "object", "required": ["kind", "id", "version", "digest"], "properties": {"kind": {"type": "string"}, "id": {"type": "string"}, "version": {"type": ["integer", "string"]}, "digest": {"type": "string"}}, "additionalProperties": false}
+  }
+}

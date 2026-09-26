@@ -1,5 +1,6 @@
 package vip.mate.bidding;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Set;
 import java.util.LinkedHashSet;
@@ -44,6 +45,15 @@ public class BiddingDependencies {
                 materials.requireReadable(scope,agent,ref);
             } else if("sourceSet".equals(ref.kind())) {
                 if(!repository.revisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
+            } else if("chapter".equals(ref.kind())) {
+                var row=repository.businessRevision(scope,ref);
+                if(row==null || !Set.of("SELECTED","HUMAN_EDIT").contains(row.path("status").asText()))
+                    throw BiddingAccess.error(404,"NOT_FOUND","Chapter revision not found");
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
+            } else if("manuscript".equals(ref.kind())) {
+                var row=repository.businessRevision(scope,ref);
+                if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Manuscript not found");
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
             } else if(Set.of("analysisBaseline","outline").contains(ref.kind())) {
                 var row=repository.businessRevision(scope,ref);
                 if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Business revision not found");
@@ -72,6 +82,15 @@ public class BiddingDependencies {
             } else if ("sourceSet".equals(ref.kind())) {
                 if (!repository.revisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
                 if (!repository.isSelectedSourceSet(scope,ref)) throw BiddingAccess.error(409,"DEPENDENCY_STALE","Source set is no longer current");
+            } else if ("chapter".equals(ref.kind())) {
+                ObjectNode row=repository.businessRevision(scope,ref);
+                if(row==null || !Set.of("SELECTED","HUMAN_EDIT").contains(row.path("status").asText()) || !repository.isSelectedBusinessRevision(scope,ref))
+                    throw BiddingAccess.error(409,"DEPENDENCY_STALE","Selected chapter revision is no longer current");
+                validateRefs(scope,repository.businessRefs(row),visiting);
+            } else if ("manuscript".equals(ref.kind())) {
+                ObjectNode row=repository.businessRevision(scope,ref);
+                if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Manuscript not found");
+                validateRefs(scope,repository.businessRefs(row),visiting);
             } else if ("material".equals(ref.kind())) {
                 var project=repository.findProject(scope.workspaceId(),scope.projectId());
                 String agentId=project==null?"":project.path("bindings").path("writer").path("agentId").asText("");

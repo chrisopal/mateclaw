@@ -113,6 +113,7 @@ public class BiddingRepository {
         if(!stored.path("input").isObject()) throw new IllegalStateException("Task input is not an object");
         ObjectNode input=(ObjectNode)stored.path("input").deepCopy();
         if(stored.path("_bidding").hasNonNull("targetId")) input.put("_biddingTargetId",stored.path("_bidding").path("targetId").asText());
+        if(stored.path("_bidding").path("headGuard").isObject()) input.set("_biddingHeadGuard",stored.path("_bidding").path("headGuard").deepCopy());
         List<BiddingTypes.Ref> refs=readRefs(task.refsJson());
         Map<String,String> files;
         try { files=json.readValue(task.filesJson(),new com.fasterxml.jackson.core.type.TypeReference<Map<String,String>>() {}); }

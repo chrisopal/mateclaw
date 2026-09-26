@@ -12,6 +12,43 @@ public final class BiddingSkillValidator {
     private static final Set<String> SKILLS = Set.of("bidding-tender-profile", "bidding-elimination-analysis",
             "bidding-requirement-analysis", "bidding-scoring-analysis");
 
+    public void validateWriting(ObjectNode payload, List<BiddingTypes.Ref> allowedMaterials) {
+        if (payload == null || !"1".equals(payload.path("schemaVersion").asText())) invalid("/schemaVersion", "Expected writing schema version 1");
+        only(payload, Set.of("schemaVersion", "chapter", "responses", "citations", "missingMaterials", "unresolvedItems", "warnings"), "");
+        new BiddingContentBlocks().validate(payload.path("chapter").isObject()?(ObjectNode)payload.path("chapter"):null, allowedMaterials);
+        for (String key : List.of("responses", "citations", "missingMaterials", "unresolvedItems", "warnings")) {
+            if (!payload.path(key).isArray()) invalid("/" + key, "Expected an array");
+        }
+        if(payload.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>2*1024*1024)throw BiddingAccess.error(413,"WRITING_OUTPUT_LIMIT","Writing result exceeds 2 MiB");
+    }
+
+    public void validateWritingEvidence(ObjectNode payload,ObjectNode input) {
+        Set<String> baselineEvidence=new HashSet<>();Set<String> assigned=new HashSet<>();
+        for(String key:List.of("requirements","criteria"))if(input.path(key).isArray())for(JsonNode item:input.path(key)){
+            String id=item.path("id").asText();if(!id.isBlank())assigned.add(id);
+            JsonNode evidence=item.path("evidenceRefs");if(evidence.isArray())for(JsonNode ref:evidence)baselineEvidence.add(evidenceKey(ref));
+        }
+        Map<String,JsonNode> materials=new HashMap<>();JsonNode snapshot=input.path("materials").path("items");if(snapshot.isArray())for(JsonNode item:snapshot){JsonNode ref=item.path("ref");materials.put(ref.path("kind").asText()+":"+ref.path("id").asText()+":"+ref.path("version").asText()+":"+ref.path("digest").asText(),item.path("content"));}
+        Set<String> citedRequirements=new HashSet<>();
+        for(int i=0;i<payload.path("citations").size();i++){
+            JsonNode c=payload.path("citations").get(i);String at="/citations/"+i;
+            only(c,Set.of("requirementRef","criterionRef","sourceId","version","blockId","quote","materialRef"),at);
+            String linked=c.path("requirementRef").asText(c.path("criterionRef").asText(""));if(!assigned.contains(linked))invalid(at,"Citation must link to an assigned requirement or criterion");
+            if(c.hasNonNull("requirementRef"))citedRequirements.add(c.path("requirementRef").asText());
+            JsonNode quote=c.path("quote");if(!quote.isTextual()||quote.asText().isBlank()||quote.asText().length()>2000)invalid(at+"/quote","Citation quote is required and bounded");
+            if(c.has("materialRef")){
+                JsonNode r=c.path("materialRef");String key=r.path("kind").asText()+":"+r.path("id").asText()+":"+r.path("version").asText()+":"+r.path("digest").asText();JsonNode content=materials.get(key);
+                if(content==null||!containsText(content,quote.asText()))invalid(at,"Citation material or exact quote is outside the authorized snapshot");
+            }else{
+                String key=evidenceKey(c);if(!baselineEvidence.contains(key))invalid(at,"Source citation is not exact evidence assigned to this chapter");
+            }
+        }
+        for(JsonNode response:payload.path("responses"))if("RESPONDED".equals(response.path("status").asText())&&!citedRequirements.contains(response.path("requirementRef").asText()))invalid("/responses","A responded requirement needs an exact assigned citation");
+    }
+
+    private static String evidenceKey(JsonNode ref){return ref.path("sourceId").asText()+"|"+ref.path("version").asText()+"|"+ref.path("blockId").asText()+"|"+ref.path("quote").asText();}
+    private static boolean containsText(JsonNode node,String quote){if(node.isTextual())return node.asText().contains(quote);if(node.isContainerNode()){var fields=node.elements();while(fields.hasNext())if(containsText(fields.next(),quote))return true;}return false;}
+
     public void validate(String skillId, ObjectNode payload, ObjectNode input) {
         if (!SKILLS.contains(skillId)) invalid("/skillId", "Unsupported analysis skill");
         if (payload == null || input == null) invalid("/", "Payload and input must be objects");

@@ -80,6 +80,7 @@ public class BiddingTaskService {
         String modelConfigId=employees.getObject().modelConfigId(scope,selected.agentId());
         ObjectNode snapshot=json.createObjectNode(); ObjectNode metadata=snapshot.putObject("_bidding");
         metadata.put("skillId",skillId); metadata.put("targetId",targetId); metadata.put("modelConfigId",modelConfigId);
+        if(input.has("_chapterHeadGuard")) metadata.set("headGuard",input.path("_chapterHeadGuard").deepCopy());
         snapshot.set("input",input.deepCopy());
         List<BiddingTypes.Ref> fixed=List.copyOf(refs);
         String id=UUID.randomUUID().toString(); Timestamp now=Timestamp.from(Instant.now());
@@ -267,9 +268,10 @@ public class BiddingTaskService {
         transactions.execute(tx->{
             if(activeAttempt(claim)==null) return null;
             Timestamp now=Timestamp.from(Instant.now()); ObjectNode error=json.createObjectNode(); error.put("code",code); error.put("category",category);
-            jdbc.update("UPDATE mate_bidding_attempt SET state='FAILED',error_json=?,rejected_output=?,finished_at=? WHERE id=? AND token=? AND state='RUNNING'",
-                write(error),execution.rejectedOutput()==null?write(execution.payload()):execution.rejectedOutput(),now,claim.attemptId(),claim.token());
-            jdbc.update("UPDATE mate_bidding_task SET status='FAILED',active_attempt_id=NULL,next_run_at=NULL,updated_at=? WHERE id=? AND status='RUNNING' AND active_attempt_id=?",now,claim.taskId(),claim.attemptId());
+            String terminal="CHAPTER_STALE".equals(code)||"DEPENDENCY_STALE".equals(code)?"STALE":"FAILED";
+            jdbc.update("UPDATE mate_bidding_attempt SET state=?,error_json=?,rejected_output=?,finished_at=? WHERE id=? AND token=? AND state='RUNNING'",
+                terminal,write(error),execution.rejectedOutput()==null?write(execution.payload()):execution.rejectedOutput(),now,claim.attemptId(),claim.token());
+            jdbc.update("UPDATE mate_bidding_task SET status=?,active_attempt_id=NULL,next_run_at=NULL,updated_at=? WHERE id=? AND status='RUNNING' AND active_attempt_id=?",terminal,now,claim.taskId(),claim.attemptId());
             return null;
         });
     }
