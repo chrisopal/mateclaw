@@ -206,6 +206,8 @@ class BiddingReviewTest extends BiddingHttpFixture {
         requirements.addAll((ArrayNode)analysisOutput.path("requirements"));
         analyses.putObject("bidding-scoring-analysis").putArray("criteria"); analyses.putObject("bidding-elimination-analysis").putArray("items");
         BiddingTypes.Ref baseline=save(scope,new BiddingTypes.Ref("analysisBaseline","review-baseline",1,"baseline-digest"),baselineBody,List.of(sourceSet),"CONFIRMED");
+        jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",
+                workspace,projectId,"analysisBaseline",baseline.id(),baseline.version(),json.writeValueAsString(baseline));
         ObjectNode outlineBody=json.createObjectNode().put("schemaVersion","1");outlineBody.putArray("chapters").addObject().put("id","c1").putArray("requirementRefs").add("REQ-1");
         BiddingTypes.Ref outline=save(scope,new BiddingTypes.Ref("outline","review-outline",1,"outline-digest"),outlineBody,List.of(baseline),"CONFIRMED");
         ObjectNode chapterBody=json.createObjectNode().put("chapterId","c1");chapterBody.putArray("blocks").addObject().put("type","paragraph").put("text","接口响应时间不超过2秒");
@@ -318,6 +320,9 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertEquals(scope.actorId(),persistedTodo.path("resolvedBy").asText());assertEquals("confirmed exact quotation with commercial owner",persistedTodo.path("resolutionReason").asText());
         assertEquals(sourceId,persistedTodo.path("resolutionEvidenceRefs").get(0).path("sourceId").asText());
         assertDoesNotThrow(()->reviews.requireReviewed(scope,manuscript));
+        assertEquals(4,repository.maxRevisionVersion(scope,"HUMAN_TODO",todoRef.id()),
+                "classification and resolution revisions stay on the same baseline-scoped todo identity");
+
         Mockito.verify(dependencies,Mockito.atLeastOnce()).validate(scope,List.of(manuscript));
         Mockito.doThrow(new BiddingApiException(409,"DEPENDENCY_STALE","test current source closure changed"))
                 .when(dependencies).validate(scope,List.of(manuscript));
@@ -338,8 +343,79 @@ class BiddingReviewTest extends BiddingHttpFixture {
         api("GET","/tasks/"+reviewerTaskId,"viewer",workspace,null,403);
         BiddingApiException revokedGate=assertThrows(BiddingApiException.class,()->reviews.requireReviewed(scope,manuscript));
         assertEquals("REVIEWER_MATERIAL_UNAVAILABLE",revokedGate.code());
+        // Preserve an old, pre-baseline todo shape. Reusing COMM-1 in a later
+        // analysis must create a new open todo instead of inheriting this resolved
+        // nontechnical decision.
+        ObjectNode legacyTodo=json.createObjectNode().put("todoId","COMM-1").put("requirementRef","COMM-1")
+                .put("title","legacy commercial assumption").put("ownerId",scope.actorId()).put("status","RESOLVED")
+                .put("impactClassification","CLASSIFIED").put("affectsTechnical",false);
+        legacyTodo.set("sourceRefs",json.valueToTree(List.of(sourceRef)));
+        legacyTodo.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1)
+                .put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        long legacyVersion=repository.maxRevisionVersion(scope,"HUMAN_TODO","COMM-1")+1;
+        save(scope,new BiddingTypes.Ref("HUMAN_TODO","COMM-1",legacyVersion,"legacy-todo-digest-"+legacyVersion),
+                legacyTodo,List.of(sourceRef),"RESOLVED");
+
+        String nextSourceId="review-evidence-next",nextSourceDigest="evidence-digest-next";
+        jdbc.update("INSERT INTO mate_bidding_source(id,workspace_id,project_id,source_id,version,kind,digest,content,blocks_json,quality,read_token,read_started_at,filename,read_status,problems_json,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",
+                UUID.randomUUID().toString(),workspace,projectId,nextSourceId,1,"TENDER",nextSourceDigest,"new evidence".getBytes(),"[{\"id\":\"b2\",\"locator\":\"p2\",\"text\":\"新基线的商务口径\"}]","PASS",null,null,"evidence-next.txt","READY","[]");
+        BiddingTypes.Ref nextSourceRef=new BiddingTypes.Ref("source",nextSourceId,1,nextSourceDigest);
+        BiddingTypes.Ref nextSourceSet=confirmSourceSet(scope,sourceSet,List.of(sourceRef,nextSourceRef),"confirm-next-review-source-set");
+        ObjectNode nextBaselineBody=baselineBody.deepCopy();nextBaselineBody.set("sourceSetRef",json.valueToTree(nextSourceSet));
+        ObjectNode nextAnalysis=(ObjectNode)nextBaselineBody.path("analyses").path("bidding-requirement-analysis");
+        ObjectNode nextCommercial=(ObjectNode)nextAnalysis.path("requirements").get(1);
+        nextCommercial.put("text","新基线要求商务负责人确认报价边界");
+        nextCommercial.putArray("evidenceRefs").addObject().put("sourceId",nextSourceId).put("version",1)
+                .put("blockId","b2").put("quote","新基线的商务口径");
+        BiddingTypes.Ref nextBaseline=save(scope,new BiddingTypes.Ref("analysisBaseline","review-baseline-next",1,"baseline-digest-next"),
+                nextBaselineBody,List.of(nextSourceSet),"CONFIRMED");
+        jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id=?",
+                nextBaseline.version(),json.writeValueAsString(nextBaseline),workspace,projectId,nextBaseline.id());
+        ObjectNode nextOutlineBody=json.createObjectNode().put("schemaVersion","1");
+        nextOutlineBody.putArray("chapters").addObject().put("id","c1").putArray("requirementRefs").add("REQ-1");
+        BiddingTypes.Ref nextOutline=save(scope,new BiddingTypes.Ref("outline","review-outline-next",1,"outline-digest-next"),
+                nextOutlineBody,List.of(nextBaseline),"CONFIRMED");
+        ObjectNode nextChapterBody=json.createObjectNode().put("chapterId","c1");
+        nextChapterBody.putArray("blocks").addObject().put("type","paragraph").put("text","接口响应时间不超过2秒");
+        BiddingTypes.Ref nextChapter=save(scope,new BiddingTypes.Ref("chapter","c1",2,"chapter-digest-next"),
+                nextChapterBody,List.of(nextOutline,reviewerMaterial),"CONFIRMED");
         Mockito.when(pageTypePermissions.canRead(Long.valueOf(reviewer),kbId,"experience")).thenReturn(true);
-        BiddingTypes.Ref revised=save(scope,new BiddingTypes.Ref("manuscript","manuscript",2,"new-manuscript-digest"),manuscriptBody,List.of(outline,chapter),"DRAFT_PENDING_REVIEW");
+        ObjectNode nextManuscriptBody=json.createObjectNode().put("schemaVersion","1");
+        nextManuscriptBody.set("outlineRef",json.valueToTree(nextOutline));
+        nextManuscriptBody.putArray("chapters").addObject().put("chapterId","c1").set("chapter",nextChapterBody);
+        BiddingTypes.Ref nextManuscript=save(scope,new BiddingTypes.Ref("manuscript","manuscript",2,"next-manuscript-digest"),
+                nextManuscriptBody,List.of(nextOutline,nextChapter),"DRAFT_PENDING_REVIEW");
+        ObjectNode nextDispatch=json.createObjectNode().set("manuscriptRef",json.valueToTree(nextManuscript));
+        reviews.dispatch(scope,new BiddingTypes.Command("review-next-baseline",nextManuscript,"DISPATCH_REVIEW",nextDispatch));
+        Mockito.doNothing().when(dependencies).validateForRead(scope,List.of(nextManuscript));
+        JsonNode nextReviewRead=reviews.read(scope);
+        assertEquals(1,nextReviewRead.path("humanTodos").size(),"historical and unscoped todo rows must not appear in the current baseline read model: "+nextReviewRead);
+        JsonNode nextTodo=nextReviewRead.path("humanTodos").get(0);
+        assertEquals("OPEN",nextTodo.path("status").asText());
+        assertEquals("UNCLASSIFIED",nextTodo.path("impactClassification").asText());
+        assertEquals(nextBaseline,json.treeToValue(nextTodo.path("baselineRef"),BiddingTypes.Ref.class));
+        assertEquals("COMM-1",nextTodo.path("requirementId").asText());
+        assertEquals(nextSourceId,nextTodo.path("sourceRefs").get(0).path("id").asText());
+        JsonNode storedNextTodoRefs=json.readTree(jdbc.queryForObject("SELECT input_refs_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=? ORDER BY version DESC LIMIT 1",String.class,workspace,projectId,nextTodo.path("ref").path("id").asText()));
+        assertTrue(java.util.stream.StreamSupport.stream(storedNextTodoRefs.spliterator(),false)
+                .anyMatch(ref->nextBaseline.equals(json.convertValue(ref,BiddingTypes.Ref.class))),"stored todo dependency closure includes the exact analysis baseline");
+        for(int i=0;i<2;i++) {
+            BiddingTypes.Claim claim=repository.claimDue(Instant.now(),"reviewer-next-baseline",1).getFirst();
+            ObjectNode output=json.createObjectNode().put("schemaVersion","1");output.putArray("findings");
+            ObjectNode coverage=output.putObject("coverage");ArrayNode chapterCoverage=coverage.putArray("chapterRefs");
+            for(JsonNode assigned:claim.input().path("chapters"))chapterCoverage.add(assigned.path("chapterRef").deepCopy());
+            ArrayNode requirementCoverage=coverage.putArray("requirementRefs");
+            for(JsonNode assigned:claim.input().path("requirements"))requirementCoverage.add(assigned.path("id").asText());
+            coverage.put("crossChapterReviewed",claim.input().path("_biddingTargetId").asText().endsWith(":cross"));
+            output.putArray("limitations");output.putArray("warnings");
+            tasks.complete(claim,new BiddingTypes.Execution(output,null,claim.skill().digest(),claim.configDigest(),null));
+        }
+        BiddingApiException freshBaselineGate=assertThrows(BiddingApiException.class,()->reviews.requireReviewed(scope,nextManuscript));
+        assertEquals("HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL",freshBaselineGate.code());
+        BiddingApiException freshBaselineApproval=assertThrows(BiddingApiException.class,()->reviews.approvalEvidence(scope,nextManuscript));
+        assertEquals("HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL",freshBaselineApproval.code());
+        Mockito.when(pageTypePermissions.canRead(Long.valueOf(reviewer),kbId,"experience")).thenReturn(true);
+        BiddingTypes.Ref revised=save(scope,new BiddingTypes.Ref("manuscript","manuscript",3,"new-manuscript-digest"),manuscriptBody,List.of(outline,chapter),"DRAFT_PENDING_REVIEW");
         BiddingApiException staleReview=assertThrows(BiddingApiException.class,()->reviews.requireReviewed(scope,revised));
         assertEquals("REVIEW_INCOMPLETE",staleReview.code());
         ObjectNode latest=repository.findProject(workspace,projectId);((ObjectNode)latest.path("bindings").path("reviewer")).put("agentId",writer);

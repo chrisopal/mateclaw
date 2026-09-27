@@ -98,7 +98,8 @@ public class BiddingReviewService implements BiddingResultHandler {
         ArrayNode criteria = copyArray(analyses.path("bidding-scoring-analysis").path("criteria"));
         ArrayNode eliminationItems = copyArray(analyses.path("bidding-elimination-analysis").path("items"));
         ObjectNode evidenceSnapshot = sourceEvidence(scope, baseline);
-        ensureHumanTodos(scope, project, analyses.path("bidding-requirement-analysis").path("requirements"));
+        ensureHumanTodos(scope, project, ref(baselineRow.path("ref")),
+                analyses.path("bidding-requirement-analysis").path("requirements"));
         if (reviewerId.isBlank()) return notReady("REVIEWER_NOT_BOUND");
         if (!evidenceSnapshot.path("unreadableSourceRefs").isEmpty()) return notReady("SOURCE_UNREADABLE");
         List<BiddingTypes.Ref> materialRefs = chapterRefs.stream().map(r -> repository.businessRefs(repository.businessRevision(scope, r)))
@@ -368,10 +369,14 @@ public class BiddingReviewService implements BiddingResultHandler {
                     throw BiddingAccess.error(409, "TECHNICAL_REVIEW_BLOCKED", "Unresolved technical review finding blocks approval");
             }
         }
-        List<String> technicalTodos=jdbc.query("SELECT payload_json FROM mate_bidding_revision r WHERE r.workspace_id=? AND r.project_id=? AND r.kind='HUMAN_TODO' AND r.status='OPEN' AND r.version=(SELECT MAX(latest.version) FROM mate_bidding_revision latest WHERE latest.workspace_id=r.workspace_id AND latest.project_id=r.project_id AND latest.kind=r.kind AND latest.object_id=r.object_id)",
-                (rs,n)->rs.getString(1),scope.workspaceId(),scope.projectId());
-        for(String todoPayload:technicalTodos)if("UNCLASSIFIED".equals(object(todoPayload).path("impactClassification").asText())
-                || object(todoPayload).path("affectsTechnical").asBoolean(false))
+        BiddingTypes.Ref baselineRef=ref(baselineRow.path("ref"));
+        JsonNode requirements=baselineRow.path("payload").path("analyses").path("bidding-requirement-analysis").path("requirements");
+        List<String> missingTodos=new ArrayList<>();
+        List<ObjectNode> technicalTodos=currentHumanTodoRows(scope,baselineRef,requirements,missingTodos);
+        if(!missingTodos.isEmpty())throw BiddingAccess.error(409,"HUMAN_TODO_MISSING","Current baseline commercial decisions are incomplete");
+        for(ObjectNode todo:technicalTodos)if("OPEN".equals(todo.path("status").asText())
+                &&("UNCLASSIFIED".equals(todo.path("impactClassification").asText())
+                || todo.path("affectsTechnical").asBoolean(false)))
             throw BiddingAccess.error(409,"HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL","An unresolved business fact affects the technical response");
     }
 
@@ -441,20 +446,25 @@ public class BiddingReviewService implements BiddingResultHandler {
         access.requireReaderActor(scope,scope.actorId());
         ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());if(project==null)throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         BiddingTypes.Ref manuscript=latestManuscript(scope);ObjectNode out=json.createObjectNode();
-        if(manuscript==null){out.putNull("manuscriptRef").put("status","NOT_ASSEMBLED");out.putArray("tasks");out.putArray("findings").addAll(json.createArrayNode());out.putArray("humanTodos");return out;}
+        if(manuscript==null){out.putNull("manuscriptRef").put("status","NOT_ASSEMBLED");out.putArray("tasks");out.putArray("findings").addAll(json.createArrayNode());out.putArray("humanTodos");out.put("humanTodosComplete",true);return out;}
         try { dependencies.validateForRead(scope,List.of(manuscript)); }
         catch (BiddingApiException stale) { out.set("manuscriptRef",json.valueToTree(manuscript));out.put("status","REVIEW_STALE").put("reason","CURRENT_DEPENDENCY_CLOSURE_INVALID");out.putArray("tasks");out.putArray("findings");out.putArray("humanTodos");return out; }
+        ObjectNode currentManuscript=(ObjectNode)requiredManuscript(scope,manuscript).path("payload");
+        ObjectNode currentOutline=(ObjectNode)requiredBusiness(scope,ref(currentManuscript.path("outlineRef")),"outline").path("payload");
+        ObjectNode currentBaselineRow=requiredBaseline(scope,envelope(ref(currentManuscript.path("outlineRef")),currentOutline));
+        BiddingTypes.Ref currentBaselineRef=ref(currentBaselineRow.path("ref"));
+        JsonNode currentRequirements=currentBaselineRow.path("payload").path("analyses").path("bidding-requirement-analysis").path("requirements");
         out.set("manuscriptRef",json.valueToTree(manuscript));ArrayNode findings=out.putArray("findings");
         String reviewerId=project.path("bindings").path("reviewer").path("agentId").asText("");
         if (reviewerId.isBlank() || reviewerId.equals(project.path("bindings").path("writer").path("agentId").asText(""))) {
             out.put("status", "NOT_DISPATCHED").put("reason", reviewerId.isBlank() ? "REVIEWER_NOT_BOUND" : "REVIEWER_MUST_DIFFER");
-            out.putArray("tasks"); out.set("findings", findings); out.putArray("humanTodos"); readHumanTodos(scope,out.withArray("humanTodos"));
+            out.putArray("tasks"); out.set("findings", findings); appendCurrentHumanTodos(scope,currentBaselineRef,currentRequirements,out);
             return out;
         }
         ObjectNode reviewerBinding = (ObjectNode) project.path("bindings").path("reviewer");
         employees.getObject().validate(scope, reviewerId, reviewerBinding.path("configDigest").asText(null));
         try { validateReviewerMaterials(scope,reviewerId,List.of(manuscript)); }
-        catch (RuntimeException denied) { out.put("status","REVIEW_ACCESS_REVOKED").put("reason","REVIEWER_MATERIAL_ACCESS_REVOKED");out.putArray("tasks");out.set("findings",findings);out.putArray("humanTodos");readHumanTodos(scope,out.withArray("humanTodos"));return out; }
+        catch (RuntimeException denied) { out.put("status","REVIEW_ACCESS_REVOKED").put("reason","REVIEWER_MATERIAL_ACCESS_REVOKED");out.putArray("tasks");out.set("findings",findings);appendCurrentHumanTodos(scope,currentBaselineRef,currentRequirements,out);return out; }
         String activeSkill = pinnedSkillId(reviewerBinding, scope.workspaceId());
         String activeSkillDigest = pinDigest(reviewerBinding, activeSkill);
         ArrayNode taskViews=out.putArray("tasks");
@@ -480,7 +490,7 @@ public class BiddingReviewService implements BiddingResultHandler {
                 try { materials.requireReviewerReadable(scope, reviewerId, ref(material)); }
                 catch (RuntimeException denied) { readable = false; break; }
             }
-            if (!readable) { out.put("status", "REVIEW_ACCESS_REVOKED").put("reason", "REVIEWER_MATERIAL_ACCESS_REVOKED"); out.putArray("humanTodos"); readHumanTodos(scope,out.withArray("humanTodos")); return out; }
+            if (!readable) { out.put("status", "REVIEW_ACCESS_REVOKED").put("reason", "REVIEWER_MATERIAL_ACCESS_REVOKED"); appendCurrentHumanTodos(scope,currentBaselineRef,currentRequirements,out); return out; }
             if(currentKey==null)currentKey=meta.path("reviewKey").asText("");if(!currentKey.equals(meta.path("reviewKey").asText()))continue;
             selectedGroup.set(result.path("_objectId").asText(),result);
         }
@@ -497,15 +507,14 @@ public class BiddingReviewService implements BiddingResultHandler {
             Set<String> chapters=new LinkedHashSet<>(),requirements=new LinkedHashSet<>();boolean cross=false;
             for(JsonNode result:selectedGroup){for(JsonNode r:result.path("coverage").path("chapterRefs"))chapters.add(r.path("id").asText());for(JsonNode r:result.path("coverage").path("requirementRefs"))requirements.add(r.asText());if("cross".equals(result.path("_bidding").path("reviewSegment").asText()))cross=result.path("coverage").path("crossChapterReviewed").asBoolean(false);
                 for(JsonNode finding:result.path("findings")){ObjectNode item=json.createObjectNode();BiddingTypes.Ref reviewRef=refFromRow((ObjectNode)result);item.set("reviewRef",json.valueToTree(reviewRef));item.set("finding",finding.deepCopy());BiddingTypes.Ref findingRef=findingRefFor(scope,reviewRef,finding.path("id").asText());item.set("findingRef",json.valueToTree(findingRef));ObjectNode decision=latestDecisionRecord(scope,findingRef);item.put("decision",decision==null?"OPEN":decision.path("_status").asText());if(decision!=null){BiddingTypes.Ref decisionRef=new BiddingTypes.Ref("findingDecision",decision.path("_objectId").asText(),decision.path("_version").asLong(),decision.path("_digest").asText());item.set("findingDecisionRef",json.valueToTree(decisionRef));item.set("findingDecision",decision.path("payload").deepCopy());}findings.add(item);}}
-            ObjectNode manuscriptPayload=(ObjectNode)requiredManuscript(scope,manuscript).path("payload");
+            ObjectNode manuscriptPayload=currentManuscript;
             Set<String> expectedChapters=new LinkedHashSet<>();for(JsonNode chapter:manuscriptPayload.path("chapters"))expectedChapters.add(chapter.path("chapterId").asText());
-            ObjectNode outline=(ObjectNode)requiredBusiness(scope,ref(manuscriptPayload.path("outlineRef")),"outline").path("payload");
-            ObjectNode baseline=(ObjectNode)requiredBaseline(scope,envelope(ref(manuscriptPayload.path("outlineRef")),outline)).path("payload");
+            ObjectNode baseline=(ObjectNode)currentBaselineRow.path("payload");
             Set<String> expectedRequirements=new LinkedHashSet<>();for(JsonNode requirement:baseline.path("analyses").path("bidding-requirement-analysis").path("requirements"))if("TECHNICAL".equals(requirement.path("category").asText()))expectedRequirements.add(requirement.path("id").asText());
             boolean complete=cross&&chapters.containsAll(expectedChapters)&&requirements.containsAll(expectedRequirements);
             out.put("reviewKey",currentKey);out.put("status",complete?"REVIEWED":"IN_PROGRESS");ObjectNode coverage=out.putObject("coverage");coverage.set("chapterIds",json.valueToTree(chapters));coverage.set("requirementIds",json.valueToTree(requirements));coverage.set("expectedChapterIds",json.valueToTree(expectedChapters));coverage.set("expectedRequirementIds",json.valueToTree(expectedRequirements));coverage.put("crossChapterReviewed",cross);
         }
-        ArrayNode todos=out.putArray("humanTodos");readHumanTodos(scope,todos);
+        appendCurrentHumanTodos(scope,currentBaselineRef,currentRequirements,out);
         return out;
     }
 
@@ -516,6 +525,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         String status=view.path("status").asText();
         if("REVIEW_ACCESS_REVOKED".equals(status))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer material access is no longer valid");
         if(!"REVIEWED".equals(status))throw BiddingAccess.error(409,"REVIEW_INCOMPLETE","A complete current whole-book review is required");
+        if(!view.path("humanTodosComplete").asBoolean(false))throw BiddingAccess.error(409,"HUMAN_TODO_MISSING","Current baseline commercial decisions are incomplete");
         for(JsonNode item:view.path("findings")) {
             JsonNode finding=item.path("finding");String decision=item.path("decision").asText("OPEN");
             if(blocksTechnicalApproval(finding.path("category").asText(),finding.path("severity").asText(),isResolvedFindingDecision(decision)))
@@ -544,18 +554,63 @@ public class BiddingReviewService implements BiddingResultHandler {
         ObjectNode result=json.createObjectNode();result.set("reviewRef",json.valueToTree(reviewRef));result.set("evidence",proof);return result;
     }
 
-    private void ensureHumanTodos(BiddingTypes.Scope scope,ObjectNode project,JsonNode requirements) {
-        for(JsonNode requirement:requirements){if(!"COMMERCIAL".equals(requirement.path("category").asText()))continue;String id=requirement.path("id").asText();if(id.isBlank())continue;
-            Long count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=?",Long.class,scope.workspaceId(),scope.projectId(),id);if(count!=null&&count>0)continue;
-            List<BiddingTypes.Ref> sources=new ArrayList<>();JsonNode evidence=requirement.path("evidenceRefs");if(evidence.isArray())for(JsonNode e:evidence){String sourceId=e.path("sourceId").asText();long version=e.path("version").asLong(0);BiddingRepository.SourceRow source=repository.source(scope.workspaceId(),scope.projectId(),sourceId,version);if(source!=null)sources.add(new BiddingTypes.Ref("source",sourceId,version,source.digest()));}
-            ObjectNode todo=json.createObjectNode().put("todoId",id).put("requirementRef",id).put("title",requirement.path("text").asText()).put("ownerId",project.path("ownerId").asText()).put("status","OPEN").put("impactClassification","UNCLASSIFIED").put("affectsTechnical",true).put("createdBy","bidding-review");todo.set("sourceRefs",json.valueToTree(sources));todo.set("evidenceRefs",evidence.deepCopy());
-            saveBusinessRevision(scope,"HUMAN_TODO",id,todo,sources,"OPEN");
+    private void ensureHumanTodos(BiddingTypes.Scope scope,ObjectNode project,BiddingTypes.Ref baselineRef,JsonNode requirements) {
+        for(JsonNode requirement:requirements){if(!"COMMERCIAL".equals(requirement.path("category").asText()))continue;String requirementId=requirement.path("id").asText();if(requirementId.isBlank())continue;
+            String todoId=humanTodoId(baselineRef,requirementId);
+            Long count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=?",Long.class,scope.workspaceId(),scope.projectId(),todoId);if(count!=null&&count>0)continue;
+            List<BiddingTypes.Ref> sources=sourceRefsForRequirement(scope,requirement);
+            ObjectNode todo=json.createObjectNode().put("todoId",todoId).put("requirementId",requirementId).put("requirementRef",requirementId)
+                    .put("title",requirement.path("text").asText()).put("ownerId",project.path("ownerId").asText()).put("status","OPEN")
+                    .put("impactClassification","UNCLASSIFIED").put("affectsTechnical",true).put("createdBy","bidding-review");
+            todo.set("baselineRef",json.valueToTree(baselineRef));todo.set("sourceRefs",json.valueToTree(sources));
+            todo.set("evidenceRefs",requirement.path("evidenceRefs").deepCopy());
+            saveBusinessRevision(scope,"HUMAN_TODO",todoId,todo,append(List.of(baselineRef),sources),"OPEN");
         }
     }
-    private void readHumanTodos(BiddingTypes.Scope scope,ArrayNode output) {
-        List<ObjectNode> rows=jdbc.query("SELECT object_id,version,digest,payload_json,status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' ORDER BY object_id,version DESC",
+    private void appendCurrentHumanTodos(BiddingTypes.Scope scope,BiddingTypes.Ref baselineRef,JsonNode requirements,ObjectNode output) {
+        ArrayNode todos=output.putArray("humanTodos");List<String> missing=new ArrayList<>();
+        for(ObjectNode row:currentHumanTodoRows(scope,baselineRef,requirements,missing)) {
+            String id=row.path("_id").asText();ObjectNode view=row.deepCopy();
+            view.remove(List.of("_id","_version","_digest","_status","_bidding"));
+            view.set("ref",json.valueToTree(new BiddingTypes.Ref("HUMAN_TODO",id,row.path("_version").asLong(),row.path("_digest").asText())));todos.add(view);
+        }
+        output.put("humanTodosComplete",missing.isEmpty());output.set("missingHumanTodoRequirementIds",json.valueToTree(missing));
+    }
+    private List<ObjectNode> currentHumanTodoRows(BiddingTypes.Scope scope,BiddingTypes.Ref baselineRef,JsonNode requirements,List<String> missing) {
+        List<ObjectNode> revisions=jdbc.query("SELECT object_id,version,digest,payload_json,status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' ORDER BY object_id,version DESC",
                 (rs,n)->{ObjectNode row=object(rs.getString(4));row.put("_id",rs.getString(1)).put("_version",rs.getLong(2)).put("_digest",rs.getString(3)).put("_status",rs.getString(5));return row;},scope.workspaceId(),scope.projectId());
-        Set<String> seen=new LinkedHashSet<>();for(ObjectNode row:rows){String id=row.path("_id").asText();if(!seen.add(id))continue;ObjectNode view=row.deepCopy();view.remove(List.of("_id","_version","_digest","_status","_bidding"));view.set("ref",json.valueToTree(new BiddingTypes.Ref("HUMAN_TODO",id,row.path("_version").asLong(),row.path("_digest").asText())));output.add(view);}
+        Map<String,ObjectNode> latest=new LinkedHashMap<>();for(ObjectNode row:revisions)latest.putIfAbsent(row.path("_id").asText(),row);
+        List<ObjectNode> current=new ArrayList<>();
+        if(requirements!=null&&requirements.isArray())for(JsonNode requirement:requirements) {
+            if(!"COMMERCIAL".equals(requirement.path("category").asText()))continue;
+            String requirementId=requirement.path("id").asText();if(requirementId.isBlank())continue;
+            ObjectNode row=latest.get(humanTodoId(baselineRef,requirementId));
+            if(row==null||!same(ref(row.path("baselineRef")),baselineRef)||!requirementId.equals(row.path("requirementId").asText())
+                    ||!requirementId.equals(row.path("requirementRef").asText())
+                    ||!matchesTodoProvenance(scope,row,requirement)
+                    ||!row.path("status").asText().equals(row.path("_status").asText())) {
+                missing.add(requirementId);continue;
+            }
+            current.add(row);
+        }
+        return current;
+    }
+    private boolean matchesTodoProvenance(BiddingTypes.Scope scope,ObjectNode todo,JsonNode requirement) {
+        JsonNode evidence=requirement.path("evidenceRefs");List<BiddingTypes.Ref> sources=sourceRefsForRequirement(scope,requirement);
+        return evidence.isArray()&&!evidence.isEmpty()&&sources.size()==evidence.size()
+                &&canonical(todo.path("evidenceRefs")).equals(canonical(evidence))
+                &&canonical(todo.path("sourceRefs")).equals(canonical(json.valueToTree(sources)));
+    }
+    private List<BiddingTypes.Ref> sourceRefsForRequirement(BiddingTypes.Scope scope,JsonNode requirement) {
+        List<BiddingTypes.Ref> sources=new ArrayList<>();JsonNode evidence=requirement.path("evidenceRefs");
+        if(evidence.isArray())for(JsonNode item:evidence){String sourceId=item.path("sourceId").asText();long version=item.path("version").asLong(0);
+            BiddingRepository.SourceRow source=repository.source(scope.workspaceId(),scope.projectId(),sourceId,version);
+            if(source!=null)sources.add(new BiddingTypes.Ref("source",sourceId,version,source.digest()));}
+        return sources;
+    }
+    private String humanTodoId(BiddingTypes.Ref baselineRef,String requirementId) {
+        if(baselineRef==null||requirementId==null||requirementId.isBlank())throw BiddingAccess.error(409,"HUMAN_TODO_MISSING","Current baseline requirement identity is unavailable");
+        return digest(Map.of("baselineRef",baselineRef,"requirementId",requirementId));
     }
     private String latestDecision(BiddingTypes.Scope scope,BiddingTypes.Ref finding) {
         if(finding==null)return null;
@@ -653,6 +708,13 @@ public class BiddingReviewService implements BiddingResultHandler {
         ArrayNode originalSourceRefs = copyArray(todo.path("sourceRefs"));
         if (originalRefs.isEmpty() || originalSourceRefs.isEmpty())
             throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are unavailable");
+        BiddingTypes.Ref baselineRef=ref(todo.path("baselineRef"));
+        if(baselineRef!=null) {
+            boolean bound=false;
+            for(JsonNode node:originalRefs)if(same(ref(node),baselineRef)){bound=true;break;}
+            if(!bound)throw BiddingAccess.error(409,"DEPENDENCY_STALE","Original human todo baseline is unavailable");
+            dependencies.validate(scope,List.of(baselineRef));
+        }
         for (JsonNode node : originalRefs) {
             BiddingTypes.Ref ref = ref(node);
             if (ref == null) throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are invalid");
