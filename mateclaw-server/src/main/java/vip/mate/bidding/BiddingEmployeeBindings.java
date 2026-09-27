@@ -228,7 +228,14 @@ public class BiddingEmployeeBindings {
 
     private List<ResolvedSkill> requiredRoleSkills(String role, long agentId, long workspace) {
         List<ResolvedSkill> found = new ArrayList<>();
-        for (String name : REQUIRED_SKILLS.get(role)) {
+        List<String> names = new ArrayList<>(REQUIRED_SKILLS.get(role));
+        // Preserve P2 writer readiness while pinning export only when it is actively available and granted.
+        if ("writer".equals(role)) {
+            ResolvedSkill export = skills.findActiveSkill("bidding-document-export", workspace);
+            if (export != null && export.getId() != null && SkillRuntimeService.passesActiveGate(export)
+                    && isGranted(agentId, export.getId())) names.add("bidding-document-export");
+        }
+        for (String name : names) {
             ResolvedSkill skill = skills.findActiveSkill(name, workspace);
             if (skill == null || skill.getId() == null || !SkillRuntimeService.passesActiveGate(skill) || !isGranted(agentId, skill.getId()))
                 throw BiddingAccess.error(422, "EMPLOYEE_SKILL_UNAVAILABLE", "岗位缺少已授权且可用的必需技能: " + name);

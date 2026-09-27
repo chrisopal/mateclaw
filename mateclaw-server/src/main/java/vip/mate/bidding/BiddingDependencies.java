@@ -52,6 +52,10 @@ public class BiddingDependencies {
                 materials.requireReadable(scope,agent,ref);
             } else if("sourceSet".equals(ref.kind())) {
                 if(!repository.historicalRevisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
+            } else if(Set.of("TEMPLATE","FORMAT_REQUIREMENTS").contains(ref.kind())) {
+                ObjectNode row=repository.businessRevision(scope,ref);
+                if(row==null||!repository.historicalRevisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Export reference not found");
+                List<BiddingTypes.Ref> nested=repository.businessRefs(row);if(!nested.isEmpty())validateHistoricalRefs(scope,nested,visiting);
             } else if("chapter".equals(ref.kind())) {
                 var row=repository.businessRevision(scope,ref);
                 if(row==null || !Set.of("SELECTED","HUMAN_EDIT","NEEDS_RECONFIRMATION").contains(row.path("status").asText()))
@@ -89,6 +93,12 @@ public class BiddingDependencies {
             } else if ("sourceSet".equals(ref.kind())) {
                 if (!repository.revisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Source set not found");
                 if (!repository.isSelectedSourceSet(scope,ref)) throw BiddingAccess.error(409,"DEPENDENCY_STALE","Source set is no longer current");
+            } else if (Set.of("TEMPLATE","FORMAT_REQUIREMENTS").contains(ref.kind())) {
+                ObjectNode row=repository.businessRevision(scope,ref);
+                if(row==null||!repository.isSelectedBusinessRevision(scope,ref)) throw BiddingAccess.error(409,"DEPENDENCY_STALE","Export template or format requirements are no longer current");
+                Set<String> allowed=Set.of("CONFIRMED","NEEDS_RECONFIRMATION");
+                if(!allowed.contains(row.path("status").asText())) throw BiddingAccess.error(422,"DEPENDENCY_NOT_CONFIRMED","Export reference is not confirmed");
+                List<BiddingTypes.Ref> nested=repository.businessRefs(row);if(!nested.isEmpty())validateRefs(scope,nested,visiting);
             } else if ("chapter".equals(ref.kind())) {
                 ObjectNode row=repository.businessRevision(scope,ref);
                 if(row==null || !Set.of("SELECTED","HUMAN_EDIT").contains(row.path("status").asText()) || !repository.isSelectedBusinessRevision(scope,ref))

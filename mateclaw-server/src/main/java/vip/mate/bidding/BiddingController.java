@@ -29,12 +29,13 @@ public class BiddingController {
     private final ObjectProvider<BiddingOutlineService> outlines;
     private final ObjectProvider<BiddingWritingService> writing;
     private final ObjectProvider<BiddingReviewService> reviews;
+    private final ObjectProvider<BiddingArtifactService> artifacts;
     private final ObjectMapper json;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
             BiddingSourceService sources, BiddingDependencies dependencies, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectProvider<BiddingOutlineService> outlines, ObjectProvider<BiddingWritingService> writing, ObjectProvider<BiddingReviewService> reviews, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectProvider<BiddingOutlineService> outlines, ObjectProvider<BiddingWritingService> writing, ObjectProvider<BiddingReviewService> reviews, ObjectProvider<BiddingArtifactService> artifacts, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
@@ -48,6 +49,7 @@ public class BiddingController {
         this.outlines = outlines;
         this.writing = writing;
         this.reviews = reviews;
+        this.artifacts = artifacts;
         this.json = json;
         this.jdbc = jdbc;
     }
@@ -121,6 +123,20 @@ public class BiddingController {
     @GetMapping("/projects/{id}/review")
     public R<?> review(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
         String actor=access.require(workspace,"viewer");return R.ok(reviews.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    }
+    @GetMapping("/projects/{id}/templates")
+    public R<?> templates(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
+        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().templates(new BiddingTypes.Scope(workspace,actor,id)));
+    }
+    @GetMapping("/projects/{id}/artifacts/{artifactId}")
+    public R<?> artifact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
+        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().metadata(new BiddingTypes.Scope(workspace,actor,id),artifactId));
+    }
+    @GetMapping("/projects/{id}/artifacts/{artifactId}/content")
+    public ResponseEntity<byte[]> artifactContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
+        String actor=access.require(workspace,"viewer");byte[] bytes=artifacts.getObject().bytes(new BiddingTypes.Scope(workspace,actor,id),artifactId);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .header(HttpHeaders.CACHE_CONTROL,"no-store").header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename(artifactId+".docx").build().toString()).body(bytes);
     }
     @GetMapping("/projects/{id}/change-impact")
     public R<?> changeImpact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {

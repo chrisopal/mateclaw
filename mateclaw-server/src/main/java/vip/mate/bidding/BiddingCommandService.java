@@ -17,10 +17,11 @@ public class BiddingCommandService {
     private final ObjectProvider<BiddingOutlineService> outlines;
     private final ObjectProvider<BiddingWritingService> writing;
     private final ObjectProvider<BiddingReviewService> reviews;
+    private final ObjectProvider<BiddingArtifactService> artifacts;
     public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,BiddingDependencies dependencies,ObjectProvider<BiddingEmployeeBindings> employees,
             ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews) {
-        this.projects=projects; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing; this.reviews=reviews;
+            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews,ObjectProvider<BiddingArtifactService> artifacts) {
+        this.projects=projects; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing; this.reviews=reviews;this.artifacts=artifacts;
     }
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
@@ -47,6 +48,8 @@ public class BiddingCommandService {
             case "RESOLVE_HUMAN_TODO" -> reviews.getObject().resolveHumanTodo(scope,command);
             case "CLASSIFY_HUMAN_TODO" -> reviews.getObject().classifyHumanTodo(scope,command);
             case "REVISE_CHAPTER" -> writing.getObject().revise(scope,command);
+            case "DISPATCH_EXPORT" -> artifacts.getObject().dispatch(scope,command);
+            case "SAVE_FORMAT_REQUIREMENTS" -> artifacts.getObject().saveFormatRequirements(scope,command);
             case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
             default -> projects.execute(scope,command);
         };
