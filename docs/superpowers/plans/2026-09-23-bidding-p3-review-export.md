@@ -347,3 +347,8 @@ No new public commands, dependencies, schema or migrations. This is the machine-
 
 **Verification:**
 Regression RED/GREEN for classified/resolved R1 reused by a fresh baseline, same-baseline idempotent reuse, legacy and missing current todo rejection; full root Task5 backend selector in an isolated skill root; fixed-source scoped Sol re-review. Complete business acceptance remains open.
+
+
+### Task 6 scoped review fix round 1
+
+Declared owner remains the exact two Task 6 Java files and this plan's `final-fix-report.md`; controller owns review, gate, acceptance and progress artifacts. Before edit: Sol's `final-review-fix-round1.md` found two MEDIUM gaps. Legacy HUMAN_TODO lacking `baselineRef` must reject further CLASSIFY/RESOLVE operations without appending a revision, even when an old source remains selected; existing historical bytes/readback remain. Regression must seed a selected exact baseline for the original source-closure test and assert legacy rejection. The new-baseline fixture must reuse one baseline object ID with a higher version, update its selected head with affected-row assertion, and exercise real selected-baseline dependency validation instead of merely trusting a Mockito no-op. No new schema/dependency/permission bypass and no other source files. Focused tests, full root Task 6 gate and scoped Sol re-review remain mandatory.
