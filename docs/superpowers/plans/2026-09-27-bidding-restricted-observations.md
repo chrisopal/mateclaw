@@ -11,7 +11,7 @@ Prerequisite: Task4 source gate and Sol approval. Execute this scoped repair bef
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ReasoningNode.java` only to pass current conversation ID into the age-compaction overload; no reasoning/model behavior changes.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolResultStorage.java` only if existing retrieval policy can safely express the repair.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java` only for explicit restricted-observation policy wiring.
-- Create: `mateclaw-server/src/test/java/vip/mate/agent/graph/executor/RestrictedProjectObservationTest.java`.
+- Create: `mateclaw-server/src/test/java/vip/mate/agent/context/RestrictedProjectObservationTest.java`.
 - Modify: `mateclaw-server/src/test/java/vip/mate/agent/context/ConversationWindowManagerExemptAndSpillTest.java`.
 - Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java`.
 
@@ -30,3 +30,5 @@ Root follow-up after accepted repair: package a fresh QA backend using preserved
 Scope clarification: age compaction currently omits conversationId at its caller. Passing it through ReasoningNode is authorized so preservation is keyed by conversation plus call ID rather than trusting provider call IDs globally. Cover same call ID in separate conversations; preserve the existing generic overload for callers without restricted context.
 
 Confirmed scoped extension (2026-09-27): readSkillFile is excluded from immediate spill but is absent from CWM age/prune exemptions. Thus a pinned output.schema.json can be lost later. Extend only the server-created Bidding preservation policy to its pinned `readSkillFile`/`load_skill` observations alongside the two source readers. Keep generic global exemptions unchanged. Within the already declared test/runtime/window files, regress exact schema/skill retention through age/prune plus source retention, denied arbitrary path/file reads, cross-conversation isolation, generic compaction and hard budget refusal. This is a proven observation-contract defect, not proof that it caused every live wrong-schema output.
+
+Root scope reconciliation (2026-09-27): the new combined executor/window regression belongs in `agent/context` to exercise package-scoped window seams without widening production visibility. The original planned `graph/executor` test location is replaced, not a second file. Source base remains d9851921; this documented test-location adjustment is approved before the root gate. Add a long pinned excluded-tool schema regression above `excludedToolInlineChars` under aggregate pressure: the excluded-tool fallback must preserve the exact protected observation and emit insufficient-context; the generic counterpart must still compact.
