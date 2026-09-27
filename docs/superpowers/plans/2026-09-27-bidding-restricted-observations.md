@@ -5,6 +5,7 @@ Prerequisite: Task4 source gate and Sol approval. Execute this scoped repair bef
 ### Task 1: Preserve authorized observations through restricted execution
 
 **Files:**
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java` real ToolResultStorage bean wiring for the existing lightweight Spring fixture only.
 - Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingFakeRuntime.java` existing test helper super-constructor wiring only.
 - Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingRuntimeIsolationTest.java` constructor and isolated Spring fixture wiring only for the required metadata cleanup dependency.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ActionNode.java` restricted terminal failure only.
@@ -44,3 +45,5 @@ Sol review fix scope (2026-09-27): HIGH budget events do not enforce refusal; ME
 Constructor fixture scope reconciliation: metadata-only finally release uses a required shared ToolResultStorage dependency in BiddingEmployeeRuntime. Root authorizes only the direct-constructor argument and isolated Spring bean registration in BiddingRuntimeIsolationTest, preserving isolation assertions. Keep required constructor injection rather than introducing optional setter/null behavior solely to avoid this legitimate test adaptation. The test edit occurred before scope notification; this is recorded and reconciled before gate, not silently treated as originally declared. Graph-level semantic RED is still pending; report only the capacity RED until it exists.
 
 Existing BiddingFakeRuntime test subclass also needs the new required storage dependency passed to super. Root authorizes only that test constructor mock wiring, no fake-runtime behavior changes and no use of this helper as the new native-graph acceptance runtime.
+
+Broad gate exposed a lightweight fixture wiring gap: BiddingHttpFixture imports the real BiddingEmployeeRuntime but does not provide its now-required ToolResultStorage. Root authorizes one real storage bean using the fixture's existing properties; no behavior/auth/model fake changes, no weakening production injection. Preserve the failed gate as infrastructure/fixture failure, then rerun all affected suites and complete broad gate.
