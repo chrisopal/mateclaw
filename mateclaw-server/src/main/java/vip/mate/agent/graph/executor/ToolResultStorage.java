@@ -62,6 +62,14 @@ public class ToolResultStorage {
     /** D-6: monotonically increasing spill counter for observability. */
     private final java.util.concurrent.atomic.AtomicLong spillCount = new java.util.concurrent.atomic.AtomicLong();
 
+    /** Trusted, per-conversation observations that cannot use arbitrary read_file recovery. */
+    private final java.util.concurrent.ConcurrentHashMap<ProtectedObservation, Long> protectedObservations =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long PROTECTED_OBSERVATION_TTL_MILLIS = 6L * 60 * 60 * 1000;
+    private static final int MAX_PROTECTED_OBSERVATIONS = 8_192;
+
+    private record ProtectedObservation(String conversationId, String toolUseId) { }
+
     /**
      * Workspace roots observed during this JVM's lifetime. Populated every
      * time a successful spill resolves a base directory; consulted by the
@@ -103,6 +111,32 @@ public class ToolResultStorage {
     /** D-6: current cumulative spill count (monotonically increasing). */
     public long getSpillCount() {
         return spillCount.get();
+    }
+
+    /** Marks one successful scoped source read for preservation through context compaction. */
+    public void protectObservation(String conversationId, String toolUseId) {
+        if (conversationId == null || conversationId.isBlank() || toolUseId == null || toolUseId.isBlank()) return;
+        long now = System.currentTimeMillis();
+        protectedObservations.entrySet().removeIf(entry -> now - entry.getValue() >= PROTECTED_OBSERVATION_TTL_MILLIS);
+        if (protectedObservations.size() >= MAX_PROTECTED_OBSERVATIONS
+                && !protectedObservations.containsKey(new ProtectedObservation(conversationId, toolUseId))) {
+            protectedObservations.entrySet().stream()
+                    .min(Comparator.comparingLong(java.util.Map.Entry::getValue))
+                    .ifPresent(entry -> protectedObservations.remove(entry.getKey(), entry.getValue()));
+        }
+        protectedObservations.put(new ProtectedObservation(conversationId, toolUseId), now);
+    }
+
+    public boolean isProtectedObservation(String conversationId, String toolUseId) {
+        if (conversationId == null || toolUseId == null) return false;
+        ProtectedObservation key = new ProtectedObservation(conversationId, toolUseId);
+        Long markedAt = protectedObservations.get(key);
+        if (markedAt == null) return false;
+        if (System.currentTimeMillis() - markedAt >= PROTECTED_OBSERVATION_TTL_MILLIS) {
+            protectedObservations.remove(key, markedAt);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -151,6 +185,9 @@ public class ToolResultStorage {
     public String persistIfOversized(String result, String toolName, String toolUseId,
                                      String conversationId, String workspaceBasePath) {
         if (!props.isEnabled() || result == null) {
+            return result;
+        }
+        if (isProtectedObservation(conversationId, toolUseId)) {
             return result;
         }
         if (isExcluded(toolName)) {
@@ -209,7 +246,7 @@ public class ToolResultStorage {
                 ToolResponseMessage.ToolResponse r = mutable.get(i);
                 String body = r.responseData();
                 if (body == null || body.startsWith(SPILL_MARKER_PREFIX)) continue;
-                if (isExcluded(r.name())) continue;     // retrieval tools must not be spilled
+                if (isExcluded(r.name()) || isProtectedObservation(conversationId, r.id())) continue;
                 if (body.length() > targetLen) {
                     targetLen = body.length();
                     targetIdx = i;
@@ -221,8 +258,10 @@ public class ToolResultStorage {
                     aggregate = aggregateSize(mutable);
                     continue;
                 }
-                log.warn("[ToolResultStorage] aggregate still {} chars after spilling/compacting everything eligible",
-                        aggregate);
+                boolean protectedOverflow = mutable.stream().anyMatch(r ->
+                        isProtectedObservation(conversationId, r.id()) && r.responseData() != null);
+                log.warn("[ToolResultStorage] aggregate still {} chars after spilling/compacting everything eligible{}",
+                        aggregate, protectedOverflow ? "; protected source observations exceed the turn budget" : "");
                 break;
             }
             ToolResponseMessage.ToolResponse target = mutable.get(targetIdx);
@@ -243,6 +282,14 @@ public class ToolResultStorage {
             aggregate = aggregateSize(mutable);
         }
         return mutable;
+    }
+
+    boolean hasProtectedObservationOverflow(List<ToolResponseMessage.ToolResponse> responses,
+                                           String conversationId) {
+        return props.isEnabled() && responses != null
+                && aggregateSize(responses) > props.getPerTurnBudgetChars()
+                && responses.stream().anyMatch(response ->
+                        isProtectedObservation(conversationId, response.id()));
     }
 
     private int compactLargestExcludedResult(List<ToolResponseMessage.ToolResponse> mutable) {
@@ -455,6 +502,7 @@ public class ToolResultStorage {
         if (conversationId == null || conversationId.isEmpty()) {
             return 0;
         }
+        protectedObservations.keySet().removeIf(key -> conversationId.equals(key.conversationId()));
         String safeConv = sanitize(conversationId);
         java.util.Set<Path> roots = new java.util.LinkedHashSet<>(observedRoots);
         if (!props.getStorageBaseDir().isEmpty()) {

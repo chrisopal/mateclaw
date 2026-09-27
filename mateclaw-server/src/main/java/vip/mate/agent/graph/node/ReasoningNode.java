@@ -943,7 +943,7 @@ public class ReasoningNode implements NodeAction {
             // this, even spilled previews (~1-2 KB each) accumulate across
             // 30+ tool calls and bloat the prompt the model sees every turn.
             messages = conversationWindowManager.compactAgedToolResponses(
-                    messages, KEEP_RECENT_TOOL_RESPONSES);
+                    messages, KEEP_RECENT_TOOL_RESPONSES, conversationId);
             // Pass conversationId + workspaceBasePath so oversized older
             // tool results can be spilled to the workspace spill directory
             // (preserving the full body for read_file recovery) instead of

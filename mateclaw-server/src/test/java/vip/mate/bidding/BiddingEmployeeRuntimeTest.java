@@ -332,6 +332,10 @@ class BiddingEmployeeRuntimeTest {
                 attemptId, token, 1, 0, java.time.Instant.now().plusSeconds(60), agent.getId().toString(),
                 new BiddingTypes.SkillPin("skill-" + modelId, "v1", skillDigest, skillFiles),
                 Long.toString(modelId), configDigest, List.of(sourceSet), mapper.createObjectNode().put("task", "run"));
+        var executionOptions = BiddingEmployeeRuntime.executionOptions(claim);
+        assertEquals(java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources"),
+                executionOptions.preservedObservationTools());
+        assertFalse(executionOptions.allowedTools().contains("read_file"));
 
         var fixedContractCheck = BiddingEmployeeRuntime.readResult(Flux.just(
                 AgentService.StreamDelta.event("project_skill_loaded", Map.of("digest", skillDigest)),

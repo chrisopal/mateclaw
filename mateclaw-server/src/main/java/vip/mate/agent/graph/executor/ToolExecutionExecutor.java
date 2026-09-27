@@ -147,6 +147,9 @@ public class ToolExecutionExecutor {
                                      String conversationId, String workspaceBasePath) {
         if (result == null) return null;
         if (storage != null) {
+            if (storage.isProtectedObservation(conversationId, toolUseId)) {
+                return result;
+            }
             String safeConv = conversationId != null && !conversationId.isEmpty()
                     ? conversationId : "unknown";
             String candidate = storage.persistIfOversized(
@@ -765,6 +768,11 @@ public class ToolExecutionExecutor {
         if (resultStorage != null && !allResponses.isEmpty()) {
             allResponses = new ArrayList<>(resultStorage.enforceTurnBudget(
                     allResponses, conversationId, workspaceBasePath));
+            if (resultStorage.hasProtectedObservationOverflow(allResponses, conversationId)) {
+                events.add(GraphEventPublisher.phase("restricted_observation_budget", Map.of(
+                        "status", "insufficient_context",
+                        "reason", "restricted_source_observation_exceeds_turn_budget")));
+            }
         }
 
         boolean hasApprovalPending = barrier != null;
@@ -1224,6 +1232,12 @@ public class ToolExecutionExecutor {
                 if (rawDelta.hasEvidence()) {
                     pc.rawEvidenceCollector.accumulateAndGet(rawDelta, SourceEvidenceLedger::merge);
                 }
+            }
+
+            if (resultStorage != null && pc.projectOptions != null
+                    && pc.projectOptions.preservedObservationTools().contains(toolName)
+                    && result != null && !result.isBlank() && !result.startsWith("Error:")) {
+                resultStorage.protectObservation(pc.conversationId, pc.toolCall.id());
             }
 
             // Raw-first spill: write the full output to disk and replace

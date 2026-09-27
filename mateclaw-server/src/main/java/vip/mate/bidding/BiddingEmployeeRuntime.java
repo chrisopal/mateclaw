@@ -103,13 +103,7 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         conversations.getOrCreateConversation(conversationId, agentId, claim.scope().actorId(),
                 BiddingAccess.parse(claim.scope().workspaceId(), "WORKSPACE_REQUIRED"));
         var files = claim.skill().files();
-        java.util.Set<String> allowedTools=SKILL_EXPORT.equals(skillName(claim.skill().files()))
-                ? java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources", "bidding_export_document")
-                : java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources");
-        var options = new vip.mate.agent.execution.ProjectExecutionOptions(claim.attemptId(), claim.modelConfigId(),
-                claim.configDigest(), skillName(files), claim.skill().digest(), files,
-                allowedTools,
-                new BiddingToolScope(claim), 0, false, false, 12);
+        var options = executionOptions(claim);
         var origin = new vip.mate.agent.context.ChatOrigin(agentId, conversationId, claim.scope().actorId(),
                 BiddingAccess.parse(claim.scope().workspaceId(), "WORKSPACE_REQUIRED"), null, null, null,
                 false, null, null, null, null, null);
@@ -145,6 +139,17 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
                     ? "MODEL_RUNTIME_UNSUPPORTED" : "EMPLOYEE_UNAVAILABLE";
             return failure(code, "PERMANENT", false, false, false);
         }
+    }
+
+    static vip.mate.agent.execution.ProjectExecutionOptions executionOptions(BiddingTypes.Claim claim) {
+        Map<String, String> files = claim.skill().files();
+        java.util.Set<String> allowedTools = SKILL_EXPORT.equals(skillName(files))
+                ? java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources", "bidding_export_document")
+                : java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources");
+        return new vip.mate.agent.execution.ProjectExecutionOptions(claim.attemptId(), claim.modelConfigId(),
+                claim.configDigest(), skillName(files), claim.skill().digest(), files, allowedTools,
+                new BiddingToolScope(claim), 0, false, false, 12,
+                java.util.Set.of("load_skill", "readSkillFile", "bidding_read_source", "bidding_read_sources"));
     }
 
     private static final String SKILL_EXPORT="bidding-document-export";

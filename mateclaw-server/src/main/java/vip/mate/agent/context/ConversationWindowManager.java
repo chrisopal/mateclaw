@@ -452,7 +452,7 @@ public class ConversationWindowManager {
         List<Message> recentMessages = messages.subList(tailStart, messages.size());
 
         // ═══ Phase 1: Soft Trim — 裁剪旧工具结果 ═══
-        int softTrimmed = softTrimToolResults(oldMessages);
+        int softTrimmed = softTrimToolResults(oldMessages, conversationId);
         if (softTrimmed > 0) {
             int afterTrimTokens = TokenEstimator.estimateTokens(oldMessages) + TokenEstimator.estimateTokens(recentMessages);
             log.info("[ConversationWindow] Phase 1 Soft trim: {} tool results trimmed, tokens={}, budget={}",
@@ -465,7 +465,7 @@ public class ConversationWindowManager {
         }
 
         // ═══ Phase 2: Hard Clear — 替换所有旧工具结果为占位符 ═══
-        int hardCleared = hardClearToolResults(oldMessages);
+        int hardCleared = hardClearToolResults(oldMessages, conversationId);
         if (hardCleared > 0) {
             int afterClearTokens = TokenEstimator.estimateTokens(oldMessages) + TokenEstimator.estimateTokens(recentMessages);
             log.info("[ConversationWindow] Phase 2 Hard clear: {} replaced, tokens={}, budget={}",
@@ -521,11 +521,24 @@ public class ConversationWindowManager {
             }
         }
 
+        int afterProtectedSpillTokens = TokenEstimator.estimateTokens(oldMessages)
+                + TokenEstimator.estimateTokens(recentMessages);
+        if (hasProtectedObservation(oldMessages, conversationId)
+                && afterProtectedSpillTokens > historyBudget) {
+            log.warn("[ConversationWindow] Protected source observations exceed history budget; preserving evidence and skipping compaction for conv={}",
+                    conversationId);
+            broadcastCompactStatus(conversationId, "skipped", Map.of(
+                    "reason", "restricted_observation_context_budget_exceeded",
+                    "preTokens", preTokens,
+                    "budget", historyBudget));
+            return messages;
+        }
+
         // ═══ Phase 3: Pre-Prune + LLM 结构化摘要 ═══
 
         // Pre-prune：在喂给摘要 LLM 前清理旧消息中的工具输出
         List<Message> forSummary = new ArrayList<>(oldMessages);
-        int prePruned = prePruneForSummary(forSummary);
+        int prePruned = prePruneForSummary(forSummary, conversationId);
         if (prePruned > 0) {
             log.info("[ConversationWindow] Phase 3 Pre-prune: {} tool results cleared before summarization", prePruned);
         }
@@ -1069,6 +1082,11 @@ public class ConversationWindowManager {
      *                     disables the pass.
      */
     public List<Message> compactAgedToolResponses(List<Message> messages, int keepRecentN) {
+        return compactAgedToolResponses(messages, keepRecentN, null);
+    }
+
+    public List<Message> compactAgedToolResponses(List<Message> messages, int keepRecentN,
+                                                   String conversationId) {
         if (messages == null || messages.isEmpty() || keepRecentN <= 0) {
             return messages;
         }
@@ -1093,7 +1111,7 @@ public class ConversationWindowManager {
                 String body = r.responseData();
                 String name = r.name();
                 boolean exempt = name != null && PRUNE_EXEMPT_TOOLS.contains(name);
-                if (exempt || body == null || body.isEmpty()) {
+                if (exempt || isProtectedObservation(r, conversationId) || body == null || body.isEmpty()) {
                     newResponses.add(r);
                     continue;
                 }
@@ -1176,13 +1194,17 @@ public class ConversationWindowManager {
      * survives intact across compaction.
      */
     int softTrimToolResults(List<Message> messages) {
+        return softTrimToolResults(messages, null);
+    }
+
+    private int softTrimToolResults(List<Message> messages, String conversationId) {
         int trimmed = 0;
         for (int i = 0; i < messages.size(); i++) {
             if (messages.get(i) instanceof ToolResponseMessage trm) {
                 List<ToolResponseMessage.ToolResponse> newResponses = new ArrayList<>();
                 boolean changed = false;
                 for (ToolResponseMessage.ToolResponse r : trm.getResponses()) {
-                    if (isSpillMarker(r)) {
+                    if (isSpillMarker(r) || isProtectedObservation(r, conversationId)) {
                         // Pointer + preview already; trimming would lose the path.
                         newResponses.add(r);
                         continue;
@@ -1220,13 +1242,17 @@ public class ConversationWindowManager {
      * tool output it could otherwise recover via {@code read_file}.
      */
     int hardClearToolResults(List<Message> messages) {
+        return hardClearToolResults(messages, null);
+    }
+
+    private int hardClearToolResults(List<Message> messages, String conversationId) {
         int cleared = 0;
         for (int i = 0; i < messages.size(); i++) {
             if (messages.get(i) instanceof ToolResponseMessage trm) {
                 boolean changed = false;
                 List<ToolResponseMessage.ToolResponse> replaced = new ArrayList<>(trm.getResponses().size());
                 for (ToolResponseMessage.ToolResponse r : trm.getResponses()) {
-                    if (isSpillMarker(r)) {
+                    if (isSpillMarker(r) || isProtectedObservation(r, conversationId)) {
                         replaced.add(r);
                         continue;
                     }
@@ -1254,6 +1280,10 @@ public class ConversationWindowManager {
      * still has the on-disk path the model might cite back in its summary.
      */
     int prePruneForSummary(List<Message> messages) {
+        return prePruneForSummary(messages, null);
+    }
+
+    private int prePruneForSummary(List<Message> messages, String conversationId) {
         int pruned = 0;
         for (int i = 0; i < messages.size(); i++) {
             if (messages.get(i) instanceof ToolResponseMessage trm) {
@@ -1262,13 +1292,14 @@ public class ConversationWindowManager {
                 // there's nothing to prune.
                 boolean hasSubstantial = trm.getResponses().stream()
                         .anyMatch(r -> !isSpillMarker(r)
+                                && !isProtectedObservation(r, conversationId)
                                 && !isExemptTool(r)
                                 && r.responseData() != null
                                 && r.responseData().length() > 200);
                 if (hasSubstantial) {
                     List<ToolResponseMessage.ToolResponse> placeholders = new ArrayList<>(trm.getResponses().size());
                     for (ToolResponseMessage.ToolResponse r : trm.getResponses()) {
-                        if (isSpillMarker(r)) {
+                        if (isSpillMarker(r) || isProtectedObservation(r, conversationId)) {
                             placeholders.add(r);
                             continue;
                         }
@@ -1325,7 +1356,7 @@ public class ConversationWindowManager {
             List<ToolResponseMessage.ToolResponse> newResponses = new ArrayList<>();
             boolean changed = false;
             for (ToolResponseMessage.ToolResponse r : trm.getResponses()) {
-                if (isSpillMarker(r) || isExemptTool(r)) {
+                if (isSpillMarker(r) || isExemptTool(r) || isProtectedObservation(r, conversationId)) {
                     newResponses.add(r);
                     continue;
                 }
@@ -1351,6 +1382,19 @@ public class ConversationWindowManager {
             }
         }
         return spilled;
+    }
+
+    private boolean isProtectedObservation(ToolResponseMessage.ToolResponse response, String conversationId) {
+        return response != null && toolResultStorage != null
+                && toolResultStorage.isProtectedObservation(conversationId, response.id());
+    }
+
+    private boolean hasProtectedObservation(List<Message> messages, String conversationId) {
+        if (messages == null || toolResultStorage == null) return false;
+        return messages.stream().filter(ToolResponseMessage.class::isInstance)
+                .map(ToolResponseMessage.class::cast)
+                .flatMap(message -> message.getResponses().stream())
+                .anyMatch(response -> isProtectedObservation(response, conversationId));
     }
 
     // ==================== LLM 摘要生成（结构化 + 迭代更新） ====================
