@@ -392,6 +392,18 @@ public class BiddingReviewService implements BiddingResultHandler {
         }
     }
 
+    /** Checks the current reviewer and its ACL against the fixed manuscript closure retained by an artifact. */
+    public void validateArtifactReviewerRead(BiddingTypes.Scope scope,BiddingTypes.Ref manuscript) {
+        access.requireReaderActor(scope,scope.actorId());
+        ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());
+        if(project==null)throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+        String reviewerId=project.path("bindings").path("reviewer").path("agentId").asText("");
+        if(reviewerId.isBlank()||reviewerId.equals(project.path("bindings").path("writer").path("agentId").asText("")))
+            throw BiddingAccess.error(409,"REVIEWER_NOT_READY","An independent reviewer must be bound");
+        employees.getObject().validate(scope,reviewerId,project.path("bindings").path("reviewer").path("configDigest").asText(null));
+        validateReviewerMaterials(scope,reviewerId,List.of(manuscript));
+    }
+
     public static boolean blocksTechnicalApproval(String category, String severity, boolean resolved) {
         return !resolved && ("BLOCKER".equals(severity) || Set.of("MISSING_MANDATORY_PROOF", "UNANSWERED_TECHNICAL_REQUIREMENT",
                 "UNSUPPORTED_COMMITMENT", "SOURCE_UNREADABLE", "VERSION_CONFLICT").contains(category));

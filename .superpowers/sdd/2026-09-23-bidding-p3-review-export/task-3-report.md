@@ -57,3 +57,15 @@ Plan deviations: none
 - Focused verification: `env JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home /opt/homebrew/Cellar/maven/3.9.11/libexec/bin/mvn -pl mateclaw-server -am -Dtest='BiddingApprovalTest,BiddingApprovalEndToEndTest,BiddingReviewTest,BiddingProjectTest,BiddingArtifactTest,BiddingChangeImpactTest,BiddingMaterialsTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test`. Surefire recorded 41 tests, 0 failures, 0 errors, 0 skipped across the seven explicitly selected classes. `git diff --check` passed.
 
 Root full gate and independent scoped re-review remain pending this commit. No Task 4 work or live provider/Office acceptance is claimed.
+
+## Artifact context authorization fix round 3
+
+Status: DONE
+Verification: PASS
+Plan deviations: none
+
+- Approval-context now authorizes the immutable origin closure before constructing a manifest or returning any preview/stale status. A narrow historical-artifact read validator reuses the existing reference walker and allows `DRAFT_PENDING_REVIEW` only for this stored-artifact path; ordinary comparison/download currentness rules are unchanged. The current reviewer binding/configuration and that reviewer's ACL over the same old manuscript material closure are checked separately before any response. Currency evaluation and preview/stale classification happen only after both checks.
+- TDD RED: the authenticated end-to-end regression revoked the writer's real origin page-type permission, queried an authorized preview, and observed HTTP 200 with artifact id/digest/input refs where 403 was required. The regression also revokes reviewer permission for a stale artifact. After the fix, both return 403 without artifact id, digest, artifact/input refs, or review proof; with permissions restored, preview still returns `NOT_APPROVABLE` and stale still returns `STALE` without a review ref. Candidate currentness and approval proof remain separately revalidated.
+- Focused verification: `env JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home /opt/homebrew/Cellar/maven/3.9.11/libexec/bin/mvn -pl mateclaw-server -am -Dtest='BiddingApprovalTest,BiddingApprovalEndToEndTest,BiddingReviewTest,BiddingArtifactTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test`. Surefire recorded 12 tests, 0 failures, 0 errors, 0 skipped (ApprovalTest 1, explicitly selected EndToEnd 1, Review 7, Artifact 3). `git diff --check` passed.
+
+Root full gate and scoped independent review remain pending this fix commit. No live provider or Office visual acceptance is claimed.

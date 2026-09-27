@@ -36,7 +36,17 @@ public class BiddingDependencies {
         validateHistoricalRefs(scope,refs,new LinkedHashSet<>());
     }
 
+    /** Validates the historical origin closure retained by an artifact, including an assembled manuscript awaiting review. */
+    public void validateForArtifactHistoryRead(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) {
+        access.requireReaderActor(scope,scope.actorId());
+        validateHistoricalRefs(scope,refs,new LinkedHashSet<>(),true);
+    }
+
     private void validateHistoricalRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs,Set<String> visiting) {
+        validateHistoricalRefs(scope,refs,visiting,false);
+    }
+
+    private void validateHistoricalRefs(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs,Set<String> visiting,boolean allowPendingReviewManuscript) {
         if(refs==null||refs.isEmpty()) throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
         for(var ref:refs) {
             if(ref==null||ref.id()==null||ref.version()<1) throw BiddingAccess.error(422,"SOURCE_REF_INVALID","A source reference is invalid");
@@ -55,22 +65,23 @@ public class BiddingDependencies {
             } else if(Set.of("TEMPLATE","FORMAT_REQUIREMENTS").contains(ref.kind())) {
                 ObjectNode row=repository.businessRevision(scope,ref);
                 if(row==null||!repository.historicalRevisionExists(scope,ref)) throw BiddingAccess.error(404,"NOT_FOUND","Export reference not found");
-                List<BiddingTypes.Ref> nested=repository.businessRefs(row);if(!nested.isEmpty())validateHistoricalRefs(scope,nested,visiting);
+                List<BiddingTypes.Ref> nested=repository.businessRefs(row);if(!nested.isEmpty())validateHistoricalRefs(scope,nested,visiting,allowPendingReviewManuscript);
             } else if("chapter".equals(ref.kind())) {
                 var row=repository.businessRevision(scope,ref);
                 if(row==null || !Set.of("SELECTED","HUMAN_EDIT","NEEDS_RECONFIRMATION").contains(row.path("status").asText()))
                     throw BiddingAccess.error(404,"NOT_FOUND","Chapter revision not found");
-                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting,allowPendingReviewManuscript);
             } else if("manuscript".equals(ref.kind())) {
                 var row=repository.businessRevision(scope,ref);
-                if(row==null || !Set.of("CONFIRMED","NEEDS_RECONFIRMATION","CANDIDATE").contains(row.path("status").asText())) throw BiddingAccess.error(404,"NOT_FOUND","Manuscript not found");
-                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
+                Set<String> allowed=allowPendingReviewManuscript?Set.of("CONFIRMED","NEEDS_RECONFIRMATION","CANDIDATE","DRAFT_PENDING_REVIEW"):Set.of("CONFIRMED","NEEDS_RECONFIRMATION","CANDIDATE");
+                if(row==null || !allowed.contains(row.path("status").asText())) throw BiddingAccess.error(404,"NOT_FOUND","Manuscript not found");
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting,allowPendingReviewManuscript);
             } else if(Set.of("analysisBaseline","outline").contains(ref.kind())) {
                 var row=repository.businessRevision(scope,ref);
                 if(row==null) throw BiddingAccess.error(404,"NOT_FOUND","Business revision not found");
                 Set<String> permitted=Set.of("CONFIRMED","NEEDS_RECONFIRMATION","CANDIDATE");
                 if(!permitted.contains(row.path("status").asText())) throw BiddingAccess.error(422,"DEPENDENCY_NOT_CONFIRMED","Historical revision is not readable");
-                validateHistoricalRefs(scope,repository.businessRefs(row),visiting);
+                validateHistoricalRefs(scope,repository.businessRefs(row),visiting,allowPendingReviewManuscript);
             } else throw BiddingAccess.error(422,"SOURCE_REF_INVALID","Unsupported fixed reference kind");
             visiting.remove(key);
         }

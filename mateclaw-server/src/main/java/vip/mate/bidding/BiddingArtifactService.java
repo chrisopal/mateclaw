@@ -178,6 +178,8 @@ public class BiddingArtifactService implements BiddingResultHandler {
         access.requireReaderActor(scope,scope.actorId());projects.get(scope);
         Artifact row=artifact(scope,artifactId);
         if(row==null||!Set.of("CANDIDATE","PREVIEW","APPROVED","STALE").contains(row.status()))throw BiddingAccess.error(404,"NOT_FOUND","Candidate artifact not found");
+        dependencies.validateForArtifactHistoryRead(scope,List.of(row.manuscript(),row.template(),row.formatRef()));
+        reviews.getObject().validateArtifactReviewerRead(scope,row.manuscript());
         ObjectNode out=manifest(row,row.mode());out.set("artifactRef",json.valueToTree(new BiddingTypes.Ref("artifact",row.id(),1,row.digest())));
         out.set("manuscriptRef",json.valueToTree(row.manuscript()));out.set("templateRef",json.valueToTree(row.template()));out.set("formatRef",json.valueToTree(row.formatRef()));
         if("preview".equals(row.mode())||"PREVIEW".equals(row.status()))return out.put("status","NOT_APPROVABLE").put("reasonCode","PREVIEW_NOT_APPROVABLE");
