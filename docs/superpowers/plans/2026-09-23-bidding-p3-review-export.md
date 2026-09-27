@@ -94,8 +94,8 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 
 **Files:**
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDocxRenderer.java`.
-- Create: `BiddingArtifactService.java`.
-- Create: `BiddingExportTool.java`.
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingArtifactService.java`.
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingExportTool.java`.
 - Create: `mateclaw-server/src/main/resources/bidding/templates/technical-v1.json`.
 - Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/SKILL.md`.
 - Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/input.schema.json`.
@@ -239,6 +239,7 @@ it('approves only an unblocked candidate under the current permission', () => {
 
 - [ ] Run UI范围测试，Expected 新审核/产物组件和方法缺失 FAIL。
 - [ ] 审核页面问题列表支持严重度/章节筛选、证据定位、选择整改、附证据驳回、暂不采纳建议。点击整改派发数字员工，返回候选后进入比较/采用，页面不会直接覆盖章节。审核覆盖/限制作按需展开，状态与按钮不要使用原始enum。
+- [ ] 商务待办显示“待判断 / 影响技术标 / 仅商务事项”；真实 approver 通过 `CLASSIFY_HUMAN_TODO` 提交当前 todoRef、判断、理由和来源证据。未判断阻断审定，不能通过关闭待办绕过；仅商务事项可以保持待处理且不阻断技术审定。判断与关闭待办分别操作，409 保留输入并刷新当前版本；不能要求模型生成旧 schema 不支持的 affectsTechnical 字段。
 
 ```ts
 export const canApproveArtifact = (mode: string, state: string, blockers: number, allowed: boolean) =>
