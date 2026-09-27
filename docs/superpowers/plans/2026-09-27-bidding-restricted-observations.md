@@ -8,6 +8,7 @@ Prerequisite: Task4 source gate and Sol approval. Execute this scoped repair bef
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectExecutionOptions.java` if a scoped policy field is necessary.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolExecutionExecutor.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/context/ConversationWindowManager.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/node/ReasoningNode.java` only to pass current conversation ID into the age-compaction overload; no reasoning/model behavior changes.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolResultStorage.java` only if existing retrieval policy can safely express the repair.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java` only for explicit restricted-observation policy wiring.
 - Create: `mateclaw-server/src/test/java/vip/mate/agent/graph/executor/RestrictedProjectObservationTest.java`.
@@ -25,3 +26,5 @@ Prerequisite: Task4 source gate and Sol approval. Execute this scoped repair bef
 - [ ] Commit only declared code/tests/report with Lore trailers; report Status DONE / Verification PASS / Plan deviations none only after evidence. Root scope+tests then independent Sol review required.
 
 Root follow-up after accepted repair: package a fresh QA backend using preserved private DB, rerun one actual DeepSeek analysis generation and record all source read coverage/schema results/attempts. Model maxTokens4096 and graph normal do not establish provider stop semantics. Provider terminal metadata instrumentation is a separate defect hypothesis and requires a separately declared scope/regression before editing. This repair alone cannot be called full live technical-bid acceptance.
+
+Scope clarification: age compaction currently omits conversationId at its caller. Passing it through ReasoningNode is authorized so preservation is keyed by conversation plus call ID rather than trusting provider call IDs globally. Cover same call ID in separate conversations; preserve the existing generic overload for callers without restricted context.
