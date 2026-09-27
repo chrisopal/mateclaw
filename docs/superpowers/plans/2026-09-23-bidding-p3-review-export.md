@@ -35,13 +35,21 @@
 | P3-04 | UI 审核、候选/正式文件组件；沿用任务与证据抽屉 |
 | P3-05 | 全链路测试与真实样例证据；单实例运行与备份手册 |
 
-### Task P3-01：独立审核、问题处置和定向修订
+### Task 1: P3-01 — 独立审核、问题处置和定向修订
 
 **Files:**
-- Create: J`BiddingReviewService.java`。
-- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Modify: J`BiddingCommandService.java`, `BiddingSkillValidator.java`, `BiddingWritingService.java`, `BiddingTaskService.java`。
-- Test: T`BiddingReviewTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingReviewService.java`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/SKILL.md`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/input.schema.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/output.schema.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/references/rules.md`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/examples/valid.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-technical-review/examples/invalid.json`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingWritingService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingReviewTest.java`.
 
 **Interfaces:**
 - Consumes: MANUSCRIPT/outline/baseline精确Ref、材料快照、独立reviewer、P1 TaskService。
@@ -73,15 +81,28 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 - [ ] 测试同员工审核拒绝、审批工具拒绝、无证据驳回拒绝、修订不自动覆盖、接受修订后旧review失效、一般建议可暂不采纳留理由。Run BiddingReviewTest+Writing/Dependencies相关测试，Expected PASS。
 - [ ] Commit：`git commit -m "Separate independent technical review from human acceptance of revisions" -m "Tested: Review coverage, blockers and revision re-review"`。
 
-### Task P3-02：受控 DOCX 候选生成与实际字节校验
+### Task 2: P3-02 — 受控 DOCX 候选生成与实际字节校验
 
 **Files:**
-- Create: J`BiddingDocxRenderer.java`, `BiddingArtifactService.java`, `BiddingExportTool.java`。
-- Create: `mateclaw-server/src/main/resources/bidding/templates/technical-v1.json`（版本化排版参数）。
-- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/SKILL.md`, `input.schema.json`, `output.schema.json`, `references/rules.md`, `examples/valid.json`, `examples/invalid.json`（同技能目录）。
-- Create: `mateclaw-server/src/main/resources/db/migration/h2/V214__bidding_artifacts.sql`、`mysql/V214__bidding_artifacts.sql`、`kingbase/V214__bidding_artifacts.sql`（同 migration 根）。
-- Modify: J`BiddingToolScope.java`, `BiddingCommandService.java`, `BiddingSkillValidator.java`, `BiddingController.java`；平台工具注册沿用现有 Spring ToolCallback 收集方式。
-- Test: T`BiddingDocxRendererTest.java`, `BiddingArtifactTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDocxRenderer.java`.
+- Create: `BiddingArtifactService.java`.
+- Create: `BiddingExportTool.java`.
+- Create: `mateclaw-server/src/main/resources/bidding/templates/technical-v1.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/SKILL.md`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/input.schema.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/output.schema.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/references/rules.md`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/examples/valid.json`.
+- Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/examples/invalid.json`.
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V214__bidding_artifacts.sql`.
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V214__bidding_artifacts.sql`.
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V214__bidding_artifacts.sql`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingToolScope.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDocxRendererTest.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java`.
 
 **Interfaces:**
 - Consumes: P2 BiddingContentBlocks、MANUSCRIPT Ref、模板Ref、formatRequirements Ref；现有 Apache POI。
@@ -128,12 +149,15 @@ String digest = java.util.HexFormat.of().formatHex(
 - [ ] 测试导出重试不重写正文、重复tool同attempt不重复artifact、非法外部链接/本地图片拒绝、无实际文件不能成功、DB提交失败不再次模型调用、候选和预览分离。Run上述测试+runtime受控工具回归，Expected PASS。
 - [ ] Commit：`git commit -m "Persist verifiable DOCX candidates before any final approval" -m "Rejected: Rendering model markdown with local image paths | unsafe file access" -m "Tested: DOCX readback, artifact digest and idempotent generation"`。
 
-### Task P3-03：人工审定具体文件与同字节正式下载
+### Task 3: P3-03 — 人工审定具体文件与同字节正式下载
 
 **Files:**
-- Create: J`BiddingApprovalService.java`。
-- Modify: J`BiddingArtifactService.java`, `BiddingController.java`, `BiddingCommandService.java`, `BiddingDependencies.java`。
-- Test: T`BiddingApprovalTest.java`。
+- Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingApprovalService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingArtifactService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java`.
 
 **Interfaces:**
 - Consumes: Access.requireApprover、Dependencies.validate/isCurrent、ReviewService.requireReviewed、ArtifactService.metadata。
@@ -167,12 +191,17 @@ WHERE id=:artifactId AND workspace_id=:workspaceId AND project_id=:projectId
 - [ ] 集成测试：candidate bytes=DB bytes=批准后两次formal下载bytes；批准并发变更body/模板/格式403或409；重新render新artifact无旧decision；撤权后元数据/快照/文件都拒绝；强制问题未解决422；model/普通member批准403。对renderer加调用计数，下载不得触发。
 - [ ] Run BiddingApprovalTest+BiddingArtifactTest+BiddingChangeImpactTest，Expected PASS。Commit：`git commit -m "Bind final approval to the exact technical bid bytes reviewed by a person" -m "Directive: Formal downloads must never re-render approved artifacts" -m "Tested: Digest equality, approval races and revoked access"`。
 
-### Task P3-04：审核、整改与文件审定界面
+### Task 4: P3-04 — 审核、整改与文件审定界面
 
 **Files:**
-- Create: `mateclaw-ui/src/features/bidding/components/BiddingReview.vue`, `BiddingArtifacts.vue`, `BiddingApprovalDialog.vue`（同 components 根）。
-- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`, `api/biddingApi.ts`, `api/types.ts`（同 bidding 根）。
-- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingReview.test.ts`, `biddingArtifacts.test.ts`。
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingReview.vue`.
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingArtifacts.vue`.
+- Create: `mateclaw-ui/src/features/bidding/components/BiddingApprovalDialog.vue`.
+- Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`.
+- Modify: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`.
+- Modify: `mateclaw-ui/src/features/bidding/api/types.ts`.
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingReview.test.ts`.
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingArtifacts.test.ts`.
 
 **Interfaces:**
 - Consumes: P3 HTTP/Command契约；P1TaskDrawer/P2CandidateCompare与版本Ref。
@@ -204,12 +233,14 @@ export const canApproveArtifact = (mode: string, state: string, blockers: number
 - [ ] Run UI范围+售前回归+eslint/precision/vue-tsc/临时build；浏览器点选审核、整改、接受、重审、候选检查、审定、formal下载并刷新，保存实际文件与服务端摘要核对。失败需修复后仅重跑受影响检查。
 - [ ] Commit：`git commit -m "Make review and exact-file approval explicit in the bidding workbench" -m "Tested: Review actions, approval UI and download permission states"`。
 
-### Task P3-05：完整技术标验收与交付运行说明
+### Task 5: P3-05 — 完整技术标验收与交付运行说明
 
 **Files:**
-- Create: T`BiddingEndToEndTest.java`；`mateclaw-server/src/test/resources/bidding/golden/technical-tender.json`。
-- Create: `docs/bidding/acceptance/2026-09-23-full.md`, `docs/bidding/skills.md`。
-- Modify: `docs/bidding/runtime.md`；修复本阶段发现的缺陷必须另列实际文件和证据。
+- Create: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java`.
+- Create: `mateclaw-server/src/test/resources/bidding/golden/technical-tender.json`.
+- Create: `docs/bidding/acceptance/2026-09-23-full.md`.
+- Create: `docs/bidding/skills.md`.
+- Modify: `docs/bidding/runtime.md`.
 
 **Interfaces:**
 - Consumes: 八项skill、全HTTP流程和A01～A16；真实模型验收不使用BiddingFakeRuntime。
