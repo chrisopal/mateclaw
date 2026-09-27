@@ -76,6 +76,7 @@ class BiddingArtifactTest {
         ObjectNode chapter=manuscriptBody.putArray("chapters").addObject().put("chapterId","leaf");
         ObjectNode chapterBody=chapter.putObject("chapter").put("chapterId","leaf").put("title","实施计划");chapterBody.putArray("blocks").addObject().put("type","paragraph").put("text","确保现场安全");
         ObjectNode earlyChapter=manuscriptBody.withArray("chapters").addObject().put("chapterId","early").putObject("chapter");earlyChapter.put("chapterId","early").put("title","前置实施");earlyChapter.putArray("blocks").addObject().put("type","paragraph").put("text","先行实施措施");
+        ObjectNode table=earlyChapter.withArray("blocks").addObject().put("type","table");table.putArray("columns").add("验收项").add("标准");table.putArray("rows").addArray().add("响应时间").add("2秒");
         saveRevision(scope,manuscript,manuscriptBody,List.of(outline),"DRAFT_PENDING_REVIEW",false);
         long modelId=Math.abs(UUID.randomUUID().getLeastSignificantBits());String modelName="artifact-runtime-"+modelId;
         jdbc.update("INSERT INTO mate_model_config(id,name,provider,model_name,model_type,enabled,is_default,create_time,update_time,deleted) VALUES(?,?,? ,?,'chat',TRUE,FALSE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",modelId,"artifact test model","openai",modelName);
@@ -90,7 +91,35 @@ class BiddingArtifactTest {
         String configDigest=employeeBindings.configDigest(scope,agent.getId().toString());project.path("bindings").path("writer");((ObjectNode)project.path("bindings").path("writer")).put("configDigest",configDigest);
         jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(project),projectId);
         BiddingTypes.Ref projectRef=json.convertValue(created.path("ref"),BiddingTypes.Ref.class);
-        ObjectNode dispatch=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscript));dispatch.put("mode","candidate");
+        List<ObjectNode> unprepared=artifacts.templates(scope);
+        assertEquals("UNPREPARED",unprepared.getFirst().path("status").asText(),"template GET must state that explicit preparation is required");
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind IN ('TEMPLATE','FORMAT_REQUIREMENTS')",Integer.class,scope.workspaceId(),scope.projectId()));
+        ObjectNode unpreparedDispatch=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscript));unpreparedDispatch.put("mode","candidate");
+        BiddingApiException requiresPreparation=assertThrows(BiddingApiException.class,()->artifacts.dispatch(scope,new BiddingTypes.Command("unprepared-export",projectRef,"DISPATCH_EXPORT",unpreparedDispatch)));
+        assertEquals("EXPORT_REFS_REQUIRED",requiresPreparation.code());
+        ObjectNode preparePayload=json.createObjectNode();
+        BiddingTypes.Ref staleProjectRef=new BiddingTypes.Ref(projectRef.kind(),projectRef.id(),projectRef.version()+1,"0".repeat(64));
+        BiddingApiException stalePrepare=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(scope,new BiddingTypes.Command("stale-prepare",staleProjectRef,"PREPARE_EXPORT",preparePayload)));
+        assertEquals("VERSION_CONFLICT",stalePrepare.code());
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind IN ('TEMPLATE','FORMAT_REQUIREMENTS')",Integer.class,scope.workspaceId(),scope.projectId()));
+        BiddingTypes.Command prepare=new BiddingTypes.Command("prepare-export-1",projectRef,"PREPARE_EXPORT",preparePayload);
+        ObjectNode prepared=artifacts.prepareExport(scope,prepare);
+        ObjectNode preparedAgain=artifacts.prepareExport(scope,prepare);
+        assertEquals(prepared,preparedAgain,"same operation replays the exact prepared refs");
+        BiddingApiException operationConflict=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(scope,
+                new BiddingTypes.Command("prepare-export-1",staleProjectRef,"PREPARE_EXPORT",preparePayload)));
+        assertEquals("OPERATION_CONFLICT",operationConflict.code());
+        ObjectNode preparedTemplate=artifacts.templates(scope).getFirst();
+        assertEquals("PREPARED",preparedTemplate.path("status").asText());
+        assertEquals(prepared.path("templateRef"),preparedTemplate.path("ref"));
+        assertEquals(prepared.path("formatRef"),preparedTemplate.path("formatRef"));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='TEMPLATE'",Integer.class,scope.workspaceId(),scope.projectId()));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='FORMAT_REQUIREMENTS'",Integer.class,scope.workspaceId(),scope.projectId()));
+        ObjectNode dispatch=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscript));dispatch.set("templateRef",prepared.path("templateRef"));dispatch.set("formatRef",prepared.path("formatRef"));dispatch.put("mode","candidate");
+        ObjectNode staleTemplateDispatch=dispatch.deepCopy();staleTemplateDispatch.set("templateRef",json.valueToTree(new BiddingTypes.Ref("TEMPLATE","technical-v1",99,"x".repeat(64))));
+        assertEquals("TEMPLATE_STALE",assertThrows(BiddingApiException.class,()->artifacts.dispatch(scope,new BiddingTypes.Command("stale-template",projectRef,"DISPATCH_EXPORT",staleTemplateDispatch))).code());
+        ObjectNode staleFormatDispatch=dispatch.deepCopy();staleFormatDispatch.set("formatRef",json.valueToTree(new BiddingTypes.Ref("FORMAT_REQUIREMENTS","current",99,"y".repeat(64))));
+        assertEquals("FORMAT_REQUIREMENTS_STALE",assertThrows(BiddingApiException.class,()->artifacts.dispatch(scope,new BiddingTypes.Command("stale-format",projectRef,"DISPATCH_EXPORT",staleFormatDispatch))).code());
         ObjectNode queued=artifacts.dispatch(scope,new BiddingTypes.Command("export-op-1",projectRef,"DISPATCH_EXPORT",dispatch));
         assertEquals("QUEUED",queued.path("status").asText());
         BiddingTypes.Claim claim=tasks.claimDue(Instant.now(),"artifact-test",1).getFirst();
@@ -111,8 +140,18 @@ class BiddingArtifactTest {
         byte[] persisted=artifacts.bytes(reader,manifest.path("artifactId").asText());
         assertEquals(manifest.path("byteSize").asLong(),persisted.length);
         assertEquals(manifest.path("digest").asText(),HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(persisted)));
-        assertEquals("PASS",artifacts.verify(persisted,manuscriptBody).path("structural").asText());
-        BiddingApiException external=assertThrows(BiddingApiException.class,()->artifacts.verify(withExternalRelationship(persisted),manuscriptBody));
+        ObjectNode expectedDocument=expectedDocument();
+        assertEquals("PASS",artifacts.verify(persisted,expectedDocument).path("structural").asText());
+        assertDocxRejected(persisted,expectedDocument,doc->{
+            var earlyText=doc.getParagraphs().stream().filter(p->"先行实施措施".equals(p.getText())).findFirst().orElseThrow();
+            var leafText=doc.getParagraphs().stream().filter(p->"确保现场安全".equals(p.getText())).findFirst().orElseThrow();
+            replaceParagraph(earlyText,"确保现场安全");replaceParagraph(leafText,"先行实施措施");
+        });
+        assertDocxRejected(persisted,expectedDocument,doc->{var removed=doc.getParagraphs().stream().filter(p->"先行实施措施".equals(p.getText())).findFirst().orElseThrow();replaceParagraph(removed,"");});
+        assertDocxRejected(persisted,expectedDocument,doc->doc.createParagraph().createRun().setText("确保现场安全"));
+        assertDocxRejected(persisted,expectedDocument,doc->doc.getTables().getFirst().getRow(1).getCell(1).getParagraphs().getFirst().getRuns().getFirst().setText("3秒",0));
+        try(var empty=new org.apache.poi.xwpf.usermodel.XWPFDocument();var bytes=new java.io.ByteArrayOutputStream()) { empty.write(bytes);assertThrows(BiddingApiException.class,()->artifacts.verify(bytes.toByteArray(),expectedDocument)); }
+        BiddingApiException external=assertThrows(BiddingApiException.class,()->artifacts.verify(withExternalRelationship(persisted),expectedDocument));
         assertEquals("ARTIFACT_EXTERNAL_RELATIONSHIP",external.code());
         BiddingTypes.Ref templateRef=json.convertValue(queued.path("templateRef"),BiddingTypes.Ref.class);
         BiddingTypes.Ref formatRef=json.convertValue(queued.path("formatRef"),BiddingTypes.Ref.class);
@@ -203,6 +242,19 @@ class BiddingArtifactTest {
     private void persistToolFailure(BiddingTypes.Claim claim,String code) {
         tasks.complete(claim,new BiddingTypes.Execution(null,new BiddingTypes.Failure(code,"VALIDATION",null,false,false,false),claim.skill().digest(),claim.configDigest(),null));
     }
+    private ObjectNode expectedDocument() {
+        ObjectNode doc=json.createObjectNode().put("title","技术标");var chapters=doc.putArray("chapters");
+        chapters.addObject().put("title","总体方案").put("level",1).putArray("blocks");
+        var early=chapters.addObject().put("title","前置实施").put("level",2).putArray("blocks");early.addObject().put("type","paragraph").put("text","先行实施措施");
+        ObjectNode table=early.addObject().put("type","table");table.putArray("columns").add("验收项").add("标准");table.putArray("rows").addArray().add("响应时间").add("2秒");
+        var leaf=chapters.addObject().put("title","实施计划").put("level",2).putArray("blocks");leaf.addObject().put("type","paragraph").put("text","确保现场安全");
+        return doc;
+    }
+    private void assertDocxRejected(byte[] source,ObjectNode expected,java.util.function.Consumer<org.apache.poi.xwpf.usermodel.XWPFDocument> mutation) throws Exception {
+        byte[] tampered;try(var doc=new org.apache.poi.xwpf.usermodel.XWPFDocument(new java.io.ByteArrayInputStream(source));var out=new java.io.ByteArrayOutputStream()) { mutation.accept(doc);doc.write(out);tampered=out.toByteArray(); }
+        BiddingApiException rejected=assertThrows(BiddingApiException.class,()->artifacts.verify(tampered,expected));assertEquals("ARTIFACT_CONTENT_MISMATCH",rejected.code());
+    }
+    private void replaceParagraph(org.apache.poi.xwpf.usermodel.XWPFParagraph paragraph,String text) { while(!paragraph.getRuns().isEmpty())paragraph.removeRun(paragraph.getRuns().size()-1);paragraph.createRun().setText(text); }
     private void assertTamperedManifestIsRejected(BiddingTypes.Scope scope,BiddingTypes.Ref projectRef,BiddingTypes.Claim prior,
             BiddingTypes.Ref manuscript,BiddingTypes.Ref template,BiddingTypes.Ref format) throws Exception {
         ObjectNode input=prior.input().deepCopy().put("mode","preview");
@@ -251,11 +303,12 @@ class BiddingArtifactTest {
         var profile=base.putObject("analyses").putObject("bidding-tender-profile");
         var hard=profile.putArray("formatRequirements").addObject().put("name","页边距").put("value","30 mm");hard.putArray("evidenceRefs");
         saveRevision(unsupportedScope,baseline,base,List.of(),"CONFIRMED",true);
-        var empty=json.createObjectNode();empty.putArray("requirements");
-        var unsupportedError=assertThrows(BiddingApiException.class,()->artifacts.saveFormatRequirements(unsupportedScope,
-                new BiddingTypes.Command("unsupported-format",json.convertValue(unsupported.path("ref"),BiddingTypes.Ref.class),"SAVE_FORMAT_REQUIREMENTS",empty)));
+        var unsupportedProjectRef=json.convertValue(unsupported.path("ref"),BiddingTypes.Ref.class);
+        var unsupportedError=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(unsupportedScope,
+                new BiddingTypes.Command("unsupported-format",unsupportedProjectRef,"PREPARE_EXPORT",json.createObjectNode())));
         assertEquals("EXPORT_FORMAT_UNSUPPORTED",unsupportedError.code());
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id='1' AND project_id=? AND kind='FORMAT_REQUIREMENTS'",Integer.class,unsupportedScope.projectId()));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id='1' AND project_id=? AND kind='TEMPLATE'",Integer.class,unsupportedScope.projectId()));
 
         var constrained=projects.create(new BiddingTypes.Scope("1","approver",null),new BiddingTypes.NewProject("format-retention-"+UUID.randomUUID(),"format","lot","approver"));
         var constrainedScope=new BiddingTypes.Scope("1","approver",constrained.path("id").asText());

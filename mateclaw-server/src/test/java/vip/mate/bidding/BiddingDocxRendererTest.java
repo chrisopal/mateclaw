@@ -55,6 +55,10 @@ class BiddingDocxRendererTest {
             assertTrue(document.getParagraphs().stream().anyMatch(p -> "第一章".equals(p.getText()) && "Heading1".equals(p.getStyle())));
             assertTrue(document.getParagraphs().stream().anyMatch(p -> "范围".equals(p.getText()) && "Heading2".equals(p.getStyle())));
             assertTrue(document.getParagraphs().stream().anyMatch(p -> "验收标准".equals(p.getText()) && "Heading3".equals(p.getStyle())));
+            String styles=zipEntry(bytes,"word/styles.xml");
+            assertTrue(styles.contains("w:styleId=\"Heading1\"") && styles.contains("w:styleId=\"Heading2\"") && styles.contains("w:styleId=\"Heading3\""));
+            assertTrue(styles.contains("w:outlineLvl w:val=\"0\"") && styles.contains("w:outlineLvl w:val=\"1\"") && styles.contains("w:outlineLvl w:val=\"2\""));
+            assertTrue(styles.contains("w:eastAsia=\"宋体\"") && styles.contains("w:sz w:val=\"24\""));
             assertTrue(document.getParagraphs().stream().anyMatch(p -> p.getText().contains("第一项")));
             assertTrue(document.getTables().get(0).getRow(0).getCtRow().xmlText().contains("tblHeader"));
             assertTrue(document.getTables().get(0).getRow(1).getCtRow().xmlText().contains("cantSplit"));
@@ -132,5 +136,12 @@ class BiddingDocxRendererTest {
              "bodyWidthMm":160,"maxImageWidthMm":160,"toc":true,"pageNumbers":true,
              "headingStyles":{"1":"Heading1","2":"Heading2","3":"Heading3"}}
             """);
+    }
+
+    private String zipEntry(byte[] bytes,String name) throws Exception {
+        try(ZipInputStream zip=new ZipInputStream(new ByteArrayInputStream(bytes))) {
+            java.util.zip.ZipEntry entry;while((entry=zip.getNextEntry())!=null)if(name.equals(entry.getName()))return new String(zip.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return "";
     }
 }

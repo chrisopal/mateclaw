@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.BodyElementType;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,12 +56,36 @@ public class BiddingArtifactService implements BiddingResultHandler {
     @Transactional(readOnly=true)
     public List<ObjectNode> templates(BiddingTypes.Scope scope) {
         access.requireReaderActor(scope, scope.actorId()); projects.get(scope);
-        // The reference is materialized by the first dispatch; a read endpoint never creates state.
         BiddingTypes.Ref ref=repository.selectedRef(scope,"TEMPLATE","technical-v1");
+        BiddingTypes.Ref format=repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current");
         ObjectNode value=json.createObjectNode().put("id","technical-v1").put("name","Technical proposal v1");
-        if(ref!=null) value.set("ref",json.valueToTree(ref));
-        else value.put("availableOnDispatch",true);
+        if(ref!=null&&format!=null&&repository.businessRevision(scope,ref)!=null&&repository.businessRevision(scope,format)!=null) {
+            value.put("status","PREPARED");value.set("ref",json.valueToTree(ref));value.set("formatRef",json.valueToTree(format));
+            value.put("format","docx");
+        } else value.put("status","UNPREPARED");
         return List.of(value);
+    }
+
+    @Transactional
+    public ObjectNode prepareExport(BiddingTypes.Scope scope,BiddingTypes.Command command) {
+        access.requireActor(scope,scope.actorId());
+        if(command==null||command.payload()==null||!"PREPARE_EXPORT".equals(command.action())||command.operationId()==null||command.operationId().isBlank()||command.operationId().length()>128||command.expected()==null)
+            throw BiddingAccess.error(400,"INVALID_REQUEST","PREPARE_EXPORT requires expected project ref and operationId");
+        only(command.payload(),Set.of());
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+        String requestDigest=sha(canonical(json.valueToTree(Map.of("action",command.action(),"expected",command.expected(),"payload",command.payload()))));
+        BiddingRepository.StoredOperation prior=repository.findOperation(scope.workspaceId(),scope.actorId(),command.operationId());
+        if(prior!=null) {
+            if(!prior.digest().equals(requestDigest))throw BiddingAccess.error(409,"OPERATION_CONFLICT","operationId was used for a different preparation request");
+            return prior.result();
+        }
+        ObjectNode project=projects.get(scope);BiddingTypes.Ref current=parseRef(project.path("ref"));
+        if(!Objects.equals(current,command.expected()))throw BiddingAccess.error(409,"VERSION_CONFLICT","Project changed; reload before export preparation");
+        BiddingTypes.Ref template=ensureTemplate(scope),format=ensureFormat(scope);
+        ObjectNode result=json.createObjectNode().put("status","PREPARED");result.set("templateRef",json.valueToTree(template));result.set("formatRef",json.valueToTree(format));
+        repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),requestDigest,"{}",Timestamp.from(Instant.now()));
+        repository.updateOperation(scope.workspaceId(),scope.actorId(),command.operationId(),write(result));
+        return result;
     }
 
     @Transactional
@@ -75,10 +101,10 @@ public class BiddingArtifactService implements BiddingResultHandler {
         String mode=command.payload().path("mode").asText(); if(!Set.of("preview","candidate").contains(mode)) throw BiddingAccess.error(422,"EXPORT_MODE_INVALID","Export mode must be preview or candidate");
         ObjectNode row=repository.businessRevision(scope,manuscript);
         if(row==null||!isLatestManuscript(scope,manuscript)||!dependencies.isCurrentForRead(scope,repository.businessRefs(row))) throw BiddingAccess.error(409,"MANUSCRIPT_STALE","Only the current dependency-valid manuscript can be exported");
-        BiddingTypes.Ref template=ensureTemplate(scope);
-        if(command.payload().has("templateRef")&&!template.equals(parseRef(command.payload().path("templateRef")))) throw BiddingAccess.error(409,"TEMPLATE_STALE","Selected template is not the current fixed template");
-        BiddingTypes.Ref format=ensureFormat(scope);
-        if(command.payload().has("formatRef")&&!format.equals(parseRef(command.payload().path("formatRef")))) throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_STALE","Format requirements changed; reload before export");
+        BiddingTypes.Ref template=parseRef(command.payload().path("templateRef")),format=parseRef(command.payload().path("formatRef"));
+        if(template==null||format==null)throw BiddingAccess.error(422,"EXPORT_REFS_REQUIRED","Prepare export and provide exact template and format references");
+        if(!template.equals(repository.selectedRef(scope,"TEMPLATE","technical-v1"))||repository.businessRevision(scope,template)==null) throw BiddingAccess.error(409,"TEMPLATE_STALE","Selected template is not the prepared current template");
+        if(!format.equals(repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current"))||repository.businessRevision(scope,format)==null) throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_STALE","Selected format requirements are not the prepared current revision");
         validateFormat(scope,format);
         List<BiddingTypes.Ref> refs=List.of(manuscript,template,format);
         dependencies.validate(scope,refs);
@@ -102,7 +128,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(row==null||!claim.attemptId().equals(row.attemptId())||!"STAGED".equals(row.status())||!manuscript.equals(row.manuscript())||!template.equals(row.template())||!format.equals(row.formatRef())) throw BiddingAccess.error(409,"ARTIFACT_UNAVAILABLE","Generated artifact is not staged for this task attempt");
         ObjectNode storedChecks=read(row.checks());
         if(!"docx".equals(payload.path("format").asText())||!row.digest().equals(payload.path("digest").asText())||row.size()!=payload.path("byteSize").asLong(-1)||!row.mode().equals(payload.path("mode").asText())||!"STAGED".equals(payload.path("status").asText())||!payload.path("checks").isObject()||!storedChecks.equals(payload.path("checks"))) throw BiddingAccess.error(422,"ARTIFACT_MANIFEST_INVALID","Tool manifest does not match stored bytes");
-        ObjectNode checks=verify(row.bytes(),loadManuscript(claim.scope(),manuscript));
+        ObjectNode checks=verify(row.bytes(),renderInput(claim.scope(),loadManuscript(claim.scope(),manuscript)));
         if(!row.digest().equals(sha(row.bytes()))||row.size()!=row.bytes().length) throw BiddingAccess.error(422,"ARTIFACT_INTEGRITY_FAILED","Candidate bytes do not match their manifest");
         String terminal="preview".equals(row.mode())?"PREVIEW":"CANDIDATE";
         jdbc.update("UPDATE mate_bidding_artifact SET status=?,checks_json=? WHERE workspace_id=? AND project_id=? AND id=? AND generator_attempt_id=? AND status='STAGED'",terminal,write(checks),claim.scope().workspaceId(),claim.scope().projectId(),artifactId,claim.attemptId());
@@ -124,7 +150,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(bytes.length>artifactLimitBytes) throw BiddingAccess.error(413,"ARTIFACT_SIZE_LIMIT","DOCX candidate exceeds 50 MiB");
         Long used=jdbc.queryForObject("SELECT COALESCE(SUM(byte_size),0) FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=?",Long.class,claim.scope().workspaceId(),claim.scope().projectId());
         if((used==null?0:used)+bytes.length>projectCapacityBytes) throw BiddingAccess.error(413,"PROJECT_ARTIFACT_CAPACITY","Project candidate capacity is exhausted");
-        ObjectNode checks=verify(bytes,manuscript); String digest=sha(bytes),id=UUID.randomUUID().toString();
+        ObjectNode checks=verify(bytes,renderInput); String digest=sha(bytes),id=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_bidding_artifact(workspace_id,project_id,id,manuscript_ref_json,template_ref_json,format_ref_json,mode,format,digest,byte_size,content,checks_json,generator_attempt_id,status,decision_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'STAGED',NULL,?)",
                 claim.scope().workspaceId(),claim.scope().projectId(),id,write(manuscriptRef),write(templateRef),write(formatRef),mode,"docx",digest,bytes.length,bytes,write(checks),claim.attemptId(),Timestamp.from(Instant.now()));
         return manifest(artifact(claim.scope(),id),mode);
@@ -146,10 +172,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
     public ObjectNode verify(byte[] bytes,ObjectNode manuscript) {
         if(bytes==null||bytes.length==0||bytes.length>artifactLimitBytes) throw BiddingAccess.error(422,"ARTIFACT_INVALID","Candidate bytes are empty or oversized");
         try(XWPFDocument doc=new XWPFDocument(new ByteArrayInputStream(bytes))) {
-            StringBuilder text=new StringBuilder(); doc.getParagraphs().forEach(p->text.append(p.getText()));
-            for(var table:doc.getTables()) for(var row:table.getRows()) for(var cell:row.getTableCells()) text.append(cell.getText());
-            ArrayNode missing=json.createArrayNode(); collectExpectedText(manuscript,text.toString(),missing);
-            if(!missing.isEmpty()) throw BiddingAccess.error(422,"ARTIFACT_CONTENT_MISMATCH","DOCX is missing manuscript text");
+            verifyBodyElements(doc,manuscript);
             validatePackageSafety(bytes);
             int expectedImages=countImageBlocks(manuscript);
             if(doc.getAllPictures().size()!=expectedImages) throw BiddingAccess.error(422,"ARTIFACT_CONTENT_MISMATCH","DOCX image content does not match the manuscript");
@@ -158,6 +181,60 @@ public class BiddingArtifactService implements BiddingResultHandler {
         } catch(BiddingApiException e) { throw e; }
         catch(Exception e) { throw BiddingAccess.error(422,"ARTIFACT_DOCX_INVALID","Candidate bytes are not a readable DOCX"); }
     }
+
+    private void verifyBodyElements(XWPFDocument doc,ObjectNode expected) {
+        if(expected==null||!expected.path("title").isTextual()||!expected.path("chapters").isArray())contentMismatch();
+        if(!expected.path("title").asText().equals(doc.getProperties().getCoreProperties().getTitle()))contentMismatch();
+        if(doc.getBodyElements().size()<2||doc.getParagraphs().size()<2||!"目录".equals(doc.getParagraphs().getFirst().getText())
+                ||!"TOCHeading".equals(doc.getParagraphs().getFirst().getStyle())||!doc.getParagraphs().get(1).getCTP().xmlText().contains(" TOC "))
+            contentMismatch();
+        List<ExpectedElement> want=new ArrayList<>();
+        for(JsonNode chapter:expected.path("chapters")) {
+            if(!chapter.path("title").isTextual()||!chapter.path("blocks").isArray())contentMismatch();
+            int level=Math.max(1,Math.min(3,chapter.path("level").asInt(1)));
+            want.add(new ExpectedElement("heading",chapter.path("title").asText(),level,List.of()));
+            for(JsonNode block:chapter.path("blocks")) {
+                switch(block.path("type").asText()) {
+                    case "paragraph" -> want.add(new ExpectedElement("paragraph",block.path("text").asText(),0,List.of()));
+                    case "heading" -> want.add(new ExpectedElement("heading",block.path("text").asText(),block.path("level").asInt(),List.of()));
+                    case "list" -> { int i=1;for(JsonNode item:block.path("items"))want.add(new ExpectedElement("paragraph",(block.path("ordered").asBoolean()?i++ + ". ":"• ")+item.asText(),0,List.of())); }
+                    case "table" -> {
+                        List<List<String>> rows=new ArrayList<>();List<String> header=new ArrayList<>();block.path("columns").forEach(c->header.add(c.asText()));rows.add(header);
+                        block.path("rows").forEach(row->{List<String> cells=new ArrayList<>();row.forEach(c->cells.add(c.asText()));rows.add(cells);});
+                        want.add(new ExpectedElement("table","",0,rows));
+                    }
+                    case "image" -> {
+                        want.add(new ExpectedElement("image","",0,List.of()));
+                        if(!block.path("caption").asText("").isBlank())want.add(new ExpectedElement("paragraph",block.path("caption").asText(),0,List.of()));
+                    }
+                    default -> contentMismatch();
+                }
+            }
+        }
+        List<IBodyElement> body=doc.getBodyElements();
+        if(body.size()!=want.size()+2)contentMismatch();
+        for(int i=0;i<want.size();i++) {
+            ExpectedElement expectedElement=want.get(i);IBodyElement actual=body.get(i+2);
+            if("table".equals(expectedElement.type())) {
+                if(actual.getElementType()!=BodyElementType.TABLE)contentMismatch();
+                var table=(org.apache.poi.xwpf.usermodel.XWPFTable)actual;
+                if(table.getRows().size()!=expectedElement.rows().size())contentMismatch();
+                for(int r=0;r<expectedElement.rows().size();r++) {
+                    var actualRow=table.getRow(r);List<String> expectedRow=expectedElement.rows().get(r);
+                    if(actualRow.getTableCells().size()!=expectedRow.size())contentMismatch();
+                    for(int c=0;c<expectedRow.size();c++)if(!expectedRow.get(c).equals(actualRow.getCell(c).getText()))contentMismatch();
+                }
+            } else {
+                if(actual.getElementType()!=BodyElementType.PARAGRAPH)contentMismatch();
+                var paragraph=(org.apache.poi.xwpf.usermodel.XWPFParagraph)actual;
+                if("image".equals(expectedElement.type())) {
+                    if(paragraph.getRuns().stream().noneMatch(run->run.getCTR().sizeOfDrawingArray()>0))contentMismatch();
+                } else if(!expectedElement.text().equals(paragraph.getText()))contentMismatch();
+                if("heading".equals(expectedElement.type())&&!("Heading"+expectedElement.level()).equals(paragraph.getStyle()))contentMismatch();
+            }
+        }
+    }
+    private void contentMismatch() { throw BiddingAccess.error(422,"ARTIFACT_CONTENT_MISMATCH","DOCX body structure does not exactly match the rendered manuscript"); }
 
     private void validatePackageSafety(byte[] bytes) {
         try(ZipInputStream zip=new ZipInputStream(new ByteArrayInputStream(bytes))) {
@@ -189,7 +266,8 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(command==null||command.payload()==null||!"SAVE_FORMAT_REQUIREMENTS".equals(command.action())) throw BiddingAccess.error(400,"INVALID_REQUEST","Format requirements command is required");
         if(!repository.lockProject(scope.workspaceId(),scope.projectId())) throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         only(command.payload(),Set.of("requirements"));
-        BiddingTypes.Ref current=ensureFormat(scope);
+        BiddingTypes.Ref current=repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current");
+        if(current==null||repository.businessRevision(scope,current)==null)throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_UNAVAILABLE","Prepare export before changing format requirements");
         if(!current.equals(command.expected())) throw BiddingAccess.error(409,"VERSION_CONFLICT","Format requirements changed; reload before saving");
         ArrayNode requirements=command.payload().withArray("requirements"); validateRequirements(requirements);
         JsonNode existing=repository.businessRevision(scope,current).path("requirements");
@@ -326,7 +404,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
         }
         throw BiddingAccess.error(422,"EXPORT_SKILL_NOT_PINNED","The writer must be assigned the fixed export skill package");
     }
-    private void collectExpectedText(JsonNode n,String actual,ArrayNode missing) { if(n.isTextual()){String t=n.asText().trim();if(!t.isEmpty()&&!actual.contains(t))missing.add(t);}else if(n.isObject()){n.fields().forEachRemaining(e->{if(Set.of("text","title").contains(e.getKey()))collectExpectedText(e.getValue(),actual,missing);else if("columns".equals(e.getKey())||"rows".equals(e.getKey())||"items".equals(e.getKey()))collectExpectedText(e.getValue(),actual,missing);});}else if(n.isArray())n.forEach(v->collectExpectedText(v,actual,missing)); }
+    private record ExpectedElement(String type,String text,int level,List<List<String>> rows) {}
     private void createHead(BiddingTypes.Scope s,BiddingTypes.Ref r) { jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",s.workspaceId(),s.projectId(),r.kind(),r.id(),r.version(),write(r)); }
     private void advanceHead(BiddingTypes.Scope s,BiddingTypes.Ref old,BiddingTypes.Ref next) { int count=jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND version=?",next.version(),write(next),s.workspaceId(),s.projectId(),old.kind(),old.id(),old.version());if(count!=1)throw BiddingAccess.error(409,"VERSION_CONFLICT","Format requirements changed during save"); }
     private String canonical(JsonNode n) { try { return json.writeValueAsString(json.treeToValue(n,Object.class)); }catch(Exception e){throw new IllegalStateException(e);} }

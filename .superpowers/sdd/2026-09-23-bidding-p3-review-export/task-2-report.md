@@ -19,3 +19,19 @@ Result: BUILD SUCCESS; 10 tests, 0 failures, 0 errors, 0 skipped. `BiddingMigrat
 `git diff --check` passed. The initial focused run after expanding manifest tamper cases failed because the test generated several extra artifacts and reached its intentionally low capacity threshold early; the test was corrected to validate all altered manifest fields against one staged attempt. A missing skill frontmatter issue found in test startup logs was fixed. The root full gate then ran 178 tests with 177 passing and one failure: the old migration test expected 11 bidding tables after V216 introduced the artifact table. This test now expects 12 and verifies actual artifact bytes and metadata read back from H2. The final focused rerun passed all 10 tests.
 
 Known limits: Office visual pagination was not inspected (`visualPageInspection: NOT_RUN`); the test verifies document structure and fields, not rendered page breaks. No live model/provider was called. The H2 migration was exercised by Spring integration tests; MySQL and Kingbase migrations were not executed against live engines. This task produces candidates/previews only; final approval and publication remain separate workflow stages.
+
+## Review fix round 1
+
+Addressed all three scoped review findings. Artifact acceptance now reopens the DOCX and compares its ordered body elements against the exact render DTO: headings retain level/style, paragraphs and lists retain exact text/order, and tables retain row, cell-count, and cell-text structure. Tamper regressions cover reordered and removed paragraphs, duplicated trailing text, empty documents, and altered table cells. A red probe temporarily restored the reviewed substring-only verifier and the real persisted-artifact test then failed as expected: the swapped-paragraph document was accepted (failure at `BiddingArtifactTest.java:145`, “Expected BiddingApiException to be thrown”). The strict verifier was restored before final verification.
+
+Heading styles now have actual Heading1–Heading3 definitions, outline levels 0–2, explicit 宋体 font and size properties, and TOC heading metadata. The renderer regression checks the reopened `word/styles.xml` definitions and paragraph style links; its earlier red run failed because `configureStyles` produced no definition. Export preparation is now explicit and member-authorized through `PREPARE_EXPORT`, guarded by expected project CAS and operationId replay/conflict rules. Template discovery reports `UNPREPARED` without writing revisions; after preparation it reports `PREPARED`, exact template/format references, and `format: "docx"`. Dispatch requires those exact references and rejects missing or stale refs; it does not silently create replacements. The earlier preparation regression failed because discovery had no explicit unprepared status.
+
+Final focused verification:
+
+```sh
+export JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+mvn -pl mateclaw-server -am -Dtest=BiddingArtifactTest,BiddingDocxRendererTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+```
+
+Result: BUILD SUCCESS; 8 tests, 0 failures, 0 errors, 0 skipped (`BiddingArtifactTest` 2; `BiddingDocxRendererTest` 6). `git diff --check` passed. Root’s broader gate and independent scoped review remain pending. Visual Office pagination remains unverified; no live provider/model was called, and MySQL/Kingbase migrations were not run against live engines.

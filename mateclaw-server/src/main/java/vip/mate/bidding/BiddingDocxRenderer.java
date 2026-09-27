@@ -146,7 +146,19 @@ public final class BiddingDocxRenderer {
     }
 
     private void configureStyles(XWPFDocument doc) {
-        // POI's built-in Heading styles carry outline levels; runs set the explicit East Asian font.
+        XWPFStyles styles=doc.getStyles();
+        if(styles==null)styles=doc.createStyles();
+        for(int level=1;level<=3;level++) {
+            CTStyle style=CTStyle.Factory.newInstance();
+            style.setType(STStyleType.PARAGRAPH);style.setStyleId("Heading"+level);
+            style.addNewName().setVal("heading "+level);style.addNewBasedOn().setVal("Normal");style.addNewNext().setVal("Normal");style.addNewQFormat();
+            style.addNewPPr().addNewOutlineLvl().setVal(java.math.BigInteger.valueOf(level-1));
+            CTRPr run=style.addNewRPr();CTFonts fonts=run.addNewRFonts();fonts.setAscii(FONT);fonts.setHAnsi(FONT);fonts.setEastAsia(FONT);
+            run.addNewB();run.addNewSz().setVal(java.math.BigInteger.valueOf(24));
+            styles.addStyle(new XWPFStyle(style));
+        }
+        CTStyle toc=CTStyle.Factory.newInstance();toc.setType(STStyleType.PARAGRAPH);toc.setStyleId("TOCHeading");toc.addNewName().setVal("TOC Heading");toc.addNewBasedOn().setVal("Normal");
+        styles.addStyle(new XWPFStyle(toc));
     }
 
     private void addToc(XWPFDocument doc) {

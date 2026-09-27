@@ -49,6 +49,7 @@ public class BiddingCommandService {
             case "CLASSIFY_HUMAN_TODO" -> reviews.getObject().classifyHumanTodo(scope,command);
             case "REVISE_CHAPTER" -> writing.getObject().revise(scope,command);
             case "DISPATCH_EXPORT" -> artifacts.getObject().dispatch(scope,command);
+            case "PREPARE_EXPORT" -> artifacts.getObject().prepareExport(scope,command);
             case "SAVE_FORMAT_REQUIREMENTS" -> artifacts.getObject().saveFormatRequirements(scope,command);
             case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
             default -> projects.execute(scope,command);
