@@ -98,11 +98,18 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 - Create: `mateclaw-server/src/main/resources/db/migration/mysql/V216__bidding_artifacts.sql`.
 - Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V216__bidding_artifacts.sql`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingToolScope.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeRuntime.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDocxRendererTest.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java`.
+
+**Source preflight (2026-09-27):**
+现有 runtime 固定 tools 尚未包含导出，writer role 技能白名单尚无 export，Dependencies 尚未识别 TEMPLATE/FORMAT_REQUIREMENTS；本任务沿既有 Claim/角色授权/固定技能包校验 seam 补齐，不能只注册工具。保留 P2 员工绑定兼容，导出派发必须额外验证实际已授权且固定的导出技能包。当前材料绑定仅提供 WIKI_PAGE 文本，不提供 IMAGE_ASSET 原字节；renderer 验证授权图片 map，但生产遇到无受控授权字节的图片必须显式 IMAGE_NOT_AUTHORIZED 阻断，不读取任意 URL/path、不宣称生产图片接入已完成。
 
 **Interfaces:**
 - Consumes: P2 BiddingContentBlocks、MANUSCRIPT Ref、模板Ref、formatRequirements Ref；现有 Apache POI。
@@ -200,6 +207,7 @@ WHERE id=:artifactId AND workspace_id=:workspaceId AND project_id=:projectId
 - Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`.
 - Modify: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`.
 - Modify: `mateclaw-ui/src/features/bidding/api/types.ts`.
+- Modify: `mateclaw-ui/src/features/bidding/shared/state.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingReview.test.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingArtifacts.test.ts`.
 
