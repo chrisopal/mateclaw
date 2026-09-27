@@ -227,6 +227,8 @@ WHERE id=:artifactId AND workspace_id=:workspaceId AND project_id=:projectId
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingReview.test.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingArtifacts.test.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`.
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWriting.test.ts`.
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingWorkbench.test.ts`.
 
 **Interfaces:**
 - Consumes: P3 HTTP/Command契约；P1TaskDrawer/P2CandidateCompare与版本Ref。
