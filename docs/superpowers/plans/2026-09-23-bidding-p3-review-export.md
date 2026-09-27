@@ -266,6 +266,9 @@ export const canApproveArtifact = (mode: string, state: string, blockers: number
 ### Task 5: P3-05 — 完整技术标验收与交付运行说明
 
 **Files:**
+- Modify: `docs/superpowers/plans/2026-09-23-bidding-p3-review-export.md` root-controller scope reconciliation only.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingAnalysisService.java` only for confirmed builtin/global skill-pin visibility compatibility at dispatch.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingEmployeeBindings.java` only if necessary to reuse its existing current authorized skill-resolution seam; no role/grant/model/pin rules relaxed.
 - Create: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java`.
 - Create: `mateclaw-server/src/test/resources/bidding/golden/technical-tender.json`.
 - Create: `docs/bidding/acceptance/2026-09-23-full.md`.
@@ -299,3 +302,5 @@ export const canApproveArtifact = (mode: string, state: string, blockers: number
 ## P3 完成判定
 
 A01～A16均有明确证据，阻断缺陷为零；真实模型产生完整技术标，人工检查具体候选文件并审定，正式下载与已审文件字节一致。自动化测试通过但真实样例/Office/必要数据库验证未完成时，交付状态只能是“实现完成，相关验收未完成”，不能称完整上线就绪。外部投标提交、盖章、报价和商务标写作始终不在本阶段范围。
+
+Task5 source-driven scope reconciliation (2026-09-27): new full-app workspace HTTP assignment obtains four valid numeric pins to globally visible builtin packages; dispatch then rejects ANALYSIS_SKILL_UNAVAILABLE because AnalysisService.pinForName requires the builtin row workspace to equal the project workspace. This contradicts the existing SkillRuntimeService.matchesWorkspace policy (builtin/global visible, foreign workspace-owned skills excluded) already used by employee readiness and claim validation. Preserve current actor/workspace/project membership, role grants, active package digest and runtime validation. Resolve pinned name using the existing authorized visibility rule, never an unrestricted ID/name lookup. Fix only the two declared production seams if required, retain the failing full HTTP test as RED and prove a fresh workspace can dispatch and claim globally visible builtin pins. Foreign non-builtin workspace skills must remain excluded; use existing binding authorization regression plus a focused check if the repair opens a new branch. No SQL-seeded business revisions, fixture ACL mocks, default-workspace workaround or custom clones of reserved builtin slugs. Record this proven integration fix rather than marking the required positive chain NOT_RUN.
