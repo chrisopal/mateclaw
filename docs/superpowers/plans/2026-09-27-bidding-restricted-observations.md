@@ -5,6 +5,7 @@ Prerequisite: Task4 source gate and Sol approval. Execute this scoped repair bef
 ### Task 1: Preserve authorized observations through restricted execution
 
 **Files:**
+- Modify: `docs/superpowers/plans/2026-09-27-bidding-restricted-observations.md` root-controller scope reconciliation only.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/execution/ProjectExecutionOptions.java` if a scoped policy field is necessary.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/graph/executor/ToolExecutionExecutor.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/agent/context/ConversationWindowManager.java`.
