@@ -52,6 +52,7 @@
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingMaterials.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingReviewTest.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingWritingTest.java`.
 
 **Source preflight (2026-09-27):**
 材料只读审核入口必须校验当前绑定 reviewer 的独立知识库/页面类型权限，并保持现有 writer 读写规则；禁止为通过审核把 reviewer 冒充 writer。未绑定/未就绪审核员工时保留有效 P2 组装草稿，明确审核尚未派发。
