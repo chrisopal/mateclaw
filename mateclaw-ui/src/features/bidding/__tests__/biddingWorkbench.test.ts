@@ -7,14 +7,14 @@ import BiddingSources from '../components/BiddingSources.vue'
 import BiddingWorkbench from '../pages/BiddingWorkbench.vue'
 import { biddingApi } from '../api/biddingApi'
 
-const harness=vi.hoisted(()=>({projectId:'p1',push:vi.fn(),workspaceGuard:undefined as undefined|((id:string)=>boolean|Promise<boolean>),routeLeaveGuard:undefined as undefined|(()=>boolean|Promise<boolean>)}))
-vi.mock('vue-router',()=>({useRoute:()=>({params:{id:harness.projectId}}),useRouter:()=>({push:harness.push}),onBeforeRouteLeave:(guard:()=>boolean|Promise<boolean>)=>{harness.routeLeaveGuard=guard},onBeforeRouteUpdate:vi.fn()}))
-vi.mock('@/stores/useWorkspaceStore',()=>({useWorkspaceStore:()=>({currentWorkspaceId:'ws-1',registerBeforeSwitch:(guard:(id:string)=>boolean|Promise<boolean>)=>{harness.workspaceGuard=guard;return ()=>{harness.workspaceGuard=undefined}}})}))
+const harness=vi.hoisted(()=>({projectId:'p1',setProjectId:undefined as undefined|((id:string)=>void),currentWorkspaceId:'ws-1',push:vi.fn(),workspaceGuard:undefined as undefined|((id:string)=>boolean|Promise<boolean>),routeLeaveGuard:undefined as undefined|(()=>boolean|Promise<boolean>)}))
+vi.mock('vue-router',async()=>{const {reactive}=await vi.importActual<typeof import('vue')>('vue');const params=reactive({id:harness.projectId});harness.setProjectId=(id:string)=>{params.id=id};return {useRoute:()=>({params}),useRouter:()=>({push:harness.push}),onBeforeRouteLeave:(guard:()=>boolean|Promise<boolean>)=>{harness.routeLeaveGuard=guard},onBeforeRouteUpdate:vi.fn()}})
+vi.mock('@/stores/useWorkspaceStore',()=>({useWorkspaceStore:()=>({get currentWorkspaceId(){return harness.currentWorkspaceId},registerBeforeSwitch:(guard:(id:string)=>boolean|Promise<boolean>)=>{harness.workspaceGuard=guard;return ()=>{harness.workspaceGuard=undefined}}})}))
 vi.mock('../api/biddingApi',()=>({biddingApi:{command:vi.fn(),upload:vi.fn(),capabilities:vi.fn(),get:vi.fn(),members:vi.fn(),employees:vi.fn(),sources:vi.fn(),sourceSetHead:vi.fn(),analysis:vi.fn(),materials:vi.fn().mockResolvedValue({items:[]}),outline:vi.fn().mockResolvedValue({candidates:[]}),writing:vi.fn().mockResolvedValue({chapters:[]}),changeImpact:vi.fn().mockResolvedValue({events:[],formalBlocked:false}),handoffOptions:vi.fn(),handoffSnapshot:vi.fn(),knowledgeBases:vi.fn(),knowledgePages:vi.fn(),knowledgePage:vi.fn(),tasks:vi.fn(),task:vi.fn(),evidence:vi.fn(),content:vi.fn(),revision:vi.fn()}}))
 
 let app:App|undefined,host:HTMLElement|undefined
 const flush=async()=>{await new Promise(resolve=>setTimeout(resolve,0));await nextTick()}
-afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;harness.workspaceGuard=undefined;harness.routeLeaveGuard=undefined;vi.clearAllMocks()})
+afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;harness.setProjectId?.('p1');harness.projectId='p1';harness.currentWorkspaceId='ws-1';harness.workspaceGuard=undefined;harness.routeLeaveGuard=undefined;vi.clearAllMocks()})
 it('keeps review and export explicitly unavailable in the current P3 scope',async()=>{
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
   vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
@@ -320,7 +320,68 @@ it('clears cached change-impact labels when confirmation is denied',async()=>{
   expect(host.textContent).toContain('Sensitive change label')
   ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Confirm impact')) as HTMLButtonElement).click();await flush()
   expect(host.textContent).not.toContain('Sensitive change label')
-  expect(host.textContent).toContain('Change impact data is unavailable and was cleared.')
+  expect(host.textContent).toContain('Project or source access changed. Restricted content was cleared.')
+})
+
+it.each([{status:401,clear:true},{status:403,clear:true},{status:404,clear:true},{status:410,clear:true},{status:409,clear:false},{status:503,clear:false}])('clears scoped P2 chapter content on command response $status while preserving transient drafts',async({status,clear})=>{
+  const project={id:'p1',workspaceId:'ws-1',name:'Protected project marker',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
+  const outlineRef={kind:'outline',id:'outline-1',version:2,digest:'outline-2'}
+  const selectedRef={kind:'chapter',id:'chapter-1',version:3,digest:'chapter-3'}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+  vi.mocked(biddingApi.get).mockResolvedValue(project as never)
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockResolvedValue([])
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  vi.mocked(biddingApi.outline).mockResolvedValue({confirmed:{ref:outlineRef,status:'CONFIRMED',inputRefs:[],payload:{chapters:[]}},candidates:[]} as never)
+  vi.mocked(biddingApi.writing).mockResolvedValue({outlineRef,chapters:[{chapterId:'chapter-1',title:'Protected chapter title',editExpectedRef:selectedRef,selected:{ref:selectedRef,status:'SELECTED',inputRefs:[outlineRef],payload:{chapter:{chapterId:'chapter-1',blocks:[{type:'paragraph',text:'Protected selected content'}]}}},candidates:[]}]} as never)
+  vi.mocked(biddingApi.command).mockRejectedValueOnce(Object.assign(new Error('restricted'),{response:{status}}))
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Writing')) as HTMLElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Edit chapter')) as HTMLButtonElement).click();await flush()
+  const textarea=host.querySelector('.el-dialog textarea') as HTMLTextAreaElement
+  Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!.call(textarea,'Unsaved sensitive edit')
+  textarea.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Unsaved sensitive edit'}));await flush()
+  ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.includes('Save revision')) as HTMLButtonElement).click();await flush()
+  if(clear){
+    expect(host.textContent).not.toContain('Protected project marker')
+    expect(host.textContent).not.toContain('Protected selected content')
+    expect(host.textContent).not.toContain('Unsaved sensitive edit')
+    expect(host.querySelector('.el-dialog textarea')).toBeNull()
+    expect(host.textContent).toContain('Restricted content was cleared.')
+  }else{
+    expect(host.textContent).toContain('Protected selected content')
+    expect((host.querySelector('.el-dialog textarea') as HTMLTextAreaElement).value).toBe('Unsaved sensitive edit')
+  }
+})
+
+it('ignores a late access-denied command response after navigation loads another project',async()=>{
+  let rejectCommand!:(reason:unknown)=>void
+  const lateCommand=new Promise((_,reject)=>{rejectCommand=reject})
+  const project=(id:string,name:string)=>({id,workspaceId:'ws-1',name,lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id,version:2,digest:`${id}-2`},bindings:{},selectedRefs:{}})
+  const outlineRef={kind:'outline',id:'outline-1',version:2,digest:'outline-2'},chapterRef={kind:'chapter',id:'chapter-1',version:3,digest:'chapter-3'}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+  vi.mocked(biddingApi.get).mockResolvedValueOnce(project('p1','Old project marker') as never).mockResolvedValue(project('p2','New project marker') as never)
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockResolvedValue([])
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  vi.mocked(biddingApi.outline).mockResolvedValue({confirmed:{ref:outlineRef,status:'CONFIRMED',inputRefs:[],payload:{chapters:[]}},candidates:[]} as never)
+  vi.mocked(biddingApi.writing).mockResolvedValue({outlineRef,chapters:[{chapterId:'chapter-1',title:'Old project chapter',editExpectedRef:chapterRef,selected:{ref:chapterRef,status:'SELECTED',inputRefs:[outlineRef],payload:{chapter:{blocks:[{type:'paragraph',text:'Old project content'}]}}},candidates:[]}]} as never)
+  vi.mocked(biddingApi.command).mockImplementationOnce(()=>lateCommand as never)
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Writing')) as HTMLElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Edit chapter')) as HTMLButtonElement).click();await flush()
+  ;([...host.querySelectorAll('.el-dialog button')].find(button=>button.textContent?.includes('Save revision')) as HTMLButtonElement).click();await flush()
+  harness.setProjectId?.('p2');await flush()
+  expect(host.textContent).toContain('New project marker')
+  rejectCommand(Object.assign(new Error('old scope denied'),{response:{status:403}}));await flush()
+  expect(host.textContent).toContain('New project marker')
+  expect(host.textContent).not.toContain('Restricted content was cleared.')
 })
 
 it('requires an explicit reason to exclude each blank page before confirming a review-needed source',async()=>{

@@ -14,12 +14,12 @@ import { canAdopt } from '../shared/state'
 const props=defineProps<{candidate:ChapterRevision;selected?:boolean;currentVersion:number|string;expectedVersion:number|string;currentRef?:import('../api/types').Ref;canRevise:boolean;busy?:boolean}>()
 defineEmits<{adopt:[];revise:[]}>()
 const {locale}=useI18n(),l=(zh:string,en:string)=>String(locale.value).startsWith('zh')?zh:en
-const adoptable=computed(()=>props.candidate.status==='CANDIDATE'&&canAdopt(props.candidate.status,props.currentVersion,props.expectedVersion)&&sameRef(props.currentRef,props.candidate.headGuard))
+const adoptable=computed(()=>props.canRevise&&props.candidate.status==='CANDIDATE'&&canAdopt(props.candidate.status,props.currentVersion,props.expectedVersion)&&sameRef(props.currentRef,props.candidate.headGuard))
 function sameRef(left?:import('../api/types').Ref,right?:import('../api/types').Ref){return !!left&&!!right&&left.kind===right.kind&&String(left.id)===String(right.id)&&left.digest===right.digest&&Number(left.version)===Number(right.version)}
 const blocks=computed(()=>{const chapter=props.candidate.payload.chapter as {blocks?:Record<string,any>[]} | undefined;return Array.isArray(chapter?.blocks)?chapter.blocks:[]})
 const inputVersions=computed(()=>props.candidate.inputRefs.map(item=>`V${item.version}`).join(' · '))
-function strings(value:unknown):string[]{return Array.isArray(value)?value.map(item=>typeof item==='string'?item:summary(item as Record<string,unknown>)).filter(item=>!!item&&item!=='—'):[]}
-function summary(value:Record<string,unknown>){return [value.title,value.text,value.description,value.reason].filter(item=>typeof item==='string'&&item.trim()).join(' · ')||'—'}
+function strings(value:unknown):string[]{return Array.isArray(value)?value.map(item=>{if(typeof item==='string')return item.trim();if(!item||typeof item!=='object'||Array.isArray(item))return'';return summary(item as Record<string,unknown>)}).filter(Boolean):[]}
+function summary(value:Record<string,unknown>){const fields=['title','text','description','reason','summary','item','material','requirement','issue','question','needed','nextStep','label'];return fields.flatMap(key=>typeof value[key]==='string'&&value[key].trim()?[value[key].trim()]:[]).filter((text,index,all)=>all.indexOf(text)===index).join(' · ')||'Details to be confirmed'}
 function statusLabel(value:string){return value==='CANDIDATE'?l('候选','Candidate'):value==='STALE'?l('依赖已变化','Inputs changed'):value==='ADOPTED'?l('已采用','Adopted'):l('不可用','Unavailable')}
 </script>
 <style scoped>

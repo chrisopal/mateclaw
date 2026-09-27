@@ -62,6 +62,40 @@ it('does not allow a read-only viewer to assemble selected chapter heads',async(
   expect(onAssemble).not.toHaveBeenCalled()
 })
 
+it('keeps object-shaped material gaps readable before and after candidate adoption',async()=>{
+  const gaps={missingMaterials:[{title:'Current site drawing required',id:'internal-material-1',ref:{kind:'material',id:'secret-ref',version:1,digest:'secret'}},{id:'only-id'}],unresolvedItems:[{requirement:'Confirm accessible route',reason:'No approved route evidence',ref:'private-requirement-ref'}]}
+  const candidate={ref:candidateRef,status:'CANDIDATE',headGuard:editExpectedRef,inputRefs:[outlineRef],payload:{chapter:{chapterId:'chapter-1',blocks:[{type:'paragraph',text:'Candidate body'}]},...gaps}}
+  const before=mount({outlineRef,chapters:[{chapterId:'chapter-1',title:'Delivery plan',editExpectedRef,selected:{ref:currentRef,status:'SELECTED',inputRefs:[outlineRef],payload:{chapter:{chapterId:'chapter-1',blocks:[]}}},candidates:[candidate]}]});await flush()
+  expect(before.root.textContent).toContain('Current site drawing required')
+  expect(before.root.textContent).toContain('Confirm accessible route')
+  expect(before.root.textContent).toContain('No approved route evidence')
+  expect(before.root.textContent).not.toContain('secret-ref')
+  const adopt=[...before.root.querySelectorAll('button')].find(button=>button.textContent?.includes('Adopt candidate')) as HTMLButtonElement
+  expect(adopt.disabled).toBe(false)
+  adopt.click();await flush()
+  expect(before.onCommand).toHaveBeenCalledWith({action:'ADOPT_CHAPTER',expected:editExpectedRef,payload:{chapterId:'chapter-1',candidateRef}})
+  const acceptedRef={kind:'chapter',id:'chapter-1',version:4,digest:'chapter-4'}
+  await app?.unmount();app=undefined;host?.remove();host=undefined
+  const after=mount({outlineRef,chapters:[{chapterId:'chapter-1',title:'Delivery plan',editExpectedRef:acceptedRef,selected:{ref:acceptedRef,status:'SELECTED',inputRefs:[outlineRef],payload:candidate.payload},candidates:[]}]});await flush()
+  expect(after.root.textContent).toContain('Current site drawing required')
+  expect(after.root.textContent).toContain('Confirm accessible route')
+  expect(after.root.textContent).toContain('No approved route evidence')
+  expect(after.root.textContent).toContain('Details to be confirmed')
+  expect(after.root.textContent).not.toContain('secret-ref')
+  expect(after.root.textContent).not.toContain('internal-material-1')
+  expect(after.root.textContent).not.toContain('private-requirement-ref')
+  expect(after.root.textContent).not.toContain('"requirement"')
+})
+
+it('disables candidate adoption for read-only viewers even when the head guard matches',async()=>{
+  const candidate={ref:candidateRef,status:'CANDIDATE',headGuard:editExpectedRef,inputRefs:[outlineRef],payload:{chapter:{chapterId:'chapter-1',blocks:[{type:'paragraph',text:'Ready candidate'}]}}}
+  const {root,onCommand}=mount({outlineRef,chapters:[{chapterId:'chapter-1',title:'Delivery plan',editExpectedRef,candidates:[candidate]}]},vi.fn(),false);await flush()
+  const adopt=[...root.querySelectorAll('button')].find(button=>button.textContent?.includes('Adopt candidate')) as HTMLButtonElement
+  expect(adopt.disabled).toBe(true)
+  adopt.click();await flush()
+  expect(onCommand).not.toHaveBeenCalled()
+})
+
 it('rejects stale candidates and adopts a current candidate with the server chapter ref',async()=>{
   expect(canAdopt('STALE',3,2)).toBe(false)
   expect(canAdopt('CANDIDATE',3,2)).toBe(false)
