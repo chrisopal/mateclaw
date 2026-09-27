@@ -19,6 +19,16 @@ export interface Task { taskId: string; id?: string; skillId?: string; status: s
 export interface TaskPage { items: Task[]; total: number; page: number; pageSize: number }
 export interface Attempt { attemptNo: number; state: string; failureCode?: string; failureMessage?: string; [key: string]: unknown }
 export interface TaskDetails extends Task { attempts: Attempt[]; diagnostics?: unknown; input?: unknown; result?: unknown }
+export interface BiddingReviewFinding {
+  reviewRef: Ref; findingRef: Ref; findingDecisionRef?: Ref; findingDecision?: Record<string, unknown>
+  decision: 'OPEN' | 'FIX' | 'DISMISS_WITH_EVIDENCE' | 'DEFER_SUGGESTION' | string
+  finding: { id: string; severity?: string; category?: string; description?: string; recommendation?: string; chapterRefs?: Ref[]; requirementRefs?: string[]; evidenceRefs?: Record<string, unknown>[] }
+}
+export interface BiddingHumanTodo { ref: Ref; title: string; status: string; impactClassification: string; affectsTechnical?: boolean; evidenceRefs?: Record<string, unknown>[] }
+export interface BiddingReviewView { manuscriptRef?: Ref; reviewKey?: string; status: string; reason?: string; tasks: Record<string, unknown>[]; findings: BiddingReviewFinding[]; humanTodos: BiddingHumanTodo[]; coverage?: { chapterIds: string[]; requirementIds: string[]; expectedChapterIds: string[]; expectedRequirementIds: string[]; crossChapterReviewed: boolean } }
+export interface ExportTemplate { id?: string; name: string; status: 'PREPARED' | 'UNPREPARED' | string; ref?: Ref; formatRef?: Ref; format?: string }
+export interface ArtifactMetadata { artifactId: string; filename?: string; mode: 'candidate' | 'preview' | string; status: 'CANDIDATE' | 'PREVIEW' | 'APPROVED' | 'STALE' | string; digest?: string; byteSize?: number; manuscriptRef: Ref; templateRef: Ref; formatRef: Ref; [key: string]: unknown }
+export interface ArtifactApprovalContext extends ArtifactMetadata { status: 'READY' | 'BLOCKED' | 'STALE' | 'NOT_APPROVABLE' | string; artifactRef?: Ref; reviewRef?: Ref; reviewEvidence?: Record<string, unknown>; reasonCode?: string }
 export interface AnalysisView { baseline?: { ref: Ref; status: string; payload: AnalysisBaseline }; groups: AnalysisGroup[] }
 export interface AnalysisBaseline { schemaVersion: string; taskGroupId: string; analyses: Record<string, AnalysisPayload>; conflicts: unknown[]; [key: string]: unknown }
 export interface AnalysisPayload { [key: string]: unknown }

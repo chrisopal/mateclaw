@@ -3,6 +3,9 @@ export const isCurrentRequest = (workspaceId: string, projectId: string, activeW
 
 export const operationId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
+export const canApproveArtifact = (mode: string, state: string, blockerCount: number, canApprove: boolean) =>
+  mode === 'candidate' && state === 'CANDIDATE' && blockerCount === 0 && canApprove
+
 export const canAdopt = (state: string, current: number | string, expected: number | string) =>
   state === 'CANDIDATE' && Number.isSafeInteger(Number(current)) && Number(current) === Number(expected)
 

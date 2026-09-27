@@ -141,3 +141,18 @@ it('keeps retry and cancel actions unavailable to a workspace viewer',async()=>{
   expect([...document.querySelectorAll('button')].some(button=>['Retry','Cancel'].includes(button.textContent?.trim()||''))).toBe(false)
   expect(biddingApi.command).not.toHaveBeenCalled()
 })
+
+it('clears protected task details and stops polling after a revoked task read',async()=>{
+  const items=[{taskId:'task-protected',skillId:'bidding-document-export',status:'RUNNING',attemptCount:1}]
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items,total:1,page:1,pageSize:100})
+  vi.mocked(biddingApi.task).mockRejectedValue(Object.assign(new Error('revoked'),{response:{status:403}}))
+  const denied=vi.fn(),project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingTaskDrawer,{modelValue:true,workspaceId:'ws-1',project,canWrite:false,'onAccess-denied':denied})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;[...document.querySelectorAll('tr')].find(row=>row.textContent?.includes('Technical proposal export'))?.dispatchEvent(new MouseEvent('click',{bubbles:true}));await flush()
+  expect(denied).toHaveBeenCalledOnce()
+  expect(document.querySelector('.task-detail')).toBeNull()
+  expect(document.body.textContent).not.toContain('Technical proposal export')
+  expect(document.body.textContent).toContain('protected details were cleared')
+})

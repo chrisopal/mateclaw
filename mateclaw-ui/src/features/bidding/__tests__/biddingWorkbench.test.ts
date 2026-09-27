@@ -10,12 +10,12 @@ import { biddingApi } from '../api/biddingApi'
 const harness=vi.hoisted(()=>({projectId:'p1',setProjectId:undefined as undefined|((id:string)=>void),currentWorkspaceId:'ws-1',push:vi.fn(),workspaceGuard:undefined as undefined|((id:string)=>boolean|Promise<boolean>),routeLeaveGuard:undefined as undefined|(()=>boolean|Promise<boolean>)}))
 vi.mock('vue-router',async()=>{const {reactive}=await vi.importActual<typeof import('vue')>('vue');const params=reactive({id:harness.projectId});harness.setProjectId=(id:string)=>{params.id=id};return {useRoute:()=>({params}),useRouter:()=>({push:harness.push}),onBeforeRouteLeave:(guard:()=>boolean|Promise<boolean>)=>{harness.routeLeaveGuard=guard},onBeforeRouteUpdate:vi.fn()}})
 vi.mock('@/stores/useWorkspaceStore',()=>({useWorkspaceStore:()=>({get currentWorkspaceId(){return harness.currentWorkspaceId},registerBeforeSwitch:(guard:(id:string)=>boolean|Promise<boolean>)=>{harness.workspaceGuard=guard;return ()=>{harness.workspaceGuard=undefined}}})}))
-vi.mock('../api/biddingApi',()=>({biddingApi:{command:vi.fn(),upload:vi.fn(),capabilities:vi.fn(),get:vi.fn(),members:vi.fn(),employees:vi.fn(),sources:vi.fn(),sourceSetHead:vi.fn(),analysis:vi.fn(),materials:vi.fn().mockResolvedValue({items:[]}),outline:vi.fn().mockResolvedValue({candidates:[]}),writing:vi.fn().mockResolvedValue({chapters:[]}),changeImpact:vi.fn().mockResolvedValue({events:[],formalBlocked:false}),handoffOptions:vi.fn(),handoffSnapshot:vi.fn(),knowledgeBases:vi.fn(),knowledgePages:vi.fn(),knowledgePage:vi.fn(),tasks:vi.fn(),task:vi.fn(),evidence:vi.fn(),content:vi.fn(),revision:vi.fn()}}))
+vi.mock('../api/biddingApi',()=>({biddingApi:{command:vi.fn(),upload:vi.fn(),capabilities:vi.fn(),get:vi.fn(),members:vi.fn(),employees:vi.fn(),sources:vi.fn(),sourceSetHead:vi.fn(),analysis:vi.fn(),materials:vi.fn().mockResolvedValue({items:[]}),outline:vi.fn().mockResolvedValue({candidates:[]}),writing:vi.fn().mockResolvedValue({chapters:[]}),changeImpact:vi.fn().mockResolvedValue({events:[],formalBlocked:false}),review:vi.fn().mockResolvedValue({status:'NOT_ASSEMBLED',tasks:[],findings:[],humanTodos:[]}),templates:vi.fn().mockResolvedValue([]),artifact:vi.fn(),approvalContext:vi.fn(),download:vi.fn(),handoffOptions:vi.fn(),handoffSnapshot:vi.fn(),knowledgeBases:vi.fn(),knowledgePages:vi.fn(),knowledgePage:vi.fn(),tasks:vi.fn().mockResolvedValue({items:[]}),task:vi.fn(),evidence:vi.fn(),content:vi.fn(),revision:vi.fn()}}))
 
 let app:App|undefined,host:HTMLElement|undefined
 const flush=async()=>{await new Promise(resolve=>setTimeout(resolve,0));await nextTick()}
 afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;harness.setProjectId?.('p1');harness.projectId='p1';harness.currentWorkspaceId='ws-1';harness.workspaceGuard=undefined;harness.routeLeaveGuard=undefined;vi.clearAllMocks()})
-it('keeps review and export explicitly unavailable in the current P3 scope',async()=>{
+it('opens the sixth tab with current review and export surfaces',async()=>{
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
   vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
   vi.mocked(biddingApi.get).mockResolvedValue(project as never)
@@ -24,12 +24,51 @@ it('keeps review and export explicitly unavailable in the current P3 scope',asyn
   vi.mocked(biddingApi.sources).mockResolvedValue([])
   vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
   vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  vi.mocked(biddingApi.review).mockResolvedValue({status:'NOT_ASSEMBLED',tasks:[],findings:[],humanTodos:[]} as never)
+  vi.mocked(biddingApi.templates).mockResolvedValue([])
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items:[]} as never)
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Review')) as HTMLElement).click();await flush()
-  expect(host.textContent).toContain('Review and export')
-  expect(host.textContent).toContain('Not available in P3 scope')
-  expect([...host.querySelectorAll('button')].some(button=>/approve|export/i.test(button.textContent||''))).toBe(false)
+  expect(host.textContent).toContain('Whole-book review')
+  expect(host.textContent).toContain('Deliverables')
+  expect(host.textContent).toContain('No generated files yet')
+  expect(biddingApi.review).toHaveBeenCalledWith('ws-1','p1',expect.any(AbortSignal))
+})
+
+it('generates with pinned refs and submits approval from the server approval context',async()=>{
+  const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot A',ownerId:'7',version:2,stage:'WRITING',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version:2,digest:'p2'},bindings:{reviewer:{agentId:'reviewer',skillPins:['review-skill']},writer:{agentId:'writer',skillPins:['write-skill']}},selectedRefs:{}}
+  const manuscriptRef={kind:'manuscript',id:'ms1',version:4,digest:'ms4'},templateRef={kind:'template',id:'template1',version:2,digest:'t2'},formatRef={kind:'format',id:'format1',version:1,digest:'fmt1'},artifactRef={kind:'artifact',id:'artifact1',version:1,digest:'file-digest'},reviewRef={kind:'reviewSnapshot',id:'proof',version:1,digest:'review-proof'}
+  const metadata={artifactId:'artifact1',filename:'Technical proposal.docx',mode:'candidate',status:'CANDIDATE',digest:'file-digest',byteSize:4096,manuscriptRef,templateRef,formatRef,formalAvailable:false}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+  vi.mocked(biddingApi.get).mockResolvedValue(project as never)
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockResolvedValue([])
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  vi.mocked(biddingApi.outline).mockResolvedValue({candidates:[]} as never)
+  vi.mocked(biddingApi.writing).mockResolvedValue({outlineRef:{kind:'outline',id:'ol1',version:2,digest:'ol2'},chapters:[],manuscript:{ref:manuscriptRef,status:'DRAFT_PENDING_REVIEW',payload:{chapters:[]}}} as never)
+  vi.mocked(biddingApi.review).mockResolvedValue({status:'REVIEWED',manuscriptRef,tasks:[],findings:[],humanTodos:[],coverage:{chapterIds:[],requirementIds:[],expectedChapterIds:[],expectedRequirementIds:[],crossChapterReviewed:true}} as never)
+  vi.mocked(biddingApi.templates).mockResolvedValue([{name:'Technical v1',format:'docx',status:'PREPARED',ref:templateRef,formatRef}] as never)
+  vi.mocked(biddingApi.tasks).mockResolvedValue({items:[{taskId:'export-task',skillId:'bidding-document-export',status:'SUCCEEDED',attemptCount:1}]} as never)
+  vi.mocked(biddingApi.task).mockResolvedValue({taskId:'export-task',status:'SUCCEEDED',attemptCount:1,result:{payload:{artifactId:'artifact1'}}} as never)
+  vi.mocked(biddingApi.artifact).mockResolvedValue(metadata as never)
+  vi.mocked(biddingApi.approvalContext).mockResolvedValue({...metadata,status:'READY',artifactRef,reviewRef} as never)
+  vi.mocked(biddingApi.command).mockResolvedValue({} as never)
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Review')) as HTMLElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Generate candidate')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'DISPATCH_EXPORT',expected:project.ref,payload:{manuscriptRef,templateRef,formatRef,mode:'candidate'}}))
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Approve this file')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.approvalContext).toHaveBeenCalledWith('ws-1','p1','artifact1',expect.any(AbortSignal))
+  const checks=[...host.querySelectorAll('.el-dialog .el-checkbox')];checks.forEach(item=>(item as HTMLElement).click());await flush()
+  const reason=host.querySelector('.el-dialog textarea') as HTMLTextAreaElement
+  Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!.call(reason,'Opened the saved candidate and checked its layout')
+  reason.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Checked layout'}));await flush()
+  ;([...host.querySelectorAll('.el-dialog__footer button')].find(button=>button.textContent?.includes('Approve this file')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenLastCalledWith('ws-1','p1',expect.objectContaining({action:'APPROVE_ARTIFACT',expected:artifactRef,payload:expect.objectContaining({artifactId:'artifact1',digest:'file-digest',manuscriptRef,templateRef,formatRef,reviewRef,inspection:{opened:true,layoutChecked:true,reason:'Opened the saved candidate and checked its layout'}})}))
 })
 it('retains project settings through a real 409 and refreshes the expected revision before retry',async()=>{
   const project=(version:number,name:string)=>({id:'p1',workspaceId:'ws-1',name,lotName:'Lot A',ownerId:'7',version,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version,digest:`d${version}`},bindings:{},selectedRefs:{}})

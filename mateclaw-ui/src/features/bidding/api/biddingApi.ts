@@ -1,7 +1,7 @@
 import type { AxiosRequestConfig, AxiosRequestTransformer } from 'axios'
 import { http } from '@/api'
 import { scopedConfig } from '@/features/semantic/api/ontologyApi'
-import type { AnalysisView, BiddingMaterialsView, Capabilities, ChangeImpactView, Command, CommandResult, Dashboard, Employee, Evidence, HandoffOption, HandoffSnapshot, Member, OutlineView, Project, ProjectPage, Source, TaskDetails, TaskPage, WritingView } from './types'
+import type { AnalysisView, ArtifactApprovalContext, ArtifactMetadata, BiddingMaterialsView, BiddingReviewView, Capabilities, ChangeImpactView, Command, CommandResult, Dashboard, Employee, Evidence, ExportTemplate, HandoffOption, HandoffSnapshot, Member, OutlineView, Project, ProjectPage, Source, TaskDetails, TaskPage, WritingView } from './types'
 
 async function request<T>(workspaceId: string, config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
   const response = await http.request<unknown, { data: T }>({ ...config, ...scopedConfig(workspaceId, signal) })
@@ -41,6 +41,14 @@ export const biddingApi = {
   evidence: (ws: string, id: string, input: { sourceId: string; version: number; blockId: string }, signal?: AbortSignal) => request<Evidence>(ws, { url: `${projectPath(id)}/evidence`, params: input }, signal),
   analysis: (ws: string, id: string, signal?: AbortSignal) => request<AnalysisView>(ws, { url: `${projectPath(id)}/analysis` }, signal),
   revision: (ws: string, id: string, revisionId: string, signal?: AbortSignal) => request<Record<string, unknown>>(ws, { url: `${projectPath(id)}/revisions/${encodeURIComponent(revisionId)}` }, signal),
-  tasks: (ws: string, id: string, signal?: AbortSignal) => request<TaskPage>(ws, { url: `${projectPath(id)}/tasks`, params: { page: 1, pageSize: 100 } }, signal),
+  tasks: (ws: string, id: string, signal?: AbortSignal, page=1, pageSize=100) => request<TaskPage>(ws, { url: `${projectPath(id)}/tasks`, params: { page, pageSize } }, signal),
   task: (ws: string, taskId: string, signal?: AbortSignal) => request<TaskDetails>(ws, { url: `${base}/tasks/${encodeURIComponent(taskId)}` }, signal),
+  review: (ws: string, id: string, signal?: AbortSignal) => request<BiddingReviewView>(ws, { url: `${projectPath(id)}/review` }, signal),
+  templates: (ws: string, id: string, signal?: AbortSignal) => request<ExportTemplate[]>(ws, { url: `${projectPath(id)}/templates` }, signal),
+  artifact: (ws: string, id: string, artifactId: string, signal?: AbortSignal) => request<ArtifactMetadata>(ws, { url: `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}` }, signal),
+  approvalContext: (ws: string, id: string, artifactId: string, signal?: AbortSignal) => request<ArtifactApprovalContext>(ws, { url: `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/approval-context` }, signal),
+  download: async (ws: string, id: string, artifactId: string, mode: 'candidate'|'preview'|'formal', signal?: AbortSignal): Promise<Blob> => {
+    const response = await http.get<unknown, { data: Blob }>(`${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/content`, { ...scopedConfig(ws, signal), params: { mode }, responseType: 'blob' })
+    return response.data
+  },
 }

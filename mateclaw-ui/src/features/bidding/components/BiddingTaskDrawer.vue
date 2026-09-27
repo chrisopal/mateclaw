@@ -33,22 +33,25 @@ import { useI18n } from 'vue-i18n'
 import { biddingApi } from '../api/biddingApi'
 import { operationId } from '../shared/state'
 import type { Project, Task, TaskDetails } from '../api/types'
-const props=defineProps<{modelValue:boolean;workspaceId:string;project:Project;canWrite:boolean}>(),emit=defineEmits<{ 'update:modelValue':[boolean]; changed:[] }>()
+const props=defineProps<{modelValue:boolean;workspaceId:string;project:Project;canWrite:boolean}>(),emit=defineEmits<{ 'update:modelValue':[boolean]; changed:[];'access-denied':[unknown] }>()
 const {locale}=useI18n(),l=(zh:string,en:string)=>String(locale.value).startsWith('zh')?zh:en
 const open=ref(false),tasks=ref<Task[]>([]),detail=ref<TaskDetails>(),loading=ref(false),error=ref('')
 let controller:AbortController|undefined,timer:number|undefined
 const active=(items:Task[])=>items.some(task=>['QUEUED','RUNNING','WAITING_RETRY'].includes(task.status))
-async function load(){controller?.abort();controller=new AbortController();const signal=controller.signal,ws=props.workspaceId,id=props.project.id;if(!ws||!id)return;loading.value=true;try{const result=await biddingApi.tasks(ws,id,signal);if(ws===props.workspaceId&&id===props.project.id&&!signal.aborted){tasks.value=result.items;if(detail.value){const selected=tasks.value.find(task=>task.taskId===detail.value?.taskId);if(selected){const current=await biddingApi.task(ws,selected.taskId,signal);if(ws===props.workspaceId&&id===props.project.id&&!signal.aborted)detail.value=current}}if(props.modelValue&&active(tasks.value))timer=window.setTimeout(()=>void load(),2000)}}catch{if(!signal.aborted)error.value=l('任务读取失败。','Could not load tasks.')}finally{if(!signal.aborted)loading.value=false}}
+function handleDenied(cause:unknown){const status=cause&&typeof cause==='object'&&'response'in cause?(cause as {response?:{status?:number}}).response?.status:undefined;if(status!==401&&status!==403&&status!==404&&status!==410)return false;stop();tasks.value=[];detail.value=undefined;loading.value=false;error.value=l('访问权限已变化，任务内容已清除。','Task access changed; protected details were cleared.');emit('access-denied',cause);return true}
+async function load(){controller?.abort();controller=new AbortController();const signal=controller.signal,ws=props.workspaceId,id=props.project.id;if(!ws||!id)return;loading.value=true;try{const result=await biddingApi.tasks(ws,id,signal);if(ws===props.workspaceId&&id===props.project.id&&!signal.aborted){tasks.value=result.items;if(detail.value){const selected=tasks.value.find(task=>task.taskId===detail.value?.taskId);if(selected){const current=await biddingApi.task(ws,selected.taskId,signal);if(ws===props.workspaceId&&id===props.project.id&&!signal.aborted)detail.value=current}}if(props.modelValue&&active(tasks.value))timer=window.setTimeout(()=>void load(),2000)}}catch(cause){if(!signal.aborted&&!handleDenied(cause))error.value=l('任务读取失败。','Could not load tasks.')}finally{if(!signal.aborted)loading.value=false}}
 watch(()=>[props.modelValue,props.workspaceId,props.project.id] as const,(next,previous)=>{const [visible,workspaceId,projectId]=next,oldWorkspaceId=previous?.[1],oldProjectId=previous?.[2];if(workspaceId!==oldWorkspaceId||projectId!==oldProjectId){tasks.value=[];detail.value=undefined;error.value=''}open.value=visible;stop();if(visible)void load()},{immediate:true})
 watch(open,value=>emit('update:modelValue',value))
 function stop(){controller?.abort();if(timer)window.clearTimeout(timer);timer=undefined}
-async function select(row:Task){controller?.abort();controller=new AbortController();const signal=controller.signal,ws=props.workspaceId,id=props.project.id;try{const value=await biddingApi.task(ws,row.taskId,signal);if(!signal.aborted&&ws===props.workspaceId&&id===props.project.id)detail.value=value}catch{if(!signal.aborted)error.value=l('任务详情读取失败。','Could not load task details.')}}
+async function select(row:Task){controller?.abort();controller=new AbortController();const signal=controller.signal,ws=props.workspaceId,id=props.project.id;try{const value=await biddingApi.task(ws,row.taskId,signal);if(!signal.aborted&&ws===props.workspaceId&&id===props.project.id)detail.value=value}catch(cause){if(!signal.aborted&&!handleDenied(cause))error.value=l('任务详情读取失败。','Could not load task details.')}}
 async function mutate(row:Task,action:string){try{await biddingApi.command(props.workspaceId,props.project.id,{operationId:operationId(),expected:props.project.ref,action,payload:{taskId:row.taskId}});emit('changed');await load()}catch{error.value=l('任务状态已变化，请刷新后重试。','Task state changed. Refresh before retrying.')}}
 const skillLabels:Record<string,[string,string]>={
   'bidding-tender-profile':['招标文件基本信息','Tender profile'],
   'bidding-elimination-analysis':['废标条款','Disqualification analysis'],
   'bidding-requirement-analysis':['技术与商务要求','Technical and commercial requirements'],
   'bidding-scoring-analysis':['评分标准','Scoring criteria'],
+  'bidding-technical-review':['投标文件审核','Technical proposal review'],
+  'bidding-document-export':['技术标文件生成','Technical proposal export'],
 }
 const statusLabels:Record<string,[string,string]>={QUEUED:['排队中','Queued'],RUNNING:['执行中','Running'],WAITING_RETRY:['等待重试','Waiting to retry'],FAILED:['失败','Failed'],SUCCEEDED:['已完成','Succeeded'],CANCELLED:['已取消','Cancelled'],STALE:['已过期','Stale']}
 const failureLabels:Record<string,[string,string]>={
