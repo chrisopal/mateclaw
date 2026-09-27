@@ -46,7 +46,11 @@ class BiddingWritingTest extends BiddingHttpFixture {
         var project=project();String projectId=project.path("id").asText(),actor=project.path("ownerId").asText();
         var outline=seedConfirmedOutline(projectId);var scope=new BiddingTypes.Scope(workspace,actor,projectId);
         Mockito.doNothing().when(dependencies).validate(Mockito.eq(scope),Mockito.anyList());
-        Mockito.doNothing().when(dependencies).validateForComparisonRead(Mockito.eq(scope),Mockito.anyList());
+        Mockito.doAnswer(invocation->{
+            List<BiddingTypes.Ref> checked=invocation.getArgument(1);
+            if(checked==null||checked.isEmpty())throw BiddingAccess.error(422,"SOURCE_SET_INCOMPLETE","Fixed references are required");
+            return null;
+        }).when(dependencies).validateForComparisonRead(Mockito.eq(scope),Mockito.any());
         Mockito.when(dependencies.isCurrent(Mockito.eq(scope),Mockito.anyList())).thenReturn(true);
         Mockito.doNothing().when(employees).validate(Mockito.eq(scope),Mockito.anyString(),Mockito.anyString());
         Mockito.when(employees.modelConfigId(Mockito.eq(scope),Mockito.anyString())).thenReturn("model-config");
@@ -98,9 +102,18 @@ class BiddingWritingTest extends BiddingHttpFixture {
         var assembled=writing.assemble(scope,assembleCommand);assertEquals("DRAFT_PENDING_REVIEW",assembled.path("status").asText());
         JsonNode manuscript=json.readTree(jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND version=?",String.class,workspace,projectId,assembled.path("ref").path("version").asLong()));
         assertEquals("Human authored draft",manuscript.path("chapters").get(1).path("chapter").path("blocks").get(0).path("text").asText());
+        JsonNode manuscriptView=writing.read(scope).path("manuscript");
+        assertTrue(manuscriptView.isObject(),"A persisted manuscript must be returned by the public writing read model");
+        assertEquals(assembled.path("ref"),manuscriptView.path("ref"));
+        assertEquals(manuscript,manuscriptView.path("payload"));
+        assertEquals(3,manuscriptView.path("inputRefs").size());
         assertEquals(assembled,writing.assemble(scope,assembleCommand));
         assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript'",Integer.class,workspace,projectId));
         assertEquals(humanRef,json.treeToValue(find(writing.read(scope).path("chapters"),"c2").path("selected").path("ref"),BiddingTypes.Ref.class));
+        List<BiddingTypes.Ref> manuscriptInputs=json.convertValue(manuscriptView.path("inputRefs"),new com.fasterxml.jackson.core.type.TypeReference<List<BiddingTypes.Ref>>(){});
+        Mockito.doThrow(BiddingAccess.error(403,"FORBIDDEN","A manuscript source is no longer readable"))
+                .when(dependencies).validateForComparisonRead(scope,manuscriptInputs);
+        assertFalse(writing.read(scope).has("manuscript"),"Revoked source access must hide the assembled manuscript");
     }
 
     @Test void editEnvelopeLimitIncludesLargeEvidenceArrays() throws Exception {
