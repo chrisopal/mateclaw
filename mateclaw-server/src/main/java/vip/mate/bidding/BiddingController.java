@@ -145,7 +145,11 @@ public class BiddingController {
         if(bindingsJson!=null)try { bindings=(ObjectNode)json.readTree(bindingsJson).path("bindings"); }
         catch(Exception invalidProject) { throw BiddingAccess.error(500,"PROJECT_STATE_INVALID","Project bindings are unavailable"); }
         String reviewerId=bindings.path("reviewer").path("agentId").asText("");
-        if(agentId.equals(reviewerId)) {
+        // The immutable target identifies historical review tasks even after rebinding
+        // or skill package changes; never downgrade their authorization to writer ACL.
+        boolean reviewTask = details.path("snapshot").path("_bidding").path("targetId").asText().startsWith("review:");
+        if(reviewTask) {
+            if(!agentId.equals(reviewerId)) throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Review task is no longer assigned to the bound reviewer");
             for(JsonNode ref:details.path("snapshot").path("inputRefs"))
                 materials.getObject().requireReviewerReadable(taskScope,reviewerId,json.convertValue(ref,BiddingTypes.Ref.class));
             for(JsonNode material:details.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items"))

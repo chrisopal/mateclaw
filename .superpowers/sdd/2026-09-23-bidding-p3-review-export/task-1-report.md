@@ -39,3 +39,20 @@ mvn -pl mateclaw-server -am -Dtest='BiddingReviewTest,BiddingWritingTest,Bidding
 Result: exit 0; 14 tests, 0 failures, 0 errors, 0 skipped (BiddingReviewTest 6, BiddingWritingTest 6, BiddingMaterialsTest 2). `git diff --check` is also required before commit. The DEFER regression was observed RED before its guard: one focused test failed because the expected rejection was absent. The reviewer task-detail regression was observed RED before its controller fix: after revoking reviewer page-type access, GET `/tasks/{taskId}` returned 200 instead of 403.
 
 Fix-round changed files: `BiddingCommandService.java`, `BiddingController.java`, `BiddingReviewService.java`, `BiddingReviewTest.java`. The prior independent 168-test backend gate was run by the parent before this fix round; it has not been rerun here. Production/live bid acceptance remains outside this H2/API verification.
+
+### Review 2 remediation (fix base `59cc6726`)
+
+The HIGH todo-provenance finding is fixed in both classification and resolution. Each action revalidates the todo revision's immutable `refs` and payload `sourceRefs` against the current dependency closure before accepting newly submitted evidence. A focused H2 workflow uploads and parses real DOCX source files, confirms the original source set, classifies a todo, replaces the current set through `confirmSet`, verifies replacement evidence is independently current, and then verifies both reclassification and resolution reject the replaced original source with `SOURCE_NOT_CONFIRMED` and append no new revision.
+
+The reviewer task-detail finding is fixed by recognizing immutable `review:` task targets independently of the employee's current role. Task detail always requires the currently bound reviewer and current material access; it cannot fall back to writer ACL after a reviewer rebind. The H2/API workflow rebinds the former reviewer as writer and binds a new reviewer, then verifies GET `/tasks/{taskId}` returns 403 without returning the embedded material snapshot. The normal writer material-access path remains covered by existing material and task read tests.
+
+Focused verification command:
+
+```sh
+export JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home
+mvn -pl mateclaw-server -am -Dtest='BiddingReviewTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test -q
+```
+
+Result: exit 0; 7 tests, 0 failures, 0 errors, 0 skipped. The RED check temporarily removed only the two fix hunks and ran the same focused suite: 7 tests, 2 failures, one because todo reclassification unexpectedly succeeded after source replacement, and one because a former reviewer received HTTP 200 with the historical embedded review snapshot. The fix hunks were restored and the GREEN command above passed. `git diff --check` passed. The parent will rerun the full backend gate and scoped independent review; those are not claimed here.
+
+Fix-round-2 changed files: `BiddingController.java`, `BiddingReviewService.java`, `BiddingReviewTest.java`. The regression uses isolated H2 and DOCX source-reader behavior; no production database or live process was used.

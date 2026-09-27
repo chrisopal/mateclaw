@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import org.mockito.Mockito;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
 import vip.mate.wiki.model.WikiPageEntity;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
@@ -26,11 +29,12 @@ import vip.mate.wiki.service.WikiPageTypePermissionService;
 class BiddingReviewTest extends BiddingHttpFixture {
     @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingEmployeeRuntime runtime;
-    @MockBean BiddingDependencies dependencies;
+    @SpyBean BiddingDependencies dependencies;
     @Autowired BiddingRepository repository;
     @Autowired BiddingReviewService reviews;
     @Autowired BiddingTaskService tasks;
     @Autowired BiddingMaterials materials;
+    @Autowired BiddingSourceService sources;
     @Autowired WikiKnowledgeBaseService knowledgeBases;
     @MockBean WikiPageService pages;
     @MockBean WikiPageTypePermissionService pageTypePermissions;
@@ -105,6 +109,54 @@ class BiddingReviewTest extends BiddingHttpFixture {
         }
     }
 
+    @Test void todoClassificationAndResolutionRejectReplacementForOriginalSourceClosure() throws Exception {
+        JsonNode project=project();
+        BiddingTypes.Scope scope=new BiddingTypes.Scope(workspace,project.path("ownerId").asText(),project.path("id").asText());
+        ObjectNode originalUpload=sources.upload(scope,"todo-original-source","TENDER",null,
+                docx("报价口径由商务负责人确认"),"original.docx");
+        assertEquals(1,sources.readPending(2));
+        BiddingTypes.Ref original=json.treeToValue(originalUpload.path("ref"),BiddingTypes.Ref.class);
+        BiddingTypes.Ref originalSet=confirmSourceSet(scope,null,List.of(original),"select-original-todo-source");
+        JsonNode originalBlock=sourceBlock(scope,original);
+
+        ObjectNode todo=json.createObjectNode().put("todoId","COMM-REPLACED").put("title","Confirm pricing basis")
+                .put("ownerId",scope.actorId()).put("status","OPEN").put("impactClassification","UNCLASSIFIED");
+        todo.putArray("sourceRefs").add(json.valueToTree(original));
+        todo.putArray("evidenceRefs").addObject().put("sourceId",original.id()).put("version",original.version())
+                .put("blockId",originalBlock.path("id").asText()).put("quote",originalBlock.path("text").asText());
+        BiddingTypes.Ref todoRef=save(scope,new BiddingTypes.Ref("HUMAN_TODO","todo-original-source",1,"todo-original-digest"),todo,List.of(original),"OPEN");
+        ObjectNode classify=json.createObjectNode().set("todoRef",json.valueToTree(todoRef));
+        classify.put("affectsTechnical",false).put("reason","business-only owner confirmation");
+        classify.putArray("evidenceRefs").addObject().put("sourceId",original.id()).put("version",original.version())
+                .put("blockId",originalBlock.path("id").asText()).put("quote",originalBlock.path("text").asText());
+        ObjectNode classified=reviews.classifyHumanTodo(scope,new BiddingTypes.Command("classify-original-todo",todoRef,"CLASSIFY_HUMAN_TODO",classify));
+        BiddingTypes.Ref classifiedRef=json.treeToValue(classified.path("ref"),BiddingTypes.Ref.class);
+
+        ObjectNode replacementUpload=sources.upload(scope,"todo-replacement-source","TENDER",null,
+                docx("报价口径已由另一个来源确认"),"replacement.docx");
+        assertEquals(1,sources.readPending(2));
+        BiddingTypes.Ref replacement=json.treeToValue(replacementUpload.path("ref"),BiddingTypes.Ref.class);
+        BiddingTypes.Ref replacementSet=confirmSourceSet(scope,originalSet,List.of(replacement),"select-replacement-todo-source");
+        JsonNode replacementBlock=sourceBlock(scope,replacement);
+        assertDoesNotThrow(()->dependencies.validate(scope,List.of(replacement)),"replacement evidence is current on its own");
+
+        ObjectNode reclassify=classify.deepCopy().set("todoRef",json.valueToTree(classifiedRef));
+        reclassify.put("affectsTechnical",true).put("reason","newly supplied quote does not repair original todo provenance");
+        reclassify.putArray("evidenceRefs").removeAll().addObject().put("sourceId",replacement.id()).put("version",replacement.version())
+                .put("blockId",replacementBlock.path("id").asText()).put("quote",replacementBlock.path("text").asText());
+        BiddingApiException staleClassification=assertThrows(BiddingApiException.class,()->reviews.classifyHumanTodo(scope,
+                new BiddingTypes.Command("reclassify-replaced-todo",classifiedRef,"CLASSIFY_HUMAN_TODO",reclassify)));
+        assertEquals("SOURCE_NOT_CONFIRMED",staleClassification.code());
+
+        ObjectNode resolve=json.createObjectNode();resolve.set("todoRef",json.valueToTree(classifiedRef));resolve.put("reason","close from replacement source");
+        resolve.putArray("evidenceRefs").addObject().put("sourceId",replacement.id()).put("version",replacement.version())
+                .put("blockId",replacementBlock.path("id").asText()).put("quote",replacementBlock.path("text").asText());
+        BiddingApiException staleResolution=assertThrows(BiddingApiException.class,()->reviews.resolveHumanTodo(scope,
+                new BiddingTypes.Command("resolve-replaced-todo",classifiedRef,"RESOLVE_HUMAN_TODO",resolve)));
+        assertEquals("SOURCE_NOT_CONFIRMED",staleResolution.code());
+        assertEquals(2,repository.maxRevisionVersion(scope,"HUMAN_TODO",todoRef.id()),"neither rejected operation may append a todo revision");
+    }
+
     @Test void dispatchPersistsChapterAndCrossChapterTasksAgainstOneExactManuscript() throws Exception {
         JsonNode project = project(); String projectId = project.path("id").asText();
         BiddingTypes.Scope scope = new BiddingTypes.Scope(workspace, project.path("ownerId").asText(), projectId);
@@ -138,8 +190,7 @@ class BiddingReviewTest extends BiddingHttpFixture {
         jdbc.update("INSERT INTO mate_bidding_source(id,workspace_id,project_id,source_id,version,kind,digest,content,blocks_json,quality,read_token,read_started_at,filename,read_status,problems_json,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 UUID.randomUUID().toString(),workspace,projectId,sourceId,1,"TENDER",sourceDigest,"evidence".getBytes(),"[{\"id\":\"b1\",\"locator\":\"p1\",\"text\":\"报价口径由商务负责人确认\"}]","PASS",null,null,"evidence.txt","READY","[]",Timestamp.from(Instant.now()));
         BiddingTypes.Ref sourceRef=new BiddingTypes.Ref("source",sourceId,1,sourceDigest);
-        ObjectNode sourceSetPayload=json.createObjectNode();
-        BiddingTypes.Ref sourceSet=save(scope,new BiddingTypes.Ref("sourceSet","review-source-set",1,"source-set-digest"),sourceSetPayload,List.of(sourceRef),"CONFIRMED");
+        BiddingTypes.Ref sourceSet=confirmSourceSet(scope,null,List.of(sourceRef),"confirm-review-source-set");
         ObjectNode baselineBody=json.createObjectNode().put("schemaVersion","1");baselineBody.put("sourceSetRef",json.writeValueAsString(sourceSet));
         baselineBody.set("sourceSetRef",json.valueToTree(sourceSet));
         ObjectNode analyses=baselineBody.putObject("analyses");
@@ -199,6 +250,21 @@ class BiddingReviewTest extends BiddingHttpFixture {
         String reviewerTaskId=dispatched.path("tasks").get(0).path("taskId").asText();
         JsonNode reviewerTask=api("GET","/tasks/"+reviewerTaskId,"viewer",workspace,null,200);
         assertTrue(reviewerTask.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items").toString().contains("Frozen reviewer-only evidence"));
+        // Rebinding the task to a different employee must revoke the old reviewer's
+        // embedded snapshot even when that employee is now the project writer.
+        String reboundReviewer="920003";
+        jdbc.update("INSERT INTO mate_agent(id,name,enabled,workspace_id,create_time,update_time,deleted) VALUES(?,?,TRUE,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",Long.valueOf(reboundReviewer),"Rebound review fixture",Long.valueOf(workspace));
+        ObjectNode reboundProject=repository.findProject(workspace,projectId);
+        ((ObjectNode)reboundProject.path("bindings").path("writer")).put("agentId",reviewer);
+        ((ObjectNode)reboundProject.path("bindings").path("reviewer")).put("agentId",reboundReviewer);
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(reboundProject),projectId);
+        JsonNode formerReviewerRead=api("GET","/tasks/"+reviewerTaskId,"viewer",workspace,null,403);
+        assertFalse(formerReviewerRead.toString().contains("Frozen reviewer-only evidence"),"a former reviewer must not receive the embedded historical evidence snapshot");
+        // Restore the original reviewer for the remaining review and ACL checks.
+        ((ObjectNode)reboundProject.path("bindings").path("writer")).put("agentId",writer);
+        ((ObjectNode)reboundProject.path("bindings").path("reviewer")).put("agentId",reviewer);
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(reboundProject),projectId);
+        Mockito.doNothing().when(dependencies).validateForRead(scope,List.of(manuscript));
         JsonNode review=reviews.read(scope);assertEquals("REVIEWED",review.path("status").asText());assertEquals(2,review.path("tasks").size());
         assertEquals(1,review.path("humanTodos").size());assertEquals(scope.actorId(),review.path("humanTodos").get(0).path("ownerId").asText());
         JsonNode publicReview=api("GET","/projects/"+projectId+"/review","member",workspace,null,200);
@@ -264,6 +330,7 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertEquals("REVIEW_STALE",reviews.read(scope).path("status").asText());
         Mockito.reset(dependencies);
         Mockito.doNothing().when(dependencies).validate(Mockito.eq(scope),Mockito.anyList());
+        Mockito.doNothing().when(dependencies).validateForRead(scope,List.of(manuscript));
         Mockito.when(pageTypePermissions.canRead(Long.valueOf(reviewer),kbId,"experience")).thenReturn(false);
         assertEquals("Frozen reviewer-only evidence",materials.snapshot(scope,writer,List.of(reviewerMaterial)).path("items").get(0).path("content").path("content").asText(),"the writer retains material access");
         JsonNode revokedRead=reviews.read(scope);assertEquals("REVIEW_ACCESS_REVOKED",revokedRead.path("status").asText());
@@ -285,6 +352,26 @@ class BiddingReviewTest extends BiddingHttpFixture {
     private BiddingTypes.Ref save(BiddingTypes.Scope scope,BiddingTypes.Ref ref,ObjectNode payload,List<BiddingTypes.Ref> refs,String status)throws Exception {
         jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),ref.kind(),ref.id(),ref.version(),json.writeValueAsString(payload),json.writeValueAsString(refs),status,ref.digest(),Timestamp.from(Instant.now()));
         return ref;
+    }
+
+    private BiddingTypes.Ref confirmSourceSet(BiddingTypes.Scope scope,BiddingTypes.Ref expected,List<BiddingTypes.Ref> selected,String operationId) {
+        ObjectNode payload=json.createObjectNode();
+        if(expected==null)payload.putNull("expectedSourceSetRef");else payload.set("expectedSourceSetRef",json.valueToTree(expected));
+        payload.set("sourceRefs",json.valueToTree(selected));payload.putArray("exclusions");
+        BiddingTypes.Ref projectRef=json.convertValue(repository.findProject(scope.workspaceId(),scope.projectId()).path("ref"),BiddingTypes.Ref.class);
+        ObjectNode result=sources.confirmSet(scope,new BiddingTypes.Command(operationId,projectRef,"CONFIRM_SOURCE_SET",payload));
+        return json.convertValue(result.path("ref"),BiddingTypes.Ref.class);
+    }
+
+    private JsonNode sourceBlock(BiddingTypes.Scope scope,BiddingTypes.Ref ref) throws Exception {
+        BiddingRepository.SourceRow source=repository.source(scope.workspaceId(),scope.projectId(),ref.id(),ref.version());
+        assertNotNull(source);JsonNode blocks=json.readTree(source.blocks());assertTrue(blocks.isArray()&&!blocks.isEmpty());return blocks.get(0);
+    }
+
+    private byte[] docx(String text) throws Exception {
+        try (XWPFDocument document=new XWPFDocument();ByteArrayOutputStream output=new ByteArrayOutputStream()) {
+            document.createParagraph().createRun().setText(text);document.write(output);return output.toByteArray();
+        }
     }
 
     private JsonNode findFinding(JsonNode review,String id){for(JsonNode finding:review.path("findings"))if(id.equals(finding.path("finding").path("id").asText()))return finding;throw new AssertionError("Missing finding "+id);}

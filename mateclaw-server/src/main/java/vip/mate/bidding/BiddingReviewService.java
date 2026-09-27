@@ -261,7 +261,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         String reason = bounded(command.payload().path("reason"), "reason", 2000);
         ArrayNode evidence = copyArray(command.payload().path("evidenceRefs"));
         if (evidence.isEmpty()) throw BiddingAccess.error(422, "HUMAN_TODO_EVIDENCE_REQUIRED", "Human todo resolution requires evidence");
-        validateTodoEvidence(scope, row, evidence);
+        validateTodoEvidence(scope, envelope, row, evidence);
         ObjectNode resolved = row.deepCopy(); resolved.put("status", "RESOLVED").put("resolutionReason", reason)
                 .put("resolvedBy", scope.actorId()).put("resolvedAt", Instant.now().toString()); resolved.set("resolutionEvidenceRefs", evidence);
         BiddingTypes.Ref saved = saveBusinessRevision(scope, "HUMAN_TODO", todoRef.id(), resolved,
@@ -291,7 +291,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         String reason=bounded(command.payload().path("reason"),"reason",2000);
         ArrayNode evidence=copyArray(command.payload().path("evidenceRefs"));
         if(evidence.isEmpty())throw BiddingAccess.error(422,"HUMAN_TODO_EVIDENCE_REQUIRED","Impact classification requires source evidence");
-        validateTodoEvidence(scope,todo,evidence);
+        validateTodoEvidence(scope,envelope,todo,evidence);
         ObjectNode classified=todo.deepCopy();
         classified.put("impactClassification","CLASSIFIED").put("affectsTechnical",command.payload().path("affectsTechnical").asBoolean())
                 .put("classificationReason",reason).put("classifiedBy",scope.actorId()).put("classifiedAt",Instant.now().toString());
@@ -577,7 +577,23 @@ public class BiddingReviewService implements BiddingResultHandler {
                 throw BiddingAccess.error(422, "FINDING_EVIDENCE_INVALID", "Evidence does not match a stored source block");
         }
     }
-    private void validateTodoEvidence(BiddingTypes.Scope scope, ObjectNode todo, ArrayNode evidence) {
+    private void validateTodoEvidence(BiddingTypes.Scope scope, ObjectNode envelope, ObjectNode todo, ArrayNode evidence) {
+        // A human todo is tied to the source set that created it. New evidence cannot
+        // replace that original dependency closure after the selected sources change.
+        ArrayNode originalRefs = copyArray(envelope.path("refs"));
+        ArrayNode originalSourceRefs = copyArray(todo.path("sourceRefs"));
+        if (originalRefs.isEmpty() || originalSourceRefs.isEmpty())
+            throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are unavailable");
+        for (JsonNode node : originalRefs) {
+            BiddingTypes.Ref ref = ref(node);
+            if (ref == null) throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are invalid");
+            dependencies.validate(scope, List.of(ref));
+        }
+        for (JsonNode node : originalSourceRefs) {
+            BiddingTypes.Ref ref = ref(node);
+            if (ref == null) throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are invalid");
+            dependencies.validate(scope, List.of(ref));
+        }
         for (JsonNode node : evidence) {
             BiddingTypes.Ref ref = evidenceSourceRef(scope,node);dependencies.validate(scope,List.of(ref));
             if (!repository.hasEvidenceBlock(scope, ref, node.path("blockId").asText(), node.path("quote").asText()))
