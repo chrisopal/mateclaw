@@ -35,3 +35,17 @@ mvn -pl mateclaw-server -am -Dtest=BiddingArtifactTest,BiddingDocxRendererTest -
 ```
 
 Result: BUILD SUCCESS; 8 tests, 0 failures, 0 errors, 0 skipped (`BiddingArtifactTest` 2; `BiddingDocxRendererTest` 6). `git diff --check` passed. Root’s broader gate and independent scoped review remain pending. Visual Office pagination remains unverified; no live provider/model was called, and MySQL/Kingbase migrations were not run against live engines.
+
+## Review fix round 2
+
+Aligned the image-count check with the normalized flat chapter DTO used by structural verification. The regression renders authorized in-memory PNG and JPEG bytes through `BiddingDocxRenderer`, then passes the resulting DOCX to `BiddingArtifactService.verify`. Before the fix, the focused test failed on the first authorized PNG with `ARTIFACT_CONTENT_MISMATCH` (“DOCX image content does not match the manuscript”) because the counter looked for the source-only nested `chapter.blocks` path. After the fix, both formats pass; each format also rejects a missing expected image and an unexpected extra image.
+
+Focused verification command:
+
+```sh
+export JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+mvn -pl mateclaw-server -am -Dtest=BiddingArtifactTest,BiddingDocxRendererTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test
+```
+
+Result: BUILD SUCCESS; 9 tests, 0 failures, 0 errors, 0 skipped (`BiddingArtifactTest` 3; `BiddingDocxRendererTest` 6). `git diff --check` passed. The regression supplies explicitly authorized fixture bytes to the renderer; production still has no IMAGE_ASSET byte source and remains fail-closed when authorized bytes are unavailable. Root full gate and scoped review remain pending.

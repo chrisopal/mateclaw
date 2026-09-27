@@ -253,9 +253,9 @@ public class BiddingArtifactService implements BiddingResultHandler {
         } catch(BiddingApiException e) { throw e; }
         catch(Exception e) { throw BiddingAccess.error(422,"ARTIFACT_DOCX_INVALID","Candidate bytes are not a readable DOCX package"); }
     }
-    private int countImageBlocks(JsonNode manuscript) {
+    private int countImageBlocks(JsonNode renderInput) {
         int count=0;
-        for(JsonNode chapter:manuscript.path("chapters")) for(JsonNode block:chapter.path("chapter").path("blocks"))
+        for(JsonNode chapter:renderInput.path("chapters")) for(JsonNode block:chapter.path("blocks"))
             if("image".equals(block.path("type").asText()))count++;
         return count;
     }

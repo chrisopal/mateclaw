@@ -47,6 +47,32 @@ class BiddingArtifactTest {
     @MockBean BiddingAccess access;
     @MockBean vip.mate.llm.chatmodel.ProviderChatModelFactory providerFactory;
 
+    @Test void artifactVerifierAcceptsAuthorizedImagesAndRejectsMissingOrExtraImages() throws Exception {
+        for(String imageFormat:List.of("png","jpeg")) {
+            java.io.ByteArrayOutputStream imageBytes=new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(24,12,java.awt.image.BufferedImage.TYPE_INT_RGB),imageFormat,imageBytes);
+            String digest=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(imageBytes.toByteArray()));
+            String imageId="authorized-"+imageFormat;
+            String imageKey=imageId+":7:"+digest;
+            ObjectNode withImage=(ObjectNode)json.readTree("""
+                {"title":"图像验证","chapters":[{"title":"图像章节","level":1,"blocks":[
+                  {"type":"image","materialRef":{"kind":"material","id":"%s","version":7,"digest":"%s"},"alt":"示例","caption":"图注"}]}]}
+                """.formatted(imageId,digest));
+            ObjectNode withoutImage=(ObjectNode)json.readTree("""
+                {"title":"图像验证","chapters":[{"title":"图像章节","level":1,"blocks":[{"type":"paragraph","text":"无图文本"}]}]}
+                """);
+            ObjectNode template=(ObjectNode)json.readTree("""
+                {"version":"1","pageSize":"A4","font":"宋体","fontSize":12,"marginMm":25,"bodyWidthMm":160,
+                 "maxImageWidthMm":160,"toc":true,"pageNumbers":true,"headingStyles":{"1":"Heading1","2":"Heading2","3":"Heading3"}}
+                """);
+            byte[] valid=new BiddingDocxRenderer().render(withImage,template,Map.of(imageKey,imageBytes.toByteArray()));
+            assertEquals("PASS",artifacts.verify(valid,withImage).path("structural").asText(),imageFormat);
+            byte[] missing=new BiddingDocxRenderer().render(withoutImage,template,Map.of());
+            assertEquals("ARTIFACT_CONTENT_MISMATCH",assertThrows(BiddingApiException.class,()->artifacts.verify(missing,withImage)).code(),"missing "+imageFormat);
+            assertEquals("ARTIFACT_CONTENT_MISMATCH",assertThrows(BiddingApiException.class,()->artifacts.verify(valid,withoutImage)).code(),"extra "+imageFormat);
+        }
+    }
+
     @Test void claimedExportToolPersistsImmutableDocxAndRegisteredHandlerAcceptsReadback() throws Exception {
         doNothing().when(access).requireActor(any(),anyString());doNothing().when(access).requireReaderActor(any(),anyString());doNothing().when(access).requireOwner(anyString(),anyString());
         jdbc.update("UPDATE mate_model_provider SET api_key='test-key',enabled=TRUE,chat_model='OpenAIChatModel' WHERE provider_id='openai'");
