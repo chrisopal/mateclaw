@@ -267,6 +267,7 @@ export const canApproveArtifact = (mode: string, state: string, blockers: number
 
 **Files:**
 - Modify: `mateclaw-server/src/main/resources/skills/bidding-document-export/SKILL.md` declare only the fixed `bidding_export_document` allowed tool and explicit bundle version so existing archive/install upgrades deliver it; preserve project scope, exact reference and candidate-only checks. Full-app HTTP export regression must prove actual tool execution, never fake an AvailableTool row or manually assemble runtime capabilities.
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java` narrow slice fixture adaptation to supply current employee/skill grant resolution dependencies introduced by the authorized pin repair; keep scoped visibility and revoked/foreign/private denial expectations, and do not mock authorization in the separate full-app EndToEndTest.
 - Modify: `mateclaw-server/src/main/resources/skills/bidding-scoring-analysis/SKILL.md` explicit scoring bundle version only, using existing archive/install upgrade mechanism to deliver the already committed schema; do not relax schemas or rewrite existing project pins.
 - Modify: `mateclaw-server/src/test/java/vip/mate/skill/workspace/BundledSkillSyncerTest.java` first install and historical unversioned scoring-directory upgrade regressions with isolated skill roots.
 - Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSkillPackagesTest.java` authorized new scoring pin includes current criterionIds schema while old project package digest/files remain unchanged.
