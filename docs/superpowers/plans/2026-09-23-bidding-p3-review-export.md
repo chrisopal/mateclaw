@@ -266,6 +266,9 @@ export const canApproveArtifact = (mode: string, state: string, blockers: number
 ### Task 5: P3-05 — 完整技术标验收与交付运行说明
 
 **Files:**
+- Modify: `mateclaw-server/src/main/resources/skills/bidding-scoring-analysis/SKILL.md` explicit scoring bundle version only, using existing archive/install upgrade mechanism to deliver the already committed schema; do not relax schemas or rewrite existing project pins.
+- Modify: `mateclaw-server/src/test/java/vip/mate/skill/workspace/BundledSkillSyncerTest.java` first install and historical unversioned scoring-directory upgrade regressions with isolated skill roots.
+- Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingSkillPackagesTest.java` authorized new scoring pin includes current criterionIds schema while old project package digest/files remain unchanged.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java` task-list pinned skill-name visibility and MySQL-compatible numeric ID casts only; preserve exact workspace/project package join and current actor/project authorization. Root isolated MySQL8.0.46 probe rejects CAST AS VARCHAR(64) with1064 and accepts CAST AS CHAR(64).
 - Modify: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingTaskTest.java` task-list builtin/global visibility regression, retaining foreign private and wrong project/workspace package denial.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingOutlineService.java` same builtin/global pinned-name visibility compatibility only.
