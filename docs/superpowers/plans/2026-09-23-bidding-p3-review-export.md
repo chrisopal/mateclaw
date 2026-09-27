@@ -127,6 +127,7 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 - Produces: `BiddingExportTool.generate(String manuscriptId,String templateId,String formatId,ToolContext context):String` 返回结构化 manifest JSON；注册工具名固定 `bidding_export_document`。ToolContext 为现有 `org.springframework.ai.chat.model.ToolContext`，从服务端绑定Claim，不接受模型传scope/path/approve。
 
 - [ ] 写真实DOCX再开验证测试，输入统一内容块，不用Markdown renderer；测试字数、表格、标题与文件有效性。
+- [ ] 同时覆盖 P2 实际持久化 MANUSCRIPT：`chapters[].chapter.title/blocks` 为叶子正文，目录父级与顺序从精确冻结的 `outlineRef` 读取。ArtifactService 可以构造受控 render DTO，但须验证转换、父级标题顺序和原文完整保留；不能只通过下方扁平示例而漏掉真实嵌套正文，不接受任意客户端别名。
 
 ```java
 @Test void generatedDocxRetainsChineseTextAndTableCells() throws Exception {
