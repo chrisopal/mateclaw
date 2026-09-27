@@ -400,7 +400,7 @@ public class BiddingReviewService implements BiddingResultHandler {
     private boolean hasResolution(BiddingTypes.Scope scope, String findingId) {
         String status = jdbc.query("SELECT status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='findingDecision' AND object_id=? ORDER BY version DESC",
                 rs -> rs.next() ? rs.getString(1) : null, scope.workspaceId(), scope.projectId(), findingId);
-        return "DISMISS_WITH_EVIDENCE".equals(status) || "DEFER_SUGGESTION".equals(status);
+        return isResolvedFindingDecision(status);
     }
 
     public ArrayNode selectedFindings(BiddingTypes.Scope scope,String chapterId,JsonNode selected) {
@@ -484,7 +484,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         else {
             Set<String> chapters=new LinkedHashSet<>(),requirements=new LinkedHashSet<>();boolean cross=false;
             for(JsonNode result:selectedGroup){for(JsonNode r:result.path("coverage").path("chapterRefs"))chapters.add(r.path("id").asText());for(JsonNode r:result.path("coverage").path("requirementRefs"))requirements.add(r.asText());if("cross".equals(result.path("_bidding").path("reviewSegment").asText()))cross=result.path("coverage").path("crossChapterReviewed").asBoolean(false);
-                for(JsonNode finding:result.path("findings")){ObjectNode item=json.createObjectNode();BiddingTypes.Ref reviewRef=refFromRow((ObjectNode)result);item.set("reviewRef",json.valueToTree(reviewRef));item.set("finding",finding.deepCopy());BiddingTypes.Ref findingRef=findingRefFor(scope,reviewRef,finding.path("id").asText());item.set("findingRef",json.valueToTree(findingRef));String decision=latestDecision(scope,findingRef);item.put("decision",decision==null?"OPEN":decision);findings.add(item);}}
+                for(JsonNode finding:result.path("findings")){ObjectNode item=json.createObjectNode();BiddingTypes.Ref reviewRef=refFromRow((ObjectNode)result);item.set("reviewRef",json.valueToTree(reviewRef));item.set("finding",finding.deepCopy());BiddingTypes.Ref findingRef=findingRefFor(scope,reviewRef,finding.path("id").asText());item.set("findingRef",json.valueToTree(findingRef));ObjectNode decision=latestDecisionRecord(scope,findingRef);item.put("decision",decision==null?"OPEN":decision.path("_status").asText());if(decision!=null){BiddingTypes.Ref decisionRef=new BiddingTypes.Ref("findingDecision",decision.path("_objectId").asText(),decision.path("_version").asLong(),decision.path("_digest").asText());item.set("findingDecisionRef",json.valueToTree(decisionRef));item.set("findingDecision",decision.path("payload").deepCopy());}findings.add(item);}}
             ObjectNode manuscriptPayload=(ObjectNode)requiredManuscript(scope,manuscript).path("payload");
             Set<String> expectedChapters=new LinkedHashSet<>();for(JsonNode chapter:manuscriptPayload.path("chapters"))expectedChapters.add(chapter.path("chapterId").asText());
             ObjectNode outline=(ObjectNode)requiredBusiness(scope,ref(manuscriptPayload.path("outlineRef")),"outline").path("payload");
@@ -506,8 +506,9 @@ public class BiddingReviewService implements BiddingResultHandler {
         if(!"REVIEWED".equals(status))throw BiddingAccess.error(409,"REVIEW_INCOMPLETE","A complete current whole-book review is required");
         for(JsonNode item:view.path("findings")) {
             JsonNode finding=item.path("finding");String decision=item.path("decision").asText("OPEN");
-            if(blocksTechnicalApproval(finding.path("category").asText(),finding.path("severity").asText(),!"OPEN".equals(decision)))
+            if(blocksTechnicalApproval(finding.path("category").asText(),finding.path("severity").asText(),isResolvedFindingDecision(decision)))
                 throw BiddingAccess.error(409,"TECHNICAL_REVIEW_BLOCKED","Unresolved technical review finding blocks approval");
+            validateFindingDecisionProof(scope,item);
         }
         for(JsonNode todo:view.path("humanTodos"))if("OPEN".equals(todo.path("status").asText())
                 &&("UNCLASSIFIED".equals(todo.path("impactClassification").asText())||todo.path("affectsTechnical").asBoolean()))
@@ -554,6 +555,23 @@ public class BiddingReviewService implements BiddingResultHandler {
         for(ObjectNode row:candidates)if(findingId.equals(row.path("findingId").asText())&&same(ref(row.path("reviewRef")),reviewRef))
             return new BiddingTypes.Ref("reviewFinding",row.path("_objectId").asText(),row.path("_version").asLong(),row.path("_digest").asText());
         return null;
+    }
+    private ObjectNode latestDecisionRecord(BiddingTypes.Scope scope,BiddingTypes.Ref finding) {
+        if(finding==null)return null;
+        return jdbc.query("SELECT object_id,version,digest,payload_json,status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='findingDecision' AND object_id=? ORDER BY version DESC LIMIT 1",
+                rs->{if(!rs.next())return null;ObjectNode row=json.createObjectNode();row.put("_objectId",rs.getString(1)).put("_version",rs.getLong(2)).put("_digest",rs.getString(3)).put("_status",rs.getString(5));row.set("payload",object(rs.getString(4)));return row;},scope.workspaceId(),scope.projectId(),finding.id());
+    }
+    private static boolean isResolvedFindingDecision(String decision) { return "DISMISS_WITH_EVIDENCE".equals(decision)||"DEFER_SUGGESTION".equals(decision); }
+    private void validateFindingDecisionProof(BiddingTypes.Scope scope,JsonNode item) {
+        String status=item.path("decision").asText("OPEN");if("OPEN".equals(status))return;
+        BiddingTypes.Ref findingRef=ref(item.path("findingRef")),decisionRef=ref(item.path("findingDecisionRef"));
+        if(findingRef==null||decisionRef==null||!"findingDecision".equals(decisionRef.kind()))throw BiddingAccess.error(409,"REVIEW_STALE","Finding decision proof is unavailable");
+        ObjectNode saved=repository.businessRevision(scope,decisionRef);
+        if(saved==null||!status.equals(saved.path("status").asText()))throw BiddingAccess.error(409,"REVIEW_STALE","Finding decision proof changed");
+        JsonNode payload=saved;
+        if(!same(findingRef,ref(payload.path("findingRef")))||!status.equals(payload.path("decision").asText())||payload.path("actorId").asText().isBlank()||payload.path("reason").asText().isBlank())throw BiddingAccess.error(409,"REVIEW_STALE","Finding decision proof is invalid");
+        if("DISMISS_WITH_EVIDENCE".equals(status)){ArrayNode evidence=copyArray(payload.path("evidenceRefs"));if(evidence.isEmpty())throw BiddingAccess.error(409,"REVIEW_STALE","Finding evidence proof is unavailable");
+            for(JsonNode entry:evidence){BiddingTypes.Ref source=evidenceSourceRef(scope,entry);String block=entry.path("blockId").asText(),quote=entry.path("quote").asText();dependencies.validateForRead(scope,List.of(source));if(block.isBlank()||quote.isBlank()||!repository.hasEvidenceBlock(scope,source,block,quote))throw BiddingAccess.error(409,"REVIEW_STALE","Finding source evidence is no longer current");}}
     }
     private BiddingTypes.Ref latestManuscript(BiddingTypes.Scope scope) {
         return jdbc.query("SELECT version,digest FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND object_id='manuscript' ORDER BY version DESC",rs->rs.next()?new BiddingTypes.Ref("manuscript","manuscript",rs.getLong(1),rs.getString(2)):null,scope.workspaceId(),scope.projectId());
