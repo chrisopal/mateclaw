@@ -50,7 +50,7 @@ class BiddingMigrationTest {
                 assertTrue(rows.next()); assertEquals("保留本体",rows.getString("name"));
             }
             assertEquals(0,scalar(statement,"SELECT COUNT(*) FROM mate_bidding_project"));
-            assertEquals(11,scalar(statement,"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) LIKE 'mate_bidding_%'"));
+            assertEquals(12,scalar(statement,"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) LIKE 'mate_bidding_%'"));
             try(var rows=statement.executeQuery("SELECT content,read_status,problems_json FROM mate_bidding_source WHERE id='legacy-source'")) {
                 assertTrue(rows.next()); assertArrayEquals(legacySource,rows.getBytes("content"));
                 assertEquals("PENDING",rows.getString("read_status")); assertEquals("[]",rows.getString("problems_json"));
@@ -66,6 +66,23 @@ class BiddingMigrationTest {
             }
             try(var rows=statement.executeQuery("SELECT content,blocks_json FROM mate_bidding_source WHERE id='source-row'")) {
                 assertTrue(rows.next()); assertArrayEquals(largeContent,rows.getBytes("content")); assertEquals("{\"blocks\":[]}",rows.getString("blocks_json"));
+            }
+            byte[] artifactBytes=new byte[]{0,1,2,13,10,(byte)0xff,(byte)0x80,42};
+            String artifactDigest=java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(artifactBytes));
+            try(var insert=connection.prepareStatement("INSERT INTO mate_bidding_artifact(workspace_id,project_id,id,manuscript_ref_json,template_ref_json,format_ref_json,mode,format,digest,byte_size,content,checks_json,generator_attempt_id,status,decision_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)")) {
+                insert.setString(1,"7"); insert.setString(2,"project"); insert.setString(3,"artifact-row");
+                insert.setString(4,"{\"kind\":\"manuscript\",\"version\":3}"); insert.setString(5,"{\"kind\":\"template\",\"version\":1}");
+                insert.setString(6,"{\"kind\":\"formatRequirements\",\"version\":2}"); insert.setString(7,"candidate"); insert.setString(8,"docx");
+                insert.setString(9,artifactDigest); insert.setLong(10,artifactBytes.length); insert.setBytes(11,artifactBytes);
+                insert.setString(12,"{\"structural\":\"PASS\"}"); insert.setString(13,"attempt-row"); insert.setString(14,"CANDIDATE"); insert.setString(15,null);
+                assertEquals(1,insert.executeUpdate());
+            }
+            try(var rows=statement.executeQuery("SELECT manuscript_ref_json,template_ref_json,format_ref_json,digest,byte_size,content,status FROM mate_bidding_artifact WHERE workspace_id='7' AND project_id='project' AND id='artifact-row'")) {
+                assertTrue(rows.next()); assertEquals("{\"kind\":\"manuscript\",\"version\":3}",rows.getString("manuscript_ref_json"));
+                assertEquals("{\"kind\":\"template\",\"version\":1}",rows.getString("template_ref_json"));
+                assertEquals("{\"kind\":\"formatRequirements\",\"version\":2}",rows.getString("format_ref_json"));
+                byte[] readBack=rows.getBytes("content"); assertArrayEquals(artifactBytes,readBack); assertEquals((long)artifactBytes.length,rows.getLong("byte_size"));
+                assertEquals(artifactDigest,rows.getString("digest")); assertEquals("CANDIDATE",rows.getString("status"));
             }
         }
     }
