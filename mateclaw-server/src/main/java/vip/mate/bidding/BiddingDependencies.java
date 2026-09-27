@@ -113,6 +113,7 @@ public class BiddingDependencies {
         }
     }
     public boolean isCurrent(BiddingTypes.Scope scope, List<BiddingTypes.Ref> refs) { try { validate(scope,refs); return true; } catch(BiddingApiException e) { if (e.status()==404 || e.status()==409 || e.status()==422) return false; throw e; } }
+    public boolean isCurrentForRead(BiddingTypes.Scope scope,List<BiddingTypes.Ref> refs) { try { validateForRead(scope,refs);return true; } catch(BiddingApiException e) { if(e.status()==404||e.status()==409||e.status()==422)return false;throw e; } }
     public void invalidate(BiddingTypes.Scope scope, BiddingTypes.Ref changed) { repository.invalidateDependencies(scope,changed); }
 
     public ObjectNode impact(BiddingTypes.Scope scope,BiddingTypes.Ref changed) {

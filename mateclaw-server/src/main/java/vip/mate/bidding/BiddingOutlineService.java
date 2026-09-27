@@ -97,7 +97,7 @@ public class BiddingOutlineService implements BiddingResultHandler {
         dependencies.validate(scope,List.of(baseline)); List<BiddingTypes.Ref> chosenRefs=refs(row.path("refs")); dependencies.validate(scope,chosenRefs);
         List<BiddingTypes.Ref> materialRefs=chosenRefs.stream().filter(r->"material".equals(r.kind())).toList();
         validatePayload((ObjectNode)row.path("payload"),outlineInput(scope,baseline,materialRefs),true);
-        BiddingTypes.Ref previousConfirmed=confirmedHead(scope);
+        BiddingTypes.Ref previousConfirmed=previousConfirmedOutline(scope,candidate);
         BiddingTypes.Ref confirmed=candidate;
         setRevisionStatus(scope,candidate,"CONFIRMED"); setHead(scope,confirmed);
         dependencies.recordTransition(scope,previousConfirmed,confirmed);
@@ -217,9 +217,18 @@ public class BiddingOutlineService implements BiddingResultHandler {
     private void setHead(BiddingTypes.Scope s,BiddingTypes.Ref r){ ObjectNode n=json.valueToTree(r); jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=?",r.version(),write(n),s.workspaceId(),s.projectId(),KIND,OBJECT); if(head(s)==null) jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",s.workspaceId(),s.projectId(),KIND,OBJECT,r.version(),write(n)); }
     private BiddingTypes.Ref head(BiddingTypes.Scope s){ return selected(s,KIND,OBJECT); }
     private BiddingTypes.Ref confirmedHead(BiddingTypes.Scope s){
-        List<BiddingTypes.Ref> confirmed=jdbc.query("SELECT version,digest FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND status IN ('CONFIRMED','NEEDS_RECONFIRMATION') ORDER BY version DESC",
-                (rs,n)->new BiddingTypes.Ref(KIND,OBJECT,rs.getLong(1),rs.getString(2)),s.workspaceId(),s.projectId(),KIND,OBJECT);
-        return confirmed.isEmpty()?null:confirmed.getFirst();
+        BiddingTypes.Ref r=head(s);if(r==null)return null;JsonNode row=revision(s,r);
+        return row!=null&&"CONFIRMED".equals(row.path("status").asText())&&dependencies.isCurrentForRead(s,refs(row.path("refs")))?r:null;
+    }
+    private BiddingTypes.Ref previousConfirmedOutline(BiddingTypes.Scope s,BiddingTypes.Ref candidate){
+        List<String> decisions=jdbc.query("SELECT target_ref_json FROM mate_bidding_decision WHERE workspace_id=? AND project_id=? AND decision='CONFIRM_OUTLINE' ORDER BY created_at DESC,id DESC",
+                (rs,n)->rs.getString(1),s.workspaceId(),s.projectId());
+        for(String raw:decisions){
+            BiddingTypes.Ref previous=readRef(read(raw));if(previous==null||previous.equals(candidate))continue;
+            JsonNode row=revision(s,previous);
+            if(row!=null&&Set.of("CONFIRMED","NEEDS_RECONFIRMATION").contains(row.path("status").asText()))return previous;
+        }
+        return null;
     }
     private BiddingTypes.Ref baselineRef(BiddingTypes.Scope s){ return selected(s,"analysisBaseline","current"); }
     private BiddingTypes.Ref selected(BiddingTypes.Scope s,String kind,String id){ String raw=jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=?",rs->rs.next()?rs.getString(1):null,s.workspaceId(),s.projectId(),kind,id); return raw==null?null:readRef(read(raw)); }

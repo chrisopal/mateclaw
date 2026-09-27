@@ -17,6 +17,7 @@ class BiddingChangeImpactTest extends BiddingHttpFixture {
     @Autowired BiddingDependencies dependencies;
     @Autowired BiddingRepository repository;
     @Autowired BiddingWritingService writing;
+    @Autowired BiddingOutlineService outlines;
 
     @Test void deadlineOnlyTransitionClonesBothChapterBodiesOntoNewOutlineWithCas() throws Exception {
         var fixture=baselineTransition(false);
@@ -193,6 +194,45 @@ class BiddingChangeImpactTest extends BiddingHttpFixture {
         assertFalse(event.has("confirmation"),"MISSING_MATERIAL is not a server-proven repair");
         assertEquals("PENDING",event.path("status").asText());
         assertTrue(read.path("formalBlocked").asBoolean());
+    }
+
+    @Test void invalidatedOrCandidateOutlineNeverAppearsAsConfirmedInReadModel() throws Exception {
+        var fixture=baselineTransition(false);
+        BiddingTypes.Ref sourceSet=repository.businessRefs(repository.businessRevision(fixture.scope(),fixture.oldBaseline())).getFirst();head(fixture.scope(),sourceSet);
+        BiddingTypes.Ref selectedOutline=repository.selectedRef(fixture.scope(),"outline","current");
+        repository.setRevisionStatus(fixture.scope(),selectedOutline,"NEEDS_RECONFIRMATION");
+        assertFalse(outlines.read(fixture.scope()).has("confirmed"),"An invalidated selected outline must not unlock writing");
+        ObjectNode payload=(ObjectNode)json.readTree(outlinePayload());
+        for(JsonNode chapter:payload.path("chapters"))((ObjectNode)chapter).put("instructions","Replacement instructions");
+        payload.putArray("unmappedItems");payload.putArray("warnings");
+        ObjectNode save=json.createObjectNode().set("payload",payload);
+        BiddingTypes.Command command=new BiddingTypes.Command("save-only-outline-candidate",selectedOutline,"SAVE_OUTLINE",save);
+        ObjectNode candidate=outlines.save(fixture.scope(),command);
+        assertEquals("CANDIDATE",candidate.path("status").asText());
+        assertFalse(outlines.read(fixture.scope()).has("confirmed"),"Saving an editable candidate cannot restore the confirmed gate");
+        assertEquals("CANDIDATE",repository.businessRevision(fixture.scope(),json.treeToValue(candidate.path("ref"),BiddingTypes.Ref.class)).path("status").asText());
+    }
+
+    @Test void viewerCanReadCurrentOutlineAndWritingButCannotMutate() throws Exception {
+        var fixture=baselineTransition(false);
+        BiddingTypes.Ref sourceSet=repository.businessRefs(repository.businessRevision(fixture.scope(),fixture.oldBaseline())).getFirst();
+        head(fixture.scope(),sourceSet);
+        BiddingTypes.Ref outlineRef=repository.selectedRef(fixture.scope(),"outline","current");
+        for(BiddingTypes.Ref previous:fixture.chapters()) {
+            ObjectNode body=(ObjectNode)json.readTree(repository.rawRevisionPayload(fixture.scope(),previous));
+            body.with("_bidding").set("outlineRef",json.valueToTree(outlineRef));
+            BiddingTypes.Ref current=new BiddingTypes.Ref("chapter",previous.id(),2,"viewer-current-"+UUID.randomUUID());
+            repository.insertRevision(UUID.randomUUID().toString(),workspace,fixture.scope().projectId(),"chapter",current.id(),current.version(),json.writeValueAsString(body),json.writeValueAsString(List.of(outlineRef)),"SELECTED",current.digest(),Timestamp.from(Instant.now()));
+            head(fixture.scope(),current);
+        }
+        JsonNode outline=api("GET","/projects/"+fixture.scope().projectId()+"/outline","viewer",workspace,null,200);
+        assertEquals("CONFIRMED",outline.path("confirmed").path("status").asText());
+        JsonNode read=api("GET","/projects/"+fixture.scope().projectId()+"/writing","viewer",workspace,null,200);
+        assertEquals(2,read.path("chapters").size());
+        assertTrue(read.path("chapters").get(0).path("selected").has("payload"),read.toString());
+        BiddingTypes.Ref chapter=json.treeToValue(read.path("chapters").get(0).path("selected").path("ref"),BiddingTypes.Ref.class);
+        JsonNode denied=api("POST","/projects/"+fixture.scope().projectId()+"/commands","viewer",workspace,
+                Map.of("operationId","viewer-cannot-edit","expected",chapter,"action","EDIT_CHAPTER","payload",Map.of("chapterId",chapter.id())),403);
     }
 
     @Test void sourceAndSourceSetEventsResolveOnlyThroughConfirmedBaselineEvidenceChain() throws Exception {

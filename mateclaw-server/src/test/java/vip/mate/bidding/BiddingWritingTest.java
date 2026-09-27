@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,6 +19,10 @@ class BiddingWritingTest extends BiddingHttpFixture {
     @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingEmployeeRuntime runtime;
     @MockBean BiddingDependencies dependencies;
+
+    @BeforeEach void allowCurrentReadRefsByDefault() {
+        Mockito.when(dependencies.isCurrentForRead(Mockito.any(),Mockito.anyList())).thenReturn(true);
+    }
 
     @Test void leavesWriteIndependentlyAndLateCandidateCannotReplaceHumanEdit() throws Exception {
         var project=project();String id=project.path("id").asText(),actor=project.path("ownerId").asText();
@@ -52,6 +57,7 @@ class BiddingWritingTest extends BiddingHttpFixture {
             return null;
         }).when(dependencies).validateForComparisonRead(Mockito.eq(scope),Mockito.any());
         Mockito.when(dependencies.isCurrent(Mockito.eq(scope),Mockito.anyList())).thenReturn(true);
+        Mockito.when(dependencies.isCurrentForRead(Mockito.eq(scope),Mockito.anyList())).thenReturn(true);
         Mockito.doNothing().when(employees).validate(Mockito.eq(scope),Mockito.anyString(),Mockito.anyString());
         Mockito.when(employees.modelConfigId(Mockito.eq(scope),Mockito.anyString())).thenReturn("model-config");
         bindWritingSkill(scope,project);

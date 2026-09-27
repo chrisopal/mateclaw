@@ -70,8 +70,8 @@ class BiddingOutlineTest extends BiddingHttpFixture {
         var strictRead=assertThrows(BiddingApiException.class,()->dependencies.validateForRead(scopeForRead,List.of(candidate)));
         assertEquals("DEPENDENCY_STALE",strictRead.code());
         var readback=api("GET","/projects/"+id+"/outline","owner",workspace,null,200);
-        assertEquals("CONFIRMED",readback.path("confirmed").path("status").asText());
-        assertEquals(candidate.digest(),readback.path("confirmed").path("ref").path("digest").asText());
+        assertFalse(readback.has("confirmed"),"A historically confirmed outline with stale dependencies must not unlock writing");
+        assertEquals(candidate.digest(),readback.path("editExpectedRef").path("digest").asText());
     }
 
     @Test void firstEmployeeCandidateCanBeConfirmedWithoutCreatingAnEditableHead() throws Exception {
