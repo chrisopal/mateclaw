@@ -85,6 +85,7 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 ```
 
 - [ ] `RESOLVE_FINDING` payload `{findingRef,decision:"FIX|DISMISS_WITH_EVIDENCE|DEFER_SUGGESTION",reason,evidenceRefs}`；驳回需真实approver且证据完整；强制材料事实缺失不能驳回伪造。FIX仅选中问题，不改正文。`REVISE_CHAPTER` 交给writing.dispatch，输入current chapterRef及selectedFindingRefs；新candidate待人工采用，采用后新MANUSCRIPT必须重审受影响章及跨章一致性。
+- [ ] 技术影响分类由真实 approver 通过 `CLASSIFY_HUMAN_TODO` 完成，payload `{todoRef,affectsTechnical,reason,evidenceRefs}`，expected=精确当前todoRef；采用已有ref/CAS/幂等/权限模式保存不可变决定和新revision。Schema有效 COMMERCIAL 输入形成 owner 真实的待办，初始影响未分类时保守阻断技术审定，不消费不存在的模型 `affectsTechnical` 字段。明确仅商务的分类不关闭待办；分类影响技术但未解决仍阻断。旧todo、无依据、model/member越权、来源变化拒绝；测试经过真实来源与结构化分析输出契约/人类command回读，不SQL硬塞影响字段。
 - [ ] 商务待办用业务revision kind=HUMAN_TODO，真实owner/userId、来源与状态；`RESOLVE_HUMAN_TODO` 只真实成员且记录依据，model不能执行该动作。只有影响技术标的未决商务事实才阻断技术成果，技术标批准不改变商务待办状态。
 - [ ] 测试同员工审核拒绝、审批工具拒绝、无证据驳回拒绝、修订不自动覆盖、接受修订后旧review失效、一般建议可暂不采纳留理由。Run BiddingReviewTest+Writing/Dependencies相关测试，Expected PASS。
 - [ ] Commit：`git commit -m "Separate independent technical review from human acceptance of revisions" -m "Tested: Review coverage, blockers and revision re-review"`。
