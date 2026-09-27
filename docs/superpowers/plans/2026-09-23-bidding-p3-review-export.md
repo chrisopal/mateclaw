@@ -151,7 +151,7 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 
 - [ ] Run：Maven `-Dtest='BiddingDocxRendererTest,BiddingArtifactTest'`，Expected renderer/候选持久化缺失 FAIL。
 - [ ] V216 artifact列：workspace_id/project_id/id/manuscript_ref_json/template_ref_json/format_ref_json/mode/format/digest/byte_size/content/checks_json/generator_attempt_id/status/decision_id/created_at；generator_attempt_id unique。大小超过50MiB返回413，记录导出失败；单项目候选累计容量配置可观测，首版不自动删除历史。
-- [ ] JSON模板technical-v1使用A4/25mm、宋体12pt、标题1/2/3级、页码、目录字段、表头重复、行不拆分页、图片最大宽度≤正文宽度。招标格式要求优先，单位明确并验证值域，无法支持的强制格式显式阻断；不能用模板默认值盖掉招标要求。模板字节固定快照到TEMPLATE revision并计算digest，GET /templates返回此Ref。招标formatRequirements从已确认基础信息形成FORMAT_REQUIREMENTS revision；人工调整须另存新revision、校验不得违反强制格式并invalidate旧文件。注册 `SAVE_FORMAT_REQUIREMENTS` action处理此调整，expected=当前formatRef，真实approver执行。
+- [ ] JSON模板technical-v1使用A4/25mm、宋体12pt、标题1/2/3级、页码、目录字段、表头重复、行不拆分页、图片最大宽度≤正文宽度。招标格式要求优先，单位明确并验证值域，无法支持的强制格式显式阻断；不能用模板默认值盖掉招标要求。通过 member 授权、项目 expected CAS 与 operationId 幂等的 `PREPARE_EXPORT` command 显式固定模板字节到 TEMPLATE revision，并从已确认基础信息固定 FORMAT_REQUIREMENTS revision；返回精确 templateRef/formatRef。GET `/projects/{id}/templates` 仅读取已准备的 `{ref,name,format}` 及精确格式引用，首次未准备返回明确状态且不产生数据库写入。派发前必须完成准备，`DISPATCH_EXPORT` 必须显式提供精确 manuscript/template/format refs，缺失或失效拒绝，不能自动替换。人工调整格式须另存新revision、校验不得违反强制格式并invalidate旧文件。注册 `SAVE_FORMAT_REQUIREMENTS` action处理此调整，expected=当前formatRef，真实approver执行。
 - [ ] POI逐块生成标题、段落、列表、表格、授权图片；只从authorizedImages按materialRef key取bytes，拒绝URL/path/外部relationship，不执行OLE/宏。段落转义，不使用任意HTML。图片先校验PNG/JPEG内容类型和尺寸；保持比例，不凭文件名信任图片。
 
 ```java
