@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 /** Chapter candidates, human edits and assembled draft manuscripts. */
 @Service
 public class BiddingWritingService implements BiddingResultHandler {
+    private static final org.slf4j.Logger LOG=org.slf4j.LoggerFactory.getLogger(BiddingWritingService.class);
     private static final String SKILL="bidding-technical-writing", KIND="chapter", MANUSCRIPT="manuscript";
     private final JdbcTemplate jdbc; private final ObjectMapper json; private final BiddingAccess access;
     private final BiddingProjectService projects; private final BiddingRepository repository;
@@ -126,7 +127,11 @@ public class BiddingWritingService implements BiddingResultHandler {
         for(String id:order){BiddingTypes.Ref r=selected.get(id);dependencies.validate(scope,refs(scope,r));JsonNode rev=revision(scope,r,id);if(rev==null||!Set.of("SELECTED","HUMAN_EDIT").contains(rev.path("status").asText()))throw BiddingAccess.error(409,"CHAPTER_STALE","Selected chapter is unreadable");JsonNode body=rev.path("payload");requireResponseCoverage(body.path("responses"),findChapter(op.path("chapters"),id));ObjectNode item=contents.addObject().put("chapterId",id);item.set("chapter",body.path("chapter").deepCopy());copyField(body,item,"responses");copyField(body,item,"citations");copyField(body,item,"missingMaterials");copyField(body,item,"unresolvedItems");refs.add(r);}
         if(manuscript.path("chapters").isEmpty())throw BiddingAccess.error(422,"MANUSCRIPT_INCOMPLETE","No chapter content can be assembled");dependencies.validate(scope,refs);String body=canonical(manuscript),refsJson=write(refs),bodyDigest=sha(body);BiddingTypes.Ref saved=jdbc.query("SELECT version FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND object_id='manuscript' AND digest=? AND input_refs_json=? ORDER BY version DESC",rs->rs.next()?new BiddingTypes.Ref(MANUSCRIPT,"manuscript",rs.getLong(1),bodyDigest):null,scope.workspaceId(),scope.projectId(),bodyDigest,refsJson);if(saved==null)saved=saveRevision(scope,MANUSCRIPT,"manuscript",manuscript,refs,"DRAFT_PENDING_REVIEW");ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(saved));out.put("status","DRAFT_PENDING_REVIEW");out.put("reviewDispatch","SCHEDULED");store(scope,command,digest,out);
         BiddingTypes.Ref manuscriptRef=saved;String operationId="auto-review-"+saved.digest().substring(0,48);
-        Runnable dispatchReview=()->{try{ObjectNode p=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscriptRef));reviews.getObject().dispatch(scope,new BiddingTypes.Command(operationId,manuscriptRef,"DISPATCH_REVIEW",p));}catch(RuntimeException ignored){/* The immutable manuscript remains valid; review status is read separately. */}};
+        Runnable dispatchReview=()->{try{ObjectNode p=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscriptRef));reviews.getObject().dispatch(scope,new BiddingTypes.Command(operationId,manuscriptRef,"DISPATCH_REVIEW",p));}catch(RuntimeException failure){
+            String reason=failure instanceof BiddingApiException api?api.code():"REVIEW_DISPATCH_FAILED";
+            LOG.warn("Automatic review dispatch failed project={} manuscript={} reason={}",scope.projectId(),manuscriptRef.digest().substring(0,12),reason);
+            try{reviews.getObject().recordDispatchFailure(scope,manuscriptRef,reason);}catch(RuntimeException recordFailure){LOG.warn("Automatic review dispatch failure status could not be recorded project={} manuscript={}",scope.projectId(),manuscriptRef.digest().substring(0,12));}
+        }};
         if(TransactionSynchronizationManager.isSynchronizationActive())TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){@Override public void afterCommit(){dispatchReview.run();}});else dispatchReview.run();
         return out;
     }

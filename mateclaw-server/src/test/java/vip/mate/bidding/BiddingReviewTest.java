@@ -97,13 +97,19 @@ class BiddingReviewTest extends BiddingHttpFixture {
         Mockito.when(employees.modelConfigId(Mockito.eq(scope),Mockito.anyString())).thenReturn("review-model");
         Mockito.doNothing().when(dependencies).validate(Mockito.eq(scope),Mockito.anyList());
 
-        BiddingTypes.Ref sourceSet=save(scope,new BiddingTypes.Ref("sourceSet","review-source-set",1,"source-set-digest"),json.createObjectNode(),List.of(),"CONFIRMED");
+        String sourceId="review-evidence"; String sourceDigest="evidence-digest";
+        jdbc.update("INSERT INTO mate_bidding_source(id,workspace_id,project_id,source_id,version,kind,digest,content,blocks_json,quality,read_token,read_started_at,filename,read_status,problems_json,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                UUID.randomUUID().toString(),workspace,projectId,sourceId,1,"TENDER",sourceDigest,"evidence".getBytes(),"[{\"id\":\"b1\",\"locator\":\"p1\",\"text\":\"报价口径由商务负责人确认\"}]","PASS",null,null,"evidence.txt","READY","[]",Timestamp.from(Instant.now()));
+        BiddingTypes.Ref sourceRef=new BiddingTypes.Ref("source",sourceId,1,sourceDigest);
+        ObjectNode sourceSetPayload=json.createObjectNode();
+        BiddingTypes.Ref sourceSet=save(scope,new BiddingTypes.Ref("sourceSet","review-source-set",1,"source-set-digest"),sourceSetPayload,List.of(sourceRef),"CONFIRMED");
         ObjectNode baselineBody=json.createObjectNode().put("schemaVersion","1");baselineBody.put("sourceSetRef",json.writeValueAsString(sourceSet));
         baselineBody.set("sourceSetRef",json.valueToTree(sourceSet));
         ObjectNode analyses=baselineBody.putObject("analyses");
         ArrayNode requirements=analyses.putObject("bidding-requirement-analysis").putArray("requirements");
         requirements.addObject().put("id","REQ-1").put("category","TECHNICAL").put("text","接口响应时间不超过2秒");
-        requirements.addObject().put("id","COMM-1").put("category","COMMERCIAL").put("text","项目商务负责人需确认报价口径");
+        ObjectNode commercial=requirements.addObject().put("id","COMM-1").put("category","COMMERCIAL").put("text","项目商务负责人需确认报价口径");commercial.put("affectsTechnical",true);
+        commercial.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
         analyses.putObject("bidding-scoring-analysis").putArray("criteria"); analyses.putObject("bidding-elimination-analysis").putArray("items");
         BiddingTypes.Ref baseline=save(scope,new BiddingTypes.Ref("analysisBaseline","review-baseline",1,"baseline-digest"),baselineBody,List.of(sourceSet),"CONFIRMED");
         ObjectNode outlineBody=json.createObjectNode().put("schemaVersion","1");outlineBody.putArray("chapters").addObject().put("id","c1").putArray("requirementRefs").add("REQ-1");
@@ -120,7 +126,7 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id=? AND status='QUEUED'",Integer.class,workspace,projectId,reviewer));
         assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND status='OPEN'",Integer.class,workspace,projectId));
         JsonNode todo=json.readTree(jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO'",String.class,workspace,projectId));
-        assertEquals(scope.actorId(),todo.path("ownerId").asText());assertFalse(todo.path("affectsTechnical").asBoolean());
+        assertEquals(scope.actorId(),todo.path("ownerId").asText());assertTrue(todo.path("affectsTechnical").asBoolean());
         var snapshots=jdbc.query("SELECT input_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id=?",(rs,n)->rs.getString(1),workspace,projectId,reviewer).stream().map(raw->{try{return json.readTree(raw);}catch(Exception e){throw new IllegalStateException(e);}}).toList();
         assertEquals(2,snapshots.size());
         assertTrue(snapshots.stream().allMatch(s->manuscript.equals(json.convertValue(s.path("input").path("manuscriptRef"),BiddingTypes.Ref.class))));
@@ -135,6 +141,13 @@ class BiddingReviewTest extends BiddingHttpFixture {
             if(claim.input().path("_biddingTargetId").asText().contains(":chapter:")) {
                 ObjectNode finding=findingRows.addObject().put("id","F-1").put("severity","MAJOR").put("category","TECHNICAL_GAP");
                 finding.set("chapterRefs",chapterCoverage.deepCopy());finding.set("requirementRefs",json.createArrayNode().add("REQ-1"));finding.putArray("evidenceRefs");finding.put("description","需补充技术响应细节").put("recommendation","定向补写技术方案");
+                ObjectNode dismiss=findingRows.addObject().put("id","F-EVID").put("severity","MAJOR").put("category","UNSUPPORTED_COMMITMENT");
+                dismiss.set("chapterRefs",chapterCoverage.deepCopy());dismiss.putArray("requirementRefs").add("REQ-1");
+                dismiss.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
+                dismiss.put("description","commitment requires qualification").put("recommendation","confirm source qualification");
+                ObjectNode suggestion=findingRows.addObject().put("id","F-SUG").put("severity","SUGGESTION").put("category","STYLE_SUGGESTION");
+                suggestion.set("chapterRefs",chapterCoverage.deepCopy());suggestion.putArray("requirementRefs");suggestion.putArray("evidenceRefs");
+                suggestion.put("description","consider a clearer heading").put("recommendation","defer if not in scope");
             }
             coverage.put("crossChapterReviewed",claim.input().path("_biddingTargetId").asText().endsWith(":cross"));output.putArray("limitations");output.putArray("warnings");
             tasks.complete(claim,new BiddingTypes.Execution(output,null,claim.skill().digest(),claim.configDigest(),null));
@@ -144,14 +157,31 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertEquals(1,review.path("humanTodos").size());assertEquals(scope.actorId(),review.path("humanTodos").get(0).path("ownerId").asText());
         JsonNode publicReview=api("GET","/projects/"+projectId+"/review","member",workspace,null,200);
         assertEquals("REVIEWED",publicReview.path("status").asText());assertEquals(2,publicReview.path("tasks").size());
-        JsonNode reviewFinding=review.path("findings").get(0);BiddingTypes.Ref findingRef=json.treeToValue(reviewFinding.path("findingRef"),BiddingTypes.Ref.class);
+        JsonNode reviewFinding=findFinding(review,"F-1");BiddingTypes.Ref findingRef=json.treeToValue(reviewFinding.path("findingRef"),BiddingTypes.Ref.class);
         ObjectNode fix=json.createObjectNode().set("findingRef",json.valueToTree(findingRef));fix.put("decision","FIX").put("reason","需要定向修订").putArray("evidenceRefs");
         reviews.resolve(scope,new BiddingTypes.Command("fix-finding",findingRef,"RESOLVE_FINDING",fix));
         assertEquals(1,reviews.selectedFindings(scope,"c1",json.createArrayNode().add(json.valueToTree(findingRef)),manuscript).size());
-        assertDoesNotThrow(()->reviews.requireReviewed(scope,manuscript));
-        ObjectNode gatingTodo=json.createObjectNode().put("todoId","COMM-TECH").put("ownerId",scope.actorId()).put("status","OPEN").put("affectsTechnical",true);
-        save(scope,new BiddingTypes.Ref("HUMAN_TODO","COMM-TECH",1,"todo-digest"),gatingTodo,List.of(),"OPEN");
+        JsonNode evidenceFinding=findFinding(review,"F-EVID");BiddingTypes.Ref evidenceFindingRef=json.treeToValue(evidenceFinding.path("findingRef"),BiddingTypes.Ref.class);
+        ObjectNode dismiss=json.createObjectNode().set("findingRef",json.valueToTree(evidenceFindingRef));dismiss.put("decision","DISMISS_WITH_EVIDENCE").put("reason","source evidence resolves the concern");
+        dismiss.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        reviews.resolve(scope,new BiddingTypes.Command("dismiss-with-evidence",evidenceFindingRef,"RESOLVE_FINDING",dismiss));
+        JsonNode suggestionFinding=findFinding(review,"F-SUG");BiddingTypes.Ref suggestionRef=json.treeToValue(suggestionFinding.path("findingRef"),BiddingTypes.Ref.class);
+        ObjectNode defer=json.createObjectNode().set("findingRef",json.valueToTree(suggestionRef));defer.put("decision","DEFER_SUGGESTION").put("reason","retain as a follow-up suggestion").putArray("evidenceRefs");
+        reviews.resolve(scope,new BiddingTypes.Command("defer-suggestion",suggestionRef,"RESOLVE_FINDING",defer));
+        JsonNode savedDismiss=json.readTree(jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='findingDecision' AND object_id=?",String.class,workspace,projectId,evidenceFindingRef.id()));
+        assertEquals("DISMISS_WITH_EVIDENCE",jdbc.queryForObject("SELECT status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='findingDecision' AND object_id=?",String.class,workspace,projectId,evidenceFindingRef.id()));
+        assertEquals(sourceId,savedDismiss.path("evidenceRefs").get(0).path("sourceId").asText());
+        assertEquals("DEFER_SUGGESTION",jdbc.queryForObject("SELECT status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='findingDecision' AND object_id=?",String.class,workspace,projectId,suggestionRef.id()));
         BiddingApiException todoGate=assertThrows(BiddingApiException.class,()->reviews.requireReviewed(scope,manuscript));assertEquals("HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL",todoGate.code());
+        BiddingTypes.Ref todoRef=json.treeToValue(review.path("humanTodos").get(0).path("ref"),BiddingTypes.Ref.class);
+        ObjectNode closeTodo=json.createObjectNode().set("todoRef",json.valueToTree(todoRef));closeTodo.put("reason","confirmed exact quotation with commercial owner");
+        closeTodo.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        ObjectNode todoResolution=reviews.resolveHumanTodo(scope,new BiddingTypes.Command("resolve-real-todo",todoRef,"RESOLVE_HUMAN_TODO",closeTodo));
+        assertEquals("RESOLVED",todoResolution.path("status").asText());
+        JsonNode persistedTodo=json.readTree(jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=? ORDER BY version DESC LIMIT 1",String.class,workspace,projectId,todoRef.id()));
+        assertEquals(scope.actorId(),persistedTodo.path("resolvedBy").asText());assertEquals("confirmed exact quotation with commercial owner",persistedTodo.path("resolutionReason").asText());
+        assertEquals(sourceId,persistedTodo.path("resolutionEvidenceRefs").get(0).path("sourceId").asText());
+        assertDoesNotThrow(()->reviews.requireReviewed(scope,manuscript));
         BiddingTypes.Ref revised=save(scope,new BiddingTypes.Ref("manuscript","manuscript",2,"new-manuscript-digest"),manuscriptBody,List.of(outline,chapter),"DRAFT_PENDING_REVIEW");
         BiddingApiException staleReview=assertThrows(BiddingApiException.class,()->reviews.requireReviewed(scope,revised));
         assertEquals("REVIEW_INCOMPLETE",staleReview.code());
@@ -166,4 +196,6 @@ class BiddingReviewTest extends BiddingHttpFixture {
         jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),ref.kind(),ref.id(),ref.version(),json.writeValueAsString(payload),json.writeValueAsString(refs),status,ref.digest(),Timestamp.from(Instant.now()));
         return ref;
     }
+
+    private JsonNode findFinding(JsonNode review,String id){for(JsonNode finding:review.path("findings"))if(id.equals(finding.path("finding").path("id").asText()))return finding;throw new AssertionError("Missing finding "+id);}
 }

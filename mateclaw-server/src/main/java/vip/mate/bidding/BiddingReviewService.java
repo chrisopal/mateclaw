@@ -49,6 +49,19 @@ public class BiddingReviewService implements BiddingResultHandler {
     @Override public Set<String> skillIds() { return Set.of(SKILL); }
 
     @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void recordDispatchFailure(BiddingTypes.Scope scope,BiddingTypes.Ref manuscript,String reasonCode) {
+        access.requireActor(scope,scope.actorId());
+        if(manuscript==null||!"manuscript".equals(manuscript.kind()))return;
+        String safeCode=reasonCode!=null&&reasonCode.matches("[A-Z][A-Z0-9_]{0,63}")?reasonCode:"REVIEW_DISPATCH_FAILED";
+        ObjectNode payload=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscript));
+        payload.put("status","NOT_DISPATCHED").put("reasonCode",safeCode).put("recordedAt",Instant.now().toString());
+        ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());
+        payload.put("reviewerId",project.path("bindings").path("reviewer").path("agentId").asText(""));
+        payload.put("reviewerConfigDigest",project.path("bindings").path("reviewer").path("configDigest").asText(""));
+        saveBusinessRevision(scope,"reviewDispatch",manuscript.digest().substring(0,48),payload,List.of(manuscript),"NOT_DISPATCHED");
+    }
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public ObjectNode dispatch(BiddingTypes.Scope scope, BiddingTypes.Command command) {
         access.requireActor(scope, scope.actorId());
         if (command == null || !"DISPATCH_REVIEW".equals(command.action()) || command.payload() == null
@@ -391,7 +404,15 @@ public class BiddingReviewService implements BiddingResultHandler {
             if(currentKey==null)currentKey=meta.path("reviewKey").asText("");if(!currentKey.equals(meta.path("reviewKey").asText()))continue;
             selectedGroup.set(result.path("_objectId").asText(),result);
         }
-        if(currentKey==null) out.put("status",reviewerId.isBlank()?"NOT_DISPATCHED":"NOT_STARTED");
+        if(currentKey==null) {
+            ObjectNode failure=jdbc.query("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='reviewDispatch' AND object_id=? ORDER BY version DESC LIMIT 1",
+                    rs->rs.next()?object(rs.getString(1)):null,scope.workspaceId(),scope.projectId(),manuscript.digest().substring(0,48));
+            if(failure!=null&&same(ref(failure.path("manuscriptRef")),manuscript)
+                    &&reviewerId.equals(failure.path("reviewerId").asText())
+                    &&reviewerBinding.path("configDigest").asText().equals(failure.path("reviewerConfigDigest").asText()))
+                out.put("status","NOT_DISPATCHED").put("reason",failure.path("reasonCode").asText("REVIEW_DISPATCH_FAILED"));
+            else out.put("status",reviewerId.isBlank()?"NOT_DISPATCHED":"NOT_STARTED");
+        }
         else {
             Set<String> chapters=new LinkedHashSet<>(),requirements=new LinkedHashSet<>();boolean cross=false;
             for(JsonNode result:selectedGroup){for(JsonNode r:result.path("coverage").path("chapterRefs"))chapters.add(r.path("id").asText());for(JsonNode r:result.path("coverage").path("requirementRefs"))requirements.add(r.asText());if("cross".equals(result.path("_bidding").path("reviewSegment").asText()))cross=result.path("coverage").path("crossChapterReviewed").asBoolean(false);
