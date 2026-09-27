@@ -334,3 +334,16 @@ Sol downstream preflight confirms the same exact-workspace contradiction in Outl
 Before any repair edits, declare ownership limited to `mateclaw-server/src/main/java/vip/mate/bidding/BiddingReviewService.java`, `mateclaw-server/src/test/java/vip/mate/bidding/BiddingReviewTest.java`, and this plan's `final-fix-report.md` SDD artifact. Root owns acceptance/progress/review artifacts. No other source/dependencies/schema/migration changes.
 
 A new analysis baseline may reuse model-local requirement IDs. It must not inherit another baseline's classified or resolved HUMAN_TODO. Bind todo identity and stored provenance to the exact baseline ref and commercial requirement; read/approval must select only exact current baseline todos while preserving immutable prior history. Same-baseline manuscript revisions may reuse current todo dispositions. Historical unscoped todos must not silently authorize a fresh baseline. Regression first: old nontechnical-classified and resolved requirement R1, new baseline R1, fresh OPEN/UNCLASSIFIED todo blocks approval; exact baseline/source closure; old history unchanged; same-baseline reuse remains valid. Run focused RED/GREEN then root bidding/runtime regression gate and scoped Sol re-review.
+
+
+### Task 6: Final integration provenance repair gate
+
+**Files:**
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingReviewService.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingReviewTest.java`
+
+**Interfaces:**
+No new public commands, dependencies, schema or migrations. This is the machine-readable gate for the ownership and behavior already declared before edits in commit 627fc505. Exact baseline and original evidence bind current commercial obligations and both approval predicates; historical revisions remain immutable.
+
+**Verification:**
+Regression RED/GREEN for classified/resolved R1 reused by a fresh baseline, same-baseline idempotent reuse, legacy and missing current todo rejection; full root Task5 backend selector in an isolated skill root; fixed-source scoped Sol re-review. Complete business acceptance remains open.
