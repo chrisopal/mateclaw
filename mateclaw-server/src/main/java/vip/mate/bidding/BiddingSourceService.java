@@ -75,7 +75,8 @@ public class BiddingSourceService {
         repository.insertSource(rowId,scope.workspaceId(),scope.projectId(),sourceId,version,kind,digest,bytes,filename,now());
         repository.insertSourceHead(scope,sourceId,version,write(ref));
         repository.updateOperation(scope.workspaceId(),scope.actorId(),operationId,write(result));
-        dependencies.invalidate(scope,new BiddingTypes.Ref("source",sourceId,version,digest));
+        if(supersedes!=null) dependencies.recordTransition(scope,supersedes,json.convertValue(ref,BiddingTypes.Ref.class));
+        if(supersedes!=null) dependencies.invalidate(scope,supersedes);
         return result;
     }
 
@@ -228,8 +229,9 @@ public class BiddingSourceService {
         ObjectNode sourceSetRef=json.createObjectNode(); sourceSetRef.put("kind","sourceSet"); sourceSetRef.put("id","current"); sourceSetRef.put("version",version); sourceSetRef.put("digest",digest);
         if(!repository.advanceSourceSetHead(scope,expectedHead,json.convertValue(sourceSetRef,BiddingTypes.Ref.class),write(sourceSetRef)))
             throw BiddingAccess.error(409,"SOURCE_SET_HEAD_CONFLICT","The confirmed source set changed; reload before confirming");
+        if(currentHead!=null) dependencies.recordTransition(scope,currentHead,json.convertValue(sourceSetRef,BiddingTypes.Ref.class));
         for(var ref:refs) dependencies.validate(scope,List.of(ref));
-        repository.invalidateSourceSet(scope);
+        if(currentHead!=null) { repository.invalidateSourceSet(scope); dependencies.invalidate(scope,currentHead); }
         ObjectNode result=json.createObjectNode(); result.set("ref",sourceSetRef); result.set("sourceSet",payload);
         repository.updateOperation(scope.workspaceId(),scope.actorId(),command.operationId(),write(result)); return result;
     }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BiddingCommandService {
     private final BiddingProjectService projects;
+    private final BiddingDependencies dependencies;
     private final BiddingSourceService sources;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectProvider<BiddingTaskService> tasks;
@@ -15,10 +16,10 @@ public class BiddingCommandService {
     private final ObjectProvider<BiddingMaterials> materials;
     private final ObjectProvider<BiddingOutlineService> outlines;
     private final ObjectProvider<BiddingWritingService> writing;
-    public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,ObjectProvider<BiddingEmployeeBindings> employees,
+    public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,BiddingDependencies dependencies,ObjectProvider<BiddingEmployeeBindings> employees,
             ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis,
             ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing) {
-        this.projects=projects; this.sources=sources; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing;
+        this.projects=projects; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing;
     }
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
@@ -40,6 +41,7 @@ public class BiddingCommandService {
             case "EDIT_CHAPTER" -> writing.getObject().edit(scope,command);
             case "ADOPT_CHAPTER" -> writing.getObject().adopt(scope,command);
             case "ASSEMBLE_MANUSCRIPT" -> writing.getObject().assemble(scope,command);
+            case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
             default -> projects.execute(scope,command);
         };
     }

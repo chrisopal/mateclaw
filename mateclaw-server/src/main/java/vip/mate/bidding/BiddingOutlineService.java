@@ -97,8 +97,11 @@ public class BiddingOutlineService implements BiddingResultHandler {
         dependencies.validate(scope,List.of(baseline)); List<BiddingTypes.Ref> chosenRefs=refs(row.path("refs")); dependencies.validate(scope,chosenRefs);
         List<BiddingTypes.Ref> materialRefs=chosenRefs.stream().filter(r->"material".equals(r.kind())).toList();
         validatePayload((ObjectNode)row.path("payload"),outlineInput(scope,baseline,materialRefs),true);
+        BiddingTypes.Ref previousConfirmed=confirmedHead(scope);
         BiddingTypes.Ref confirmed=candidate;
         setRevisionStatus(scope,candidate,"CONFIRMED"); setHead(scope,confirmed);
+        dependencies.recordTransition(scope,previousConfirmed,confirmed);
+        if(previousConfirmed!=null) dependencies.invalidate(scope,previousConfirmed);
         jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
                 UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),write(confirmed),"CONFIRM_OUTLINE",command.payload().path("reason").asText(null),scope.actorId(),Timestamp.from(Instant.now()));
         ObjectNode result=json.createObjectNode(); result.set("ref",json.valueToTree(confirmed)); result.put("status","CONFIRMED"); storeOperation(scope,command,requestDigest,result); return result;

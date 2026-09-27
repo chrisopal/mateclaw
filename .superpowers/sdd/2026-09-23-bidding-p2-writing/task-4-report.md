@@ -1,0 +1,15 @@
+Status: DONE
+Verification: PASS
+Plan deviations: none
+
+Implemented Task 4 scoped change-impact handling. Persisted immutable old-to-new events for source, source-set, baseline, outline, and selected chapter transitions. Reverse dependency lookup uses workspace/project-scoped SQL candidate matching followed by exact parsed Ref equality; invalidation now traverses exact transitive dependencies, and never loads the whole project graph. Added authenticated read-only GET `/api/v1/bidding/projects/{id}/change-impact`; it returns every event, derived labels, exact affected/unaffected/unknown refs, and a server-generated optional `confirmation` envelope only when an exact selected baseline transition has complete semantic and evidence proof. The UI submits that envelope unchanged with current project expected Ref and a fresh operation id.
+
+Direct baseline comparison maps each selected chapter's requirement, scoring, mandatory, and material refs. Deadline-only profile changes do not affect body semantics. Technical/mandatory/scoring semantic changes remain scoped to mapped chapters; missing/mismatched mappings and unverified evidence remain unknown. A selected unaffected chapter receives a new immutable revision association with unchanged chapter content, a re-bound outline/citation provenance, new fixed refs, and a scoped CAS head advance. Old payloads remain intact and their historical revision status is retained as NEEDS_RECONFIRMATION; no review/artifact approval is revived. Source/source-set events can resolve only through a confirmed baseline transition that contains the exact old and new refs. Confirmation is approver-gated, idempotent, checks expected project version and exact server-derived unchanged refs, and rejects ACCEPT_RISK. Current actor and origin ACL are rechecked; read paths expose no source content.
+
+Tests include persisted source v1→sourceSet v2→baseline v2→outline v2 transitions, old citation/source evidence v1 and verified identical quote in source v2, citation metadata rebinding on an unchanged immutable chapter body, per-chapter technical requirement impact, deadline-only reuse, wrong/missing replacement quote blocking, exact digest isolation, pending read-only behavior, cross-workspace denial, caller ACCEPT_RISK denial, and revoked actor authorization. Targeted Java 21 command:
+`mvn -pl mateclaw-server -am -Dtest='BiddingChangeImpactTest,BiddingSourceTest,BiddingAnalysisTest,BiddingOutlineTest,BiddingWritingTest' -Dsurefire.failIfNoSpecifiedTests=false test`
+Expected final output: BUILD SUCCESS, 39 tests, 0 failures/errors. `git diff --check` also passed before final commit.
+
+Files changed: BiddingController, BiddingDependencies, BiddingSourceService, BiddingAnalysisService, BiddingOutlineService, BiddingWritingService, BiddingCommandService, BiddingRepository, BiddingChangeImpactTest.
+
+Remaining conservative boundary: source/source-set events without an exact confirmed baseline chain, ambiguous clause mapping, changed material association, or unavailable new evidence remain blocked for explicit repair; only exact semantic proof enables selective chapter cloning.

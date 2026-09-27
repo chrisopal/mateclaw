@@ -275,7 +275,11 @@ public class BiddingAnalysisService implements BiddingResultHandler {
                 revisionId, scope.workspaceId(), scope.projectId(), kind, objectId, version, canonical, write(List.of(sourceSet)), "CONFIRMED", digest, now);
         if (inserted != 1) throw BiddingAccess.error(409, "ANALYSIS_BASELINE_CONFLICT", "Baseline could not be stored");
         BiddingTypes.Ref baselineRef = new BiddingTypes.Ref(kind, objectId, version, digest);
+        BiddingTypes.Ref previousBaseline=jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=?",
+                rs->rs.next()?json.convertValue(parseObject(rs.getString(1)),BiddingTypes.Ref.class):null,scope.workspaceId(),scope.projectId(),kind,objectId);
         replaceHead(scope, baselineRef);
+        dependencies.recordTransition(scope,previousBaseline,baselineRef);
+        if(previousBaseline!=null) dependencies.invalidate(scope,previousBaseline);
         String decisionId=UUID.randomUUID().toString(); boolean autoPlan=command.payload().path("autoPlanOutline").asBoolean(false);
         jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
                 decisionId, scope.workspaceId(), scope.projectId(), write(baselineRef), "CONFIRM_ANALYSIS",

@@ -349,11 +349,9 @@ public class BiddingRepository {
         return jdbc.update("UPDATE mate_bidding_source SET read_status='FAILED',quality='FAILED',problems_json='[\"READ_INTERRUPTED\"]',read_completed_at=:now WHERE read_status='READING'",Map.of("now",now));
     }
     public int invalidateSourceSet(BiddingTypes.Scope scope) {
-        int derived=jdbc.update("UPDATE mate_bidding_revision SET status='NEEDS_RECONFIRMATION' WHERE workspace_id=:w AND project_id=:p AND status='CONFIRMED' AND kind<>'sourceSet' AND input_refs_json LIKE :needle",
-            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"needle","%sourceSet%current%"));
         jdbc.update("UPDATE mate_bidding_revision SET status='NEEDS_RECONFIRMATION' WHERE workspace_id=:w AND project_id=:p AND kind='sourceSet' AND object_id='current' AND version<(SELECT MAX(v.version) FROM mate_bidding_revision v WHERE v.workspace_id=:w AND v.project_id=:p AND v.kind='sourceSet' AND v.object_id='current')",
             Map.of("w",scope.workspaceId(),"p",scope.projectId()));
-        return derived;
+        return 0;
     }
     public int retrySource(String workspace,String project,String sourceId,long version) {
         return jdbc.update("UPDATE mate_bidding_source SET read_status='PENDING',quality='PENDING',blocks_json='[]',problems_json='[]',read_token=NULL,read_started_at=NULL,read_completed_at=NULL WHERE workspace_id=:w AND project_id=:p AND source_id=:s AND version=:v AND read_status IN ('FAILED','NEEDS_REVIEW')",
@@ -369,6 +367,63 @@ public class BiddingRepository {
             Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),Integer.class);
         return count!=null && count==1;
     }
+    public boolean historicalRevisionExists(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object AND version=:version AND digest=:digest AND status IN ('CONFIRMED','NEEDS_RECONFIRMATION','CANDIDATE','SELECTED','HUMAN_EDIT')",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),Integer.class);
+        return count!=null && count==1;
+    }
+    public BiddingTypes.Ref selectedRef(BiddingTypes.Scope scope,String kind,String objectId) {
+        List<String> rows=jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",kind,"id",objectId),(rs,n)->rs.getString(1));
+        return rows.isEmpty()?null:json.convertValue(parseObject(rows.getFirst()),BiddingTypes.Ref.class);
+    }
+    public List<BiddingTypes.Ref> selectedChapterRefs(BiddingTypes.Scope scope) {
+        return jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='chapter' ORDER BY object_id",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId()),(rs,n)->json.convertValue(parseObject(rs.getString(1)),BiddingTypes.Ref.class));
+    }
+    public String rawRevisionPayload(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        List<String> rows=jdbc.query("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id AND version=:v AND digest=:d",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"id",ref.id(),"v",ref.version(),"d",ref.digest()),(rs,n)->rs.getString(1));
+        return rows.isEmpty()?null:rows.getFirst();
+    }
+    public boolean advanceBusinessHead(BiddingTypes.Scope scope,BiddingTypes.Ref expected,BiddingTypes.Ref next) {
+        String expectedJson=write(json.valueToTree(expected)),nextJson=write(json.valueToTree(next));
+        return jdbc.update("UPDATE mate_bidding_head SET version=:nextVersion,selected_ref_json=:next WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id AND version=:expectedVersion AND selected_ref_json=:expected",
+            Map.of("nextVersion",next.version(),"next",nextJson,"w",scope.workspaceId(),"p",scope.projectId(),"kind",expected.kind(),"id",expected.id(),"expectedVersion",expected.version(),"expected",expectedJson))==1;
+    }
+    public int setRevisionStatus(BiddingTypes.Scope scope,BiddingTypes.Ref ref,String status) {
+        return jdbc.update("UPDATE mate_bidding_revision SET status=:status WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id AND version=:v AND digest=:d",
+            Map.of("status",status,"w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"id",ref.id(),"v",ref.version(),"d",ref.digest()));
+    }
+    public boolean hasEvidenceBlock(BiddingTypes.Scope scope,BiddingTypes.Ref sourceRef,String blockId,String quote) {
+        SourceRow source=source(scope.workspaceId(),scope.projectId(),sourceRef.id(),sourceRef.version());
+        if(source==null||!source.digest().equals(sourceRef.digest())) return false;
+        try {
+            JsonNode blocks=json.readTree(source.blocks());
+            for(JsonNode block:blocks) if(blockId.equals(block.path("id").asText())&&block.path("text").asText().contains(quote)) return true;
+        } catch(Exception ignored) { return false; }
+        return false;
+    }
+    @org.springframework.transaction.annotation.Transactional
+    public BiddingTypes.Ref cloneChapterAssociation(BiddingTypes.Scope scope,BiddingTypes.Ref expected,BiddingTypes.Ref outline,JsonNode citations) {
+        ObjectNode row=businessRevision(scope,expected);
+        if(row==null||!isSelectedBusinessRevision(scope,expected)) throw BiddingAccess.error(409,"CHAPTER_STALE","Chapter head changed during reconfirmation");
+        ObjectNode payload=parseObject(rawRevisionPayload(scope,expected));
+        if(!payload.path("_bidding").isObject()) throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","Chapter provenance is unavailable");
+        ((ObjectNode)payload.path("_bidding")).set("outlineRef",json.valueToTree(outline));
+        if(citations!=null)payload.set("citations",citations.deepCopy());
+        List<BiddingTypes.Ref> refs=new ArrayList<>();refs.add(outline);
+        businessRefs(row).stream().filter(ref->"material".equals(ref.kind())).forEach(refs::add);
+        String raw=write(payload),digest=sha256(raw);long version=maxRevisionVersion(scope,"chapter",expected.id())+1;
+        Timestamp now=Timestamp.from(Instant.now());
+        insertRevision(UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),"chapter",expected.id(),version,raw,
+                write(json.valueToTree(refs)),"SELECTED",digest,now);
+        BiddingTypes.Ref next=new BiddingTypes.Ref("chapter",expected.id(),version,digest);
+        if(!advanceBusinessHead(scope,expected,next)) throw BiddingAccess.error(409,"CHAPTER_STALE","Chapter head changed during reconfirmation");
+        setRevisionStatus(scope,expected,"NEEDS_RECONFIRMATION");
+        return next;
+    }
+    public long nextRevisionVersion(BiddingTypes.Scope scope,String kind,String objectId) { return maxRevisionVersion(scope,kind,objectId)+1; }
     public ObjectNode businessRevision(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
         try {
             String payload=jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:object AND version=:version AND digest=:digest",Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"object",ref.id(),"version",ref.version(),"digest",ref.digest()),String.class);
@@ -407,8 +462,69 @@ public class BiddingRepository {
         } catch(org.springframework.dao.EmptyResultDataAccessException e) { return false; }
     }
     public void invalidateDependencies(BiddingTypes.Scope scope,BiddingTypes.Ref changed) {
-        jdbc.update("UPDATE mate_bidding_revision SET status='NEEDS_RECONFIRMATION' WHERE workspace_id=:w AND project_id=:p AND status='CONFIRMED' AND input_refs_json LIKE :needle",
-            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"needle","%"+changed.id()+"%"));
+        java.util.ArrayDeque<BiddingTypes.Ref> queue=new java.util.ArrayDeque<>();java.util.LinkedHashSet<BiddingTypes.Ref> visited=new java.util.LinkedHashSet<>();queue.add(changed);
+        while(!queue.isEmpty()) { BiddingTypes.Ref current=queue.removeFirst();if(!visited.add(current))continue;for(BiddingTypes.Ref next:dependents(scope,current))queue.addLast(next); }
+        visited.remove(changed);markNeedsReconfirmation(scope,visited);
+    }
+
+    /** Scoped SQL prefilter followed by exact parsed Ref matching; never treats an id substring as a dependency. */
+    public List<BiddingTypes.Ref> dependents(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        String token=write(json.valueToTree(ref));
+        String escaped=token.replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        List<DependencyRow> rows=jdbc.query("SELECT kind,object_id,version,digest,input_refs_json FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind<>'changeImpact' AND input_refs_json LIKE :token ESCAPE '!'",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"token","%"+escaped+"%"),(rs,n)->new DependencyRow(rs.getString("kind"),rs.getString("object_id"),rs.getLong("version"),rs.getString("digest"),rs.getString("input_refs_json")));
+        LinkedHashSet<BiddingTypes.Ref> result=new LinkedHashSet<>();
+        for(DependencyRow row:rows) {
+            try {
+                if(readRefs(row.refs()).contains(ref)) result.add(new BiddingTypes.Ref(row.kind(),row.id(),row.version(),row.digest()));
+            } catch(RuntimeException malformed) { /* malformed dependencies remain blocked by callers */ }
+        }
+        return List.copyOf(result);
+    }
+
+    private record DependencyRow(String kind,String id,long version,String digest,String refs) {}
+    private String write(JsonNode node) { try { return json.writeValueAsString(node); } catch(Exception e) { throw new IllegalStateException("Could not serialize bidding JSON",e); } }
+    private String sha256(String value) { try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8))); } catch(Exception e) { throw new IllegalStateException(e); } }
+
+    public List<ObjectNode> changeEvents(BiddingTypes.Scope scope) {
+        return jdbc.query("SELECT e.id,e.object_id,e.version,e.digest,e.payload_json,e.status,e.input_refs_json FROM mate_bidding_revision e WHERE e.workspace_id=:w AND e.project_id=:p AND e.kind='changeImpact' AND e.version=(SELECT MAX(latest.version) FROM mate_bidding_revision latest WHERE latest.workspace_id=e.workspace_id AND latest.project_id=e.project_id AND latest.kind=e.kind AND latest.object_id=e.object_id) ORDER BY e.created_at,e.id",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId()),(rs,n)->{
+                ObjectNode event=parseObject(rs.getString("payload_json"));
+                event.put("eventId",rs.getString("object_id")); event.put("status",rs.getString("status"));
+                return event;
+            });
+    }
+
+    public ObjectNode changeEvent(BiddingTypes.Scope scope,String eventId) {
+        List<ObjectNode> rows=jdbc.query("SELECT payload_json,status FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind='changeImpact' AND object_id=:id ORDER BY version DESC",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"id",eventId),(rs,n)->{ ObjectNode n1=parseObject(rs.getString(1)); n1.put("status",rs.getString(2)); return n1; });
+        return rows.isEmpty()?null:rows.getFirst();
+    }
+
+    public void saveChangeEvent(BiddingTypes.Scope scope,String eventId,ObjectNode payload,List<BiddingTypes.Ref> refs,String status,java.sql.Timestamp now) {
+        long version=maxRevisionVersion(scope,"changeImpact",eventId)+1;
+        String body=write(payload),digest=sha256(body);
+        insertRevision(UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),"changeImpact",eventId,version,body,write(json.valueToTree(refs)),status,digest,now);
+    }
+
+    public void markNeedsReconfirmation(BiddingTypes.Scope scope,Collection<BiddingTypes.Ref> refs) {
+        for(BiddingTypes.Ref ref:refs) jdbc.update("UPDATE mate_bidding_revision SET status='NEEDS_RECONFIRMATION' WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id AND version=:version AND digest=:digest AND status IN ('CONFIRMED','SELECTED','HUMAN_EDIT')",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",ref.kind(),"id",ref.id(),"version",ref.version(),"digest",ref.digest()));
+    }
+    public String refTitle(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        if("source".equals(ref.kind())) {
+            List<String> names=jdbc.query("SELECT filename FROM mate_bidding_source WHERE workspace_id=:w AND project_id=:p AND source_id=:id AND version=:v AND digest=:d",
+                Map.of("w",scope.workspaceId(),"p",scope.projectId(),"id",ref.id(),"v",ref.version(),"d",ref.digest()),(rs,n)->rs.getString(1));
+            return names.isEmpty()?"招标来源":"来源文件："+names.getFirst();
+        }
+        ObjectNode revision=businessRevision(scope,ref);
+        if(revision!=null&&"chapter".equals(ref.kind())) {
+            String title=revision.path("payload").path("chapter").path("title").asText("");
+            if(title.isBlank()) title=revision.path("chapter").path("title").asText("");
+            if(!title.isBlank()) return "章节："+title;
+        }
+        String type=switch(ref.kind()) { case "sourceSet" -> "生效来源集"; case "analysisBaseline" -> "解析基线"; case "outline" -> "技术目录"; case "chapter" -> "技术章节"; case "manuscript" -> "整本正文"; case "material" -> "授权材料"; default -> "待核对内容"; };
+        return type+" v"+ref.version();
     }
     public List<SourceRow> sources(String workspace,String project) {
         return jdbc.query("SELECT id,source_id,version,kind,digest,content,filename,blocks_json,quality,read_status,problems_json,read_token FROM mate_bidding_source WHERE workspace_id=:w AND project_id=:p ORDER BY created_at,source_id,version",
