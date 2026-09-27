@@ -98,7 +98,7 @@ public class BiddingWritingService implements BiddingResultHandler {
         validator.validateWriting(payload,allowed,snapshot);
         requireResponseCoverage(payload.path("responses"),findChapter(payload(scope,outline).path("chapters"),id));
         ObjectNode evidencePayload=json.createObjectNode();evidencePayload.set("citations",payload.path("citations"));evidencePayload.set("responses",payload.path("responses"));validator.validateWritingEvidence(evidencePayload,evidenceInput(scope,outline,id,allowed));
-        BiddingTypes.Ref saved=saveRevision(scope,id,payload,append(List.of(outline),allowed),"HUMAN_EDIT");advanceHead(scope,id,current,saved);if(current!=null){dependencies.recordTransition(scope,current,saved);dependencies.invalidate(scope,current);}ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(saved));out.put("status","EDITED");store(scope,command,digest,out);return out;
+        BiddingTypes.Ref saved=saveRevision(scope,id,payload,append(List.of(outline),allowed),"HUMAN_EDIT");advanceHead(scope,id,current,saved);if(current!=null){dependencies.recordTransition(scope,current,saved);dependencies.invalidate(scope,current);repository.setRevisionStatus(scope,current,"NEEDS_RECONFIRMATION");}ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(saved));out.put("status","EDITED");store(scope,command,digest,out);return out;
     }
 
     @Transactional
@@ -107,7 +107,7 @@ public class BiddingWritingService implements BiddingResultHandler {
         String id=required(command.payload(),"chapterId");BiddingTypes.Ref current=head(scope,id),expected=current==null?emptyHead(scope,id):current;if(!same(command.expected(),expected))throw conflict();BiddingTypes.Ref candidate=ref(command.payload().path("candidateRef"));JsonNode row=revision(scope,candidate,id);if(row==null||!"CANDIDATE".equals(row.path("status").asText()))throw BiddingAccess.error(404,"NOT_FOUND","Chapter candidate not found");
         List<BiddingTypes.Ref> refs=refs(row.path("refs"));dependencies.validate(scope,refs);BiddingTypes.Ref outline=confirmedOutline(scope);if(outline==null||refs.stream().noneMatch(r->same(r,outline)))throw BiddingAccess.error(409,"CHAPTER_STALE","Candidate outline is no longer confirmed");
         BiddingTypes.Ref guard=ref(row.path("payload").path("_bidding").path("headGuard"));if(!same(guard,expected))throw BiddingAccess.error(409,"CHAPTER_STALE","Candidate was written against a different chapter head");
-        advanceHead(scope,id,current,candidate);setStatus(scope,candidate,"SELECTED");if(current!=null){dependencies.recordTransition(scope,current,candidate);dependencies.invalidate(scope,current);}ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(candidate));out.put("status","SELECTED");store(scope,command,digest,out);return out;
+        advanceHead(scope,id,current,candidate);setStatus(scope,candidate,"SELECTED");if(current!=null){dependencies.recordTransition(scope,current,candidate);dependencies.invalidate(scope,current);repository.setRevisionStatus(scope,current,"NEEDS_RECONFIRMATION");}ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(candidate));out.put("status","SELECTED");store(scope,command,digest,out);return out;
     }
 
     @Transactional

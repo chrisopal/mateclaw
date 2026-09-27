@@ -377,6 +377,12 @@ public class BiddingRepository {
             Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",kind,"id",objectId),(rs,n)->rs.getString(1));
         return rows.isEmpty()?null:json.convertValue(parseObject(rows.getFirst()),BiddingTypes.Ref.class);
     }
+    public BiddingTypes.Ref latestBusinessRef(BiddingTypes.Scope scope,String kind,String objectId) {
+        List<BiddingTypes.Ref> rows=jdbc.query("SELECT version,digest FROM mate_bidding_revision WHERE workspace_id=:w AND project_id=:p AND kind=:kind AND object_id=:id ORDER BY version DESC",
+            Map.of("w",scope.workspaceId(),"p",scope.projectId(),"kind",kind,"id",objectId),
+            (rs,n)->new BiddingTypes.Ref(kind,objectId,rs.getLong(1),rs.getString(2)));
+        return rows.isEmpty()?null:rows.getFirst();
+    }
     public List<BiddingTypes.Ref> selectedChapterRefs(BiddingTypes.Scope scope) {
         return jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=:w AND project_id=:p AND kind='chapter' ORDER BY object_id",
             Map.of("w",scope.workspaceId(),"p",scope.projectId()),(rs,n)->json.convertValue(parseObject(rs.getString(1)),BiddingTypes.Ref.class));

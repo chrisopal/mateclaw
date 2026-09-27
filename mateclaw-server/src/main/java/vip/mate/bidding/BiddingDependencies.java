@@ -160,11 +160,27 @@ public class BiddingDependencies {
         for(ObjectNode event:repository.changeEvents(scope)) {
             if(!"CONFIRMED".equals(event.path("status").asText()))continue;
             BiddingTypes.Ref old=parseRef(event.path("changedRef")),next=parseRef(event.path("replacementRef"));
-            if(old==null||next==null||!"analysisBaseline".equals(old.kind())||!next.equals(repository.selectedRef(scope,"analysisBaseline","current")))continue;
+            if(old==null||next==null||!"analysisBaseline".equals(old.kind())||!baselineTransitionReaches(scope,old,next,repository.selectedRef(scope,"analysisBaseline","current")))continue;
             BiddingTypes.Ref pendingReplacement=transitionReplacement(scope,changed);
             if(pendingReplacement!=null&&baselineContains(scope,old,changed)&&baselineContains(scope,next,pendingReplacement))return old;
         }
         return null;
+    }
+    private boolean baselineTransitionReaches(BiddingTypes.Scope scope,BiddingTypes.Ref old,BiddingTypes.Ref replacement,BiddingTypes.Ref selected) {
+        if(old==null||replacement==null||selected==null||!"analysisBaseline".equals(old.kind()))return false;
+        BiddingTypes.Ref current=old;
+        Set<BiddingTypes.Ref> seen=new LinkedHashSet<>();
+        while(seen.add(current)) {
+            BiddingTypes.Ref next=null;
+            for(ObjectNode event:repository.changeEvents(scope)) {
+                if(current.equals(parseRef(event.path("changedRef")))&&"analysisBaseline".equals(current.kind())) { next=parseRef(event.path("replacementRef"));break; }
+            }
+            if(next==null)return false;
+            if(current.equals(old)&&!next.equals(replacement))return false;
+            if(next.equals(selected))return true;
+            current=next;
+        }
+        return false;
     }
     private BiddingTypes.Ref transitionReplacement(BiddingTypes.Scope scope,BiddingTypes.Ref changed) {
         for(ObjectNode event:repository.changeEvents(scope)) if(changed.equals(parseRef(event.path("changedRef"))))return parseRef(event.path("replacementRef"));
@@ -321,10 +337,12 @@ public class BiddingDependencies {
             else {
                 try { event.set("impact",impact(scope,changed)); }
                 catch(BiddingApiException denied) { if(denied.status()==403||denied.status()==404) throw denied; event.set("impact",unknownImpact()); }
-                boolean directBaseline="analysisBaseline".equals(changed.kind())&&parseRef(event.path("replacementRef"))!=null
-                        &&parseRef(event.path("replacementRef")).equals(repository.selectedRef(scope,"analysisBaseline","current"));
+                BiddingTypes.Ref replacement=parseRef(event.path("replacementRef"));
+                boolean directBaseline="analysisBaseline".equals(changed.kind())&&baselineTransitionReaches(scope,changed,replacement,repository.selectedRef(scope,"analysisBaseline","current"));
                 boolean chainedInput=("source".equals(changed.kind())||"sourceSet".equals(changed.kind()))&&supportingBaselineTransition(scope,changed)!=null;
-                if("PENDING".equals(event.path("status").asText())&&(directBaseline||chainedInput)
+                boolean downstreamRepaired=("outline".equals(changed.kind())||"chapter".equals(changed.kind()))&&downstreamRepairComplete(scope,event);
+                if(downstreamRepaired) event.set("impact",emptyImpact());
+                if("PENDING".equals(event.path("status").asText())&&(directBaseline||chainedInput||downstreamRepaired)
                         &&event.path("impact").path("unknownRefs").isArray()&&event.path("impact").path("unknownRefs").isEmpty()
                         ) {
                     ObjectNode confirmation=event.putObject("confirmation");confirmation.put("ready",true);
@@ -364,15 +382,16 @@ public class BiddingDependencies {
         ObjectNode impact=impact(scope,parseRef(stored.path("changedRef")));
         BiddingTypes.Ref oldBaseline=parseRef(stored.path("changedRef")),replacement=parseRef(stored.path("replacementRef"));
         BiddingTypes.Ref selectedBaseline=repository.selectedRef(scope,"analysisBaseline","current");
-        boolean directBaseline=oldBaseline!=null&&"analysisBaseline".equals(oldBaseline.kind())&&replacement!=null&&replacement.equals(selectedBaseline);
+        boolean directBaseline=oldBaseline!=null&&"analysisBaseline".equals(oldBaseline.kind())&&baselineTransitionReaches(scope,oldBaseline,replacement,selectedBaseline);
         boolean chainedInput=oldBaseline!=null&&("source".equals(oldBaseline.kind())||"sourceSet".equals(oldBaseline.kind()))
                 &&supportingBaselineTransition(scope,oldBaseline)!=null;
-        if(oldBaseline==null||(!directBaseline&&!chainedInput)||impact.path("unknownRefs").size()>0)
-            throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","Only a directly compared, selected baseline transition with complete mappings can be reconfirmed");
+        boolean downstreamTransition=oldBaseline!=null&&("outline".equals(oldBaseline.kind())||"chapter".equals(oldBaseline.kind()))&&downstreamRepairComplete(scope,stored);
+        if(oldBaseline==null||(!directBaseline&&!chainedInput&&!downstreamTransition)||(!downstreamTransition&&impact.path("unknownRefs").size()>0))
+            throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","The selected replacement and its required downstream evidence are not complete");
         Set<BiddingTypes.Ref> proved=new LinkedHashSet<>();
         for(JsonNode ref:command.payload().path("unchangedRefs")) { BiddingTypes.Ref parsed=parseRef(ref);if(parsed==null)throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","unchangedRefs contains an invalid reference");proved.add(parsed); }
         Set<BiddingTypes.Ref> serverUnaffected=new LinkedHashSet<>();
-        for(JsonNode ref:impact.path("unaffectedRefs")) { BiddingTypes.Ref parsed=parseRef(ref);if(parsed!=null)serverUnaffected.add(parsed); }
+        if(!downstreamTransition) for(JsonNode ref:impact.path("unaffectedRefs")) { BiddingTypes.Ref parsed=parseRef(ref);if(parsed!=null)serverUnaffected.add(parsed); }
         if(!proved.equals(serverUnaffected)) throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","unchangedRefs must exactly match the server-computed semantic proof");
         for(JsonNode resolution:command.payload().path("resolutions")) if("ACCEPT_RISK".equals(resolution.path("decision").asText()))
             throw BiddingAccess.error(422,"CHANGE_IMPACT_UNPROVEN","Accepting risk cannot clear a changed or missing requirement");
@@ -383,12 +402,76 @@ public class BiddingDependencies {
             if(repository.isSelectedBusinessRevision(scope,oldChapter)&&!repository.businessRefs(repository.businessRevision(scope,oldChapter)).contains(newOutline))
                 cloned.add(json.valueToTree(repository.cloneChapterAssociation(scope,oldChapter,newOutline,rebaseCitations(scope,oldChapter,selectedBaseline))));
         }
-        ObjectNode proof=stored.deepCopy();proof.put("status","CONFIRMED");proof.set("impact",impact.deepCopy());proof.set("clonedRefs",cloned);
+        ObjectNode proof=stored.deepCopy();proof.put("status","CONFIRMED");proof.set("impact",downstreamTransition?emptyImpact():impact.deepCopy());proof.set("clonedRefs",cloned);
         repository.saveChangeEvent(scope,eventId,proof,List.of(oldBaseline,replacement), "CONFIRMED",java.sql.Timestamp.from(Instant.now()));
         repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),requestDigest,proof.toString(),java.sql.Timestamp.from(Instant.now()));
         return proof;
     }
     private String sha(String value) { try{return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8)));}catch(Exception e){throw new IllegalStateException(e);} }
+
+    /** A downstream event closes only after exact selected heads and the latest persisted manuscript agree. */
+    private boolean downstreamRepairComplete(BiddingTypes.Scope scope,ObjectNode event) {
+        BiddingTypes.Ref changed=parseRef(event.path("changedRef")),replacement=parseRef(event.path("replacementRef"));
+        if(changed==null||replacement==null)return false;
+        BiddingTypes.Ref outline=repository.selectedRef(scope,"outline","current");
+        if(outline==null)return false;
+        if("outline".equals(changed.kind())) {
+            if(!transitionReaches(scope,changed,replacement,outline,"outline"))return false;
+        } else if("chapter".equals(changed.kind())) {
+            BiddingTypes.Ref selected=repository.selectedRef(scope,"chapter",changed.id());
+            if(!transitionReaches(scope,changed,replacement,selected,"chapter"))return false;
+        } else return false;
+        ObjectNode outlineRow=repository.businessRevision(scope,outline);
+        BiddingTypes.Ref baseline=repository.selectedRef(scope,"analysisBaseline","current");
+        if(outlineRow==null||!"CONFIRMED".equals(outlineRow.path("status").asText())||baseline==null||!repository.businessRefs(outlineRow).contains(baseline))return false;
+        List<BiddingTypes.Ref> selectedChapters=repository.selectedChapterRefs(scope);
+        Set<String> required=leafChapterIds(outlineRow.path("chapters"));
+        if(required.isEmpty()||selectedChapters.size()!=required.size())return false;
+        for(BiddingTypes.Ref selected:selectedChapters) {
+            if(!required.contains(selected.id()))return false;
+            ObjectNode chapter=repository.businessRevision(scope,selected);
+            if(chapter==null||!Set.of("SELECTED","HUMAN_EDIT").contains(chapter.path("status").asText())||!repository.businessRefs(chapter).contains(outline))return false;
+            JsonNode responses=chapter.path("responses");
+            if(!responses.isArray()||responses.isEmpty()||!chapter.path("missingMaterials").isArray()||!chapter.path("missingMaterials").isEmpty()
+                    ||!chapter.path("unresolvedItems").isArray()||!chapter.path("unresolvedItems").isEmpty())return false;
+            for(JsonNode response:responses)if(!"RESPONDED".equals(response.path("status").asText()))return false;
+        }
+        BiddingTypes.Ref manuscript=repository.latestBusinessRef(scope,"manuscript","manuscript");
+        ObjectNode assembled=manuscript==null?null:repository.businessRevision(scope,manuscript);
+        if(assembled==null||!"DRAFT_PENDING_REVIEW".equals(assembled.path("status").asText()))return false;
+        List<BiddingTypes.Ref> expected=new java.util.ArrayList<>();expected.add(outline);
+        Map<String,BiddingTypes.Ref> selectedById=new java.util.HashMap<>();selectedChapters.forEach(ref->selectedById.put(ref.id(),ref));
+        for(String id:leafOrder(outlineRow.path("chapters")))expected.add(selectedById.get(id));
+        return repository.businessRefs(assembled).equals(expected);
+    }
+    private boolean transitionReaches(BiddingTypes.Scope scope,BiddingTypes.Ref old,BiddingTypes.Ref replacement,BiddingTypes.Ref selected,String kind) {
+        if(old==null||replacement==null||selected==null||!kind.equals(old.kind())||!kind.equals(selected.kind())||!old.id().equals(selected.id()))return false;
+        BiddingTypes.Ref current=old;Set<BiddingTypes.Ref> seen=new LinkedHashSet<>();
+        while(seen.add(current)) {
+            BiddingTypes.Ref next=null;
+            for(ObjectNode event:repository.changeEvents(scope))if(current.equals(parseRef(event.path("changedRef")))&&kind.equals(current.kind())){next=parseRef(event.path("replacementRef"));break;}
+            if(next==null)return false;
+            if(current.equals(old)&&!next.equals(replacement))return false;
+            if(next.equals(selected))return true;
+            current=next;
+        }
+        return false;
+    }
+    private Set<String> leafChapterIds(JsonNode chapters) {
+        Set<String> parents=new LinkedHashSet<>(),ids=new LinkedHashSet<>();
+        for(JsonNode chapter:chapters)if(chapter.path("id").isTextual()){ids.add(chapter.path("id").asText());if(chapter.path("parentId").isTextual())parents.add(chapter.path("parentId").asText());}
+        ids.removeAll(parents);return ids;
+    }
+    private List<String> leafOrder(JsonNode chapters) {
+        Map<String,List<JsonNode>> children=new java.util.LinkedHashMap<>();
+        for(JsonNode chapter:chapters){String parent=chapter.path("parentId").isTextual()?chapter.path("parentId").asText():"";children.computeIfAbsent(parent,key->new java.util.ArrayList<>()).add(chapter);}
+        children.values().forEach(items->items.sort(java.util.Comparator.comparingInt(item->item.path("order").asInt(Integer.MAX_VALUE))));
+        List<String> out=new java.util.ArrayList<>();collectLeaves("",children,out);return out;
+    }
+    private void collectLeaves(String parent,Map<String,List<JsonNode>> children,List<String> out) {
+        for(JsonNode chapter:children.getOrDefault(parent,List.of())){String id=chapter.path("id").asText();if(children.getOrDefault(id,List.of()).isEmpty())out.add(id);else collectLeaves(id,children,out);}
+    }
+    private ObjectNode emptyImpact() { ObjectNode impact=json.createObjectNode();impact.putArray("affectedRefs");impact.putArray("unaffectedRefs");impact.putArray("unknownRefs");impact.putArray("refLabels");impact.put("formalBlocked",false);return impact; }
 
     public void recordTransition(BiddingTypes.Scope scope,BiddingTypes.Ref oldRef,BiddingTypes.Ref newRef) {
         if(oldRef==null||oldRef.equals(newRef)) return;

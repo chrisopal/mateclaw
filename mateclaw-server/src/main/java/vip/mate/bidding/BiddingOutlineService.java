@@ -101,7 +101,11 @@ public class BiddingOutlineService implements BiddingResultHandler {
         BiddingTypes.Ref confirmed=candidate;
         setRevisionStatus(scope,candidate,"CONFIRMED"); setHead(scope,confirmed);
         dependencies.recordTransition(scope,previousConfirmed,confirmed);
-        if(previousConfirmed!=null) dependencies.invalidate(scope,previousConfirmed);
+        if(previousConfirmed!=null) {
+            dependencies.invalidate(scope,previousConfirmed);
+            jdbc.update("UPDATE mate_bidding_revision SET status='NEEDS_RECONFIRMATION' WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND version=? AND digest=?",
+                    scope.workspaceId(),scope.projectId(),previousConfirmed.kind(),previousConfirmed.id(),previousConfirmed.version(),previousConfirmed.digest());
+        }
         jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
                 UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),write(confirmed),"CONFIRM_OUTLINE",command.payload().path("reason").asText(null),scope.actorId(),Timestamp.from(Instant.now()));
         ObjectNode result=json.createObjectNode(); result.set("ref",json.valueToTree(confirmed)); result.put("status","CONFIRMED"); storeOperation(scope,command,requestDigest,result); return result;
@@ -212,7 +216,11 @@ public class BiddingOutlineService implements BiddingResultHandler {
     }
     private void setHead(BiddingTypes.Scope s,BiddingTypes.Ref r){ ObjectNode n=json.valueToTree(r); jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=?",r.version(),write(n),s.workspaceId(),s.projectId(),KIND,OBJECT); if(head(s)==null) jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",s.workspaceId(),s.projectId(),KIND,OBJECT,r.version(),write(n)); }
     private BiddingTypes.Ref head(BiddingTypes.Scope s){ return selected(s,KIND,OBJECT); }
-    private BiddingTypes.Ref confirmedHead(BiddingTypes.Scope s){ BiddingTypes.Ref r=head(s); if(r==null)return null; JsonNode row=revision(s,r); return row!=null&&"CONFIRMED".equals(row.path("status").asText())?r:null; }
+    private BiddingTypes.Ref confirmedHead(BiddingTypes.Scope s){
+        List<BiddingTypes.Ref> confirmed=jdbc.query("SELECT version,digest FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND status IN ('CONFIRMED','NEEDS_RECONFIRMATION') ORDER BY version DESC",
+                (rs,n)->new BiddingTypes.Ref(KIND,OBJECT,rs.getLong(1),rs.getString(2)),s.workspaceId(),s.projectId(),KIND,OBJECT);
+        return confirmed.isEmpty()?null:confirmed.getFirst();
+    }
     private BiddingTypes.Ref baselineRef(BiddingTypes.Scope s){ return selected(s,"analysisBaseline","current"); }
     private BiddingTypes.Ref selected(BiddingTypes.Scope s,String kind,String id){ String raw=jdbc.query("SELECT selected_ref_json FROM mate_bidding_head WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=?",rs->rs.next()?rs.getString(1):null,s.workspaceId(),s.projectId(),kind,id); return raw==null?null:readRef(read(raw)); }
     private BiddingTypes.Ref emptyHead(BiddingTypes.Scope s){ return new BiddingTypes.Ref(KIND,OBJECT,0,sha(s.workspaceId()+":"+s.projectId()+":"+KIND+":"+OBJECT+":0")); }
