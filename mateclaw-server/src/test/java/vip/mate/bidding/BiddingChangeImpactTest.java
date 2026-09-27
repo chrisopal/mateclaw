@@ -6,18 +6,32 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import static org.mockito.Mockito.when;
+import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
+import vip.mate.wiki.model.WikiPageEntity;
+import vip.mate.wiki.service.WikiKnowledgeBaseService;
+import vip.mate.wiki.service.WikiPageService;
+import vip.mate.wiki.service.WikiPageTypePermissionService;
 
 class BiddingChangeImpactTest extends BiddingHttpFixture {
     @Autowired BiddingDependencies dependencies;
     @Autowired BiddingRepository repository;
     @Autowired BiddingWritingService writing;
     @Autowired BiddingOutlineService outlines;
+    @Autowired BiddingMaterials materials;
+    @Autowired WikiKnowledgeBaseService knowledgeBases;
+    @MockBean WikiPageService pages;
+    @MockBean WikiPageTypePermissionService pageTypePermissions;
 
     @Test void deadlineOnlyTransitionClonesBothChapterBodiesOntoNewOutlineWithCas() throws Exception {
         var fixture=baselineTransition(false);
@@ -169,6 +183,62 @@ class BiddingChangeImpactTest extends BiddingHttpFixture {
         assertEquals("CONFIRMED",repository.changeEvent(fixture.scope(),event.path("eventId").asText()).path("status").asText());
         assertNotNull(firstOld);
         assertEquals("NEEDS_RECONFIRMATION",repository.businessRevision(fixture.scope(),firstOld).path("status").asText());
+    }
+
+    @Test void revokedReplacementOnlyMaterialBlocksOutlineChangeConfirmation() throws Exception {
+        var fixture=baselineTransition(false);
+        BiddingTypes.Ref sourceSet=repository.businessRefs(repository.businessRevision(fixture.scope(),fixture.oldBaseline())).getFirst();
+        head(fixture.scope(),sourceSet);
+        dependencies.reconfirm(fixture.scope(),fixture.command(dependencies.impact(fixture.scope(),fixture.oldBaseline()),"material-outline-baseline"));
+        BiddingTypes.Ref priorOutline=repository.selectedRef(fixture.scope(),"outline","current");
+        jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
+                UUID.randomUUID().toString(),workspace,fixture.scope().projectId(),json.writeValueAsString(priorOutline),"CONFIRM_OUTLINE","{}",fixture.scope().actorId(),Timestamp.from(Instant.now()));
+
+        long agentId=Math.abs(UUID.randomUUID().getLeastSignificantBits()%1_000_000_000L)+1_000_000_000L;
+        long kbId=7021,pageId=Math.abs(UUID.randomUUID().getLeastSignificantBits()%1_000_000_000L)+1_000_000_000L;
+        jdbc.update("INSERT INTO mate_agent(id,name,enabled,workspace_id,create_time,update_time,deleted) VALUES(?,?,TRUE,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",agentId,"Material writer",Long.valueOf(workspace));
+        ObjectNode storedProject=repository.findProject(workspace,fixture.scope().projectId());
+        storedProject.putObject("bindings").putObject("writer").put("agentId",Long.toString(agentId));
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE workspace_id=? AND id=?",json.writeValueAsString(storedProject),workspace,fixture.scope().projectId());
+        WikiKnowledgeBaseEntity kb=new WikiKnowledgeBaseEntity();kb.setId(kbId);kb.setWorkspaceId(Long.valueOf(workspace));kb.setDeleted(0);
+        when(knowledgeBases.findVisibleById(agentId,kbId)).thenReturn(kb);
+        WikiPageEntity page=new WikiPageEntity();page.setId(pageId);page.setKbId(kbId);page.setDeleted(0);page.setTitle("Replacement evidence");page.setPageType("experience");page.setContent("Replacement material");
+        when(pages.getById(pageId)).thenReturn(page);when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(true);
+        ObjectNode bindPayload=json.createObjectNode().put("kind","WIKI_PAGE").put("knowledgeBaseId",kbId).put("pageId",pageId)
+                .put("expectedDigest",sha("Replacement material")).put("applicability","Replacement outline evidence");
+        ObjectNode bound=materials.bind(fixture.scope(),new BiddingTypes.Command("bind-replacement-material",ref(storedProject),"BIND_MATERIAL",bindPayload));
+        BiddingTypes.Ref materialRef=json.treeToValue(bound.path("ref"),BiddingTypes.Ref.class);
+
+        ObjectNode revisedOutline=(ObjectNode)json.readTree(outlinePayload());
+        for(JsonNode chapter:revisedOutline.path("chapters"))((ObjectNode)chapter).put("instructions","Use the selected source material with traceable evidence.");
+        ((ObjectNode)revisedOutline.path("chapters").get(0)).withArray("materialRefs").add(materialRef.id());
+        revisedOutline.putArray("unmappedItems");revisedOutline.putArray("warnings");
+        JsonNode candidate=api("POST","/projects/"+fixture.scope().projectId()+"/commands","member",workspace,
+                Map.of("operationId","save-material-outline","expected",priorOutline,"action","SAVE_OUTLINE","payload",Map.of("payload",revisedOutline)),200);
+        JsonNode confirmed=api("POST","/projects/"+fixture.scope().projectId()+"/commands","owner",workspace,
+                Map.of("operationId","confirm-material-outline","expected",candidate.path("editExpectedRef"),"action","CONFIRM_OUTLINE","payload",Map.of("outlineRef",candidate.path("ref"))),200);
+        BiddingTypes.Ref newOutline=json.treeToValue(confirmed.path("ref"),BiddingTypes.Ref.class);
+        for(BiddingTypes.Ref selected:repository.selectedChapterRefs(fixture.scope())) {
+            String requirement="REQ-"+(selected.id().endsWith("2")?"2":"1");
+            ObjectNode edit=json.createObjectNode().put("chapterId",selected.id());edit.putArray("blocks").addObject().put("type","paragraph").put("text","Rebuilt "+requirement);
+            edit.putArray("responses").addObject().put("requirementRef",requirement).put("status","RESPONDED");
+            edit.putArray("citations").addObject().put("requirementRef",requirement).put("sourceId","source-proof").put("version",1).put("blockId","block-1").put("quote","Exact tender evidence");
+            edit.putArray("missingMaterials");edit.putArray("unresolvedItems");
+            writing.edit(fixture.scope(),new BiddingTypes.Command("edit-with-material-"+selected.id(),selected,"EDIT_CHAPTER",edit));
+        }
+        ObjectNode assemble=json.createObjectNode().set("outlineRef",json.valueToTree(newOutline));ArrayNode chapters=assemble.putArray("chapterRefs");
+        for(BiddingTypes.Ref selected:repository.selectedChapterRefs(fixture.scope())){ObjectNode item=chapters.addObject().put("chapterId",selected.id());item.set("ref",json.valueToTree(selected));}
+        writing.assemble(fixture.scope(),new BiddingTypes.Command("assemble-with-material",newOutline,"ASSEMBLE_MANUSCRIPT",assemble));
+        when(pageTypePermissions.canRead(agentId,kbId,"experience")).thenReturn(false);
+
+        api("GET","/projects/"+fixture.scope().projectId()+"/change-impact","owner",workspace,null,403);
+        ObjectNode event=repository.changeEvents(fixture.scope()).stream().filter(row->priorOutline.equals(json.convertValue(row.path("changedRef"),BiddingTypes.Ref.class))).findFirst().orElseThrow();
+        assertEquals("PENDING",event.path("status").asText());
+        ObjectNode project=api("GET","/projects/"+fixture.scope().projectId(),"owner",workspace,null,200).deepCopy();
+        ObjectNode payload=json.createObjectNode().put("eventId",event.path("eventId").asText());payload.set("changedRef",json.valueToTree(priorOutline));payload.putArray("unchangedRefs");payload.putArray("resolutions");
+        api("POST","/projects/"+fixture.scope().projectId()+"/commands","owner",workspace,
+                Map.of("operationId","confirm-revoked-material-outline","expected",ref(project),"action","CONFIRM_CHANGE_IMPACT","payload",payload),403);
+        assertEquals("PENDING",repository.changeEvent(fixture.scope(),event.path("eventId").asText()).path("status").asText());
     }
 
     @Test void assembledManuscriptWithUnresolvedRequiredResponseCannotCloseChapterTransition() throws Exception {
@@ -349,6 +419,7 @@ class BiddingChangeImpactTest extends BiddingHttpFixture {
         for(int i=1;i<=2;i++){var c=cs.addObject().put("id","chapter-"+i).put("title","Chapter "+i).put("order",i);c.putNull("parentId");c.putArray("requirementRefs").add("REQ-"+i);c.putArray("scoringRefs");c.putArray("mandatoryOutlineRefs");c.putArray("materialRefs");}
         return p.toString();
     }
+    private String sha(String value) throws Exception { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }
     private void head(BiddingTypes.Scope s,BiddingTypes.Ref ref) throws Exception {
         jdbc.update("MERGE INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) KEY(workspace_id,project_id,kind,object_id) VALUES(?,?,?,?,?,?)",s.workspaceId(),s.projectId(),ref.kind(),ref.id(),ref.version(),json.writeValueAsString(ref));
     }

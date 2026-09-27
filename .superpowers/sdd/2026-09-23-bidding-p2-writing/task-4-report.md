@@ -10,10 +10,12 @@ Added persisted regressions for successive baseline 1→2→3 confirmation, actu
 
 Verification (Temurin Java 21):
 `JAVA_HOME=$(/usr/libexec/java_home -v 21) PATH="$(/usr/libexec/java_home -v 21)/bin:$PATH" mvn -pl mateclaw-server -am -Dtest=BiddingSourceTest,BiddingAnalysisTest,BiddingOutlineTest,BiddingWritingTest,BiddingChangeImpactTest -Dsurefire.failIfNoSpecifiedTests=false test`
-Result: BUILD SUCCESS; 45 tests, 0 failures, 0 errors (Source 17, Analysis 6, Outline 5, Writing 3, ChangeImpact 14). `git diff --check` passed.
+Result: BUILD SUCCESS; 46 tests, 0 failures, 0 errors (Source 17, Analysis 6, Outline 5, Writing 3, ChangeImpact 15). `git diff --check` passed.
 
 Files changed in this follow-up: BiddingDependencies.java, BiddingOutlineService.java, BiddingRepository.java, BiddingWritingService.java, BiddingChangeImpactTest.java, and this report. No UI/controller files were staged or changed by this follow-up. The independently committed manuscript public-read fix remains preserved.
 
 Remaining conservative limits: unknown dependency records, incomplete evidence, unresolved or missing required responses, and non-exact transition chains do not receive confirmation envelopes and remain blocked. Broader final repository gates and Sol review are intentionally left to the controller.
 
 Task4 review follow-up: public outline reads now return a confirmed outline only when the exact selected head is still CONFIRMED and its dependency chain is current for a reader. The former stale-outline read regression now verifies that an invalidated dependency cannot unlock writing, and a saved candidate remains unconfirmed. Writing reads validate outline, selected chapter, and candidate refs using the reader ACL path; mutation commands retain their member/actor checks. A persisted HTTP regression verifies a workspace viewer can read a current outline and chapter body while a chapter edit receives 403. Five-suite verification above was rerun after these changes.
+
+Final Task4 proof repair: downstream closure now revalidates the exact persisted manuscript input refs with `validateForRead` after matching the expected current outline and selected chapter refs. A real database/HTTP regression adds a replacement-only wiki material to a confirmed replacement outline, rebuilds chapters and assembles the manuscript, then revokes the writer's wiki page-type permission. Both change-impact GET and reconfirm return 403 and the persisted outline event remains PENDING; the prior implementation incorrectly accepted the confirmation. The five-suite gate above includes this regression.

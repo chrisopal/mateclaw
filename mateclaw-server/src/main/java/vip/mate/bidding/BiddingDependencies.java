@@ -443,7 +443,10 @@ public class BiddingDependencies {
         List<BiddingTypes.Ref> expected=new java.util.ArrayList<>();expected.add(outline);
         Map<String,BiddingTypes.Ref> selectedById=new java.util.HashMap<>();selectedChapters.forEach(ref->selectedById.put(ref.id(),ref));
         for(String id:leafOrder(outlineRow.path("chapters")))expected.add(selectedById.get(id));
-        return repository.businessRefs(assembled).equals(expected);
+        List<BiddingTypes.Ref> assembledRefs=repository.businessRefs(assembled);
+        if(!assembledRefs.equals(expected))return false;
+        validateForRead(scope,assembledRefs);
+        return true;
     }
     private boolean transitionReaches(BiddingTypes.Scope scope,BiddingTypes.Ref old,BiddingTypes.Ref replacement,BiddingTypes.Ref selected,String kind) {
         if(old==null||replacement==null||selected==null||!kind.equals(old.kind())||!kind.equals(selected.kind())||!old.id().equals(selected.id()))return false;
