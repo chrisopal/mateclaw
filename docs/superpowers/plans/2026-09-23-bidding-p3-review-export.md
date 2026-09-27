@@ -94,9 +94,9 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 - Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/references/rules.md`.
 - Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/examples/valid.json`.
 - Create: `mateclaw-server/src/main/resources/skills/bidding-document-export/examples/invalid.json`.
-- Create: `mateclaw-server/src/main/resources/db/migration/h2/V214__bidding_artifacts.sql`.
-- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V214__bidding_artifacts.sql`.
-- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V214__bidding_artifacts.sql`.
+- Create: `mateclaw-server/src/main/resources/db/migration/h2/V216__bidding_artifacts.sql`.
+- Create: `mateclaw-server/src/main/resources/db/migration/mysql/V216__bidding_artifacts.sql`.
+- Create: `mateclaw-server/src/main/resources/db/migration/kingbase/V216__bidding_artifacts.sql`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingToolScope.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingSkillValidator.java`.
@@ -132,7 +132,7 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 ```
 
 - [ ] Run：Maven `-Dtest='BiddingDocxRendererTest,BiddingArtifactTest'`，Expected renderer/候选持久化缺失 FAIL。
-- [ ] V214 artifact列：workspace_id/project_id/id/manuscript_ref_json/template_ref_json/format_ref_json/mode/format/digest/byte_size/content/checks_json/generator_attempt_id/status/decision_id/created_at；generator_attempt_id unique。大小超过50MiB返回413，记录导出失败；单项目候选累计容量配置可观测，首版不自动删除历史。
+- [ ] V216 artifact列：workspace_id/project_id/id/manuscript_ref_json/template_ref_json/format_ref_json/mode/format/digest/byte_size/content/checks_json/generator_attempt_id/status/decision_id/created_at；generator_attempt_id unique。大小超过50MiB返回413，记录导出失败；单项目候选累计容量配置可观测，首版不自动删除历史。
 - [ ] JSON模板technical-v1使用A4/25mm、宋体12pt、标题1/2/3级、页码、目录字段、表头重复、行不拆分页、图片最大宽度≤正文宽度。招标格式要求优先，单位明确并验证值域，无法支持的强制格式显式阻断；不能用模板默认值盖掉招标要求。模板字节固定快照到TEMPLATE revision并计算digest，GET /templates返回此Ref。招标formatRequirements从已确认基础信息形成FORMAT_REQUIREMENTS revision；人工调整须另存新revision、校验不得违反强制格式并invalidate旧文件。注册 `SAVE_FORMAT_REQUIREMENTS` action处理此调整，expected=当前formatRef，真实approver执行。
 - [ ] POI逐块生成标题、段落、列表、表格、授权图片；只从authorizedImages按materialRef key取bytes，拒绝URL/path/外部relationship，不执行OLE/宏。段落转义，不使用任意HTML。图片先校验PNG/JPEG内容类型和尺寸；保持比例，不凭文件名信任图片。
 
