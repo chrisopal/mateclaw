@@ -219,11 +219,14 @@ WHERE id=:artifactId AND workspace_id=:workspaceId AND project_id=:projectId
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingArtifacts.vue`.
 - Create: `mateclaw-ui/src/features/bidding/components/BiddingApprovalDialog.vue`.
 - Modify: `mateclaw-ui/src/features/bidding/pages/BiddingWorkbench.vue`.
+- Modify: `mateclaw-ui/src/features/bidding/components/BiddingTaskDrawer.vue`.
+- Modify: `mateclaw-ui/src/features/bidding/components/BiddingWriting.vue`.
 - Modify: `mateclaw-ui/src/features/bidding/api/biddingApi.ts`.
 - Modify: `mateclaw-ui/src/features/bidding/api/types.ts`.
 - Modify: `mateclaw-ui/src/features/bidding/shared/state.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingReview.test.ts`.
 - Test: `mateclaw-ui/src/features/bidding/__tests__/biddingArtifacts.test.ts`.
+- Test: `mateclaw-ui/src/features/bidding/__tests__/biddingTasks.test.ts`.
 
 **Interfaces:**
 - Consumes: P3 HTTP/Command契约；P1TaskDrawer/P2CandidateCompare与版本Ref。
