@@ -3,6 +3,9 @@ export const isCurrentRequest = (workspaceId: string, projectId: string, activeW
 
 export const operationId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
 
+export const canAdopt = (state: string, current: number | string, expected: number | string) =>
+  state === 'CANDIDATE' && Number.isSafeInteger(Number(current)) && Number(current) === Number(expected)
+
 export function isConflict(error: unknown): boolean {
   return !!error && typeof error === 'object' && 'response' in error
     && (error as { response?: { status?: number } }).response?.status === 409

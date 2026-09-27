@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { ElLoading } from 'element-plus'
 // Element Plus components and imperative APIs (ElMessage, ElMessageBox, …) are
 // now resolved on demand by unplugin (see vite.config.ts) instead of registering
 // the whole library via app.use(ElementPlus). Only the full stylesheet is still
@@ -28,6 +29,7 @@ async function bootstrap() {
 
   const app = createApp(App)
 
+  app.directive('loading', ElLoading.directive)
   app.use(createPinia())
   app.use(router)
   app.use(i18n)

@@ -1,6 +1,6 @@
 <template>
   <section class="analysis">
-    <header class="analysis-heading"><div><h2>{{ l('解析结果', 'Analysis results') }}</h2><span v-if="baseline" class="baseline">{{ l('已确认基线', 'Confirmed baseline') }} V{{ baseline.ref.version }}</span></div><div class="actions"><el-button v-if="canApprove && activeGroup?.complete" type="primary" :disabled="hasConflicts || !!baseline" @click="$emit('confirm', activeGroup.taskGroupId)">{{ l('确认解析基线', 'Confirm analysis baseline') }}</el-button><el-button v-else-if="!canApprove" disabled>{{ l('只读访问', 'Read only') }}</el-button></div></header>
+    <header class="analysis-heading"><div><h2>{{ l('解析结果', 'Analysis results') }}</h2><span v-if="baseline" class="baseline">{{ l('已确认基线', 'Confirmed baseline') }} V{{ baseline.ref.version }}</span></div><div class="actions"><el-checkbox v-if="canApprove && activeGroup?.complete && !baseline" v-model="autoPlanOutline">{{ l('确认后编写目录','Plan outline after confirmation') }}</el-checkbox><el-button v-if="canApprove && activeGroup?.complete" type="primary" :disabled="hasConflicts || !!baseline" @click="$emit('confirm', activeGroup.taskGroupId, autoPlanOutline)">{{ l('确认解析基线', 'Confirm analysis baseline') }}</el-button><el-button v-else-if="!canApprove" disabled>{{ l('只读访问', 'Read only') }}</el-button></div></header>
     <el-alert v-if="!groups.length && !baseline" :title="l('尚无解析结果。先确认文件来源并开始解析。', 'No analysis results. Confirm sources and start analysis first.')" type="info" :closable="false" />
     <el-alert v-if="hasConflicts" :title="l('存在待处理冲突；确认前请逐项修订。', 'Conflicts remain. Resolve each item before confirmation.')" type="warning" :closable="false" />
     <el-tabs v-if="availableSkills.length" v-model="activeSkill" class="skill-tabs">
@@ -34,13 +34,14 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { AnalysisGroup, AnalysisPayload, AnalysisView } from '../api/types'
 const props = defineProps<{ analysis: AnalysisView; canWrite: boolean; canApprove: boolean }>()
-const emit = defineEmits<{ evidence:[ref: Record<string, unknown>]; edit:[body:{taskGroupId:string;skillId:string;payload:AnalysisPayload;reason:string}] ; confirm:[groupId:string] }>()
+const emit = defineEmits<{ evidence:[ref: Record<string, unknown>]; edit:[body:{taskGroupId:string;skillId:string;payload:AnalysisPayload;reason:string}] ; confirm:[groupId:string,autoPlanOutline:boolean] }>()
 const { locale } = useI18n(), l=(zh:string,en:string)=>String(locale.value).startsWith('zh')?zh:en
 const labels = [ ['bidding-tender-profile',l('基本信息','Basic information')], ['bidding-elimination-analysis',l('废标条件','Disqualification')], ['bidding-requirement-analysis',l('技术与商务要求','Requirements')], ['bidding-scoring-analysis',l('评分标准','Scoring')] ]
 const baseline = computed(() => props.analysis.baseline)
 const groups = computed(() => props.analysis.groups || [])
 const activeGroup = computed<AnalysisGroup | undefined>(() => groups.value.find(group => group.complete) || groups.value[0])
 const activeSkill = ref(labels[0]![0]), availableSkills = computed(() => labels.map(([id,label])=>({id,label})))
+const autoPlanOutline = ref(false)
 watch(() => groups.value, value => { if (value.length && !activeGroup.value) activeSkill.value=labels[0]![0] }, { immediate:true })
 function statusLabel(status?:string) { const labels:Record<string,string>={SUCCEEDED:l('已完成','Completed'),FAILED:l('失败','Failed'),RUNNING:l('执行中','Running'),QUEUED:l('等待执行','Queued'),CANCELLED:l('已取消','Cancelled'),STALE:l('已失效','Outdated')}; return status ? labels[status] || l('候选','Candidate') : l('候选','Candidate') }
 const groupStatus = computed(() => baseline.value ? l('已确认','Confirmed') : statusLabel(activeGroup.value?.status))

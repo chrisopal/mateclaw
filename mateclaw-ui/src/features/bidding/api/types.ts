@@ -1,4 +1,4 @@
-export interface Ref { kind: string; id: string; version: number; digest: string }
+export interface Ref { kind: string; id: string; version: number | string; digest: string }
 export interface Project {
   id: string; workspaceId: string; name: string; lotName: string; ownerId: string
   version: number; stage: string; ref: Ref; capabilities?: ProjectCapabilities
@@ -27,3 +27,66 @@ export interface Evidence { id: string; locator: string; text: string; pdfPage?:
 export interface Command { operationId: string; expected: Ref; action: string; payload: Record<string, unknown> }
 export interface CommandResult { ref?: Ref; result?: unknown; taskGroupId?: string; taskIds?: string[]; [key: string]: unknown }
 export interface Dashboard { inProgress: number; dueWithin7Days: number; overdueDeadlines: number; unknownDeadlines: number; pendingConfirmation: number; failedTasks: number }
+
+export interface HandoffOption {
+  presalesProjectId: string
+  releaseId: string
+  digest: string
+  title: string
+  publishedAt?: string
+  solutionVersion?: number
+  status: 'PUBLISHED'
+  available?: boolean
+  unavailableReason?: string
+}
+export interface HandoffSnapshot {
+  baseline?: Record<string, unknown>
+  solution?: { title?: string; version?: number; sections?: { title?: string; text?: string }[] }
+  risksAndUnknowns?: Record<string, unknown>[]
+  clarifications?: Record<string, unknown>[]
+  historicalClarificationsAvailable?: boolean
+  [key: string]: unknown
+}
+export interface BiddingMaterial {
+  ref: Ref
+  source: 'WIKI_PAGE' | 'PRESALES_RELEASE' | string
+  title: string
+  version: number
+  digest: string
+  validity: string
+  applicability: string
+  selectedAt?: string
+  receivedAt?: string
+  solutionVersion?: number
+  publishedAt?: string
+  content?: HandoffSnapshot
+  accessRef?: Record<string, unknown>
+}
+export interface BiddingMaterialsView { items: BiddingMaterial[] }
+export interface OutlineChapter {
+  id: string
+  parentId: string | null
+  order: number
+  title: string
+  instructions?: string
+  mandatoryOutlineRefs?: string[]
+  requirementRefs?: string[]
+  scoringRefs?: string[]
+  materialRefs?: Ref[]
+  children?: OutlineChapter[]
+  [key: string]: unknown
+}
+export interface OutlineRevision { ref: Ref; status: string; payload: { chapters?: OutlineChapter[]; unmappedItems?: Record<string, unknown>[]; warnings?: string[] }; inputRefs: Ref[] }
+export interface OutlineView { baselineRef?: Ref; editExpectedRef?: Ref; confirmed?: OutlineRevision; candidates: OutlineRevision[]; dispatchTodo?: { status: string; action?: string; reasonCode?: string; baselineRef?: Ref } }
+export interface ChapterRevision { ref: Ref; status: string; payload: Record<string, unknown>; inputRefs: Ref[]; headGuard?: Ref }
+export interface WritingChapter { chapterId: string; title: string; editExpectedRef?: Ref; selected?: ChapterRevision; candidates: ChapterRevision[]; tasks?: Pick<Task, 'taskId' | 'status' | 'attemptCount'>[] }
+export interface ManuscriptChapter { chapterId: string; chapter?: { title?: string; blocks?: Record<string, unknown>[]; [key: string]: unknown }; responses?: unknown[]; citations?: unknown[]; missingMaterials?: unknown[]; unresolvedItems?: unknown[] }
+export interface ManuscriptPayload { schemaVersion?: string; status?: string; chapters?: ManuscriptChapter[]; [key: string]: unknown }
+export interface WritingView { outlineRef?: Ref; chapters: WritingChapter[]; manuscript?: { ref: Ref; status: string; inputRefs?: Ref[]; payload?: ManuscriptPayload } }
+
+export interface ChangeImpactLabel { ref: Ref; title: string }
+export interface ChangeImpact { affectedRefs: Ref[]; unaffectedRefs: Ref[]; unknownRefs: Ref[]; formalBlocked: boolean; refLabels?: ChangeImpactLabel[] }
+export interface ChangeImpactConfirmationPayload extends Record<string, unknown> { eventId: string; changedRef: Ref; unchangedRefs: Ref[]; resolutions: Array<{ ref: Ref; decision: string; reason?: string; evidenceRefs?: Ref[] }> }
+export interface ChangeImpactConfirmation { ready: boolean; payload?: ChangeImpactConfirmationPayload }
+export interface ChangeImpactEvent { eventId: string; changedRef: Ref; replacementRef?: Ref; status: string; impact: ChangeImpact; confirmation?: ChangeImpactConfirmation; refLabels?: ChangeImpactLabel[] }
+export interface ChangeImpactView { events: ChangeImpactEvent[]; formalBlocked: boolean }

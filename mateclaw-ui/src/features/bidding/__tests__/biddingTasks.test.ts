@@ -118,16 +118,17 @@ it('uses Chinese task skill, status, and failure labels for Chinese workspaces',
   expect(document.querySelector('.task-detail .el-alert')?.textContent).toContain('技能包未能加载')
 })
 
-it('localizes project stages and describes unavailable later capabilities without internal phase codes',async()=>{
+it('localizes project stages and shows the current overview roles without obsolete P2 copy',async()=>{
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingOverview,{project,members:[{userId:'7',nickname:'Owner'}],employees:[],canApprove:false,saving:false,error:''})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   expect(host.textContent).toContain('Setup')
-  expect(host.textContent).toContain('not available yet')
+  expect(host.textContent).toContain('Employee roles')
+  expect(host.textContent).not.toContain('Outline planning is not available yet')
+  expect(host.textContent).not.toContain('Writing, review and export are not available yet')
   expect(host.textContent).not.toContain('SETUP')
   expect(host.textContent).not.toContain('P2')
-  expect(host.textContent).not.toContain('P3')
 })
 
 it('keeps retry and cancel actions unavailable to a workspace viewer',async()=>{
