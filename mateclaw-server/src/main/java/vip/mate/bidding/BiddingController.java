@@ -3,6 +3,7 @@ package vip.mate.bidding;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -137,8 +138,23 @@ public class BiddingController {
         String projectId=details.path("projectId").asText();
         String agentId=jdbc.query("SELECT agent_id FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND id=?",
                 rs->rs.next()?rs.getString(1):null,workspace,projectId,taskId);
-        materials.getObject().requireReadable(new BiddingTypes.Scope(workspace,actor,projectId),agentId,
-                details.path("snapshot").path("inputRefs"));
+        BiddingTypes.Scope taskScope=new BiddingTypes.Scope(workspace,actor,projectId);
+        String bindingsJson=jdbc.query("SELECT body_json FROM mate_bidding_project WHERE workspace_id=? AND id=?",
+                rs->rs.next()?rs.getString(1):null,workspace,projectId);
+        ObjectNode bindings=json.createObjectNode();
+        if(bindingsJson!=null)try { bindings=(ObjectNode)json.readTree(bindingsJson).path("bindings"); }
+        catch(Exception invalidProject) { throw BiddingAccess.error(500,"PROJECT_STATE_INVALID","Project bindings are unavailable"); }
+        String reviewerId=bindings.path("reviewer").path("agentId").asText("");
+        if(agentId.equals(reviewerId)) {
+            for(JsonNode ref:details.path("snapshot").path("inputRefs"))
+                materials.getObject().requireReviewerReadable(taskScope,reviewerId,json.convertValue(ref,BiddingTypes.Ref.class));
+            for(JsonNode material:details.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items"))
+                materials.getObject().requireReviewerReadable(taskScope,reviewerId,json.convertValue(material.path("ref"),BiddingTypes.Ref.class));
+        } else {
+            materials.getObject().requireReadable(taskScope,agentId,details.path("snapshot").path("inputRefs"));
+            for(JsonNode material:details.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items"))
+                materials.getObject().requireReadable(taskScope,agentId,json.convertValue(material.path("ref"),BiddingTypes.Ref.class));
+        }
         return R.ok(details);
     }
     @PostMapping("/projects/{id}/commands")

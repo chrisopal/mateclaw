@@ -229,8 +229,10 @@ public class BiddingReviewService implements BiddingResultHandler {
                     && mandatoryMissing(originalFinding))
                 throw BiddingAccess.error(422, "MANDATORY_PROOF_CANNOT_BE_DISMISSED", "A missing mandatory proof cannot be dismissed as risk acceptance");
         } else if ("DEFER_SUGGESTION".equals(decision)) {
-            if (!"SUGGESTION".equals(originalFinding.path("severity").asText())
-                    && !"STYLE_SUGGESTION".equals(originalFinding.path("category").asText()))
+            String category = originalFinding.path("category").asText();
+            String severity = originalFinding.path("severity").asText();
+            if (blocksTechnicalApproval(category, severity, false)
+                    || (!"SUGGESTION".equals(severity) && !"STYLE_SUGGESTION".equals(category)))
                 throw BiddingAccess.error(422, "FINDING_DECISION_INVALID", "Only a general suggestion may be deferred");
         } else if (!"FIX".equals(decision)) throw BiddingAccess.error(400, "FINDING_DECISION_INVALID", "Unsupported finding decision");
         ObjectNode decisionPayload = json.createObjectNode(); decisionPayload.set("findingRef", json.valueToTree(findingRef));
@@ -247,10 +249,13 @@ public class BiddingReviewService implements BiddingResultHandler {
         access.requireActor(scope, scope.actorId()); validateCommand(command, "RESOLVE_HUMAN_TODO");
         only(command.payload(), Set.of("todoRef", "reason", "evidenceRefs"), "HUMAN_TODO_INVALID");
         BiddingTypes.Ref todoRef = ref(command.payload().path("todoRef"));
-        if (todoRef == null || !"HUMAN_TODO".equals(todoRef.kind())) throw BiddingAccess.error(400, "HUMAN_TODO_INVALID", "todoRef must identify a human todo");
+        if (todoRef == null || !"HUMAN_TODO".equals(todoRef.kind()) || !same(command.expected(),todoRef)) throw BiddingAccess.error(400, "HUMAN_TODO_INVALID", "Expected todoRef must identify the exact current human todo");
+        if(repository.maxRevisionVersion(scope,"HUMAN_TODO",todoRef.id())!=todoRef.version())throw BiddingAccess.error(409,"HUMAN_TODO_STALE","Human todo changed; reload before resolving it");
         ObjectNode envelope = requiredBusiness(scope, todoRef, "HUMAN_TODO");
         if(!"OPEN".equals(envelope.path("status").asText()))throw BiddingAccess.error(409,"HUMAN_TODO_ALREADY_RESOLVED","Human todo is no longer open");
         ObjectNode row=(ObjectNode)envelope.path("payload");
+        if ("UNCLASSIFIED".equals(row.path("impactClassification").asText()))
+            throw BiddingAccess.error(409,"HUMAN_TODO_IMPACT_UNCLASSIFIED","Classify technical impact before resolving this todo");
         String owner = row.path("ownerId").asText("");
         if (!scope.actorId().equals(owner)) access.requireApprover(scope);
         String reason = bounded(command.payload().path("reason"), "reason", 2000);
@@ -265,10 +270,44 @@ public class BiddingReviewService implements BiddingResultHandler {
         return result;
     }
 
+    @Transactional
+    public ObjectNode classifyHumanTodo(BiddingTypes.Scope scope, BiddingTypes.Command command) {
+        access.requireApprover(scope);
+        validateCommand(command,"CLASSIFY_HUMAN_TODO");
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+        only(command.payload(),Set.of("todoRef","affectsTechnical","reason","evidenceRefs"),"HUMAN_TODO_CLASSIFICATION_INVALID");
+        if(!command.payload().path("affectsTechnical").isBoolean())throw BiddingAccess.error(422,"HUMAN_TODO_CLASSIFICATION_INVALID","affectsTechnical must be an explicit boolean");
+        String requestDigest=digest(Map.of("action",command.action(),"expected",command.expected(),"payload",command.payload()));
+        var replay=repository.findOperation(scope.workspaceId(),scope.actorId(),command.operationId());
+        if(replay!=null){if(!requestDigest.equals(replay.digest()))throw BiddingAccess.error(409,"IDEMPOTENCY_CONFLICT","Operation id was used for another request");return replay.result();}
+        BiddingTypes.Ref todoRef=ref(command.payload().path("todoRef"));
+        if(todoRef==null||!"HUMAN_TODO".equals(todoRef.kind())||!same(command.expected(),todoRef))
+            throw BiddingAccess.error(400,"HUMAN_TODO_CLASSIFICATION_INVALID","Expected todoRef must identify the exact current todo");
+        if(repository.maxRevisionVersion(scope,"HUMAN_TODO",todoRef.id())!=todoRef.version())throw BiddingAccess.error(409,"HUMAN_TODO_STALE","Human todo changed; reload before classifying it");
+        ObjectNode envelope=requiredBusiness(scope,todoRef,"HUMAN_TODO");
+        ObjectNode todo=(ObjectNode)envelope.path("payload");
+        if(!"OPEN".equals(envelope.path("status").asText())||!"OPEN".equals(todo.path("status").asText()))
+            throw BiddingAccess.error(409,"HUMAN_TODO_ALREADY_RESOLVED","Only an open todo can be classified");
+        String reason=bounded(command.payload().path("reason"),"reason",2000);
+        ArrayNode evidence=copyArray(command.payload().path("evidenceRefs"));
+        if(evidence.isEmpty())throw BiddingAccess.error(422,"HUMAN_TODO_EVIDENCE_REQUIRED","Impact classification requires source evidence");
+        validateTodoEvidence(scope,todo,evidence);
+        ObjectNode classified=todo.deepCopy();
+        classified.put("impactClassification","CLASSIFIED").put("affectsTechnical",command.payload().path("affectsTechnical").asBoolean())
+                .put("classificationReason",reason).put("classifiedBy",scope.actorId()).put("classifiedAt",Instant.now().toString());
+        classified.set("classificationEvidenceRefs",evidence);
+        BiddingTypes.Ref saved=saveBusinessRevision(scope,"HUMAN_TODO",todoRef.id(),classified,
+                append(refs(envelope.path("refs")),evidenceSourceRefs(scope,evidence)),"OPEN");
+        ObjectNode result=json.createObjectNode();result.set("ref",json.valueToTree(saved));result.put("impactClassification","CLASSIFIED").put("affectsTechnical",classified.path("affectsTechnical").asBoolean());
+        repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),requestDigest,write(result),Timestamp.from(Instant.now()));
+        return result;
+    }
+
     public void requireReviewed(BiddingTypes.Scope scope, BiddingTypes.Ref manuscript) {
         access.requireActor(scope, scope.actorId());
         BiddingTypes.Ref latest = latestManuscript(scope);
         if (!same(latest, manuscript)) throw BiddingAccess.error(409, "REVIEW_STALE", "Review is not bound to the current manuscript");
+        dependencies.validate(scope,List.of(manuscript));
         ObjectNode row = requiredManuscript(scope, manuscript);
         ObjectNode payload = (ObjectNode) row.path("payload");
         BiddingTypes.Ref outline = ref(payload.path("outlineRef"));
@@ -284,6 +323,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         if (reviewerId.isBlank() || reviewerId.equals(project.path("bindings").path("writer").path("agentId").asText("")))
             throw BiddingAccess.error(409, "REVIEWER_NOT_READY", "An independent reviewer must be bound");
         employees.getObject().validate(scope, reviewerId, project.path("bindings").path("reviewer").path("configDigest").asText(null));
+        validateReviewerMaterials(scope,reviewerId,List.of(manuscript));
         String currentSkill = pinnedSkillId((ObjectNode) project.path("bindings").path("reviewer"), scope.workspaceId());
         String currentSkillDigest = pinDigest((ObjectNode) project.path("bindings").path("reviewer"), currentSkill);
         List<ObjectNode> saved = jdbc.query("SELECT object_id,version,digest,payload_json,status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='review' ORDER BY created_at DESC",
@@ -301,6 +341,7 @@ public class BiddingReviewService implements BiddingResultHandler {
                     || !project.path("bindings").path("reviewer").path("configDigest").asText().equals(meta.path("reviewerConfigDigest").asText())
                     || !currentSkillDigest.equals(meta.path("skillDigest").asText())) continue;
             String groupKey = meta.path("reviewKey").asText("");
+            validateReviewerMaterials(scope,reviewerId,refs(meta.path("materialRefs")));
             if (currentReviewKey == null) currentReviewKey = groupKey;
             if (!currentReviewKey.equals(groupKey)) continue;
             JsonNode coverage = body.path("coverage");
@@ -324,8 +365,26 @@ public class BiddingReviewService implements BiddingResultHandler {
         }
         List<String> technicalTodos=jdbc.query("SELECT payload_json FROM mate_bidding_revision r WHERE r.workspace_id=? AND r.project_id=? AND r.kind='HUMAN_TODO' AND r.status='OPEN' AND r.version=(SELECT MAX(latest.version) FROM mate_bidding_revision latest WHERE latest.workspace_id=r.workspace_id AND latest.project_id=r.project_id AND latest.kind=r.kind AND latest.object_id=r.object_id)",
                 (rs,n)->rs.getString(1),scope.workspaceId(),scope.projectId());
-        for(String todoPayload:technicalTodos)if(object(todoPayload).path("affectsTechnical").asBoolean(false))
+        for(String todoPayload:technicalTodos)if("UNCLASSIFIED".equals(object(todoPayload).path("impactClassification").asText())
+                || object(todoPayload).path("affectsTechnical").asBoolean(false))
             throw BiddingAccess.error(409,"HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL","An unresolved business fact affects the technical response");
+    }
+
+    private void validateReviewerMaterials(BiddingTypes.Scope scope,String reviewerId,List<BiddingTypes.Ref> roots) {
+        java.util.ArrayDeque<BiddingTypes.Ref> queue=new java.util.ArrayDeque<>(roots);
+        Set<BiddingTypes.Ref> visited=new LinkedHashSet<>();
+        while(!queue.isEmpty()) {
+            BiddingTypes.Ref current=queue.removeFirst();if(current==null||!visited.add(current))continue;
+            if("material".equals(current.kind())){
+                try { materials.requireReviewerReadable(scope,reviewerId,current); }
+                catch (BiddingApiException denied) { throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer material access is no longer valid"); }
+                continue;
+            }
+            if(Set.of("manuscript","outline","analysisBaseline","chapter","sourceSet").contains(current.kind())) {
+                ObjectNode revision=repository.businessRevision(scope,current);
+                if(revision!=null)queue.addAll(repository.businessRefs(revision));
+            }
+        }
     }
 
     public static boolean blocksTechnicalApproval(String category, String severity, boolean resolved) {
@@ -366,6 +425,8 @@ public class BiddingReviewService implements BiddingResultHandler {
         ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());if(project==null)throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         BiddingTypes.Ref manuscript=latestManuscript(scope);ObjectNode out=json.createObjectNode();
         if(manuscript==null){out.putNull("manuscriptRef").put("status","NOT_ASSEMBLED");out.putArray("tasks");out.putArray("findings").addAll(json.createArrayNode());out.putArray("humanTodos");return out;}
+        try { dependencies.validateForRead(scope,List.of(manuscript)); }
+        catch (BiddingApiException stale) { out.set("manuscriptRef",json.valueToTree(manuscript));out.put("status","REVIEW_STALE").put("reason","CURRENT_DEPENDENCY_CLOSURE_INVALID");out.putArray("tasks");out.putArray("findings");out.putArray("humanTodos");return out; }
         out.set("manuscriptRef",json.valueToTree(manuscript));ArrayNode findings=out.putArray("findings");
         String reviewerId=project.path("bindings").path("reviewer").path("agentId").asText("");
         if (reviewerId.isBlank() || reviewerId.equals(project.path("bindings").path("writer").path("agentId").asText(""))) {
@@ -375,6 +436,8 @@ public class BiddingReviewService implements BiddingResultHandler {
         }
         ObjectNode reviewerBinding = (ObjectNode) project.path("bindings").path("reviewer");
         employees.getObject().validate(scope, reviewerId, reviewerBinding.path("configDigest").asText(null));
+        try { validateReviewerMaterials(scope,reviewerId,List.of(manuscript)); }
+        catch (RuntimeException denied) { out.put("status","REVIEW_ACCESS_REVOKED").put("reason","REVIEWER_MATERIAL_ACCESS_REVOKED");out.putArray("tasks");out.set("findings",findings);out.putArray("humanTodos");readHumanTodos(scope,out.withArray("humanTodos"));return out; }
         String activeSkill = pinnedSkillId(reviewerBinding, scope.workspaceId());
         String activeSkillDigest = pinDigest(reviewerBinding, activeSkill);
         ArrayNode taskViews=out.putArray("tasks");
@@ -433,7 +496,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         for(JsonNode requirement:requirements){if(!"COMMERCIAL".equals(requirement.path("category").asText()))continue;String id=requirement.path("id").asText();if(id.isBlank())continue;
             Long count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=?",Long.class,scope.workspaceId(),scope.projectId(),id);if(count!=null&&count>0)continue;
             List<BiddingTypes.Ref> sources=new ArrayList<>();JsonNode evidence=requirement.path("evidenceRefs");if(evidence.isArray())for(JsonNode e:evidence){String sourceId=e.path("sourceId").asText();long version=e.path("version").asLong(0);BiddingRepository.SourceRow source=repository.source(scope.workspaceId(),scope.projectId(),sourceId,version);if(source!=null)sources.add(new BiddingTypes.Ref("source",sourceId,version,source.digest()));}
-            ObjectNode todo=json.createObjectNode().put("todoId",id).put("requirementRef",id).put("title",requirement.path("text").asText()).put("ownerId",project.path("ownerId").asText()).put("status","OPEN").put("affectsTechnical",requirement.path("affectsTechnical").asBoolean(false)).put("createdBy","bidding-review");todo.set("sourceRefs",json.valueToTree(sources));todo.set("evidenceRefs",evidence.deepCopy());
+            ObjectNode todo=json.createObjectNode().put("todoId",id).put("requirementRef",id).put("title",requirement.path("text").asText()).put("ownerId",project.path("ownerId").asText()).put("status","OPEN").put("impactClassification","UNCLASSIFIED").put("affectsTechnical",true).put("createdBy","bidding-review");todo.set("sourceRefs",json.valueToTree(sources));todo.set("evidenceRefs",evidence.deepCopy());
             saveBusinessRevision(scope,"HUMAN_TODO",id,todo,sources,"OPEN");
         }
     }

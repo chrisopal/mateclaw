@@ -45,6 +45,7 @@ public class BiddingCommandService {
             case "DISPATCH_REVIEW" -> reviews.getObject().dispatch(scope,command);
             case "RESOLVE_FINDING" -> reviews.getObject().resolve(scope,command);
             case "RESOLVE_HUMAN_TODO" -> reviews.getObject().resolveHumanTodo(scope,command);
+            case "CLASSIFY_HUMAN_TODO" -> reviews.getObject().classifyHumanTodo(scope,command);
             case "REVISE_CHAPTER" -> writing.getObject().revise(scope,command);
             case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
             default -> projects.execute(scope,command);
