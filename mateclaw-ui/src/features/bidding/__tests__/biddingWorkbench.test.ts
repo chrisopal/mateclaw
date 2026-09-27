@@ -384,6 +384,38 @@ it('ignores a late access-denied command response after navigation loads another
   expect(host.textContent).not.toContain('Restricted content was cleared.')
 })
 
+it.each(['P2 command denial','same-scope read denial'])('aborts sibling reads before clearing project state on %s',async denialPath=>{
+  let resolveSources!:(value:unknown[])=>void,capturedSignal:AbortSignal|undefined
+  const pendingSources=new Promise<unknown[]>(resolve=>{resolveSources=resolve})
+  const project={id:'p1',workspaceId:'ws-1',name:'Protected project marker',lotName:'Lot A',ownerId:'7',version:2,stage:'SETUP',capabilities:{canApprove:true},ref:{kind:'project',id:'p1',version:2,digest:'d2'},bindings:{},selectedRefs:{}}
+  const outlineRef={kind:'outline',id:'outline-1',version:2,digest:'outline-2'},chapterRef={kind:'chapter',id:'chapter-1',version:3,digest:'chapter-3'},candidateRef={kind:'chapter',id:'candidate-1',version:4,digest:'candidate-4'}
+  vi.mocked(biddingApi.capabilities).mockResolvedValue({enabled:true,canWrite:true,canApprove:true})
+  vi.mocked(biddingApi.get).mockResolvedValue(project as never)
+  vi.mocked(biddingApi.members).mockResolvedValue([{userId:'7',nickname:'Owner'}] as never)
+  vi.mocked(biddingApi.employees).mockResolvedValue([])
+  vi.mocked(biddingApi.sources).mockImplementation((_ws,_id,signal)=>{capturedSignal=signal;return pendingSources as never})
+  vi.mocked(biddingApi.sourceSetHead).mockResolvedValue(null)
+  vi.mocked(biddingApi.analysis).mockResolvedValue({groups:[]} as never)
+  vi.mocked(biddingApi.outline).mockResolvedValue({confirmed:{ref:outlineRef,status:'CONFIRMED',inputRefs:[],payload:{chapters:[]}},candidates:[]} as never)
+  vi.mocked(biddingApi.writing).mockResolvedValue({outlineRef,chapters:[{chapterId:'chapter-1',title:'Protected chapter',editExpectedRef:chapterRef,selected:{ref:chapterRef,status:'SELECTED',inputRefs:[outlineRef],payload:{chapter:{blocks:[{type:'paragraph',text:'Protected chapter body'}]}}},candidates:[{ref:candidateRef,status:'CANDIDATE',headGuard:chapterRef,inputRefs:[outlineRef],payload:{chapter:{blocks:[{type:'paragraph',text:'Candidate body'}]}}}]}]} as never)
+  if(denialPath==='P2 command denial')vi.mocked(biddingApi.command).mockRejectedValueOnce(Object.assign(new Error('restricted'),{response:{status:403}}))
+  else vi.mocked(biddingApi.sourceSetHead).mockRejectedValueOnce(Object.assign(new Error('restricted origin'),{response:{status:403}}))
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  expect(capturedSignal).toBeTruthy()
+  if(denialPath==='P2 command denial'){
+    ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Writing')) as HTMLElement).click();await flush()
+    ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Adopt candidate')) as HTMLButtonElement).click();await flush()
+  }else await flush()
+  expect(capturedSignal?.aborted).toBe(true)
+  resolveSources([{sourceId:'late-source',version:1,kind:'TENDER',filename:'Late protected source marker',digest:'late-digest',readStatus:'READY',problems:[],blocks:[]}])
+  await flush()
+  expect(host.textContent).not.toContain('Late protected source marker')
+  expect(host.textContent).not.toContain('Protected chapter body')
+  expect(host.textContent).not.toContain('Candidate body')
+  expect(host.textContent).toContain(denialPath==='P2 command denial'?'Restricted content was cleared.':'You no longer have access to this project.')
+})
+
 it('requires an explicit reason to exclude each blank page before confirming a review-needed source',async()=>{
   vi.mocked(biddingApi.command).mockResolvedValue({} as never)
   const project={id:'p1',workspaceId:'ws-1',name:'Tender',lotName:'Lot',ownerId:'7',version:2,stage:'SETUP',ref:{kind:'project',id:'p1',version:2,digest:'d'},bindings:{},selectedRefs:{}}
