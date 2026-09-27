@@ -116,6 +116,7 @@ return !resolved && ("BLOCKER".equals(severity) || java.util.Set.of(
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingDocxRendererTest.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java`.
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingMigrationTest.java`.
 
 **Source preflight (2026-09-27):**
 现有 runtime 固定 tools 尚未包含导出，writer role 技能白名单尚无 export，Dependencies 尚未识别 TEMPLATE/FORMAT_REQUIREMENTS；本任务沿既有 Claim/角色授权/固定技能包校验 seam 补齐，不能只注册工具。保留 P2 员工绑定兼容，导出派发必须额外验证实际已授权且固定的导出技能包。当前材料绑定仅提供 WIKI_PAGE 文本，不提供 IMAGE_ASSET 原字节；renderer 验证授权图片 map，但生产遇到无受控授权字节的图片必须显式 IMAGE_NOT_AUTHORIZED 阻断，不读取任意 URL/path、不宣称生产图片接入已完成。
