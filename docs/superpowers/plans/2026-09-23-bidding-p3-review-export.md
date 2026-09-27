@@ -199,7 +199,7 @@ String digest = java.util.HexFormat.of().formatHex(
 
 - [ ] Run：Maven `-Dtest=BiddingApprovalTest`，Expected 文件批准门禁缺失 FAIL。必须补下述实际bytes场景通过才能完成，不能只依靠示例中的权限测试。
 - [ ] `APPROVE_ARTIFACT` payload `{artifactId,digest,manuscriptRef,templateRef,formatRef,reviewRef,inspection:{opened:true,layoutChecked:true,reason}}`，expected=artifact.ref；真实approver，current refs、完整审核、无未处置技术阻断、实际candidate digest一致，inspection是记录人的检查不是后端证明Office已打开。
-- [ ] 一个事务锁artifact和相关head/decision，重查所有依赖，写human decision固定 artifactId+digest+refs，然后CAS状态APPROVED；并发两次批准返回同decision或409，不生成不一致approval。变更文档/模板/格式/新补遗让旧批准失效，不能在artifact记录上替换content。来源和人工处置写入沿同一项目锁串行化。导出生成同样在项目锁内重查 refs、attempt 幂等和累计容量后写入不可变 bytes：当前 scheduler 有两个执行线程，不能让两个任务各自读取旧 SUM 后同时突破项目容量。用真实生成字节与可控并发验证容量上限，不以固定 sleep 或伪造 byte_size 代替回读。
+- [ ] 一个事务锁artifact和相关head/decision，重查所有依赖，写human decision固定 artifactId+digest+refs，然后CAS状态APPROVED；并发两次批准返回同decision或409，不生成不一致approval。变更文档/模板/格式/新补遗让旧批准失效，不能在artifact记录上替换content。来源和人工处置写入沿同一项目锁串行化。导出生成同样在项目锁内重查 refs、attempt 幂等和累计容量后写入不可变 bytes。源码确认 claimDue/claimedWorkspaces 已保证同一 workspace 至多一个 RUNNING task；两个 scheduler 线程服务不同 workspace，不能为了测试放宽此策略或伪造并行 claims。并发回归使用同一个真实 active attempt 的重复受控工具调用，验证只生成/保存一次且两次返回同一原字节，并验证与来源/人工处置变更的项目锁边界。容量保留真实字节边界回读，不宣称已复现不存在的跨 attempt 同项目并发超额。
 
 ```sql
 UPDATE mate_bidding_artifact
