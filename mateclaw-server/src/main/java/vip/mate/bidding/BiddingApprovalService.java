@@ -50,7 +50,8 @@ public class BiddingApprovalService {
         if(artifact==null)throw BiddingAccess.error(404,"ARTIFACT_NOT_FOUND","Candidate artifact not found");
         BiddingTypes.Ref artifactRef=new BiddingTypes.Ref("artifact",artifactId,1,artifact.path("digest").asText());
         if(!artifactRef.equals(command.expected())||!artifactRef.digest().equals(command.payload().path("digest").asText()))throw BiddingAccess.error(409,"ARTIFACT_STALE","Approval must identify the exact artifact digest");
-        if(!"candidate".equals(artifact.path("mode").asText())||!"CANDIDATE".equals(artifact.path("status").asText()))throw BiddingAccess.error(422,"ARTIFACT_NOT_APPROVABLE","Only a completed candidate can be approved");
+        if(!"candidate".equals(artifact.path("mode").asText()))throw BiddingAccess.error(422,"ARTIFACT_NOT_APPROVABLE","Only a completed candidate can be approved");
+        if(!"CANDIDATE".equals(artifact.path("status").asText()))throw BiddingAccess.error(409,"ARTIFACT_APPROVAL_CONFLICT","Candidate was already approved or changed concurrently");
         BiddingTypes.Ref manuscript=ref(command.payload().path("manuscriptRef")),template=ref(command.payload().path("templateRef")),format=ref(command.payload().path("formatRef")),reviewRef=ref(command.payload().path("reviewRef"));
         if(!Objects.equals(manuscript,ref(artifact.path("manuscriptRef")))||!Objects.equals(template,ref(artifact.path("templateRef")))||!Objects.equals(format,ref(artifact.path("formatRef")))||reviewRef==null||!"reviewSnapshot".equals(reviewRef.kind()))
             throw BiddingAccess.error(409,"APPROVAL_REFS_MISMATCH","Approval references must match the exact candidate and current whole-book review");

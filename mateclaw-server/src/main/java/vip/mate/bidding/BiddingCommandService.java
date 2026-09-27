@@ -2,6 +2,8 @@ package vip.mate.bidding;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,15 +22,23 @@ public class BiddingCommandService {
     private final ObjectProvider<BiddingReviewService> reviews;
     private final ObjectProvider<BiddingArtifactService> artifacts;
     private final ObjectProvider<BiddingApprovalService> approvals;
+    private final TransactionTemplate commandTransactions;
     public BiddingCommandService(BiddingProjectService projects,BiddingRepository repository,BiddingSourceService sources,BiddingDependencies dependencies,ObjectProvider<BiddingEmployeeBindings> employees,
             ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews,ObjectProvider<BiddingArtifactService> artifacts,ObjectProvider<BiddingApprovalService> approvals) {
+            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews,ObjectProvider<BiddingArtifactService> artifacts,ObjectProvider<BiddingApprovalService> approvals,PlatformTransactionManager transactionManager) {
         this.projects=projects; this.repository=repository; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing; this.reviews=reviews;this.artifacts=artifacts;this.approvals=approvals;
+        this.commandTransactions=new TransactionTemplate(transactionManager);
     }
-    @org.springframework.transaction.annotation.Transactional
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
+        if(command==null || command.action()==null || "UPDATE_PROJECT".equals(command.action()) || "ARCHIVE_PROJECT".equals(command.action()) || "DISPATCH_REVIEW".equals(command.action()))
+            return route(scope,command);
+        return commandTransactions.execute(status->{
+            if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+            return route(scope,command);
+        });
+    }
+    private ObjectNode route(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
-        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         return switch(command.action()) {
             case "CONFIRM_SOURCE_SET" -> sources.confirmSet(scope,command);
             case "RETRY_SOURCE_READ" -> sources.retryRead(scope,command);
