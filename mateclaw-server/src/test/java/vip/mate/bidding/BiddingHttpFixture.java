@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.*;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.*;
@@ -45,6 +46,7 @@ import java.util.*;
 @AutoConfigureMockMvc
 abstract class BiddingHttpFixture {
     @Configuration @Profile("bidding-test") @EnableWebSecurity
+    @EnableConfigurationProperties(vip.mate.agent.graph.executor.ToolResultProperties.class)
     @ImportAutoConfiguration({DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         JdbcTemplateAutoConfiguration.class, org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration.class,
         FlywayAutoConfiguration.class, MybatisPlusAutoConfiguration.class, JacksonAutoConfiguration.class,
@@ -58,6 +60,10 @@ abstract class BiddingHttpFixture {
         @Bean PersonalAccessTokenService pats() { return org.mockito.Mockito.mock(PersonalAccessTokenService.class); }
         @Bean WikiKnowledgeBaseService wiki() { return org.mockito.Mockito.mock(WikiKnowledgeBaseService.class); }
         @Bean I18nService i18n() { return org.mockito.Mockito.mock(I18nService.class); }
+        @Bean vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage(
+                vip.mate.agent.graph.executor.ToolResultProperties properties) {
+            return new vip.mate.agent.graph.executor.ToolResultStorage(properties);
+        }
         @Bean SecurityFilterChain chain(HttpSecurity http, JwtAuthFilter jwt) throws Exception {
             return http.csrf(c -> c.disable()).authorizeHttpRequests(a -> a.requestMatchers("/api/v1/auth/login").permitAll().anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint((r,s,x) -> s.setStatus(401)))

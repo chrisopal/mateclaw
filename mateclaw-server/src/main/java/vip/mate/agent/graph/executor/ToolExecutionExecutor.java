@@ -1237,7 +1237,9 @@ public class ToolExecutionExecutor {
             if (resultStorage != null && pc.projectOptions != null
                     && pc.projectOptions.preservedObservationTools().contains(toolName)
                     && result != null && !result.isBlank() && !result.startsWith("Error:")) {
-                resultStorage.protectObservation(pc.conversationId, pc.toolCall.id());
+                if (!resultStorage.protectObservation(pc.conversationId, pc.toolCall.id())) {
+                    result = ToolResultStorage.INSUFFICIENT_CONTEXT_MARKER;
+                }
             }
 
             // Raw-first spill: write the full output to disk and replace

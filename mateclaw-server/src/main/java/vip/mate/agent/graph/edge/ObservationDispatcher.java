@@ -3,6 +3,7 @@ package vip.mate.agent.graph.edge;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.EdgeAction;
 import lombok.extern.slf4j.Slf4j;
+import vip.mate.agent.graph.executor.ToolResultStorage;
 import vip.mate.agent.graph.state.MateClawStateAccessor;
 
 import static vip.mate.agent.graph.state.MateClawStateKeys.*;
@@ -37,6 +38,13 @@ public class ObservationDispatcher implements EdgeAction {
                     "(replay will continue after user decision), iteration {}/{}", currentIteration, maxIterations);
             return FINAL_ANSWER_NODE;
         }
+
+        if (ToolResultStorage.INSUFFICIENT_CONTEXT_MARKER.equals(accessor.error())) {
+            log.warn("[ObservationDispatcher] Restricted observation exceeds the effective context budget; "
+                    + "terminating without another provider call");
+            return FINAL_ANSWER_NODE;
+        }
+
 
         // RFC-052: returnDirect short-circuit — highest priority after approval.
         // Any tool in the latest batch declared returnDirect=true: skip the next

@@ -8,7 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import vip.mate.agent.GraphEventPublisher;
+import vip.mate.agent.GraphEventPublisher.GraphEvent;
 import vip.mate.agent.graph.executor.ToolExecutionExecutor;
+import vip.mate.agent.graph.executor.ToolResultStorage;
 import vip.mate.agent.graph.state.MateClawStateAccessor;
 import vip.mate.agent.graph.state.MateClawStateKeys;
 import vip.mate.agent.graph.state.SourceEvidenceLedger;
@@ -164,6 +167,15 @@ public class ActionNode implements NodeAction {
                 .sourceEvidenceLedger(accessor.sourceEvidenceLedger().merge(rawLedger))
                 .actionExecutionLedger(accessor.actionExecutionLedger().merge(actionLedger));
 
+        boolean restrictedObservationOverflow = result.events().stream()
+                .anyMatch(event -> "restricted_observation_budget".equals(event.data().get("phase"))
+                        && "insufficient_context".equals(event.data().get("status")));
+        if (restrictedObservationOverflow) {
+            output.error(ToolResultStorage.INSUFFICIENT_CONTEXT_MARKER)
+                    .events(appendInsufficientContextFailure(result.events()));
+        }
+
+
         if (result.awaitingApproval()) {
             output.awaitingApproval(true);
             log.info("[ActionNode] Approval pending detected, setting AWAITING_APPROVAL=true to terminate graph");
@@ -222,6 +234,19 @@ public class ActionNode implements NodeAction {
         autoRecordToolCalls(conversationId, result.responses(), actionLedger);
 
         return output.build();
+    }
+
+    private static List<GraphEvent> appendInsufficientContextFailure(List<GraphEvent> events) {
+        List<GraphEvent> updated = new ArrayList<>(events);
+        updated.add(new GraphEvent(
+                "project_execution_failed", Map.of(
+                "code", "INSUFFICIENT_CONTEXT",
+                "category", "VALIDATION",
+                "retryAfterMs", 0L,
+                "resultUnknown", false,
+                "partial", false,
+                "stopped", false), System.currentTimeMillis()));
+        return updated;
     }
 
     // ==================== B2: Pin skill constraints ====================

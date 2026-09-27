@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +33,57 @@ import static org.mockito.Mockito.*;
 class RestrictedProjectObservationTest {
     private static final String CONVERSATION = "bidding:project:attempt";
     private static final String SOURCE_TOOL = "bidding_read_sources";
+
+    @Test
+    void protectedObservationAdmissionNeverEvictsAnActiveKeyAtCapacity() throws Exception {
+        ToolResultStorage storage = storage();
+        storage.protectObservation(CONVERSATION, "active-source");
+        Thread.sleep(2); // Make the protected first key unambiguously oldest for the eviction regression.
+
+        for (int i = 0; i < 8_192; i++) {
+            storage.protectObservation("other-conversation-" + i, "source-" + i);
+        }
+
+        assertTrue(storage.isProtectedObservation(CONVERSATION, "active-source"),
+                "admission pressure must not silently revoke a live source observation");
+        assertFalse(storage.isProtectedObservation("overflow-conversation", "overflow-source"),
+                "a full bounded registry must refuse new preservation metadata");
+    }
+
+    @Test
+    void concurrentAdmissionAtCapacityRefusesOneWithoutEvictingExistingEvidence() throws Exception {
+        ToolResultStorage storage = storage();
+        assertTrue(storage.protectObservation(CONVERSATION, "active-source"));
+        for (int i = 0; i < 8_189; i++) {
+            assertTrue(storage.protectObservation("other-conversation-" + i, "source-" + i));
+        }
+        assertTrue(storage.protectObservation("last-slot", "source"));
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        var pool = Executors.newFixedThreadPool(2);
+        try {
+            var first = pool.submit(() -> admission(storage, "race-one", ready, start));
+            var second = pool.submit(() -> admission(storage, "race-two", ready, start));
+            assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            boolean firstAdmitted = first.get(5, TimeUnit.SECONDS);
+            boolean secondAdmitted = second.get(5, TimeUnit.SECONDS);
+            assertNotEquals(firstAdmitted, secondAdmitted,
+                    "one bounded registry slot cannot be concurrently granted twice");
+            assertTrue(storage.isProtectedObservation(CONVERSATION, "active-source"));
+            assertEquals(firstAdmitted, storage.isProtectedObservation("race-one", "tool-call"));
+            assertEquals(secondAdmitted, storage.isProtectedObservation("race-two", "tool-call"));
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    private boolean admission(ToolResultStorage storage, String conversation, CountDownLatch ready,
+            CountDownLatch start) throws InterruptedException {
+        ready.countDown();
+        start.await();
+        return storage.protectObservation(conversation, "tool-call");
+    }
 
     @Test
     void restrictedSourceObservationSurvivesImmediateAndLaterWindowCompaction() throws Exception {

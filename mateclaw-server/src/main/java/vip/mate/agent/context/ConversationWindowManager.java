@@ -160,6 +160,30 @@ public class ConversationWindowManager {
         this.toolResultStorage = toolResultStorage;
     }
 
+    public boolean hasProtectedObservations(List<Message> messages, String conversationId) {
+        return protectedObservations(messages, conversationId).size() > 0;
+    }
+
+    public boolean retainsProtectedObservations(List<Message> original, List<Message> candidate,
+            String conversationId) {
+        var expected = protectedObservations(original, conversationId);
+        if (expected.isEmpty()) return true;
+        return protectedObservations(candidate, conversationId).entrySet().containsAll(expected.entrySet());
+    }
+
+    private java.util.Map<String, String> protectedObservations(List<Message> messages, String conversationId) {
+        java.util.Map<String, String> found = new java.util.LinkedHashMap<>();
+        if (toolResultStorage == null || messages == null) return found;
+        for (Message message : messages) {
+            if (!(message instanceof ToolResponseMessage responseMessage)) continue;
+            for (ToolResponseMessage.ToolResponse response : responseMessage.getResponses()) {
+                if (response != null && toolResultStorage.isProtectedObservation(conversationId, response.id()))
+                    found.put(response.id(), response.responseData());
+            }
+        }
+        return found;
+    }
+
     /**
      * Optional stream tracker for broadcasting {@code compact_status}
      * SSE events. Wired via setter so unit tests can leave it {@code null}

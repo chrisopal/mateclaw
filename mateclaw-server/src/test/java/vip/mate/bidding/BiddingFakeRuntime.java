@@ -12,7 +12,8 @@ final class BiddingFakeRuntime extends BiddingEmployeeRuntime {
     BiddingFakeRuntime(BiddingAccess access,BiddingDependencies dependencies,BiddingEmployeeBindings bindings,
             org.springframework.jdbc.core.JdbcTemplate jdbc,vip.mate.agent.AgentService agents,
             vip.mate.workspace.conversation.ConversationService conversations,vip.mate.agent.repository.AgentMapper mapper) {
-        super(access,dependencies,bindings,jdbc,agents,conversations,mapper);
+        super(access,dependencies,bindings,jdbc,agents,conversations,mapper,
+                org.mockito.Mockito.mock(vip.mate.agent.graph.executor.ToolResultStorage.class));
         this.bindings=bindings;
     }
 

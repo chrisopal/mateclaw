@@ -781,6 +781,7 @@ public class ReasoningNode implements NodeAction {
         // always-on for the runtime LLM.
         systemPrompt = buildGroundedSystemPrompt(systemPrompt, hasWikiTool());
         List<Message> messages = accessor.messages();
+        List<Message> messagesBeforeLoopBudget = new ArrayList<>(messages);
 
         // Per-loop budget: bound the working message list a single Reasoning
         // iteration hands to the LLM. The previous fixed head=4 + tail=36 cut
@@ -980,6 +981,14 @@ public class ReasoningNode implements NodeAction {
         // surfacing as an opaque provider 400.
         int prefixEstimateTokens = TokenEstimator.estimateTokens(nonHistoryPrefix);
         int toolSchemaEstimateTokens = TokenEstimator.estimateToolsTokens(activeCallbacks);
+        boolean hasProtectedObservation = conversationWindowManager != null
+                && conversationWindowManager.hasProtectedObservations(messagesBeforeLoopBudget, conversationId);
+        int completePromptEstimate = TokenEstimator.estimateTokens(promptMessages)
+                + toolSchemaEstimateTokens + maxOutputTokens;
+        boolean restrictedObservationOverflow = hasProtectedObservation
+                && (!conversationWindowManager.retainsProtectedObservations(
+                        messagesBeforeLoopBudget, messages, conversationId)
+                    || completePromptEstimate > loopContextWindowTokens());
         if (accessor.llmCallCount() == 0) {
             log.info("[ReasoningNode] Prefix accounting conv={}: window={} tokens, prefix={} "
                             + "(system+context+wiki+skills+ledger), toolSchemas={}, history={}",
@@ -1023,7 +1032,14 @@ public class ReasoningNode implements NodeAction {
 
         NodeStreamingChatHelper.StreamResult result;
         try {
-            if (prefixOverflow) {
+            if (restrictedObservationOverflow) {
+                String overflowMessage = "Protected project evidence cannot fit in the effective model context window; narrow the task input before retrying";
+                log.error("[ReasoningNode] {} (estimated={} tokens, window={})", overflowMessage,
+                        completePromptEstimate, loopContextWindowTokens());
+                result = new NodeStreamingChatHelper.StreamResult(null, null, null, List.of(), false,
+                        0, 0, false, overflowMessage,
+                        NodeStreamingChatHelper.ErrorType.PROMPT_TOO_LONG, false, 0, 0, 0);
+            } else if (prefixOverflow) {
                 String overflowMessage = "Prompt 前缀估算 " + (prefixEstimateTokens + toolSchemaEstimateTokens)
                         + " tokens(注入块 " + prefixEstimateTokens + " + 工具 schema " + toolSchemaEstimateTokens
                         + ")已超过模型上下文窗口 " + prefixBudgetPlan.effectiveMaxTokens()
@@ -1141,10 +1157,12 @@ public class ReasoningNode implements NodeAction {
 
         if (accessor.projectExecutionOptions() != null
                 && (result.partial() || result.stopped() || result.hasFatalError() || result.isPromptTooLong())) {
-            String code = result.stopped() ? "EXECUTION_STOPPED"
+            String code = restrictedObservationOverflow ? "INSUFFICIENT_CONTEXT"
+                    : result.stopped() ? "EXECUTION_STOPPED"
                     : result.isPromptTooLong() ? "PROMPT_TOO_LONG"
                     : result.partial() ? "STREAM_INCOMPLETE" : "MODEL_REQUEST_FAILED";
-            String category = result.stopped() ? "CANCELLED"
+            String category = restrictedObservationOverflow ? "VALIDATION"
+                    : result.stopped() ? "CANCELLED"
                     : result.isPromptTooLong() ? "VALIDATION"
                     : result.partial() || result.errorType() == NodeStreamingChatHelper.ErrorType.SERVER_ERROR
                         || result.errorType() == NodeStreamingChatHelper.ErrorType.RATE_LIMIT
@@ -1155,8 +1173,13 @@ public class ReasoningNode implements NodeAction {
                     .finishReason(result.stopped() ? FinishReason.STOPPED : FinishReason.ERROR_FALLBACK)
                     .llmCallCount(nextLlmCallCount).contentStreamed(true).thinkingStreamed(true)
                     .mergeUsage(state, result)
-                    .events(List.of(projectExecutionFailure(code, category, unknown,
-                            result.partial(), result.stopped())))
+                    .events(restrictedObservationOverflow
+                            ? List.of(GraphEventPublisher.phase("restricted_observation_budget", Map.of(
+                                    "status", "insufficient_context",
+                                    "reason", "restricted_source_observation_exceeds_context_window")),
+                                    projectExecutionFailure(code, category, false, false, false))
+                            : List.of(projectExecutionFailure(code, category, unknown,
+                                    result.partial(), result.stopped())))
                     .build();
         }
 

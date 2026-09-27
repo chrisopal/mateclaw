@@ -47,7 +47,7 @@ class BiddingRuntimeIsolationTest {
         when(employeeBindings.modelConfigId(any(), any())).thenReturn("7");
         runtime = new BiddingEmployeeRuntime(access, dependencies, employeeBindings, jdbc, mock(vip.mate.agent.AgentService.class),
                 mock(vip.mate.workspace.conversation.ConversationService.class),
-                mock(vip.mate.agent.repository.AgentMapper.class));
+                mock(vip.mate.agent.repository.AgentMapper.class), mock(vip.mate.agent.graph.executor.ToolResultStorage.class));
         claim = new BiddingTypes.Claim(new BiddingTypes.Scope("workspace-1", "actor-1", "project-1"),
                 "task-1", "attempt-1", "secret-token", 1, 1, Instant.now().plusSeconds(60), "42",
                 new BiddingTypes.SkillPin("skill", "v1", "skill-digest", Map.of("SKILL.md", "# pinned")),
@@ -61,6 +61,8 @@ class BiddingRuntimeIsolationTest {
             context.registerBean(BiddingAccess.class, () -> mock(BiddingAccess.class));
             context.registerBean(BiddingDependencies.class, () -> mock(BiddingDependencies.class));
             context.registerBean(JdbcTemplate.class, () -> mock(JdbcTemplate.class));
+            context.registerBean(vip.mate.agent.graph.executor.ToolResultStorage.class,
+                    () -> mock(vip.mate.agent.graph.executor.ToolResultStorage.class));
             context.register(BiddingEmployeeRuntime.class);
             context.refresh();
 

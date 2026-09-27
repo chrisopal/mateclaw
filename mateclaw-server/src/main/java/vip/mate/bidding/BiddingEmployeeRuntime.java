@@ -29,12 +29,14 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
     private final vip.mate.agent.AgentService agents;
     private final vip.mate.workspace.conversation.ConversationService conversations;
     private final vip.mate.agent.repository.AgentMapper agentMapper;
+    private final vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage;
 
     public BiddingEmployeeRuntime(BiddingAccess access, BiddingDependencies dependencies,
             @Lazy BiddingEmployeeBindings employeeBindings,
             org.springframework.jdbc.core.JdbcTemplate jdbc, @Lazy vip.mate.agent.AgentService agents,
             @Lazy vip.mate.workspace.conversation.ConversationService conversations,
-            @Lazy vip.mate.agent.repository.AgentMapper agentMapper) {
+            @Lazy vip.mate.agent.repository.AgentMapper agentMapper,
+            vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage) {
         this.access = access;
         this.dependencies = dependencies;
         this.employeeBindings = employeeBindings;
@@ -42,6 +44,7 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         this.agents = agents;
         this.conversations = conversations;
         this.agentMapper = agentMapper;
+        this.toolResultStorage = toolResultStorage;
     }
 
     /** Validates the active server-owned attempt before any model/tool work. */
@@ -126,9 +129,14 @@ public class BiddingEmployeeRuntime implements vip.mate.agent.execution.ProjectT
         }
         catch (Exception e) { return failure("VALIDATION_FAILED", "VALIDATION", false, false, false); }
         try {
-            BiddingTypes.Execution result = readResult(agents.chatStructuredStream(agentId, prompt, conversationId,
-                    claim.scope().actorId(), null, origin, options).timeout(EXECUTION_TIMEOUT),
-                    claim.skill().digest(), claim.configDigest(), claim.skill().files().get("output.schema.json"));
+            BiddingTypes.Execution result;
+            try {
+                result = readResult(agents.chatStructuredStream(agentId, prompt, conversationId,
+                        claim.scope().actorId(), null, origin, options).timeout(EXECUTION_TIMEOUT),
+                        claim.skill().digest(), claim.configDigest(), claim.skill().files().get("output.schema.json"));
+            } finally {
+                toolResultStorage.releaseObservations(conversationId);
+            }
             try { requireActive(claim); }
             catch (BiddingApiException revoked) {
                 return failure(revoked.code(), "PERMANENT", true, result.failure() == null, false);

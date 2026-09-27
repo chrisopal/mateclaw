@@ -54,6 +54,7 @@ public class ToolResultStorage {
 
     /** Marker placed in the in-context preview so callers and tools can recognize spill output. */
     public static final String SPILL_MARKER_PREFIX = "[mate-tool-result-spill]";
+    public static final String INSUFFICIENT_CONTEXT_MARKER = "[mateclaw-insufficient-context]";
 
     private final ToolResultProperties props;
     /** Cached at construction; refreshed lazily if the underlying list mutates (rare). */
@@ -65,7 +66,6 @@ public class ToolResultStorage {
     /** Trusted, per-conversation observations that cannot use arbitrary read_file recovery. */
     private final java.util.concurrent.ConcurrentHashMap<ProtectedObservation, Long> protectedObservations =
             new java.util.concurrent.ConcurrentHashMap<>();
-    private static final long PROTECTED_OBSERVATION_TTL_MILLIS = 6L * 60 * 60 * 1000;
     private static final int MAX_PROTECTED_OBSERVATIONS = 8_192;
 
     private record ProtectedObservation(String conversationId, String toolUseId) { }
@@ -114,29 +114,25 @@ public class ToolResultStorage {
     }
 
     /** Marks one successful scoped source read for preservation through context compaction. */
-    public void protectObservation(String conversationId, String toolUseId) {
-        if (conversationId == null || conversationId.isBlank() || toolUseId == null || toolUseId.isBlank()) return;
-        long now = System.currentTimeMillis();
-        protectedObservations.entrySet().removeIf(entry -> now - entry.getValue() >= PROTECTED_OBSERVATION_TTL_MILLIS);
-        if (protectedObservations.size() >= MAX_PROTECTED_OBSERVATIONS
-                && !protectedObservations.containsKey(new ProtectedObservation(conversationId, toolUseId))) {
-            protectedObservations.entrySet().stream()
-                    .min(Comparator.comparingLong(java.util.Map.Entry::getValue))
-                    .ifPresent(entry -> protectedObservations.remove(entry.getKey(), entry.getValue()));
-        }
-        protectedObservations.put(new ProtectedObservation(conversationId, toolUseId), now);
+    public synchronized boolean protectObservation(String conversationId, String toolUseId) {
+        if (conversationId == null || conversationId.isBlank() || toolUseId == null || toolUseId.isBlank()) return false;
+        ProtectedObservation key = new ProtectedObservation(conversationId, toolUseId);
+        if (protectedObservations.containsKey(key)) return true;
+        if (protectedObservations.size() >= MAX_PROTECTED_OBSERVATIONS) return false;
+        protectedObservations.put(key, System.currentTimeMillis());
+        return true;
     }
 
     public boolean isProtectedObservation(String conversationId, String toolUseId) {
         if (conversationId == null || toolUseId == null) return false;
         ProtectedObservation key = new ProtectedObservation(conversationId, toolUseId);
-        Long markedAt = protectedObservations.get(key);
-        if (markedAt == null) return false;
-        if (System.currentTimeMillis() - markedAt >= PROTECTED_OBSERVATION_TTL_MILLIS) {
-            protectedObservations.remove(key, markedAt);
-            return false;
-        }
-        return true;
+        return protectedObservations.containsKey(key);
+    }
+
+    /** Releases only in-memory protection metadata after an owned task attempt completes. */
+    public void releaseObservations(String conversationId) {
+        if (conversationId != null && !conversationId.isBlank())
+            protectedObservations.keySet().removeIf(key -> conversationId.equals(key.conversationId()));
     }
 
     /**
@@ -286,10 +282,11 @@ public class ToolResultStorage {
 
     boolean hasProtectedObservationOverflow(List<ToolResponseMessage.ToolResponse> responses,
                                            String conversationId) {
-        return props.isEnabled() && responses != null
-                && aggregateSize(responses) > props.getPerTurnBudgetChars()
-                && responses.stream().anyMatch(response ->
-                        isProtectedObservation(conversationId, response.id()));
+        return responses != null && (responses.stream().anyMatch(response -> response != null
+                    && INSUFFICIENT_CONTEXT_MARKER.equals(response.responseData()))
+                || (props.isEnabled() && aggregateSize(responses) > props.getPerTurnBudgetChars()
+                    && responses.stream().anyMatch(response -> response != null
+                        && isProtectedObservation(conversationId, response.id()))));
     }
 
     private int compactLargestExcludedResult(List<ToolResponseMessage.ToolResponse> mutable, String conversationId) {
