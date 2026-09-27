@@ -432,10 +432,13 @@ public class BiddingDependencies {
             if(!required.contains(selected.id()))return false;
             ObjectNode chapter=repository.businessRevision(scope,selected);
             if(chapter==null||!Set.of("SELECTED","HUMAN_EDIT").contains(chapter.path("status").asText())||!repository.businessRefs(chapter).contains(outline))return false;
-            JsonNode responses=chapter.path("responses");
-            if(!responses.isArray()||responses.isEmpty()||!chapter.path("missingMaterials").isArray()||!chapter.path("missingMaterials").isEmpty()
+            JsonNode responses=chapter.path("responses");JsonNode outlineChapter=null;for(JsonNode candidate:outlineRow.path("chapters"))if(selected.id().equals(candidate.path("id").asText())){outlineChapter=candidate;break;}if(outlineChapter==null)return false;
+            Set<String> requiredResponses=new LinkedHashSet<>();if(outlineChapter.path("requirementRefs").isArray())outlineChapter.path("requirementRefs").forEach(ref->{if(ref.isTextual())requiredResponses.add(ref.asText());});
+            if(!responses.isArray()||!chapter.path("missingMaterials").isArray()||!chapter.path("missingMaterials").isEmpty()
                     ||!chapter.path("unresolvedItems").isArray()||!chapter.path("unresolvedItems").isEmpty())return false;
-            for(JsonNode response:responses)if(!"RESPONDED".equals(response.path("status").asText()))return false;
+            Set<String> answered=new LinkedHashSet<>();
+            for(JsonNode response:responses){String requirement=response.path("requirementRef").asText("");if(requirement.isBlank()||!requiredResponses.contains(requirement)||!"RESPONDED".equals(response.path("status").asText()))return false;answered.add(requirement);}
+            if(!answered.containsAll(requiredResponses))return false;
         }
         BiddingTypes.Ref manuscript=repository.latestBusinessRef(scope,"manuscript","manuscript");
         ObjectNode assembled=manuscript==null?null:repository.businessRevision(scope,manuscript);

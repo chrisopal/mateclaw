@@ -241,6 +241,59 @@ class BiddingChangeImpactTest extends BiddingHttpFixture {
         assertEquals("PENDING",repository.changeEvent(fixture.scope(),event.path("eventId").asText()).path("status").asText());
     }
 
+    @Test void scoringOnlyLeafWithoutResponsesCanCloseAfterEvidenceAndManuscriptArePersisted() throws Exception {
+        var fixture=baselineTransition(false);
+        BiddingTypes.Ref sourceSet=repository.businessRefs(repository.businessRevision(fixture.scope(),fixture.oldBaseline())).getFirst();head(fixture.scope(),sourceSet);
+        BiddingTypes.Ref baseline=repository.selectedRef(fixture.scope(),"analysisBaseline","current");
+        ObjectNode baselinePayload=repository.businessRevision(fixture.scope(),baseline);
+        baselinePayload.with("analyses").with("bidding-scoring-analysis").withArray("criteria").addObject().put("id","CRIT-1").put("text","Scoring criterion").putArray("evidenceRefs")
+                .addObject().put("sourceId","source-proof").put("version",1).put("blockId","block-1").put("quote","Exact tender evidence");
+        jdbc.update("UPDATE mate_bidding_revision SET payload_json=? WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id=? AND version=? AND digest=?",
+                json.writeValueAsString(baselinePayload),workspace,fixture.scope().projectId(),baseline.id(),baseline.version(),baseline.digest());
+
+        BiddingTypes.Ref priorOutline=repository.selectedRef(fixture.scope(),"outline","current");
+        jdbc.update("INSERT INTO mate_bidding_decision(id,workspace_id,project_id,target_ref_json,decision,reason,actor_id,created_at) VALUES(?,?,?,?,?,?,?,?)",
+                UUID.randomUUID().toString(),workspace,fixture.scope().projectId(),json.writeValueAsString(priorOutline),"CONFIRM_OUTLINE","{}",fixture.scope().actorId(),Timestamp.from(Instant.now()));
+        ObjectNode outline=json.createObjectNode().put("schemaVersion","1");ArrayNode leaves=outline.putArray("chapters");
+        ObjectNode scoreLeaf=leaves.addObject().put("id","chapter-1").putNull("parentId").put("order",0).put("title","Scoring response").put("instructions","Evaluate the assigned scoring criterion.");
+        scoreLeaf.putArray("mandatoryOutlineRefs");scoreLeaf.putArray("requirementRefs");scoreLeaf.putArray("scoringRefs").add("CRIT-1");scoreLeaf.putArray("materialRefs");
+        ObjectNode technicalLeaf=leaves.addObject().put("id","chapter-2").putNull("parentId").put("order",1).put("title","Technical response").put("instructions","Respond to the assigned technical requirements.");
+        technicalLeaf.putArray("mandatoryOutlineRefs");technicalLeaf.putArray("requirementRefs").add("REQ-1").add("REQ-2");technicalLeaf.putArray("scoringRefs");technicalLeaf.putArray("materialRefs");
+        outline.putArray("unmappedItems");outline.putArray("warnings");
+        JsonNode candidate=api("POST","/projects/"+fixture.scope().projectId()+"/commands","member",workspace,
+                Map.of("operationId","save-scoring-only-outline","expected",priorOutline,"action","SAVE_OUTLINE","payload",Map.of("payload",outline)),200);
+        JsonNode confirmed=api("POST","/projects/"+fixture.scope().projectId()+"/commands","owner",workspace,
+                Map.of("operationId","confirm-scoring-only-outline","expected",candidate.path("editExpectedRef"),"action","CONFIRM_OUTLINE","payload",Map.of("outlineRef",candidate.path("ref"))),200);
+        BiddingTypes.Ref selectedOutline=json.treeToValue(confirmed.path("ref"),BiddingTypes.Ref.class);
+
+        for(BiddingTypes.Ref selected:repository.selectedChapterRefs(fixture.scope())) {
+            ObjectNode edit=json.createObjectNode().put("chapterId",selected.id());edit.putArray("blocks").addObject().put("type","paragraph").put("text","Evidence-backed response for "+selected.id());
+            ArrayNode responses=edit.putArray("responses"),citations=edit.putArray("citations");
+            if("chapter-1".equals(selected.id())) {
+                citations.addObject().put("criterionRef","CRIT-1").put("sourceId","source-proof").put("version",1).put("blockId","block-1").put("quote","Exact tender evidence");
+            } else {
+                for(String requirement:List.of("REQ-1","REQ-2")) {
+                    responses.addObject().put("requirementRef",requirement).put("status","RESPONDED");
+                    citations.addObject().put("requirementRef",requirement).put("sourceId","source-proof").put("version",1).put("blockId","block-1").put("quote","Exact tender evidence");
+                }
+            }
+            edit.putArray("missingMaterials");edit.putArray("unresolvedItems");
+            writing.edit(fixture.scope(),new BiddingTypes.Command("edit-scoring-leaf-"+selected.id(),selected,"EDIT_CHAPTER",edit));
+        }
+        ObjectNode assemble=json.createObjectNode().set("outlineRef",json.valueToTree(selectedOutline));ArrayNode chapterRefs=assemble.putArray("chapterRefs");
+        for(BiddingTypes.Ref selected:repository.selectedChapterRefs(fixture.scope())){ObjectNode item=chapterRefs.addObject().put("chapterId",selected.id());item.set("ref",json.valueToTree(selected));}
+        writing.assemble(fixture.scope(),new BiddingTypes.Command("assemble-scoring-only-manuscript",selectedOutline,"ASSEMBLE_MANUSCRIPT",assemble));
+
+        JsonNode read=api("GET","/projects/"+fixture.scope().projectId()+"/change-impact","owner",workspace,null,200);
+        JsonNode event=java.util.stream.StreamSupport.stream(read.path("events").spliterator(),false)
+                .filter(value->priorOutline.equals(json.convertValue(value.path("changedRef"),BiddingTypes.Ref.class))).findFirst().orElseThrow();
+        assertTrue(event.path("confirmation").path("ready").asBoolean(),event.toString());
+        ObjectNode project=api("GET","/projects/"+fixture.scope().projectId(),"owner",workspace,null,200).deepCopy();
+        api("POST","/projects/"+fixture.scope().projectId()+"/commands","owner",workspace,
+                Map.of("operationId","confirm-scoring-only-change-impact","expected",ref(project),"action","CONFIRM_CHANGE_IMPACT","payload",event.path("confirmation").path("payload")),200);
+        assertEquals("CONFIRMED",repository.changeEvent(fixture.scope(),event.path("eventId").asText()).path("status").asText());
+    }
+
     @Test void assembledManuscriptWithUnresolvedRequiredResponseCannotCloseChapterTransition() throws Exception {
         var fixture=baselineTransition(false);
         BiddingTypes.Ref sourceSet=repository.businessRefs(repository.businessRevision(fixture.scope(),fixture.oldBaseline())).getFirst();
