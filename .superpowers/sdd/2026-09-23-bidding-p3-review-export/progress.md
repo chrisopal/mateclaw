@@ -49,3 +49,5 @@ Task3 authfixround3 4e0c4ce1 rootgatec844..4e0 PASS4sourcefiles FULL181PASS0fail
 Task 3: complete — source4e0c4ce1 root181PASS, Solreview4SPEC PASS/APPROVE. Engineering acceptance only, limits task-3-acceptance.md. Next Task4; prepared brief+ui-blueprint+acceptance-plan.
 
 Task4 accepted source12390925/root122tests+lintprecisiontypeenterprisePASS/Solreview2APPROVE; visualdark94/narrow92 EMPTYONLY. Next scoped restricted-observations repair before Task5; liveDeepSeek3analysisOUTPUT_INVALID and repeatrequirementfailure persists.
+
+Restricted observations: complete — source20499d90, root d9851921..20499d90 scope15files PASS,61suites378tests0failure/error/skip33.947s; Solreview3 SPEC PASS/APPROVE. Review2 marker-forgery and synchronous provider-counter findings both ADDRESSED. Metadata capacity refuses new admissions without revoking active keys; generic literal response remains ordinary content. Engineering acceptance only: live provider unchanged QA runtime still needs fresh package/restart/retry. Next Task5 full HTTP controlled-provider chain and separate actual model/Office evidence.
