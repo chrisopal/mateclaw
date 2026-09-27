@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "findings": [{
+    "id": "f-1",
+    "severity": "BLOCKER",
+    "category": "MISSING_MANDATORY_PROOF",
+    "chapterRefs": [{"kind": "chapter", "id": "delivery", "version": 2, "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}],
+    "requirementRefs": ["req-proof"],
+    "evidenceRefs": [],
+    "description": "The mandatory qualification proof is not attached.",
+    "recommendation": "Attach the exact qualification certificate before approval."
+  }],
+  "coverage": {
+    "chapterRefs": [{"kind": "chapter", "id": "delivery", "version": 2, "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}],
+    "requirementRefs": ["req-proof"],
+    "crossChapterReviewed": false
+  },
+  "limitations": [],
+  "warnings": []
+}

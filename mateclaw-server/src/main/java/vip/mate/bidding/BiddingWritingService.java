@@ -9,6 +9,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,16 +24,17 @@ public class BiddingWritingService implements BiddingResultHandler {
     private final BiddingDependencies dependencies; private final BiddingTaskService tasks;
     private final BiddingMaterials materials; private final BiddingContentBlocks blocks=new BiddingContentBlocks();
     private final BiddingSkillValidator validator;
+    private final ObjectProvider<BiddingReviewService> reviews;
     public BiddingWritingService(JdbcTemplate jdbc,ObjectMapper json,BiddingAccess access,BiddingProjectService projects,
-            BiddingRepository repository,BiddingDependencies dependencies,BiddingTaskService tasks,BiddingMaterials materials,BiddingSkillValidator validator) {
-        this.jdbc=jdbc;this.json=json;this.access=access;this.projects=projects;this.repository=repository;this.dependencies=dependencies;this.tasks=tasks;this.materials=materials;this.validator=validator;
+            BiddingRepository repository,BiddingDependencies dependencies,BiddingTaskService tasks,BiddingMaterials materials,BiddingSkillValidator validator,ObjectProvider<BiddingReviewService> reviews) {
+        this.jdbc=jdbc;this.json=json;this.access=access;this.projects=projects;this.repository=repository;this.dependencies=dependencies;this.tasks=tasks;this.materials=materials;this.validator=validator;this.reviews=reviews;
     }
     @Override public Set<String> skillIds(){return Set.of(SKILL);}
 
     @Transactional
     public ObjectNode dispatch(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         access.requireActor(scope,scope.actorId()); validate(command,"DISPATCH_WRITING"); lockProject(scope);
-        only(command.payload(),Set.of("outlineRef","chapterIds","materialRefs","retryOfTaskId"));
+        only(command.payload(),Set.of("outlineRef","chapterIds","materialRefs","retryOfTaskId","selectedFindingRefs"));
         String digest=requestDigest(command); ObjectNode replay=operation(scope,command,digest);if(replay!=null)return replay;
         BiddingTypes.Ref outline=ref(command.payload().path("outlineRef")); requireConfirmedOutline(scope,outline);
         List<BiddingTypes.Ref> outlineRefs=repository.businessRefs(repository.businessRevision(scope,outline)); dependencies.validate(scope,outlineRefs);
@@ -56,7 +60,8 @@ public class BiddingWritingService implements BiddingResultHandler {
             input.set("requirements",selectById(analyses.path("bidding-requirement-analysis").path("requirements"),chapter.path("requirementRefs")));
             input.set("criteria",selectById(analyses.path("bidding-scoring-analysis").path("criteria"),chapter.path("scoringRefs")));input.set("materials",materials.snapshot(scope,writerId(scope),selected));
             if(current!=null)input.set("previousChapterRef",json.valueToTree(current));
-            input.set("selectedFindingRefs",json.createArrayNode());input.set("_chapterHeadGuard",json.valueToTree(guard));
+            JsonNode selectedFindings=command.payload().path("selectedFindingRefs");
+            input.set("selectedFindingRefs",selectedFindings.isArray()?reviews.getObject().selectedFindings(scope,id,selectedFindings):json.createArrayNode());input.set("_chapterHeadGuard",json.valueToTree(guard));
             // The prior chapter is frozen provenance and is guarded separately. It is
             // intentionally not a current dependency: replacing this chapter must not
             // make its own newly-adopted candidate stale.
@@ -119,7 +124,27 @@ public class BiddingWritingService implements BiddingResultHandler {
         List<String> order=leafOrder(op.path("chapters"));if(selected.size()!=order.size()||!selected.keySet().containsAll(order))throw BiddingAccess.error(422,"MANUSCRIPT_INCOMPLETE","Every confirmed leaf chapter needs a selected revision");
         ObjectNode manuscript=json.createObjectNode().put("schemaVersion","1").put("status","DRAFT_PENDING_REVIEW");manuscript.set("outlineRef",json.valueToTree(outline));ArrayNode contents=manuscript.putArray("chapters");List<BiddingTypes.Ref> refs=new ArrayList<>();refs.add(outline);
         for(String id:order){BiddingTypes.Ref r=selected.get(id);dependencies.validate(scope,refs(scope,r));JsonNode rev=revision(scope,r,id);if(rev==null||!Set.of("SELECTED","HUMAN_EDIT").contains(rev.path("status").asText()))throw BiddingAccess.error(409,"CHAPTER_STALE","Selected chapter is unreadable");JsonNode body=rev.path("payload");requireResponseCoverage(body.path("responses"),findChapter(op.path("chapters"),id));ObjectNode item=contents.addObject().put("chapterId",id);item.set("chapter",body.path("chapter").deepCopy());copyField(body,item,"responses");copyField(body,item,"citations");copyField(body,item,"missingMaterials");copyField(body,item,"unresolvedItems");refs.add(r);}
-        if(manuscript.path("chapters").isEmpty())throw BiddingAccess.error(422,"MANUSCRIPT_INCOMPLETE","No chapter content can be assembled");dependencies.validate(scope,refs);String body=canonical(manuscript),refsJson=write(refs),bodyDigest=sha(body);BiddingTypes.Ref saved=jdbc.query("SELECT version FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND object_id='manuscript' AND digest=? AND input_refs_json=? ORDER BY version DESC",rs->rs.next()?new BiddingTypes.Ref(MANUSCRIPT,"manuscript",rs.getLong(1),bodyDigest):null,scope.workspaceId(),scope.projectId(),bodyDigest,refsJson);if(saved==null)saved=saveRevision(scope,MANUSCRIPT,"manuscript",manuscript,refs,"DRAFT_PENDING_REVIEW");ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(saved));out.put("status","DRAFT_PENDING_REVIEW");store(scope,command,digest,out);return out;
+        if(manuscript.path("chapters").isEmpty())throw BiddingAccess.error(422,"MANUSCRIPT_INCOMPLETE","No chapter content can be assembled");dependencies.validate(scope,refs);String body=canonical(manuscript),refsJson=write(refs),bodyDigest=sha(body);BiddingTypes.Ref saved=jdbc.query("SELECT version FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND object_id='manuscript' AND digest=? AND input_refs_json=? ORDER BY version DESC",rs->rs.next()?new BiddingTypes.Ref(MANUSCRIPT,"manuscript",rs.getLong(1),bodyDigest):null,scope.workspaceId(),scope.projectId(),bodyDigest,refsJson);if(saved==null)saved=saveRevision(scope,MANUSCRIPT,"manuscript",manuscript,refs,"DRAFT_PENDING_REVIEW");ObjectNode out=json.createObjectNode().set("ref",json.valueToTree(saved));out.put("status","DRAFT_PENDING_REVIEW");out.put("reviewDispatch","SCHEDULED");store(scope,command,digest,out);
+        BiddingTypes.Ref manuscriptRef=saved;String operationId="auto-review-"+saved.digest().substring(0,48);
+        Runnable dispatchReview=()->{try{ObjectNode p=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscriptRef));reviews.getObject().dispatch(scope,new BiddingTypes.Command(operationId,manuscriptRef,"DISPATCH_REVIEW",p));}catch(RuntimeException ignored){/* The immutable manuscript remains valid; review status is read separately. */}};
+        if(TransactionSynchronizationManager.isSynchronizationActive())TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){@Override public void afterCommit(){dispatchReview.run();}});else dispatchReview.run();
+        return out;
+    }
+
+    @Transactional
+    public ObjectNode revise(BiddingTypes.Scope scope,BiddingTypes.Command command) {
+        access.requireActor(scope,scope.actorId());validate(command,"REVISE_CHAPTER");
+        only(command.payload(),Set.of("manuscriptRef","chapterRef","selectedFindingRefs"));
+        BiddingTypes.Ref manuscript=ref(command.payload().path("manuscriptRef")),chapter=ref(command.payload().path("chapterRef"));
+        if(manuscript==null||chapter==null||!MANUSCRIPT.equals(manuscript.kind())||!KIND.equals(chapter.kind()))throw BiddingAccess.error(400,"REVISION_INPUT_INVALID","Exact manuscript and chapter refs are required");
+        if(!command.expected().equals(chapter))throw BiddingAccess.error(409,"CHAPTER_STALE","Expected chapter ref differs from the revision target");
+        JsonNode selected=command.payload().path("selectedFindingRefs");if(!selected.isArray()||selected.isEmpty())throw BiddingAccess.error(422,"REVISION_FINDING_REQUIRED","Select at least one finding to revise");
+        if(!same(head(scope,chapter.id()),chapter))throw BiddingAccess.error(409,"CHAPTER_STALE","Revision must target the current selected chapter");
+        reviews.getObject().selectedFindings(scope,chapter.id(),selected,manuscript);
+        ObjectNode project=projects.get(scope);ObjectNode payload=json.createObjectNode();payload.set("outlineRef",json.valueToTree(confirmedOutline(scope)));
+        payload.set("chapterIds",json.createArrayNode().add(chapter.id()));payload.set("selectedFindingRefs",selected.deepCopy());
+        ObjectNode result=dispatch(scope,new BiddingTypes.Command(command.operationId(),ref(project.path("ref")),"DISPATCH_WRITING",payload));
+        result.put("status","CANDIDATE_PENDING");result.set("manuscriptRef",json.valueToTree(manuscript));result.set("chapterRef",json.valueToTree(chapter));return result;
     }
 
     @Transactional(readOnly=true)

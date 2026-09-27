@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "findings", "coverage", "limitations", "warnings"],
+  "properties": {
+    "schemaVersion": {"const": "1"},
+    "findings": {"type": "array", "items": {"type": "object", "required": ["id", "severity", "category", "chapterRefs", "requirementRefs", "evidenceRefs", "description", "recommendation"], "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "severity": {"enum": ["BLOCKER", "MAJOR", "MINOR", "SUGGESTION"]}, "category": {"enum": ["MISSING_MANDATORY_PROOF", "UNANSWERED_TECHNICAL_REQUIREMENT", "UNSUPPORTED_COMMITMENT", "SOURCE_UNREADABLE", "VERSION_CONFLICT", "CROSS_CHAPTER_INCONSISTENCY", "TECHNICAL_GAP", "STYLE_SUGGESTION"]}, "chapterRefs": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "requirementRefs": {"type": "array", "items": {"type": "string"}}, "evidenceRefs": {"type": "array", "items": {"type": "object", "required": ["sourceId", "version", "blockId", "quote"], "properties": {"sourceId": {"type": "string"}, "version": {"type": ["integer", "string"]}, "blockId": {"type": "string"}, "quote": {"type": "string"}}, "additionalProperties": false}}, "description": {"type": "string", "minLength": 1, "maxLength": 4000}, "recommendation": {"type": "string", "minLength": 1, "maxLength": 4000}}, "additionalProperties": false}},
+    "coverage": {"type": "object", "required": ["chapterRefs", "requirementRefs", "crossChapterReviewed"], "properties": {"chapterRefs": {"type": "array", "items": {"$ref": "#/$defs/ref"}}, "requirementRefs": {"type": "array", "items": {"type": "string"}}, "crossChapterReviewed": {"type": "boolean"}}, "additionalProperties": false},
+    "limitations": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+    "warnings": {"type": "array", "items": {"type": "string", "maxLength": 1000}}
+  },
+  "additionalProperties": false,
+  "$defs": {"ref": {"type": "object", "required": ["kind", "id", "version", "digest"], "properties": {"kind": {"type": "string"}, "id": {"type": "string"}, "version": {"type": ["integer", "string"]}, "digest": {"type": "string"}}, "additionalProperties": false}}
+}

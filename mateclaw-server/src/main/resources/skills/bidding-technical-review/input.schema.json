@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "baselineRef", "outlineRef", "manuscriptRef", "chapters", "requirements", "criteria", "eliminationItems", "evidenceSnapshot"],
+  "properties": {
+    "schemaVersion": {"const": "1"},
+    "baselineRef": {"$ref": "#/$defs/ref"},
+    "outlineRef": {"$ref": "#/$defs/ref"},
+    "manuscriptRef": {"$ref": "#/$defs/ref"},
+    "chapters": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["chapterId", "chapterRef", "content"], "properties": {"chapterId": {"type": "string"}, "chapterRef": {"$ref": "#/$defs/ref"}, "content": {"type": "object"}}, "additionalProperties": false}},
+    "requirements": {"type": "array", "items": {"type": "object"}},
+    "criteria": {"type": "array", "items": {"type": "object"}},
+    "eliminationItems": {"type": "array", "items": {"type": "object"}},
+    "evidenceSnapshot": {"type": "object", "required": ["blocks", "materials"], "properties": {"blocks": {"type": "array", "items": {"type": "object", "required": ["sourceId", "version", "blockId", "locator", "text"]}}, "materials": {"type": "object", "required": ["items"], "properties": {"items": {"type": "array", "items": {"type": "object", "required": ["ref", "content", "source", "validity"]}}}}, "unreadableSourceRefs": {"type": "array"}}, "additionalProperties": true},
+    "_biddingTargetId": {"type": "string", "description": "Server-only task identity; do not reproduce."}
+  },
+  "additionalProperties": false,
+  "$defs": {"ref": {"type": "object", "required": ["kind", "id", "version", "digest"], "properties": {"kind": {"type": "string"}, "id": {"type": "string"}, "version": {"type": ["integer", "string"]}, "digest": {"type": "string"}}, "additionalProperties": false}}
+}

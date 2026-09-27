@@ -3,6 +3,7 @@ package vip.mate.bidding;
 import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -106,6 +107,9 @@ class BiddingWritingTest extends BiddingHttpFixture {
         ObjectNode assemblePayload=json.createObjectNode().set("outlineRef",json.valueToTree(outline));assemblePayload.set("chapterRefs",refs);
         var assembleCommand=new BiddingTypes.Command("assemble-selected-and-human",outline,"ASSEMBLE_MANUSCRIPT",assemblePayload);
         var assembled=writing.assemble(scope,assembleCommand);assertEquals("DRAFT_PENDING_REVIEW",assembled.path("status").asText());
+        var reviewRead=api("GET","/projects/"+projectId+"/review","member",workspace,null,200);
+        assertEquals("NOT_DISPATCHED",reviewRead.path("status").asText());
+        assertEquals(assembled.path("ref"),reviewRead.path("manuscriptRef"));
         JsonNode manuscript=json.readTree(jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' AND version=?",String.class,workspace,projectId,assembled.path("ref").path("version").asLong()));
         assertEquals("Human authored draft",manuscript.path("chapters").get(1).path("chapter").path("blocks").get(0).path("text").asText());
         JsonNode manuscriptView=writing.read(scope).path("manuscript");
@@ -131,6 +135,37 @@ class BiddingWritingTest extends BiddingHttpFixture {
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='chapter'",Integer.class,workspace,id));
     }
 
+    @Test void targetedFindingRevisionCreatesCandidateWithoutChangingSelectedChapter() throws Exception {
+        var project=project();String projectId=project.path("id").asText(),actor=project.path("ownerId").asText();
+        var outline=seedConfirmedOutline(projectId);var scope=new BiddingTypes.Scope(workspace,actor,projectId);
+        Mockito.doNothing().when(dependencies).validate(Mockito.eq(scope),Mockito.anyList());
+        Mockito.when(dependencies.isCurrentForRead(Mockito.eq(scope),Mockito.anyList())).thenReturn(true);
+        Mockito.doNothing().when(employees).validate(Mockito.eq(scope),Mockito.anyString(),Mockito.anyString());
+        Mockito.when(employees.modelConfigId(Mockito.eq(scope),Mockito.anyString())).thenReturn("model-config");bindWritingSkill(scope,project);
+        for(String chapter:List.of("c1","c2")) {
+            JsonNode item=find(writing.read(scope).path("chapters"),chapter);BiddingTypes.Ref guard=json.treeToValue(item.path("editExpectedRef"),BiddingTypes.Ref.class);
+            ObjectNode edit=json.createObjectNode().put("chapterId",chapter);edit.putArray("blocks").addObject().put("type","paragraph").put("text","Initial "+chapter);edit.putArray("responses");edit.putArray("citations");edit.putArray("missingMaterials");edit.putArray("unresolvedItems");
+            writing.edit(scope,new BiddingTypes.Command("select-"+chapter,guard,"EDIT_CHAPTER",edit));
+        }
+        JsonNode read=writing.read(scope);ArrayNode chapterRefs=json.createArrayNode();for(String chapter:List.of("c1","c2")){JsonNode row=find(read.path("chapters"),chapter);chapterRefs.addObject().put("chapterId",chapter).set("ref",row.path("editExpectedRef").deepCopy());}
+        ObjectNode assemble=json.createObjectNode().set("outlineRef",json.valueToTree(outline));assemble.set("chapterRefs",chapterRefs);
+        BiddingTypes.Ref manuscript=json.treeToValue(writing.assemble(scope,new BiddingTypes.Command("assemble-for-fix",outline,"ASSEMBLE_MANUSCRIPT",assemble)).path("ref"),BiddingTypes.Ref.class);
+        BiddingTypes.Ref chapter=json.treeToValue(find(writing.read(scope).path("chapters"),"c1").path("selected").path("ref"),BiddingTypes.Ref.class);
+        BiddingTypes.Ref reviewRef=new BiddingTypes.Ref("review","revision-test",1,"e".repeat(64));ObjectNode reviewBody=json.createObjectNode().put("schemaVersion","1");
+        ObjectNode meta=reviewBody.putObject("_bidding");meta.set("manuscriptRef",json.valueToTree(manuscript));meta.put("reviewKey","revision-test-key");meta.put("reviewerId","reviewer");
+        ObjectNode finding=reviewBody.putArray("findings").addObject().put("id","F-1").put("severity","MAJOR").put("category","TECHNICAL_GAP");
+        finding.set("chapterRefs",json.createArrayNode().add(json.valueToTree(chapter)));finding.putArray("requirementRefs");finding.putArray("evidenceRefs");finding.put("description","补充方案细节").put("recommendation","定向修订章节");
+        persist(scope,reviewRef,reviewBody,List.of(outline),"REVIEW_RESULT");
+        BiddingTypes.Ref findingRef=new BiddingTypes.Ref("reviewFinding","revision-finding",1,"f".repeat(64));ObjectNode issue=json.createObjectNode().put("findingId","F-1");issue.set("reviewRef",json.valueToTree(reviewRef));issue.set("finding",finding.deepCopy());persist(scope,findingRef,issue,List.of(reviewRef),"OPEN");
+        jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",UUID.randomUUID().toString(),workspace,projectId,"findingDecision",findingRef.id(),1,"{}",json.writeValueAsString(List.of(findingRef)),"FIX","decision-digest");
+        ObjectNode revise=json.createObjectNode().set("manuscriptRef",json.valueToTree(manuscript));revise.set("chapterRef",json.valueToTree(chapter));revise.putArray("selectedFindingRefs").add(json.valueToTree(findingRef));
+        ObjectNode queued=writing.revise(scope,new BiddingTypes.Command("revise-finding-F1",chapter,"REVISE_CHAPTER",revise));assertEquals("CANDIDATE_PENDING",queued.path("status").asText());
+        assertEquals(chapter,json.treeToValue(find(writing.read(scope).path("chapters"),"c1").path("selected").path("ref"),BiddingTypes.Ref.class));
+        var claim=repository.claimDue(Instant.now(),"targeted-revision-test",1).getFirst();assertEquals("c1",claim.input().path("chapterId").asText());assertEquals(1,claim.input().path("selectedFindingRefs").size());
+        tasks.complete(claim,execution(claim,"c1","Revision candidate"));
+        JsonNode after=writing.read(scope);assertEquals(chapter,json.treeToValue(find(after.path("chapters"),"c1").path("selected").path("ref"),BiddingTypes.Ref.class));assertEquals("CANDIDATE",find(after.path("chapters"),"c1").path("candidates").get(0).path("status").asText());
+    }
+
     private void bindWritingSkill(BiddingTypes.Scope scope,JsonNode project) throws Exception {
         long skillId=91_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000);String skill=Long.toString(skillId),digest="c".repeat(64),config="b".repeat(64),packageId=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",skillId,"bidding-technical-writing",Long.valueOf(workspace));
@@ -139,6 +174,10 @@ class BiddingWritingTest extends BiddingHttpFixture {
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",packageId,workspace,scope.projectId(),skill,"v1",digest,files);
         var stored=(ObjectNode)project.deepCopy();var writer=stored.putObject("bindings").putObject("writer");writer.put("agentId","employee").put("configDigest",config);writer.putArray("skillPins").addObject().put("skillId",skill).put("digest",digest);
         jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(stored),scope.projectId());
+    }
+
+    private void persist(BiddingTypes.Scope scope,BiddingTypes.Ref ref,ObjectNode payload,List<BiddingTypes.Ref> refs,String status)throws Exception {
+        jdbc.update("INSERT INTO mate_bidding_revision(id,workspace_id,project_id,kind,object_id,version,payload_json,input_refs_json,status,digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),ref.kind(),ref.id(),ref.version(),json.writeValueAsString(payload),json.writeValueAsString(refs),status,ref.digest(),Timestamp.from(Instant.now()));
     }
 
     private BiddingTypes.Execution execution(BiddingTypes.Claim claim,String chapter,String text){return new BiddingTypes.Execution(result(chapter,text),null,claim.skill().digest(),claim.configDigest(),null);}

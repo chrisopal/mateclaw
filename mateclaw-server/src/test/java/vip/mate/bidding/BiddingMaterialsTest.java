@@ -3,9 +3,11 @@ package vip.mate.bidding;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import vip.mate.wiki.service.WikiPageTypePermissionService;
 class BiddingMaterialsTest extends BiddingHttpFixture {
     @Autowired WikiKnowledgeBaseService knowledgeBases;
     @Autowired BiddingMaterials materials;
+    @Autowired BiddingRepository repository;
     @MockBean WikiPageService pages;
     @MockBean WikiPageTypePermissionService pageTypePermissions;
 
@@ -80,5 +83,30 @@ class BiddingMaterialsTest extends BiddingHttpFixture {
             assertThrows(BiddingApiException.class,()->materials.snapshot(new BiddingTypes.Scope(workspace,actorId,project.path("id").asText()),Long.toString(agentId),
                     java.util.List.of(json.treeToValue(result.path("ref"),BiddingTypes.Ref.class))),invalidState);
         }
+    }
+
+    @Test void reviewerMustHaveIndependentCurrentWikiAndPageTypeAccess() throws Exception {
+        var project=project();long kbId=7101,pageId=9811,writerId=7_000_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000_000),reviewerId=writerId+1;
+        jdbc.update("INSERT INTO mate_agent(id,name,enabled,workspace_id,create_time,update_time,deleted) VALUES(?,?,TRUE,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",writerId,"Material writer",Long.valueOf(workspace));
+        jdbc.update("INSERT INTO mate_agent(id,name,enabled,workspace_id,create_time,update_time,deleted) VALUES(?,?,TRUE,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",reviewerId,"Independent reviewer",Long.valueOf(workspace));
+        ObjectNode stored=(ObjectNode)project.deepCopy();ObjectNode bindings=stored.putObject("bindings");
+        bindings.putObject("writer").put("agentId",Long.toString(writerId));bindings.putObject("reviewer").put("agentId",Long.toString(reviewerId));
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE workspace_id=? AND id=?",json.writeValueAsString(stored),workspace,project.path("id").asText());
+        WikiKnowledgeBaseEntity kb=new WikiKnowledgeBaseEntity();kb.setId(kbId);kb.setWorkspaceId(Long.valueOf(workspace));kb.setDeleted(0);
+        when(knowledgeBases.findVisibleById(writerId,kbId)).thenReturn(kb);when(knowledgeBases.findVisibleById(reviewerId,kbId)).thenReturn(kb);
+        WikiPageEntity page=new WikiPageEntity();page.setId(pageId);page.setKbId(kbId);page.setDeleted(0);page.setTitle("Reviewer input");page.setPageType("experience");page.setContent("Frozen source content");when(pages.getById(pageId)).thenReturn(page);
+        when(pageTypePermissions.canRead(writerId,kbId,"experience")).thenReturn(true);when(pageTypePermissions.canRead(reviewerId,kbId,"experience")).thenReturn(false);
+        String digest=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest("Frozen source content".getBytes(StandardCharsets.UTF_8)));
+        var request=Map.of("operationId","bind-review-material-"+UUID.randomUUID(),"action","BIND_MATERIAL","expected",ref(project),"payload",Map.of("kind","WIKI_PAGE","knowledgeBaseId",kbId,"pageId",pageId,"expectedDigest",digest,"applicability","Review context"));
+        JsonNode bound=api("POST","/projects/"+project.path("id").asText()+"/commands","member",workspace,request,200);
+        BiddingTypes.Ref materialRef=json.treeToValue(bound.path("ref"),BiddingTypes.Ref.class);
+        String actor=jdbc.queryForObject("SELECT id FROM mate_user WHERE username=?",String.class,auth.parseToken(tokens.get("member").substring(7)));
+        BiddingTypes.Scope scope=new BiddingTypes.Scope(workspace,actor,project.path("id").asText());
+        assertThrows(BiddingApiException.class,()->materials.snapshotForReviewer(scope,Long.toString(reviewerId),List.of(materialRef)));
+        when(pageTypePermissions.canRead(reviewerId,kbId,"experience")).thenReturn(true);
+        assertEquals("Frozen source content",materials.snapshotForReviewer(scope,Long.toString(reviewerId),List.of(materialRef)).path("items").get(0).path("content").path("content").asText());
+        ObjectNode rebound=repository.findProject(workspace,project.path("id").asText());((ObjectNode)rebound.path("bindings").path("reviewer")).put("agentId",Long.toString(writerId));
+        jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(rebound),project.path("id").asText());
+        assertThrows(BiddingApiException.class,()->materials.requireReviewerReadable(scope,Long.toString(reviewerId),materialRef));
     }
 }

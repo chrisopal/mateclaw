@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1",
+  "findings": [],
+  "coverage": {"chapterRefs": [], "requirementRefs": [], "crossChapterReviewed": false},
+  "limitations": [],
+  "warnings": [],
+  "approved": true,
+  "closedHumanTodos": ["todo-1"]
+}

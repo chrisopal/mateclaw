@@ -161,6 +161,56 @@ public class BiddingMaterials {
         return result;
     }
 
+    /** Frozen read-only snapshot checked against the separately bound review employee's ACL. */
+    public ObjectNode snapshotForReviewer(BiddingTypes.Scope scope,String reviewerAgentId,java.util.List<BiddingTypes.Ref> refs) {
+        access.requireReaderActor(scope,scope.actorId());
+        ObjectNode result=json.createObjectNode(); var items=result.putArray("items");
+        if(refs==null)return result;
+        for(BiddingTypes.Ref ref:refs) if(ref!=null&&"material".equals(ref.kind())) {
+            requireReviewerReadable(scope,reviewerAgentId,ref);
+            var row=jdbc.queryForMap("SELECT content_json,source_kind,validity FROM mate_bidding_material WHERE workspace_id=? AND project_id=? AND external_id=? AND version=? AND digest=?",
+                    scope.workspaceId(),scope.projectId(),ref.id(),ref.version(),ref.digest());
+            if(!"VALID".equals(row.get("validity")))throw BiddingAccess.error(422,"MATERIAL_UNREADABLE","Review material snapshot is unavailable");
+            ObjectNode item=items.addObject();item.set("ref",json.valueToTree(ref));item.set("content",read((String)row.get("content_json")));
+            item.put("source",(String)row.get("source_kind")).put("validity","VALID");
+        }
+        return result;
+    }
+
+    public void requireReviewerReadable(BiddingTypes.Scope scope,String reviewerAgentId,BiddingTypes.Ref ref) {
+        if(ref==null||!"material".equals(ref.kind()))return;
+        access.requireReaderActor(scope,scope.actorId());
+        ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());
+        if(project==null||!reviewerAgentId.equals(project.path("bindings").path("reviewer").path("agentId").asText()))
+            throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Material access must be checked as the current reviewer");
+        AgentEntity reviewer=requireAgent(scope,reviewerAgentId);
+        var rows=jdbc.query("SELECT access_ref_json,validity,source_kind,content_json FROM mate_bidding_material WHERE workspace_id=? AND project_id=? AND external_id=? AND version=? AND digest=?",
+                (rs,n)->new MaterialAccess(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4)),scope.workspaceId(),scope.projectId(),ref.id(),ref.version(),ref.digest());
+        if(rows.isEmpty()||!"VALID".equals(rows.getFirst().validity()))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Review material is unavailable");
+        ObjectNode link=read(rows.getFirst().accessRef());
+        if("PRESALES_RELEASE".equals(rows.getFirst().sourceKind())) {
+            var service=presales.getIfAvailable();if(service==null)throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Presales authorization cannot be rechecked");
+            ObjectNode current;
+            try{current=service.handoff(scope.workspaceId(),link.path("presalesProjectId").asText(),link.path("releaseId").asText());}
+            catch(vip.mate.semantic.web.SemanticApiException denied){throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Presales source access was revoked");}
+            if(!ref.digest().equals(sha(write(current))))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Presales source snapshot changed");
+            var kbService=knowledgeBases.getIfAvailable();if(kbService==null)throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Knowledge authorization cannot be rechecked");
+            for(var source:current.path("materials")) {
+                WikiKnowledgeBaseEntity kb=kbService.findVisibleById(reviewer.getId(),parseId(source.path("kbId").asText()));
+                if(kb==null||!scope.workspaceId().equals(String.valueOf(kb.getWorkspaceId()))||!active(kb.getDeleted()))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer cannot read a handoff source");
+            }
+            return;
+        }
+        long kbId=parseId(link.path("knowledgeBaseId").asText()),pageId=parseId(link.path("pageId").asText());
+        var kbService=knowledgeBases.getIfAvailable();var pageService=pages.getIfAvailable();
+        if(kbService==null||pageService==null)throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Knowledge authorization cannot be rechecked");
+        WikiKnowledgeBaseEntity kb=kbService.findVisibleById(reviewer.getId(),kbId);WikiPageEntity page=pageService.getById(pageId);
+        if(kb==null||!scope.workspaceId().equals(String.valueOf(kb.getWorkspaceId()))||!active(kb.getDeleted())
+                ||page==null||!active(page.getDeleted())||page.getKbId()==null||page.getKbId()!=kbId)
+            throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer cannot read this material");
+        requirePageTypeReadable(reviewer.getId(),kbId,page.getPageType());
+    }
+
     public void requireReadable(BiddingTypes.Scope scope,String agentId,BiddingTypes.Ref ref) {
         if(ref==null || !"material".equals(ref.kind())) return;
         access.requireReaderActor(scope,scope.actorId());

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public final class BiddingSkillValidator {
     private static final Set<String> SKILLS = Set.of("bidding-tender-profile", "bidding-elimination-analysis",
             "bidding-requirement-analysis", "bidding-scoring-analysis");
+    private static final String REVIEW_SKILL = "bidding-technical-review";
 
     public void validateWriting(ObjectNode payload, List<BiddingTypes.Ref> allowedMaterials) {
         validateWriting(payload, allowedMaterials, null);
@@ -24,6 +25,80 @@ public final class BiddingSkillValidator {
             if (!payload.path(key).isArray()) invalid("/" + key, "Expected an array");
         }
         if(payload.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>2*1024*1024)throw BiddingAccess.error(413,"WRITING_OUTPUT_LIMIT","Writing result exceeds 2 MiB");
+    }
+
+    /** Verifies review scope and exact coverage; approval fields are rejected by the closed contract. */
+    public void validateReview(ObjectNode payload, ObjectNode input) {
+        if (payload == null || input == null) invalid("/", "Review payload and input must be objects");
+        only(input, Set.of("schemaVersion", "baselineRef", "outlineRef", "manuscriptRef", "chapters", "requirements",
+                "criteria", "eliminationItems", "evidenceSnapshot", "_biddingTargetId"), "/input");
+        if (!"1".equals(input.path("schemaVersion").asText())) invalid("/input/schemaVersion", "Expected schema version 1");
+        if (!input.path("chapters").isArray() || input.path("chapters").isEmpty()) invalid("/input/chapters", "Assigned chapters are required");
+        if (!input.path("requirements").isArray() || !input.path("criteria").isArray() || !input.path("eliminationItems").isArray()) invalid("/input", "Review analysis snapshots are required");
+        JsonNode evidence = input.path("evidenceSnapshot");
+        if (!evidence.isObject() || !evidence.path("blocks").isArray() || !evidence.path("materials").path("items").isArray()) invalid("/input/evidenceSnapshot", "Evidence and material snapshots are required");
+        String target = input.path("_biddingTargetId").asText("");
+        if (!target.startsWith("review:")) invalid("/input/_biddingTargetId", "Review task identity is required");
+        boolean cross = target.endsWith(":cross");
+        Set<String> assignedChapters = new LinkedHashSet<>(); Map<String, JsonNode> assignedChapterRefs = new LinkedHashMap<>();
+        for (int i = 0; i < input.path("chapters").size(); i++) {
+            JsonNode chapter = input.path("chapters").get(i); String at = "/input/chapters/" + i;
+            only(chapter, Set.of("chapterId", "chapterRef", "content"), at);
+            if (!chapter.path("chapterRef").isObject() || !"chapter".equals(chapter.path("chapterRef").path("kind").asText())
+                    || !chapter.path("chapterId").asText().equals(chapter.path("chapterRef").path("id").asText())) invalid(at, "Chapter must be pinned to its exact selected revision");
+            String chapterId=chapter.path("chapterId").asText();
+            if (!assignedChapters.add(chapterId)) invalid(at, "Duplicate assigned chapter");
+            assignedChapterRefs.put(chapterId,chapter.path("chapterRef"));
+        }
+        if (cross && input.path("chapters").size() < 1) invalid("/input/chapters", "Cross-chapter review needs the entire manuscript");
+        Set<String> assignedRequirements = new LinkedHashSet<>();
+        for (JsonNode requirement : input.path("requirements")) {
+            String id = text(requirement, "id", "/input/requirements", 128);
+            if (!"TECHNICAL".equals(requirement.path("category").asText()) || !assignedRequirements.add(id)) invalid("/input/requirements", "Requirements must be unique technical clauses");
+        }
+        only(payload, Set.of("schemaVersion", "findings", "coverage", "limitations", "warnings"), "");
+        if (!"1".equals(payload.path("schemaVersion").asText())) invalid("/schemaVersion", "Expected schema version 1");
+        only(payload.path("coverage"), Set.of("chapterRefs", "requirementRefs", "crossChapterReviewed"), "/coverage");
+        if (!payload.path("coverage").path("chapterRefs").isArray() || !payload.path("coverage").path("requirementRefs").isArray()) invalid("/coverage", "Chapter and requirement coverage arrays are required");
+        Set<String> coveredChapters = new LinkedHashSet<>();
+        for (JsonNode chapterRef : payload.path("coverage").path("chapterRefs")) {
+            String id = chapterRef.path("id").asText();
+            if (!assignedChapters.contains(id) || !"chapter".equals(chapterRef.path("kind").asText())
+                    || !assignedChapterRefs.get(id).equals(chapterRef) || !coveredChapters.add(id)) invalid("/coverage/chapterRefs", "Coverage contains an unassigned, stale or duplicate chapter");
+        }
+        Set<String> coveredRequirements = stringSet(payload.path("coverage").path("requirementRefs"), "/coverage/requirementRefs");
+        if (!coveredChapters.equals(assignedChapters) || !coveredRequirements.equals(assignedRequirements)) fail("REVIEW_COVERAGE_INCOMPLETE", "/coverage", "Every assigned chapter and technical requirement must be reviewed");
+        if (!payload.path("coverage").path("crossChapterReviewed").isBoolean() || payload.path("coverage").path("crossChapterReviewed").asBoolean() != cross) invalid("/coverage/crossChapterReviewed", "Only the cross-chapter task may claim cross-chapter coverage");
+        if (!payload.path("findings").isArray() || !payload.path("limitations").isArray() || !payload.path("warnings").isArray()) invalid("/", "Findings, limitations and warnings must be arrays");
+        Set<String> findingIds = new LinkedHashSet<>();
+        for (int i = 0; i < payload.path("findings").size(); i++) {
+            String at = "/findings/" + i; JsonNode finding = payload.path("findings").get(i);
+            only(finding, Set.of("id", "severity", "category", "chapterRefs", "requirementRefs", "evidenceRefs", "description", "recommendation"), at);
+            String id = text(finding, "id", at, 128); if (!findingIds.add(id)) invalid(at + "/id", "Finding IDs must be unique");
+            if (!Set.of("BLOCKER", "MAJOR", "MINOR", "SUGGESTION").contains(finding.path("severity").asText())) invalid(at + "/severity", "Invalid finding severity");
+            if (!Set.of("MISSING_MANDATORY_PROOF", "UNANSWERED_TECHNICAL_REQUIREMENT", "UNSUPPORTED_COMMITMENT", "SOURCE_UNREADABLE", "VERSION_CONFLICT", "CROSS_CHAPTER_INCONSISTENCY", "TECHNICAL_GAP", "STYLE_SUGGESTION").contains(finding.path("category").asText())) invalid(at + "/category", "Invalid finding category");
+            text(finding, "description", at, 4000); text(finding, "recommendation", at, 4000);
+            if (!finding.path("chapterRefs").isArray() || !finding.path("requirementRefs").isArray() || !finding.path("evidenceRefs").isArray()) invalid(at, "Finding references must be arrays");
+            for (JsonNode ref : finding.path("chapterRefs")) if (!assignedChapters.contains(ref.path("id").asText())
+                    || !assignedChapterRefs.get(ref.path("id").asText()).equals(ref)) invalid(at + "/chapterRefs", "Finding references an unassigned or stale chapter");
+            for (JsonNode ref : finding.path("requirementRefs")) if (!assignedRequirements.contains(ref.asText())) invalid(at + "/requirementRefs", "Finding references an unassigned requirement");
+            validateReviewEvidence(finding.path("evidenceRefs"), evidence.path("blocks"), at + "/evidenceRefs");
+        }
+        for (String field : List.of("limitations", "warnings")) for (int i = 0; i < payload.path(field).size(); i++) text(payload.path(field).get(i), "/" + field + "/" + i, 1000);
+        if (payload.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 2 * 1024 * 1024) throw BiddingAccess.error(413, "REVIEW_OUTPUT_LIMIT", "Review result exceeds 2 MiB");
+    }
+
+    private void validateReviewEvidence(JsonNode refs, JsonNode blocks, String path) {
+        for (int i = 0; i < refs.size(); i++) {
+            JsonNode ref = refs.get(i); only(ref, Set.of("sourceId", "version", "blockId", "quote"), path + "/" + i);
+            String sourceId = text(ref, "sourceId", path + "/" + i, 128), blockId = text(ref, "blockId", path + "/" + i, 128);
+            String quote = text(ref, "quote", path + "/" + i, 2000);
+            if (!ref.path("version").canConvertToLong() || ref.path("version").asLong() < 1) invalid(path + "/" + i + "/version", "Positive source version is required");
+            boolean exact = false;
+            for (JsonNode block : blocks) if (sourceId.equals(block.path("sourceId").asText()) && ref.path("version").asLong() == block.path("version").asLong()
+                    && blockId.equals(block.path("blockId").asText()) && block.path("text").asText().contains(quote)) { exact = true; break; }
+            if (!exact) fail("EVIDENCE_QUOTE_INVALID", path + "/" + i, "Finding evidence must match the frozen source snapshot");
+        }
     }
 
     public void validateWritingEvidence(ObjectNode payload,ObjectNode input) {
