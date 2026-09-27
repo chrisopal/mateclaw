@@ -171,6 +171,7 @@ String digest = java.util.HexFormat.of().formatHex(
 **Files:**
 - Create: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingApprovalService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingArtifactService.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingReviewService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingDependencies.java`.
@@ -179,6 +180,8 @@ String digest = java.util.HexFormat.of().formatHex(
 **Interfaces:**
 - Consumes: Access.requireApprover、Dependencies.validate/isCurrent、ReviewService.requireReviewed、ArtifactService.metadata。
 - Produces: `BiddingApprovalService.approve(Scope,Command):ObjectNode`；`BiddingArtifactService.download(Scope,String artifactId,String mode):byte[]`；`BiddingApprovalService.requireDownloadable(Scope,String artifactId,String mode):void`。
+- Produces: ReviewService 提供写入审定与 viewer 读取分别授权的完整审核证据 seam，汇总当前 reviewKey 的全部章节与跨章 task/result refs。`reviewRef` 必须标识此服务端确定的整本审核快照；不能取任意单章 Ref 充当整本证明。人工 decision 持久化该不可变快照与全部精确 result refs，批准与下载重新验证完整组、正文闭包与当前审核员工材料权限；不得借批准人的身份替代当前下载人的权限。
+- Source preflight: 现有 requireReviewed/Dependencies.validate 要求 member，正式 viewer 下载应使用读取权限 seam 和 validateForRead。现有 Repository.invalidate 只传播 revision 依赖，不自动更新 artifact 表；本阶段采用 metadata/approve/download 实时重查全部 refs 并返回安全失效状态，保留历史 decision/bytes，不假定事件已把 artifact 标为 STALE。不新增 Repository 修改职责。
 
 - [ ] 写实际完整candidate生成后的批准/下载回读测试；用fixture创建真实解析/目录/正文/审核，不直接SQL伪造批准。HTTP下载用MockMvc字节数组与DB bytes比较（api JSON helper不适用二进制）。
 
