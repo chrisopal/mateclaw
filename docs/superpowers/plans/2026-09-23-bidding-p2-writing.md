@@ -215,6 +215,8 @@ head 已由 P1-01 创建，当前选择 CAS 只修改对应章节指针；所有
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingCommandService.java`
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingRepository.java`
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingOutlineTest.java`
+- Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingWritingTest.java`
 
 **Interfaces:**
 - Consumes: P1 Dependencies.validate/isCurrent/invalidate、所有业务revision.inputRefs及当前head。
