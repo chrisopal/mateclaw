@@ -50,12 +50,14 @@
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingWritingService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskService.java`.
 - Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingMaterials.java`.
+- Modify: `mateclaw-server/src/main/java/vip/mate/bidding/BiddingController.java`.
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingReviewTest.java`.
 
 **Source preflight (2026-09-27):**
 材料只读审核入口必须校验当前绑定 reviewer 的独立知识库/页面类型权限，并保持现有 writer 读写规则；禁止为通过审核把 reviewer 冒充 writer。未绑定/未就绪审核员工时保留有效 P2 组装草稿，明确审核尚未派发。
 
 **Interfaces:**
+- Produces: `BiddingReviewService.read(Scope):ObjectNode`；`GET /projects/{id}/review` 返回当前正文绑定的审核任务、逐章/跨章覆盖、findings、处置和 HUMAN_TODO；读时重查 reader/material/reviewer ACL，明确历史与当前状态，只有 refs/config/两层 coverage 匹配才报告当前完整审核。
 - Consumes: MANUSCRIPT/outline/baseline精确Ref、材料快照、独立reviewer、P1 TaskService。
 - Produces: `BiddingReviewService` implements `BiddingResultHandler`，skillIds返回审核技能ID；`BiddingReviewService.dispatch(Scope,Command):ObjectNode`；`accept(Claim,ObjectNode):Ref`；`resolve(Scope,Command):ObjectNode`；`requireReviewed(Scope,Ref manuscript):void`；`static blocksTechnicalApproval(String category,String severity,boolean resolved):boolean`。
 
