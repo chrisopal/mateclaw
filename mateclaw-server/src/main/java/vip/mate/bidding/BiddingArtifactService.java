@@ -174,6 +174,31 @@ public class BiddingArtifactService implements BiddingResultHandler {
     }
 
     @Transactional(readOnly=true)
+    public ObjectNode approvalContext(BiddingTypes.Scope scope,String artifactId) {
+        access.requireReaderActor(scope,scope.actorId());projects.get(scope);
+        Artifact row=artifact(scope,artifactId);
+        if(row==null||!Set.of("CANDIDATE","PREVIEW","APPROVED","STALE").contains(row.status()))throw BiddingAccess.error(404,"NOT_FOUND","Candidate artifact not found");
+        ObjectNode out=manifest(row,row.mode());out.set("artifactRef",json.valueToTree(new BiddingTypes.Ref("artifact",row.id(),1,row.digest())));
+        out.set("manuscriptRef",json.valueToTree(row.manuscript()));out.set("templateRef",json.valueToTree(row.template()));out.set("formatRef",json.valueToTree(row.formatRef()));
+        if("preview".equals(row.mode())||"PREVIEW".equals(row.status()))return out.put("status","NOT_APPROVABLE").put("reasonCode","PREVIEW_NOT_APPROVABLE");
+        if("STALE".equals(row.status()))return out.put("status","STALE").put("reasonCode","ARTIFACT_STALE");
+        if(!Set.of("CANDIDATE","APPROVED").contains(row.status()))return out.put("status","NOT_APPROVABLE").put("reasonCode","ARTIFACT_NOT_APPROVABLE");
+        try {
+            dependencies.validateForRead(scope,List.of(row.manuscript(),row.template(),row.formatRef()));
+            ObjectNode proof=reviews.getObject().approvalEvidence(scope,row.manuscript());
+            out.put("status","READY");out.set("reviewRef",proof.path("reviewRef").deepCopy());out.set("reviewEvidence",proof.path("evidence").deepCopy());
+            return out;
+        } catch(BiddingApiException blocked) {
+            if(blocked.status()==403)throw blocked;
+            if(Set.of("REVIEW_INCOMPLETE","TECHNICAL_REVIEW_BLOCKED","HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL").contains(blocked.code()))
+                return out.put("status","BLOCKED").put("reasonCode",blocked.code());
+            if(blocked.status()==404||blocked.status()==409||blocked.status()==422)
+                return out.put("status","STALE").put("reasonCode",blocked.code());
+            throw blocked;
+        }
+    }
+
+    @Transactional(readOnly=true)
     public byte[] bytes(BiddingTypes.Scope scope,String artifactId) { return download(scope,artifactId,"candidate"); }
 
     @Transactional(readOnly=true)

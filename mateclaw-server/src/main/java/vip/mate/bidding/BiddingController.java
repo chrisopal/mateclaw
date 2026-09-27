@@ -132,6 +132,10 @@ public class BiddingController {
     public R<?> artifact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
         String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().metadata(new BiddingTypes.Scope(workspace,actor,id),artifactId));
     }
+    @GetMapping("/projects/{id}/artifacts/{artifactId}/approval-context")
+    public R<?> artifactApprovalContext(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
+        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().approvalContext(new BiddingTypes.Scope(workspace,actor,id),artifactId));
+    }
     @GetMapping("/projects/{id}/artifacts/{artifactId}/content")
     public ResponseEntity<byte[]> artifactContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId,
             @RequestParam(defaultValue="candidate") String mode) {

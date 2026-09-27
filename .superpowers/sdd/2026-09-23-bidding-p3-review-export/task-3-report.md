@@ -44,3 +44,16 @@ Plan deviations: none
 - Final focused verification command: `env JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home /opt/homebrew/Cellar/maven/3.9.11/libexec/bin/mvn -pl mateclaw-server -am -Dtest='BiddingApprovalTest,BiddingApprovalEndToEndTest,BiddingReviewTest,BiddingProjectTest,BiddingArtifactTest,BiddingChangeImpactTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test`. Result: BUILD SUCCESS, 39 tests, 0 failures, 0 errors, 0 skipped. This explicitly selected the separate `BiddingApprovalEndToEndTest` top-level class in `BiddingApprovalTest.java`. `git diff --check` passed.
 
 Root full gate and scoped independent re-review remain pending this commit. This fix round does not claim live provider or Office visual acceptance.
+
+## HTTP approval-context seam fix round 2
+
+Status: DONE
+Verification: PASS
+Plan deviations: none
+
+- Added viewer-authorized `GET /projects/{id}/artifacts/{artifactId}/approval-context`. It scopes artifact lookup to workspace/project, derives artifact/manuscript/template/format refs from that row, and returns `READY` with the server-generated review snapshot, `BLOCKED` with a bounded reason code, `STALE` without a review ref, or `NOT_APPROVABLE` for preview. Authorization failures remain 403 and cross-workspace/project misses remain 404. The GET is read-only and does not invoke the renderer.
+- The approval E2E now builds every positive approval reference from authenticated HTTP context GETs; it no longer calls `reviews.approvalEvidence` internally. It exercises blocked blocker and FIX context, blocked human-todo context, preview context, ready owner and viewer contexts, revoked workspace membership (403), revoked reviewer page-type access (403 with no proof in response), cross-workspace artifact access (404), and stale context/POST after TODO and format changes. It checks blocked and ready GETs do not add business revisions or decisions and that ready GET does not call the renderer. Persisted approval proof still equals the exact context proof.
+- TDD RED: before adding the route, the authenticated E2E GET expected HTTP 200 and received HTTP 404 `Resource not found`; Surefire path at that run was `mateclaw-server/target/surefire-reports/TEST-vip.mate.bidding.BiddingApprovalEndToEndTest.xml` (transient report overwritten by GREEN).
+- Focused verification: `env JAVA_HOME=/Users/guojiexie/Library/Java/JavaVirtualMachines/temurin-21/Contents/Home /opt/homebrew/Cellar/maven/3.9.11/libexec/bin/mvn -pl mateclaw-server -am -Dtest='BiddingApprovalTest,BiddingApprovalEndToEndTest,BiddingReviewTest,BiddingProjectTest,BiddingArtifactTest,BiddingChangeImpactTest,BiddingMaterialsTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test`. Surefire recorded 41 tests, 0 failures, 0 errors, 0 skipped across the seven explicitly selected classes. `git diff --check` passed.
+
+Root full gate and independent scoped re-review remain pending this commit. No Task 4 work or live provider/Office acceptance is claimed.
