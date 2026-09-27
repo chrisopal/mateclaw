@@ -1,0 +1,11 @@
+# Task 3 HTTP seam scoped re-review
+
+Baseline 18f81954..1ec49617. SPEC: FAIL. Quality: REQUEST CHANGES. Previous three fixes remain closed.
+
+The original missing HTTP reviewRef finding is closed: `BiddingController.java:135–138` exposes authenticated approval-context; `BiddingArtifactService.java:181–189` derives exact artifact/input refs and server whole-book proof. `BiddingApprovalTest.java:103,111,124` constructs positive requests from authenticated currentContext/raceContext; no internal approvalEvidence call remains. POST still rechecks exact proof/current refs, so frontend hashing is unnecessary. READY/BLOCKED context does not write or render, and cross-scope misses remain 404.
+
+**HIGH — preview/stale context bypasses origin/reviewer authorization.** `BiddingArtifactService.java:183–185` returns manifest, digest, size/checks and all three input refs before either validateForRead (187) or current reviewer/material proof (188). A still-current workspace viewer can therefore read this derived metadata after underlying material/reviewer page access is revoked simply by requesting a PREVIEW or STALE artifact's approval-context. Existing metadata/download paths perform dependency and reviewer checks; this new route creates a bypass. The 403 catch at 192 cannot protect early returns. Tests cover revoked reviewer access only on the ready candidate path, not these branches.
+
+Fix: perform origin/material/read authorization checks before any preview/stale response. Separate authorization from currency evaluation so stale refs can still produce a safe STALE state without bypassing revoked grants; do not expose manifest/ref fields when authorization fails. Reuse existing historical read-authorization seams plus current reviewer authorization as appropriate, retaining 403 rather than converting it to STALE. Add authenticated HTTP regression for preview and stale artifacts after reviewer/origin ACL revocation, requiring 403 and no manifest/proof; keep authorized preview NOT_APPROVABLE and authorized stale STALE positive cases. This is a bounded ArtifactService/test fix, not Task 4 scope.
+
+Evidence: root mandatory gate reports three source files PASS and 181 tests, zero failures/errors/skips; no Maven rerun or Java LSP claim. Only this report written. Live provider/Office/dialect acceptance remains outside scope.
