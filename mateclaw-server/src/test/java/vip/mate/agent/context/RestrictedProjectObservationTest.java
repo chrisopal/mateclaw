@@ -75,6 +75,17 @@ class RestrictedProjectObservationTest {
         assertEquals(pinnedSkillSnapshot, skillResponse(skillRun.responses(), "skill-call").responseData());
         assertEquals(pinnedOutputSchema, skillResponse(skillRun.responses(), "schema-call").responseData(),
                 "the exact schema snapshot read from the pinned skill remains available through compaction");
+        assertTrue(skillRun.events().stream().anyMatch(event ->
+                        "restricted_observation_budget".equals(event.data().get("phase"))
+                                && "insufficient_context".equals(event.data().get("status"))),
+                "protected excluded-tool results over budget must report insufficient context");
+
+        ToolResponseMessage.ToolResponse genericSchema = executor.execute(
+                        List.of(new AssistantMessage.ToolCall("generic-schema-call", "function", "readSkillFile", "{}")),
+                        "generic:schema-conversation", "agent", false, "actor", null, ChatOrigin.EMPTY, Set.of())
+                .responses().getFirst();
+        assertNotEquals(pinnedOutputSchema, genericSchema.responseData(),
+                "an ordinary excluded-tool result remains eligible for the existing aggregate-budget compaction fallback");
 
         ToolResponseMessage.ToolResponse deniedRecovery = executor.execute(
                 List.of(new AssistantMessage.ToolCall("file-call", "function", "read_file", "{}")),
@@ -142,7 +153,8 @@ class RestrictedProjectObservationTest {
         ToolResultProperties properties = new ToolResultProperties();
         properties.setEnabled(true);
         properties.setPerResultThresholdChars(1_000);
-        properties.setPerTurnBudgetChars(4_000);
+        properties.setExcludedToolInlineChars(1_000);
+        properties.setPerTurnBudgetChars(1_000);
         properties.setStorageBaseDir(Files.createTempDirectory("restricted-observation").toString());
         return new ToolResultStorage(properties);
     }

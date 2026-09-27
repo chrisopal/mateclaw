@@ -253,7 +253,7 @@ public class ToolResultStorage {
                 }
             }
             if (targetIdx < 0) {
-                int compactedIdx = compactLargestExcludedResult(mutable);
+                int compactedIdx = compactLargestExcludedResult(mutable, conversationId);
                 if (compactedIdx >= 0) {
                     aggregate = aggregateSize(mutable);
                     continue;
@@ -292,14 +292,14 @@ public class ToolResultStorage {
                         isProtectedObservation(conversationId, response.id()));
     }
 
-    private int compactLargestExcludedResult(List<ToolResponseMessage.ToolResponse> mutable) {
+    private int compactLargestExcludedResult(List<ToolResponseMessage.ToolResponse> mutable, String conversationId) {
         int targetIdx = -1;
         int targetLen = props.getExcludedToolInlineChars();
         for (int i = 0; i < mutable.size(); i++) {
             ToolResponseMessage.ToolResponse r = mutable.get(i);
             String body = r.responseData();
             if (body == null || body.startsWith(SPILL_MARKER_PREFIX)) continue;
-            if (!isExcluded(r.name())) continue;
+            if (!isExcluded(r.name()) || isProtectedObservation(conversationId, r.id())) continue;
             if (body.length() > targetLen) {
                 targetLen = body.length();
                 targetIdx = i;
