@@ -180,6 +180,7 @@ String digest = java.util.HexFormat.of().formatHex(
 - Test: `mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java`.
 
 **Interfaces:**
+- Produces: viewer-authorized read-only `GET /projects/{id}/artifacts/{artifactId}/approval-context`, deriving exact artifact/digest/manuscript/template/format and whole-book reviewSnapshot refs on the server. Return READY/BLOCKED/STALE/NOT_APPROVABLE with bounded reason codes; revoked permissions stay403 and unknown/cross-scope artifacts404. No GET writes/render and no browser hash reconstruction. POST rechecks current refs/CAS. Tests obtain every approval field through HTTP, including blocked/FIX/preview/stale/revoked contexts and GET side-effect checks.
 - Consumes: Access.requireApprover、Dependencies.validate/isCurrent、ReviewService.requireReviewed、ArtifactService.metadata。
 - Produces: `BiddingApprovalService.approve(Scope,Command):ObjectNode`；`BiddingArtifactService.download(Scope,String artifactId,String mode):byte[]`；`BiddingApprovalService.requireDownloadable(Scope,String artifactId,String mode):void`。
 - Produces: ReviewService 提供写入审定与 viewer 读取分别授权的完整审核证据 seam，汇总当前 reviewKey 的全部章节与跨章 task/result refs。`reviewRef` 必须标识此服务端确定的整本审核快照；不能取任意单章 Ref 充当整本证明。人工 decision 持久化该不可变快照与全部精确 result refs，批准与下载重新验证完整组、正文闭包与当前审核员工材料权限；不得借批准人的身份替代当前下载人的权限。
