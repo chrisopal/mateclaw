@@ -1,0 +1,10 @@
+# Task 3 historical artifact authorization re-review
+
+Baseline c8449028..4e0c4ce1. SPEC: PASS. Quality: APPROVE. No remaining blocking finding in this auth repair scope; previous fixes remain closed.
+
+- Prior HIGH closed: `BiddingArtifactService.java:181–182` performs historical origin and current reviewer authorization before constructing manifest or reaching preview/stale early returns. Exceptions escape before sensitive response fields are produced.
+- `BiddingDependencies.java:40–43,49–85` walks the artifact's exact saved refs, with current actor and current writer material origin checks. Only the artifact entry enables DRAFT_PENDING_REVIEW; ordinary comparison delegates with false. Exact scoped revision/source lookups reject absent/digest-mismatched refs, unsupported kinds and cycles; no selected-head substitution occurs. Currency validation remains later and separate.
+- `BiddingReviewService.java:395–404` reads current DB reviewer binding, rejects absent/same-writer reviewer, validates current employee/config, and checks reviewer origin/page ACL over the artifact's fixed manuscript closure. The historical dependency guard runs first, so the reused reviewer traversal's missing-row skip cannot grant access to an absent manuscript/chapter/outline/baseline in this route. Current role checks in Materials remain intact.
+- `BiddingApprovalTest.java:109,111` supplies actual authenticated preview writer-ACL revocation and stale reviewer-ACL revocation requests. Both require 403 without artifact identity/digest/refs/proof; authorized preview NOT_APPROVABLE and stale STALE cases remain covered. This supports the repaired early branches without asserting real live wiki-provider acceptance.
+
+Root gate evidence: four source files ownership PASS; task-3-gate.log records 181 tests with zero failures/errors/skips and BUILD SUCCESS; diff check PASS. No Maven rerun, source edits, child agents or Java LSP claim. Only this report written. Live model, Office, database dialect and broader Task 5 acceptance remain separate.
