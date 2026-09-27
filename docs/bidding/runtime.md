@@ -34,6 +34,12 @@ The checker verifies that each backup file exists, is nonempty, and matches its 
 
 The checker prints only a success marker or problem code and relevant filesystem path. It does not print manifest contents or environment values. A local or remote preflight does not prove browser behavior, model availability, analysis quality, or production readiness.
 
+## Bidding skill and pin changes
+
+The eight bidding employee skills are versioned runtime packages. When a bundled contract changes, advance that skill's explicit package version and let the normal bundled-skill synchronization install it into the configured workspace. Existing project package pins are immutable snapshots: updating the bundled directory does not rewrite past task claims, package digests, or revision history. Dispatch new work only after the current visible skill, employee grant, and project package pin have been checked together.
+
+For isolated tests, set `mateclaw.skill.workspace.root` to a new temporary directory. Do not run synchronization tests against the operator's ordinary skill workspace. A project binding or readiness result confirms configuration only; retain the claimed attempt and its observed `load_skill` / `readSkillFile` responses when proving that a pinned contract was actually loaded. See [the skill package guide](skills.md) and the generated `mateclaw-server/target/bidding/task5-run-evidence.json` from the controlled full-application test.
+
 ## Enterprise UI preview
 
 Run `scripts/presales/start-ui.sh` from the active checkout. It explicitly selects `--mode enterprise`, serves the shared presales/bidding UI at port 5198, and proxies the existing preview backend at port 18118. Equivalent command from `mateclaw-ui`: `node node_modules/vite/bin/vite.js --config ../scripts/presales/vite.config.mjs --mode enterprise`. Omitting the mode selects the classic theme by design. Production builds must likewise use `--mode enterprise`; launching UI never selects or creates a database.

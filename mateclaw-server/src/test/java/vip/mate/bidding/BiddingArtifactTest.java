@@ -47,9 +47,12 @@ class BiddingArtifactTest {
     @Autowired BiddingEmployeeRuntime runtime;
     @SpyBean BiddingRepository repository;
     @Autowired vip.mate.agent.AgentService agents;
+    @Autowired vip.mate.agent.binding.service.AgentBindingService agentBindings;
     @Autowired vip.mate.llm.service.ModelConfigService models;
     @Autowired vip.mate.llm.failover.AvailableProviderPool providerPool;
     @Autowired BiddingEmployeeBindings employeeBindings;
+    @Autowired BiddingSkillPackages skillPackages;
+    @Autowired vip.mate.skill.runtime.SkillRuntimeService skillRuntime;
     @MockBean BiddingAccess access;
     @MockBean vip.mate.llm.chatmodel.ProviderChatModelFactory providerFactory;
 
@@ -114,10 +117,11 @@ class BiddingArtifactTest {
         jdbc.update("INSERT INTO mate_model_config(id,name,provider,model_name,model_type,enabled,is_default,create_time,update_time,deleted) VALUES(?,?,? ,?,'chat',TRUE,FALSE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",modelId,"artifact test model","openai",modelName);
         models.getModel(modelId);
         vip.mate.agent.model.AgentEntity agent=new vip.mate.agent.model.AgentEntity();agent.setName("artifact-writer-"+modelId);agent.setDescription("artifact export test");agent.setAgentType("react");agent.setRuntimeType("native");agent.setSystemPrompt("Return JSON only");agent.setMaxIterations(12);agent.setWorkspaceId(1L);agent.setModelName(modelName);agent=agents.createAgent(agent);
-        long skillId=90_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000);String skill=Long.toString(skillId),skillDigest="d".repeat(64);
-        jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",skillId,"bidding-document-export",1L);
-        Map<String,String> files=Map.of("SKILL.md","---\nname: bidding-document-export\n---\nUse exact refs.","input.schema.json",resource("/skills/bidding-document-export/input.schema.json"),"output.schema.json",resource("/skills/bidding-document-export/output.schema.json"));
-        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",UUID.randomUUID().toString(),"1",projectId,skill,"v1",skillDigest,json.writeValueAsString(files));
+        var activeExport=skillRuntime.findActiveSkill("bidding-document-export",1L);
+        assertNotNull(activeExport,"the isolated bundle root should expose the versioned fixed export skill");
+        agentBindings.setSkillBindings(agent.getId(),List.of(activeExport.getId()));
+        BiddingTypes.SkillPin exportPin=skillPackages.pin(scope,agent.getId().toString(),activeExport.getId().toString());
+        String skill=exportPin.skillId(),skillDigest=exportPin.digest();
         ObjectNode project=(ObjectNode)created.deepCopy();ObjectNode writer=project.putObject("bindings").putObject("writer");writer.put("agentId",agent.getId().toString());writer.put("configDigest","pending");writer.putArray("skillPins").addObject().put("skillId",skill).put("digest",skillDigest);
         jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(project),projectId);
         String configDigest=employeeBindings.configDigest(scope,agent.getId().toString());project.path("bindings").path("writer");((ObjectNode)project.path("bindings").path("writer")).put("configDigest",configDigest);
@@ -182,6 +186,8 @@ class BiddingArtifactTest {
         assertDocxRejected(persisted,expectedDocument,doc->{var removed=doc.getParagraphs().stream().filter(p->"先行实施措施".equals(p.getText())).findFirst().orElseThrow();replaceParagraph(removed,"");});
         assertDocxRejected(persisted,expectedDocument,doc->doc.createParagraph().createRun().setText("确保现场安全"));
         assertDocxRejected(persisted,expectedDocument,doc->doc.getTables().getFirst().getRow(1).getCell(1).getParagraphs().getFirst().getRuns().getFirst().setText("3秒",0));
+        assertDocxRejected(persisted,expectedDocument,doc->{var toc=doc.getParagraphs().stream().filter(p->"TOC1".equals(p.getStyle())).findFirst().orElseThrow();toc.getRuns().getLast().setText("伪造目录",0);});
+        assertDocxRejected(persisted,expectedDocument,doc->{var toc=doc.getParagraphs().stream().filter(p->p.getStyle()!=null&&p.getStyle().matches("TOC[1-3]")).findFirst().orElseThrow();toc.getCTP().getHyperlinkArray(0).setAnchor("missing-bookmark");});
         try(var empty=new org.apache.poi.xwpf.usermodel.XWPFDocument();var bytes=new java.io.ByteArrayOutputStream()) { empty.write(bytes);assertThrows(BiddingApiException.class,()->artifacts.verify(bytes.toByteArray(),expectedDocument)); }
         BiddingApiException external=assertThrows(BiddingApiException.class,()->artifacts.verify(withExternalRelationship(persisted),expectedDocument));
         assertEquals("ARTIFACT_EXTERNAL_RELATIONSHIP",external.code());
@@ -259,7 +265,7 @@ class BiddingArtifactTest {
         assertEquals("SKILL.md",execution.path("loadSkillArgs").path("filePath").asText());
         var options=(org.springframework.ai.model.tool.ToolCallingChatOptions)prompt.getOptions();
         Set<String> callbacks=options.getToolCallbacks().stream().map(callback->callback.getToolDefinition().name()).collect(java.util.stream.Collectors.toSet());
-        assertEquals(Set.of("load_skill","readSkillFile","bidding_read_source","bidding_read_sources","bidding_export_document"),callbacks);
+        assertEquals(Set.of("load_skill", "readSkillFile", "bidding_export_document"), callbacks);
     }
 
     private BiddingTypes.Claim enqueueExport(BiddingTypes.Scope scope,BiddingTypes.Ref projectRef,BiddingTypes.Claim prior,String target,ObjectNode input) {
@@ -381,6 +387,21 @@ class BiddingArtifactTest {
         var removalError=assertThrows(BiddingApiException.class,()->artifacts.saveFormatRequirements(constrainedScope,
                 new BiddingTypes.Command("drop-hard-format",formatRef,"SAVE_FORMAT_REQUIREMENTS",removal)));
         assertEquals("FORMAT_REQUIREMENT_CONFLICT",removalError.code());
+    }
+
+    @Test void mandatoryTocPageNumbersFailClosedBeforePreparingTemplate() throws Exception {
+        doNothing().when(access).requireApprover(any());
+        var created=projects.create(new BiddingTypes.Scope("1","approver",null),new BiddingTypes.NewProject("toc-pages-unsupported-"+UUID.randomUUID(),"format","lot","approver"));
+        var scope=new BiddingTypes.Scope("1","approver",created.path("id").asText());
+        var baseline=new BiddingTypes.Ref("analysisBaseline","current",1,"p".repeat(64));
+        ObjectNode body=json.createObjectNode().put("schemaVersion","1");
+        var requirement=body.putObject("analyses").putObject("bidding-tender-profile").putArray("formatRequirements").addObject();
+        requirement.put("name","目录页码").put("value","必须显示");requirement.putArray("evidenceRefs");
+        saveRevision(scope,baseline,body,List.of(),"CONFIRMED",true);
+        BiddingApiException rejected=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(scope,
+                new BiddingTypes.Command("toc-pages-unsupported",json.convertValue(created.path("ref"),BiddingTypes.Ref.class),"PREPARE_EXPORT",json.createObjectNode())));
+        assertEquals("EXPORT_FORMAT_UNSUPPORTED",rejected.code());
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind IN ('TEMPLATE','FORMAT_REQUIREMENTS')",Integer.class,scope.workspaceId(),scope.projectId()));
     }
 
     @Autowired BiddingProjectService projects;

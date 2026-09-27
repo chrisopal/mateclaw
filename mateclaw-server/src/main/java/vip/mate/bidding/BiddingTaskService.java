@@ -149,7 +149,7 @@ public class BiddingTaskService {
         long total=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=?",Long.class,scope.workspaceId(),scope.projectId());
         List<ObjectNode> items=jdbc.query("SELECT t.id,t.status,t.cycle_no,t.cycle_attempt,t.attempt_count,t.created_at,t.updated_at,s.name AS skill_name "
                 + "FROM mate_bidding_task t LEFT JOIN mate_bidding_skill_package sp ON sp.id=t.skill_package_id AND sp.workspace_id=t.workspace_id AND sp.project_id=t.project_id "
-                + "LEFT JOIN mate_skill s ON CAST(s.id AS VARCHAR(64))=sp.skill_id AND CAST(s.workspace_id AS VARCHAR(64))=t.workspace_id AND s.deleted=0 "
+                + "LEFT JOIN mate_skill s ON CAST(s.id AS CHAR(64))=sp.skill_id AND (s.builtin=TRUE OR s.workspace_id IS NULL OR CAST(s.workspace_id AS CHAR(64))=t.workspace_id) AND s.deleted=0 "
                 + "WHERE t.workspace_id=? AND t.project_id=? ORDER BY t.created_at DESC,t.id LIMIT ? OFFSET ?",
             (rs,n)->{
                 ObjectNode item=json.createObjectNode(); item.put("taskId",rs.getString("id")); item.put("status",rs.getString("status"));

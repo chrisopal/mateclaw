@@ -251,6 +251,15 @@ public class BiddingEmployeeBindings {
                 .filter(s -> SkillRuntimeService.passesActiveGate(s)).toList();
     }
 
+    /** Resolve a project pin against current workspace visibility and the employee's current grant. */
+    public ResolvedSkill currentGrantedSkill(long agentId, long skillId, long workspace) {
+        ResolvedSkill active = skills.findActiveSkillById(skillId, workspace);
+        if (active == null || !SkillRuntimeService.passesActiveGate(active)) return null;
+        return availableGrantedSkills(agentId, workspace).stream()
+                .filter(skill -> skill.getId() != null && skill.getId() == skillId)
+                .findFirst().orElse(null);
+    }
+
     private void requireModel(long agentId, AgentEntity employee) {
         if (modelRow(employee) == null) throw BiddingAccess.error(422, "MODEL_CONFIG_MISSING", "数字员工未配置可用的对话模型");
     }

@@ -25,7 +25,6 @@ import vip.mate.agent.execution.ProjectExecutionOptions;
 class BiddingAnalysisTest extends BiddingHttpFixture {
     private static final List<String> SKILLS = List.of("bidding-tender-profile", "bidding-elimination-analysis",
             "bidding-requirement-analysis", "bidding-scoring-analysis");
-    @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingEmployeeRuntime runtime;
     @org.springframework.beans.factory.annotation.Autowired BiddingRepository repository;
     @org.springframework.beans.factory.annotation.Autowired BiddingTaskService tasks;
@@ -321,6 +320,7 @@ class BiddingAnalysisTest extends BiddingHttpFixture {
             Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM mate_skill WHERE workspace_id=? AND name=? AND deleted=0", Integer.class, Long.valueOf(workspace), skill);
             if (count == null || count == 0) jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time,deleted) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)", id, skill, Long.valueOf(workspace));
             else id = jdbc.queryForObject("SELECT id FROM mate_skill WHERE workspace_id=? AND name=? AND deleted=0", Long.class, Long.valueOf(workspace), skill);
+            grantCurrentSkill(999_999L, id);
             Map<String, String> files = packageFiles(skill); String digest = BiddingSkillPackages.digest(files);
             jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     UUID.randomUUID().toString(), workspace, project.path("id").asText(), Long.toString(id), "test-v1", digest, json.writeValueAsString(files));

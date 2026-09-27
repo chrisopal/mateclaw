@@ -705,11 +705,11 @@ public class BiddingReviewService implements BiddingResultHandler {
     private JsonNode findOutlineChapter(JsonNode chapters, String id) { for (JsonNode c : chapters) if (id.equals(c.path("id").asText())) return c; throw BiddingAccess.error(422, "REVIEW_INPUT_INVALID", "Manuscript chapter is absent from its outline"); }
     private Map<String, JsonNode> indexed(JsonNode values) { Map<String, JsonNode> result = new LinkedHashMap<>(); if (values.isArray()) for (JsonNode value : values) result.put(value.path("id").asText(), value); return result; }
     private String pinnedSkillId(ObjectNode reviewer, String workspace) {
+        String agentId=reviewer.path("agentId").asText("");
         for (JsonNode pin : reviewer.path("skillPins")) try {
-            String skill = jdbc.queryForObject("SELECT name FROM mate_skill WHERE id=? AND workspace_id=? AND deleted=0", String.class,
-                    Long.valueOf(pin.path("skillId").asText()), Long.valueOf(workspace));
-            if (SKILL.equals(skill)) return pin.path("skillId").asText();
-        } catch (Exception ignored) { }
+            var skill=employees.getObject().currentGrantedSkill(Long.parseLong(agentId),Long.parseLong(pin.path("skillId").asText()),Long.parseLong(workspace));
+            if (skill!=null&&SKILL.equals(skill.getName())) return pin.path("skillId").asText();
+        } catch (NumberFormatException ignored) { }
         throw BiddingAccess.error(422, "REVIEW_SKILL_REQUIRED", "Bind the pinned technical-review skill first");
     }
     private String pinDigest(ObjectNode reviewer, String skillId) { for (JsonNode pin : reviewer.path("skillPins")) if (skillId.equals(pin.path("skillId").asText())) return pin.path("digest").asText(); return ""; }

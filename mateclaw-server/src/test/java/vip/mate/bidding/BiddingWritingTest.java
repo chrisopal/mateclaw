@@ -18,7 +18,6 @@ class BiddingWritingTest extends BiddingHttpFixture {
     @Autowired BiddingReviewService reviews;
     @Autowired BiddingTaskService tasks;
     @Autowired BiddingRepository repository;
-    @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingEmployeeRuntime runtime;
     @MockBean BiddingDependencies dependencies;
 
@@ -143,7 +142,7 @@ class BiddingWritingTest extends BiddingHttpFixture {
             writing.adopt(scope,new BiddingTypes.Command("adopt-initial-"+chapter,guard,"ADOPT_CHAPTER",adopt));selected.put(chapter,candidate);
         }
         BiddingTypes.Ref firstManuscript=assembleSelected(scope,outline,selected,"assemble-first");
-        int initiallyQueued=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='reviewer' AND status='QUEUED'",Integer.class,workspace,projectId);
+        int initiallyQueued=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='920102' AND status='QUEUED'",Integer.class,workspace,projectId);
         assertEquals(3,initiallyQueued,"review readback="+reviews.read(scope));
         completeAutoReviewTasks(scope,firstManuscript,3);
         assertDoesNotThrow(()->reviews.requireReviewed(scope,firstManuscript));
@@ -166,8 +165,8 @@ class BiddingWritingTest extends BiddingHttpFixture {
         assertEquals("REVIEW_INCOMPLETE",incomplete.code());
         JsonNode current=reviews.read(scope);assertEquals("IN_PROGRESS",current.path("status").asText());
         assertEquals(secondManuscript,json.treeToValue(current.path("manuscriptRef"),BiddingTypes.Ref.class));
-        assertEquals(3,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='reviewer' AND status='QUEUED'",Integer.class,workspace,projectId));
-        List<JsonNode> latestInputs=jdbc.query("SELECT input_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='reviewer' AND status='QUEUED'",(rs,n)->{try{return json.readTree(rs.getString(1));}catch(Exception e){throw new IllegalStateException(e);}},workspace,projectId);
+        assertEquals(3,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='920102' AND status='QUEUED'",Integer.class,workspace,projectId));
+        List<JsonNode> latestInputs=jdbc.query("SELECT input_json FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND agent_id='920102' AND status='QUEUED'",(rs,n)->{try{return json.readTree(rs.getString(1));}catch(Exception e){throw new IllegalStateException(e);}},workspace,projectId);
         assertEquals(3,latestInputs.size());assertTrue(latestInputs.stream().allMatch(input->secondManuscript.equals(json.convertValue(input.path("input").path("manuscriptRef"),BiddingTypes.Ref.class))));
         completeAutoReviewTasks(scope,secondManuscript,3);
     }
@@ -223,7 +222,7 @@ class BiddingWritingTest extends BiddingHttpFixture {
         BiddingTypes.Ref manuscript=json.treeToValue(writing.assemble(scope,new BiddingTypes.Command("assemble-for-fix",outline,"ASSEMBLE_MANUSCRIPT",assemble)).path("ref"),BiddingTypes.Ref.class);
         BiddingTypes.Ref chapter=json.treeToValue(find(writing.read(scope).path("chapters"),"c1").path("selected").path("ref"),BiddingTypes.Ref.class);
         BiddingTypes.Ref reviewRef=new BiddingTypes.Ref("review","revision-test",1,"e".repeat(64));ObjectNode reviewBody=json.createObjectNode().put("schemaVersion","1");
-        ObjectNode meta=reviewBody.putObject("_bidding");meta.set("manuscriptRef",json.valueToTree(manuscript));meta.put("reviewKey","revision-test-key");meta.put("reviewerId","reviewer");
+        ObjectNode meta=reviewBody.putObject("_bidding");meta.set("manuscriptRef",json.valueToTree(manuscript));meta.put("reviewKey","revision-test-key");meta.put("reviewerId","920102");
         ObjectNode finding=reviewBody.putArray("findings").addObject().put("id","F-1").put("severity","MAJOR").put("category","TECHNICAL_GAP");
         finding.set("chapterRefs",json.createArrayNode().add(json.valueToTree(chapter)));finding.putArray("requirementRefs");finding.putArray("evidenceRefs");finding.put("description","补充方案细节").put("recommendation","定向修订章节");
         persist(scope,reviewRef,reviewBody,List.of(outline),"REVIEW_RESULT");
@@ -247,7 +246,7 @@ class BiddingWritingTest extends BiddingHttpFixture {
     private void completeAutoReviewTasks(BiddingTypes.Scope scope,BiddingTypes.Ref manuscript,int expected)throws Exception {
         for(int i=0;i<expected;i++) {
             BiddingTypes.Claim claim=repository.claimDue(Instant.now(),"auto-review-test",1).getFirst();
-            assertEquals("reviewer",claim.agentId());assertEquals(manuscript,json.treeToValue(claim.input().path("manuscriptRef"),BiddingTypes.Ref.class));
+            assertEquals("920102",claim.agentId());assertEquals(manuscript,json.treeToValue(claim.input().path("manuscriptRef"),BiddingTypes.Ref.class));
             ObjectNode output=json.createObjectNode().put("schemaVersion","1");output.putArray("findings");
             ObjectNode coverage=output.putObject("coverage");ArrayNode chapters=coverage.putArray("chapterRefs");ArrayNode requirements=coverage.putArray("requirementRefs");
             for(JsonNode chapter:claim.input().path("chapters"))chapters.add(chapter.path("chapterRef").deepCopy());
@@ -262,23 +261,25 @@ class BiddingWritingTest extends BiddingHttpFixture {
         long writeId=92_100_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000),reviewId=writeId+1;String writeDigest="e".repeat(64),reviewDigest="f".repeat(64),config="a".repeat(64);
         for(var entry:List.of(Map.entry(writeId,"bidding-technical-writing"),Map.entry(reviewId,"bidding-technical-review"))) {
             jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",entry.getKey(),entry.getValue(),Long.valueOf(workspace));
+            grantCurrentSkill(entry.getValue().equals("bidding-technical-writing") ? 920101L : 920102L, entry.getKey());
             String digest=entry.getKey().equals(writeId)?writeDigest:reviewDigest;
             Map<String,String> files=Map.of("SKILL.md","---\nname: "+entry.getValue()+"\n---\nRead only.","input.schema.json","{}","output.schema.json","{}");
             jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",UUID.randomUUID().toString(),workspace,scope.projectId(),Long.toString(entry.getKey()),"v1",digest,json.writeValueAsString(files));
         }
         ObjectNode stored=(ObjectNode)project.deepCopy();ObjectNode bindings=stored.putObject("bindings");
-        bindings.putObject("writer").put("agentId","writer").put("configDigest",config).putArray("skillPins").addObject().put("skillId",Long.toString(writeId)).put("digest",writeDigest);
-        bindings.putObject("reviewer").put("agentId","reviewer").put("configDigest",config).putArray("skillPins").addObject().put("skillId",Long.toString(reviewId)).put("digest",reviewDigest);
+        bindings.putObject("writer").put("agentId","920101").put("configDigest",config).putArray("skillPins").addObject().put("skillId",Long.toString(writeId)).put("digest",writeDigest);
+        bindings.putObject("reviewer").put("agentId","920102").put("configDigest",config).putArray("skillPins").addObject().put("skillId",Long.toString(reviewId)).put("digest",reviewDigest);
         jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(stored),scope.projectId());
     }
 
     private void bindWritingSkill(BiddingTypes.Scope scope,JsonNode project) throws Exception {
         long skillId=91_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000);String skill=Long.toString(skillId),digest="c".repeat(64),config="b".repeat(64),packageId=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",skillId,"bidding-technical-writing",Long.valueOf(workspace));
+        grantCurrentSkill(920103L,skillId);
         String skillMd="---\nname: bidding-technical-writing\n---\nWrite safely.";
         String files=json.writeValueAsString(Map.of("SKILL.md",skillMd,"input.schema.json","{}","output.schema.json","{}"));
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",packageId,workspace,scope.projectId(),skill,"v1",digest,files);
-        var stored=(ObjectNode)project.deepCopy();var writer=stored.putObject("bindings").putObject("writer");writer.put("agentId","employee").put("configDigest",config);writer.putArray("skillPins").addObject().put("skillId",skill).put("digest",digest);
+        var stored=(ObjectNode)project.deepCopy();var writer=stored.putObject("bindings").putObject("writer");writer.put("agentId","920103").put("configDigest",config);writer.putArray("skillPins").addObject().put("skillId",skill).put("digest",digest);
         jdbc.update("UPDATE mate_bidding_project SET body_json=? WHERE id=?",json.writeValueAsString(stored),scope.projectId());
     }
 
@@ -292,7 +293,7 @@ class BiddingWritingTest extends BiddingHttpFixture {
 
     private BiddingTypes.Claim claim(BiddingTypes.Scope scope,BiddingTypes.Ref outline,String chapter,BiddingTypes.Ref guard){
         ObjectNode input=json.createObjectNode().set("outlineRef",json.valueToTree(outline));input.put("chapterId",chapter);input.set("_biddingHeadGuard",json.valueToTree(guard));
-        return new BiddingTypes.Claim(scope,"task-"+chapter,"attempt-"+chapter,"token-"+chapter,1,1,Instant.now(),"agent",
+        return new BiddingTypes.Claim(scope,"task-"+chapter,"attempt-"+chapter,"token-"+chapter,1,1,Instant.now(),"920103",
                 new BiddingTypes.SkillPin("bidding-technical-writing","1","digest",Map.of()),"model","config",List.of(outline),input);
     }
     private ObjectNode result(String chapter){ObjectNode out=json.createObjectNode().put("schemaVersion","1");ObjectNode body=out.putObject("chapter").put("chapterId",chapter);body.putArray("blocks").addObject().put("type","paragraph").put("text","Evidence pending");out.putArray("responses");out.putArray("citations");out.putArray("missingMaterials");out.putArray("unresolvedItems");out.putArray("warnings");return out;}

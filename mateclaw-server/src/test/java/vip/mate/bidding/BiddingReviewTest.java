@@ -27,7 +27,6 @@ import vip.mate.wiki.service.WikiPageService;
 import vip.mate.wiki.service.WikiPageTypePermissionService;
 
 class BiddingReviewTest extends BiddingHttpFixture {
-    @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingEmployeeRuntime runtime;
     @SpyBean BiddingDependencies dependencies;
     @Autowired BiddingRepository repository;
@@ -166,6 +165,7 @@ class BiddingReviewTest extends BiddingHttpFixture {
         Map<String,String> files = Map.of("SKILL.md", "---\nname: bidding-technical-review\n---\nRead only.", "input.schema.json", "{}", "output.schema.json", "{}");
         String packageId=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",packageId,workspace,projectId,Long.toString(skillNumericId),"v1",skillDigest,json.writeValueAsString(files));
+        grantCurrentSkill(Long.parseLong(reviewer),skillNumericId);
         ObjectNode stored = repository.findProject(workspace, projectId);
         ObjectNode bindings=(ObjectNode)stored.path("bindings"); ObjectNode reviewerBinding=bindings.putObject("reviewer");
         reviewerBinding.put("agentId",reviewer).put("configDigest",configDigest).putArray("skillPins").addObject().put("skillId",Long.toString(skillNumericId)).put("digest",skillDigest);

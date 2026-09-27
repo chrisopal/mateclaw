@@ -39,6 +39,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
     private final ObjectProvider<BiddingWritingService> writing;
     private final ObjectProvider<BiddingApprovalService> approvals;
     private final ObjectProvider<BiddingReviewService> reviews;
+    private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final long artifactLimitBytes;
     private final long projectCapacityBytes;
 
@@ -46,10 +47,11 @@ public class BiddingArtifactService implements BiddingResultHandler {
             BiddingProjectService projects, BiddingRepository repository, BiddingDependencies dependencies,
             BiddingTaskService tasks, BiddingDocxRenderer renderer, ObjectProvider<BiddingWritingService> writing,
             ObjectProvider<BiddingApprovalService> approvals, ObjectProvider<BiddingReviewService> reviews,
+            ObjectProvider<BiddingEmployeeBindings> employees,
             @Value("${mateclaw.bidding.artifacts.max-bytes:52428800}") long configuredArtifactLimit,
             @Value("${mateclaw.bidding.artifacts.project-capacity-bytes:524288000}") long configuredProjectCapacity) {
         this.jdbc=jdbc; this.json=json; this.access=access; this.projects=projects; this.repository=repository;
-        this.dependencies=dependencies; this.tasks=tasks; this.renderer=renderer; this.writing=writing; this.approvals=approvals; this.reviews=reviews;
+        this.dependencies=dependencies; this.tasks=tasks; this.renderer=renderer; this.writing=writing; this.approvals=approvals; this.reviews=reviews; this.employees=employees;
         this.artifactLimitBytes=Math.max(1,Math.min(MAX_ARTIFACT_BYTES,configuredArtifactLimit));
         this.projectCapacityBytes=Math.max(1,Math.min(PROJECT_CAPACITY,configuredProjectCapacity));
     }
@@ -247,9 +249,8 @@ public class BiddingArtifactService implements BiddingResultHandler {
     private void verifyBodyElements(XWPFDocument doc,ObjectNode expected) {
         if(expected==null||!expected.path("title").isTextual()||!expected.path("chapters").isArray())contentMismatch();
         if(!expected.path("title").asText().equals(doc.getProperties().getCoreProperties().getTitle()))contentMismatch();
-        if(doc.getBodyElements().size()<2||doc.getParagraphs().size()<2||!"目录".equals(doc.getParagraphs().getFirst().getText())
-                ||!"TOCHeading".equals(doc.getParagraphs().getFirst().getStyle())||!doc.getParagraphs().get(1).getCTP().xmlText().contains(" TOC "))
-            contentMismatch();
+        List<ExpectedHeading> headings=expectedHeadings(expected);
+        int bodyStart=verifyToc(doc,headings);
         List<ExpectedElement> want=new ArrayList<>();
         for(JsonNode chapter:expected.path("chapters")) {
             if(!chapter.path("title").isTextual()||!chapter.path("blocks").isArray())contentMismatch();
@@ -274,9 +275,10 @@ public class BiddingArtifactService implements BiddingResultHandler {
             }
         }
         List<IBodyElement> body=doc.getBodyElements();
-        if(body.size()!=want.size()+2)contentMismatch();
+        if(body.size()!=want.size()+bodyStart)contentMismatch();
+        int headingOrdinal=0;
         for(int i=0;i<want.size();i++) {
-            ExpectedElement expectedElement=want.get(i);IBodyElement actual=body.get(i+2);
+            ExpectedElement expectedElement=want.get(i);IBodyElement actual=body.get(i+bodyStart);
             if("table".equals(expectedElement.type())) {
                 if(actual.getElementType()!=BodyElementType.TABLE)contentMismatch();
                 var table=(org.apache.poi.xwpf.usermodel.XWPFTable)actual;
@@ -292,10 +294,67 @@ public class BiddingArtifactService implements BiddingResultHandler {
                 if("image".equals(expectedElement.type())) {
                     if(paragraph.getRuns().stream().noneMatch(run->run.getCTR().sizeOfDrawingArray()>0))contentMismatch();
                 } else if(!expectedElement.text().equals(paragraph.getText()))contentMismatch();
-                if("heading".equals(expectedElement.type())&&!("Heading"+expectedElement.level()).equals(paragraph.getStyle()))contentMismatch();
+                if("heading".equals(expectedElement.type())) {
+                    if(!("Heading"+expectedElement.level()).equals(paragraph.getStyle()))contentMismatch();
+                    String bookmark=bookmarkName(headingOrdinal++);
+                    if(paragraph.getCTP().getBookmarkStartList().size()!=1||paragraph.getCTP().getBookmarkEndList().size()!=1
+                            ||!bookmark.equals(paragraph.getCTP().getBookmarkStartList().getFirst().getName())
+                            ||!paragraph.getCTP().getBookmarkStartList().getFirst().getId().equals(paragraph.getCTP().getBookmarkEndList().getFirst().getId()))contentMismatch();
+                }
             }
         }
     }
+
+    private int verifyToc(XWPFDocument doc,List<ExpectedHeading> headings) {
+        List<IBodyElement> body=doc.getBodyElements();
+        int entries=headings.isEmpty()?1:headings.size();
+        int start=1+entries;
+        if(body.size()<start||body.getFirst().getElementType()!=BodyElementType.PARAGRAPH)contentMismatch();
+        var title=(org.apache.poi.xwpf.usermodel.XWPFParagraph)body.getFirst();
+        if(!"目录".equals(title.getText())||!"TOCHeading".equals(title.getStyle()))contentMismatch();
+        List<String> expectedBookmarks=new ArrayList<>();for(int i=0;i<headings.size();i++)expectedBookmarks.add(bookmarkName(i));
+        List<String> actualBookmarks=doc.getParagraphs().stream().flatMap(paragraph->paragraph.getCTP().getBookmarkStartList().stream())
+                .map(bookmark->bookmark.getName()).toList();
+        int actualBookmarkEnds=doc.getParagraphs().stream().mapToInt(paragraph->paragraph.getCTP().getBookmarkEndList().size()).sum();
+        if(!expectedBookmarks.equals(actualBookmarks)||actualBookmarkEnds!=expectedBookmarks.size()
+                ||new HashSet<>(actualBookmarks).size()!=actualBookmarks.size())contentMismatch();
+        Set<String> bookmarkNames=new HashSet<>();
+        if(headings.isEmpty()) {
+            var field=body.get(1);
+            if(field.getElementType()!=BodyElementType.PARAGRAPH)contentMismatch();
+            var paragraph=(org.apache.poi.xwpf.usermodel.XWPFParagraph)field;
+            String xml=paragraph.getCTP().xmlText();String lower=xml.toLowerCase(Locale.ROOT);
+            if(!"TOC1".equals(paragraph.getStyle())||!"暂无章节目录".equals(paragraph.getText())||!xml.contains(" TOC ")||!xml.contains("\\n")
+                    ||!lower.contains("fldchartype=\"begin\"")||!lower.contains("fldchartype=\"separate\"")||!lower.contains("fldchartype=\"end\""))contentMismatch();
+            return start;
+        }
+        for(int i=0;i<headings.size();i++) {
+            IBodyElement element=body.get(i+1);
+            if(element.getElementType()!=BodyElementType.PARAGRAPH)contentMismatch();
+            var paragraph=(org.apache.poi.xwpf.usermodel.XWPFParagraph)element;
+            ExpectedHeading heading=headings.get(i);String expectedBookmark=bookmarkName(i);
+            String xml=paragraph.getCTP().xmlText();String lower=xml.toLowerCase(Locale.ROOT);
+            var links=paragraph.getCTP().getHyperlinkList();
+            if(!("TOC"+heading.level()).equals(paragraph.getStyle())||!heading.text().equals(paragraph.getText())||links.size()!=1
+                    ||!expectedBookmark.equals(links.getFirst().getAnchor())||links.getFirst().getId()!=null
+                    ||!bookmarkNames.add(expectedBookmark))contentMismatch();
+            if(i==0&&(!xml.contains(" TOC ")||!xml.contains("\\n")||!lower.contains("fldchartype=\"begin\"")||!lower.contains("fldchartype=\"separate\"")))contentMismatch();
+            if(i==headings.size()-1&&!lower.contains("fldchartype=\"end\""))contentMismatch();
+        }
+        return start;
+    }
+
+    private List<ExpectedHeading> expectedHeadings(ObjectNode expected) {
+        List<ExpectedHeading> headings=new ArrayList<>();
+        for(JsonNode chapter:expected.path("chapters")) {
+            if(chapter.path("title").isTextual())headings.add(new ExpectedHeading(chapter.path("title").asText(),chapter.path("level").asInt(1)));
+            for(JsonNode block:chapter.path("blocks"))if("heading".equals(block.path("type").asText()))
+                headings.add(new ExpectedHeading(block.path("text").asText(),block.path("level").asInt()));
+        }
+        if(headings.stream().anyMatch(h->h.level()<1||h.level()>3))contentMismatch();
+        return headings;
+    }
+    private String bookmarkName(int ordinal) { return "biddingHeading"+String.format(Locale.ROOT,"%04d",ordinal+1); }
     private void contentMismatch() { throw BiddingAccess.error(422,"ARTIFACT_CONTENT_MISMATCH","DOCX body structure does not exactly match the rendered manuscript"); }
 
     private void validatePackageSafety(byte[] bytes) {
@@ -459,14 +518,17 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(agent.isBlank())throw BiddingAccess.error(409,"WRITER_NOT_ASSIGNED","A writer must be assigned before export");
         for(JsonNode pin:project.path("bindings").path("writer").path("skillPins")) {
             String id=pin.path("skillId").asText(""),digest=pin.path("digest").asText("");
-            String name=jdbc.query("SELECT name FROM mate_skill WHERE id=? AND workspace_id=?",rs->rs.next()?rs.getString(1):null,Long.valueOf(id),Long.valueOf(scope.workspaceId()));
-            if(!SKILL.equals(name))continue;
+            vip.mate.skill.runtime.model.ResolvedSkill skill;
+            try { skill=employees.getObject().currentGrantedSkill(Long.parseLong(agent),Long.parseLong(id),Long.parseLong(scope.workspaceId())); }
+            catch(NumberFormatException invalidPin) { continue; }
+            if(skill==null||!SKILL.equals(skill.getName()))continue;
             Integer count=jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_skill_package WHERE workspace_id=? AND project_id=? AND skill_id=? AND digest=?",Integer.class,scope.workspaceId(),scope.projectId(),id,digest);
             if(count!=null&&count==1)return id;
         }
         throw BiddingAccess.error(422,"EXPORT_SKILL_NOT_PINNED","The writer must be assigned the fixed export skill package");
     }
     private record ExpectedElement(String type,String text,int level,List<List<String>> rows) {}
+    private record ExpectedHeading(String text,int level) {}
     private void createHead(BiddingTypes.Scope s,BiddingTypes.Ref r) { jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",s.workspaceId(),s.projectId(),r.kind(),r.id(),r.version(),write(r)); }
     private void advanceHead(BiddingTypes.Scope s,BiddingTypes.Ref old,BiddingTypes.Ref next) { int count=jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind=? AND object_id=? AND version=?",next.version(),write(next),s.workspaceId(),s.projectId(),old.kind(),old.id(),old.version());if(count!=1)throw BiddingAccess.error(409,"VERSION_CONFLICT","Format requirements changed during save"); }
     private String canonical(JsonNode n) { try { return json.writeValueAsString(json.treeToValue(n,Object.class)); }catch(Exception e){throw new IllegalStateException(e);} }

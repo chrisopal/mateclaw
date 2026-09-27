@@ -31,12 +31,15 @@ public class BiddingAnalysisService implements BiddingResultHandler {
     private final BiddingProjectService projects;
     private final BiddingSkillValidator validator;
     private final ObjectProvider<BiddingOutlineService> outlines;
+    private final BiddingEmployeeBindings employees;
 
     public BiddingAnalysisService(JdbcTemplate jdbc, ObjectMapper json, BiddingTaskService tasks,
             BiddingRepository repository, BiddingSourceService sources, BiddingDependencies dependencies, BiddingAccess access,
-            BiddingProjectService projects, BiddingSkillValidator validator,ObjectProvider<BiddingOutlineService> outlines) {
+            BiddingProjectService projects, BiddingSkillValidator validator,ObjectProvider<BiddingOutlineService> outlines,
+            BiddingEmployeeBindings employees) {
         this.jdbc = jdbc; this.json = json; this.tasks = tasks; this.repository = repository; this.sources = sources;
         this.dependencies = dependencies; this.access = access; this.projects = projects; this.validator = validator; this.outlines=outlines;
+        this.employees = employees;
     }
 
     @Override public Set<String> skillIds() { return Set.copyOf(SKILLS); }
@@ -657,11 +660,15 @@ public class BiddingAnalysisService implements BiddingResultHandler {
     }
 
     private JsonNode pinForName(ObjectNode analyst, String name, String workspaceId) {
+        long agentId;
+        try { agentId = Long.parseLong(analyst.path("agentId").asText()); }
+        catch (RuntimeException invalid) { return json.nullNode(); }
         for (JsonNode pin : analyst.path("skillPins")) {
-            String id = pin.path("skillId").asText();
-            String actual = jdbc.query("SELECT name FROM mate_skill WHERE id=? AND workspace_id=? AND deleted=0",
-                    rs -> rs.next() ? rs.getString(1) : null, Long.valueOf(id), Long.valueOf(workspaceId));
-            if (name.equals(actual)) return pin;
+            long skillId;
+            try { skillId = Long.parseLong(pin.path("skillId").asText()); }
+            catch (RuntimeException invalid) { continue; }
+            var current = employees.currentGrantedSkill(agentId, skillId, Long.parseLong(workspaceId));
+            if (current != null && name.equals(current.getName())) return pin;
         }
         return json.nullNode();
     }

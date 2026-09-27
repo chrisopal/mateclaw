@@ -1,6 +1,9 @@
 ---
 name: bidding-document-export
 description: Generate a controlled DOCX candidate from fixed bidding manuscript and format references.
+version: 1.0.1
+allowed-tools:
+  - bidding_export_document
 ---
 
 # Controlled DOCX candidate export

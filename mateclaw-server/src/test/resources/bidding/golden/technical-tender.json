@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "SYNTHETIC_NOT_HUMAN_REVIEWED",
+  "source": "technical-tender-synthetic.docx",
+  "sourceSha256": "fff869b6fae5e668cc9e2378c9f0944b90ad0145e426f8e33f2746edf2c05ed8",
+  "provenance": "Independent test-author draft oracle; not expert-annotated and not a real tender acceptance gold set.",
+  "facts": {
+    "projectNumber": {"value": "QM-MES-DEMO-202609", "location": "Cover / project identification"},
+    "budgetCny": {"value": 800000, "location": "Tender overview"},
+    "deliveryDays": {"value": 90, "location": "Delivery and schedule clause"},
+    "productionLines": {"value": 2, "location": "Project scope"}
+  },
+  "eliminationClauses": [
+    {"id": "D01", "location": "Eligibility", "summary": "Bidder must provide required legal qualification evidence."},
+    {"id": "D02", "location": "Response completeness", "summary": "Mandatory response documents must be present."},
+    {"id": "D03", "location": "Signature and seal", "summary": "Required signatures and seals must be supplied."},
+    {"id": "D04", "location": "Delivery deadline", "summary": "The bid must arrive by the stated deadline."}
+  ],
+  "technicalRequirements": [
+    {"id": "R01", "location": "Functional scope", "summary": "Cover both production lines."},
+    {"id": "R02", "location": "Interfaces", "summary": "Describe interface connectivity and data exchange."},
+    {"id": "R03", "location": "Performance", "summary": "Provide measurable performance evidence."},
+    {"id": "R04", "location": "Implementation", "summary": "Provide a 90-day implementation schedule."},
+    {"id": "R05", "location": "Acceptance", "summary": "Describe test cases and acceptance evidence."},
+    {"id": "R06", "location": "Operations", "summary": "Describe maintenance, support, and training."}
+  ],
+  "scoring": {
+    "items": [
+      {"id": "S01", "points": 30, "location": "Technical solution"},
+      {"id": "S02", "points": 20, "location": "Implementation plan"},
+      {"id": "S03", "points": 20, "location": "Performance and interfaces"},
+      {"id": "S04", "points": 20, "location": "Acceptance and service"},
+      {"id": "S05", "points": 10, "location": "Training"}
+    ],
+    "statedTotal": 100,
+    "calculation": "30 + 20 + 20 + 20 + 10 = 100"
+  },
+  "requiredOutline": ["项目理解", "需求响应", "总体方案", "接口与数据", "实施及验收", "运维与培训"],
+  "formatRequirements": {"fileFormat": "docx", "paper": "A4", "marginMm": 25, "font": "宋体", "fontPt": 12},
+  "claimsForbiddenWithoutEvidence": [
+    "真实供应商资质已核验",
+    "ERP接口已完成联调",
+    "预测性维护已交付"
+  ],
+  "matchingPolicy": {
+    "countOnlySourceLocatedItems": true,
+    "unresolvedAmbiguityMustRemainVisible": true,
+    "doNotInferSupplierCredentialsOrDeliveryAsFacts": true,
+    "acceptableMissesForMandatoryClauses": 0,
+    "acceptableMissesForTechnicalRequirements": 0,
+    "acceptableMissesForScoringItems": 0
+  }
+}

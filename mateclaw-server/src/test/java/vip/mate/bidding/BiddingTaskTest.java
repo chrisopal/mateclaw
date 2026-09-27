@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 class BiddingTaskTest extends BiddingHttpFixture {
     @Autowired BiddingRepository repository;
     @Autowired BiddingTaskService tasks;
-    @MockBean BiddingEmployeeBindings employees;
     @MockBean BiddingDependencies dependencies;
     @MockBean BiddingSourceService sources;
     @Autowired TestResultHandler resultHandler;
@@ -350,19 +349,31 @@ class BiddingTaskTest extends BiddingHttpFixture {
         var project=project(); String projectId=project.path("id").asText(), actor=actorId("member");
         long skillId=95_000_000L+Math.floorMod(UUID.randomUUID().hashCode(),1_000_000);
         long otherSkillId=skillId+2_000_000L;
+        long builtinSkillId=skillId+4_000_000L;
+        long foreignPrivateSkillId=skillId+6_000_000L;
+        long deletedBuiltinSkillId=skillId+8_000_000L;
         jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",skillId,"bidding-tender-profile",Long.valueOf(workspace));
         jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",otherSkillId,"private-other-project-skill",Long.valueOf(workspace));
-        String validPackage=UUID.randomUUID().toString(),wrongProjectPackage=UUID.randomUUID().toString(),wrongWorkspacePackage=UUID.randomUUID().toString();
+        jdbc.update("INSERT INTO mate_skill(id,name,skill_type,builtin,workspace_id,create_time,update_time) VALUES(?,?,'builtin',TRUE,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",builtinSkillId,"bidding-outline-planning",Long.valueOf(otherWorkspace));
+        jdbc.update("INSERT INTO mate_skill(id,name,workspace_id,create_time,update_time) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",foreignPrivateSkillId,"private-foreign-workspace-skill",Long.valueOf(otherWorkspace));
+        jdbc.update("INSERT INTO mate_skill(id,name,skill_type,builtin,workspace_id,deleted,create_time,update_time) VALUES(?,?,'builtin',TRUE,?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",deletedBuiltinSkillId,"deleted-builtin-skill",Long.valueOf(otherWorkspace));
+        String validPackage=UUID.randomUUID().toString(),wrongProjectPackage=UUID.randomUUID().toString(),wrongWorkspacePackage=UUID.randomUUID().toString(),builtinPackage=UUID.randomUUID().toString(),foreignPrivatePackage=UUID.randomUUID().toString(),deletedBuiltinPackage=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",validPackage,workspace,projectId,Long.toString(skillId),"v1","a".repeat(64),"{}");
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",wrongProjectPackage,workspace,UUID.randomUUID().toString(),Long.toString(otherSkillId),"v1","b".repeat(64),"{}");
         jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",wrongWorkspacePackage,otherWorkspace,projectId,Long.toString(skillId),"v1","c".repeat(64),"{}");
-        String validTask=listedTask(projectId,actor,validPackage),wrongProjectTask=listedTask(projectId,actor,wrongProjectPackage),wrongWorkspaceTask=listedTask(projectId,actor,wrongWorkspacePackage);
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",builtinPackage,workspace,projectId,Long.toString(builtinSkillId),"v1","e".repeat(64),"{}");
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",foreignPrivatePackage,workspace,projectId,Long.toString(foreignPrivateSkillId),"v1","f".repeat(64),"{}");
+        jdbc.update("INSERT INTO mate_bidding_skill_package(id,workspace_id,project_id,skill_id,version,digest,files_json,created_at) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",deletedBuiltinPackage,workspace,projectId,Long.toString(deletedBuiltinSkillId),"v1","9".repeat(64),"{}");
+        String validTask=listedTask(projectId,actor,validPackage),wrongProjectTask=listedTask(projectId,actor,wrongProjectPackage),wrongWorkspaceTask=listedTask(projectId,actor,wrongWorkspacePackage),builtinTask=listedTask(projectId,actor,builtinPackage),foreignPrivateTask=listedTask(projectId,actor,foreignPrivatePackage),deletedBuiltinTask=listedTask(projectId,actor,deletedBuiltinPackage);
 
         var page=api("GET","/projects/"+projectId+"/tasks?page=1&pageSize=10","viewer",workspace,null,200);
         var items=page.path("items");
         assertEquals("bidding-tender-profile",listedSkill(items,validTask));
+        assertEquals("bidding-outline-planning",listedSkill(items,builtinTask),"globally visible builtin skill names must resolve for a fresh workspace");
         assertTrue(listedSkill(items,wrongProjectTask)==null || listedSkill(items,wrongProjectTask).isBlank());
         assertTrue(listedSkill(items,wrongWorkspaceTask)==null || listedSkill(items,wrongWorkspaceTask).isBlank());
+        assertTrue(listedSkill(items,foreignPrivateTask)==null || listedSkill(items,foreignPrivateTask).isBlank(),"foreign private skill names must remain hidden");
+        assertTrue(listedSkill(items,deletedBuiltinTask)==null || listedSkill(items,deletedBuiltinTask).isBlank(),"deleted builtin skill names must remain hidden");
     }
 
     private String listedTask(String project,String actor,String packageId) {

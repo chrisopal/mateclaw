@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.jdbc.*;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -58,6 +59,8 @@ abstract class BiddingHttpFixture {
     static class App {
         @Bean BCryptPasswordEncoder encoder() { return new BCryptPasswordEncoder(4); }
         @Bean PersonalAccessTokenService pats() { return org.mockito.Mockito.mock(PersonalAccessTokenService.class); }
+        @Bean vip.mate.agent.AgentService agentService() { return org.mockito.Mockito.mock(vip.mate.agent.AgentService.class); }
+        @Bean vip.mate.agent.runtime.ConversationTurnGate conversationTurnGate() { return new vip.mate.agent.runtime.ConversationTurnGate(); }
         @Bean WikiKnowledgeBaseService wiki() { return org.mockito.Mockito.mock(WikiKnowledgeBaseService.class); }
         @Bean I18nService i18n() { return org.mockito.Mockito.mock(I18nService.class); }
         @Bean vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage(
@@ -81,6 +84,7 @@ abstract class BiddingHttpFixture {
     @Autowired protected WorkspaceService workspaces;
     @Autowired protected org.springframework.jdbc.core.JdbcTemplate jdbc;
     @Autowired protected BiddingProperties biddingProperties;
+    @MockBean protected BiddingEmployeeBindings employees;
     protected String workspace, otherWorkspace;
     protected Map<String,String> tokens;
 
@@ -101,6 +105,35 @@ abstract class BiddingHttpFixture {
         for(String role:List.of("member","viewer")) workspaces.addMember(Long.valueOf(workspace),ids.get(role),role);
         WorkspaceEntity other = new WorkspaceEntity(); other.setName("Other " + UUID.randomUUID()); other.setDeleted(0);
         otherWorkspace=workspaces.create(other,ids.get("owner")).getId().toString();
+        stubCurrentGrantedSkillFromFixtureRows();
+    }
+
+    private void stubCurrentGrantedSkillFromFixtureRows() {
+        org.mockito.Mockito.lenient().when(employees.currentGrantedSkill(
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong()))
+                .thenAnswer(invocation -> {
+                    long agentId = invocation.getArgument(0), skillId = invocation.getArgument(1), requestedWorkspace = invocation.getArgument(2);
+                    String skillName = jdbc.query("SELECT name FROM mate_skill WHERE id=? AND enabled=TRUE AND deleted=0 "
+                                    + "AND (builtin=TRUE OR workspace_id IS NULL OR workspace_id=?)",
+                            rows -> rows.next() ? rows.getString(1) : null, skillId, requestedWorkspace);
+                    if (skillName == null) return null;
+                    Integer exactGrant = jdbc.queryForObject("SELECT COUNT(*) FROM mate_agent_skill WHERE agent_id=? AND skill_id=? AND enabled=TRUE AND deleted=0",
+                            Integer.class, agentId, skillId);
+                    if (exactGrant == null || exactGrant == 0) return null;
+                    return vip.mate.skill.runtime.model.ResolvedSkill.builder().id(skillId).name(skillName)
+                            .enabled(true).runtimeAvailable(true).dependencyReady(true).securityBlocked(false).build();
+                });
+    }
+
+    protected void grantCurrentSkill(long agentId, long skillId) {
+        Integer existing = jdbc.queryForObject("SELECT COUNT(*) FROM mate_agent_skill WHERE agent_id=? AND skill_id=? AND deleted=0",
+                Integer.class, agentId, skillId);
+        if (existing == null || existing == 0) {
+            jdbc.update("INSERT INTO mate_agent_skill(id,agent_id,skill_id,enabled,create_time,update_time,deleted) VALUES(?,?,?,TRUE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
+                    Long.MAX_VALUE - Math.floorMod(Objects.hash(workspace, agentId, skillId), 1_000_000_000), agentId, skillId);
+        } else {
+            jdbc.update("UPDATE mate_agent_skill SET enabled=TRUE,deleted=0 WHERE agent_id=? AND skill_id=?", agentId, skillId);
+        }
     }
 
     protected JsonNode api(String method,String path,String role,String scope,Object body,int expectedStatus) throws Exception {

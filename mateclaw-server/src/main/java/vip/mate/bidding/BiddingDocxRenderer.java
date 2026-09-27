@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.math.BigInteger;
 import javax.imageio.ImageIO;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
@@ -28,14 +31,16 @@ public final class BiddingDocxRenderer {
             doc.getProperties().getCoreProperties().setTitle(manuscript.path("title").asText());
             configurePage(doc);
             configureStyles(doc);
-            addToc(doc);
+            List<Heading> headings = collectHeadings(manuscript);
+            addToc(doc, headings);
+            int[] headingIndex = {0};
             for (JsonNode chapter : manuscript.path("chapters")) {
                 if (!chapter.isObject() || !chapter.path("title").isTextual() || !chapter.path("blocks").isArray()) throw invalid("Chapter structure is invalid");
                 only(chapter, java.util.Set.of("title", "level", "blocks"));
                 int level = chapter.path("level").asInt(1);
                 if (level < 1 || level > 3) throw invalid("Heading level is outside supported bounds");
-                addHeading(doc, safeText(chapter.path("title").asText()), level);
-                for (JsonNode block : chapter.path("blocks")) addBlock(doc, block, authorizedImages, template);
+                addHeading(doc, safeText(chapter.path("title").asText()), level, headingIndex[0]++);
+                for (JsonNode block : chapter.path("blocks")) addBlock(doc, block, authorizedImages, template, headingIndex);
             }
             addPageNumber(doc);
             doc.write(out);
@@ -47,14 +52,14 @@ public final class BiddingDocxRenderer {
         }
     }
 
-    private void addBlock(XWPFDocument doc, JsonNode block, Map<String, byte[]> images, ObjectNode template) throws Exception {
+    private void addBlock(XWPFDocument doc, JsonNode block, Map<String, byte[]> images, ObjectNode template, int[] headingIndex) throws Exception {
         if (!block.isObject() || !block.path("type").isTextual()) throw invalid("Every block needs a supported type");
         switch (block.path("type").asText()) {
             case "heading" -> {
                 only(block, java.util.Set.of("type", "level", "text"));
                 int level = block.path("level").asInt();
                 if (level < 1 || level > 3) throw invalid("Heading level is outside supported bounds");
-                addHeading(doc, requiredText(block, "text"), level);
+                addHeading(doc, requiredText(block, "text"), level, headingIndex[0]++);
             }
             case "paragraph" -> { only(block, java.util.Set.of("type", "text")); addParagraph(doc, requiredText(block, "text")); }
             case "list" -> {
@@ -103,18 +108,24 @@ public final class BiddingDocxRenderer {
         if (image == null || image.getWidth() < 1 || image.getHeight() < 1 || image.getWidth() > 12000 || image.getHeight() > 12000
                 || (long) image.getWidth() * image.getHeight() > 40_000_000L) throw imageDenied();
         double widthMm = Math.min(template.path("maxImageWidthMm").asDouble(), template.path("bodyWidthMm").asDouble());
-        double widthInches = widthMm / 25.4;
-        double heightInches = widthInches * image.getHeight() / image.getWidth();
+        double widthPoints = widthMm * 72.0 / 25.4;
+        double heightPoints = widthPoints * image.getHeight() / image.getWidth();
         XWPFParagraph p = doc.createParagraph();
-        p.createRun().addPicture(new ByteArrayInputStream(bytes), type, "authorized-image", Units.toEMU(widthInches), Units.toEMU(heightInches));
+        p.createRun().addPicture(new ByteArrayInputStream(bytes), type, "authorized-image", Units.toEMU(widthPoints), Units.toEMU(heightPoints));
         String caption = block.path("caption").asText("");
         if (!caption.isBlank()) addParagraph(doc, safeText(caption));
     }
 
-    private void addHeading(XWPFDocument doc, String text, int level) {
+    private void addHeading(XWPFDocument doc, String text, int level, int ordinal) {
         XWPFParagraph p = doc.createParagraph();
         p.setStyle("Heading" + level);
+        String bookmark = bookmarkName(ordinal);
+        BigInteger id = BigInteger.valueOf(ordinal + 1L);
+        CTBookmark start = p.getCTP().addNewBookmarkStart();
+        start.setId(id);
+        start.setName(bookmark);
         setRun(p.createRun(), safeText(text), true);
+        p.getCTP().addNewBookmarkEnd().setId(id);
     }
 
     private void addParagraph(XWPFDocument doc, String text) {
@@ -156,22 +167,54 @@ public final class BiddingDocxRenderer {
             CTRPr run=style.addNewRPr();CTFonts fonts=run.addNewRFonts();fonts.setAscii(FONT);fonts.setHAnsi(FONT);fonts.setEastAsia(FONT);
             run.addNewB();run.addNewSz().setVal(java.math.BigInteger.valueOf(24));
             styles.addStyle(new XWPFStyle(style));
+            CTStyle tocLevel=CTStyle.Factory.newInstance();tocLevel.setType(STStyleType.PARAGRAPH);tocLevel.setStyleId("TOC"+level);
+            tocLevel.addNewName().setVal("TOC "+level);tocLevel.addNewBasedOn().setVal("Normal");
+            tocLevel.addNewPPr().addNewInd().setLeft(BigInteger.valueOf((level-1)*360L));
+            CTRPr tocRun=tocLevel.addNewRPr();CTFonts tocFonts=tocRun.addNewRFonts();tocFonts.setAscii(FONT);tocFonts.setHAnsi(FONT);tocFonts.setEastAsia(FONT);tocRun.addNewSz().setVal(BigInteger.valueOf(24));
+            styles.addStyle(new XWPFStyle(tocLevel));
         }
         CTStyle toc=CTStyle.Factory.newInstance();toc.setType(STStyleType.PARAGRAPH);toc.setStyleId("TOCHeading");toc.addNewName().setVal("TOC Heading");toc.addNewBasedOn().setVal("Normal");
         styles.addStyle(new XWPFStyle(toc));
     }
 
-    private void addToc(XWPFDocument doc) {
+    private void addToc(XWPFDocument doc, List<Heading> headings) {
         XWPFParagraph p = doc.createParagraph();
         p.setStyle("TOCHeading");
         setRun(p.createRun(), "目录", true);
-        XWPFParagraph field = doc.createParagraph();
-        XWPFRun begin = field.createRun(); begin.getCTR().addNewFldChar().setFldCharType(STFldCharType.BEGIN);
-        XWPFRun instr = field.createRun(); instr.getCTR().addNewInstrText().setStringValue(" TOC \\o \"1-3\" \\h ");
-        XWPFRun separate = field.createRun(); separate.getCTR().addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
-        setRun(field.createRun(), "在 Word 中更新目录", false);
-        XWPFRun end = field.createRun(); end.getCTR().addNewFldChar().setFldCharType(STFldCharType.END);
+        if (headings.isEmpty()) {
+            XWPFParagraph field=doc.createParagraph();field.setStyle("TOC1");
+            XWPFRun begin=field.createRun();begin.getCTR().addNewFldChar().setFldCharType(STFldCharType.BEGIN);
+            XWPFRun instr=field.createRun();instr.getCTR().addNewInstrText().setStringValue(" TOC \\o \"1-3\" \\h \\z \\n ");
+            XWPFRun separate=field.createRun();separate.getCTR().addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
+            setRun(field.createRun(), "暂无章节目录", false);
+            field.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.END);
+            return;
+        }
+        for(int i=0;i<headings.size();i++) {
+            Heading heading=headings.get(i);XWPFParagraph entry=doc.createParagraph();entry.setStyle("TOC"+heading.level());
+            if(i==0) {
+                entry.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.BEGIN);
+                entry.createRun().getCTR().addNewInstrText().setStringValue(" TOC \\o \"1-3\" \\h \\z \\n ");
+                entry.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
+            }
+            CTHyperlink hyperlink=entry.getCTP().addNewHyperlink();hyperlink.setAnchor(bookmarkName(i));
+            XWPFHyperlinkRun link=new XWPFHyperlinkRun(hyperlink,hyperlink.addNewR(),entry);entry.addRun(link);setRun(link,heading.text(),false);
+            if(i==headings.size()-1)entry.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.END);
+        }
     }
+
+    private List<Heading> collectHeadings(ObjectNode manuscript) {
+        List<Heading> headings=new ArrayList<>();
+        for(JsonNode chapter:manuscript.path("chapters")) {
+            headings.add(new Heading(safeText(chapter.path("title").asText()),chapter.path("level").asInt(1)));
+            for(JsonNode block:chapter.path("blocks"))if("heading".equals(block.path("type").asText()))
+                headings.add(new Heading(safeText(block.path("text").asText()),block.path("level").asInt()));
+        }
+        return headings;
+    }
+
+    private String bookmarkName(int ordinal) { return "biddingHeading"+String.format(java.util.Locale.ROOT,"%04d",ordinal+1); }
+    private record Heading(String text,int level) {}
 
     private void addPageNumber(XWPFDocument doc) {
         XWPFHeaderFooterPolicy policy = doc.createHeaderFooterPolicy();

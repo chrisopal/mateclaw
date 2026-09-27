@@ -262,6 +262,33 @@ class BiddingEmployeeBindingsTest {
         assertEquals("EMPLOYEE_SKILL_UNAVAILABLE", failure.code());
     }
 
+    @Test void currentGrantedSkillRejectsForeignInactiveAndRevokedPins() throws Exception {
+        long valid = skillIds.get("bidding-technical-writing");
+        assertEquals("bidding-technical-writing", employeeBindings.currentGrantedSkill(writer.getId(), valid, 1L).getName());
+
+        long foreign = IDS.incrementAndGet();
+        Path directory = Files.createDirectory(temp.resolve("foreign-skill-" + foreign));
+        Files.writeString(directory.resolve("SKILL.md"), "---\nname: foreign-private-skill\ndescription: test\n---\nprivate");
+        Files.writeString(directory.resolve("input.schema.json"), "{\"version\":1}");
+        jdbc.update("INSERT INTO mate_skill(id,name,skill_type,version,skill_content,config_json,enabled,builtin,workspace_id,create_time,update_time,deleted) VALUES(?,?,'custom','1.0.0',?,?,TRUE,FALSE,2,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
+                foreign, "foreign-private-skill", Files.readString(directory.resolve("SKILL.md")), json.writeValueAsString(Map.of("skillDir", directory.toString())));
+        jdbc.update("INSERT INTO mate_agent_skill(id,agent_id,skill_id,enabled,create_time,update_time,deleted) VALUES(?,?,?,TRUE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
+                IDS.incrementAndGet(), writer.getId(), foreign);
+        skills.refreshActiveSkills();
+        assertNull(employeeBindings.currentGrantedSkill(writer.getId(), foreign, 1L),
+                "a granted but foreign non-builtin pin is invisible in this workspace");
+
+        jdbc.update("UPDATE mate_skill SET enabled=FALSE WHERE id=?", valid);
+        skills.refreshActiveSkills();
+        assertNull(employeeBindings.currentGrantedSkill(writer.getId(), valid, 1L),
+                "disabled fixed pins cannot resolve even while the agent grant remains");
+        jdbc.update("UPDATE mate_skill SET enabled=TRUE WHERE id=?", valid);
+        skills.refreshActiveSkills();
+        agentBindings.setSkillBindings(writer.getId(), List.of(skillIds.get("bidding-outline-planning")));
+        assertNull(employeeBindings.currentGrantedSkill(writer.getId(), valid, 1L),
+                "a revoked current agent grant cannot resolve a previously pinned skill");
+    }
+
     @Test void effectiveModelUsesPlatformSelectionAndConfiguredProviderFallback() {
         BiddingTypes.Scope configScope = new BiddingTypes.Scope("1", "44", "model-selection-test");
         String configuredDigest = employeeBindings.configDigest(configScope, analyst.getId().toString());

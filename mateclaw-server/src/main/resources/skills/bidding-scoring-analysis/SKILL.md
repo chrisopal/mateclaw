@@ -1,6 +1,7 @@
 ---
 name: bidding-scoring-analysis
 description: Extract scoring criteria and compare stated totals with sums that can be calculated from source evidence.
+version: 1.0.1
 allowed-tools:
   - bidding_read_sources
   - bidding_read_source

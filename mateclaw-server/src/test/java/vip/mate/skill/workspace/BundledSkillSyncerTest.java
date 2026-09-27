@@ -127,4 +127,81 @@ class BundledSkillSyncerTest {
         assertFalse(second.contains("pptx"), "Unchanged workspace should not re-sync");
         verify(skillFileService, never()).applyBundleFiles(anyLong(), anyMap(), anyBoolean());
     }
+
+    @Test
+    @DisplayName("A versioned scoring bundle installs the runtime schema on a fresh skill root")
+    void syncInstallsCurrentScoringContractOnFreshRoot() throws IOException {
+        SkillEntity scoringSkill = new SkillEntity();
+        scoringSkill.setId(101L);
+        scoringSkill.setName("bidding-scoring-analysis");
+        when(skillService.findByName("bidding-scoring-analysis")).thenReturn(scoringSkill);
+
+        List<String> synced = syncer.sync();
+
+        assertTrue(synced.contains("bidding-scoring-analysis"));
+        Path skillDir = tmp.resolve("1").resolve("bidding-scoring-analysis");
+        String manifest = Files.readString(skillDir.resolve("SKILL.md"));
+        assertTrue(manifest.contains("version: 1.0.1"), manifest);
+        String schema = Files.readString(skillDir.resolve("output.schema.json"));
+        assertTrue(schema.contains("criterionIds"), schema);
+    }
+
+    @Test
+    @DisplayName("A versioned scoring bundle upgrades an unversioned old workspace without mutating the archive")
+    void syncUpgradesUnversionedScoringWorkspace() throws IOException {
+        Path skillDir = tmp.resolve("1").resolve("bidding-scoring-analysis");
+        Files.createDirectories(skillDir);
+        String oldManifest = "---\nname: bidding-scoring-analysis\ndescription: old local copy\n---\nold instructions";
+        String oldSchema = "{\"type\":\"object\",\"properties\":{\"totalChecks\":{\"type\":\"array\"}}}";
+        Files.writeString(skillDir.resolve("SKILL.md"), oldManifest);
+        Files.writeString(skillDir.resolve("output.schema.json"), oldSchema);
+        SkillEntity scoringSkill = new SkillEntity();
+        scoringSkill.setId(101L);
+        scoringSkill.setName("bidding-scoring-analysis");
+        when(skillService.findByName("bidding-scoring-analysis")).thenReturn(scoringSkill);
+
+        List<String> synced = syncer.sync();
+
+        assertTrue(synced.contains("bidding-scoring-analysis"));
+        assertTrue(Files.readString(skillDir.resolve("output.schema.json")).contains("criterionIds"));
+        Path archiveRoot = tmp.resolve("1").resolve(".archived");
+        try (var archived = Files.list(archiveRoot)) {
+            Path oldCopy = archived.filter(path -> path.getFileName().toString().startsWith("bidding-scoring-analysis-"))
+                    .findFirst().orElseThrow();
+            assertEquals(oldManifest, Files.readString(oldCopy.resolve("SKILL.md")));
+            assertEquals(oldSchema, Files.readString(oldCopy.resolve("output.schema.json")));
+        }
+    }
+
+    @Test
+    @DisplayName("A versioned export bundle advertises its controlled tool and upgrades old workspaces")
+    void syncInstallsAndUpgradesExportToolContract() throws IOException {
+        SkillEntity exportSkill = new SkillEntity();
+        exportSkill.setId(102L);
+        exportSkill.setName("bidding-document-export");
+        when(skillService.findByName("bidding-document-export")).thenReturn(exportSkill);
+
+        List<String> synced = syncer.sync();
+
+        assertTrue(synced.contains("bidding-document-export"));
+        Path skillDir = tmp.resolve("1").resolve("bidding-document-export");
+        String installed = Files.readString(skillDir.resolve("SKILL.md"));
+        assertTrue(installed.contains("version: 1.0.1"), installed);
+        assertTrue(installed.contains("- bidding_export_document"), installed);
+
+        Path oldDir = skillDir;
+        String oldManifest = "---\nname: bidding-document-export\ndescription: old local copy\n---\nold instructions";
+        Files.writeString(oldDir.resolve("SKILL.md"), oldManifest);
+        List<String> upgraded = syncer.sync();
+        assertTrue(upgraded.contains("bidding-document-export"));
+        String upgradedManifest = Files.readString(oldDir.resolve("SKILL.md"));
+        assertTrue(upgradedManifest.contains("version: 1.0.1"), upgradedManifest);
+        assertTrue(upgradedManifest.contains("- bidding_export_document"), upgradedManifest);
+        Path archiveRoot = tmp.resolve("1").resolve(".archived");
+        try (var archived = Files.list(archiveRoot)) {
+            Path oldCopy = archived.filter(path -> path.getFileName().toString().startsWith("bidding-document-export-"))
+                    .findFirst().orElseThrow();
+            assertEquals(oldManifest, Files.readString(oldCopy.resolve("SKILL.md")));
+        }
+    }
 }

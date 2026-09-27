@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,11 @@ public class BiddingOutlineService implements BiddingResultHandler {
     private final BiddingTaskService tasks;
     private final BiddingSkillValidator validator;
     private final BiddingMaterials materials;
+    private final ObjectProvider<BiddingEmployeeBindings> employees;
     public BiddingOutlineService(JdbcTemplate jdbc,ObjectMapper json,BiddingAccess access,BiddingProjectService projects,
-            BiddingDependencies dependencies,BiddingTaskService tasks,BiddingSkillValidator validator,BiddingMaterials materials) {
-        this.jdbc=jdbc; this.json=json; this.access=access; this.projects=projects; this.dependencies=dependencies; this.tasks=tasks; this.validator=validator; this.materials=materials;
+            BiddingDependencies dependencies,BiddingTaskService tasks,BiddingSkillValidator validator,BiddingMaterials materials,
+            ObjectProvider<BiddingEmployeeBindings> employees) {
+        this.jdbc=jdbc; this.json=json; this.access=access; this.projects=projects; this.dependencies=dependencies; this.tasks=tasks; this.validator=validator; this.materials=materials; this.employees=employees;
     }
     @Override public Set<String> skillIds(){ return Set.of(SKILL); }
 
@@ -41,8 +44,10 @@ public class BiddingOutlineService implements BiddingResultHandler {
         JsonNode pins=writer.path("skillPins"); String skillDigest=null,skillId=null;
         for(JsonNode pin:pins) {
             String pinnedId=pin.path("skillId").asText("");
-            String name=jdbc.query("SELECT name FROM mate_skill WHERE id=? AND workspace_id=? AND deleted=0",rs->rs.next()?rs.getString(1):null,number(pinnedId),number(scope.workspaceId()));
-            if(SKILL.equals(name)) {skillDigest=pin.path("digest").asText(null);skillId=pinnedId;break;}
+            try {
+                var resolved=employees.getObject().currentGrantedSkill(Long.parseLong(agent),Long.parseLong(pinnedId),Long.parseLong(scope.workspaceId()));
+                if(resolved!=null && SKILL.equals(resolved.getName())) {skillDigest=pin.path("digest").asText(null);skillId=pinnedId;break;}
+            } catch (NumberFormatException ignored) { }
         }
         if(skillDigest==null || skillDigest.isBlank() || skillId==null) return json.createObjectNode().put("status","CONFIGURATION_REQUIRED").put("todo","Bind a writer with the outline planning skill");
         List<BiddingTypes.Ref> materialRefs=selectedMaterialRefs(scope);
