@@ -133,10 +133,11 @@ public class BiddingController {
         String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().metadata(new BiddingTypes.Scope(workspace,actor,id),artifactId));
     }
     @GetMapping("/projects/{id}/artifacts/{artifactId}/content")
-    public ResponseEntity<byte[]> artifactContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
-        String actor=access.require(workspace,"viewer");byte[] bytes=artifacts.getObject().bytes(new BiddingTypes.Scope(workspace,actor,id),artifactId);
+    public ResponseEntity<byte[]> artifactContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId,
+            @RequestParam(defaultValue="candidate") String mode) {
+        String actor=access.require(workspace,"viewer");byte[] bytes=artifacts.getObject().download(new BiddingTypes.Scope(workspace,actor,id),artifactId,mode);
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                .header(HttpHeaders.CACHE_CONTROL,"no-store").header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename(artifactId+".docx").build().toString()).body(bytes);
+                .header(HttpHeaders.CACHE_CONTROL,"no-store").header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename("technical-proposal.docx").build().toString()).body(bytes);
     }
     @GetMapping("/projects/{id}/change-impact")
     public R<?> changeImpact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {

@@ -37,16 +37,19 @@ public class BiddingArtifactService implements BiddingResultHandler {
     private final BiddingTaskService tasks;
     private final BiddingDocxRenderer renderer;
     private final ObjectProvider<BiddingWritingService> writing;
+    private final ObjectProvider<BiddingApprovalService> approvals;
+    private final ObjectProvider<BiddingReviewService> reviews;
     private final long artifactLimitBytes;
     private final long projectCapacityBytes;
 
     public BiddingArtifactService(JdbcTemplate jdbc, ObjectMapper json, BiddingAccess access,
             BiddingProjectService projects, BiddingRepository repository, BiddingDependencies dependencies,
             BiddingTaskService tasks, BiddingDocxRenderer renderer, ObjectProvider<BiddingWritingService> writing,
+            ObjectProvider<BiddingApprovalService> approvals, ObjectProvider<BiddingReviewService> reviews,
             @Value("${mateclaw.bidding.artifacts.max-bytes:52428800}") long configuredArtifactLimit,
             @Value("${mateclaw.bidding.artifacts.project-capacity-bytes:524288000}") long configuredProjectCapacity) {
         this.jdbc=jdbc; this.json=json; this.access=access; this.projects=projects; this.repository=repository;
-        this.dependencies=dependencies; this.tasks=tasks; this.renderer=renderer; this.writing=writing;
+        this.dependencies=dependencies; this.tasks=tasks; this.renderer=renderer; this.writing=writing; this.approvals=approvals; this.reviews=reviews;
         this.artifactLimitBytes=Math.max(1,Math.min(MAX_ARTIFACT_BYTES,configuredArtifactLimit));
         this.projectCapacityBytes=Math.max(1,Math.min(PROJECT_CAPACITY,configuredProjectCapacity));
     }
@@ -138,6 +141,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
     @Transactional
     public ObjectNode generate(BiddingTypes.Claim claim,BiddingTypes.Ref manuscriptRef,BiddingTypes.Ref templateRef,BiddingTypes.Ref formatRef,String mode) {
         if(claim==null||!SKILL.equals(skillName(claim.skill().files()))) throw BiddingAccess.error(403,"EXPORT_SKILL_REQUIRED","A pinned export skill claim is required");
+        if(!repository.lockProject(claim.scope().workspaceId(),claim.scope().projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         BiddingTypes.Ref im=parseRef(claim.input().path("manuscriptRef")),it=parseRef(claim.input().path("templateRef")),iff=parseRef(claim.input().path("formatRef"));
         if(!Objects.equals(im,manuscriptRef)||!Objects.equals(it,templateRef)||!Objects.equals(iff,formatRef)||!mode.equals(claim.input().path("mode").asText())) throw BiddingAccess.error(403,"EXPORT_REFS_NOT_ASSIGNED","Tool arguments differ from fixed task references");
         dependencies.validate(claim.scope(),claim.inputRefs());
@@ -159,14 +163,45 @@ public class BiddingArtifactService implements BiddingResultHandler {
     @Transactional(readOnly=true)
     public ObjectNode metadata(BiddingTypes.Scope scope,String artifactId) {
         access.requireReaderActor(scope,scope.actorId()); projects.get(scope);
-        Artifact row=artifact(scope,artifactId); if(row==null||!Set.of("CANDIDATE","PREVIEW").contains(row.status())) throw BiddingAccess.error(404,"NOT_FOUND","Candidate artifact not found");
+        Artifact row=artifact(scope,artifactId); if(row==null||!Set.of("CANDIDATE","PREVIEW","APPROVED").contains(row.status())) throw BiddingAccess.error(404,"NOT_FOUND","Candidate artifact not found");
         dependencies.validateForRead(scope,List.of(row.manuscript(),row.template(),row.formatRef()));
-        ObjectNode out=manifest(row,row.mode()); out.put("status",row.status()); out.set("checks",read(row.checks())); return out;
+        requireCurrentReviewerRead(scope);
+        ObjectNode out=manifest(row,row.mode()); out.put("status",row.status()); out.set("checks",read(row.checks()));
+        out.put("formalAvailable",false);
+        if("APPROVED".equals(row.status()))try { approvals.getObject().requireDownloadable(scope,artifactId,"formal");out.put("formalAvailable",true); }
+        catch(BiddingApiException stale) { if(stale.status()!=409&&stale.status()!=422)throw stale; }
+        return out;
     }
 
     @Transactional(readOnly=true)
-    public byte[] bytes(BiddingTypes.Scope scope,String artifactId) {
-        ObjectNode meta=metadata(scope,artifactId); Artifact row=artifact(scope,artifactId); return row.bytes();
+    public byte[] bytes(BiddingTypes.Scope scope,String artifactId) { return download(scope,artifactId,"candidate"); }
+
+    @Transactional(readOnly=true)
+    public byte[] download(BiddingTypes.Scope scope,String artifactId,String mode) {
+        access.requireReaderActor(scope,scope.actorId()); projects.get(scope);
+        if(!Set.of("candidate","formal","preview").contains(mode))throw BiddingAccess.error(400,"DOWNLOAD_MODE_INVALID","Download mode is invalid");
+        Artifact row=artifact(scope,artifactId);
+        if(row==null)throw BiddingAccess.error(404,"NOT_FOUND","Artifact not found");
+        if("formal".equals(mode))approvals.getObject().requireDownloadable(scope,artifactId,mode);
+        else {
+            String expected="preview".equals(mode)?"PREVIEW":"CANDIDATE";
+            if(!expected.equals(row.status()))throw BiddingAccess.error(404,"NOT_FOUND","Artifact is not available in this download mode");
+            dependencies.validateForRead(scope,List.of(row.manuscript(),row.template(),row.formatRef()));
+            requireCurrentReviewerRead(scope);
+        }
+        if(row.bytes()==null||row.bytes().length!=row.size()||!row.digest().equals(sha(row.bytes())))throw BiddingAccess.error(422,"ARTIFACT_INTEGRITY_FAILED","Stored artifact bytes do not match their digest");
+        return row.bytes();
+    }
+
+    ObjectNode approvalRecord(BiddingTypes.Scope scope,String artifactId) {
+        Artifact row=artifact(scope,artifactId);if(row==null)return null;
+        ObjectNode value=json.createObjectNode().put("id",row.id()).put("mode",row.mode()).put("status",row.status()).put("digest",row.digest()).put("byteSize",row.size()).put("decisionId",row.decisionId());
+        value.set("manuscriptRef",json.valueToTree(row.manuscript()));value.set("templateRef",json.valueToTree(row.template()));value.set("formatRef",json.valueToTree(row.formatRef()));
+        return value;
+    }
+
+    private void requireCurrentReviewerRead(BiddingTypes.Scope scope) {
+        ObjectNode review=reviews.getObject().read(scope);if("REVIEW_ACCESS_REVOKED".equals(review.path("status").asText()))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer material access is no longer valid");
     }
 
     public ObjectNode verify(byte[] bytes,ObjectNode manuscript) {
@@ -390,7 +425,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
     private boolean isLatestManuscript(BiddingTypes.Scope scope,BiddingTypes.Ref ref) { BiddingTypes.Ref current=jdbc.query("SELECT kind,object_id,version,digest FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='manuscript' ORDER BY version DESC",rs->rs.next()?new BiddingTypes.Ref(rs.getString(1),rs.getString(2),rs.getLong(3),rs.getString(4)):null,scope.workspaceId(),scope.projectId());return ref.equals(current); }
     private ObjectNode readTemplateBytes() { try(var in=getClass().getResourceAsStream("/bidding/templates/technical-v1.json")){if(in==null)throw new IllegalStateException("Template missing");return (ObjectNode)json.readTree(in);}catch(Exception e){throw BiddingAccess.error(500,"TEMPLATE_UNAVAILABLE","Fixed DOCX template is unavailable");} }
     private ObjectNode manifest(Artifact row,String mode) { ObjectNode out=json.createObjectNode();out.put("artifactId",row.id());out.put("format","docx");out.put("digest",row.digest());out.put("byteSize",row.size());out.put("mode",mode);out.put("status",row.status());out.set("checks",read(row.checks()));return out; }
-    private Artifact artifact(BiddingTypes.Scope s,String id) { return jdbc.query("SELECT id,manuscript_ref_json,template_ref_json,format_ref_json,mode,digest,byte_size,content,checks_json,generator_attempt_id,status FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=? AND id=?",rs->rs.next()?new Artifact(rs.getString(1),parseRef(json,rs.getString(2)),parseRef(json,rs.getString(3)),parseRef(json,rs.getString(4)),rs.getString(5),rs.getString(6),rs.getLong(7),rs.getBytes(8),rs.getString(9),rs.getString(10),rs.getString(11)):null,s.workspaceId(),s.projectId(),id); }
+    private Artifact artifact(BiddingTypes.Scope s,String id) { return jdbc.query("SELECT id,manuscript_ref_json,template_ref_json,format_ref_json,mode,digest,byte_size,content,checks_json,generator_attempt_id,status,decision_id FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=? AND id=?",rs->rs.next()?new Artifact(rs.getString(1),parseRef(json,rs.getString(2)),parseRef(json,rs.getString(3)),parseRef(json,rs.getString(4)),rs.getString(5),rs.getString(6),rs.getLong(7),rs.getBytes(8),rs.getString(9),rs.getString(10),rs.getString(11),rs.getString(12)):null,s.workspaceId(),s.projectId(),id); }
     private Artifact artifactByAttempt(String attempt) { return jdbc.query("SELECT workspace_id,project_id,id FROM mate_bidding_artifact WHERE generator_attempt_id=?",rs->rs.next()?artifact(new BiddingTypes.Scope(rs.getString(1),"",rs.getString(2)),rs.getString(3)):null,attempt); }
     private String exportSkillId(ObjectNode project,BiddingTypes.Scope scope) {
         String agent=project.path("bindings").path("writer").path("agentId").asText("");
@@ -417,5 +452,5 @@ public class BiddingArtifactService implements BiddingResultHandler {
     private static BiddingTypes.Ref parseRef(ObjectMapper m,String raw) { try{return m.readValue(raw,BiddingTypes.Ref.class);}catch(Exception e){return null;} }
     private BiddingTypes.Ref parseRef(ObjectMapper m,JsonNode n) { try{return m.treeToValue(n,BiddingTypes.Ref.class);}catch(Exception e){return null;} }
     private void only(JsonNode n,Set<String> allowed) { n.fieldNames().forEachRemaining(k->{if(!allowed.contains(k))throw BiddingAccess.error(400,"INVALID_REQUEST","Unsupported export field: "+k);}); }
-    private record Artifact(String id,BiddingTypes.Ref manuscript,BiddingTypes.Ref template,BiddingTypes.Ref formatRef,String mode,String digest,long size,byte[] bytes,String checks,String attemptId,String status) {}
+    private record Artifact(String id,BiddingTypes.Ref manuscript,BiddingTypes.Ref template,BiddingTypes.Ref formatRef,String mode,String digest,long size,byte[] bytes,String checks,String attemptId,String status,String decisionId) {}
 }

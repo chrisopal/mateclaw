@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.TestPropertySource;
@@ -29,17 +30,22 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.io.ByteArrayOutputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest(classes=MateClawApplication.class,webEnvironment=SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource(properties={"spring.datasource.url=jdbc:h2:mem:bidding_artifact_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1","spring.ai.dashscope.api-key=test-key","spring.main.web-application-type=none","mateclaw.semantic.enabled=false","mateclaw.presales.enabled=false","mateclaw.bidding.enabled=true","mateclaw.bidding.scheduler-enabled=false","mateclaw.bidding.artifacts.max-bytes=10000","mateclaw.bidding.artifacts.project-capacity-bytes=11000"})
+@TestPropertySource(properties={"spring.datasource.url=jdbc:h2:mem:bidding_artifact_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1","spring.ai.dashscope.api-key=test-key","spring.main.web-application-type=none","mateclaw.semantic.enabled=false","mateclaw.presales.enabled=false","mateclaw.bidding.enabled=true","mateclaw.bidding.scheduler-enabled=false","mateclaw.bidding.artifacts.max-bytes=10000","mateclaw.bidding.artifacts.project-capacity-bytes=18000"})
 class BiddingArtifactTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired ObjectMapper json;
     @Autowired BiddingArtifactService artifacts;
+    @SpyBean BiddingDocxRenderer renderer;
     @Autowired BiddingExportTool exportTool;
     @Autowired BiddingTaskService tasks;
     @Autowired BiddingEmployeeRuntime runtime;
-    @Autowired BiddingRepository repository;
+    @SpyBean BiddingRepository repository;
     @Autowired vip.mate.agent.AgentService agents;
     @Autowired vip.mate.llm.service.ModelConfigService models;
     @Autowired vip.mate.llm.failover.AvailableProviderPool providerPool;
@@ -181,6 +187,7 @@ class BiddingArtifactTest {
         assertEquals("ARTIFACT_EXTERNAL_RELATIONSHIP",external.code());
         BiddingTypes.Ref templateRef=json.convertValue(queued.path("templateRef"),BiddingTypes.Ref.class);
         BiddingTypes.Ref formatRef=json.convertValue(queued.path("formatRef"),BiddingTypes.Ref.class);
+        assertConcurrentGenerationRespectsRealByteCapacity(scope,projectRef,claim,manuscript,templateRef,formatRef);
         assertCanceledExportRemainsUnusable(scope,projectRef,claim,manuscript,templateRef,formatRef);
         assertTamperedManifestIsRejected(scope,projectRef,claim,manuscript,templateRef,formatRef);
         assertCapacityRejectsRealGeneratedBytes(scope,projectRef,claim);
@@ -305,6 +312,30 @@ class BiddingArtifactTest {
                 json.convertValue(claim.input().path("templateRef"),BiddingTypes.Ref.class),json.convertValue(claim.input().path("formatRef"),BiddingTypes.Ref.class)));
         assertEquals("PROJECT_ARTIFACT_CAPACITY",rejected.code());persistToolFailure(claim,rejected.code());
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_artifact WHERE generator_attempt_id=?",Integer.class,claim.attemptId()));
+    }
+
+    private void assertConcurrentGenerationRespectsRealByteCapacity(BiddingTypes.Scope scope,BiddingTypes.Ref projectRef,BiddingTypes.Claim prior,
+            BiddingTypes.Ref manuscript,BiddingTypes.Ref template,BiddingTypes.Ref format) throws Exception {
+        Long before=jdbc.queryForObject("SELECT COALESCE(SUM(byte_size),0) FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=?",Long.class,scope.workspaceId(),scope.projectId());
+        var sameAttempt=enqueueExport(scope,projectRef,prior,"concurrent-idempotency",prior.input().deepCopy());
+        AtomicInteger renderCalls=new AtomicInteger(),lockCalls=new AtomicInteger();CountDownLatch firstRendering=new CountDownLatch(1),bothLocksEntered=new CountDownLatch(2),releaseFirst=new CountDownLatch(1);
+        doAnswer(invocation->{lockCalls.incrementAndGet();bothLocksEntered.countDown();return invocation.callRealMethod();}).when(repository).lockProject(scope.workspaceId(),scope.projectId());
+        doAnswer(invocation->{renderCalls.incrementAndGet();firstRendering.countDown();if(!releaseFirst.await(10,TimeUnit.SECONDS))throw new IllegalStateException("test did not release first real render");return invocation.callRealMethod();})
+                .when(renderer).render(any(ObjectNode.class),any(ObjectNode.class),anyMap());
+        var pool=Executors.newFixedThreadPool(2);
+        try {
+            var first=pool.submit(()->callTool(sameAttempt,manuscript,template,format));
+            assertTrue(firstRendering.await(5,TimeUnit.SECONDS),"first real DOCX render entered the controlled latch");
+            var second=pool.submit(()->callTool(sameAttempt,manuscript,template,format));
+            assertTrue(bothLocksEntered.await(5,TimeUnit.SECONDS),"both tool calls reached the real project lock");
+            releaseFirst.countDown();ObjectNode acceptedManifest=first.get(10,TimeUnit.SECONDS),replayedManifest=second.get(10,TimeUnit.SECONDS);
+            assertEquals(acceptedManifest.path("artifactId"),replayedManifest.path("artifactId"));assertEquals(acceptedManifest.path("digest"),replayedManifest.path("digest"));
+            tasks.complete(sameAttempt,new BiddingTypes.Execution(acceptedManifest,null,sameAttempt.skill().digest(),sameAttempt.configDigest(),null));
+            assertEquals(1,renderCalls.get(),"the serialized retry returns the existing artifact instead of rendering again");
+            Long after=jdbc.queryForObject("SELECT COALESCE(SUM(byte_size),0) FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=?",Long.class,scope.workspaceId(),scope.projectId());
+            assertTrue(after-before>0,"read-back uses actual generated DOCX byte_size");
+            assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_artifact WHERE generator_attempt_id=? AND status='CANDIDATE'",Integer.class,sameAttempt.attemptId()));
+        } finally {releaseFirst.countDown();pool.shutdownNow();clearInvocations(renderer);clearInvocations(repository);}
     }
     private void assertSingleArtifactLimitRejectsActualOversizedDocx(BiddingTypes.Scope scope,BiddingTypes.Ref projectRef,ObjectNode originalBody,
             BiddingTypes.Ref originalRef,BiddingTypes.Ref template,BiddingTypes.Ref format,BiddingTypes.Ref outline) throws Exception {

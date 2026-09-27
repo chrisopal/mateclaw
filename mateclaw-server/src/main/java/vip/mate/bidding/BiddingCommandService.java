@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BiddingCommandService {
     private final BiddingProjectService projects;
+    private final BiddingRepository repository;
     private final BiddingDependencies dependencies;
     private final BiddingSourceService sources;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
@@ -18,13 +19,16 @@ public class BiddingCommandService {
     private final ObjectProvider<BiddingWritingService> writing;
     private final ObjectProvider<BiddingReviewService> reviews;
     private final ObjectProvider<BiddingArtifactService> artifacts;
-    public BiddingCommandService(BiddingProjectService projects,BiddingSourceService sources,BiddingDependencies dependencies,ObjectProvider<BiddingEmployeeBindings> employees,
+    private final ObjectProvider<BiddingApprovalService> approvals;
+    public BiddingCommandService(BiddingProjectService projects,BiddingRepository repository,BiddingSourceService sources,BiddingDependencies dependencies,ObjectProvider<BiddingEmployeeBindings> employees,
             ObjectProvider<BiddingTaskService> tasks,ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews,ObjectProvider<BiddingArtifactService> artifacts) {
-        this.projects=projects; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing; this.reviews=reviews;this.artifacts=artifacts;
+            ObjectProvider<BiddingHandoffService> handoffs,ObjectProvider<BiddingMaterials> materials,ObjectProvider<BiddingOutlineService> outlines,ObjectProvider<BiddingWritingService> writing,ObjectProvider<BiddingReviewService> reviews,ObjectProvider<BiddingArtifactService> artifacts,ObjectProvider<BiddingApprovalService> approvals) {
+        this.projects=projects; this.repository=repository; this.sources=sources; this.dependencies=dependencies; this.employees=employees; this.tasks=tasks; this.analysis=analysis; this.handoffs=handoffs; this.materials=materials; this.outlines=outlines; this.writing=writing; this.reviews=reviews;this.artifacts=artifacts;this.approvals=approvals;
     }
+    @org.springframework.transaction.annotation.Transactional
     public ObjectNode execute(BiddingTypes.Scope scope,BiddingTypes.Command command) {
         if(command==null || command.action()==null) return projects.execute(scope,command);
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         return switch(command.action()) {
             case "CONFIRM_SOURCE_SET" -> sources.confirmSet(scope,command);
             case "RETRY_SOURCE_READ" -> sources.retryRead(scope,command);
@@ -50,6 +54,7 @@ public class BiddingCommandService {
             case "REVISE_CHAPTER" -> writing.getObject().revise(scope,command);
             case "DISPATCH_EXPORT" -> artifacts.getObject().dispatch(scope,command);
             case "PREPARE_EXPORT" -> artifacts.getObject().prepareExport(scope,command);
+            case "APPROVE_ARTIFACT" -> approvals.getObject().approve(scope,command);
             case "SAVE_FORMAT_REQUIREMENTS" -> artifacts.getObject().saveFormatRequirements(scope,command);
             case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
             default -> projects.execute(scope,command);

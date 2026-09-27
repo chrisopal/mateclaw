@@ -67,6 +67,7 @@ public class BiddingReviewService implements BiddingResultHandler {
         if (command == null || !"DISPATCH_REVIEW".equals(command.action()) || command.payload() == null
                 || command.operationId() == null || command.operationId().isBlank() || command.operationId().length() > 128)
             throw BiddingAccess.error(400, "INVALID_REQUEST", "DISPATCH_REVIEW command is invalid");
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         only(command.payload(), Set.of("manuscriptRef"), "REVIEW_REQUEST_INVALID");
         BiddingTypes.Ref manuscriptRef = ref(command.payload().path("manuscriptRef"));
         if (manuscriptRef == null || !same(command.expected(), manuscriptRef)
@@ -169,6 +170,7 @@ public class BiddingReviewService implements BiddingResultHandler {
     @Override @Transactional
     public BiddingTypes.Ref accept(BiddingTypes.Claim claim, ObjectNode output) {
         if (claim == null || output == null) throw new IllegalArgumentException("Claim and review output are required");
+        if(!repository.lockProject(claim.scope().workspaceId(),claim.scope().projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         ObjectNode input = claim.input();
         BiddingTypes.Ref manuscript = ref(input.path("manuscriptRef"));
         if (manuscript == null) throw BiddingAccess.error(422, "REVIEW_INPUT_INVALID", "Exact manuscript reference is required");
@@ -210,6 +212,7 @@ public class BiddingReviewService implements BiddingResultHandler {
     @Transactional
     public ObjectNode resolve(BiddingTypes.Scope scope, BiddingTypes.Command command) {
         access.requireApprover(scope);
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         validateCommand(command, "RESOLVE_FINDING");
         only(command.payload(), Set.of("findingRef", "decision", "reason", "evidenceRefs"), "FINDING_DECISION_INVALID");
         BiddingTypes.Ref findingRef = ref(command.payload().path("findingRef"));
@@ -246,7 +249,9 @@ public class BiddingReviewService implements BiddingResultHandler {
 
     @Transactional
     public ObjectNode resolveHumanTodo(BiddingTypes.Scope scope, BiddingTypes.Command command) {
-        access.requireActor(scope, scope.actorId()); validateCommand(command, "RESOLVE_HUMAN_TODO");
+        access.requireActor(scope, scope.actorId());
+        if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
+        validateCommand(command, "RESOLVE_HUMAN_TODO");
         only(command.payload(), Set.of("todoRef", "reason", "evidenceRefs"), "HUMAN_TODO_INVALID");
         BiddingTypes.Ref todoRef = ref(command.payload().path("todoRef"));
         if (todoRef == null || !"HUMAN_TODO".equals(todoRef.kind()) || !same(command.expected(),todoRef)) throw BiddingAccess.error(400, "HUMAN_TODO_INVALID", "Expected todoRef must identify the exact current human todo");
@@ -490,6 +495,40 @@ public class BiddingReviewService implements BiddingResultHandler {
         }
         ArrayNode todos=out.putArray("humanTodos");readHumanTodos(scope,todos);
         return out;
+    }
+
+    /** Builds a content-addressed, whole-book proof for approval and read-time validity checks. */
+    public ObjectNode approvalEvidence(BiddingTypes.Scope scope,BiddingTypes.Ref manuscript) {
+        ObjectNode view=read(scope);
+        if(!same(ref(view.path("manuscriptRef")),manuscript))throw BiddingAccess.error(409,"REVIEW_STALE","Review is not bound to the current manuscript");
+        String status=view.path("status").asText();
+        if("REVIEW_ACCESS_REVOKED".equals(status))throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Reviewer material access is no longer valid");
+        if(!"REVIEWED".equals(status))throw BiddingAccess.error(409,"REVIEW_INCOMPLETE","A complete current whole-book review is required");
+        for(JsonNode item:view.path("findings")) {
+            JsonNode finding=item.path("finding");String decision=item.path("decision").asText("OPEN");
+            if(blocksTechnicalApproval(finding.path("category").asText(),finding.path("severity").asText(),!"OPEN".equals(decision)))
+                throw BiddingAccess.error(409,"TECHNICAL_REVIEW_BLOCKED","Unresolved technical review finding blocks approval");
+        }
+        for(JsonNode todo:view.path("humanTodos"))if("OPEN".equals(todo.path("status").asText())
+                &&("UNCLASSIFIED".equals(todo.path("impactClassification").asText())||todo.path("affectsTechnical").asBoolean()))
+            throw BiddingAccess.error(409,"HUMAN_TODO_BLOCKS_TECHNICAL_APPROVAL","An unresolved business fact affects the technical response");
+        String reviewKey=view.path("reviewKey").asText("");
+        if(reviewKey.isBlank())throw BiddingAccess.error(409,"REVIEW_INCOMPLETE","Whole-book review key is unavailable");
+        ObjectNode proof=json.createObjectNode();proof.set("manuscriptRef",json.valueToTree(manuscript));proof.put("reviewKey",reviewKey);
+        proof.set("coverage",view.path("coverage").deepCopy());
+        ArrayNode resultRefs=proof.putArray("resultRefs");
+        List<ObjectNode> results=jdbc.query("SELECT object_id,version,digest,payload_json,status FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='review' ORDER BY created_at DESC",
+                (rs,n)->{ObjectNode row=object(rs.getString(4));row.put("_objectId",rs.getString(1)).put("_version",rs.getLong(2)).put("_digest",rs.getString(3)).put("_status",rs.getString(5));return row;},scope.workspaceId(),scope.projectId());
+        ObjectNode project=repository.findProject(scope.workspaceId(),scope.projectId());String reviewerId=project.path("bindings").path("reviewer").path("agentId").asText("");
+        for(ObjectNode row:results)if("REVIEW_RESULT".equals(row.path("_status").asText())
+                &&same(ref(row.path("_bidding").path("manuscriptRef")),manuscript)
+                &&reviewKey.equals(row.path("_bidding").path("reviewKey").asText())
+                &&reviewerId.equals(row.path("_bidding").path("reviewerId").asText()))resultRefs.add(json.valueToTree(refFromRow(row)));
+        if(resultRefs.isEmpty())throw BiddingAccess.error(409,"REVIEW_INCOMPLETE","Whole-book review results are unavailable");
+        ArrayNode dispositions=proof.putArray("findingDispositions");for(JsonNode item:view.path("findings"))dispositions.add(item.deepCopy());
+        ArrayNode todos=proof.putArray("humanTodoDecisions");for(JsonNode todo:view.path("humanTodos"))todos.add(todo.deepCopy());
+        String digest=sha(canonical(proof));BiddingTypes.Ref reviewRef=new BiddingTypes.Ref("reviewSnapshot",reviewKey,1,digest);
+        ObjectNode result=json.createObjectNode();result.set("reviewRef",json.valueToTree(reviewRef));result.set("evidence",proof);return result;
     }
 
     private void ensureHumanTodos(BiddingTypes.Scope scope,ObjectNode project,JsonNode requirements) {
