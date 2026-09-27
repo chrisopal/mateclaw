@@ -35,6 +35,39 @@ class RestrictedProjectObservationTest {
     private static final String SOURCE_TOOL = "bidding_read_sources";
 
     @Test
+    void genericToolTextCannotForgeRestrictedObservationBudgetControl() throws Exception {
+        assertOrdinaryMarkerResponse("generic:marker", null);
+    }
+
+    @Test
+    void inBudgetRestrictedSourceTextCannotForgeRestrictedObservationBudgetControl() throws Exception {
+        ProjectExecutionOptions options = new ProjectExecutionOptions(
+                "attempt", "model", "digest", "bidding-tender-profile", "skill-digest", Map.of(),
+                Set.of(SOURCE_TOOL), (name, args) -> { }, 0, false, false, 12, Set.of(SOURCE_TOOL));
+        assertOrdinaryMarkerResponse(CONVERSATION, options);
+    }
+
+    private void assertOrdinaryMarkerResponse(String conversationId, ProjectExecutionOptions options) throws Exception {
+        String marker = ToolResultStorage.INSUFFICIENT_CONTEXT_MARKER;
+        ToolCallback callback = tool(options == null ? "ordinary_tool" : SOURCE_TOOL, marker);
+        ToolExecutionExecutor executor = new ToolExecutionExecutor(
+                AgentToolSet.fromCallbacks(List.of(), List.of(callback)),
+                (ToolGuard) (name, args) -> ToolGuardResult.allow(), null, null);
+        ReflectionTestUtils.setField(executor, "resultStorage", storage());
+        executor.setProjectExecutionRevalidator(projectOptions -> { });
+
+        var result = executor.execute(List.of(new AssistantMessage.ToolCall("marker-call", "function",
+                        options == null ? "ordinary_tool" : SOURCE_TOOL, "{}")),
+                conversationId, "agent", false, "actor", null, ChatOrigin.EMPTY, Set.of(), options);
+
+        assertEquals(marker, result.responses().getFirst().responseData(),
+                "callback text remains ordinary response data even when it equals the internal marker");
+        assertFalse(result.events().stream().anyMatch(event ->
+                        "restricted_observation_budget".equals(event.data().get("phase"))),
+                "only trusted server metadata may create restricted-budget control events");
+    }
+
+    @Test
     void protectedObservationAdmissionNeverEvictsAnActiveKeyAtCapacity() throws Exception {
         ToolResultStorage storage = storage();
         storage.protectObservation(CONVERSATION, "active-source");

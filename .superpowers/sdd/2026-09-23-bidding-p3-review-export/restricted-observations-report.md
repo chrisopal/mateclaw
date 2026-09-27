@@ -34,3 +34,18 @@ The first broad suite attempt before the fixture bean change produced 100 Spring
 The 8,192-key bound prevents unbounded metadata growth; if all keys are active, subsequent protected reads are rejected explicitly and require retry after narrowing/finishing the current work. Attempt completion clears only metadata for its own conversation. A forcibly terminated thread that bypasses `finally` can leave metadata resident until JVM exit; keys are never silently revoked, so a full registry continues to reject new protected reads. No spill/source data is deleted by this change.
 
 Verification used isolated H2 test databases and fake provider responses. It does not establish live-provider truncation behavior, model-quality outcomes, or production runtime acceptance. No model settings, schemas, skills, provider limits, or production processes were changed.
+
+## Scoped review fix 2: control signals require trusted metadata
+
+The second Sol review found that matching the literal `[mateclaw-insufficient-context]` in any tool response could forge terminal control, including from a generic tool or from an in-budget restricted source. `ToolResultStorage` no longer interprets response text as control. `ToolExecutionExecutor` now carries a private per-execution refusal flag into its prepared calls and emits the terminal budget event only when server-side protection admission actually fails or a genuinely protected result remains over the aggregate budget. The sentinel remains response data for the existing graph routing path, but callback text alone cannot set the flag.
+
+The native fake `ChatModel` now records and throws on unexpected synchronous `call(Prompt)` entry as well as counting streaming provider calls. This makes the no-next-provider assertion fail if a synchronous model path is introduced.
+
+### Review-fix evidence
+
+- Semantic RED: before the production edit, `RestrictedProjectObservationTest.genericToolTextCannotForgeRestrictedObservationBudgetControl` and `inBudgetRestrictedSourceTextCannotForgeRestrictedObservationBudgetControl` both failed because the executor emitted `restricted_observation_budget` for the exact marker text (2 failures, 5 tests run). The failures were in the event assertion, while the returned callback text remained unchanged.
+- Focused GREEN: `mvn -pl mateclaw-server -am -Dtest='RestrictedProjectObservationTest,BiddingContextBudgetEndToEndTest' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 9 tests, 0 failures/errors/skips. This includes both literal-marker cases and the existing real-runtime immediate/window/capacity stop checks with persisted `INSUFFICIENT_CONTEXT` failure readback.
+- Combined scoped gate: `mvn -pl mateclaw-server -am -Dtest='Bidding*Test,PresalesIntegrationTest,PresalesEmployeeRuntimeTest,ToolRegistryProxyTest,ToolExecutionExecutor*Test,ToolResultStorage*Test,ConversationWindowManager*Test,RestrictedProjectObservationTest,ActionNode*Test,ObservationDispatcher*Test,ReasoningNode*Test' -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test` — PASS, 378 tests, 0 failures/errors/skips.
+- `git diff --check` — PASS.
+
+The tests use fake model output and isolated H2; they do not exercise a live provider. The original `ToolResultStorage` registry and graph terminal regression coverage remains in place.

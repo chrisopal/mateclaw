@@ -282,11 +282,10 @@ public class ToolResultStorage {
 
     boolean hasProtectedObservationOverflow(List<ToolResponseMessage.ToolResponse> responses,
                                            String conversationId) {
-        return responses != null && (responses.stream().anyMatch(response -> response != null
-                    && INSUFFICIENT_CONTEXT_MARKER.equals(response.responseData()))
-                || (props.isEnabled() && aggregateSize(responses) > props.getPerTurnBudgetChars()
-                    && responses.stream().anyMatch(response -> response != null
-                        && isProtectedObservation(conversationId, response.id()))));
+        return responses != null && props.isEnabled()
+                && aggregateSize(responses) > props.getPerTurnBudgetChars()
+                && responses.stream().anyMatch(response -> response != null
+                    && isProtectedObservation(conversationId, response.id()));
     }
 
     private int compactLargestExcludedResult(List<ToolResponseMessage.ToolResponse> mutable, String conversationId) {

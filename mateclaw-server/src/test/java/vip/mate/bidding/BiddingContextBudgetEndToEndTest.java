@@ -142,6 +142,10 @@ class BiddingContextBudgetEndToEndTest {
             }
             return Flux.just(new ChatResponse(List.of(new Generation(new AssistantMessage("{}")))));
         });
+        when(fake.call(any(Prompt.class))).thenAnswer(invocation -> {
+            providerCalls.incrementAndGet();
+            throw new AssertionError("unexpected synchronous ChatModel.call; restricted overflow must stop before provider invocation");
+        });
         when(providerFactory.buildFor(any(), any())).thenReturn(fake);
 
         if (fillProtectionRegistry) {

@@ -554,6 +554,8 @@ public class ToolExecutionExecutor {
         // a 30 KB grep result that got head/tail-cut to 4 KB).
         java.util.concurrent.atomic.AtomicReference<SourceEvidenceLedger> rawEvidenceRef =
                 new java.util.concurrent.atomic.AtomicReference<>(SourceEvidenceLedger.empty());
+        java.util.concurrent.atomic.AtomicBoolean restrictedObservationRefused =
+                new java.util.concurrent.atomic.AtomicBoolean();
 
         // ═══ Phase 1: 顺序 Guard + 分段 ═══
         List<PreparedToolCall> preparedCalls = new ArrayList<>();
@@ -749,7 +751,8 @@ public class ToolExecutionExecutor {
             // 4. 分类: concurrencySafe
             boolean safe = isConcurrencySafe(toolName);
             preparedCalls.add(new PreparedToolCall(toolCall, responseName, callback, arguments, safe, allResponses.size(),
-                    conversationId, requesterId, workspaceBasePath, safeOrigin, projectOptions, rawEvidenceRef));
+                    conversationId, requesterId, workspaceBasePath, safeOrigin, projectOptions, rawEvidenceRef,
+                    restrictedObservationRefused));
             // 占位，Phase 2 填充
             allResponses.add(null);
         }
@@ -768,7 +771,8 @@ public class ToolExecutionExecutor {
         if (resultStorage != null && !allResponses.isEmpty()) {
             allResponses = new ArrayList<>(resultStorage.enforceTurnBudget(
                     allResponses, conversationId, workspaceBasePath));
-            if (resultStorage.hasProtectedObservationOverflow(allResponses, conversationId)) {
+            if (restrictedObservationRefused.get()
+                    || resultStorage.hasProtectedObservationOverflow(allResponses, conversationId)) {
                 events.add(GraphEventPublisher.phase("restricted_observation_budget", Map.of(
                         "status", "insufficient_context",
                         "reason", "restricted_source_observation_exceeds_turn_budget")));
@@ -1238,6 +1242,7 @@ public class ToolExecutionExecutor {
                     && pc.projectOptions.preservedObservationTools().contains(toolName)
                     && result != null && !result.isBlank() && !result.startsWith("Error:")) {
                 if (!resultStorage.protectObservation(pc.conversationId, pc.toolCall.id())) {
+                    pc.restrictedObservationRefused.set(true);
                     result = ToolResultStorage.INSUFFICIENT_CONTEXT_MARKER;
                 }
             }
@@ -1926,7 +1931,8 @@ public class ToolExecutionExecutor {
              * <p>Atomic merge via {@code AtomicReference.accumulateAndGet}
              * because parallel batches run on {@code TOOL_EXECUTOR}.
              */
-            java.util.concurrent.atomic.AtomicReference<SourceEvidenceLedger> rawEvidenceCollector
+            java.util.concurrent.atomic.AtomicReference<SourceEvidenceLedger> rawEvidenceCollector,
+            java.util.concurrent.atomic.AtomicBoolean restrictedObservationRefused
     ) {}
 
     private record BridgeUnwrap(AssistantMessage.ToolCall toolCall, String error) {
