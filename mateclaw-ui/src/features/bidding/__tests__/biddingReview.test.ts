@@ -57,3 +57,20 @@ it('does not expose todo closure to a writer who is neither its owner nor approv
   expect(host.textContent).toContain('Business only')
   expect([...host.querySelectorAll('button')].some(button=>button.textContent?.includes('Resolve item'))).toBe(false)
 })
+
+it('labels actual blocker categories and reserves human finding decisions for project approvers',async()=>{
+  const ref=(kind:string,id:string):Ref=>({kind,id,version:1,digest:id})
+  const view:BiddingReviewView={status:'REVIEWED',manuscriptRef:ref('manuscript','ms'),tasks:[],humanTodos:[],findings:[
+    {reviewRef:ref('review','r1'),findingRef:ref('reviewFinding','f1'),decision:'OPEN',finding:{id:'f1',severity:'BLOCKER',category:'MISSING_MANDATORY_PROOF',description:'Missing required bank guarantee'}},
+    {reviewRef:ref('review','r1'),findingRef:ref('reviewFinding','f2'),decision:'OPEN',finding:{id:'f2',severity:'MAJOR',category:'UNANSWERED_TECHNICAL_REQUIREMENT',description:'Required cooling capacity is unanswered'}}
+  ]}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingReview,{view,chapters:[],canWrite:true,canApprove:false,canResolveTodo:false,reviewerReady:true,busy:false})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  const cards=[...host.querySelectorAll('.finding-card')]
+  expect(cards[0]?.textContent).toContain('Blocker')
+  expect(cards[0]?.textContent).toContain('Mandatory proof missing')
+  expect(cards[1]?.textContent).toContain('Technical requirement unanswered')
+  expect(cards[0]?.textContent).not.toContain('Dismiss with evidence')
+  expect([...host.querySelectorAll('.finding-actions button')].some(button=>button.textContent?.includes('Targeted revision'))).toBe(false)
+})

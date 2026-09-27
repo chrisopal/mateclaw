@@ -43,8 +43,18 @@ it('downloads preview mode without exposing approval',async()=>{
   expect([...host.querySelectorAll('button')].some(button=>button.textContent?.includes('Approve this file'))).toBe(false)
 })
 
+it('renders the real artifact metadata shape before approval context is fetched',async()=>{
+  const serverMetadata:ArtifactMetadata={artifactId:'artifact-manifest-1',mode:'candidate',status:'CANDIDATE',filename:'Technical proposal.docx',digest:'sha256-manifest',byteSize:8192,manifest:{artifactId:'artifact-manifest-1',sha256:'sha256-manifest',byte_size:8192},checks:{current:true},formalAvailable:false}
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingArtifacts,{templates:[],artifacts:[serverMetadata],loading:false,busy:false,canWrite:true,canApprove:true})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  expect(host.textContent).toContain('Technical proposal.docx')
+  expect([...host.querySelectorAll('button')].some(button=>button.textContent?.includes('Download and inspect'))).toBe(true)
+  expect(host.querySelector('details')?.textContent).not.toContain('undefined')
+})
+
 it('keeps previews and technical blockers from opening an approval decision',async()=>{
-  const emit=vi.fn(),ctx:ArtifactApprovalContext={...artifact,status:'NOT_APPROVABLE',reasonCode:'PREVIEW_NOT_APPROVABLE'}
+  const emit=vi.fn(),ctx:ArtifactApprovalContext={...artifact,manuscriptRef:ref('manuscript','ms-3'),templateRef:ref('template','template-3'),formatRef:ref('format','format-3'),status:'NOT_APPROVABLE',reasonCode:'PREVIEW_NOT_APPROVABLE'}
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingApprovalDialog,{modelValue:true,context:ctx,busy:false,conflict:false,onApprove:emit})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
@@ -55,7 +65,7 @@ it('keeps previews and technical blockers from opening an approval decision',asy
 })
 
 it('records exact server refs only after fresh READY context and human inspection',async()=>{
-  const emit=vi.fn(),ctx:ArtifactApprovalContext={...artifact,status:'READY',artifactRef:ref('artifact','artifact-1'),reviewRef:ref('review','whole-book-review')}
+  const emit=vi.fn(),ctx:ArtifactApprovalContext={...artifact,manuscriptRef:ref('manuscript','ms-3'),templateRef:ref('template','template-3'),formatRef:ref('format','format-3'),status:'READY',artifactRef:ref('artifact','artifact-1'),reviewRef:ref('review','whole-book-review')}
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingApprovalDialog,{modelValue:true,context:ctx,busy:false,conflict:false,onApprove:emit})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
