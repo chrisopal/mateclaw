@@ -72,6 +72,38 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertThrows(BiddingApiException.class, () -> validator.validateReview(modelApproval, input));
     }
 
+    @Test void reviewChapterRefsAcceptEquivalentJsonVersionTypesButRejectChangedIdentity() throws Exception {
+        var validator = new BiddingSkillValidator();
+        ObjectNode input = json.readValue("""
+            {"schemaVersion":"1","baselineRef":{"kind":"analysisBaseline","id":"b","version":1,"digest":"d"},
+             "outlineRef":{"kind":"outline","id":"o","version":1,"digest":"d"},
+             "manuscriptRef":{"kind":"manuscript","id":"m","version":1,"digest":"d"},
+             "chapters":[{"chapterId":"c1","chapterRef":{"kind":"chapter","id":"c1","version":"1","digest":"chapter-digest"},"content":{}}],
+             "requirements":[],"criteria":[],"eliminationItems":[],"evidenceSnapshot":{"blocks":[],"materials":{"items":[]}},
+             "_biddingTargetId":"review:key:chapter:c1"}
+            """, ObjectNode.class);
+        ObjectNode output = json.readValue("""
+            {"schemaVersion":"1","findings":[{"id":"F-1","severity":"MINOR","category":"TECHNICAL_GAP",
+             "chapterRefs":[{"kind":"chapter","id":"c1","version":1,"digest":"chapter-digest"}],
+             "requirementRefs":[],"evidenceRefs":[],"description":"gap","recommendation":"address gap"}],
+             "coverage":{"chapterRefs":[{"kind":"chapter","id":"c1","version":1,"digest":"chapter-digest"}],
+             "requirementRefs":[],"crossChapterReviewed":false},"limitations":[],"warnings":[]}
+            """, ObjectNode.class);
+        assertDoesNotThrow(() -> validator.validateReview(output, input));
+
+        ObjectNode changedDigest = output.deepCopy();
+        ((ObjectNode) changedDigest.path("coverage").path("chapterRefs").get(0)).put("digest", "forged-digest");
+        assertThrows(BiddingApiException.class, () -> validator.validateReview(changedDigest, input));
+
+        ObjectNode changedVersion = output.deepCopy();
+        ((ObjectNode) changedVersion.path("findings").get(0).path("chapterRefs").get(0)).put("version", 2);
+        assertThrows(BiddingApiException.class, () -> validator.validateReview(changedVersion, input));
+
+        ObjectNode changedId = output.deepCopy();
+        ((ObjectNode) changedId.path("coverage").path("chapterRefs").get(0)).put("id", "c2");
+        assertThrows(BiddingApiException.class, () -> validator.validateReview(changedId, input));
+    }
+
     @Test void reviewReadModelIsScopedAndReportsUnassembledProject() throws Exception {
         var project = project();
         String id = project.path("id").asText();

@@ -64,7 +64,8 @@ public final class BiddingSkillValidator {
         for (JsonNode chapterRef : payload.path("coverage").path("chapterRefs")) {
             String id = chapterRef.path("id").asText();
             if (!assignedChapters.contains(id) || !"chapter".equals(chapterRef.path("kind").asText())
-                    || !assignedChapterRefs.get(id).equals(chapterRef) || !coveredChapters.add(id)) invalid("/coverage/chapterRefs", "Coverage contains an unassigned, stale or duplicate chapter");
+                    || !sameChapterRef(assignedChapterRefs.get(id), chapterRef, "/coverage/chapterRefs")
+                    || !coveredChapters.add(id)) invalid("/coverage/chapterRefs", "Coverage contains an unassigned, stale or duplicate chapter");
         }
         Set<String> coveredRequirements = stringSet(payload.path("coverage").path("requirementRefs"), "/coverage/requirementRefs");
         if (!coveredChapters.equals(assignedChapters) || !coveredRequirements.equals(assignedRequirements)) fail("REVIEW_COVERAGE_INCOMPLETE", "/coverage", "Every assigned chapter and technical requirement must be reviewed");
@@ -80,7 +81,7 @@ public final class BiddingSkillValidator {
             text(finding, "description", at, 4000); text(finding, "recommendation", at, 4000);
             if (!finding.path("chapterRefs").isArray() || !finding.path("requirementRefs").isArray() || !finding.path("evidenceRefs").isArray()) invalid(at, "Finding references must be arrays");
             for (JsonNode ref : finding.path("chapterRefs")) if (!assignedChapters.contains(ref.path("id").asText())
-                    || !assignedChapterRefs.get(ref.path("id").asText()).equals(ref)) invalid(at + "/chapterRefs", "Finding references an unassigned or stale chapter");
+                    || !sameChapterRef(assignedChapterRefs.get(ref.path("id").asText()), ref, at + "/chapterRefs")) invalid(at + "/chapterRefs", "Finding references an unassigned or stale chapter");
             for (JsonNode ref : finding.path("requirementRefs")) if (!assignedRequirements.contains(ref.asText())) invalid(at + "/requirementRefs", "Finding references an unassigned requirement");
             validateReviewEvidence(finding.path("evidenceRefs"), evidence.path("blocks"), at + "/evidenceRefs");
         }
@@ -390,6 +391,37 @@ public final class BiddingSkillValidator {
             if (field.equals(candidate) || qualified.equals(candidate)) return true;
         }
         return false;
+    }
+
+    private static boolean sameChapterRef(JsonNode expected, JsonNode actual, String path) {
+        if (expected == null || !expected.isObject() || actual == null || !actual.isObject()) return false;
+        only(actual, Set.of("kind", "id", "version", "digest"), path);
+        Long expectedVersion = positiveVersion(expected.get("version"));
+        Long actualVersion = positiveVersion(actual.get("version"));
+        return sameText(expected, actual, "kind") && sameText(expected, actual, "id")
+                && sameText(expected, actual, "digest") && expectedVersion != null
+                && expectedVersion.equals(actualVersion);
+    }
+
+    private static boolean sameText(JsonNode expected, JsonNode actual, String field) {
+        JsonNode expectedValue = expected.get(field), actualValue = actual.get(field);
+        return expectedValue != null && expectedValue.isTextual() && actualValue != null
+                && actualValue.isTextual() && expectedValue.asText().equals(actualValue.asText());
+    }
+
+    private static Long positiveVersion(JsonNode value) {
+        if (value == null) return null;
+        if (value.isIntegralNumber() && value.canConvertToLong()) {
+            long version = value.asLong();
+            return version > 0 ? version : null;
+        }
+        if (!value.isTextual() || !value.asText().matches("[1-9][0-9]*")) return null;
+        try {
+            long version = Long.parseLong(value.asText());
+            return version > 0 ? version : null;
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
     }
 
     private static JsonNode requiredObject(JsonNode node, String field, String path) { JsonNode value = node.get(field); if (value == null || !value.isObject()) invalid(path + "/" + field, "Expected an object"); return value; }
