@@ -999,9 +999,11 @@ public class ConversationWindowManager {
                 boolean alreadySpilled = data != null
                         && data.startsWith(ToolResultStorage.SPILL_MARKER_PREFIX);
 
-                // Pass through: the latest response, exempt tools, empty bodies,
-                // already-spilled previews — none should be rewritten.
-                if (keepFull || exempt || data == null || data.isEmpty() || alreadySpilled) {
+                // Pass through: the latest response, protected observations,
+                // exempt tools, empty bodies, already-spilled previews — none
+                // should be rewritten.
+                if (keepFull || isProtectedObservation(r, conversationId) || exempt
+                        || data == null || data.isEmpty() || alreadySpilled) {
                     newResponses.add(r);
                     if (data != null && data.length() > DEDUP_MIN_CHARS) {
                         seenLargeOutputs.add(data);

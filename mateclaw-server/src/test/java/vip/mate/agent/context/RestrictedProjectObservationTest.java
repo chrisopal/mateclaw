@@ -236,6 +236,33 @@ class RestrictedProjectObservationTest {
                 "conversation cleanup removes retained observation metadata");
     }
 
+    @Test
+    void preRequestPrunePreservesOlderProtectedDuplicateButCompactsOrdinaryDuplicate() throws Exception {
+        ToolResultStorage storage = storage();
+        ConversationWindowManager manager = new ConversationWindowManager(null, null, null);
+        manager.setToolResultStorage(storage);
+
+        String protectedSchema = "PINNED_OUTPUT_SCHEMA_EXACT " + "schema contract ".repeat(80);
+        String ordinaryOutput = "ORDINARY_DUPLICATE_OUTPUT " + "repeated result ".repeat(80);
+        storage.protectObservation(CONVERSATION, "protected-old");
+
+        List<Message> history = new ArrayList<>(List.of(
+                ToolResponseMessage.builder().responses(List.of(
+                        new ToolResponseMessage.ToolResponse("protected-old", "readSkillFile", protectedSchema),
+                        new ToolResponseMessage.ToolResponse("ordinary-old", "web_search", ordinaryOutput))).build(),
+                ToolResponseMessage.builder().responses(List.of(
+                        new ToolResponseMessage.ToolResponse("protected-latest", "readSkillFile", protectedSchema),
+                        new ToolResponseMessage.ToolResponse("ordinary-latest", "web_search", ordinaryOutput))).build()));
+
+        List<Message> pruned = manager.pruneOldToolResultsForModelInput(history, CONVERSATION, null);
+
+        assertEquals(protectedSchema, response(pruned, "protected-old").responseData(),
+                "an older protected observation must retain its exact bytes before duplicate pruning");
+        assertNotEquals(ordinaryOutput, response(pruned, "ordinary-old").responseData(),
+                "ordinary older duplicates remain eligible for pre-request compaction");
+        assertTrue(response(pruned, "ordinary-old").responseData().contains("duplicate tool output omitted"));
+    }
+
     private ToolResultStorage storage() throws Exception {
         ToolResultProperties properties = new ToolResultProperties();
         properties.setEnabled(true);
