@@ -56,6 +56,20 @@ class BiddingArtifactTest {
     @MockBean BiddingAccess access;
     @MockBean vip.mate.llm.chatmodel.ProviderChatModelFactory providerFactory;
 
+    @Test void internalPreviewPreservesDeepHeadingTextButCandidateRejectsUnsupportedLevel() throws Exception {
+        var original=json.readTree("[{\"type\":\"heading\",\"level\":4,\"text\":\"第四级标题\"},{\"type\":\"paragraph\",\"text\":\"正文\"}]");
+        var candidate=original.deepCopy();
+        assertEquals("EXPORT_HEADING_UNSUPPORTED",assertThrows(BiddingApiException.class,
+                ()->artifacts.adjustPreviewHeadings(candidate,"candidate")).code());
+        assertEquals(original,candidate,"candidate rejection must not alter the manuscript");
+        var preview=original.deepCopy();
+        assertEquals(1,artifacts.adjustPreviewHeadings(preview,"preview"));
+        assertEquals(3,preview.get(0).path("level").asInt());
+        assertEquals("第四级标题",preview.get(0).path("text").asText());
+        assertEquals(original.get(1),preview.get(1));
+        assertEquals(4,original.get(0).path("level").asInt(),"stored manuscript remains unchanged");
+    }
+
     @Test void artifactVerifierAcceptsAuthorizedImagesAndRejectsMissingOrExtraImages() throws Exception {
         for(String imageFormat:List.of("png","jpeg")) {
             java.io.ByteArrayOutputStream imageBytes=new java.io.ByteArrayOutputStream();
@@ -401,6 +415,53 @@ class BiddingArtifactTest {
         BiddingApiException rejected=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(scope,
                 new BiddingTypes.Command("toc-pages-unsupported",json.convertValue(created.path("ref"),BiddingTypes.Ref.class),"PREPARE_EXPORT",json.createObjectNode())));
         assertEquals("EXPORT_FORMAT_UNSUPPORTED",rejected.code());
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind IN ('TEMPLATE','FORMAT_REQUIREMENTS')",Integer.class,scope.workspaceId(),scope.projectId()));
+    }
+
+    @Test void unsupportedMandatoryFormatCanPreparePreviewButCandidatePreparationFailsClosed() throws Exception {
+        doNothing().when(access).requireActor(any(),anyString());
+        doNothing().when(access).requireReaderActor(any(),anyString());
+        var created=projects.create(new BiddingTypes.Scope("1","preview-owner",null),new BiddingTypes.NewProject("preview-format-unsupported-"+UUID.randomUUID(),"format","lot","preview-owner"));
+        var scope=new BiddingTypes.Scope("1","preview-owner",created.path("id").asText());
+        var baseline=new BiddingTypes.Ref("analysisBaseline","current",1,"q".repeat(64));
+        var sourceSet=new BiddingTypes.Ref("sourceSet","current",1,"r".repeat(64));
+        saveRevision(scope,sourceSet,json.createObjectNode().put("schemaVersion","1"),List.of(),"CONFIRMED",true);
+        ObjectNode body=json.createObjectNode().put("schemaVersion","1");
+        var requirement=body.putObject("analyses").putObject("bidding-tender-profile").putArray("formatRequirements").addObject();
+        requirement.put("name","目录页码").put("value","必须显示");requirement.putArray("evidenceRefs");
+        saveRevision(scope,baseline,body,List.of(sourceSet),"CONFIRMED",true);
+        BiddingTypes.Ref projectRef=json.convertValue(created.path("ref"),BiddingTypes.Ref.class);
+
+        ObjectNode preview=artifacts.preparePreview(scope,new BiddingTypes.Command("prepare-preview",projectRef,"PREPARE_PREVIEW",json.createObjectNode()));
+        assertEquals("PREVIEW_ONLY",preview.path("status").asText());
+        ObjectNode template=artifacts.templates(scope).getFirst();
+        assertEquals("PREVIEW_ONLY",template.path("status").asText());
+        assertEquals(preview.path("templateRef"),template.path("ref"));
+        assertEquals(preview.path("formatRef"),template.path("formatRef"));
+        JsonNode pinnedFormat=repository.businessRevision(scope,json.convertValue(preview.path("formatRef"),BiddingTypes.Ref.class));
+        assertEquals("目录页码",pinnedFormat.path("requirements").get(0).path("name").asText());
+        assertEquals("必须显示",pinnedFormat.path("requirements").get(0).path("value").asText());
+        assertEquals("CONFIRMED",pinnedFormat.path("status").asText());
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='TEMPLATE'",Integer.class,scope.workspaceId(),scope.projectId()));
+
+        BiddingApiException candidate=assertThrows(BiddingApiException.class,()->artifacts.prepareExport(scope,
+                new BiddingTypes.Command("prepare-candidate",projectRef,"PREPARE_EXPORT",json.createObjectNode())));
+        assertEquals("EXPORT_FORMAT_UNSUPPORTED",candidate.code());
+        assertEquals("PREVIEW_ONLY",artifacts.templates(scope).getFirst().path("status").asText());
+    }
+
+    @Test void staleConfirmedBaselineCannotPreparePreviewOrPinFormat() throws Exception {
+        doNothing().when(access).requireActor(any(),anyString());
+        var created=projects.create(new BiddingTypes.Scope("1","preview-stale-owner",null),new BiddingTypes.NewProject("preview-stale-baseline-"+UUID.randomUUID(),"format","lot","preview-stale-owner"));
+        var scope=new BiddingTypes.Scope("1","preview-stale-owner",created.path("id").asText());
+        var baseline=new BiddingTypes.Ref("analysisBaseline","current",1,"s".repeat(64));
+        ObjectNode body=json.createObjectNode().put("schemaVersion","1");
+        body.putObject("analyses").putObject("bidding-tender-profile").putArray("formatRequirements");
+        saveRevision(scope,baseline,body,List.of(),"NEEDS_RECONFIRMATION",true);
+
+        BiddingApiException stale=assertThrows(BiddingApiException.class,()->artifacts.preparePreview(scope,
+                new BiddingTypes.Command("prepare-preview-stale",json.convertValue(created.path("ref"),BiddingTypes.Ref.class),"PREPARE_PREVIEW",json.createObjectNode())));
+        assertEquals("DEPENDENCY_NOT_CONFIRMED",stale.code());
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind IN ('TEMPLATE','FORMAT_REQUIREMENTS')",Integer.class,scope.workspaceId(),scope.projectId()));
     }
 

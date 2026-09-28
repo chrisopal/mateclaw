@@ -157,7 +157,7 @@ it.each([{action:'prepare',outcome:'resolve'},{action:'prepare',outcome:'reject'
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Review')) as HTMLElement).click();await flush()
-  const label=action==='prepare'?'Prepare export':'Generate candidate'
+  const label=action==='prepare'?'Validate formal format':'Generate candidate'
   ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes(label)) as HTMLButtonElement).click();await flush()
   expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:action==='prepare'?'PREPARE_EXPORT':'DISPATCH_EXPORT'}))
   harness.setWorkspaceId?.('ws-2');await flush()
@@ -168,6 +168,30 @@ it.each([{action:'prepare',outcome:'resolve'},{action:'prepare',outcome:'reject'
   expect(host.textContent).toContain('New workspace project')
   expect([...host.querySelectorAll('button')].some(button=>button.textContent?.includes('Project settings'))).toBe(true)
   expect(biddingApi.get).toHaveBeenCalledTimes(2)
+})
+
+it('dispatches preview export with pinned refs but keeps candidate disabled for preview-only format',async()=>{
+  const {manuscriptRef,templateRef,formatRef}=installReviewScopeFixtures()
+  vi.mocked(biddingApi.templates).mockResolvedValue([{name:'Technical v1',format:'docx',status:'PREVIEW_ONLY',ref:templateRef,formatRef}] as never)
+  vi.mocked(biddingApi.command).mockResolvedValue({} as never)
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Review')) as HTMLElement).click();await flush()
+  const candidate=[...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Generate candidate')) as HTMLButtonElement
+  expect(candidate.disabled).toBe(true)
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Generate internal preview')) as HTMLButtonElement).click();await flush()
+  expect(biddingApi.command).toHaveBeenCalledWith('ws-1','p1',expect.objectContaining({action:'DISPATCH_EXPORT',payload:{manuscriptRef,templateRef,formatRef,mode:'preview'}}))
+})
+
+it('explains an unsupported mandatory format without offering a formal candidate',async()=>{
+  installReviewScopeFixtures()
+  vi.mocked(biddingApi.command).mockRejectedValue({response:{status:422,data:{data:{code:'EXPORT_FORMAT_UNSUPPORTED'}}}})
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingWorkbench);app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  ;([...host.querySelectorAll('.el-tabs__item')].find(tab=>tab.textContent?.includes('Review')) as HTMLElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Validate formal format')) as HTMLButtonElement).click();await flush()
+  expect(host.textContent).toContain('cannot meet confirmed mandatory formatting')
+  expect(([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Generate candidate')) as HTMLButtonElement).disabled).toBe(true)
 })
 
 it('discards a pending approval-context response from the previous workspace',async()=>{

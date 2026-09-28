@@ -13,15 +13,31 @@ afterEach(()=>{app?.unmount();host?.remove();app=undefined;host=undefined;vi.cle
 const ref=(kind:string,id:string):Ref=>({kind,id,version:3,digest:`${id}-digest`})
 const artifact:ArtifactMetadata={artifactId:'artifact-1',filename:'Technical proposal.docx',mode:'candidate',status:'CANDIDATE',digest:'sha256-digest',byteSize:2048,manuscriptRef:ref('manuscript','ms-3'),templateRef:ref('template','template-3'),formatRef:ref('format','format-3'),formalAvailable:false}
 
-it('requires PREPARE_EXPORT before candidate generation and separates preview from candidate',async()=>{
+it('requires format validation before candidate generation and offers internal preview separately',async()=>{
   const prepare=vi.fn(),generate=vi.fn()
   host=document.createElement('div');document.body.append(host)
   app=createApp(BiddingArtifacts,{templates:[{name:'Technical template',status:'UNPREPARED',format:'docx'}],artifacts:[],loading:false,busy:false,canWrite:true,canApprove:true,onPrepare:prepare,onGenerate:generate})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   const candidate=[...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Generate candidate')) as HTMLButtonElement
   expect(candidate.disabled).toBe(true)
-  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Prepare export')) as HTMLButtonElement).click();await flush()
-  expect(prepare).toHaveBeenCalledOnce()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Prepare internal preview')) as HTMLButtonElement).click();await flush()
+  ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Validate formal format')) as HTMLButtonElement).click();await flush()
+  expect(prepare.mock.calls).toEqual([['preview'],['candidate']])
+})
+
+it('allows a preview-only pinned template for internal draft while keeping candidate disabled',async()=>{
+  const generate=vi.fn()
+  host=document.createElement('div');document.body.append(host)
+  app=createApp(BiddingArtifacts,{templates:[{name:'Technical template',status:'PREVIEW_ONLY',format:'docx',ref:ref('template','t'),formatRef:ref('format','f')}],artifacts:[],loading:false,busy:false,canWrite:true,canApprove:true,onGenerate:generate})
+  app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
+  const buttons=[...host.querySelectorAll('button')]
+  const preview=buttons.find(button=>button.textContent?.includes('Generate internal preview')) as HTMLButtonElement
+  const candidate=buttons.find(button=>button.textContent?.includes('Generate candidate')) as HTMLButtonElement
+  expect(preview.disabled).toBe(false)
+  expect(candidate.disabled).toBe(true)
+  expect(host.textContent).toContain('cannot be approved or formally delivered')
+  preview.click();await flush()
+  expect(generate).toHaveBeenCalledWith('preview')
 })
 
 it('does not expose candidate approval to a project member without approval capability',async()=>{
@@ -35,9 +51,10 @@ it('does not expose candidate approval to a project member without approval capa
 it('downloads preview mode without exposing approval',async()=>{
   const download=vi.fn()
   host=document.createElement('div');document.body.append(host)
-  app=createApp(BiddingArtifacts,{templates:[{name:'Technical template',status:'PREPARED',format:'docx',ref:ref('template','t'),formatRef:ref('format','f')}],artifacts:[{...artifact,mode:'preview',status:'PREVIEW'}],loading:false,busy:false,canWrite:true,canApprove:true,onDownload:download})
+  app=createApp(BiddingArtifacts,{templates:[{name:'Technical template',status:'PREPARED',format:'docx',ref:ref('template','t'),formatRef:ref('format','f')}],artifacts:[{...artifact,mode:'preview',status:'PREVIEW',checks:{previewHeadingLevelsAdjusted:9}}],loading:false,busy:false,canWrite:true,canApprove:true,onDownload:download})
   app.use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':en}})).mount(host);await flush()
   expect(host.textContent).toContain('Preview')
+  expect(host.textContent).toContain('Adjusted 9 deep headings')
   ;([...host.querySelectorAll('button')].find(button=>button.textContent?.includes('Download preview')) as HTMLButtonElement).click();await flush()
   expect(download).toHaveBeenCalledWith(expect.objectContaining({artifactId:'artifact-1'}),'preview')
   expect([...host.querySelectorAll('button')].some(button=>button.textContent?.includes('Approve this file'))).toBe(false)

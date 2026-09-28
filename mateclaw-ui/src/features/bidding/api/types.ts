@@ -26,8 +26,8 @@ export interface BiddingReviewFinding {
 }
 export interface BiddingHumanTodo { ref: Ref; title: string; status: string; impactClassification: string; affectsTechnical?: boolean; evidenceRefs?: Record<string, unknown>[] }
 export interface BiddingReviewView { manuscriptRef?: Ref; reviewKey?: string; status: string; reason?: string; tasks: Record<string, unknown>[]; findings: BiddingReviewFinding[]; humanTodos: BiddingHumanTodo[]; coverage?: { chapterIds: string[]; requirementIds: string[]; expectedChapterIds: string[]; expectedRequirementIds: string[]; crossChapterReviewed: boolean } }
-export interface ExportTemplate { id?: string; name: string; status: 'PREPARED' | 'UNPREPARED' | string; ref?: Ref; formatRef?: Ref; format?: string }
-export interface ArtifactMetadata { artifactId: string; filename?: string; mode: 'candidate' | 'preview' | string; status: 'CANDIDATE' | 'PREVIEW' | 'APPROVED' | 'STALE' | string; digest?: string; byteSize?: number; manuscriptRef?: Ref; templateRef?: Ref; formatRef?: Ref; [key: string]: unknown }
+export interface ExportTemplate { id?: string; name: string; status: 'PREPARED' | 'PREVIEW_ONLY' | 'UNPREPARED' | string; ref?: Ref; formatRef?: Ref; format?: string }
+export interface ArtifactMetadata { artifactId: string; filename?: string; mode: 'candidate' | 'preview' | string; status: 'CANDIDATE' | 'PREVIEW' | 'APPROVED' | 'STALE' | string; digest?: string; byteSize?: number; manuscriptRef?: Ref; templateRef?: Ref; formatRef?: Ref; checks?: { previewHeadingLevelsAdjusted?: number; [key: string]: unknown }; [key: string]: unknown }
 export interface ArtifactApprovalContext extends ArtifactMetadata { manuscriptRef: Ref; templateRef: Ref; formatRef: Ref; status: 'READY' | 'BLOCKED' | 'STALE' | 'NOT_APPROVABLE' | string; artifactRef?: Ref; reviewRef?: Ref; reviewEvidence?: Record<string, unknown>; reasonCode?: string }
 export interface AnalysisView { baseline?: { ref: Ref; status: string; payload: AnalysisBaseline }; groups: AnalysisGroup[] }
 export interface AnalysisBaseline { schemaVersion: string; taskGroupId: string; analyses: Record<string, AnalysisPayload>; conflicts: unknown[]; [key: string]: unknown }

@@ -65,7 +65,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
         BiddingTypes.Ref format=repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current");
         ObjectNode value=json.createObjectNode().put("id","technical-v1").put("name","Technical proposal v1");
         if(ref!=null&&format!=null&&repository.businessRevision(scope,ref)!=null&&repository.businessRevision(scope,format)!=null) {
-            value.put("status","PREPARED");value.set("ref",json.valueToTree(ref));value.set("formatRef",json.valueToTree(format));
+            value.put("status",isPreviewOnlyFormat(scope,format)?"PREVIEW_ONLY":"PREPARED");value.set("ref",json.valueToTree(ref));value.set("formatRef",json.valueToTree(format));
             value.put("format","docx");
         } else value.put("status","UNPREPARED");
         return List.of(value);
@@ -73,9 +73,18 @@ public class BiddingArtifactService implements BiddingResultHandler {
 
     @Transactional
     public ObjectNode prepareExport(BiddingTypes.Scope scope,BiddingTypes.Command command) {
+        return prepare(scope,command,"PREPARE_EXPORT",false);
+    }
+
+    @Transactional
+    public ObjectNode preparePreview(BiddingTypes.Scope scope,BiddingTypes.Command command) {
+        return prepare(scope,command,"PREPARE_PREVIEW",true);
+    }
+
+    private ObjectNode prepare(BiddingTypes.Scope scope,BiddingTypes.Command command,String action,boolean preview) {
         access.requireActor(scope,scope.actorId());
-        if(command==null||command.payload()==null||!"PREPARE_EXPORT".equals(command.action())||command.operationId()==null||command.operationId().isBlank()||command.operationId().length()>128||command.expected()==null)
-            throw BiddingAccess.error(400,"INVALID_REQUEST","PREPARE_EXPORT requires expected project ref and operationId");
+        if(command==null||command.payload()==null||!action.equals(command.action())||command.operationId()==null||command.operationId().isBlank()||command.operationId().length()>128||command.expected()==null)
+            throw BiddingAccess.error(400,"INVALID_REQUEST",action+" requires expected project ref and operationId");
         only(command.payload(),Set.of());
         if(!repository.lockProject(scope.workspaceId(),scope.projectId()))throw BiddingAccess.error(404,"NOT_FOUND","Project not found");
         String requestDigest=sha(canonical(json.valueToTree(Map.of("action",command.action(),"expected",command.expected(),"payload",command.payload()))));
@@ -86,8 +95,9 @@ public class BiddingArtifactService implements BiddingResultHandler {
         }
         ObjectNode project=projects.get(scope);BiddingTypes.Ref current=parseRef(project.path("ref"));
         if(!Objects.equals(current,command.expected()))throw BiddingAccess.error(409,"VERSION_CONFLICT","Project changed; reload before export preparation");
-        BiddingTypes.Ref template=ensureTemplate(scope),format=ensureFormat(scope);
-        ObjectNode result=json.createObjectNode().put("status","PREPARED");result.set("templateRef",json.valueToTree(template));result.set("formatRef",json.valueToTree(format));
+        BiddingTypes.Ref template=ensureTemplate(scope),format=preview?ensurePreviewFormat(scope):ensureFormat(scope);
+        if(!preview)validateFormat(scope,format);
+        ObjectNode result=json.createObjectNode().put("status",preview&&isPreviewOnlyFormat(scope,format)?"PREVIEW_ONLY":"PREPARED");result.set("templateRef",json.valueToTree(template));result.set("formatRef",json.valueToTree(format));
         repository.insertOperation(scope.workspaceId(),scope.actorId(),command.operationId(),requestDigest,"{}",Timestamp.from(Instant.now()));
         repository.updateOperation(scope.workspaceId(),scope.actorId(),command.operationId(),write(result));
         return result;
@@ -110,9 +120,11 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(template==null||format==null)throw BiddingAccess.error(422,"EXPORT_REFS_REQUIRED","Prepare export and provide exact template and format references");
         if(!template.equals(repository.selectedRef(scope,"TEMPLATE","technical-v1"))||repository.businessRevision(scope,template)==null) throw BiddingAccess.error(409,"TEMPLATE_STALE","Selected template is not the prepared current template");
         if(!format.equals(repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current"))||repository.businessRevision(scope,format)==null) throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_STALE","Selected format requirements are not the prepared current revision");
-        validateFormat(scope,format);
+        if("candidate".equals(mode)) validateFormat(scope,format);
+        else validateFormatFacts(scope,format);
         List<BiddingTypes.Ref> refs=List.of(manuscript,template,format);
         dependencies.validate(scope,refs);
+        renderInput(scope,row,mode);
         String skillId=exportSkillId(project,scope);
         ObjectNode input=json.createObjectNode().put("schemaVersion","1").put("skillId",SKILL).put("mode",mode);
         input.set("manuscriptRef",json.valueToTree(manuscript)); input.set("templateRef",json.valueToTree(template)); input.set("formatRef",json.valueToTree(format));
@@ -133,7 +145,9 @@ public class BiddingArtifactService implements BiddingResultHandler {
         if(row==null||!claim.attemptId().equals(row.attemptId())||!"STAGED".equals(row.status())||!manuscript.equals(row.manuscript())||!template.equals(row.template())||!format.equals(row.formatRef())) throw BiddingAccess.error(409,"ARTIFACT_UNAVAILABLE","Generated artifact is not staged for this task attempt");
         ObjectNode storedChecks=read(row.checks());
         if(!"docx".equals(payload.path("format").asText())||!row.digest().equals(payload.path("digest").asText())||row.size()!=payload.path("byteSize").asLong(-1)||!row.mode().equals(payload.path("mode").asText())||!"STAGED".equals(payload.path("status").asText())||!payload.path("checks").isObject()||!storedChecks.equals(payload.path("checks"))) throw BiddingAccess.error(422,"ARTIFACT_MANIFEST_INVALID","Tool manifest does not match stored bytes");
-        ObjectNode checks=verify(row.bytes(),renderInput(claim.scope(),loadManuscript(claim.scope(),manuscript)));
+        RenderDocument rendered=renderInput(claim.scope(),loadManuscript(claim.scope(),manuscript),row.mode());
+        ObjectNode checks=verify(row.bytes(),rendered.document());
+        if(rendered.adjustedHeadingCount()>0)checks.put("previewHeadingLevelsAdjusted",rendered.adjustedHeadingCount());
         if(!row.digest().equals(sha(row.bytes()))||row.size()!=row.bytes().length) throw BiddingAccess.error(422,"ARTIFACT_INTEGRITY_FAILED","Candidate bytes do not match their manifest");
         String terminal="preview".equals(row.mode())?"PREVIEW":"CANDIDATE";
         jdbc.update("UPDATE mate_bidding_artifact SET status=?,checks_json=? WHERE workspace_id=? AND project_id=? AND id=? AND generator_attempt_id=? AND status='STAGED'",terminal,write(checks),claim.scope().workspaceId(),claim.scope().projectId(),artifactId,claim.attemptId());
@@ -149,14 +163,18 @@ public class BiddingArtifactService implements BiddingResultHandler {
         dependencies.validate(claim.scope(),claim.inputRefs());
         Artifact prior=artifactByAttempt(claim.attemptId()); if(prior!=null) return manifest(prior,mode);
         ObjectNode manuscript=loadManuscript(claim.scope(),manuscriptRef);
-        ObjectNode renderInput=renderInput(claim.scope(),manuscript);
+        RenderDocument rendered=renderInput(claim.scope(),manuscript,mode);
+        ObjectNode renderInput=rendered.document();
         ObjectNode template=readTemplate(claim.scope(),templateRef);
-        validateFormat(claim.scope(),formatRef);
+        if("candidate".equals(mode)) validateFormat(claim.scope(),formatRef);
+        else validateFormatFacts(claim.scope(),formatRef);
         byte[] bytes=renderer.render(renderInput,template,Map.of());
         if(bytes.length>artifactLimitBytes) throw BiddingAccess.error(413,"ARTIFACT_SIZE_LIMIT","DOCX candidate exceeds 50 MiB");
         Long used=jdbc.queryForObject("SELECT COALESCE(SUM(byte_size),0) FROM mate_bidding_artifact WHERE workspace_id=? AND project_id=?",Long.class,claim.scope().workspaceId(),claim.scope().projectId());
         if((used==null?0:used)+bytes.length>projectCapacityBytes) throw BiddingAccess.error(413,"PROJECT_ARTIFACT_CAPACITY","Project candidate capacity is exhausted");
-        ObjectNode checks=verify(bytes,renderInput); String digest=sha(bytes),id=UUID.randomUUID().toString();
+        ObjectNode checks=verify(bytes,renderInput);
+        if(rendered.adjustedHeadingCount()>0)checks.put("previewHeadingLevelsAdjusted",rendered.adjustedHeadingCount());
+        String digest=sha(bytes),id=UUID.randomUUID().toString();
         jdbc.update("INSERT INTO mate_bidding_artifact(workspace_id,project_id,id,manuscript_ref_json,template_ref_json,format_ref_json,mode,format,digest,byte_size,content,checks_json,generator_attempt_id,status,decision_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'STAGED',NULL,?)",
                 claim.scope().workspaceId(),claim.scope().projectId(),id,write(manuscriptRef),write(templateRef),write(formatRef),mode,"docx",digest,bytes.length,bytes,write(checks),claim.attemptId(),Timestamp.from(Instant.now()));
         return manifest(artifact(claim.scope(),id),mode);
@@ -433,15 +451,44 @@ public class BiddingArtifactService implements BiddingResultHandler {
         repository.insertRevision(UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),"FORMAT_REQUIREMENTS","current",version,body,write(List.of(baseline)),"CONFIRMED",digest,Timestamp.from(Instant.now()));
         BiddingTypes.Ref next=new BiddingTypes.Ref("FORMAT_REQUIREMENTS","current",version,digest);if(current==null)createHead(scope,next);else advanceHead(scope,current,next);return next;
     }
+    /** Pins the confirmed tender facts for an internal preview without claiming renderer support. */
+    private BiddingTypes.Ref ensurePreviewFormat(BiddingTypes.Scope scope) {
+        BiddingTypes.Ref current=repository.selectedRef(scope,"FORMAT_REQUIREMENTS","current");
+        BiddingTypes.Ref baseline=repository.selectedRef(scope,"analysisBaseline","current");
+        if(baseline==null) throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_UNAVAILABLE","Confirmed tender format requirements are unavailable");
+        dependencies.validate(scope,List.of(baseline));
+        if(current!=null&&repository.businessRevision(scope,current)!=null) {
+            List<BiddingTypes.Ref> refs=repository.businessRefs(repository.businessRevision(scope,current));
+            if(refs.contains(baseline)) { dependencies.validate(scope,List.of(current)); validateFormatFacts(scope,current); return current; }
+        }
+        ObjectNode baselineBody=repository.businessRevision(scope,baseline);JsonNode facts=baselineBody.path("analyses").path("bidding-tender-profile").path("formatRequirements");
+        if(!facts.isArray()) throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_UNAVAILABLE","Confirmed tender format requirements are unavailable");
+        ArrayNode requirements=json.createArrayNode();
+        for(JsonNode fact:facts) { ObjectNode item=requirements.addObject();item.put("name",fact.path("name").asText());item.put("value",fact.path("value").asText(""));item.put("mandatory",true);item.set("evidenceRefs",fact.path("evidenceRefs").deepCopy()); }
+        validateRequirementShape(requirements);
+        ObjectNode payload=json.createObjectNode().put("schemaVersion","1");payload.set("requirements",requirements);
+        String body=canonical(payload),digest=sha(body);long version=repository.nextRevisionVersion(scope,"FORMAT_REQUIREMENTS","current");
+        repository.insertRevision(UUID.randomUUID().toString(),scope.workspaceId(),scope.projectId(),"FORMAT_REQUIREMENTS","current",version,body,write(List.of(baseline)),"CONFIRMED",digest,Timestamp.from(Instant.now()));
+        BiddingTypes.Ref next=new BiddingTypes.Ref("FORMAT_REQUIREMENTS","current",version,digest);if(current==null)createHead(scope,next);else advanceHead(scope,current,next);return next;
+    }
     private void validateFormat(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
         ObjectNode revision=repository.businessRevision(scope,ref);if(revision==null||!revision.path("requirements").isArray())throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_STALE","Format requirements are no longer available");
         validateRequirements(revision.path("requirements"));
     }
+    private void validateFormatFacts(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        ObjectNode revision=repository.businessRevision(scope,ref);if(revision==null||!revision.path("requirements").isArray())throw BiddingAccess.error(409,"FORMAT_REQUIREMENTS_STALE","Format requirements are no longer available");
+        validateRequirementShape(revision.path("requirements"));
+    }
+    private boolean isPreviewOnlyFormat(BiddingTypes.Scope scope,BiddingTypes.Ref ref) {
+        try { validateFormat(scope,ref); return false; }
+        catch(BiddingApiException unsupported) {
+            if("EXPORT_FORMAT_UNSUPPORTED".equals(unsupported.code())) return true;
+            throw unsupported;
+        }
+    }
     private void validateRequirements(JsonNode requirements) {
-        if(!requirements.isArray())throw BiddingAccess.error(422,"FORMAT_REQUIREMENTS_INVALID","Requirements must be an array");
+        validateRequirementShape(requirements);
         for(JsonNode item:requirements) {
-            if(!item.isObject()||!item.path("name").isTextual()||!item.path("value").isTextual())
-                throw BiddingAccess.error(422,"FORMAT_REQUIREMENTS_INVALID","Each format requirement needs a name and explicit value");
             String name=item.path("name").asText().toLowerCase(Locale.ROOT).replaceAll("\\s+","");
             String value=item.path("value").asText().toLowerCase(Locale.ROOT).replaceAll("\\s+","");
             if(!item.path("mandatory").asBoolean(true))continue;
@@ -452,7 +499,14 @@ public class BiddingArtifactService implements BiddingResultHandler {
             if(!supported)throw BiddingAccess.error(422,"EXPORT_FORMAT_UNSUPPORTED","Mandatory tender format requirement is not supported by technical-v1");
         }
     }
-    private ObjectNode renderInput(BiddingTypes.Scope scope,ObjectNode manuscript) {
+    private void validateRequirementShape(JsonNode requirements) {
+        if(!requirements.isArray())throw BiddingAccess.error(422,"FORMAT_REQUIREMENTS_INVALID","Requirements must be an array");
+        for(JsonNode item:requirements) {
+            if(!item.isObject()||!item.path("name").isTextual()||!item.path("value").isTextual())
+                throw BiddingAccess.error(422,"FORMAT_REQUIREMENTS_INVALID","Each format requirement needs a name and explicit value");
+        }
+    }
+    private RenderDocument renderInput(BiddingTypes.Scope scope,ObjectNode manuscript,String mode) {
         ObjectNode input=json.createObjectNode().put("title",manuscript.path("title").asText("技术标"));ArrayNode output=input.putArray("chapters");
         ObjectNode outline=repository.businessRevision(scope,parseRef(manuscript.path("outlineRef")));
         if(outline==null)throw BiddingAccess.error(409,"MANUSCRIPT_STALE","Frozen outline is unavailable");
@@ -465,15 +519,28 @@ public class BiddingArtifactService implements BiddingResultHandler {
             resolved.add(new ResolvedChapter(chapter,body,path));
         }
         resolved.sort((left,right)->compareOutlineOrder(left.path(),right.path()));
-        List<JsonNode> lastAncestors=List.of();
+        List<JsonNode> lastAncestors=List.of();int adjustedHeadingCount=0;
         for(ResolvedChapter entry:resolved) {
             List<JsonNode> path=entry.path();int common=0;
             while(common<lastAncestors.size()&&common<path.size()-1&&sameOutlineNode(lastAncestors.get(common),path.get(common)))common++;
             for(int i=common;i<path.size()-1;i++) { JsonNode node=path.get(i);ObjectNode heading=output.addObject().put("title",node.path("title").asText());heading.put("level",Math.min(3,i+1));heading.putArray("blocks"); }
             ObjectNode leaf=output.addObject().put("title",entry.body().path("title").asText(path.getLast().path("title").asText()));leaf.put("level",Math.min(3,path.size()));leaf.set("blocks",entry.body().path("blocks").deepCopy());
+            adjustedHeadingCount+=adjustPreviewHeadings(leaf.path("blocks"),mode);
             lastAncestors=List.copyOf(path.subList(0,path.size()-1));
         }
-        return input;
+        return new RenderDocument(input,adjustedHeadingCount);
+    }
+    private record RenderDocument(ObjectNode document,int adjustedHeadingCount) {}
+    int adjustPreviewHeadings(JsonNode blocks,String mode) {
+        int adjusted=0;
+        for(JsonNode block:blocks) {
+            if(!"heading".equals(block.path("type").asText()))continue;
+            int level=block.path("level").asInt(0);
+            if(level>=1&&level<=3)continue;
+            if(!"preview".equals(mode)||level<1)throw BiddingAccess.error(422,"EXPORT_HEADING_UNSUPPORTED","Manuscript heading level is outside the DOCX template bounds");
+            ((ObjectNode)block).put("level",3);adjusted++;
+        }
+        return adjusted;
     }
     private int compareOutlineOrder(List<JsonNode> left,List<JsonNode> right) {
         for(int i=0;i<Math.min(left.size(),right.size());i++) {

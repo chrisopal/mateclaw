@@ -47,8 +47,6 @@ export const biddingApi = {
   templates: (ws: string, id: string, signal?: AbortSignal) => request<ExportTemplate[]>(ws, { url: `${projectPath(id)}/templates` }, signal),
   artifact: (ws: string, id: string, artifactId: string, signal?: AbortSignal) => request<ArtifactMetadata>(ws, { url: `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}` }, signal),
   approvalContext: (ws: string, id: string, artifactId: string, signal?: AbortSignal) => request<ArtifactApprovalContext>(ws, { url: `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/approval-context` }, signal),
-  download: async (ws: string, id: string, artifactId: string, mode: 'candidate'|'preview'|'formal', signal?: AbortSignal): Promise<Blob> => {
-    const response = await http.get<unknown, { data: Blob }>(`${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/content`, { ...scopedConfig(ws, signal), params: { mode }, responseType: 'blob' })
-    return response.data
-  },
+  download: (ws: string, id: string, artifactId: string, mode: 'candidate'|'preview'|'formal', signal?: AbortSignal): Promise<Blob> =>
+    http.get<unknown, Blob>(`${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/content`, { ...scopedConfig(ws, signal), params: { mode }, responseType: 'blob' }),
 }

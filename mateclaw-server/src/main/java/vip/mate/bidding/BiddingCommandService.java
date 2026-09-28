@@ -64,6 +64,7 @@ public class BiddingCommandService {
             case "REVISE_CHAPTER" -> writing.getObject().revise(scope,command);
             case "DISPATCH_EXPORT" -> artifacts.getObject().dispatch(scope,command);
             case "PREPARE_EXPORT" -> artifacts.getObject().prepareExport(scope,command);
+            case "PREPARE_PREVIEW" -> artifacts.getObject().preparePreview(scope,command);
             case "APPROVE_ARTIFACT" -> approvals.getObject().approve(scope,command);
             case "SAVE_FORMAT_REQUIREMENTS" -> artifacts.getObject().saveFormatRequirements(scope,command);
             case "CONFIRM_CHANGE_IMPACT" -> dependencies.reconfirm(scope,command);
