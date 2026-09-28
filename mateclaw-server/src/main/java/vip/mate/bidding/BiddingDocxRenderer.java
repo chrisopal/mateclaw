@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class BiddingDocxRenderer {
     private static final String FONT = "宋体";
+    static final String TOC_INSTRUCTION = " TOC \\o \"1-3\" \\h \\z ";
 
     public byte[] render(ObjectNode manuscript, ObjectNode template, Map<String, byte[]> authorizedImages) {
         validateTemplate(template);
@@ -29,6 +30,7 @@ public final class BiddingDocxRenderer {
         only(manuscript, java.util.Set.of("title", "chapters"));
         try (XWPFDocument doc = new XWPFDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             doc.getProperties().getCoreProperties().setTitle(manuscript.path("title").asText());
+            doc.getSettings().setUpdateFields();
             configurePage(doc);
             configureStyles(doc);
             List<Heading> headings = collectHeadings(manuscript);
@@ -184,7 +186,7 @@ public final class BiddingDocxRenderer {
         if (headings.isEmpty()) {
             XWPFParagraph field=doc.createParagraph();field.setStyle("TOC1");
             XWPFRun begin=field.createRun();begin.getCTR().addNewFldChar().setFldCharType(STFldCharType.BEGIN);
-            XWPFRun instr=field.createRun();instr.getCTR().addNewInstrText().setStringValue(" TOC \\o \"1-3\" \\h \\z \\n ");
+            XWPFRun instr=field.createRun();instr.getCTR().addNewInstrText().setStringValue(TOC_INSTRUCTION);
             XWPFRun separate=field.createRun();separate.getCTR().addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
             setRun(field.createRun(), "暂无章节目录", false);
             field.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.END);
@@ -194,7 +196,7 @@ public final class BiddingDocxRenderer {
             Heading heading=headings.get(i);XWPFParagraph entry=doc.createParagraph();entry.setStyle("TOC"+heading.level());
             if(i==0) {
                 entry.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.BEGIN);
-                entry.createRun().getCTR().addNewInstrText().setStringValue(" TOC \\o \"1-3\" \\h \\z \\n ");
+                entry.createRun().getCTR().addNewInstrText().setStringValue(TOC_INSTRUCTION);
                 entry.createRun().getCTR().addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
             }
             CTHyperlink hyperlink=entry.getCTP().addNewHyperlink();hyperlink.setAnchor(bookmarkName(i));

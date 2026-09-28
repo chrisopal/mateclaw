@@ -191,7 +191,9 @@ class BiddingArtifactTest {
         assertEquals(manifest.path("byteSize").asLong(),persisted.length);
         assertEquals(manifest.path("digest").asText(),HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(persisted)));
         ObjectNode expectedDocument=expectedDocument();
-        assertEquals("PASS",artifacts.verify(persisted,expectedDocument).path("structural").asText());
+        ObjectNode verified=artifacts.verify(persisted,expectedDocument);
+        assertEquals("PASS",verified.path("structural").asText());
+        assertEquals("NOT_VERIFIED",verified.path("tocPageNumbers").asText());
         assertDocxRejected(persisted,expectedDocument,doc->{
             var earlyText=doc.getParagraphs().stream().filter(p->"先行实施措施".equals(p.getText())).findFirst().orElseThrow();
             var leafText=doc.getParagraphs().stream().filter(p->"确保现场安全".equals(p.getText())).findFirst().orElseThrow();
@@ -202,6 +204,8 @@ class BiddingArtifactTest {
         assertDocxRejected(persisted,expectedDocument,doc->doc.getTables().getFirst().getRow(1).getCell(1).getParagraphs().getFirst().getRuns().getFirst().setText("3秒",0));
         assertDocxRejected(persisted,expectedDocument,doc->{var toc=doc.getParagraphs().stream().filter(p->"TOC1".equals(p.getStyle())).findFirst().orElseThrow();toc.getRuns().getLast().setText("伪造目录",0);});
         assertDocxRejected(persisted,expectedDocument,doc->{var toc=doc.getParagraphs().stream().filter(p->p.getStyle()!=null&&p.getStyle().matches("TOC[1-3]")).findFirst().orElseThrow();toc.getCTP().getHyperlinkArray(0).setAnchor("missing-bookmark");});
+        assertDocxRejected(persisted,expectedDocument,doc->doc.getSettings().getCTSettings().unsetUpdateFields());
+        assertDocxRejected(persisted,expectedDocument,doc->{var toc=doc.getParagraphs().stream().filter(p->p.getStyle()!=null&&p.getStyle().matches("TOC[1-3]")).findFirst().orElseThrow();toc.getRuns().stream().flatMap(run->run.getCTR().getInstrTextList().stream()).findFirst().orElseThrow().setStringValue(" TOC \\o \"1-1\" \\h \\z ");});
         try(var empty=new org.apache.poi.xwpf.usermodel.XWPFDocument();var bytes=new java.io.ByteArrayOutputStream()) { empty.write(bytes);assertThrows(BiddingApiException.class,()->artifacts.verify(bytes.toByteArray(),expectedDocument)); }
         BiddingApiException external=assertThrows(BiddingApiException.class,()->artifacts.verify(withExternalRelationship(persisted),expectedDocument));
         assertEquals("ARTIFACT_EXTERNAL_RELATIONSHIP",external.code());

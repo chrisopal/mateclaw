@@ -258,7 +258,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
             validatePackageSafety(bytes);
             int expectedImages=countImageBlocks(manuscript);
             if(doc.getAllPictures().size()!=expectedImages) throw BiddingAccess.error(422,"ARTIFACT_CONTENT_MISMATCH","DOCX image content does not match the manuscript");
-            ObjectNode checks=json.createObjectNode().put("structural","PASS").put("visualPageInspection","NOT_RUN").put("allManuscriptTextPresent",true).put("externalRelationships",false).put("validZipDocx",true);
+            ObjectNode checks=json.createObjectNode().put("structural","PASS").put("visualPageInspection","NOT_RUN").put("tocPageNumbers","NOT_VERIFIED").put("allManuscriptTextPresent",true).put("externalRelationships",false).put("validZipDocx",true);
             checks.put("digest",sha(bytes)); checks.put("byteSize",bytes.length); return checks;
         } catch(BiddingApiException e) { throw e; }
         catch(Exception e) { throw BiddingAccess.error(422,"ARTIFACT_DOCX_INVALID","Candidate bytes are not a readable DOCX"); }
@@ -324,6 +324,11 @@ public class BiddingArtifactService implements BiddingResultHandler {
     }
 
     private int verifyToc(XWPFDocument doc,List<ExpectedHeading> headings) {
+        var settings=doc.getSettings().getCTSettings();
+        if(!settings.isSetUpdateFields()||!Set.of("on","true","1").contains(String.valueOf(settings.getUpdateFields().getVal())))contentMismatch();
+        List<String> instructions=doc.getParagraphs().stream().flatMap(paragraph->paragraph.getRuns().stream())
+                .flatMap(run->run.getCTR().getInstrTextList().stream()).map(text->text.getStringValue()).toList();
+        if(!instructions.equals(List.of(BiddingDocxRenderer.TOC_INSTRUCTION)))contentMismatch();
         List<IBodyElement> body=doc.getBodyElements();
         int entries=headings.isEmpty()?1:headings.size();
         int start=1+entries;
@@ -342,7 +347,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
             if(field.getElementType()!=BodyElementType.PARAGRAPH)contentMismatch();
             var paragraph=(org.apache.poi.xwpf.usermodel.XWPFParagraph)field;
             String xml=paragraph.getCTP().xmlText();String lower=xml.toLowerCase(Locale.ROOT);
-            if(!"TOC1".equals(paragraph.getStyle())||!"暂无章节目录".equals(paragraph.getText())||!xml.contains(" TOC ")||!xml.contains("\\n")
+            if(!"TOC1".equals(paragraph.getStyle())||!"暂无章节目录".equals(paragraph.getText())
                     ||!lower.contains("fldchartype=\"begin\"")||!lower.contains("fldchartype=\"separate\"")||!lower.contains("fldchartype=\"end\""))contentMismatch();
             return start;
         }
@@ -356,7 +361,7 @@ public class BiddingArtifactService implements BiddingResultHandler {
             if(!("TOC"+heading.level()).equals(paragraph.getStyle())||!heading.text().equals(paragraph.getText())||links.size()!=1
                     ||!expectedBookmark.equals(links.getFirst().getAnchor())||links.getFirst().getId()!=null
                     ||!bookmarkNames.add(expectedBookmark))contentMismatch();
-            if(i==0&&(!xml.contains(" TOC ")||!xml.contains("\\n")||!lower.contains("fldchartype=\"begin\"")||!lower.contains("fldchartype=\"separate\"")))contentMismatch();
+            if(i==0&&(!lower.contains("fldchartype=\"begin\"")||!lower.contains("fldchartype=\"separate\"")))contentMismatch();
             if(i==headings.size()-1&&!lower.contains("fldchartype=\"end\""))contentMismatch();
         }
         return start;

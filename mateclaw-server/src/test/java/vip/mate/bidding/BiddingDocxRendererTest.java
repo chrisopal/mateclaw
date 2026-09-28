@@ -84,7 +84,8 @@ class BiddingDocxRendererTest {
             assertFalse(paragraphs.stream().anyMatch(p -> p.getText().contains("在 Word 中更新目录")));
             String instruction = paragraphs.stream().flatMap(p -> p.getRuns().stream())
                     .map(r -> r.getCTR().xmlText()).filter(xml -> xml.contains("TOC ")).findFirst().orElseThrow();
-            assertTrue(instruction.contains("\\n"), "cached directory must not claim unverified page numbers");
+            assertFalse(instruction.contains("\\n"), "TOC field should allow page numbers after refresh");
+            assertTrue(zipEntry(bytes,"word/settings.xml").contains("updateFields"), "compatible editors should refresh the TOC on open");
             var bookmarks = document.getParagraphs().stream().flatMap(p -> p.getCTP().getBookmarkStartList().stream())
                     .map(start -> start.getName()).toList();
             var anchors = toc.stream().flatMap(p -> p.getCTP().getHyperlinkList().stream()).map(link -> link.getAnchor()).toList();
