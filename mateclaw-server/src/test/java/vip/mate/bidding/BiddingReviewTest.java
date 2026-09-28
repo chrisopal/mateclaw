@@ -116,14 +116,20 @@ class BiddingReviewTest extends BiddingHttpFixture {
         assertEquals(1,sources.readPending(2));
         BiddingTypes.Ref original=json.treeToValue(originalUpload.path("ref"),BiddingTypes.Ref.class);
         BiddingTypes.Ref originalSet=confirmSourceSet(scope,null,List.of(original),"select-original-todo-source");
+        ObjectNode baselineBody=json.createObjectNode();baselineBody.set("sourceSetRef",json.valueToTree(originalSet));
+        BiddingTypes.Ref baseline=save(scope,new BiddingTypes.Ref("analysisBaseline","current",1,"todo-baseline-digest"),
+                baselineBody,List.of(originalSet),"CONFIRMED");
+        jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",
+                workspace,project.path("id").asText(),"analysisBaseline","current",baseline.version(),json.writeValueAsString(baseline));
         JsonNode originalBlock=sourceBlock(scope,original);
 
         ObjectNode todo=json.createObjectNode().put("todoId","COMM-REPLACED").put("title","Confirm pricing basis")
                 .put("ownerId",scope.actorId()).put("status","OPEN").put("impactClassification","UNCLASSIFIED");
+        todo.set("baselineRef",json.valueToTree(baseline));
         todo.putArray("sourceRefs").add(json.valueToTree(original));
         todo.putArray("evidenceRefs").addObject().put("sourceId",original.id()).put("version",original.version())
                 .put("blockId",originalBlock.path("id").asText()).put("quote",originalBlock.path("text").asText());
-        BiddingTypes.Ref todoRef=save(scope,new BiddingTypes.Ref("HUMAN_TODO","todo-original-source",1,"todo-original-digest"),todo,List.of(original),"OPEN");
+        BiddingTypes.Ref todoRef=save(scope,new BiddingTypes.Ref("HUMAN_TODO","todo-original-source",1,"todo-original-digest"),todo,List.of(baseline,original),"OPEN");
         ObjectNode classify=json.createObjectNode().set("todoRef",json.valueToTree(todoRef));
         classify.put("affectsTechnical",false).put("reason","business-only owner confirmation");
         classify.putArray("evidenceRefs").addObject().put("sourceId",original.id()).put("version",original.version())
@@ -138,6 +144,8 @@ class BiddingReviewTest extends BiddingHttpFixture {
         BiddingTypes.Ref replacementSet=confirmSourceSet(scope,originalSet,List.of(replacement),"select-replacement-todo-source");
         JsonNode replacementBlock=sourceBlock(scope,replacement);
         assertDoesNotThrow(()->dependencies.validate(scope,List.of(replacement)),"replacement evidence is current on its own");
+        BiddingApiException originalSourceRejected=assertThrows(BiddingApiException.class,()->dependencies.validate(scope,List.of(original)));
+        assertEquals("SOURCE_NOT_CONFIRMED",originalSourceRejected.code(),"the original evidence source is no longer selected");
 
         ObjectNode reclassify=classify.deepCopy().set("todoRef",json.valueToTree(classifiedRef));
         reclassify.put("affectsTechnical",true).put("reason","newly supplied quote does not repair original todo provenance");
@@ -145,14 +153,14 @@ class BiddingReviewTest extends BiddingHttpFixture {
                 .put("blockId",replacementBlock.path("id").asText()).put("quote",replacementBlock.path("text").asText());
         BiddingApiException staleClassification=assertThrows(BiddingApiException.class,()->reviews.classifyHumanTodo(scope,
                 new BiddingTypes.Command("reclassify-replaced-todo",classifiedRef,"CLASSIFY_HUMAN_TODO",reclassify)));
-        assertEquals("SOURCE_NOT_CONFIRMED",staleClassification.code());
+        assertEquals("DEPENDENCY_NOT_CONFIRMED",staleClassification.code());
 
         ObjectNode resolve=json.createObjectNode();resolve.set("todoRef",json.valueToTree(classifiedRef));resolve.put("reason","close from replacement source");
         resolve.putArray("evidenceRefs").addObject().put("sourceId",replacement.id()).put("version",replacement.version())
                 .put("blockId",replacementBlock.path("id").asText()).put("quote",replacementBlock.path("text").asText());
         BiddingApiException staleResolution=assertThrows(BiddingApiException.class,()->reviews.resolveHumanTodo(scope,
                 new BiddingTypes.Command("resolve-replaced-todo",classifiedRef,"RESOLVE_HUMAN_TODO",resolve)));
-        assertEquals("SOURCE_NOT_CONFIRMED",staleResolution.code());
+        assertEquals("DEPENDENCY_NOT_CONFIRMED",staleResolution.code());
         assertEquals(2,repository.maxRevisionVersion(scope,"HUMAN_TODO",todoRef.id()),"neither rejected operation may append a todo revision");
     }
 
@@ -205,9 +213,9 @@ class BiddingReviewTest extends BiddingHttpFixture {
         requirements.addObject().put("id","REQ-1").put("category","TECHNICAL").put("text","接口响应时间不超过2秒");
         requirements.addAll((ArrayNode)analysisOutput.path("requirements"));
         analyses.putObject("bidding-scoring-analysis").putArray("criteria"); analyses.putObject("bidding-elimination-analysis").putArray("items");
-        BiddingTypes.Ref baseline=save(scope,new BiddingTypes.Ref("analysisBaseline","review-baseline",1,"baseline-digest"),baselineBody,List.of(sourceSet),"CONFIRMED");
+        BiddingTypes.Ref baseline=save(scope,new BiddingTypes.Ref("analysisBaseline","current",1,"baseline-digest"),baselineBody,List.of(sourceSet),"CONFIRMED");
         jdbc.update("INSERT INTO mate_bidding_head(workspace_id,project_id,kind,object_id,version,selected_ref_json) VALUES(?,?,?,?,?,?)",
-                workspace,projectId,"analysisBaseline",baseline.id(),baseline.version(),json.writeValueAsString(baseline));
+                workspace,projectId,"analysisBaseline","current",baseline.version(),json.writeValueAsString(baseline));
         ObjectNode outlineBody=json.createObjectNode().put("schemaVersion","1");outlineBody.putArray("chapters").addObject().put("id","c1").putArray("requirementRefs").add("REQ-1");
         BiddingTypes.Ref outline=save(scope,new BiddingTypes.Ref("outline","review-outline",1,"outline-digest"),outlineBody,List.of(baseline),"CONFIRMED");
         ObjectNode chapterBody=json.createObjectNode().put("chapterId","c1");chapterBody.putArray("blocks").addObject().put("type","paragraph").put("text","接口响应时间不超过2秒");
@@ -367,10 +375,39 @@ class BiddingReviewTest extends BiddingHttpFixture {
         nextCommercial.put("text","新基线要求商务负责人确认报价边界");
         nextCommercial.putArray("evidenceRefs").addObject().put("sourceId",nextSourceId).put("version",1)
                 .put("blockId","b2").put("quote","新基线的商务口径");
-        BiddingTypes.Ref nextBaseline=save(scope,new BiddingTypes.Ref("analysisBaseline","review-baseline-next",1,"baseline-digest-next"),
+        BiddingTypes.Ref nextBaseline=save(scope,new BiddingTypes.Ref("analysisBaseline","current",2,"baseline-digest-next"),
                 nextBaselineBody,List.of(nextSourceSet),"CONFIRMED");
-        jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id=?",
-                nextBaseline.version(),json.writeValueAsString(nextBaseline),workspace,projectId,nextBaseline.id());
+        assertFalse(repository.isSelectedBusinessRevision(scope,nextBaseline));
+        assertTrue(repository.isSelectedBusinessRevision(scope,baseline));
+        assertEquals(1,jdbc.update("UPDATE mate_bidding_head SET version=?,selected_ref_json=? WHERE workspace_id=? AND project_id=? AND kind='analysisBaseline' AND object_id='current'",
+                nextBaseline.version(),json.writeValueAsString(nextBaseline),workspace,projectId));
+        assertEquals(nextBaseline,repository.selectedRef(scope,"analysisBaseline","current"));
+        assertTrue(repository.isSelectedBusinessRevision(scope,nextBaseline));
+        assertFalse(repository.isSelectedBusinessRevision(scope,baseline));
+        Mockito.doCallRealMethod().when(dependencies).validate(scope,List.of(nextBaseline));
+        assertDoesNotThrow(()->dependencies.validate(scope,List.of(nextBaseline)),"the exact current baseline passes the real selected-head dependency gate");
+        ObjectNode unscopedLegacy=json.createObjectNode().put("todoId","legacy-unscoped").put("title","legacy open todo")
+                .put("ownerId",scope.actorId()).put("status","OPEN").put("impactClassification","CLASSIFIED").put("affectsTechnical",false);
+        unscopedLegacy.set("sourceRefs",json.valueToTree(List.of(sourceRef)));
+        unscopedLegacy.putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1)
+                .put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        BiddingTypes.Ref unscopedLegacyRef=save(scope,new BiddingTypes.Ref("HUMAN_TODO","legacy-unscoped",1,"legacy-unscoped-digest"),
+                unscopedLegacy,List.of(sourceRef),"OPEN");
+        String unscopedBytes=jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=? AND version=1",String.class,workspace,projectId,unscopedLegacyRef.id());
+        ObjectNode legacyClassification=json.createObjectNode().set("todoRef",json.valueToTree(unscopedLegacyRef));
+        legacyClassification.put("affectsTechnical",true).put("reason","legacy rows are immutable after baseline migration")
+                .putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        BiddingApiException legacyClassifyRejected=assertThrows(BiddingApiException.class,()->reviews.classifyHumanTodo(scope,
+                new BiddingTypes.Command("classify-unscoped-legacy",unscopedLegacyRef,"CLASSIFY_HUMAN_TODO",legacyClassification)));
+        assertEquals("DEPENDENCY_STALE",legacyClassifyRejected.code());
+        ObjectNode legacyResolution=json.createObjectNode().set("todoRef",json.valueToTree(unscopedLegacyRef));
+        legacyResolution.put("reason","legacy rows are immutable after baseline migration")
+                .putArray("evidenceRefs").addObject().put("sourceId",sourceId).put("version",1).put("blockId","b1").put("quote","报价口径由商务负责人确认");
+        BiddingApiException legacyResolveRejected=assertThrows(BiddingApiException.class,()->reviews.resolveHumanTodo(scope,
+                new BiddingTypes.Command("resolve-unscoped-legacy",unscopedLegacyRef,"RESOLVE_HUMAN_TODO",legacyResolution)));
+        assertEquals("DEPENDENCY_STALE",legacyResolveRejected.code());
+        assertEquals(1,repository.maxRevisionVersion(scope,"HUMAN_TODO",unscopedLegacyRef.id()));
+        assertEquals(unscopedBytes,jdbc.queryForObject("SELECT payload_json FROM mate_bidding_revision WHERE workspace_id=? AND project_id=? AND kind='HUMAN_TODO' AND object_id=? AND version=1",String.class,workspace,projectId,unscopedLegacyRef.id()));
         ObjectNode nextOutlineBody=json.createObjectNode().put("schemaVersion","1");
         nextOutlineBody.putArray("chapters").addObject().put("id","c1").putArray("requirementRefs").add("REQ-1");
         BiddingTypes.Ref nextOutline=save(scope,new BiddingTypes.Ref("outline","review-outline-next",1,"outline-digest-next"),

@@ -709,12 +709,11 @@ public class BiddingReviewService implements BiddingResultHandler {
         if (originalRefs.isEmpty() || originalSourceRefs.isEmpty())
             throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are unavailable");
         BiddingTypes.Ref baselineRef=ref(todo.path("baselineRef"));
-        if(baselineRef!=null) {
-            boolean bound=false;
-            for(JsonNode node:originalRefs)if(same(ref(node),baselineRef)){bound=true;break;}
-            if(!bound)throw BiddingAccess.error(409,"DEPENDENCY_STALE","Original human todo baseline is unavailable");
-            dependencies.validate(scope,List.of(baselineRef));
-        }
+        if(baselineRef==null)throw BiddingAccess.error(409,"DEPENDENCY_STALE","Original human todo baseline is unavailable");
+        boolean bound=false;
+        for(JsonNode node:originalRefs)if(same(ref(node),baselineRef)){bound=true;break;}
+        if(!bound)throw BiddingAccess.error(409,"DEPENDENCY_STALE","Original human todo baseline is unavailable");
+        dependencies.validate(scope,List.of(baselineRef));
         for (JsonNode node : originalRefs) {
             BiddingTypes.Ref ref = ref(node);
             if (ref == null) throw BiddingAccess.error(409, "DEPENDENCY_STALE", "Original human todo sources are invalid");
