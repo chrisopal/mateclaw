@@ -1,0 +1,108 @@
+{
+  "schema": "mateclaw-presales-scenario-proposed-v1",
+  "status": "DESIGN_ONLY_NOT_CURRENT_RUNTIME_CONFIG",
+  "id": "manufacturing-presales",
+  "version": "1.0.0",
+  "displayName": "制造业售前解决方案",
+  "modules": [
+    "presales"
+  ],
+  "excludedModules": [
+    "bidding",
+    "contract",
+    "project-delivery"
+  ],
+  "runtimePolicy": {
+    "mode": "ASSIST",
+    "autoPublish": false,
+    "autoSend": false,
+    "directSql": false
+  },
+  "steps": [
+    "create-case",
+    "ingest-materials",
+    "understand-context",
+    "requirements-and-clarification",
+    "G1",
+    "fitgap-and-cases",
+    "compose-solution",
+    "independent-review",
+    "render-release-candidate",
+    "G2",
+    "publish-and-handoff"
+  ],
+  "humanGates": [
+    {
+      "id": "G1",
+      "purpose": "internal-requirement-baseline",
+      "customerConfirmationImplied": false,
+      "pinExactVersions": true
+    },
+    {
+      "id": "G2",
+      "purpose": "customer-output-release",
+      "pinExactVersions": true,
+      "pinArtifactDigests": true,
+      "approveRenderedBytes": true
+    }
+  ],
+  "skills": [
+    "customer-context-analysis",
+    "requirement-analysis-and-clarification",
+    "capability-mapping",
+    "case-retrieval",
+    "solution-composer",
+    "proposal-generation",
+    "solution-review",
+    "presales-context-maintenance"
+  ],
+  "fitGapKinds": [
+    "FIT",
+    "CONFIG",
+    "EXTEND",
+    "PARTNER",
+    "GAP",
+    "UNKNOWN"
+  ],
+  "outputs": [
+    "context-card",
+    "requirement-baseline",
+    "fit-gap-matrix",
+    "solution-revision",
+    "review-report",
+    "markdown",
+    "docx",
+    "editable-pptx",
+    "internal-handoff-package"
+  ],
+  "knowledgeBindings": [
+    {
+      "role": "customer-materials",
+      "scope": "case",
+      "required": true
+    },
+    {
+      "role": "product-knowledge",
+      "scope": "explicitly-authorized",
+      "required": true
+    },
+    {
+      "role": "reference-cases",
+      "scope": "explicitly-authorized",
+      "required": false
+    }
+  ],
+  "ontology": {
+    "revisionBinding": "EXACT_PUBLISHED_REVISION",
+    "autoUpgrade": false
+  },
+  "security": {
+    "existingWorkspaceAuthorizationRequired": true,
+    "caseMaterialBindingIsNotAnACL": true,
+    "sourceReauthorizationRequired": true
+  },
+  "notes": [
+    "须开发加载/适配后才能使用，不是现有 MateClaw 导入配置。",
+    "所有业务动作必须调用授权服务；配置不能削弱其权限检查。"
+  ]
+}

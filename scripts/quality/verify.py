@@ -47,7 +47,8 @@ def classify(paths: list[str]) -> dict[str, bool]:
     extra = any(p.startswith(("scripts/", "docker/")) or p in {"Dockerfile", "docker-compose.yml"} for p in paths)
     java = java or extra
     ui = control or java or any(p.startswith(("mateclaw-ui/", "scripts/check-snowflake")) for p in paths)
-    return {"java": java, "ui": ui, "control": control}
+    cost_tool = control or any(p.startswith("tools/cost-analyzer/") for p in paths)
+    return {"java": java, "ui": ui, "control": control, "cost_tool": cost_tool}
 
 
 def ensure_exact_worktree(repo: Path, mode: str) -> str:
@@ -104,6 +105,25 @@ def java21_env(env: dict[str, str]) -> dict[str, str]:
             if maven_java_major(selected) == 21:
                 return selected
     raise GateError("MAVEN_JDK21_REQUIRED: set JAVA_HOME to a Java 21 JDK")
+
+
+def cost_tool_python(env: dict[str, str]) -> str | None:
+    """Find an installed Python with the standalone tool's pinned dependency."""
+    candidates = dict.fromkeys((sys.executable, "python3.13", "python3.12", "python3"))
+    probe = ("import openpyxl; v=tuple(int(p) for p in openpyxl.__version__.split('.')[:3]); "
+             "assert (3, 1, 5) <= v < (4, 0, 0)")
+    for candidate in candidates:
+        executable = shutil.which(candidate, path=env.get("PATH"))
+        if not executable:
+            continue
+        try:
+            result = subprocess.run([executable, "-c", probe], env=env, capture_output=True,
+                                    timeout=20, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if result.returncode == 0:
+            return executable
+    return None
 
 
 def run_step(name: str, argv: list[str], cwd: Path, reports: Path, env: dict[str, str], timeout: int = 1800) -> dict:
@@ -197,6 +217,8 @@ def main() -> int:
         if args.mode in {"commit", "ci", "push"} and any(p.startswith(("mateclaw-desktop/", "mateclaw-webchat/")) for p in paths):
             raise GateError("UNMAPPED_COMPONENT: desktop/webchat require a reviewed test-plan adapter; this gate does not silently mark them tested")
         plan = classify(paths)
+        if plan["control"] and not (repo / "tools/cost-analyzer").is_dir():
+            plan["cost_tool"] = False
         report.update(changed_files=paths, plan=plan)
         env = clean_test_env()
         step = run_step("guard-self-tests", [sys.executable, "-m", "unittest", "discover", "-s", str(HERE / "tests"), "-v"], CONTROL_ROOT, reports, env, 120)
@@ -285,6 +307,27 @@ def main() -> int:
                     steps.append(run_step(f"ui-build-{theme}", ["pnpm", "build", "--mode", theme], ui, reports, env))
             else:
                 steps.append({"name": "ui-toolchain", "status": "NOT_APPLICABLE", "reason": "No frontend/backend/control changes"})
+            if plan["cost_tool"]:
+                tool = repo / "tools/cost-analyzer"
+                if not tool.is_dir():
+                    steps.append({"name": "cost-tool-tests", "status": "BLOCKED", "reason": "COST_TOOL_MISSING"})
+                else:
+                    python = cost_tool_python(env)
+                    if python is None:
+                        steps.append({"name": "cost-tool-tests", "status": "BLOCKED", "reason": "COST_TOOL_DEPENDENCY_MISSING: Python with openpyxl 3.1.5+ required"})
+                    else:
+                        step = run_step("cost-tool-tests", [python, "-B", "-m", "unittest", "discover", "-s", "tests", "-v"], tool, reports, env, 120)
+                        if step["status"] == "PASS":
+                            counts = re.findall(r"Ran (\d+) tests?", Path(step["log"]).read_text(errors="replace"))
+                            if not counts or int(counts[-1]) < 1:
+                                step.update(status="FAIL", reason="COST_TOOL_ZERO_TESTS")
+                            else:
+                                step["executed_tests"] = int(counts[-1])
+                        steps.append(step)
+                        steps.append(run_step("cost-tool-python-syntax", [python, "-B", "-c", "import ast, pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('.').rglob('*.py')]"], tool, reports, env, 120))
+                    steps.append(run_step("cost-tool-js-syntax", ["node", "--check", "static/app.js"], tool, reports, env, 120))
+            else:
+                steps.append({"name": "cost-tool", "status": "NOT_APPLICABLE", "reason": "No standalone cost tool change"})
             after_tree = ensure_exact_worktree(repo, args.mode)
             if after_tree != before_tree:
                 raise GateError("INDEX_CHANGED_DURING_CHECK: rerun; no stale PASS receipt")

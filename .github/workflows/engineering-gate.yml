@@ -49,6 +49,14 @@ jobs:
       - name: Install locked frontend dependencies
         working-directory: candidate/mateclaw-ui
         run: pnpm install --frozen-lockfile
+      - name: Install isolated cost tool test dependency
+        shell: bash
+        run: |
+          if test -d candidate/tools/cost-analyzer; then
+            python3 -m venv "$RUNNER_TEMP/cost-analyzer-python"
+            "$RUNNER_TEMP/cost-analyzer-python/bin/pip" install --disable-pip-version-check openpyxl==3.1.5 et-xmlfile==2.0.0
+            echo "$RUNNER_TEMP/cost-analyzer-python/bin" >> "$GITHUB_PATH"
+          fi
       - name: Execute base-owned runner against candidate
         shell: bash
         run: |

@@ -1,0 +1,61 @@
+{
+  "schema": "mateclaw-presales-handoff-proposed-v1",
+  "status": "SYNTHETIC_DESIGN_EXAMPLE_NOT_APPROVED",
+  "workspaceId": "DEMO-WORKSPACE",
+  "engagementId": "DEMO-ENG-001",
+  "caseRef": {
+    "module": "presales",
+    "type": "PresalesCase",
+    "id": "DEMO-CASE-001",
+    "revision": "1"
+  },
+  "packageVersion": "1",
+  "requirementBaselineRef": {
+    "id": "DEMO-BASELINE-001",
+    "revision": "1",
+    "digest": null
+  },
+  "solutionRef": {
+    "id": "DEMO-SOLUTION-001",
+    "revision": "1",
+    "digest": null
+  },
+  "artifactRefs": [],
+  "decisionRefs": [],
+  "scope": {
+    "in": [
+      "两条产线试点方案（模拟、待实际确认）"
+    ],
+    "out": [
+      "预测维护的正式交付承诺"
+    ]
+  },
+  "unknowns": [
+    {
+      "topic": "ERP接口",
+      "owner": "DEMO-OWNER",
+      "status": "OPEN"
+    },
+    {
+      "topic": "预算和上线日期",
+      "owner": "DEMO-OWNER",
+      "status": "OPEN"
+    }
+  ],
+  "risks": [
+    "接口范围未经评估，方案不得承诺确定集成工作量。"
+  ],
+  "sourceManifest": [],
+  "authorization": {
+    "classification": "INTERNAL",
+    "recheckAtRead": true,
+    "receiverMustBeAuthorized": true
+  },
+  "receivingModule": null,
+  "sideEffects": {
+    "createBiddingProject": false,
+    "createContract": false,
+    "createDeliveryProject": false
+  },
+  "note": "示例不伪造批准和内容哈希。实际生成时填充真实可核验引用；必需字段缺失不得进入已批准/已发布状态。"
+}
