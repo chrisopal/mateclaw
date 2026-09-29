@@ -75,6 +75,37 @@ def clean_test_env() -> dict[str, str]:
     return result
 
 
+def maven_java_major(env: dict[str, str]) -> int | None:
+    if not shutil.which("mvn", path=env.get("PATH")):
+        return None
+    try:
+        proc = subprocess.run(["mvn", "-v"], env=env, capture_output=True, text=True,
+                              timeout=20, check=False)
+    except subprocess.TimeoutExpired as exc:
+        raise GateError("MAVEN_VERSION_TIMEOUT") from exc
+    match = re.search(r"^Java version: (\d+)", proc.stdout, re.M)
+    if proc.returncode or not match:
+        raise GateError("MAVEN_JDK_UNDETERMINED: mvn -v did not report a Java version")
+    return int(match.group(1))
+
+
+def java21_env(env: dict[str, str]) -> dict[str, str]:
+    """Use the project's Java 21 for Maven, including macOS hook processes."""
+    if maven_java_major(env) in {None, 21}:
+        return env
+    if sys.platform == "darwin" and not env.get("JAVA_HOME"):
+        try:
+            proc = subprocess.run(["/usr/libexec/java_home", "-v", "21"], env=env,
+                                  capture_output=True, text=True, timeout=20, check=False)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise GateError("MAVEN_JDK21_REQUIRED: set JAVA_HOME to a Java 21 JDK") from exc
+        if proc.returncode == 0 and proc.stdout.strip():
+            selected = {**env, "JAVA_HOME": proc.stdout.strip()}
+            if maven_java_major(selected) == 21:
+                return selected
+    raise GateError("MAVEN_JDK21_REQUIRED: set JAVA_HOME to a Java 21 JDK")
+
+
 def run_step(name: str, argv: list[str], cwd: Path, reports: Path, env: dict[str, str], timeout: int = 1800) -> dict:
     if not shutil.which(argv[0], path=env.get("PATH")):
         return {"name": name, "status": "BLOCKED", "reason": f"TOOL_MISSING: {argv[0]}", "command": argv}
@@ -192,12 +223,13 @@ def main() -> int:
         else:
             if plan["java"]:
                 vet_maven_config(repo)
+                java_env = java21_env(env)
                 if not formatter_configured(repo):
                     steps.append({"name": "java-format", "status": "BLOCKED", "reason": "TOOLING_BOOTSTRAP_REQUIRED: merge integration/pom-format-plugin.xml into root build/plugins; do not skip formatter"})
                 else:
-                    steps.append(run_step("java-format", ["mvn", "-B", f"-Dquality.base={base}", "spotless:check"], repo, reports, env))
+                    steps.append(run_step("java-format", ["mvn", "-B", f"-Dquality.base={base}", "spotless:check"], repo, reports, java_env))
                 with tempfile.TemporaryDirectory(prefix="mateclaw-test-skills-") as skills:
-                    step = run_step("java-tests", ["mvn", "-B", "-Dmaven.compiler.proc=full", f"-Dmateclaw.skill.workspace.root={skills}", "clean", "verify"], repo, reports, env)
+                    step = run_step("java-tests", ["mvn", "-B", "-Dmaven.compiler.proc=full", f"-Dmateclaw.skill.workspace.root={skills}", "clean", "verify"], repo, reports, java_env)
                     if step["status"] == "PASS":
                         try:
                             step["executed_tests"] = java_test_count(repo)

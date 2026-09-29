@@ -15,7 +15,7 @@ HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 from gate import (DEFAULT_POLICY, GateError, eligible, evaluate, git, invariant_changes,
                   load_policy, masked, resolve_commit, scan_file, snapshot)
-from verify import (classify, clean_test_env, ensure_exact_worktree, java_test_count,
+from verify import (classify, clean_test_env, ensure_exact_worktree, java21_env, java_test_count,
                     run_step, vet_maven_config)
 from install_hooks import install
 
@@ -326,6 +326,24 @@ class PlanTest(unittest.TestCase):
         self.assertNotIn("JAVA_TOOL_OPTIONS", env)
         self.assertNotIn("MAVEN_OPTS", env)
         self.assertNotIn("_JAVA_OPTIONS", env)
+
+    def test_java21_environment_keeps_matching_maven(self):
+        env = {"PATH": "/tools"}
+        with patch("verify.maven_java_major", return_value=21):
+            self.assertIs(java21_env(env), env)
+
+    def test_java21_environment_selects_macos_jdk_for_hook(self):
+        env = {"PATH": "/tools"}
+        selected = subprocess.CompletedProcess([], 0, "/jdk21\n", "")
+        with patch("verify.sys.platform", "darwin"), \
+             patch("verify.maven_java_major", side_effect=[25, 21]), \
+             patch("verify.subprocess.run", return_value=selected):
+            self.assertEqual(java21_env(env)["JAVA_HOME"], "/jdk21")
+
+    def test_java21_environment_rejects_wrong_explicit_jdk(self):
+        with patch("verify.maven_java_major", return_value=25):
+            with self.assertRaisesRegex(GateError, "MAVEN_JDK21_REQUIRED"):
+                java21_env({"JAVA_HOME": "/jdk25"})
 
 
 if __name__ == "__main__":
