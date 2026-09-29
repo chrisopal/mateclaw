@@ -1,16 +1,13 @@
 package vip.mate.bidding;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ContentDisposition;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import vip.mate.common.result.R;
 
 @RestController
@@ -22,6 +19,7 @@ public class BiddingController {
     private final BiddingSourceService sources;
     private final BiddingDependencies dependencies;
     private final ObjectProvider<BiddingTaskService> tasks;
+    private final BiddingTaskQueryService taskQueries;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectProvider<BiddingAnalysisService> analysis;
     private final ObjectProvider<BiddingHandoffService> handoffs;
@@ -31,17 +29,31 @@ public class BiddingController {
     private final ObjectProvider<BiddingReviewService> reviews;
     private final ObjectProvider<BiddingArtifactService> artifacts;
     private final ObjectMapper json;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
-    public BiddingController(BiddingAccess access, BiddingProjectService projects, BiddingCommandService commands,
-            BiddingSourceService sources, BiddingDependencies dependencies, ObjectProvider<BiddingTaskService> tasks, ObjectProvider<BiddingEmployeeBindings> employees, ObjectProvider<BiddingAnalysisService> analysis,
-            ObjectProvider<BiddingHandoffService> handoffs, ObjectProvider<BiddingMaterials> materials, ObjectProvider<BiddingOutlineService> outlines, ObjectProvider<BiddingWritingService> writing, ObjectProvider<BiddingReviewService> reviews, ObjectProvider<BiddingArtifactService> artifacts, ObjectMapper json, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    public BiddingController(
+            BiddingAccess access,
+            BiddingProjectService projects,
+            BiddingCommandService commands,
+            BiddingSourceService sources,
+            BiddingDependencies dependencies,
+            ObjectProvider<BiddingTaskService> tasks,
+            ObjectProvider<BiddingEmployeeBindings> employees,
+            ObjectProvider<BiddingAnalysisService> analysis,
+            ObjectProvider<BiddingHandoffService> handoffs,
+            ObjectProvider<BiddingMaterials> materials,
+            ObjectProvider<BiddingOutlineService> outlines,
+            ObjectProvider<BiddingWritingService> writing,
+            ObjectProvider<BiddingReviewService> reviews,
+            ObjectProvider<BiddingArtifactService> artifacts,
+            ObjectMapper json,
+            BiddingTaskQueryService taskQueries) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
         this.sources = sources;
         this.dependencies = dependencies;
         this.tasks = tasks;
+        this.taskQueries = taskQueries;
         this.employees = employees;
         this.analysis = analysis;
         this.handoffs = handoffs;
@@ -51,179 +63,333 @@ public class BiddingController {
         this.reviews = reviews;
         this.artifacts = artifacts;
         this.json = json;
-        this.jdbc = jdbc;
     }
 
     @GetMapping("/capabilities")
     public R<?> capabilities(@RequestHeader("X-Workspace-Id") String workspace) {
-        String actor=access.require(workspace,"viewer"); boolean canWrite=hasRole(workspace,"member");
-        boolean canApprove=hasRole(workspace,"admin");
-        return R.ok(java.util.Map.of("enabled",true,"canWrite",canWrite,"canApprove",canApprove));
+        String actor = access.require(workspace, "viewer");
+        boolean canWrite = hasRole(workspace, "member");
+        boolean canApprove = hasRole(workspace, "admin");
+        return R.ok(
+                java.util.Map.of("enabled", true, "canWrite", canWrite, "canApprove", canApprove));
     }
+
     @GetMapping("/handoff-options")
-    public R<?> handoffOptions(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,
+    public R<?> handoffOptions(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
             @RequestParam String presalesProjectId) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(handoffs.getObject().options(new BiddingTypes.Scope(workspace,actor,null),presalesProjectId));
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                handoffs.getObject()
+                        .options(
+                                new BiddingTypes.Scope(workspace, actor, null), presalesProjectId));
     }
+
     @GetMapping("/employees")
-    public R<?> employees(@RequestHeader(value="X-Workspace-Id",required=false) String workspace) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(employees.getObject().employees(new BiddingTypes.Scope(workspace,actor,null)));
+    public R<?> employees(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                employees.getObject().employees(new BiddingTypes.Scope(workspace, actor, null)));
     }
+
     @GetMapping("/projects")
-    public R<?> list(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,
-        @RequestParam(required=false) String name,@RequestParam(required=false) String stage,
-        @RequestParam(required=false) String ownerId,@RequestParam(defaultValue="1") int page,
-        @RequestParam(defaultValue="20") int pageSize) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(projects.list(new BiddingTypes.Scope(workspace,actor,null),name,stage,ownerId,page,pageSize));
+    public R<?> list(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String stage,
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                projects.list(
+                        new BiddingTypes.Scope(workspace, actor, null),
+                        name,
+                        stage,
+                        ownerId,
+                        page,
+                        pageSize));
     }
+
     @GetMapping("/dashboard")
-    public R<?> dashboard(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@RequestParam(required=false) String name,@RequestParam(required=false) String stage,@RequestParam(required=false) String ownerId) {
-        String actor=access.require(workspace,"viewer"); return R.ok(projects.dashboard(new BiddingTypes.Scope(workspace,actor,null),name,stage,ownerId));
+    public R<?> dashboard(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String stage,
+            @RequestParam(required = false) String ownerId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                projects.dashboard(
+                        new BiddingTypes.Scope(workspace, actor, null), name, stage, ownerId));
     }
+
     @PostMapping("/projects")
-    public R<?> create(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,
-        @RequestBody BiddingTypes.NewProject request) {
-        String actor=access.require(workspace,"member");
-        return R.ok(projects.create(new BiddingTypes.Scope(workspace,actor,null),request));
+    public R<?> create(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @RequestBody BiddingTypes.NewProject request) {
+        String actor = access.require(workspace, "member");
+        return R.ok(projects.create(new BiddingTypes.Scope(workspace, actor, null), request));
     }
+
     @GetMapping("/projects/{id}")
-    public R<?> get(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer");
-        var scope=new BiddingTypes.Scope(workspace,actor,id);
-        var project=projects.get(scope);
-        project.putObject("capabilities").put("canApprove",access.canApproveProject(scope,project));
+    public R<?> get(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        var scope = new BiddingTypes.Scope(workspace, actor, id);
+        var project = projects.get(scope);
+        project.putObject("capabilities")
+                .put("canApprove", access.canApproveProject(scope, project));
         return R.ok(project);
     }
+
     @GetMapping("/projects/{id}/materials")
-    public R<?> materials(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(materials.getObject().list(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> materials(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(materials.getObject().list(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/tasks")
-    public R<?> tasks(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
-        @RequestParam(defaultValue="1") int page,@RequestParam(defaultValue="20") int pageSize) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(tasks.getObject().listTasks(new BiddingTypes.Scope(workspace,actor,id),page,pageSize));
+    public R<?> tasks(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                tasks.getObject()
+                        .listTasks(new BiddingTypes.Scope(workspace, actor, id), page, pageSize));
     }
+
     @GetMapping("/projects/{id}/analysis")
-    public R<?> analysis(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer"); return R.ok(analysis.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> analysis(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(analysis.getObject().read(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/outline")
-    public R<?> outline(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer"); return R.ok(outlines.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> outline(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(outlines.getObject().read(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/writing")
-    public R<?> writing(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer"); return R.ok(writing.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> writing(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(writing.getObject().read(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/review")
-    public R<?> review(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer");return R.ok(reviews.getObject().read(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> review(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(reviews.getObject().read(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/templates")
-    public R<?> templates(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().templates(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> templates(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(artifacts.getObject().templates(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/artifacts/{artifactId}")
-    public R<?> artifact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
-        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().metadata(new BiddingTypes.Scope(workspace,actor,id),artifactId));
+    public R<?> artifact(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @PathVariable String artifactId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                artifacts
+                        .getObject()
+                        .metadata(new BiddingTypes.Scope(workspace, actor, id), artifactId));
     }
+
     @GetMapping("/projects/{id}/artifacts/{artifactId}/approval-context")
-    public R<?> artifactApprovalContext(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId) {
-        String actor=access.require(workspace,"viewer");return R.ok(artifacts.getObject().approvalContext(new BiddingTypes.Scope(workspace,actor,id),artifactId));
+    public R<?> artifactApprovalContext(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @PathVariable String artifactId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                artifacts
+                        .getObject()
+                        .approvalContext(new BiddingTypes.Scope(workspace, actor, id), artifactId));
     }
+
     @GetMapping("/projects/{id}/artifacts/{artifactId}/content")
-    public ResponseEntity<byte[]> artifactContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String artifactId,
-            @RequestParam(defaultValue="candidate") String mode) {
-        String actor=access.require(workspace,"viewer");byte[] bytes=artifacts.getObject().download(new BiddingTypes.Scope(workspace,actor,id),artifactId,mode);
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                .header(HttpHeaders.CACHE_CONTROL,"no-store").header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename("technical-proposal.docx").build().toString()).body(bytes);
+    public ResponseEntity<byte[]> artifactContent(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @PathVariable String artifactId,
+            @RequestParam(defaultValue = "candidate") String mode) {
+        String actor = access.require(workspace, "viewer");
+        byte[] bytes =
+                artifacts
+                        .getObject()
+                        .download(new BiddingTypes.Scope(workspace, actor, id), artifactId, mode);
+        return ResponseEntity.ok()
+                .contentType(
+                        MediaType.parseMediaType(
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename("technical-proposal.docx")
+                                .build()
+                                .toString())
+                .body(bytes);
     }
+
     @GetMapping("/projects/{id}/change-impact")
-    public R<?> changeImpact(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer");
-        return R.ok(dependencies.readChangeImpact(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> changeImpact(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(dependencies.readChangeImpact(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/revisions/{revisionId}")
-    public R<?> revision(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,@PathVariable String revisionId) {
-        String actor=access.require(workspace,"viewer"); return R.ok(analysis.getObject().readRevision(new BiddingTypes.Scope(workspace,actor,id),revisionId));
+    public R<?> revision(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @PathVariable String revisionId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                analysis.getObject()
+                        .readRevision(new BiddingTypes.Scope(workspace, actor, id), revisionId));
     }
+
     @GetMapping("/tasks/{taskId}")
-    public R<?> task(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String taskId) {
-        String actor=access.require(workspace,"viewer");
-        var details=tasks.getObject().taskDetails(new BiddingTypes.Scope(workspace,actor,null),taskId);
-        String projectId=details.path("projectId").asText();
-        String agentId=jdbc.query("SELECT agent_id FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND id=?",
-                rs->rs.next()?rs.getString(1):null,workspace,projectId,taskId);
-        BiddingTypes.Scope taskScope=new BiddingTypes.Scope(workspace,actor,projectId);
-        String bindingsJson=jdbc.query("SELECT body_json FROM mate_bidding_project WHERE workspace_id=? AND id=?",
-                rs->rs.next()?rs.getString(1):null,workspace,projectId);
-        ObjectNode bindings=json.createObjectNode();
-        if(bindingsJson!=null)try { bindings=(ObjectNode)json.readTree(bindingsJson).path("bindings"); }
-        catch(Exception invalidProject) { throw BiddingAccess.error(500,"PROJECT_STATE_INVALID","Project bindings are unavailable"); }
-        String reviewerId=bindings.path("reviewer").path("agentId").asText("");
-        // The immutable target identifies historical review tasks even after rebinding
-        // or skill package changes; never downgrade their authorization to writer ACL.
-        boolean reviewTask = details.path("snapshot").path("_bidding").path("targetId").asText().startsWith("review:");
-        if(reviewTask) {
-            if(!agentId.equals(reviewerId)) throw BiddingAccess.error(403,"REVIEWER_MATERIAL_UNAVAILABLE","Review task is no longer assigned to the bound reviewer");
-            for(JsonNode ref:details.path("snapshot").path("inputRefs"))
-                materials.getObject().requireReviewerReadable(taskScope,reviewerId,json.convertValue(ref,BiddingTypes.Ref.class));
-            for(JsonNode material:details.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items"))
-                materials.getObject().requireReviewerReadable(taskScope,reviewerId,json.convertValue(material.path("ref"),BiddingTypes.Ref.class));
-        } else {
-            materials.getObject().requireReadable(taskScope,agentId,details.path("snapshot").path("inputRefs"));
-            for(JsonNode material:details.path("snapshot").path("input").path("evidenceSnapshot").path("materials").path("items"))
-                materials.getObject().requireReadable(taskScope,agentId,json.convertValue(material.path("ref"),BiddingTypes.Ref.class));
-        }
-        return R.ok(details);
+    public R<?> task(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String taskId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(taskQueries.details(new BiddingTypes.Scope(workspace, actor, null), taskId));
     }
+
     @PostMapping("/projects/{id}/commands")
-    public R<?> command(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
-        @RequestBody BiddingTypes.Command command) {
-        String actor=access.require(workspace,"member");
-        return R.ok(commands.execute(new BiddingTypes.Scope(workspace,actor,id),command));
+    public R<?> command(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @RequestBody BiddingTypes.Command command) {
+        String actor = access.require(workspace, "member");
+        return R.ok(commands.execute(new BiddingTypes.Scope(workspace, actor, id), command));
     }
-    @PostMapping(value="/projects/{id}/sources",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<?> uploadSource(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
-        @RequestParam String operationId,@RequestParam String sourceKind,@RequestParam("file") MultipartFile file,
-        @RequestParam(required=false) String supersedesRef) throws Exception {
-        String actor=access.require(workspace,"member");
-        if(file.getSize()>25L*1024*1024) throw new BiddingApiException(413,"SOURCE_FILE_LIMIT","文件超过25MiB上限");
-        String filename=file.getOriginalFilename(), mime=file.getContentType();
-        if(mime!=null && !MediaType.APPLICATION_OCTET_STREAM_VALUE.equalsIgnoreCase(mime)) {
-            boolean pdf=filename!=null && filename.toLowerCase(java.util.Locale.ROOT).endsWith(".pdf") && MediaType.APPLICATION_PDF_VALUE.equalsIgnoreCase(mime);
-            boolean docx=filename!=null && filename.toLowerCase(java.util.Locale.ROOT).endsWith(".docx")
-                && "application/vnd.openxmlformats-officedocument.wordprocessingml.document".equalsIgnoreCase(mime);
-            if(!pdf && !docx) throw new BiddingApiException(422,"SOURCE_TYPE_MISMATCH","File media type does not match its extension");
+
+    @PostMapping(value = "/projects/{id}/sources", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<?> uploadSource(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @RequestParam String operationId,
+            @RequestParam String sourceKind,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false) String supersedesRef)
+            throws Exception {
+        String actor = access.require(workspace, "member");
+        if (file.getSize() > 25L * 1024 * 1024)
+            throw new BiddingApiException(413, "SOURCE_FILE_LIMIT", "文件超过25MiB上限");
+        String filename = file.getOriginalFilename(), mime = file.getContentType();
+        if (mime != null && !MediaType.APPLICATION_OCTET_STREAM_VALUE.equalsIgnoreCase(mime)) {
+            boolean pdf =
+                    filename != null
+                            && filename.toLowerCase(java.util.Locale.ROOT).endsWith(".pdf")
+                            && MediaType.APPLICATION_PDF_VALUE.equalsIgnoreCase(mime);
+            boolean docx =
+                    filename != null
+                            && filename.toLowerCase(java.util.Locale.ROOT).endsWith(".docx")
+                            && "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    .equalsIgnoreCase(mime);
+            if (!pdf && !docx)
+                throw new BiddingApiException(
+                        422,
+                        "SOURCE_TYPE_MISMATCH",
+                        "File media type does not match its extension");
         }
-        BiddingTypes.Ref supersedes=null;
-        if(supersedesRef!=null && !supersedesRef.isBlank()) supersedes=json.readValue(supersedesRef,BiddingTypes.Ref.class);
-        return R.ok(sources.upload(new BiddingTypes.Scope(workspace,actor,id),operationId,sourceKind,supersedes,file.getBytes(),filename));
+        BiddingTypes.Ref supersedes = null;
+        if (supersedesRef != null && !supersedesRef.isBlank())
+            supersedes = json.readValue(supersedesRef, BiddingTypes.Ref.class);
+        return R.ok(
+                sources.upload(
+                        new BiddingTypes.Scope(workspace, actor, id),
+                        operationId,
+                        sourceKind,
+                        supersedes,
+                        file.getBytes(),
+                        filename));
     }
+
     @GetMapping("/projects/{id}/sources")
-    public R<?> listSources(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer"); return R.ok(sources.list(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> listSources(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(sources.list(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/source-set/head")
-    public R<?> sourceSetHead(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id) {
-        String actor=access.require(workspace,"viewer"); return R.ok(sources.sourceSetHead(new BiddingTypes.Scope(workspace,actor,id)));
+    public R<?> sourceSetHead(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(sources.sourceSetHead(new BiddingTypes.Scope(workspace, actor, id)));
     }
+
     @GetMapping("/projects/{id}/sources/{sourceId}/versions/{version}/content")
-    public ResponseEntity<byte[]> sourceContent(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
-        @PathVariable String sourceId,@PathVariable long version) {
-        String actor=access.require(workspace,"viewer"); var content=sources.readContent(new BiddingTypes.Scope(workspace,actor,id),sourceId,version);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).header(HttpHeaders.CACHE_CONTROL,"no-store")
-            .header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename(content.filename(),java.nio.charset.StandardCharsets.UTF_8).build().toString()).body(content.bytes());
+    public ResponseEntity<byte[]> sourceContent(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @PathVariable String sourceId,
+            @PathVariable long version) {
+        String actor = access.require(workspace, "viewer");
+        var content =
+                sources.readContent(
+                        new BiddingTypes.Scope(workspace, actor, id), sourceId, version);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename(
+                                        content.filename(), java.nio.charset.StandardCharsets.UTF_8)
+                                .build()
+                                .toString())
+                .body(content.bytes());
     }
+
     @GetMapping("/projects/{id}/evidence")
-    public R<?> evidence(@RequestHeader(value="X-Workspace-Id",required=false) String workspace,@PathVariable String id,
-        @RequestParam String sourceId,@RequestParam long version,@RequestParam String blockId) {
-        String actor=access.require(workspace,"viewer"); return R.ok(sources.evidence(new BiddingTypes.Scope(workspace,actor,id),sourceId,version,blockId));
+    public R<?> evidence(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
+            @PathVariable String id,
+            @RequestParam String sourceId,
+            @RequestParam long version,
+            @RequestParam String blockId) {
+        String actor = access.require(workspace, "viewer");
+        return R.ok(
+                sources.evidence(
+                        new BiddingTypes.Scope(workspace, actor, id), sourceId, version, blockId));
     }
-    private boolean hasRole(String workspace,String role) { try { access.require(workspace,role); return true; } catch(BiddingApiException e) { if(e.status()==403) return false; throw e; } }
+
+    private boolean hasRole(String workspace, String role) {
+        try {
+            access.require(workspace, role);
+            return true;
+        } catch (BiddingApiException e) {
+            if (e.status() == 403) return false;
+            throw e;
+        }
+    }
 }
