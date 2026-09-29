@@ -40,7 +40,8 @@
 | 任务 | 当前状态 | 下一道出口 |
 |---|---|---|
 | AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
-| AQ-01–06 | DESIGNED / NOT_IMPLEMENTED | 按实施设计逐切片行为刻画与改造 |
+| AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
+| AQ-02–06 | DESIGNED / NOT_IMPLEMENTED | 按实施设计逐切片行为刻画与改造 |
 | AQ-07 | DESIGNED / NOT_IMPLEMENTED | 清零后 ArchUnit + policy 封口 |
 | AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
 | AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |

@@ -35,6 +35,13 @@ python3 -B scripts/quality/verify.py --mode commit
 
 读取真实 report.json。退出码非零、缺工具、全跳过/零测试、失败日志、检查后代码变更都阻止提交。
 不改 skip 标记，不重新生成存量基线，不删除断言。没有 commit 权限时仅提供补丁和结果，不自行提交。
+Java 门禁使用项目 JDK 21；macOS 未显式设置 `JAVA_HOME` 时，检查器会寻找已安装的
+JDK 21 并验证 Maven 实际运行版本。找不到时按 `MAVEN_JDK21_REQUIRED` 阻断。
+
+SSH 远端推送使用 `scripts/quality/push-checked.sh -u origin <branch>`；它保留正常
+pre-push 钩子并设置连接保活。全量钩子可能运行数分钟，直接 `git push` 的空闲 SSH
+连接曾在检查全绿后被远端关闭。若传输失败，先核对该次 push 报告的 target SHA、
+base、`submission_ready` 与工作区，再重连；不得把传输失败记为远端已推送。
 
 最终回报：任务 ID、实际 base/HEAD/tree、修改职责、命令及结果、日志路径、已执行测试、
 NOT_RUN 项与风险。不得将此 Skill 已被加载当作实际代码检查证据。
