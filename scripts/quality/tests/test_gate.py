@@ -15,7 +15,7 @@ HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 from gate import (DEFAULT_POLICY, GateError, eligible, evaluate, git, invariant_changes,
                   load_policy, masked, resolve_commit, scan_file, snapshot)
-from verify import (classify, clean_test_env, ensure_exact_worktree, java21_env, java_test_count,
+from verify import (classify, clean_test_env, cost_tool_python, ensure_exact_worktree, java21_env, java_test_count,
                     run_step, vet_maven_config)
 from install_hooks import install
 
@@ -304,7 +304,7 @@ class GitFixture(unittest.TestCase):
 
 class PlanTest(unittest.TestCase):
     def test_docs_only_not_application_change(self):
-        self.assertEqual(classify(["docs/a.md"]), {"java": False, "ui": False, "control": False})
+        self.assertEqual(classify(["docs/a.md"]), {"java": False, "ui": False, "control": False, "cost_tool": False})
 
     def test_backend_change_triggers_reverse_ui_regression(self):
         result = classify([SERVER + "agent/AgentService.java"])
@@ -317,6 +317,15 @@ class PlanTest(unittest.TestCase):
         result = classify([UI + "features/bidding/api/types.ts"])
         self.assertTrue(result["ui"])
         self.assertFalse(result["java"])
+
+    def test_standalone_cost_tool_requires_its_checks(self):
+        result = classify(["tools/cost-analyzer/analysis.py"])
+        self.assertTrue(result["cost_tool"])
+        self.assertFalse(result["java"])
+
+    def test_cost_tool_python_requires_compatible_dependency(self):
+        with patch("verify.subprocess.run", return_value=subprocess.CompletedProcess([], 1, b"", b"")):
+            self.assertIsNone(cost_tool_python({"PATH": os.environ.get("PATH", "")}))
 
     def test_sensitive_env_not_forwarded(self):
         with patch.dict(os.environ, {"OPENAI_API_KEY": "fake", "SPRING_DATASOURCE_URL": "prod", "JAVA_TOOL_OPTIONS": "-DskipTests=true", "MAVEN_OPTS": "-DskipTests", "_JAVA_OPTIONS": "-DskipTests"}):

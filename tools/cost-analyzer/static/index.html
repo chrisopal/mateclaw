@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN" data-ui="enterprise" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f7fa" />
+    <title>制造成本分析工作台</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">C</span>
+          <div>
+            <div class="brand-name">制造成本分析</div>
+            <div class="brand-context">经营分析工作台 <span aria-hidden="true">/</span> 单位成本</div>
+          </div>
+        </div>
+        <div class="topbar-meta">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="runtime-label">等待数据</span>
+        </div>
+      </header>
+
+      <main class="page-main">
+        <section class="page-heading" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">COST INTELLIGENCE</p>
+            <h1 id="page-title">制造成本分析</h1>
+            <p class="page-description">上传原始成本 Excel，快速识别单位成本趋势与变化原因。</p>
+          </div>
+          <div class="heading-actions server-control" id="server-actions">
+            <button class="button button-secondary" id="template-button" type="button">下载空模板</button>
+            <button class="button button-secondary" id="sample-file-button" type="button">下载示例原始文件</button>
+            <button class="button button-primary" id="sample-button" type="button">体验示例</button>
+          </div>
+        </section>
+
+        <section class="upload-panel server-control" id="upload-panel" aria-labelledby="upload-title">
+          <div class="upload-copy">
+            <div class="section-kicker">数据入口</div>
+            <h2 id="upload-title">导入原始成本台账</h2>
+            <p>支持 .xlsx 文件。数据只在当前分析会话中处理，上传后自动生成分析报告。</p>
+          </div>
+          <label class="drop-zone" id="drop-zone" for="file-input" tabindex="0">
+            <input id="file-input" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            <span class="upload-icon" aria-hidden="true">↑</span>
+            <span class="drop-title">拖拽 Excel 到这里，或点击选择文件</span>
+            <span class="drop-hint" id="drop-hint">建议使用原始明细文件，不超过 10 MB</span>
+          </label>
+        </section>
+
+        <section class="error-panel" id="error-panel" role="alert" aria-live="assertive" hidden>
+          <span class="alert-icon" aria-hidden="true">!</span>
+          <div>
+            <strong id="error-title">分析未完成</strong>
+            <p id="error-message"></p>
+          </div>
+          <button class="button button-text" id="error-dismiss" type="button">关闭</button>
+        </section>
+
+        <section class="report-view" id="report-view" hidden aria-live="polite">
+          <div class="report-toolbar">
+            <div class="report-meta">
+              <div class="section-kicker">分析报告</div>
+              <h2 id="report-title">成本分析结果</h2>
+              <p id="report-meta-text"></p>
+            </div>
+            <div class="report-actions server-control" id="report-actions">
+              <a class="button button-secondary" id="export-excel" href="#" download>导出 Excel</a>
+              <a class="button button-primary" id="export-html" href="#" download>导出独立 HTML</a>
+            </div>
+          </div>
+
+          <div class="offline-banner" id="offline-banner" hidden>
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>离线快照 · 当前报告为只读版本</span>
+          </div>
+
+          <div class="filter-bar" aria-label="报告筛选">
+            <div class="filter-field">
+              <label for="product-select">产品</label>
+              <select id="product-select"></select>
+            </div>
+            <div class="filter-field">
+              <label for="month-select">月份</label>
+              <select id="month-select"></select>
+            </div>
+            <div class="filter-state" id="filter-state"></div>
+          </div>
+
+          <div class="kpi-grid" id="kpi-grid"></div>
+          <section class="insight-panel" id="insight-panel" aria-labelledby="insight-title">
+            <div class="insight-heading">
+              <span class="insight-icon" aria-hidden="true">↗</span>
+              <div>
+                <div class="section-kicker">分析提示</div>
+                <h2 id="insight-title">关键变化</h2>
+              </div>
+            </div>
+            <div class="insight-list" id="insight-list"></div>
+          </section>
+
+          <div class="chart-grid">
+            <section class="panel chart-panel chart-wide" aria-labelledby="trend-title">
+              <div class="panel-header">
+                <div><div class="section-kicker">全局趋势</div><h2 id="trend-title">各产品单位成本趋势</h2></div>
+                <span class="unit-label">单位：随产品</span>
+              </div>
+              <div class="chart-wrap" id="trend-chart"></div>
+            </section>
+            <section class="panel chart-panel" aria-labelledby="category-title">
+              <div class="panel-header">
+                <div><div class="section-kicker">成本构成</div><h2 id="category-title">选中产品科目趋势</h2></div>
+                <span class="unit-label">单位：随产品</span>
+              </div>
+              <div class="chart-wrap" id="category-chart"></div>
+            </section>
+            <section class="panel chart-panel" aria-labelledby="driver-title">
+              <div class="panel-header">
+                <div><div class="section-kicker">环比解释</div><h2 id="driver-title">变化驱动贡献</h2></div>
+                <span class="unit-label">单位：随产品</span>
+              </div>
+              <div class="chart-wrap" id="driver-chart"></div>
+            </section>
+              <section class="panel chart-panel chart-wide" aria-labelledby="volume-title">
+              <div class="panel-header">
+                <div><div class="section-kicker">经营量效</div><h2 id="volume-title">产量与固定费用</h2></div>
+                <span class="unit-label">双轴</span>
+              </div>
+              <div class="chart-wrap" id="volume-chart"></div>
+            </section>
+          </div>
+
+          <div class="detail-grid">
+            <section class="panel table-panel" aria-labelledby="category-table-title">
+              <div class="panel-header"><div><div class="section-kicker">成本明细</div><h2 id="category-table-title">成本类别变化</h2></div></div>
+              <div class="table-scroll"><table><thead><tr><th>成本类别</th><th>上月</th><th>本月</th><th>变化</th></tr></thead><tbody id="category-table-body"></tbody></table></div>
+            </section>
+            <section class="panel table-panel" aria-labelledby="subject-table-title">
+              <div class="panel-header"><div><div class="section-kicker">成本科目</div><h2 id="subject-table-title">科目贡献</h2></div></div>
+              <div class="table-scroll"><table><thead><tr><th>成本科目</th><th>贡献变化</th><th>方向</th></tr></thead><tbody id="subject-table-body"></tbody></table></div>
+            </section>
+          </div>
+
+          <section class="panel validation-panel" aria-labelledby="validation-title">
+            <div class="panel-header"><div><div class="section-kicker">数据质量</div><h2 id="validation-title">校验与提醒</h2></div></div>
+            <div id="warning-list" class="warning-list"></div>
+            <p class="method-note"><strong>方法说明：</strong>变化归因采用成本数据的算术桥接；当前模型不含在制品（WIP）；每次上传新的 Excel 后静态重算本报告。</p>
+          </section>
+        </section>
+
+        <section class="empty-state" id="empty-state" aria-labelledby="empty-title">
+          <div class="empty-mark" aria-hidden="true">▦</div>
+          <h2 id="empty-title">准备开始分析</h2>
+          <p>导入一份成本台账，查看产品、月份和成本科目的真实变化。</p>
+        </section>
+      </main>
+      <footer class="page-footer">制造成本分析工作台 <span aria-hidden="true">·</span> 数据由当前分析会话生成</footer>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
