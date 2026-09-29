@@ -1,5 +1,7 @@
 package vip.mate.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,31 +10,27 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 /**
- * Production posture: with {@code mateclaw.openapi.expose-ui=false} the Swagger
- * UI / OpenAPI document paths must NOT be anonymously reachable. They fall under
- * an explicit {@code hasRole('ADMIN')} rule in {@link SecurityConfig}, so an
- * unauthenticated request is rejected by the authentication entry point (401)
- * instead of leaking the full API surface.
+ * Production posture: with {@code mateclaw.openapi.expose-ui=false} the Swagger UI / OpenAPI
+ * document paths must NOT be anonymously reachable. They fall under an explicit {@code
+ * hasRole('ADMIN')} rule in {@link SecurityConfig}, so an unauthenticated request is rejected by
+ * the authentication entry point (401) instead of leaking the full API surface.
  *
- * <p>Uses a real embedded servlet container ({@code RANDOM_PORT}) because the app
- * registers a WebSocket endpoint that requires a servlet {@code ServerContainer},
- * which the MockMvc-only environment does not provide.
+ * <p>Uses a real embedded servlet container ({@code RANDOM_PORT}) because the app registers a
+ * WebSocket endpoint that requires a servlet {@code ServerContainer}, which the MockMvc-only
+ * environment does not provide.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "spring.flyway.enabled=true",
-                "spring.flyway.locations=classpath:db/migration/h2",
-                "mateclaw.openapi.expose-ui=false"
-        }
-)
+            "spring.datasource.url=jdbc:h2:mem:openapi_locked_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1",
+            "spring.flyway.enabled=true",
+            "spring.flyway.locations=classpath:db/migration/h2",
+            "mateclaw.openapi.expose-ui=false"
+        })
 class OpenApiLockedDownAccessTest {
 
-    @Autowired
-    private TestRestTemplate rest;
+    @Autowired private TestRestTemplate rest;
 
     @Test
     @DisplayName("Anonymous OpenAPI JSON is blocked (401) when expose-ui=false")
@@ -51,9 +49,10 @@ class OpenApiLockedDownAccessTest {
     @Test
     @DisplayName("Anonymous generated-file download is blocked (401)")
     void anonymousGeneratedFileDownloadBlocked() {
-        ResponseEntity<String> resp = rest.getForEntity(
-                "/api/v1/files/generated/00000000-0000-0000-0000-000000000000",
-                String.class);
+        ResponseEntity<String> resp =
+                rest.getForEntity(
+                        "/api/v1/files/generated/00000000-0000-0000-0000-000000000000",
+                        String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
     }
 
