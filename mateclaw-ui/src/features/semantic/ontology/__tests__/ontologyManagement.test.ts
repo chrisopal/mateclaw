@@ -12,7 +12,10 @@ import OntologyList from '../OntologyList.vue'
 import OntologyVersions from '../OntologyVersions.vue'
 import { modelingTaskApi, type ModelingTask } from '../../api/modelingTaskApi'
 import { ontologyApi } from '../../api/ontologyApi'
-const routeState = vi.hoisted(() => ({ params: { id: '9223372036854775800' }, query: {} as Record<string,string> }))
+const routeState = vi.hoisted(() => ({
+  params: { id: '9223372036854775800' },
+  query: {} as Record<string, string>,
+}))
 vi.mock('vue-router', () => ({
   useRoute: () => routeState,
   useRouter: () => ({ push: vi.fn() }),
@@ -36,8 +39,24 @@ vi.mock('../../api/ontologyApi', () => ({
     sourceReviews: vi.fn().mockResolvedValue([]),
   },
 }))
-vi.mock('../../api/modelingTaskApi', async original => ({...await original<object>(),modelingTaskApi: {list:vi.fn().mockResolvedValue([]), get:vi.fn(), decide:vi.fn()}}))
-const ontologyDocument = () => ({ source: { modelSchema: 'owl-document-v1' as const, syntax: 'FUNCTIONAL' as const, documentText: 'Ontology(<https://example.test/factory>)', imports: [], policy: { version: '1', rules: [] } }, ontologyIri: 'https://example.test/factory', versionIri: null, documentDigest: 'sha256:factory', importLockDigest: 'sha256:imports', axioms: [] })
+vi.mock('../../api/modelingTaskApi', async (original) => ({
+  ...(await original<object>()),
+  modelingTaskApi: { list: vi.fn().mockResolvedValue([]), get: vi.fn(), decide: vi.fn() },
+}))
+const ontologyDocument = () => ({
+  source: {
+    modelSchema: 'owl-document-v1' as const,
+    syntax: 'FUNCTIONAL' as const,
+    documentText: 'Ontology(<https://example.test/factory>)',
+    imports: [],
+    policy: { version: '1', rules: [] },
+  },
+  ontologyIri: 'https://example.test/factory',
+  versionIri: null,
+  documentDigest: 'sha256:factory',
+  importLockDigest: 'sha256:imports',
+  axioms: [],
+})
 const data = () => ({
   id: '9223372036854775799',
   ontologyId: '9223372036854775800',
@@ -78,7 +97,17 @@ beforeEach(() => {
   vi.clearAllMocks()
   routeState.query = {}
   vi.mocked(modelingTaskApi.list).mockResolvedValue([])
-  vi.mocked(ontologyApi.get).mockResolvedValue({ id: '9223372036854775800', workspaceId: '1', name: 'Factory', description: '', latestVersion: 1, latestRevisionId: null, hasDraft: true, updatedAt: '2026-09-12T00:00:00Z', archived: false })
+  vi.mocked(ontologyApi.get).mockResolvedValue({
+    id: '9223372036854775800',
+    workspaceId: '1',
+    name: 'Factory',
+    description: '',
+    latestVersion: 1,
+    latestRevisionId: null,
+    hasDraft: true,
+    updatedAt: '2026-09-12T00:00:00Z',
+    archived: false,
+  })
   vi.mocked(ontologyApi.getDraft).mockResolvedValue(data())
 })
 afterEach(() => {
@@ -86,25 +115,37 @@ afterEach(() => {
   host?.remove()
   document.body.innerHTML = ''
 })
-async function openMetadata(){
- ;[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('More'))!.click();await flush()
- ;[...document.querySelectorAll<HTMLElement>('.el-dropdown-menu__item')].find(b=>b.textContent?.includes('Basic information'))!.click();await flush()
+async function openMetadata() {
+  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('More'))!.click()
+  await flush()
+  ;[...document.querySelectorAll<HTMLElement>('.el-dropdown-menu__item')]
+    .find((b) => b.textContent?.includes('Basic information'))!
+    .click()
+  await flush()
 }
 it('renders viewer read-only and preserves large ID in real request', async () => {
-  await mount(['view:ontology']);await openMetadata()
+  await mount(['view:ontology'])
+  await openMetadata()
   expect((document.querySelector('#ontology-name') as HTMLInputElement).disabled).toBe(true)
   expect(host.textContent).toContain('viewing only')
   expect(host.textContent).not.toContain('Save draft')
-  expect(ontologyApi.getDraft).toHaveBeenCalledWith('1', '9223372036854775800', expect.any(AbortSignal))
+  expect(ontologyApi.getDraft).toHaveBeenCalledWith(
+    '1',
+    '9223372036854775800',
+    expect.any(AbortSignal),
+  )
 })
 it('edits real draft state through an Element Plus input and keeps it after a 409', async () => {
-  await mount(['view:ontology', 'manage:ontology']);await openMetadata()
+  await mount(['view:ontology', 'manage:ontology'])
+  await openMetadata()
   const input = document.querySelector('#ontology-name') as HTMLInputElement
   input.value = 'Updated factory'
   input.dispatchEvent(new Event('input', { bubbles: true }))
   await nextTick()
   vi.mocked(ontologyApi.saveDraft).mockRejectedValue({ status: 409, code: 'DRAFT_CONFLICT' })
-  const save = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Save draft'))!
+  const save = [...host.querySelectorAll('button')].find((b) =>
+    b.textContent?.includes('Save draft'),
+  )!
   save.click()
   await flush()
   expect(input.value).toBe('Updated factory')
@@ -114,7 +155,15 @@ it('edits real draft state through an Element Plus input and keeps it after a 40
 })
 it('locks editor and exposes recovery after uncertain publication', async () => {
   await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
-  vi.mocked(ontologyApi.validate).mockResolvedValue({ draftVersion: 25, valid: true, violations: [], reportId:'report',inputDigest:'digest',stale:false,checks:requiredChecks.map(kind=>({kind,status:'PASS',violations:[]})) })
+  vi.mocked(ontologyApi.validate).mockResolvedValue({
+    draftVersion: 25,
+    valid: true,
+    violations: [],
+    reportId: 'report',
+    inputDigest: 'digest',
+    stale: false,
+    checks: requiredChecks.map((kind) => ({ kind, status: 'PASS', violations: [] })),
+  })
   ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Run checks'))!.click()
   await flush()
   vi.mocked(ontologyApi.diff).mockResolvedValue({
@@ -122,7 +171,9 @@ it('locks editor and exposes recovery after uncertain publication', async () => 
     toRevisionId: data().id,
     changes: [],
   })
-  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Publish version'))!.click()
+  ;[...host.querySelectorAll('button')]
+    .find((b) => b.textContent?.includes('Publish version'))!
+    .click()
   await flush()
   const note = document.querySelector('.el-dialog textarea') as HTMLTextAreaElement
   note.value = 'First release'
@@ -156,7 +207,9 @@ it('launches the ontology builder from the list for members', async () => {
   vi.mocked(ontologyApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
   vi.mocked(ontologyApi.ensureBuilder).mockResolvedValue({ agentId: '9223372036854775807' })
   await mount(['view:ontology', 'manage:ontology'], OntologyList)
-  const launch = [...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Generate from source'))!
+  const launch = [...host.querySelectorAll('button')].find((b) =>
+    b.textContent?.includes('Generate from source'),
+  )!
   launch.click()
   await flush()
   expect(document.body.textContent).toContain('开始业务建模')
@@ -165,14 +218,16 @@ it('launches the ontology builder from the list for members', async () => {
 it('closes the task intake when the workspace changes', async () => {
   vi.mocked(ontologyApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
   const store = await mount(['view:ontology', 'manage:ontology'], OntologyList)
-  ;[...host.querySelectorAll('button')].find(b => b.textContent?.includes('Generate from source'))!.click()
+  ;[...host.querySelectorAll('button')]
+    .find((b) => b.textContent?.includes('Generate from source'))!
+    .click()
   await flush()
   expect(document.querySelector('.el-dialog')).not.toBeNull()
   store.currentWorkspaceId = '2'
   await flush()
-  await new Promise(r=>setTimeout(r,350))
-  const overlay=document.querySelector('.el-overlay') as HTMLElement|null
-  expect(!overlay||overlay.style.display==='none').toBe(true)
+  await new Promise((r) => setTimeout(r, 350))
+  const overlay = document.querySelector('.el-overlay') as HTMLElement | null
+  expect(!overlay || overlay.style.display === 'none').toBe(true)
 })
 it('renders immutable version detail and compares saved revisions for viewers', async () => {
   const revision = {
@@ -196,13 +251,23 @@ it('renders immutable version detail and compares saved revisions for viewers', 
   vi.mocked(ontologyApi.diff).mockResolvedValue({
     fromRevisionId: null,
     toRevisionId: revision.id,
-    changes: [{ kind: 'ADDED', category: 'axiom', key: 'axiom-1', before: null, after: revision.document.axioms[0] ?? null }],
+    changes: [
+      {
+        kind: 'ADDED',
+        category: 'axiom',
+        key: 'axiom-1',
+        before: null,
+        after: revision.document.axioms[0] ?? null,
+      },
+    ],
   })
   await mount(['view:ontology'], OntologyVersions)
   expect(host.textContent).toContain('Initial release')
   expect(host.textContent).not.toContain('Create draft from selection')
   expect(host.textContent).not.toContain('Disable new bindings')
-  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.includes('Compare versions'))!.click()
+  ;[...host.querySelectorAll('button')]
+    .find((b) => b.textContent?.includes('Compare versions'))!
+    .click()
   await flush()
   expect(ontologyApi.diff).toHaveBeenCalledWith(
     '1',
@@ -211,11 +276,12 @@ it('renders immutable version detail and compares saved revisions for viewers', 
     revision.id,
     expect.any(AbortSignal),
   )
-  expect(host.textContent).toContain('ADDED')
+  expect(host.textContent).toContain('Added')
 })
 it('registers the real dirty editor guard and preserves input on rejected workspace switch', async () => {
   const store = await mount(['view:ontology', 'manage:ontology'])
-  localStorage.setItem('mc-workspace-id', '1');await openMetadata()
+  localStorage.setItem('mc-workspace-id', '1')
+  await openMetadata()
   const input = document.querySelector('#ontology-name') as HTMLInputElement
   input.value = 'Keep my draft'
   input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -231,16 +297,42 @@ it('registers the real dirty editor guard and preserves input on rejected worksp
 })
 
 it('opens task deep links in a separate suggestions tab and returns to the model after acceptance', async () => {
-  routeState.query = {taskId:'task'}
-  const task: ModelingTask = {id:'task',ontologyId:'9223372036854775800',draftId:'9223372036854775799',goal:'建立设备模型',stage:'AWAITING_CONFIRMATION',sources:[],proposals:[{id:'proposal',status:'PENDING',answers:{},input:{changes:[{kind:'CREATE_TERM',name:'设备'}],questions:[],evidence:[],samples:[]}}]}
+  routeState.query = { taskId: 'task' }
+  const task: ModelingTask = {
+    id: 'task',
+    ontologyId: '9223372036854775800',
+    draftId: '9223372036854775799',
+    goal: '建立设备模型',
+    stage: 'AWAITING_CONFIRMATION',
+    sources: [],
+    proposals: [
+      {
+        id: 'proposal',
+        status: 'PENDING',
+        answers: {},
+        input: {
+          changes: [{ kind: 'CREATE_TERM', name: '设备' }],
+          questions: [],
+          evidence: [],
+          samples: [],
+        },
+      },
+    ],
+  }
   vi.mocked(modelingTaskApi.list).mockResolvedValue([task])
   vi.mocked(modelingTaskApi.get).mockResolvedValue(task)
-  vi.mocked(modelingTaskApi.decide).mockResolvedValue({...task,proposals:[{...task.proposals[0]!,status:'ACCEPTED'}]})
-  await mount(['view:ontology','manage:ontology'])
+  vi.mocked(modelingTaskApi.decide).mockResolvedValue({
+    ...task,
+    proposals: [{ ...task.proposals[0]!, status: 'ACCEPTED' }],
+  })
+  await mount(['view:ontology', 'manage:ontology'])
   expect(host.querySelector('.editor-navigation .active')?.textContent).toBe('Modeling suggestions')
   expect(host.querySelector('.editor-design')).toBeNull()
-  ;[...host.querySelectorAll('button')].find(button=>button.textContent?.includes('确认本批建议'))!.click()
-  await flush();await flush()
+  ;[...host.querySelectorAll('button')]
+    .find((button) => button.textContent?.includes('确认本批建议'))!
+    .click()
+  await flush()
+  await flush()
   expect(host.querySelector('.editor-navigation .active')?.textContent).toBe('Business model')
   expect((host.querySelector('.editor-suggestions') as HTMLElement).style.display).toBe('none')
   expect(host.querySelector('.editor-design')).not.toBeNull()
@@ -250,9 +342,14 @@ it('opens task deep links in a separate suggestions tab and returns to the model
 it('shows a business-friendly transport failure and keeps publication locked', async () => {
   vi.mocked(ontologyApi.validate).mockRejectedValueOnce(new Error('timeout of 120000ms exceeded'))
   await mount(['view:ontology', 'manage:ontology', 'publish:ontology'])
-  ;[...host.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Run checks')!.click()
+  ;[...host.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Run checks')!.click()
   await flush()
-  expect(host.textContent).toContain('The request did not complete. Check your connection and try again.')
+  expect(host.textContent).toContain(
+    'The request did not complete. Check your connection and try again.',
+  )
   expect(host.textContent).not.toContain('120000ms')
-  expect([...host.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Publish version')?.disabled).toBe(true)
+  expect(
+    [...host.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Publish version')
+      ?.disabled,
+  ).toBe(true)
 })

@@ -1,0 +1,17 @@
+{
+  "existing_violation_count": 2921,
+  "existing_by_rule": {
+    "STYLE-001": 2008,
+    "AR-002": 37,
+    "AR-001": 9,
+    "AR-004": 14,
+    "AR-005": 17,
+    "AR-003": 4,
+    "TS-001": 7,
+    "UI-001": 825
+  },
+  "removed_fingerprint_count": 0,
+  "base_commit": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "new_violations": 0,
+  "note": "Observation only; never consumed as a ratchet baseline. The gate compares actual Git commits."
+}

@@ -1,0 +1,16 @@
+{
+  "numTotalTests": 703,
+  "numPassedTests": 702,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "success": false,
+  "failures": [
+    {
+      "file": "mateclaw-ui/src/features/semantic/ontology/__tests__/ontologyManagement.test.ts",
+      "test": "renders immutable version detail and compares saved revisions for viewers",
+      "messages": [
+        "AssertionError: expected 'FactoryBack to listVersionNamePublica…' to contain 'ADDED'\n    at /Users/guojiexie/Development/mateclaw/mateclaw-ui/src/features/semantic/ontology/__tests__/ontologyManagement.test.ts:214:28\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at listOnTimeout (node:internal/timers:547:9)\n    at processTimers (node:internal/timers:521:7)\n    at file:///Users/guojiexie/Development/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "totals": {
+    "tests": 5873,
+    "failures": 21,
+    "errors": 0,
+    "skipped": 70
+  },
+  "failed_suites": [
+    {
+      "suite": "vip.mate.semantic.SemanticReasoningSnapshotGuardTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "path": "mateclaw-server/target/surefire-reports/TEST-vip.mate.semantic.SemanticReasoningSnapshotGuardTest.xml"
+    },
+    {
+      "suite": "vip.mate.semantic.SemanticContextReasoningIntegrationTest",
+      "tests": 20,
+      "failures": 20,
+      "errors": 0,
+      "skipped": 0,
+      "path": "mateclaw-server/target/surefire-reports/TEST-vip.mate.semantic.SemanticContextReasoningIntegrationTest.xml"
+    }
+  ],
+  "note": "Raw Surefire totals; skipped tests are not passed tests. Reactor stopped at server; later modules not verified."
+}

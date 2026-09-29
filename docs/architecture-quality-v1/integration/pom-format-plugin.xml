@@ -1,0 +1,15 @@
+<!-- MERGE into root pom.xml build/plugins; do not replace the POM.
+     This is an explicit tool-version proposal, not a claim about the repository.
+     quality.base is supplied as an immutable commit SHA by verify.py. -->
+<plugin>
+  <groupId>com.diffplug.spotless</groupId>
+  <artifactId>spotless-maven-plugin</artifactId>
+  <version>3.5.0</version>
+  <configuration>
+    <ratchetFrom>${quality.base}</ratchetFrom>
+    <java>
+      <includes><include>src/main/java/**/*.java</include><include>src/test/java/**/*.java</include></includes>
+      <googleJavaFormat><version>1.22.0</version><style>AOSP</style></googleJavaFormat>
+    </java>
+  </configuration>
+</plugin>

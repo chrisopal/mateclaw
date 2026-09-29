@@ -1,0 +1,26 @@
+## MateClaw mandatory engineering gate
+
+Before editing code, read `docs/architecture-quality-v1/RULES.md`, the relevant spec,
+and `.agents/skills/mateclaw-engineering-gate/SKILL.md`. Preserve all existing
+repository and directory-specific instructions. This section grants no permission
+to commit, push, change production data, or change repository administration.
+
+1. Record the actual HEAD/base and dirty worktree; run
+   `python3 -B scripts/quality/verify.py --mode dev --base origin/dev` before edits
+   and after each coherent change. Missing base/tool is BLOCKED, never PASS.
+2. Keep runtime → public interface → business adapter dependency direction.
+   No Controller SQL/DAO dependency, business-specific core hooks, cross-feature
+   private helper imports, widened authority, mutable published artifacts, or
+   edits to existing Flyway migrations.
+3. Keep IDs as strings, typed stable DTOs, existing i18n/theme/Workspace behavior,
+   source authorization, exact revisions, cancellation and approval semantics.
+4. Before any authorized commit, review and stage only intended files; run
+   `python3 -B scripts/quality/verify.py --mode commit`. Require exit 0 AND
+   `submission_ready=true` for the exact staged tree. Partial staging is rejected;
+   do not stash/reset other people's changes to make it pass.
+5. Never use --no-verify, skip tests, remove assertions, rewrite the baseline,
+   weaken checks, --fix inside check commands, or claim unrun checks passed.
+6. Changes to gates/rules/hooks/workflows/tests/tool versions require explicit
+   control-plane review. Self-written PASS reports are not merge authority.
+7. Report actual commands, logs, task ID, checked tree, limitations and unverified
+   environments. SCAN_PASS is not permission to submit.

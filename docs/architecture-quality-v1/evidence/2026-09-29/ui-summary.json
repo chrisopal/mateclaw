@@ -1,0 +1,104 @@
+[
+  {
+    "name": "ui-format",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "pnpm",
+      "exec",
+      "prettier",
+      "--check",
+      "--config",
+      "/Users/guojiexie/Development/mateclaw/.quality/prettier.json",
+      "package.json"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-format.log",
+    "log_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "elapsed_seconds": 1.021
+  },
+  {
+    "name": "ui-typecheck",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "pnpm",
+      "exec",
+      "vue-tsc",
+      "--noEmit"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-typecheck.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "elapsed_seconds": 22.152
+  },
+  {
+    "name": "ui-vitest",
+    "status": "FAIL",
+    "exit_code": 1,
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--reporter=json",
+      "--outputFile=/tmp/mateclaw-aq-toolchains-20260929/vitest.json"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-vitest.log",
+    "log_sha256": "7de180e782dabf46482d9c30cc867874c3c92fd731d42dae085f14ffc273704d",
+    "elapsed_seconds": 36.916
+  },
+  {
+    "name": "ui-node-tests",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "--test-reporter=tap",
+      "test/agentBindingSearch.test.ts"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-node-tests.log",
+    "log_sha256": "3040bd93cec8fc7bb53bf9544862fa1277870b37a6e2b10f633ce149b31320b5",
+    "elapsed_seconds": 0.23
+  },
+  {
+    "name": "id-precision",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "bash",
+      "/Users/guojiexie/Development/mateclaw/scripts/check-snowflake-precision.sh"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/id-precision.log",
+    "log_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+    "elapsed_seconds": 0.179
+  },
+  {
+    "name": "ui-build-enterprise",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "pnpm",
+      "build",
+      "--mode",
+      "enterprise"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-build-enterprise.log",
+    "log_sha256": "0fe0c57e1a0d668c8e5c98abda916b863c7e285c83fe55dd1b7ea9193fa7af8a",
+    "elapsed_seconds": 37.389
+  },
+  {
+    "name": "ui-build-classic",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "pnpm",
+      "build",
+      "--mode",
+      "classic"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/ui-build-classic.log",
+    "log_sha256": "86c0729945d27a20edee0b73018d7ed640c058757b139072c84a694fd067f90e",
+    "elapsed_seconds": 35.803
+  }
+]

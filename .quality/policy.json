@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "source_limit_bytes": 5000000,
+  "zero_tolerance": {},
+  "comment": "Initial ratchet compares immutable base code. After each fix, seal the relevant rule+path in a separately reviewed change. No regenerate-baseline command is provided."
+}
