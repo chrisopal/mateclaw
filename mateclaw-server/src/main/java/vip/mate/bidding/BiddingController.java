@@ -1,8 +1,6 @@
 package vip.mate.bidding;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +19,7 @@ public class BiddingController {
     private final BiddingSourceService sources;
     private final BiddingDependencies dependencies;
     private final ObjectProvider<BiddingTaskService> tasks;
+    private final BiddingTaskQueryService taskQueries;
     private final ObjectProvider<BiddingEmployeeBindings> employees;
     private final ObjectProvider<BiddingAnalysisService> analysis;
     private final ObjectProvider<BiddingHandoffService> handoffs;
@@ -30,7 +29,6 @@ public class BiddingController {
     private final ObjectProvider<BiddingReviewService> reviews;
     private final ObjectProvider<BiddingArtifactService> artifacts;
     private final ObjectMapper json;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     public BiddingController(
             BiddingAccess access,
@@ -48,13 +46,14 @@ public class BiddingController {
             ObjectProvider<BiddingReviewService> reviews,
             ObjectProvider<BiddingArtifactService> artifacts,
             ObjectMapper json,
-            org.springframework.jdbc.core.JdbcTemplate jdbc) {
+            BiddingTaskQueryService taskQueries) {
         this.access = access;
         this.projects = projects;
         this.commands = commands;
         this.sources = sources;
         this.dependencies = dependencies;
         this.tasks = tasks;
+        this.taskQueries = taskQueries;
         this.employees = employees;
         this.analysis = analysis;
         this.handoffs = handoffs;
@@ -64,7 +63,6 @@ public class BiddingController {
         this.reviews = reviews;
         this.artifacts = artifacts;
         this.json = json;
-        this.jdbc = jdbc;
     }
 
     @GetMapping("/capabilities")
@@ -279,85 +277,7 @@ public class BiddingController {
             @RequestHeader(value = "X-Workspace-Id", required = false) String workspace,
             @PathVariable String taskId) {
         String actor = access.require(workspace, "viewer");
-        var details =
-                tasks.getObject()
-                        .taskDetails(new BiddingTypes.Scope(workspace, actor, null), taskId);
-        String projectId = details.path("projectId").asText();
-        String agentId =
-                jdbc.query(
-                        "SELECT agent_id FROM mate_bidding_task WHERE workspace_id=? AND project_id=? AND id=?",
-                        rs -> rs.next() ? rs.getString(1) : null,
-                        workspace,
-                        projectId,
-                        taskId);
-        BiddingTypes.Scope taskScope = new BiddingTypes.Scope(workspace, actor, projectId);
-        String bindingsJson =
-                jdbc.query(
-                        "SELECT body_json FROM mate_bidding_project WHERE workspace_id=? AND id=?",
-                        rs -> rs.next() ? rs.getString(1) : null,
-                        workspace,
-                        projectId);
-        ObjectNode bindings = json.createObjectNode();
-        if (bindingsJson != null)
-            try {
-                bindings = (ObjectNode) json.readTree(bindingsJson).path("bindings");
-            } catch (Exception invalidProject) {
-                throw BiddingAccess.error(
-                        500, "PROJECT_STATE_INVALID", "Project bindings are unavailable");
-            }
-        String reviewerId = bindings.path("reviewer").path("agentId").asText("");
-        // The immutable target identifies historical review tasks even after rebinding
-        // or skill package changes; never downgrade their authorization to writer ACL.
-        boolean reviewTask =
-                details.path("snapshot")
-                        .path("_bidding")
-                        .path("targetId")
-                        .asText()
-                        .startsWith("review:");
-        if (reviewTask) {
-            if (!agentId.equals(reviewerId))
-                throw BiddingAccess.error(
-                        403,
-                        "REVIEWER_MATERIAL_UNAVAILABLE",
-                        "Review task is no longer assigned to the bound reviewer");
-            for (JsonNode ref : details.path("snapshot").path("inputRefs"))
-                materials
-                        .getObject()
-                        .requireReviewerReadable(
-                                taskScope,
-                                reviewerId,
-                                json.convertValue(ref, BiddingTypes.Ref.class));
-            for (JsonNode material :
-                    details.path("snapshot")
-                            .path("input")
-                            .path("evidenceSnapshot")
-                            .path("materials")
-                            .path("items"))
-                materials
-                        .getObject()
-                        .requireReviewerReadable(
-                                taskScope,
-                                reviewerId,
-                                json.convertValue(material.path("ref"), BiddingTypes.Ref.class));
-        } else {
-            materials
-                    .getObject()
-                    .requireReadable(
-                            taskScope, agentId, details.path("snapshot").path("inputRefs"));
-            for (JsonNode material :
-                    details.path("snapshot")
-                            .path("input")
-                            .path("evidenceSnapshot")
-                            .path("materials")
-                            .path("items"))
-                materials
-                        .getObject()
-                        .requireReadable(
-                                taskScope,
-                                agentId,
-                                json.convertValue(material.path("ref"), BiddingTypes.Ref.class));
-        }
-        return R.ok(details);
+        return R.ok(taskQueries.details(new BiddingTypes.Scope(workspace, actor, null), taskId));
     }
 
     @PostMapping("/projects/{id}/commands")
