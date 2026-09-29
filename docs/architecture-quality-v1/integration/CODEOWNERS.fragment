@@ -1,0 +1,21 @@
+# Merge with existing ownership rules. LAST matching rule wins.
+# Candidate owner is the repository owner; validate actual reviewer availability.
+# A sole developer cannot approve their own PR; provision a second human reviewer.
+/AGENTS.md @chrisopal
+/**/AGENTS.md @chrisopal
+/**/AGENTS.override.md @chrisopal
+/.agents/ @chrisopal
+/.quality/ @chrisopal
+/.githooks/ @chrisopal
+/.github/ @chrisopal
+/scripts/quality/ @chrisopal
+/pom.xml @chrisopal
+/**/pom.xml @chrisopal
+/.mvn/ @chrisopal
+/mateclaw-ui/package.json @chrisopal
+/mateclaw-ui/pnpm-lock.yaml @chrisopal
+/mateclaw-ui/eslint.config.mjs @chrisopal
+/mateclaw-ui/vitest.config.ts @chrisopal
+/mateclaw-server/src/test/ @chrisopal
+/mateclaw-ui/test/ @chrisopal
+/mateclaw-ui/src/**/__tests__/ @chrisopal

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "mode": "commit",
+  "started_at": "2026-09-29T03:16:29.514347+00:00",
+  "steps": [],
+  "application_acceptance": "NOT_RUN",
+  "report_dir": "/private/tmp/mateclaw-aq-commit-20260929",
+  "base_commit": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "policy_sha256": "2b4bb7752b64f1d18824022bae5036644f75c4a9d8a06f22b434e9ed98922d5c",
+  "runner_sha256": "47c01088aadeaa8c1319ecd27a2077ead243ff44bfc298f85542e5cfb78cb5c9",
+  "status": "BLOCKED",
+  "error": "PARTIAL_STAGING: tracked worktree differs from index. Stage the intended content or use a clean worktree; no stash is performed.",
+  "submission_ready": false,
+  "finished_at": "2026-09-29T03:16:29.541757+00:00"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "java-format",
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "mvn",
+      "-B",
+      "-Dquality.base=ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+      "spotless:check"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/java-format.log",
+    "log_sha256": "f8cf58397862e9cfd78d589650659acb25d9e96f8ac59295af5d4eb91f83c8b3",
+    "elapsed_seconds": 15.28
+  },
+  {
+    "name": "java-tests",
+    "status": "FAIL",
+    "exit_code": 1,
+    "command": [
+      "mvn",
+      "-B",
+      "-Dmaven.compiler.proc=full",
+      "-Dmateclaw.skill.workspace.root=/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-aq-test-skills-x4g85j_3",
+      "clean",
+      "verify"
+    ],
+    "log": "/tmp/mateclaw-aq-toolchains-20260929/java-tests.log",
+    "log_sha256": "2b4e503a4ed74d430083ff2b88c88976c9c57c43bc99614d897925742e507c41",
+    "elapsed_seconds": 445.616
+  }
+]

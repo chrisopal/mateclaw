@@ -1,0 +1,8 @@
+{
+  "devDependencies": {"prettier": "3.6.2"},
+  "scripts": {
+    "lint:check": "eslint src",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "_instructions": "Merge fields, do not replace package.json. Generate the lockfile using the reviewed pinned pnpm version and commit it. CI uses --frozen-lockfile; quality checks never auto-install. Existing build/test commands remain."
+}

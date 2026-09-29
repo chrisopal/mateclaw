@@ -11,7 +11,9 @@
     "lint": "eslint src --fix && bash ../scripts/check-snowflake-precision.sh",
     "lint:precision": "bash ../scripts/check-snowflake-precision.sh",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint:check": "eslint src --max-warnings=0",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -63,6 +65,8 @@
     "unplugin-vue-components": "^32.1.0",
     "vite": "^7.3.1",
     "vitest": "^4.1.7",
-    "vue-tsc": "^3.2.6"
-  }
+    "vue-tsc": "^3.2.6",
+    "prettier": "3.6.2"
+  },
+  "packageManager": "pnpm@12.4.2"
 }

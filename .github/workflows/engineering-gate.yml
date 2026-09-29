@@ -1,0 +1,76 @@
+name: MateClaw Engineering Gate
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+permissions:
+  contents: read
+concurrency:
+  group: engineering-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    name: Engineering verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+      REPORT_DIR: ${{ runner.temp }}/mateclaw-engineering-report
+    steps:
+      - name: Checkout tested merge tree
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2, pinned
+        with:
+          fetch-depth: 0
+          path: candidate
+          persist-credentials: false
+      - name: Checkout trusted base control plane
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 1
+          path: trusted
+          persist-credentials: false
+      - name: Require bootstrap already installed on base
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BASE_SHA"
+          test -f trusted/scripts/quality/verify.py
+          test -f trusted/.quality/policy.json
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.22.2'
+      - name: Install pinned package manager
+        run: npm install --global pnpm@12.4.2
+      - name: Install locked frontend dependencies
+        working-directory: candidate/mateclaw-ui
+        run: pnpm install --frozen-lockfile
+      - name: Execute base-owned runner against candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 trusted/scripts/quality/verify.py \
+            --repo "$GITHUB_WORKSPACE/candidate" --mode ci \
+            --base "$BASE_SHA" --report-dir "$REPORT_DIR"
+      - name: Upload engineering evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: engineering-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.REPORT_DIR }}
+          if-no-files-found: error
+          retention-days: 7
+  required:
+    name: Engineering Gate Required
+    if: always()
+    needs: [verify]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require actual success, not skipped/cancelled/missing
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+        run: test "$VERIFY_RESULT" = success
