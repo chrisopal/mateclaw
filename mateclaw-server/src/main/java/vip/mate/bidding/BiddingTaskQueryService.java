@@ -36,8 +36,11 @@ public class BiddingTaskQueryService {
             throw BiddingAccess.error(
                     500, "PROJECT_STATE_INVALID", "Project bindings are unavailable");
         }
-        if (access == null) throw BiddingAccess.error(404, "NOT_FOUND", "Task not found");
+        if (access == null || access.project() == null)
+            throw BiddingAccess.error(404, "NOT_FOUND", "Task not found");
         String agentId = access.agentId();
+        if (agentId == null || agentId.isBlank())
+            throw BiddingAccess.error(403, "EMPLOYEE_UNAVAILABLE", "Bound employee is unavailable");
         JsonNode project = access.project();
         if (project != null && !(project.path("bindings") instanceof ObjectNode))
             throw BiddingAccess.error(
@@ -52,7 +55,7 @@ public class BiddingTaskQueryService {
         boolean reviewTask =
                 snapshot.path("_bidding").path("targetId").asText().startsWith("review:");
         if (reviewTask) {
-            if (!reviewerId.equals(agentId))
+            if (reviewerId.isBlank() || !reviewerId.equals(agentId))
                 throw BiddingAccess.error(
                         403,
                         "REVIEWER_MATERIAL_UNAVAILABLE",

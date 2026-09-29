@@ -105,6 +105,35 @@ class BiddingTaskQueryServiceTest {
         org.mockito.Mockito.verifyNoInteractions(materials);
     }
 
+    @Test
+    void missingProjectAfterTaskLookupCannotReturnStoredSnapshot() {
+        when(tasks.taskDetails(requestScope, "task")).thenReturn(details("chapter:1"));
+        when(repository.findAccess("1", "project", "task"))
+                .thenReturn(new BiddingTaskReadRepository.TaskAccess("writer", null));
+
+        BiddingApiException denied =
+                assertThrows(
+                        BiddingApiException.class, () -> queries.details(requestScope, "task"));
+
+        assertEquals(404, denied.status());
+        org.mockito.Mockito.verifyNoInteractions(materials);
+    }
+
+    @Test
+    void blankTaskEmployeeCannotReturnStoredSnapshot() {
+        when(tasks.taskDetails(requestScope, "task")).thenReturn(details("review:old-baseline"));
+        when(repository.findAccess("1", "project", "task"))
+                .thenReturn(new BiddingTaskReadRepository.TaskAccess("", project("")));
+
+        BiddingApiException denied =
+                assertThrows(
+                        BiddingApiException.class, () -> queries.details(requestScope, "task"));
+
+        assertEquals(403, denied.status());
+        assertEquals("EMPLOYEE_UNAVAILABLE", denied.code());
+        org.mockito.Mockito.verifyNoInteractions(materials);
+    }
+
     private ObjectNode details(String targetId) {
         ObjectNode details = json.createObjectNode().put("projectId", "project");
         ObjectNode snapshot = details.putObject("snapshot");
