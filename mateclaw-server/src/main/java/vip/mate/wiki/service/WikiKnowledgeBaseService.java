@@ -151,9 +151,8 @@ public class WikiKnowledgeBaseService {
 
     /**
      * Enabled KB ids this agent is pinned to, or {@code null} when the agent is unrestricted (no
-     * scope rows, or the binding mapper isn't wired — see {@link #kbBindingMapper}). Returning
-     * {@code null} rather than an empty set is deliberate: an empty set would mean "no KB visible",
-     * but a fresh agent must default to its whole workspace.
+     * active scope rows, or the binding mapper isn't wired — see {@link #kbBindingMapper}).
+     * Disabled-only bindings mean no KB is visible.
      */
     private Set<Long> scopedKbIds(Long agentId) {
         if (agentId == null || kbBindingMapper == null) {
@@ -163,11 +162,12 @@ public class WikiKnowledgeBaseService {
                 kbBindingMapper.selectList(
                         new LambdaQueryWrapper<AgentWikiKbBinding>()
                                 .eq(AgentWikiKbBinding::getAgentId, agentId)
-                                .eq(AgentWikiKbBinding::getEnabled, true));
+                                .eq(AgentWikiKbBinding::getDeleted, 0));
         if (rows.isEmpty()) {
             return null;
         }
         return rows.stream()
+                .filter(row -> Boolean.TRUE.equals(row.getEnabled()))
                 .map(AgentWikiKbBinding::getKbId)
                 .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -424,6 +424,10 @@ public class WikiKnowledgeBaseService {
      */
     @Transactional
     public CascadeDeleteResult delete(Long id) {
+        // Result acceptance locks KB before raw rows; cascade deletion must share that order.
+        if (id == null || kbMapper.lockForUpdate(id) == null) {
+            throw new IllegalArgumentException("Knowledge base not found: " + id);
+        }
         WikiKnowledgeBaseEntity kb = kbMapper.selectById(id);
         if (kb == null) {
             throw new IllegalArgumentException("Knowledge base not found: " + id);

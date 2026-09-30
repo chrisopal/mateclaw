@@ -15,6 +15,7 @@ import vip.mate.agent.AgentToolSet;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.presales.PresalesToolPolicy;
 import vip.mate.tool.guard.ToolGuardResult;
+import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 class ToolExecutionExecutorPresalesScopeTest {
     @Test
@@ -31,7 +32,9 @@ class ToolExecutionExecutorPresalesScopeTest {
         when(jdbc.queryForObject(
                         startsWith("SELECT wiki_disabled"), eq(Boolean.class), eq("7"), eq("1")))
                 .thenReturn(false);
-        var policy = new PresalesToolPolicy(jdbc, new ObjectMapper());
+        var sourceAccess = mock(ProjectSourceAccess.class);
+        when(sourceAccess.canEmployeeReadKb("1", "7", "42")).thenReturn(true);
+        var policy = new PresalesToolPolicy(jdbc, new ObjectMapper(), sourceAccess);
         var origin = ChatOrigin.web("presales:1:p:run", "1", 1L, null).withAgent(7L);
         assertTrue(
                 policy.evaluate(
@@ -75,7 +78,8 @@ class ToolExecutionExecutorPresalesScopeTest {
         when(jdbc.queryForObject(
                         startsWith("SELECT body_json"), eq(String.class), eq("p"), eq("1")))
                 .thenReturn("{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"42\"}],\"tasks\":[]}");
-        var policy = new PresalesToolPolicy(jdbc, new ObjectMapper());
+        var policy =
+                new PresalesToolPolicy(jdbc, new ObjectMapper(), mock(ProjectSourceAccess.class));
         var origin = ChatOrigin.web("presales:1:p:run", "1", 1L, null).withAgent(7L);
         assertFalse(
                 policy.evaluate(

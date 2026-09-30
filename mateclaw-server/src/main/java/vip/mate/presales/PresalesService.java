@@ -12,12 +12,15 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import vip.mate.semantic.config.SemanticProperties;
 import vip.mate.semantic.graph.GraphApplicationService;
 import vip.mate.semantic.statement.StatementApplicationService;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
+import vip.mate.workspace.core.service.ProjectAuthorityFence;
 
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
@@ -32,6 +35,7 @@ public class PresalesService {
     private final ObjectProvider<vip.mate.semantic.query.SemanticQueryService> queries;
     private final PresalesArtifactRenderer renderer;
     private final ObjectProvider<PresalesEmployeeRuntime> employees;
+    private final ProjectAuthorityFence authorityFence;
 
     public PresalesService(
             JdbcTemplate jdbc,
@@ -43,8 +47,10 @@ public class PresalesService {
             SemanticProperties semantic,
             ObjectProvider<vip.mate.semantic.query.SemanticQueryService> queries,
             PresalesArtifactRenderer renderer,
-            ObjectProvider<PresalesEmployeeRuntime> employees) {
+            ObjectProvider<PresalesEmployeeRuntime> employees,
+            ProjectAuthorityFence authorityFence) {
         this.employees = employees;
+        this.authorityFence = authorityFence;
         this.jdbc = jdbc;
         this.json = json;
         this.access = access;
@@ -273,7 +279,7 @@ public class PresalesService {
         return applyCommand(scope, projectId, r, false);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     public ObjectNode saveEmployeeTask(String scope, String projectId, Command r) {
         if (!"SAVE_AI_TASK".equals(r.action())) throw bad("Employee task required");
         return applyCommand(scope, projectId, r, true);
@@ -379,8 +385,20 @@ public class PresalesService {
                         throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
                     if (employees.getIfAvailable() == null)
                         throw PresalesModelAdapter.error(409, "EMPLOYEE_UNAVAILABLE");
-                    // The project row is locked by load(..., true); recheck the candidate's
-                    // execution authority in this same transaction before materializing output.
+                    // Keep revocation writers behind this transaction until the candidate is
+                    // committed or rolled back. The project row alone does not protect authority
+                    // held in user, employee, model, and source rows.
+                    ObjectNode activeTask = find(p, "tasks", value.path("id").asText());
+                    if (!(activeTask.path("contextSnapshot") instanceof ObjectNode activeSnapshot))
+                        throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+                    ObjectNode durableIdentity = activeTask.deepCopy();
+                    ObjectNode candidateIdentity = value.deepCopy();
+                    durableIdentity.remove(List.of("status", "finishedAt", "result"));
+                    candidateIdentity.remove(List.of("status", "finishedAt", "result"));
+                    if (!"RUNNING".equals(activeTask.path("status").asText())
+                            || !durableIdentity.equals(candidateIdentity))
+                        throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+                    lockResultAuthority(scope, actor, activeTask, activeSnapshot);
                     employees.getObject().revalidate(scope, actor, value, snapshot);
                     PresalesModelAdapter.validate(result, snapshot, value.path("skill").asText());
                 }
@@ -1265,6 +1283,29 @@ public class PresalesService {
                         scope);
         if (found.isEmpty()) throw new SemanticApiException(404, "NOT_FOUND", "Project not found");
         return found.getFirst();
+    }
+
+    private void lockResultAuthority(
+            String scope, String actor, ObjectNode task, ObjectNode snapshot) {
+        var sources = new ArrayList<ProjectAuthorityFence.Source>();
+        for (var source : snapshot.path("sources")) {
+            sources.add(
+                    new ProjectAuthorityFence.Source(
+                            source.path("kbId").asText(),
+                            source.path("sourceRef").asText(),
+                            source.path("graphId").asText()));
+        }
+        try {
+            if (authorityFence.lockForResult(
+                    scope,
+                    List.of(actor, snapshot.path("actorId").asText()),
+                    task.path("agentId").asText(),
+                    task.path("modelConfigId").asText(),
+                    sources)) return;
+        } catch (IllegalArgumentException invalid) {
+            throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+        }
+        throw PresalesModelAdapter.error(409, "EXECUTION_AUTHORITY_CHANGED");
     }
 
     private ObjectNode replay(String scope, String actor, String operation, String hash) {

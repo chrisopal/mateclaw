@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vip.mate.agent.binding.model.AgentProviderPreference;
 import vip.mate.agent.binding.model.AgentSkillBinding;
 import vip.mate.agent.binding.model.AgentToolBinding;
@@ -1074,7 +1075,13 @@ public class AgentBindingService implements AgentBindingResolver {
      * agent to workspace-wide (unrestricted) access. Every incoming KB must live in the agent's
      * workspace — pinning a KB from another tenancy is refused (403).
      */
+    @Transactional
     public void setKbBindings(Long agentId, List<Long> kbIds) {
+        // Result acceptance locks the same agent row before rechecking source access.
+        // Bindings must take this lock before replacing rows, including an empty save.
+        if (agentId == null || agentMapper.lockForUpdate(agentId) == null) {
+            throw new MateClawException("err.agent.not_found", 404, "Agent 不存在: " + agentId);
+        }
         // De-dup defensively: the unique index is (agent_id, kb_id, deleted),
         // so two identical ids in the incoming list would collide on insert.
         Set<Long> distinct = new LinkedHashSet<>();

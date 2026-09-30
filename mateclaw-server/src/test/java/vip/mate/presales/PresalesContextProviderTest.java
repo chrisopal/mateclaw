@@ -22,6 +22,11 @@ class PresalesContextProviderTest {
                 "CREATE TABLE mate_wiki_knowledge_base(id BIGINT,workspace_id BIGINT,deleted INT)");
         jdbc.execute(
                 "CREATE TABLE mate_wiki_raw_material(id BIGINT,kb_id BIGINT,title VARCHAR,extracted_text VARCHAR,original_content VARCHAR,deleted INT)");
+        jdbc.execute(
+                "CREATE TABLE mate_agent(id BIGINT,workspace_id BIGINT,enabled BOOLEAN,deleted INT,wiki_disabled BOOLEAN)");
+        jdbc.execute(
+                "CREATE TABLE mate_agent_wiki_kb(agent_id BIGINT,kb_id BIGINT,enabled BOOLEAN,deleted INT)");
+        jdbc.update("INSERT INTO mate_agent VALUES(7,10,TRUE,0,FALSE)");
         jdbc.update("INSERT INTO mate_wiki_knowledge_base VALUES(1,10,0),(2,10,0),(3,20,0)");
         jdbc.update(
                 "INSERT INTO mate_wiki_raw_material VALUES(11,1,'A','一期两条线',NULL,0),(22,2,'B','另一个项目资料',NULL,0)");
@@ -31,8 +36,13 @@ class PresalesContextProviderTest {
         var p =
                 (com.fasterxml.jackson.databind.node.ObjectNode)
                         json.readTree(
-                                "{\"id\":\"p1\",\"version\":1,\"materials\":[{\"kbId\":\"1\",\"graphId\":\"g1\",\"role\":\"PROJECT\"}],\"reviews\":[{\"summary\":\"self-approved\"}]}");
-        var provider = new PresalesContextProvider(jdbc, json, access);
+                                "{\"id\":\"p1\",\"version\":1,\"agentId\":\"7\",\"materials\":[{\"kbId\":\"1\",\"graphId\":\"g1\",\"role\":\"PROJECT\"}],\"reviews\":[{\"summary\":\"self-approved\"}]}");
+        var provider =
+                new PresalesContextProvider(
+                        jdbc,
+                        json,
+                        access,
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
         var snapshot = provider.snapshot("10", p, "S1", "理解项目");
         assertEquals(1, snapshot.path("sources").size());
         assertEquals("11", snapshot.path("sources").get(0).path("sourceRef").asText());

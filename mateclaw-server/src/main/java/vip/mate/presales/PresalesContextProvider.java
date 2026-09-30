@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 /** Task scope is built exclusively from server-authorized project material bindings. */
 @Component
@@ -13,11 +14,17 @@ public class PresalesContextProvider {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final PresalesAccess access;
+    private final ProjectSourceAccess sourceAccess;
 
-    public PresalesContextProvider(JdbcTemplate jdbc, ObjectMapper json, PresalesAccess access) {
+    public PresalesContextProvider(
+            JdbcTemplate jdbc,
+            ObjectMapper json,
+            PresalesAccess access,
+            ProjectSourceAccess sourceAccess) {
         this.jdbc = jdbc;
         this.json = json;
         this.access = access;
+        this.sourceAccess = sourceAccess;
     }
 
     public ObjectNode snapshot(String scope, ObjectNode project, String skill, String goal) {
@@ -59,13 +66,7 @@ public class PresalesContextProvider {
         Set<String> seen = new HashSet<>();
         for (var binding : project.path("materials")) {
             String kb = binding.path("kbId").asText();
-            Integer count =
-                    jdbc.queryForObject(
-                            "SELECT COUNT(*) FROM mate_wiki_knowledge_base WHERE id=? AND workspace_id=? AND deleted=0",
-                            Integer.class,
-                            kb,
-                            scope);
-            if (count == null || count != 1)
+            if (!sourceAccess.canEmployeeReadKb(scope, project.path("agentId").asText(), kb))
                 throw PresalesModelAdapter.error(409, "SOURCE_UNAVAILABLE");
             var rows =
                     jdbc.queryForList(
@@ -118,6 +119,9 @@ public class PresalesContextProvider {
         if (project.path("version").asInt() != snapshot.path("projectVersion").asInt())
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         for (var source : snapshot.path("sources")) {
+            if (!sourceAccess.canEmployeeReadKb(
+                    scope, project.path("agentId").asText(), source.path("kbId").asText()))
+                throw PresalesModelAdapter.error(409, "SOURCE_UNAVAILABLE");
             if (!source.path("graphId").asText().isBlank()) {
                 Integer withdrawn =
                         jdbc.queryForObject(

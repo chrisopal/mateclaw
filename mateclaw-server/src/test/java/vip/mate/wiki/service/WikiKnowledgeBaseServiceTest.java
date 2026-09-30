@@ -2,6 +2,7 @@ package vip.mate.wiki.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,7 @@ import vip.mate.agent.model.AgentEntity;
 import vip.mate.agent.repository.AgentMapper;
 import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
 import vip.mate.wiki.repository.WikiKnowledgeBaseMapper;
+import vip.mate.wiki.repository.WikiRawMaterialMapper;
 
 /**
  * Unit tests for {@link WikiKnowledgeBaseService#resolvePrimaryKb(Long)}.
@@ -292,6 +294,46 @@ class WikiKnowledgeBaseServiceTest {
         assertThat(service.listByAgentId(7L))
                 .extracting(WikiKnowledgeBaseEntity::getId)
                 .containsExactlyInAnyOrder(100L, 200L);
+    }
+
+    @Test
+    @DisplayName("disabled-only binding rows do not restore workspace-wide visibility")
+    void disabledOnlyBindingsHideAllKbs() {
+        AgentWikiKbBindingMapper mapper = mock(AgentWikiKbBindingMapper.class);
+        AgentWikiKbBinding disabled = new AgentWikiKbBinding();
+        disabled.setKbId(100L);
+        disabled.setEnabled(false);
+        when(mapper.selectList(any()))
+                .thenAnswer(
+                        invocation -> {
+                            com.baomidou.mybatisplus.core.conditions.AbstractWrapper<?, ?, ?>
+                                    query = invocation.getArgument(0);
+                            return query.getParamNameValuePairs().containsValue(true)
+                                    ? List.of()
+                                    : List.of(disabled);
+                        });
+        ReflectionTestUtils.setField(service, "kbBindingMapper", mapper);
+        when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, null));
+        when(kbMapper.selectList(any()))
+                .thenReturn(List.of(kb(100L, null, 1L, "KB A"), kb(200L, null, 1L, "KB B")));
+
+        assertThat(service.listByAgentId(7L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("cascade delete locks the KB before reading children")
+    void cascadeDeleteLocksKbBeforeReadingChildren() {
+        WikiRawMaterialMapper raw = mock(WikiRawMaterialMapper.class);
+        WikiKnowledgeBaseService deleting =
+                new WikiKnowledgeBaseService(kbMapper, raw, null, null, null, null, agentMapper);
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class, () -> deleting.delete(100L));
+
+        var order = inOrder(kbMapper);
+        order.verify(kbMapper).lockForUpdate(100L);
+        order.verify(kbMapper).selectById(100L);
+        verify(raw, never()).delete(any());
     }
 
     @Test

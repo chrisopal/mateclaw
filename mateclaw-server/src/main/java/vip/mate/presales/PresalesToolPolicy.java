@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.execution.ProjectConversationToolBoundary;
+import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 /**
  * Server-side allowlist and project-source boundary for presales tool calls.
@@ -43,10 +44,13 @@ public class PresalesToolPolicy implements ProjectConversationToolBoundary {
 
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
+    private final ProjectSourceAccess sourceAccess;
 
-    public PresalesToolPolicy(JdbcTemplate jdbc, ObjectMapper json) {
+    public PresalesToolPolicy(
+            JdbcTemplate jdbc, ObjectMapper json, ProjectSourceAccess sourceAccess) {
         this.jdbc = jdbc;
         this.json = json;
+        this.sourceAccess = sourceAccess;
     }
 
     @Override
@@ -153,7 +157,10 @@ public class PresalesToolPolicy implements ProjectConversationToolBoundary {
                 return ProjectConversationToolBoundary.Decision.deny(
                         "PRESALES_PROJECT_SCOPE: kbName is not an unambiguous project-bound knowledge base.");
             }
-            return ProjectConversationToolBoundary.Decision.allow();
+            return employeeCanReadKb(project, matching.iterator().next())
+                    ? ProjectConversationToolBoundary.Decision.allow()
+                    : ProjectConversationToolBoundary.Decision.deny(
+                            "PRESALES_PROJECT_SCOPE: knowledge base is unavailable to the bound employee.");
         }
         if (!project.kbIds().contains(kbId)) {
             return ProjectConversationToolBoundary.Decision.deny(
@@ -165,39 +172,10 @@ public class PresalesToolPolicy implements ProjectConversationToolBoundary {
                         "PRESALES_PROJECT_SCOPE: knowledge base is unavailable to the bound employee.");
     }
 
-    /** Mirrors WikiKnowledgeBaseService's workspace-plus-optional-agent-scope rule. */
     private boolean employeeCanReadKb(ProjectScope project, String kbId) {
         try {
-            Integer visible =
-                    jdbc.queryForObject(
-                            "SELECT COUNT(*) FROM mate_wiki_knowledge_base WHERE id=? AND workspace_id=? AND deleted=0",
-                            Integer.class,
-                            kbId,
-                            project.workspaceId());
-            if (visible == null || visible != 1) return false;
-
-            Boolean disabled =
-                    jdbc.queryForObject(
-                            "SELECT wiki_disabled FROM mate_agent WHERE id=? AND workspace_id=?",
-                            Boolean.class,
-                            project.agentId(),
-                            project.workspaceId());
-            if (disabled == null || Boolean.TRUE.equals(disabled)) return false;
-
-            Integer scoped =
-                    jdbc.queryForObject(
-                            "SELECT COUNT(*) FROM mate_agent_wiki_kb WHERE agent_id=? AND enabled=TRUE AND deleted=0",
-                            Integer.class,
-                            project.agentId());
-            if (scoped == null || scoped == 0) return true;
-            Integer bound =
-                    jdbc.queryForObject(
-                            "SELECT COUNT(*) FROM mate_agent_wiki_kb WHERE agent_id=? AND kb_id=? AND enabled=TRUE AND deleted=0",
-                            Integer.class,
-                            project.agentId(),
-                            kbId);
-            return bound != null && bound == 1;
-        } catch (Exception ignored) {
+            return sourceAccess.canEmployeeReadKb(project.workspaceId(), project.agentId(), kbId);
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

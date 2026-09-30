@@ -28,7 +28,7 @@
 | Java 格式 | Spotless + AOSP，commit/CI 适用时 | 根 POM 已配置 | 增量格式，不格式化原文/历史字节 |
 | 前端格式 | Prettier 3.6.2 + 固定 config | package/lock 已配置 | 只检查适用变更文件；不自动 --write |
 | Java 测试 | 根 reactor clean verify，解析 XML | wrapper 已配置 | 当前基线结果见实测，不忽略失败 |
-| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置 | 构建不是浏览器/人工验收 |
+| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置；Vitest 最多 2 个 worker、单测 20 秒超时 | 构建不是浏览器/人工验收；共享机器负载仍可能影响耗时 |
 | 独立成本分析工具 | Python 依赖探测、unittest、Python/JS 语法 | wrapper 已配置 | 模拟样本通过不等于真实经营数据验收；缺 openpyxl 阻断 |
 | ArchUnit | integration/WorkbenchArchitectureTest.java | 仅模板，NOT_INSTALLED | AQ-01/03 清零后接入 AQ-07；不能冻结新增违规 |
 | pre-commit / pre-push | 当前工作区 .githooks | 已安装 worktree-local | 可绕过；其他工作区需显式独立安装 |
@@ -38,11 +38,13 @@
 
 ## 阶段台账
 
+Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker 启动和跨文件用例超时，失败分布覆盖未改动的售前、语义和本体测试；定向 54/54 通过。将 worker 上限设为 2、单测超时设为 20 秒后，使用门禁相同的默认 Vitest 命令复跑 703/703 通过。调整只影响测试运行调度与超时，不删除、跳过或放宽断言；完整提交门禁和远端结果仍需按候选提交重新验证。
+
 | 任务 | 当前状态 | 下一道出口 |
 |---|---|---|
 | AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
 | AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
-| AQ-02–06 | DESIGNED / NOT_IMPLEMENTED | 按实施设计逐切片行为刻画与改造 |
+| AQ-02–06 | AQ-02 第一片工程实现，正式 AC-07–10 仍为 NOT_RUN；其余按各任务证据推进 | 补齐角色/来源权限矩阵、生产数据库并发验证与独立 QA 签收 |
 | AQ-07 | DESIGNED / NOT_IMPLEMENTED | 清零后 ArchUnit + policy 封口 |
 | AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
 | AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |

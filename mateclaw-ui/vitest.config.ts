@@ -14,6 +14,9 @@ export default defineConfig({
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     environment: 'happy-dom',
+    // Bound fork concurrency so the full suite remains stable on shared developer machines.
+    maxWorkers: 2,
+    testTimeout: 20_000,
   },
   resolve: {
     alias: {
