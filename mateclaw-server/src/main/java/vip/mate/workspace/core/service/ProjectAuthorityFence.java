@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -12,9 +13,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Service
 public class ProjectAuthorityFence {
     private final JdbcTemplate jdbc;
+    private final SqlSessionTemplate sessions;
 
-    public ProjectAuthorityFence(JdbcTemplate jdbc) {
+    public ProjectAuthorityFence(JdbcTemplate jdbc, SqlSessionTemplate sessions) {
         this.jdbc = jdbc;
+        this.sessions = sessions;
     }
 
     public record Source(String kbId, String rawId, String graphId) {}
@@ -61,6 +64,11 @@ public class ProjectAuthorityFence {
             if (source.graphId() != null && !source.graphId().isBlank())
                 graphs.add(source.graphId());
         }
+        for (String graph : graphs)
+            if (!lock(
+                    "SELECT id FROM mate_semantic_graph WHERE id=? AND workspace_id=? FOR UPDATE",
+                    graph,
+                    workspace)) return false;
         for (long kb : knowledgeBases)
             if (!lock(
                     "SELECT id FROM mate_wiki_knowledge_base WHERE id=? AND workspace_id=?"
@@ -72,11 +80,9 @@ public class ProjectAuthorityFence {
                     "SELECT id FROM mate_wiki_raw_material WHERE id=? AND kb_id=? FOR UPDATE",
                     source.getKey(),
                     source.getValue())) return false;
-        for (String graph : graphs)
-            if (!lock(
-                    "SELECT id FROM mate_semantic_graph WHERE id=? AND workspace_id=? FOR UPDATE",
-                    graph,
-                    workspace)) return false;
+        // JDBC row locks do not invalidate MyBatis reads cached earlier in this transaction.
+        // Revalidation must read the authority that won the locks, rather than that old snapshot.
+        sessions.clearCache();
         return true;
     }
 

@@ -88,8 +88,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-09-30/AQ02_AUTHORITY_ACCEPTANCE.md",
+        "evidence/2026-09-30/authority-test-results.json"
+      ],
+      "note": "工程切片已验证 H2/隔离 MySQL 8.0.46 行锁及 Workspace/成员撤权的 MyBatis 缓存与 service 持久化路径；完整角色/runtime/UI/历史/导出和独立 QA 尚未验收，保留 NOT_RUN"
     },
     {
       "id": "AC-09",
@@ -99,8 +102,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-09-30/AQ02_AUTHORITY_ACCEPTANCE.md",
+        "evidence/2026-09-30/authority-test-results.json"
+      ],
+      "note": "工程切片已验证 H2/隔离 MySQL 8.0.46 行锁及 Workspace/成员撤权的 MyBatis 缓存与 service 持久化路径；完整角色/runtime/UI/历史/导出和独立 QA 尚未验收，保留 NOT_RUN"
     },
     {
       "id": "AC-10",

@@ -1,0 +1,455 @@
+{
+  "task": "AQ-02 authority-revocation acceptance slice",
+  "starting_head": "6a28a13132b51292d3c3130bc8036523ce78d737",
+  "formal_acceptance": "NOT_RUN",
+  "isolation": "READ_COMMITTED",
+  "mysql_version": "8.0.46",
+  "mysql_image_digest": "mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "runs": [
+    {
+      "name": "h2-before-fix",
+      "counts": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 3,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+          "status": "FAIL",
+          "error": "org.opentest4j.AssertionFailedError: Expected vip.mate.semantic.web.SemanticApiException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+          "status": "FAIL",
+          "error": "org.opentest4j.AssertionFailedError: Expected vip.mate.semantic.web.SemanticApiException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+          "status": "FAIL",
+          "error": "StatementCallback; SQL [SELECT id FROM mate_wiki_knowledge_base WHERE id=3 FOR UPDATE NOWAIT]; Timeout trying to lock table \"MATE_WIKI_KNOWLEDGE_BASE\"; SQL statement:\nSELECT id FROM mate_wiki_knowledge_base WHERE id=3 FOR UPDATE NOWAIT [50200-232]"
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-acceptance-20260930/h2-complete-red.xml",
+      "raw_xml_sha256": "927cfc94cd3d4441ba8fb25fa93dfc958874823c83ae46c427b6020ac846f38d",
+      "log_path": "/tmp/mateclaw-aq-fence-complete-red.log",
+      "log_sha256": "89ff5fb448a6e4531e4ccf1fde610b937db510bbd9f001277aa963ee34eba209"
+    },
+    {
+      "name": "mysql-before-fix-row-cache",
+      "counts": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 3,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+          "status": "FAIL",
+          "error": "org.opentest4j.AssertionFailedError: Expected vip.mate.semantic.web.SemanticApiException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+          "status": "FAIL",
+          "error": "org.opentest4j.AssertionFailedError: Expected vip.mate.semantic.web.SemanticApiException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+          "status": "FAIL",
+          "error": "StatementCallback; uncategorized SQLException for SQL [SELECT id FROM mate_wiki_knowledge_base WHERE id=3 FOR UPDATE NOWAIT]; SQL state [HY000]; error code [3572]; Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set."
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-acceptance-20260930/mysql-red.xml",
+      "raw_xml_sha256": "bf7b79a3b5df221baaa3ef37f08489de36464a197a201cef39d84cbe76eff644",
+      "log_path": "/tmp/mateclaw-aq-fence-mysql-red.log",
+      "log_sha256": "83c111f03da29739225c64aad43aeaaffd6d42ba94a62ec7a1bfc90f97774db1"
+    },
+    {
+      "name": "h2-final",
+      "counts": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-acceptance-20260930/h2-final.xml",
+      "raw_xml_sha256": "c032d166c6105237272707936f9eefdcd75f355513fa35be84c8372fa7afc727",
+      "log_path": "/tmp/mateclaw-aq-fence-h2-final.log",
+      "log_sha256": "5d07e72d4e589a9c067fe79114651cd646c8000224b812535839032c1b983abc"
+    },
+    {
+      "name": "mysql-final",
+      "counts": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+          "status": "PASS",
+          "error": null
+        },
+        {
+          "name": "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]",
+          "status": "PASS",
+          "error": null
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-acceptance-20260930/mysql-final.xml",
+      "raw_xml_sha256": "ddf96fede781ebcb225391e47a1d6dcc180841aa5963983eae3ea662aec28e2d",
+      "log_path": "/tmp/mateclaw-aq-fence-mysql-final.log",
+      "log_sha256": "17d27429074f205916ff0455228ab0d23ec3936a1d74fd682604fbad6f817e61"
+    }
+  ],
+  "checked_sources": {
+    "mateclaw-server/src/main/java/vip/mate/workspace/core/service/ProjectAuthorityFence.java": "f1cd89890ff69c34e05c427c6b81f03143928380c3e2e8af9129be04570d7101",
+    "mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java": "7c7d367316a17659da936d7859f56c5a56b2b2ed43135977608cec192a1ebc85",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java": "4ac0df40e77c63d532335e5b23731c859137aa9bc6365308d78761726c646f6f"
+  }
+}
