@@ -48,6 +48,23 @@ public class ProjectSourceAccess {
                 == 1;
     }
 
+    /** Resolve raw source ownership from live storage, rather than trusting a caller snapshot. */
+    public boolean canEmployeeReadSource(String workspaceId, String employeeId, String sourceId) {
+        long source;
+        try {
+            source = positive(sourceId);
+        } catch (IllegalArgumentException invalid) {
+            return false;
+        }
+        var kbIds =
+                jdbc.queryForList(
+                        "SELECT kb_id FROM mate_wiki_raw_material WHERE id=? AND deleted=0",
+                        Long.class,
+                        source);
+        return kbIds.size() == 1
+                && canEmployeeReadKb(workspaceId, employeeId, kbIds.getFirst().toString());
+    }
+
     private int count(String sql, Object... args) {
         Integer value = jdbc.queryForObject(sql, Integer.class, args);
         return value == null ? 0 : value;

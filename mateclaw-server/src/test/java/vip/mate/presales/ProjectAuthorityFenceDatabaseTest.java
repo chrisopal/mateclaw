@@ -257,7 +257,8 @@ class ProjectAuthorityFenceDatabaseTest {
                 mock(ObjectProvider.class),
                 mock(PresalesArtifactRenderer.class),
                 employees,
-                observedFence);
+                observedFence,
+                new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
     }
 
     @ParameterizedTest

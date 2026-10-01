@@ -21,6 +21,7 @@ import vip.mate.semantic.statement.StatementApplicationService;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
 import vip.mate.workspace.core.service.ProjectAuthorityFence;
+import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
@@ -36,6 +37,7 @@ public class PresalesService {
     private final PresalesArtifactRenderer renderer;
     private final ObjectProvider<PresalesEmployeeRuntime> employees;
     private final ProjectAuthorityFence authorityFence;
+    private final ProjectSourceAccess sourceAccess;
 
     public PresalesService(
             JdbcTemplate jdbc,
@@ -48,7 +50,9 @@ public class PresalesService {
             ObjectProvider<vip.mate.semantic.query.SemanticQueryService> queries,
             PresalesArtifactRenderer renderer,
             ObjectProvider<PresalesEmployeeRuntime> employees,
-            ProjectAuthorityFence authorityFence) {
+            ProjectAuthorityFence authorityFence,
+            ProjectSourceAccess sourceAccess) {
+        this.sourceAccess = sourceAccess;
         this.employees = employees;
         this.authorityFence = authorityFence;
         this.jdbc = jdbc;
@@ -1050,11 +1054,12 @@ public class PresalesService {
                     || (kb.getDeleted() != null && kb.getDeleted() != 0))
                 throw new SemanticApiException(
                         403, "MATERIAL_UNAVAILABLE", "Project material access was revoked");
+            authorizeEmployeeKb(scope, p, m.path("kbId").asText());
         }
         for (var baseline : p.withArray("baselines"))
             for (var ref : baseline.path("references"))
                 for (var source : ref.path("sources")) {
-                    currentSource(scope, source.path("sourceRef").asText(), "", false);
+                    authorizeHistoricalSource(scope, p, source.path("sourceRef").asText());
                     int withdrawn =
                             jdbc.queryForObject(
                                     "SELECT COUNT(*) FROM mate_semantic_source_governance WHERE graph_id=? AND"
@@ -1068,7 +1073,7 @@ public class PresalesService {
                 }
         for (var task : p.withArray("tasks"))
             for (var source : task.path("contextSnapshot").path("sources")) {
-                currentSource(scope, source.path("sourceRef").asText(), "", false);
+                authorizeHistoricalSource(scope, p, source.path("sourceRef").asText());
                 String graph = source.path("graphId").asText();
                 if (!graph.isBlank()
                         && jdbc.queryForObject(
@@ -1080,6 +1085,23 @@ public class PresalesService {
                     throw new SemanticApiException(
                             403, "SOURCE_UNAVAILABLE", "Task source withdrawn");
             }
+    }
+
+    private void authorizeHistoricalSource(String scope, ObjectNode project, String sourceId) {
+        currentSource(scope, sourceId, "", false);
+        String employeeId = project.path("agentId").asText();
+        if (!employeeId.isBlank()
+                && !sourceAccess.canEmployeeReadSource(scope, employeeId, sourceId))
+            throw new SemanticApiException(
+                    403, "SOURCE_UNAVAILABLE", "Project employee source access was revoked");
+    }
+
+    private void authorizeEmployeeKb(String scope, ObjectNode project, String kbId) {
+        String employeeId = project.path("agentId").asText();
+        // Legacy human-only projects retain their existing Workspace/source authorization.
+        if (!employeeId.isBlank() && !sourceAccess.canEmployeeReadKb(scope, employeeId, kbId))
+            throw new SemanticApiException(
+                    403, "SOURCE_UNAVAILABLE", "Project employee source access was revoked");
     }
 
     private void currentSource(String scope, String sourceId, String digest, boolean checkDigest) {

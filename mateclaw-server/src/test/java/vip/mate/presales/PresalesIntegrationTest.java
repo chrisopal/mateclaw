@@ -17,10 +17,14 @@ import vip.mate.semantic.support.SemanticHttpFixture;
     PresalesController.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
+    vip.mate.workspace.core.service.ProjectSourceAccess.class,
     vip.mate.workspace.core.service.ProjectAuthorityFence.class
 })
 @TestPropertySource(properties = "mateclaw.presales.enabled=true")
 class PresalesIntegrationTest extends SemanticHttpFixture {
+    @org.springframework.beans.factory.annotation.Autowired
+    vip.mate.agent.repository.AgentMapper employeeMapper;
+
     private JsonNode api(
             String method, String path, String role, String scope, Object body, int status)
             throws Exception {
@@ -516,6 +520,123 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         .path("schemaVersion")
                         .asInt());
         assertEquals(100, p.path("solutions").get(0).path("coverage").path("percentage").asInt());
+        // Historical reads and downloads must follow current employee KB authority.
+        var employee = new vip.mate.agent.model.AgentEntity();
+        employee.setName("history-source-" + UUID.randomUUID());
+        employee.setWorkspaceId(Long.valueOf(workspace));
+        employee.setEnabled(true);
+        employee.setDeleted(0);
+        employee.setWikiDisabled(false);
+        employeeMapper.insert(employee);
+        String employeeId = employee.getId().toString();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) p).put("agentId", employeeId);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                employee.getId(),
+                Long.valueOf(f.kb));
+        api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 200);
+        String persistedProject =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        p.path("id").asText());
+        int receipts =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace);
+        int revisions =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        p.path("id").asText());
+        for (String revoke :
+                List.of(
+                        "UPDATE mate_agent SET wiki_disabled=TRUE WHERE id=?",
+                        "UPDATE mate_agent SET enabled=FALSE WHERE id=?",
+                        "UPDATE mate_agent SET deleted=1 WHERE id=?",
+                        "UPDATE mate_agent_wiki_kb SET enabled=FALSE WHERE agent_id=?")) {
+            jdbc.update(revoke, employee.getId());
+            for (String suffix :
+                    List.of(
+                            "",
+                            "/handoff",
+                            "/releases/" + release + "/handoff",
+                            "/releases/" + release + "/files/solution.md")) {
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + suffix,
+                        "viewer",
+                        workspace,
+                        null,
+                        403);
+            }
+            assertEquals(
+                    persistedProject,
+                    jdbc.queryForObject(
+                            "SELECT body_json FROM mate_presales_project WHERE id=?",
+                            String.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    receipts,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                            Integer.class,
+                            workspace));
+            assertEquals(
+                    revisions,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                            Integer.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    original,
+                    jdbc.queryForObject(
+                            "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
+                            String.class,
+                            release));
+            jdbc.update(
+                    "UPDATE mate_agent SET wiki_disabled=FALSE,enabled=TRUE,deleted=0 WHERE id=?",
+                    employee.getId());
+            jdbc.update(
+                    "UPDATE mate_agent_wiki_kb SET enabled=TRUE WHERE agent_id=?",
+                    employee.getId());
+            api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 200);
+            assertEquals(
+                    frozenHandoff,
+                    api(
+                            "GET",
+                            "/projects/"
+                                    + p.path("id").asText()
+                                    + "/releases/"
+                                    + release
+                                    + "/handoff",
+                            "viewer",
+                            workspace,
+                            null,
+                            200));
+            var download =
+                    mvc.perform(
+                                    org.springframework.test.web.servlet.request
+                                            .MockMvcRequestBuilders.get(
+                                                    "/api/v1/presales/projects/"
+                                                            + p.path("id").asText()
+                                                            + "/releases/"
+                                                            + release
+                                                            + "/files/solution.md")
+                                            .header("Authorization", tokens.get("viewer"))
+                                            .header("X-Workspace-Id", workspace))
+                            .andReturn()
+                            .getResponse();
+            assertEquals(200, download.getStatus());
+            assertArrayEquals(
+                    Base64.getDecoder().decode(original), download.getContentAsByteArray());
+        }
         call(
                 "POST",
                 "/graphs/" + f.graph + "/sources/withdraw",
@@ -546,6 +667,80 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
 
     @org.springframework.beans.factory.annotation.Autowired
     vip.mate.semantic.config.SemanticProperties semanticProperties;
+
+    @Test
+    void historicalSourcesUseActualKbOwnershipEvenWithoutCurrentMaterialBindings()
+            throws Exception {
+        var p = (com.fasterxml.jackson.databind.node.ObjectNode) project();
+        String allowedKb = kb();
+        String deniedKb = kb();
+        String deniedRaw = raw(deniedKb, "private historical source");
+        var employee = new vip.mate.agent.model.AgentEntity();
+        employee.setName("historical-source-" + UUID.randomUUID());
+        employee.setWorkspaceId(Long.valueOf(workspace));
+        employee.setEnabled(true);
+        employee.setDeleted(0);
+        employee.setWikiDisabled(false);
+        employeeMapper.insert(employee);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                employee.getId(),
+                Long.valueOf(allowedKb));
+        for (String collection : List.of("tasks", "baselines")) {
+            p.putArray("tasks");
+            p.putArray("baselines");
+            p.put("agentId", employee.getId().toString());
+            var item = p.withArray(collection).addObject();
+            var source =
+                    collection.equals("tasks")
+                            ? item.putObject("contextSnapshot").putArray("sources").addObject()
+                            : item.putArray("references")
+                                    .addObject()
+                                    .putArray("sources")
+                                    .addObject();
+            source.put("sourceRef", deniedRaw)
+                    .put("kbId", allowedKb)
+                    .put("text", "private historical source");
+            jdbc.update(
+                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                    p.toString(),
+                    p.path("id").asText());
+            api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 403);
+            // A restored grant permits the original snapshot without rewriting historical data.
+            jdbc.update(
+                    "UPDATE mate_agent_wiki_kb SET kb_id=? WHERE agent_id=?",
+                    deniedKb,
+                    employee.getId());
+            assertEquals(
+                    p,
+                    api(
+                            "GET",
+                            "/projects/" + p.path("id").asText(),
+                            "viewer",
+                            workspace,
+                            null,
+                            200));
+            jdbc.update(
+                    "UPDATE mate_agent_wiki_kb SET kb_id=? WHERE agent_id=?",
+                    allowedKb,
+                    employee.getId());
+            p.remove("agentId");
+            jdbc.update(
+                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                    p.toString(),
+                    p.path("id").asText());
+            assertEquals(
+                    p,
+                    api(
+                            "GET",
+                            "/projects/" + p.path("id").asText(),
+                            "viewer",
+                            workspace,
+                            null,
+                            200));
+        }
+    }
 
     @Test
     void semanticDisabledStillAllowsProjectWorkAndRejectsGates() throws Exception {

@@ -98,7 +98,8 @@ class PresalesAtomicResultAcceptanceTest {
                         mock(PresalesArtifactRenderer.class),
                         employees,
                         new ProjectAuthorityFence(
-                                jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)));
+                                jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)),
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
         var candidate =
                 (ObjectNode)
                         json.readTree(
@@ -214,7 +215,8 @@ class PresalesAtomicResultAcceptanceTest {
                         mock(PresalesArtifactRenderer.class),
                         employees,
                         new ProjectAuthorityFence(
-                                jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)));
+                                jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)),
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
         var candidate =
                 (ObjectNode)
                         json.readTree(
