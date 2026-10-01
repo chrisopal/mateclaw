@@ -1,0 +1,147 @@
+{
+  "task": "AQ-02 frozen release read/command response boundary",
+  "base_commit": "a44f27f853dfb817561c69fbe5edd31a64041f5c",
+  "environment": "H2 existing full Flyway / HTTP service fixture; JDK21",
+  "log": "/tmp/mateclaw-aq-frozen-final.log",
+  "log_sha256": "68e9b91e6b53ca80100c742474e0e0afc1930f97fd4d9dee7afb3f7023a718eb",
+  "sources": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "74af9dea857251e4a16a1ac6697f3a6b238d68e98f225c9b4dab4332a7407329",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "c493a2137d3b87a3e9bbe0da454d98effb2e78c489d00bb9c3012d865a5dce6f"
+  },
+  "suites": [
+    {
+      "name": "PresalesIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "replayUsesCurrentEmployeeAuthorityWithoutChangingTheStoredReceipt",
+        "historicalSourcesUseActualKbOwnershipEvenWithoutCurrentMaterialBindings",
+        "clarificationRequiresTraceableAnswerAndScopedReferences",
+        "g1RequiresAcceptedFactsAndReleasePublishesExactBytes",
+        "authenticatedPersistenceIdempotencyAndConflict",
+        "semanticDisabledStillAllowsProjectWorkAndRejectsGates",
+        "concurrentCommandsCannotLoseAnUpdate"
+      ],
+      "xml_sha256": "1c6d676bc7e1d21a8c1c7412414bede283f6e2e768cc9a3c838bd85413c02053"
+    },
+    {
+      "name": "PresalesSourceScopeTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "nameBasedToolReadUsesTheSameEmployeeKbScope",
+        "contextCannotIncludeKbOutsideEmployeeScopeAndRevocationInvalidatesSnapshot"
+      ],
+      "xml_sha256": "ab6388922c2ec38c97472c6d301d482b3d8b893b7728802959916e5c884915ab"
+    },
+    {
+      "name": "PresalesRuntimeTransactionIntegrationTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[1]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[2]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[3]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[4]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[5]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[6]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[1]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[2]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[3]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[4]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[5]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[6]",
+        "resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback",
+        "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[1]",
+        "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[2]"
+      ],
+      "xml_sha256": "5f93657d3056ab4cbc06d1a8caa6739c0072ec163fd0cbd9272967f266440c49"
+    },
+    {
+      "name": "PresalesAtomicResultAcceptanceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "sourceEditWaitsForResultAuthorityTransaction",
+        "sourceWithdrawalWaitsForResultAuthorityTransaction",
+        "actorRevocationWaitsForResultAuthorityTransaction",
+        "lateRevocationUnderProjectLockCannotCommitSuccess",
+        "employeeRevocationWaitsForResultAuthorityTransaction"
+      ],
+      "xml_sha256": "2bd228dc904010c945e95b56bea3216cfc154a9e7bb23585a91233f15b426182"
+    },
+    {
+      "name": "ProjectAuthorityFenceDatabaseTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+        "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+        "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+        "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]"
+      ],
+      "xml_sha256": "3814e0152ed2421876626c55466a47733dad2c747bd62344ba7b553f4a79671b"
+    }
+  ],
+  "fixture_isolation": {
+    "scope": "Only SecurityAsyncDispatchTest and OpenApiExposedAccessTest; other default-file contexts remain pending",
+    "log": "/tmp/mateclaw-aq-frozen-isolation-tests.log",
+    "log_sha256": "b7d97df3509d75d0716291cb13facb15f092b5f3761a91cd1a58a7098c5266b2",
+    "suites": [
+      {
+        "name": "SecurityAsyncDispatchTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xml_sha256": "dc6555e77a8d7f758080563b57c70690b0eb3665aef3e474cd7e15f8f6edf044"
+      },
+      {
+        "name": "OpenApiExposedAccessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xml_sha256": "158fc6faca1e94a0fa00af49c2839802c6208fe8b430e4a602f5e06b01d6ff62"
+      },
+      {
+        "name": "OpenApiLockedDownAccessTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xml_sha256": "5f638c59739fa63afa182d8b7c715ecba6325ef4da498bfb3831b9a83f17703d"
+      }
+    ],
+    "sources": {
+      "mateclaw-server/src/test/java/vip/mate/config/SecurityAsyncDispatchTest.java": "e6cb7c1dbf95e831205040dde8dc9b40a4dfaf7fc4c6fc12e6c7b70410b1b5d9",
+      "mateclaw-server/src/test/java/vip/mate/config/OpenApiExposedAccessTest.java": "9b14bd80a8516fc0639418c872583c12f5ea01c6dd52fc9ec1af2209e9754f52"
+    },
+    "independent_engineering_review": "/root/frozen_source_review: no blocking finding; formal maintainer review pending"
+  }
+}

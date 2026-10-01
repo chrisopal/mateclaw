@@ -82,9 +82,11 @@
       "status": "NOT_RUN",
       "evidence": [
         "evidence/2026-10-02/AQ02_HISTORY_SOURCE_ACCEPTANCE.md",
-        "evidence/2026-10-02/history-source-test-results.json"
+        "evidence/2026-10-02/history-source-test-results.json",
+        "evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md",
+        "evidence/2026-10-02/frozen-source-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN"
     },
     {
       "id": "AC-08",
@@ -100,9 +102,11 @@
         "evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md",
         "evidence/2026-10-01/runtime-test-results.json",
         "evidence/2026-10-02/AQ02_HISTORY_SOURCE_ACCEPTANCE.md",
-        "evidence/2026-10-02/history-source-test-results.json"
+        "evidence/2026-10-02/history-source-test-results.json",
+        "evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md",
+        "evidence/2026-10-02/frozen-source-test-results.json"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN"
     },
     {
       "id": "AC-09",
@@ -116,9 +120,11 @@
         "evidence/2026-09-30/AQ02_AUTHORITY_ACCEPTANCE.md",
         "evidence/2026-09-30/authority-test-results.json",
         "evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md",
-        "evidence/2026-10-01/runtime-test-results.json"
+        "evidence/2026-10-01/runtime-test-results.json",
+        "evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md",
+        "evidence/2026-10-02/frozen-source-test-results.json"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN"
     },
     {
       "id": "AC-10",

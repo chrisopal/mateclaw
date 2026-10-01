@@ -26,6 +26,20 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesService {
+    private static final List<String> SOURCE_COLLECTIONS =
+            List.of(
+                    "materials",
+                    "requirements",
+                    "clarifications",
+                    "baselines",
+                    "fitGaps",
+                    "cases",
+                    "solutions",
+                    "reviews",
+                    "reviewDrafts",
+                    "releases",
+                    "tasks",
+                    "contextCards");
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final PresalesAccess access;
@@ -171,20 +185,7 @@ public class PresalesService {
 
     private ObjectNode summary(ObjectNode p) {
         ObjectNode summary = p.deepCopy();
-        for (String key :
-                List.of(
-                        "materials",
-                        "requirements",
-                        "clarifications",
-                        "baselines",
-                        "fitGaps",
-                        "cases",
-                        "solutions",
-                        "reviews",
-                        "reviewDrafts",
-                        "releases",
-                        "tasks",
-                        "contextCards")) summary.remove(key);
+        for (String key : SOURCE_COLLECTIONS) summary.remove(key);
         summary.put("stage", stage(p))
                 .put(
                         "openClarificationCount",
@@ -216,6 +217,7 @@ public class PresalesService {
         access.require(scope, "viewer");
         var p = load(scope, id, false);
         authorizeMaterials(scope, p);
+        authorizeReleaseSources(scope, p);
         return p;
     }
 
@@ -224,6 +226,7 @@ public class PresalesService {
         access.requireActor(scope, actorId, "member");
         var p = load(scope, id, false);
         authorizeMaterials(scope, p);
+        authorizeReleaseSources(scope, p);
         return p;
     }
 
@@ -307,8 +310,7 @@ public class PresalesService {
         authorizeMaterials(scope, p);
         var replay = replay(scope, actor, r.operationId(), hash);
         if (replay != null) {
-            authorizeMaterials(scope, replay);
-            return replay;
+            return commandResponse(scope, p, replay);
         }
         if (p.path("version").asInt() != r.expectedVersion())
             throw conflict("VERSION_CONFLICT", "Project has changed; reload before saving");
@@ -501,7 +503,26 @@ public class PresalesService {
                 != 1) throw conflict("VERSION_CONFLICT", "Concurrent update");
         record(p, actor, action);
         receipt(scope, actor, r.operationId(), hash, p);
-        return p;
+        return commandResponse(scope, p, p);
+    }
+
+    private ObjectNode commandResponse(String scope, ObjectNode current, ObjectNode response) {
+        ObjectNode view = response.deepCopy();
+        view.put("agentId", current.path("agentId").asText());
+        try {
+            authorizeMaterials(scope, view);
+            view.set("materials", current.path("materials").deepCopy());
+            authorizeReleaseSources(scope, view);
+            return response;
+        } catch (SemanticApiException unavailable) {
+            if (unavailable.status() != 403) throw unavailable;
+            // Repair remains possible without returning source-rich historical data.
+            ObjectNode restricted = summary(response);
+            // Preserve required array contracts consumed by the workbench, with no source content.
+            for (String key : SOURCE_COLLECTIONS) restricted.putArray(key);
+            restricted.put("sourceAccessRestricted", true);
+            return restricted;
+        }
     }
 
     private void projectEmployeeResult(ObjectNode p, ObjectNode task, String actor) {
@@ -1085,6 +1106,52 @@ public class PresalesService {
                     throw new SemanticApiException(
                             403, "SOURCE_UNAVAILABLE", "Task source withdrawn");
             }
+    }
+
+    private void authorizeReleaseSources(String scope, ObjectNode project) {
+        Set<String> boundKbs = new HashSet<>();
+        for (var material : project.path("materials")) boundKbs.add(material.path("kbId").asText());
+        for (var release : project.path("releases")) {
+            JsonNode snapshot = release.path("handoffSnapshot");
+            // Legacy releases without frozen provenance retain existing read gates.
+            if (!snapshot.isObject()) continue;
+            if (!project.path("agentId").asText().isBlank())
+                for (var material : snapshot.path("materials"))
+                    if (!boundKbs.contains(material.path("kbId").asText()))
+                        throw new SemanticApiException(
+                                403,
+                                "SOURCE_UNAVAILABLE",
+                                "Release source is no longer bound to the project");
+            // Project a read-only source view; never modify the frozen snapshot or rerender
+            // artifacts.
+            ObjectNode historical = json.createObjectNode();
+            historical.put("agentId", project.path("agentId").asText());
+            historical.set("materials", snapshot.path("materials").deepCopy());
+            var baselines = historical.putArray("baselines");
+            if (snapshot.path("baseline").isObject())
+                baselines.add(snapshot.path("baseline").deepCopy());
+            var references = baselines.addObject().putArray("references");
+            for (var ref : snapshot.path("sourceRefs")) {
+                if (ref.isObject() && ref.path("sources").isArray()) {
+                    references.add(ref.deepCopy());
+                    continue;
+                }
+                String sourceId = ref.isTextual() ? ref.asText() : ref.path("sourceRef").asText();
+                if (sourceId.isBlank())
+                    throw new SemanticApiException(
+                            403, "SOURCE_UNAVAILABLE", "Release source provenance is unavailable");
+                authorizeHistoricalSource(scope, project, sourceId);
+                // Scalar clarification refs inherit the frozen material graph scopes.
+                for (var material : snapshot.path("materials")) {
+                    var reference =
+                            references
+                                    .addObject()
+                                    .put("graphId", material.path("graphId").asText());
+                    reference.putArray("sources").addObject().put("sourceRef", sourceId);
+                }
+            }
+            authorizeMaterials(scope, historical);
+        }
     }
 
     private void authorizeHistoricalSource(String scope, ObjectNode project, String sourceId) {

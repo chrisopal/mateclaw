@@ -46,3 +46,10 @@ mvn -B -pl mateclaw-server -am \
 AC-06/08/09/21 仅新增工程证据，正式状态保留 NOT_RUN。其余缺口：完整角色和批准政策、真实 API/UI，Agent 图/工具/异步协调器及重启，来源撤回与历史/导出一致性，真实模型质量与授权业务样本，全部权威写入路径/生产同构验证，远端 required CI/维护人和业务 QA 签收。
 
 提交与推送必须对真实 tree 执行统一门禁并得到 PASS、submission_ready=true；结果在交付回复和 PR 中登记，本记录不替代门禁。回退仅撤销新增测试和记录，无生产或数据库变更。
+
+
+### 2026-10-02 隔离说明更正
+
+上述历史叙述中“临时 H2 文件库”和“完整门禁后续使用独立内存库”的说法不准确。`scripts/quality/verify.py` 的 `clean_test_env` 会过滤 `SPRING_*`，因此完整 hooks 没有接收当时设置的 datasource 环境变量，未显式配置 datasource 的测试实际使用默认文件库。原完整门禁的 PASS 与测试计数仍有效，但不能证明数据库隔离。直接 Maven 两类恢复测试的环境变量不经过该过滤，14 项通过的证据仍有效。
+
+本次 AQ-02 完整提交门禁再次出现 SecurityAsyncDispatchTest 默认文件库 MVStore AssertionError，提交被正常拒绝（`mateclaw-quality-b972d10h`）。改用测试类内显式 TestPropertySource 为 SecurityAsyncDispatchTest 和 OpenApiExposedAccessTest 分配唯一内存库，保持完整启动和原断言；没有调整门禁过滤规则或操作默认数据库文件。其他默认文件库上下文仍需单独处理，不能由这两个类的隔离推断全套测试均已隔离。

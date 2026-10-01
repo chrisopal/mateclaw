@@ -460,7 +460,13 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 cmd(
                         p,
                         "SAVE_CLARIFICATION",
-                        Map.of("question", "Before publication", "impact", "Confirm boundary"),
+                        Map.of(
+                                "question",
+                                "Before publication",
+                                "impact",
+                                "Confirm boundary",
+                                "sourceRefs",
+                                List.of(f.raw)),
                         "member",
                         200);
         p = cmd(p, "PUBLISH_RELEASE", Map.of("releaseId", release), "owner", 200);
@@ -620,23 +626,217 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                             workspace,
                             null,
                             200));
-            var download =
-                    mvc.perform(
-                                    org.springframework.test.web.servlet.request
-                                            .MockMvcRequestBuilders.get(
-                                                    "/api/v1/presales/projects/"
-                                                            + p.path("id").asText()
-                                                            + "/releases/"
-                                                            + release
-                                                            + "/files/solution.md")
-                                            .header("Authorization", tokens.get("viewer"))
-                                            .header("X-Workspace-Id", workspace))
-                            .andReturn()
-                            .getResponse();
-            assertEquals(200, download.getStatus());
-            assertArrayEquals(
-                    Base64.getDecoder().decode(original), download.getContentAsByteArray());
+            assertPublishedDownload(p, release, original);
         }
+        // A published snapshot remains an authorization input after current references disappear.
+        var archived = p.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) archived).remove("agentId");
+        ((com.fasterxml.jackson.databind.node.ObjectNode) archived).putArray("materials");
+        for (var oldBaseline : archived.path("baselines")) {
+            ((com.fasterxml.jackson.databind.node.ObjectNode) oldBaseline).putArray("references");
+        }
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                archived.toString(),
+                p.path("id").asText());
+        assertEquals(
+                frozenHandoff,
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                        "viewer",
+                        workspace,
+                        null,
+                        200));
+        int archivedReceipts =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace);
+        int archivedRevisions =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        p.path("id").asText());
+        for (boolean revokeRaw : List.of(true, false)) {
+            String sql =
+                    revokeRaw
+                            ? "UPDATE mate_wiki_raw_material SET deleted=? WHERE id=?"
+                            : "UPDATE mate_wiki_knowledge_base SET deleted=? WHERE id=?";
+            String id = revokeRaw ? f.raw : f.kb;
+            jdbc.update(sql, 1, id);
+            for (String candidateStatus : List.of("PENDING", "APPROVED")) {
+                var candidate = archived.deepCopy();
+                ((com.fasterxml.jackson.databind.node.ObjectNode) candidate.path("releases").get(0))
+                        .put("status", candidateStatus);
+                jdbc.update(
+                        "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                        candidate.toString(),
+                        p.path("id").asText());
+                api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 403);
+            }
+            jdbc.update(
+                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                    archived.toString(),
+                    p.path("id").asText());
+            for (String suffix :
+                    List.of(
+                            "",
+                            "/handoff",
+                            "/releases/" + release + "/handoff",
+                            "/releases/" + release + "/files/solution.md")) {
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + suffix,
+                        "viewer",
+                        workspace,
+                        null,
+                        403);
+            }
+            assertEquals(
+                    archived.toString(),
+                    jdbc.queryForObject(
+                            "SELECT body_json FROM mate_presales_project WHERE id=?",
+                            String.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    archivedReceipts,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                            Integer.class,
+                            workspace));
+            assertEquals(
+                    archivedRevisions,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                            Integer.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    original,
+                    jdbc.queryForObject(
+                            "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
+                            String.class,
+                            release));
+            jdbc.update(sql, 0, id);
+            assertEquals(
+                    frozenHandoff,
+                    api(
+                            "GET",
+                            "/projects/"
+                                    + p.path("id").asText()
+                                    + "/releases/"
+                                    + release
+                                    + "/handoff",
+                            "viewer",
+                            workspace,
+                            null,
+                            200));
+        }
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+
+        var scalarOnly = archived.deepCopy();
+        var scalarSnapshot =
+                (com.fasterxml.jackson.databind.node.ObjectNode)
+                        scalarOnly.path("releases").get(0).path("handoffSnapshot");
+        ((com.fasterxml.jackson.databind.node.ObjectNode) scalarSnapshot.path("baseline"))
+                .putArray("references");
+        scalarSnapshot.putArray("sourceRefs").add(f.raw);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                scalarOnly.toString(),
+                p.path("id").asText());
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                "viewer",
+                workspace,
+                null,
+                200);
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=1 WHERE id=?", f.raw);
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                "viewer",
+                workspace,
+                null,
+                403);
+        jdbc.update("UPDATE mate_wiki_raw_material SET deleted=0 WHERE id=?", f.raw);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+
+        String materialId = p.path("materials").get(0).path("id").asText();
+        int unbindVersion = p.path("version").asInt();
+        String unbindOperation = UUID.randomUUID().toString();
+        String projectId = p.path("id").asText();
+        var unbindRequest =
+                Map.of(
+                        "expectedVersion",
+                        unbindVersion,
+                        "operationId",
+                        unbindOperation,
+                        "action",
+                        "UNBIND_MATERIAL",
+                        "payload",
+                        Map.of("id", materialId));
+        p =
+                api(
+                        "POST",
+                        "/projects/" + projectId + "/commands",
+                        "member",
+                        workspace,
+                        unbindRequest,
+                        200);
+        assertTrue(p.path("sourceAccessRestricted").asBoolean());
+        assertTrue(p.path("releases").isArray() && p.path("releases").isEmpty());
+        assertTrue(p.path("baselines").isArray() && p.path("baselines").isEmpty());
+        assertEquals(
+                p,
+                api(
+                        "POST",
+                        "/projects/" + projectId + "/commands",
+                        "member",
+                        workspace,
+                        unbindRequest,
+                        200));
+        p = cmd(p, "UPDATE_PROJECT", Map.of("goal", "Repair binding"), "member", 200);
+        assertTrue(p.path("sourceAccessRestricted").asBoolean());
+        assertTrue(p.path("releases").isArray() && p.path("releases").isEmpty());
+        for (String suffix :
+                List.of(
+                        "",
+                        "/releases/" + release + "/handoff",
+                        "/releases/" + release + "/files/solution.md")) {
+            api("GET", "/projects/" + projectId + suffix, "viewer", workspace, null, 403);
+        }
+        // Binding repair remains possible, with no rerender of the published release.
+        p =
+                cmd(
+                        p,
+                        "BIND_MATERIAL",
+                        Map.of("kbId", f.kb, "graphId", f.graph, "role", "PROJECT"),
+                        "member",
+                        200);
+        assertEquals(
+                frozenHandoff,
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                        "viewer",
+                        workspace,
+                        null,
+                        200));
+        assertEquals(
+                original,
+                jdbc.queryForObject(
+                        "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
+                        String.class,
+                        release));
+        assertPublishedDownload(p, release, original);
         call(
                 "POST",
                 "/graphs/" + f.graph + "/sources/withdraw",
@@ -663,10 +863,178 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 workspace,
                 null,
                 403);
+        // The live project no longer carries source references; withdrawal is enforced by the
+        // release.
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                archived.toString(),
+                p.path("id").asText());
+        for (String suffix :
+                List.of(
+                        "",
+                        "/releases/" + release + "/handoff",
+                        "/releases/" + release + "/files/solution.md")) {
+            api(
+                    "GET",
+                    "/projects/" + p.path("id").asText() + suffix,
+                    "viewer",
+                    workspace,
+                    null,
+                    403);
+        }
+        assertEquals(
+                original,
+                jdbc.queryForObject(
+                        "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
+                        String.class,
+                        release));
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                scalarOnly.toString(),
+                p.path("id").asText());
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                "viewer",
+                workspace,
+                null,
+                403);
+    }
+
+    private void assertPublishedDownload(JsonNode project, String release, String original)
+            throws Exception {
+        var download =
+                mvc.perform(
+                                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                        .get(
+                                                "/api/v1/presales/projects/"
+                                                        + project.path("id").asText()
+                                                        + "/releases/"
+                                                        + release
+                                                        + "/files/solution.md")
+                                        .header("Authorization", tokens.get("viewer"))
+                                        .header("X-Workspace-Id", workspace))
+                        .andReturn()
+                        .getResponse();
+        assertEquals(200, download.getStatus());
+        assertArrayEquals(Base64.getDecoder().decode(original), download.getContentAsByteArray());
     }
 
     @org.springframework.beans.factory.annotation.Autowired
     vip.mate.semantic.config.SemanticProperties semanticProperties;
+
+    @Test
+    void replayUsesCurrentEmployeeAuthorityWithoutChangingTheStoredReceipt() throws Exception {
+        var p = (com.fasterxml.jackson.databind.node.ObjectNode) project();
+        String allowedKb = kb(),
+                otherKb = kb(),
+                source = raw(allowedKb, "historical private source");
+        var first = historyEmployee(allowedKb);
+        var second = historyEmployee(otherKb);
+        p.put("agentId", first);
+        p.withArray("tasks")
+                .addObject()
+                .putObject("contextSnapshot")
+                .putArray("sources")
+                .addObject()
+                .put("sourceRef", source)
+                .put("kbId", allowedKb)
+                .put("text", "historical private source");
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+        String operation = UUID.randomUUID().toString(), projectId = p.path("id").asText();
+        var request =
+                Map.of(
+                        "expectedVersion",
+                        p.path("version").asInt(),
+                        "operationId",
+                        operation,
+                        "action",
+                        "UPDATE_PROJECT",
+                        "payload",
+                        Map.of("goal", "Recorded goal"));
+        var originalResponse =
+                api(
+                        "POST",
+                        "/projects/" + projectId + "/commands",
+                        "member",
+                        workspace,
+                        request,
+                        200);
+        String storedReceipt =
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation);
+        var current = (com.fasterxml.jackson.databind.node.ObjectNode) originalResponse.deepCopy();
+        current.put("agentId", second);
+        current.putArray("tasks");
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                current.toString(),
+                projectId);
+        var restricted =
+                api(
+                        "POST",
+                        "/projects/" + projectId + "/commands",
+                        "member",
+                        workspace,
+                        request,
+                        200);
+        assertTrue(restricted.path("sourceAccessRestricted").asBoolean());
+        assertTrue(restricted.path("tasks").isArray() && restricted.path("tasks").isEmpty());
+        assertFalse(restricted.toString().contains("historical private source"));
+        assertEquals(
+                storedReceipt,
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation));
+        assertEquals(
+                current.toString(),
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        projectId));
+        current.put("agentId", first);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                current.toString(),
+                projectId);
+        assertEquals(
+                originalResponse,
+                api(
+                        "POST",
+                        "/projects/" + projectId + "/commands",
+                        "member",
+                        workspace,
+                        request,
+                        200));
+        assertEquals(
+                storedReceipt,
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation));
+    }
+
+    private String historyEmployee(String kb) {
+        var employee = new vip.mate.agent.model.AgentEntity();
+        employee.setName("history-" + UUID.randomUUID());
+        employee.setWorkspaceId(Long.valueOf(workspace));
+        employee.setEnabled(true);
+        employee.setDeleted(0);
+        employee.setWikiDisabled(false);
+        employeeMapper.insert(employee);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                employee.getId(),
+                Long.valueOf(kb));
+        return employee.getId().toString();
+    }
 
     @Test
     void historicalSourcesUseActualKbOwnershipEvenWithoutCurrentMaterialBindings()
