@@ -1861,3 +1861,49 @@ describe('overview task presentation contracts', () => {
     expect(presalesApi.command).not.toHaveBeenCalled()
   })
 })
+
+describe('status display boundary', () => {
+  it('keeps existing known labels without rewriting project state', async () => {
+    const detail = {
+      ...project,
+      stage: 'DISCOVERY',
+      tasks: [{ id: 'status-task', status: 'SUCCEEDED', skill: 'S1' }],
+    }
+    vi.mocked(presalesApi.get).mockResolvedValue(detail)
+    await mount(`/presales/${project.id}`)
+    expect(document.body.textContent).toContain('Discovery')
+    expect(document.body.textContent).toContain('Succeeded')
+    expect(detail.stage).toBe('DISCOVERY')
+    expect(detail.tasks[0]?.status).toBe('SUCCEEDED')
+  })
+
+  it('marks unknown historical state while preserving and safely rendering its exact raw text', async () => {
+    const raw = '<img src=x onerror="alert(1)">  LEGACY'
+    const detail = { ...project, stage: raw }
+    vi.mocked(presalesApi.get).mockResolvedValue(detail)
+    await mount(`/presales/${project.id}`)
+    expect(document.body.textContent).toContain(`Unknown status: ${raw}`)
+    expect(document.querySelector('img[src="x"]')).toBeNull()
+    expect(detail.stage).toBe(raw)
+    expect(presalesApi.update).not.toHaveBeenCalled()
+    expect(presalesApi.command).not.toHaveBeenCalled()
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.body.textContent).toContain(`未知状态：${raw}`)
+  })
+
+  it('tracks host locale for known states while keeping the original wire values', async () => {
+    const detail = {
+      ...project,
+      stage: 'DISCOVERY',
+      tasks: [{ id: 'status-task', status: 'SUCCEEDED', skill: 'S1' }],
+    }
+    vi.mocked(presalesApi.get).mockResolvedValue(detail)
+    await mount(`/presales/${project.id}`)
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.body.textContent).toContain('项目理解')
+    expect(document.body.textContent).toContain('已完成')
+    expect(detail.tasks[0]?.status).toBe('SUCCEEDED')
+  })
+})

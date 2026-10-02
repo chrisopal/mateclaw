@@ -816,6 +816,7 @@ import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, presalesError, operationReceipt } from '../shared/state'
+import { classifyStatus, statusLabel } from '../shared/status'
 import { usePresalesEditorSession } from '../composables/usePresalesEditorSession'
 import { prepareEditorSubmission } from '../shared/editorSubmission'
 const { t } = useI18n({ messages: presalesMessages })
@@ -1046,59 +1047,7 @@ function employeeIssue(code: string): string {
   return message ? l(...message) : code
 }
 function stateLabel(state: string | undefined): string {
-  const labels: Record<string, [string, string]> = {
-    DISCOVERY: ['项目理解', 'Discovery'],
-    REQUIREMENTS: ['需求梳理', 'Requirements'],
-    BASELINED: ['需求已基线', 'Baselined'],
-    SOLUTION: ['方案设计', 'Solution'],
-    RELEASE: ['成果发布', 'Release'],
-    ARCHIVED: ['已归档', 'Archived'],
-    ACTIVE: ['进行中', 'Active'],
-    FULL: ['完整响应', 'Full'],
-    PARTIAL: ['部分响应', 'Partial'],
-    CONDITIONAL: ['条件响应', 'Conditional'],
-    EXCLUDED: ['排除范围', 'Excluded'],
-    UNHANDLED: ['未处理', 'Unhandled'],
-  }
-  Object.assign(labels, {
-    HIGH: ['高', 'High'],
-    MEDIUM: ['中', 'Medium'],
-    LOW: ['低', 'Low'],
-    IN: ['范围内', 'In scope'],
-    OUT: ['范围外', 'Out of scope'],
-    UNKNOWN: ['待核实', 'Unknown'],
-    UNCONFIRMED: ['未确认', 'Unconfirmed'],
-    OPEN: ['待处理', 'Open'],
-    ANSWERED: ['已答复', 'Answered'],
-    RESOLVED: ['已解决', 'Resolved'],
-    ACCEPTED: ['已接受', 'Accepted'],
-    PENDING: ['待批准', 'Awaiting approval'],
-    APPROVED: ['已批准', 'Approved'],
-    PUBLISHED: ['已发布', 'Published'],
-    DRAFT: ['草稿', 'Draft'],
-    SUCCEEDED: ['已完成', 'Succeeded'],
-    RUNNING: ['运行中', 'Running'],
-    FAILED: ['失败', 'Failed'],
-    CANCELLED: ['已停止接收', 'Result discarded'],
-    PROJECT: ['项目资料', 'Project material'],
-    PRODUCT: ['产品资料', 'Product material'],
-    CASE: ['案例资料', 'Case material'],
-    CUSTOMER_SOURCE: ['客户来源', 'Customer source'],
-    PRODUCT_SOURCE: ['产品来源', 'Product source'],
-    INTERNAL_JUDGMENT: ['内部判断', 'Internal judgment'],
-    ASSUMPTION: ['假设', 'Assumption'],
-    AI_SUGGESTION: ['AI 建议', 'AI suggestion'],
-    FIT: ['直接满足', 'Fit'],
-    CONFIG: ['配置后满足', 'Configuration'],
-    EXTEND: ['需要开发', 'Extension'],
-    PARTNER: ['依赖合作方', 'Partner'],
-    GAP: ['暂不支持', 'Gap'],
-    BLOCKER: ['阻断', 'Blocker'],
-    WARNING: ['需关注', 'Warning'],
-    INFO: ['提示', 'Information'],
-  })
-  const pair = state ? labels[state] : undefined
-  return pair ? l(pair[0], pair[1]) : state || '—'
+  return statusLabel(classifyStatus(state), t)
 }
 function printable(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—'
