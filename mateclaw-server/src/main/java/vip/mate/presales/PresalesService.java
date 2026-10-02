@@ -104,57 +104,58 @@ public class PresalesService {
         this.renderer = renderer;
     }
 
-    public ArrayNode sources(String scope) {
+    public List<Source> sources(String scope) {
         access.require(scope, "viewer");
-        ArrayNode out = json.createArrayNode();
+        List<Source> out = new ArrayList<>();
         for (var kb : wiki.listByWorkspace(Long.valueOf(scope)).stream().limit(200).toList()) {
-            var item = out.addObject().put("kbId", kb.getId().toString()).put("name", kb.getName());
+            Source item = new KnowledgeBaseSource(kb.getId().toString(), kb.getName());
             if (semantic.isEnabled() && graphs.getIfAvailable() != null)
                 try {
                     var binding = graphs.getObject().get(scope, kb.getId().toString());
                     if (binding.enabled())
-                        item.put("graphId", binding.graphId())
-                                .put("ontologyRevisionId", binding.ontologyRevisionId());
+                        item =
+                                new GraphSource(
+                                        item.kbId(),
+                                        item.name(),
+                                        binding.graphId(),
+                                        binding.ontologyRevisionId());
                 } catch (SemanticApiException e) {
                     if (e.status() != 404) throw e;
                 }
+            out.add(item);
         }
         return out;
     }
 
-    public ArrayNode trustedStatements(String scope, String projectId) {
+    public List<TrustedStatement> trustedStatements(String scope, String projectId) {
         var p = get(scope, projectId);
         requireSemantic();
-        ArrayNode out = json.createArrayNode();
+        List<TrustedStatement> out = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         for (var material : p.withArray("materials")) {
             String graph = material.path("graphId").asText();
             if (graph.isBlank() || !seen.add(graph)) continue;
             for (var fact : statements.getObject().trusted(scope, graph)) {
-                var item =
-                        out.addObject()
-                                .put("id", fact.id())
-                                .put("revision", fact.revision())
-                                .put("graphId", graph)
-                                .put("ontologyRevisionId", fact.ontologyRevisionId())
-                                .put("label", fact.assertion().functionalSyntax());
-                item.set("evidenceIds", json.valueToTree(fact.evidenceIds()));
+                out.add(
+                        new TrustedStatement(
+                                fact.id(),
+                                fact.revision(),
+                                graph,
+                                fact.ontologyRevisionId(),
+                                fact.assertion().functionalSyntax(),
+                                fact.evidenceIds()));
                 if (out.size() >= 500) return out;
             }
         }
         return out;
     }
 
-    public Map<String, Object> capabilities(String scope) {
+    public Capabilities capabilities(String scope) {
         access.require(scope, "viewer");
-        return Map.of(
-                "enabled",
+        return new Capabilities(
                 true,
-                "semanticEnabled",
                 semantic.isEnabled(),
-                "canWrite",
                 access.allowed(scope, "member"),
-                "canApprove",
                 access.allowed(scope, "admin"));
     }
 

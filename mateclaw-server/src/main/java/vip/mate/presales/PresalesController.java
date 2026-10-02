@@ -3,6 +3,7 @@ package vip.mate.presales;
 import static vip.mate.presales.PresalesDtos.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 import vip.mate.common.result.R;
@@ -18,7 +19,7 @@ public class PresalesController {
     }
 
     @GetMapping("/capabilities")
-    public R<?> capabilities(
+    public R<Capabilities> capabilities(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
         return R.ok(service.capabilities(scope));
     }
@@ -148,12 +149,13 @@ public class PresalesController {
     }
 
     @GetMapping("/sources")
-    public R<?> sources(@RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
+    public R<List<Source>> sources(
+            @RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
         return R.ok(service.sources(scope));
     }
 
     @GetMapping("/projects/{id}/statements")
-    public R<?> statements(
+    public R<List<TrustedStatement>> statements(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
             @PathVariable String id) {
         return R.ok(service.trustedStatements(scope, id));

@@ -1,0 +1,95 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] MateClaw                                                           [pom]
+[INFO] MateClaw Plugin API                                                [jar]
+[INFO] MateClaw Semantic Core                                             [jar]
+[INFO] MateClaw Semantic OWL Adapter                                      [jar]
+[INFO] MateClaw Semantic Application                                      [jar]
+[INFO] MateClaw Server                                                    [jar]
+[INFO] MateClaw Sample Plugin                                             [jar]
+[INFO] MateClaw Search Provider Sample Plugin                             [jar]
+[INFO] MateClaw Mem0 Memory Provider Plugin                               [jar]
+[INFO] 
+[INFO] -------------------------< vip.mate:mateclaw >--------------------------
+[INFO] Building MateClaw 2.3.0-SNAPSHOT                                   [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw ---
+[INFO] 
+[INFO] --------------------< vip.mate:mateclaw-plugin-api >--------------------
+[INFO] Building MateClaw Plugin API 2.3.0-SNAPSHOT                        [2/9]
+[INFO]   from mateclaw-plugin-api/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-plugin-api ---
+[INFO] 
+[INFO] ------------------< vip.mate:mateclaw-semantic-core >-------------------
+[INFO] Building MateClaw Semantic Core 2.3.0-SNAPSHOT                     [3/9]
+[INFO]   from mateclaw-semantic-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-semantic-core ---
+[INFO] 
+[INFO] -------------------< vip.mate:mateclaw-semantic-owl >-------------------
+[INFO] Building MateClaw Semantic OWL Adapter 2.3.0-SNAPSHOT              [4/9]
+[INFO]   from mateclaw-semantic-owl/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-semantic-owl ---
+[INFO] 
+[INFO] ---------------< vip.mate:mateclaw-semantic-application >---------------
+[INFO] Building MateClaw Semantic Application 2.3.0-SNAPSHOT              [5/9]
+[INFO]   from mateclaw-semantic-application/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-semantic-application ---
+[INFO] 
+[INFO] ----------------------< vip.mate:mateclaw-server >----------------------
+[INFO] Building MateClaw Server 2.3.0-SNAPSHOT                            [6/9]
+[INFO]   from mateclaw-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-server ---
+[INFO] Spotless.Java is keeping 5 files clean - 0 needs changes to be clean, 0 were already clean, 5 were skipped because caching determined they were already clean
+[INFO] 
+[INFO] ------------------< vip.mate:mateclaw-plugin-sample >-------------------
+[INFO] Building MateClaw Sample Plugin 2.3.0-SNAPSHOT                     [7/9]
+[INFO]   from mateclaw-plugin-sample/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-plugin-sample ---
+[INFO] 
+[INFO] ---------------< vip.mate:mateclaw-plugin-search-sample >---------------
+[INFO] Building MateClaw Search Provider Sample Plugin 2.3.0-SNAPSHOT     [8/9]
+[INFO]   from mateclaw-plugin-search-sample/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-plugin-search-sample ---
+[INFO] 
+[INFO] -------------------< vip.mate:mateclaw-plugin-mem0 >--------------------
+[INFO] Building MateClaw Mem0 Memory Provider Plugin 2.3.0-SNAPSHOT       [9/9]
+[INFO]   from mateclaw-plugin-mem0/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:check (default-cli) @ mateclaw-plugin-mem0 ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO] 
+[INFO] MateClaw ........................................... SUCCESS [  0.383 s]
+[INFO] MateClaw Plugin API ................................ SUCCESS [  0.046 s]
+[INFO] MateClaw Semantic Core ............................. SUCCESS [  0.008 s]
+[INFO] MateClaw Semantic OWL Adapter ...................... SUCCESS [  0.252 s]
+[INFO] MateClaw Semantic Application ...................... SUCCESS [  0.005 s]
+[INFO] MateClaw Server .................................... SUCCESS [  0.215 s]
+[INFO] MateClaw Sample Plugin ............................. SUCCESS [  0.007 s]
+[INFO] MateClaw Search Provider Sample Plugin ............. SUCCESS [  0.005 s]
+[INFO] MateClaw Mem0 Memory Provider Plugin ............... SUCCESS [  0.007 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.045 s
+[INFO] Finished at: 2026-10-02T20:48:29+08:00
+[INFO] ------------------------------------------------------------------------

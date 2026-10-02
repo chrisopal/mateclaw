@@ -1,0 +1,186 @@
+{
+  "task": "AQ-05 typed capabilities/source/trusted-statement query boundary",
+  "start_head": "ee2a6d259bccd0ecd1dc78c00124ffaf9808d8a3",
+  "baseline": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before_tests": 13,
+  "first_after_tests": 64,
+  "final_targeted_tests": 66,
+  "classes": {
+    "PresalesQueryDtosTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesQueryDtoContractTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesIntegrationTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesRuntimeTransactionIntegrationTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesAtomicResultAcceptanceTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ProjectAuthorityFenceDatabaseTest": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesArtifactPersistenceContractTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesProjectPersistenceContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesSolutionPolicyContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "dev_tasks": [
+    "1hf7dt03",
+    "gkl7pan1",
+    "0nti63w5"
+  ],
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesDtos.java": "a7ebde2b2c82407d95e3537f465910cec12ed779de785bee677d5ef1d196e34d",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "28a7ee978ea973eff6593b2f49ef449a97b5ba20a57fb64b637e6bcbf60c2fb2",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesController.java": "802d4a86e105eeee43391de81e394f9b2f78fb314145f1bca1354a29c314d0e6",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesQueryDtoContractTest.java": "9c6cfa2978bffdeca41a088b387d4bcf37cc487dc6a4bba517d99065ee369caa",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesQueryDtosTest.java": "7d4e076bc076fd2d9912214890c213a5ec9b5b98667e56fddd1b357bf7e8b703"
+  },
+  "logs": {
+    "initial-dev": {
+      "input_sha256": "4744dcb0bcce2ddcee66181f1e80a7a0c8ae451dfb490f8013edfbfd7c86a022",
+      "sha256": "4744dcb0bcce2ddcee66181f1e80a7a0c8ae451dfb490f8013edfbfd7c86a022",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    },
+    "preparation-existing-only": {
+      "input_sha256": "4ffbe04eb788d21efd77d70bfbd726ef59abda3d437163330cdf0ed9870f2690",
+      "sha256": "b93f77c240a69177085f3bb2d2922187863f5c5be2883c68e233d2786d0bfddf",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 1,
+        "json_secrets": 0
+      }
+    },
+    "before-contract": {
+      "input_sha256": "99dfef069ebc8f201beac41edd7d9d24d882eb8ee0ec789824af6eb30e75bb96",
+      "sha256": "7b6db941d480ffbcc206428ffaef95dfb41caec2ab632ca6fa2cbdf775b8ebb3",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 2,
+        "json_secrets": 0
+      }
+    },
+    "format-before": {
+      "input_sha256": "d8ed8408207d12605d1d0a6855169753b85922521921a008eefffa456f9110f3",
+      "sha256": "d8ed8408207d12605d1d0a6855169753b85922521921a008eefffa456f9110f3",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    },
+    "first-after": {
+      "input_sha256": "7987c978108c8726320ca06f12dc5707da1f948e0f8776415a9f8474996e4f49",
+      "sha256": "b8c1e86c9d728f5c1e81d3c18c015a8e854c59fa3aea990f791dda04534e15cf",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 3,
+        "json_secrets": 0
+      }
+    },
+    "first-dev": {
+      "input_sha256": "a9a952cee1e2000ebd51b6dfb11aa4925d023e2493d834e285891153f620132d",
+      "sha256": "a9a952cee1e2000ebd51b6dfb11aa4925d023e2493d834e285891153f620132d",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    },
+    "final-tests": {
+      "input_sha256": "3b25ebab67bfb01f12865413cc2cc89187a38f7e157090adb4d38ee93196c357",
+      "sha256": "1d025f15364dd87423f291a23c8527447ed1c42c1b91b8d840970d1bf2d812a6",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 3,
+        "json_secrets": 0
+      }
+    },
+    "final-dev": {
+      "input_sha256": "e867bbc320d2fb6818687c4114b0d61377c6d571648a3acae8f525b11e538c25",
+      "sha256": "e867bbc320d2fb6818687c4114b0d61377c6d571648a3acae8f525b11e538c25",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    },
+    "format-final": {
+      "input_sha256": "9f4f81ca11b895ece7b96d24b1d22c5b09343e997a2953a49ef1b2b70675e4f7",
+      "sha256": "9f4f81ca11b895ece7b96d24b1d22c5b09343e997a2953a49ef1b2b70675e4f7",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    },
+    "format-check": {
+      "input_sha256": "2a91502ece85d625faed2f56f7a9bf6b2c15bf555c4d3a0d3218c88d3d70a532",
+      "sha256": "2a91502ece85d625faed2f56f7a9bf6b2c15bf555c4d3a0d3218c88d3d70a532",
+      "redactions": {
+        "jwt": 0,
+        "spring_password": 0,
+        "json_secrets": 0
+      }
+    }
+  },
+  "independent_review": {
+    "verdict": "APPROVE_BOUNDED",
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "scope": "Three queries, explicit Controller signatures and two new contracts",
+    "diagnostics": "LSP/AST attempted: Transport closed; Maven compilation and manual diff available"
+  },
+  "full_gate": "NOT_RUN",
+  "application_acceptance": "NOT_RUN",
+  "preparation_error": "Python2 caused fixture creation SyntaxError; existing-only8 passed, not counted as new contract evidence",
+  "limitations": [
+    "semantic Graph/Statement public ports mocked in new HTTP contract; JWT/Workspace/H2/Jackson/HTTP real",
+    "No actual graph engine, browser, MySQL/Kingbase, V2 migration, maintainer/business signoff or required remote CI enforcement evidence"
+  ],
+  "wire_change": "None for selected endpoints; Java query return types change, repository callers only Controller",
+  "rollback": "Restore DTO additions and three query handlers; no data or migration rollback"
+}

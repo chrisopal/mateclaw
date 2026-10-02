@@ -284,3 +284,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 完整门禁lojyxc1n复现旧SemanticM2IntegrationTest accepted与operation replay整JSON不相等，唯一差异为signatureIris数组顺序。AssertionPayload的Set.copyOf允许构造与wire.decode结果遍历不同；成员相等不能保证幂等响应表示稳定。复用既有OntologyAxiomDescriptor的unmodifiableSortedSet(TreeSet)惯例，只调整派生签名排序，不改functionalSyntax权威文本、Set成员/equality或授权/事务。
 
 影响/取舍：所有新构造/解码AssertionPayload的签名数组按IRI词法序输出；这是明确的wire确定性修复，不声称该数组原顺序保持。旧持久化回执/快照/批准成果字节不写回或重新渲染。拒绝删除旧整响应断言、只重跑随机绿灯或全局Jackson配置变更。新3项旧实现2红例，修复后核心12/OWL11/服务端74共97项通过，包含旧7项语义M2及售前67项；完整候选重新门禁。回退恢复已复现非确定性问题，正式幂等/迁移/多方言签收仍未完成。证据见AQ05_ASSERTION_SIGNATURE_PLAN和方案政策验收/manifest。
+
+### ADR-AQ-022：售前查询使用固定 DTO（Proposed）
+
+能力信息改为四个明确 boolean；来源使用知识库基础记录/启用图记录两种稳定形状，以保持缺省字段与显式 null 的差异；可信事实采用字符串 ID、int revision、原标签与证据列表快照。Controller 明确相同返回类型，应用服务仍先执行 Workspace/项目/来源权限检查，再调用现有公开语义端口。200/500 上限、图去重、顺序与原错误传播保持。
+
+拒绝开放 Map/ObjectNode 拼装及统一 NON_NULL：前者丢失类型边界，后者改变启用图的 null wire。证据列表复制保留 null 元素，避免序列化时看到上游后续修改。Java 返回类型改变但仓库消费者只有 Controller；HTTP形状由旧13/最终66项合同/事务回归保护。没有新增依赖、SQL、迁移或事务。完整项目/命令 DTO、SQL分页、V2、真实图/多方言/浏览器/正式 QA仍待完成。回退恢复三查询与DTO，无数据库操作。证据见 AQ05_QUERY_DTO_ACCEPTANCE。
