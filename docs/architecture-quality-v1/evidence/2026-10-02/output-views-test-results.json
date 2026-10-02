@@ -1,0 +1,59 @@
+{
+  "task": "AQ-05/AQ-09",
+  "start_head": "cc9596b91932029145b80b0f433b135f23f58351",
+  "before": {
+    "component_tests": 53,
+    "passed": 53,
+    "added_cases": 4
+  },
+  "after": {
+    "files": 7,
+    "tests": 123,
+    "passed": 123,
+    "failed": 0,
+    "skipped": 0
+  },
+  "final_models_locale": {
+    "component_tests": 53,
+    "passed": 53
+  },
+  "css_source_contracts": 98,
+  "scoped_style_compilations": 3,
+  "page_lines": {
+    "before": 3108,
+    "after": 2642
+  },
+  "typecheck": "PASS",
+  "nonfix_lint": "PASS",
+  "format": "PASS",
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "0625c028d6e30c91821b743818de834f12450be964769dbc35054495006e757e",
+    "mateclaw-ui/src/features/presales/components/PresalesSolutions.vue": "52439df58484104c9408162d91640b169d3eecb5fc45d343f4f67741a2faa574",
+    "mateclaw-ui/src/features/presales/components/PresalesOutputs.vue": "7d3d494669cdca7dfcfdd0205eff5955ae9aa676a1102418bcfd4e6dab1d1949",
+    "mateclaw-ui/src/features/presales/shared/solutionSections.css": "a945b4491e86041b3a5c036ae6e1e7328b9e16e7e801693812620b7241e63646",
+    "mateclaw-ui/src/features/presales/shared/workbenchSections.css": "dd8b4ef208baeb1de341ca3c3582d1c2c7973ce3d3922b33d7a02b6e883300f9",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "865a9707aa6db3692140f625ed2efa8ae4b41e6b837be6c0a9a3388183049e50",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-css-contract.mjs": "2ffb23657da54e15b289a7bbc3415a9802e11aa6a3eed42923aaa6454f79bff6"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/before-first-failure.txt": "639010011addc37e99698e97a507bd72808c492c201e779773c18f5dad3fa1b0",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/before.txt": "185611f881092382004d01148147e0e88da86951e25f767afd87f2a70bd88430",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/after.txt": "22f82b1f6a4757d45f52c9ab44358286b6bc45ae967d15594ef99c747fb96efc",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/models-locale.txt": "4126a5bdeed23ccba5c35d7920919b790869e968aa737e1e4f21df26e3f3f4d5",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/css-contract.txt": "03013ca0f3742ac1c99bd331f63b0bf982205f381fbb05ea7f270094f99a9a3a",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/format.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/initial-dev.txt": "06c09b11ec8a74525f86d18779bf0db0ab8d6d6a02546b975494ba51e066472b",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/dev.txt": "902c5c80435dfb86b666f0b557fc7b243bb537d7d0fdb2362f42a2789aef9510",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/first-root-lint-failure.txt": "e13547504b238755704f4c6faebaa9684753730d7aa6667117efde076bc6a88f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/test-format.txt": "3fef69bafc3cee9b4896066658744f52ebf90f9cea1e03cc33538bf7ba28aec5",
+    "docs/architecture-quality-v1/evidence/2026-10-02/output-views-tests/final-dev.txt": "8e4062c87fce2816abd56568a06932c4b188e6088272943357fa472a7cf2227d"
+  },
+  "independent_review": "APPROVE_BOUNDED_DISPLAY_EXTRACTION workbench_confirmation_audit",
+  "formal_qa": "NOT_RUN",
+  "visual_qa": "NOT_RUN",
+  "submission": "Actual exact tree and normal commit/push gate results in PR5",
+  "pnpm_invocation_failure": "Observed ERR_PNPM_BAD_PM_VERSION in tool output; raw first invocation log overwritten before evidence collection. Direct installed Node runner and formal gate retained.",
+  "dev": "SCAN_PASS w97yyfs7 / o0x04by8 / mateclaw-quality-hzw8miz0"
+}

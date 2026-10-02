@@ -1,0 +1,43 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (53 tests | 1 failed) 20007ms
+     × preserves newest-first solution versions, coverage, safe text and original draft intents 177ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > solution and output presentation contracts > preserves newest-first solution versions, coverage, safe text and original draft intents
+AssertionError: expected "vi.fn()" to be called with arguments: [ '90071992547409999', …(5) ]
+
+Received:
+
+  1st vi.fn() call:
+
+@@ -2,7 +2,6 @@
+    "90071992547409999",
+    "90071992547409998",
+    "90071992547409992",
+    "solution.md",
+    "draft",
+-   Any<AbortSignal>,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1770:30
+    1768|     ).click();
+    1769|     await settle();
+    1770|     expect(presalesApi.file).toHaveBeenCalledWith(
+       |                              ^
+    1771|       project.workspaceId,
+    1772|       project.id,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 52 passed (53)
+   Start at  14:32:19
+   Duration  20.86s (transform 353ms, setup 0ms, import 651ms, tests 20.01s, environment 110ms)
+

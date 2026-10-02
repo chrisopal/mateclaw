@@ -229,3 +229,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 ### ADR-AQ-012：编辑业务规则与提交协调分离（Proposed）
 
 2026-10-02：域内纯editorSubmission拥有11类初始化、历史副本/基线响应、校验和精确action/payload，返回typed invalid/project/command；页面保留界面、翻译、授权、scope/session、CAS/receipt及异步执行。拒绝通用表单框架、整页store或mapper内调用API/授予权限。project receipt仍使用原完整data，metadata只维持原wire白名单；受限修复和ANSWERED来源规则保持。原49项刻画前后通过、最终119项与独立工程审核无阻断，页面减少129行但整体结构尚未完成。代价是业务规则与显示模板需合同协同，正式浏览器/角色/QA待签收。见evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md。
+
+### ADR-AQ-013：方案与成果展示组件发出意图，页面保留执行权（Proposed）
+
+背景：工作台方案/评审表格同时承载覆盖计算、比较和用例调用，父scoped样式在组件拆分后不能隐式视为跨多根继承。采用两个完整职责组件，typed intent连接原用例；比较值仍由页面持有，原状态重置不变。仅共享原展示样式源并以scoped src复用，专有方案CSS归属方案组件。不引入通用事件框架或新应用状态层。
+
+约束/权衡：减少页面466行，但完整用例协调和编辑生命周期仍未拆；组件可用状态只是展示，不扩大批准或来源权限。原98项CSS合同/三组件scoped编译、旧实现53项和迁移后123项回归、模型/语言交互及独立工程审阅证明该边界；浏览器/业务QA与维护人签收保持未完成。最终提交证据见AQ09_OUTPUT_VIEWS_ACCEPTANCE及PR5。

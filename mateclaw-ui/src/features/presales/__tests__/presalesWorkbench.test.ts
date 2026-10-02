@@ -1404,3 +1404,171 @@ describe('employee-driven workbench', () => {
     expect(presalesApi.generate).not.toHaveBeenCalled()
   })
 })
+
+describe('solution and output presentation contracts', () => {
+  it('keeps solution empty-state guidance and generation authority', async () => {
+    vi.mocked(presalesApi.capabilities).mockResolvedValue({
+      enabled: true,
+      semanticEnabled: true,
+      canWrite: false,
+      canApprove: false,
+    })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Solution design')!
+      .click()
+    await settle()
+    expect(button('Ask employee to compose').disabled).toBe(true)
+    expect(document.querySelectorAll('.solution-revision')).toHaveLength(0)
+    expect(document.querySelector('.el-empty')).not.toBeNull()
+  })
+
+  it('preserves newest-first solution versions, coverage, safe text and original draft intents', async () => {
+    const unsafe = '<img src=x onerror=alert(1)>'
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      requirements: [
+        { id: 'req-in', title: 'Covered requirement', scope: 'IN' },
+        { id: 'req-out', title: 'Excluded requirement', scope: 'OUT' },
+      ],
+      baselines: [
+        {
+          id: 'baseline-1',
+          references: [
+            { requirementId: 'req-in', scope: 'IN' },
+            { requirementId: 'req-out', scope: 'OUT' },
+          ],
+        },
+      ],
+      fitGaps: [{ id: 'fit-1', requirementId: 'req-in', status: 'FIT' }],
+      solutions: [
+        {
+          id: '90071992547409991',
+          title: 'Previous',
+          sections: [{ title: 'Scope', text: 'Before' }],
+        },
+        {
+          id: '90071992547409992',
+          title: 'Latest',
+          baselineId: 'baseline-1',
+          coverage: {
+            applicable: true,
+            handledIn: 1,
+            totalIn: 1,
+            responses: [{ requirementId: 'req-in', status: 'FULL' }],
+          },
+          sections: [{ title: 'Scope', text: unsafe, requirementRefs: ['req-in'] }],
+        },
+      ],
+    })
+    vi.mocked(presalesApi.file).mockRejectedValue({
+      response: { status: 403 },
+    })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Solution design')!
+      .click()
+    await settle()
+    const versions = [...document.querySelectorAll('.solution-revision')]
+    expect(versions.map((item) => item.querySelector('h3')?.textContent?.trim())).toEqual([
+      'Latest · V2',
+      'Previous · V1',
+    ])
+    expect(versions[0]!.querySelector('pre')?.textContent).toBe(unsafe)
+    expect(versions[0]!.querySelector('img')).toBeNull()
+    expect(document.querySelector('.coverage')?.textContent).toContain('1/1')
+    expect(document.querySelector('.coverage')?.textContent).toContain('Full')
+    expect(document.querySelector('.coverage')?.textContent).toContain('Unhandled')
+    const compareSelects = document.querySelectorAll<HTMLElement>(
+      '#pane-solution .toolbar .el-select',
+    )
+    compareSelects[0]!.click()
+    await settle()
+    const option = [...document.querySelectorAll<HTMLElement>('.el-select-dropdown__item')].find(
+      (item) => item.textContent?.trim() === 'Previous · V1',
+    )!
+    option.click()
+    await settle()
+    expect(document.querySelector('#pane-solution')?.textContent).toContain('Before')
+    expect(document.querySelectorAll('#pane-solution pre.safe-content')).toHaveLength(4)
+    compareSelects[1]!.click()
+    await settle()
+    const targetOption = [...document.querySelectorAll<HTMLElement>('.el-select-dropdown__item')]
+      .filter((item) => item.textContent?.trim() === 'Previous · V1')
+      .at(-1)!
+    targetOption.click()
+    await settle()
+    expect(
+      [...document.querySelectorAll('#pane-solution pre.safe-content')].filter(
+        (item) => item.textContent === 'Before',
+      ),
+    ).toHaveLength(3)
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('#pane-solution')?.textContent).toContain('需求响应覆盖')
+    ;(versions[0]!.querySelector('.solution-downloads button') as HTMLButtonElement).click()
+    await settle()
+    expect(presalesApi.file).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      '90071992547409992',
+      'solution.md',
+      'draft',
+    )
+  })
+
+  it.each([false, true])(
+    'keeps published/preview/approval/publish availability with canApprove=%s',
+    async (canApprove) => {
+      vi.mocked(presalesApi.capabilities).mockResolvedValue({
+        enabled: true,
+        semanticEnabled: true,
+        canWrite: true,
+        canApprove,
+      })
+      vi.mocked(presalesApi.get).mockResolvedValue({
+        ...project,
+        reviews: [
+          {
+            id: 'review-1',
+            solutionId: 'missing',
+            summary: 'Checked',
+            issues: [{ title: '<script>unsafe</script>' }],
+          },
+        ],
+        releases: ['PENDING', 'APPROVED', 'PUBLISHED'].map((status, i) => ({
+          id: `release-${i}`,
+          status,
+          files: [{ filename: `file-${i}.pdf` }],
+        })),
+      })
+      await mount(`/presales/${project.id}`)
+      ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+        .find((item) => item.textContent === 'Review & outputs')!
+        .click()
+      await settle()
+      expect(button('Unapproved preview file-0.pdf').disabled).toBe(!canApprove)
+      expect(button('Unapproved preview file-1.pdf').disabled).toBe(!canApprove)
+      expect(button('Download file-2.pdf').disabled).toBe(false)
+      const actions = [...document.querySelectorAll('.table-actions')]
+      const named = (row: Element, label: string) =>
+        [...row.querySelectorAll('button')].find((item) => item.textContent?.trim() === label)!
+      expect(actions.map((row) => named(row, 'Approve release').disabled)).toEqual([
+        !canApprove,
+        true,
+        true,
+      ])
+      expect(actions.map((row) => named(row, 'Publish').disabled)).toEqual([
+        true,
+        !canApprove,
+        true,
+      ])
+      expect(document.querySelectorAll('script')).toHaveLength(0)
+      expect(document.body.textContent).toContain('<script>unsafe</script>')
+      expect(presalesApi.command).not.toHaveBeenCalled()
+      changeLocale('zh-CN')
+      await settle()
+      expect(document.querySelector('#pane-review')?.textContent).toContain('成果版本')
+    },
+  )
+})

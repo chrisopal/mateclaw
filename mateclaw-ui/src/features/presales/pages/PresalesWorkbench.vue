@@ -727,290 +727,41 @@
             :label="t('presales.solution_design')"
             name="solution"
           >
-            <section class="section-heading">
-              <h2>{{ t('presales.versioned_solutions') }}</h2>
-              <div>
-                <el-button
-                  :disabled="!canGenerate"
-                  @click="openGeneration('S5')"
-                  >{{ t('presales.ask_employee_to_compose') }}</el-button
-                >
-              </div>
-            </section>
-            <section
-              v-if="project.solutions.length"
-              class="coverage"
-            >
-              <div class="coverage-heading">
-                <h3>{{ t('presales.requirement_coverage') }}</h3>
-                <details class="inline-help">
-                  <summary>{{ t('presales.definition') }}</summary>
-                  <p>
-                    {{ t('presales.context_message_8') }}
-                  </p>
-                </details>
-              </div>
-              <div class="coverage-stats">
-                <div>
-                  <span>{{ t('presales.requirement_response') }}</span
-                  ><strong>{{
-                    project.solutions.at(-1)?.coverage?.applicable
-                      ? `${project.solutions.at(-1)?.coverage!.handledIn}/${project.solutions.at(-1)?.coverage!.totalIn}`
-                      : t('presales.not_applicable')
-                  }}</strong>
-                </div>
-                <div>
-                  <span>{{ t('presales.section_references') }}</span
-                  ><strong>{{ coverage }}</strong>
-                </div>
-              </div>
-              <el-table :data="responseRows"
-                ><el-table-column
-                  prop="title"
-                  :label="t('presales.requirement')"
-                  min-width="200" /><el-table-column :label="t('presales.scope')"
-                  ><template #default="{ row }">{{
-                    stateLabel(row.scope)
-                  }}</template></el-table-column
-                ><el-table-column :label="t('presales.fulfillment_approach')"
-                  ><template #default="{ row }">{{
-                    stateLabel(row.fit)
-                  }}</template></el-table-column
-                ><el-table-column :label="t('presales.response')"
-                  ><template #default="{ row }">{{
-                    stateLabel(row.response)
-                  }}</template></el-table-column
-                ><el-table-column
-                  prop="sections"
-                  :label="t('presales.latest_solution_sections')"
-                  min-width="230"
-              /></el-table>
-            </section>
-            <div
-              v-if="project.solutions.length > 1"
-              class="toolbar"
-            >
-              <el-select
-                v-model="compareId"
-                :placeholder="t('presales.compare_with_previous_version')"
-                ><el-option
-                  v-for="solution in project.solutions.slice(0, -1)"
-                  :key="solution.id"
-                  :value="solution.id"
-                  :label="`${solution.title} · ${versionLabel('solutions', solution.id)}`" /></el-select
-              ><el-select
-                v-model="compareTargetId"
-                :placeholder="t('presales.compare_target_latest_by_default')"
-                ><el-option
-                  v-for="solution in project.solutions"
-                  :key="solution.id"
-                  :value="solution.id"
-                  :label="`${solution.title} · ${versionLabel('solutions', solution.id)}`"
-              /></el-select>
-            </div>
-            <el-table
-              v-if="compareId"
-              :data="comparison"
-              ><el-table-column
-                prop="title"
-                :label="t('presales.section')"
-              /><el-table-column
-                :label="t('presales.selected_previous_version')"
-                min-width="250"
-                ><template #default="{ row }">
-                  <pre class="safe-content">{{ row.before }}</pre>
-                </template></el-table-column
-              ><el-table-column
-                :label="t('presales.target_version')"
-                min-width="250"
-                ><template #default="{ row }">
-                  <pre class="safe-content">{{ row.after }}</pre>
-                </template></el-table-column
-              ></el-table
-            >
-            <el-empty
-              v-if="!project.solutions.length"
-              :description="t('presales.context_message_9')"
+            <PresalesSolutions
+              :project="project"
+              :can-write="canWrite"
+              :can-generate="canGenerate"
+              :state-label="stateLabel"
+              :version-label="versionLabel"
+              v-model:compare-id="compareId"
+              v-model:compare-target-id="compareTargetId"
+              @generate="openGeneration('S5')"
+              @revise="(solution) => openEditor('solution', solution)"
+              @download="(id, filename) => download(id, filename, 'draft')"
+              @evidence="showEvidence"
             />
-            <article
-              v-for="solution in [...project.solutions].reverse()"
-              :key="solution.id"
-              class="solution-revision"
-            >
-              <div class="solution-version-header">
-                <div>
-                  <h3>
-                    {{ solution.title }} ·
-                    {{ versionLabel('solutions', solution.id) }}
-                  </h3>
-                  <el-tag>{{ stateLabel(solution.status || 'DRAFT') }}</el-tag>
-                </div>
-                <el-button
-                  type="primary"
-                  size="small"
-                  :disabled="!canWrite"
-                  @click="openEditor('solution', solution)"
-                  >{{ t('presales.revise_this_version') }}</el-button
-                >
-              </div>
-              <div class="solution-downloads">
-                <span>{{ t('presales.download_draft') }}</span
-                ><el-button
-                  v-for="filename in ['solution.md', 'solution.docx', 'solution.pptx']"
-                  :key="filename"
-                  type="primary"
-                  size="small"
-                  @click="download(solution.id, filename, 'draft')"
-                  >{{ filename }}</el-button
-                >
-              </div>
-              <details class="baseline-details">
-                <summary>
-                  {{ t('presales.confirmed_requirements') }} ·
-                  {{ solution.baselineId ? t('presales.view_details') : t('presales.unconfirmed') }}
-                </summary>
-                <p class="muted">
-                  {{ solution.baselineId || t('presales.context_message_10') }}
-                </p>
-              </details>
-              <el-alert
-                v-if="solution.baselineId && solution.baselineId !== project.baselines.at(-1)?.id"
-                type="warning"
-                :closable="false"
-                :title="t('presales.context_message_11')"
-              />
-              <section
-                v-for="(section, index) in solution.sections"
-                :key="index"
-                class="solution-section"
-              >
-                <h4>{{ section.title }}</h4>
-                <pre class="safe-content">{{ section.text }}</pre>
-                <el-button
-                  v-if="section.evidenceRefs?.length"
-                  type="primary"
-                  size="small"
-                  @click="showEvidence(section)"
-                  >{{ t('presales.section_evidence') }}</el-button
-                >
-              </section>
-            </article>
           </el-tab-pane>
           <el-tab-pane
             :label="t('presales.review_outputs')"
             name="review"
           >
-            <section class="section-heading">
-              <h2>{{ t('presales.independent_review') }}</h2>
-              <div>
-                <el-button
-                  :disabled="!canGenerate || !project.solutions.length"
-                  @click="openGeneration('S7')"
-                  >{{ t('presales.ask_employee_to_review') }}</el-button
-                ><el-button
-                  :disabled="!canWrite"
-                  @click="openEditor('review')"
-                  >{{ t('presales.record_independent_review') }}</el-button
-                ><el-button
-                  :disabled="!canWrite"
-                  @click="openEditor('release')"
-                  >{{ t('presales.create_release_candidate') }}</el-button
-                >
-              </div>
-            </section>
-            <el-table :data="project.reviews"
-              ><el-table-column :label="t('presales.solution')"
-                ><template #default="{ row }">{{
-                  versionLabel('solutions', row.solutionId)
-                }}</template></el-table-column
-              ><el-table-column
-                prop="summary"
-                :label="t('presales.summary')"
-              /><el-table-column
-                :label="t('presales.findings')"
-                min-width="300"
-                ><template #default="{ row }">
-                  <pre class="safe-content">{{
-                    (row.findings || row.issues || []).length
-                      ? printable(row.findings || row.issues)
-                      : t('presales.no_findings')
-                  }}</pre>
-                </template></el-table-column
-              ></el-table
-            >
-            <section class="section-heading">
-              <h3>{{ t('presales.release_versions') }}</h3>
-              <el-button @click="downloadHandoff">{{
-                t('presales.export_internal_handoff')
-              }}</el-button>
-            </section>
-            <el-table :data="project.releases"
-              ><el-table-column :label="t('presales.version')"
-                ><template #default="{ row }">{{
-                  versionLabel('releases', row.id)
-                }}</template></el-table-column
-              ><el-table-column :label="t('presales.status')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.status)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.files')"
-                width="90"
-                ><template #default="{ row }">{{
-                  row.files?.length || 0
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.actions')"
-                min-width="224"
-                ><template #default="{ row }"
-                  ><div class="table-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="showEvidence(row)"
-                      >{{ t('presales.manifest') }}</el-button
-                    ><el-button
-                      v-for="file in row.files || []"
-                      :key="file.filename"
-                      type="primary"
-                      size="small"
-                      :disabled="row.status !== 'PUBLISHED' && !canApprove"
-                      @click="
-                        download(
-                          row.id,
-                          file.filename,
-                          row.status === 'PUBLISHED' ? 'files' : 'preview',
-                        )
-                      "
-                      >{{
-                        row.status === 'PUBLISHED'
-                          ? t('presales.download')
-                          : t('presales.unapproved_preview')
-                      }}
-                      {{ file.filename }}</el-button
-                    ><el-button
-                      type="primary"
-                      size="small"
-                      :disabled="!canApprove || row.status !== 'PENDING'"
-                      @click="approveRelease(row)"
-                      >{{ t('presales.approve_release') }}</el-button
-                    ><el-button
-                      type="primary"
-                      size="small"
-                      :disabled="!canApprove || row.status !== 'APPROVED'"
-                      @click="command('PUBLISH_RELEASE', { releaseId: row.id })"
-                      >{{ t('presales.publish') }}</el-button
-                    >
-                  </div></template
-                ></el-table-column
-              ></el-table
-            >
-            <details class="inline-help">
-              <summary>{{ t('presales.release_rules') }}</summary>
-              <p>
-                {{ t('presales.context_message_12') }}
-              </p>
-            </details>
+            <PresalesOutputs
+              :project="project"
+              :can-write="canWrite"
+              :can-generate="canGenerate"
+              :can-approve="canApprove"
+              :state-label="stateLabel"
+              :version-label="versionLabel"
+              :printable="printable"
+              @generate="openGeneration('S7')"
+              @review="openEditor('review')"
+              @release="openEditor('release')"
+              @handoff="downloadHandoff"
+              @evidence="showEvidence"
+              @approve="approveRelease"
+              @publish="(releaseId) => command('PUBLISH_RELEASE', { releaseId })"
+              @download="download"
+            />
           </el-tab-pane>
         </el-tabs>
       </template>
@@ -1599,6 +1350,8 @@
 import { presalesMessages } from '../shared/messages'
 import { useI18n } from 'vue-i18n'
 import PresalesDashboard from '../components/PresalesDashboard.vue'
+import PresalesSolutions from '../components/PresalesSolutions.vue'
+import PresalesOutputs from '../components/PresalesOutputs.vue'
 import { loadPortfolio } from '../shared/dashboard'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
@@ -1618,7 +1371,7 @@ import {
 import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
-import { isCurrentRequest, presalesError, coverageLabel, operationReceipt } from '../shared/state'
+import { isCurrentRequest, presalesError, operationReceipt } from '../shared/state'
 import {
   createEditorForm,
   prepareEditorSubmission,
@@ -1769,53 +1522,6 @@ const loading = ref(false),
   total = ref(0)
 const compareId = ref(''),
   compareTargetId = ref('')
-const responseRows = computed(() =>
-  (project.value?.requirements || []).map((requirement) => {
-    const sections = (project.value?.solutions.at(-1)?.sections || []).filter(
-      (section: PresalesRecord) => section.requirementRefs?.includes(requirement.id),
-    )
-    const solution = project.value?.solutions.at(-1)
-    const baseline = project.value?.baselines.find((item) => item.id === solution?.baselineId)
-    const ref = baseline?.references?.find(
-      (item: PresalesRecord) => item.requirementId === requirement.id,
-    )
-    return {
-      title: requirement.title,
-      scope: ref?.scope || requirement.scope,
-      response:
-        solution?.coverage?.responses?.find(
-          (item: PresalesRecord) => item.requirementId === requirement.id,
-        )?.status || 'UNHANDLED',
-      fit:
-        project.value?.fitGaps.filter((fit) => fit.requirementId === requirement.id).at(-1)
-          ?.status || 'UNKNOWN',
-      sections: sections.map((section: PresalesRecord) => section.title).join(' / ') || '—',
-      covered: sections.length > 0,
-    }
-  }),
-)
-const coverage = computed(() => {
-  const rows = responseRows.value.filter((row) => row.scope === 'IN')
-  return rows.length
-    ? coverageLabel(rows.length, rows.filter((row) => row.covered).length)
-    : t('presales.not_applicable_zero_denominator')
-})
-const comparison = computed(() => {
-  const before =
-    project.value?.solutions.find((solution) => solution.id === compareId.value)?.sections || []
-  const after =
-    (
-      project.value?.solutions.find((solution) => solution.id === compareTargetId.value) ||
-      project.value?.solutions.at(-1)
-    )?.sections || []
-  return Array.from(
-    new Set([...before, ...after].map((section: PresalesRecord) => String(section.title))),
-  ).map((title) => ({
-    title,
-    before: before.find((section: PresalesRecord) => section.title === title)?.text || '—',
-    after: after.find((section: PresalesRecord) => section.title === title)?.text || '—',
-  }))
-})
 const clarificationFilter = ref('ALL')
 const filteredClarifications = computed(() =>
   (project.value?.clarifications || []).filter(
@@ -2663,16 +2369,13 @@ onBeforeUnmount(() => {
   background: var(--el-fill-color-lighter);
 }
 .page-heading,
-.section-heading,
-.project-meta,
-.toolbar {
+.project-meta {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
-.page-heading,
-.section-heading {
+.page-heading {
   justify-content: space-between;
 }
 .page-heading > div {
@@ -2692,51 +2395,13 @@ h1 {
   margin: 8px 0;
   font-weight: 600;
 }
-h2 {
-  font-size: 16px;
-  font-weight: 600;
-}
-h3 {
-  font-size: 15px;
-  font-weight: 600;
-}
-.muted {
-  color: var(--el-text-color-secondary);
-  font-size: 13px;
-}
-.toolbar {
-  margin: 20px 0 12px;
-}
-.toolbar .el-input {
-  width: 240px;
-}
-.toolbar .el-select {
-  width: 180px;
-}
 .project-meta {
   padding: 16px 0;
   font-size: 13px;
 }
-.section-heading {
-  margin: 16px 0;
-}
-.el-alert {
-  margin: 12px 0;
-}
 .el-pagination {
   margin-top: 20px;
   justify-content: flex-end;
-}
-.safe-content {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font: inherit;
-  line-height: 1.7;
-  margin: 8px 0;
-}
-.solution-revision {
-  border-bottom: 1px solid var(--el-border-color);
-  padding: 12px 0 24px;
 }
 .form-grid {
   display: grid;
@@ -2753,10 +2418,6 @@ h3 {
 @media (max-width: 768px) {
   .presales-workbench {
     padding: 16px;
-  }
-  .toolbar .el-input,
-  .toolbar .el-select {
-    width: 100%;
   }
   .form-grid {
     grid-template-columns: 1fr;
@@ -2915,123 +2576,6 @@ h3 {
     align-items: flex-start;
   }
 }
-.inline-help {
-  margin: 12px 0 16px;
-  color: var(--el-text-color-secondary);
-  font-size: 13px;
-  line-height: 1.7;
-}
-.inline-help summary {
-  color: var(--el-color-primary);
-  cursor: pointer;
-}
-.inline-help p {
-  margin: 8px 0 0;
-  max-width: 80ch;
-}
-.coverage {
-  margin: 20px 0 28px;
-  padding: 16px 0 20px;
-  border-top: 1px solid var(--el-border-color-light);
-  border-bottom: 1px solid var(--el-border-color-light);
-}
-.coverage-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.coverage-heading h3 {
-  margin: 0;
-}
-.coverage-heading .inline-help {
-  margin: 0;
-}
-.coverage-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.coverage-stats > div {
-  padding: 12px 14px;
-  border: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-lighter);
-}
-.coverage-stats span {
-  display: block;
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-}
-.coverage-stats strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 18px;
-  font-variant-numeric: tabular-nums;
-}
-.solution-version-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.solution-version-header > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.solution-version-header h3 {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.solution-downloads {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin: 14px 0 12px;
-  padding: 8px 0;
-  border-top: 1px solid var(--el-border-color-lighter);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-}
-.solution-downloads .el-button {
-  padding: 4px;
-}
-.baseline-details {
-  margin: 0 0 18px;
-  color: var(--el-text-color-secondary);
-  font-size: 13px;
-  line-height: 1.7;
-}
-.baseline-details summary {
-  color: var(--el-color-primary);
-  cursor: pointer;
-}
-.baseline-details p {
-  margin: 6px 0 0;
-  overflow-wrap: anywhere;
-}
-.solution-section {
-  padding: 16px 0;
-  border-top: 1px solid var(--el-border-color-lighter);
-}
-.solution-section h4 {
-  margin: 0 0 8px;
-  font-size: 15px;
-}
-.solution-section .safe-content {
-  margin: 0 0 8px;
-  line-height: 1.7;
-}
-@media (max-width: 600px) {
-  .coverage-stats {
-    grid-template-columns: 1fr;
-  }
-}
 
 .task-heading {
   display: flex;
@@ -3094,15 +2638,5 @@ h3 {
     width: 100%;
   }
 }
-
-.table-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.table-actions .el-button {
-  margin: 0;
-  flex-shrink: 0;
-}
 </style>
+<style scoped src="../shared/workbenchSections.css"></style>
