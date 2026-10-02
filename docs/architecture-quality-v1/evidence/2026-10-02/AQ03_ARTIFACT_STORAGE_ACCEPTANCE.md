@@ -25,3 +25,5 @@ dev 8daqxktq SCAN_PASS；Spotless check exit0；source diff-check通过。独立
 ## 剩余与回退
 
 H2、真实HTTP与单页编译器不证明MySQL/Kingbase、生产重启、角色/API完整矩阵、真实模型/浏览器或迁移前后黄金样本。AC23/31正式状态仍NOT_RUN，required CI未验证；无新增生产操作。下一步继续查询摘要/命令类型边界及独立对象/精确依赖/SQL分页/备份恢复单写迁移。回退仅还原两个服务SQL与DI，无数据迁移；必须保留caller事务、source/release授权和已发布字节，不把DAO事实变成批准权。
+
+最终源码提交45a97c98e9f6134d7bb025ec29d65db669c2110b，实际树d77525cb8298d05437a1c212d3c30fea9b18e455；um6o82r2精确暂存与s54u4y57正常提交钩子均PASS/submission_ready=true，同树。Java6040总数/5970执行/既有70skip、零failure/error；UI846/846、type/ID/Node/两主题构建通过。原件报告及hash见manifest与artifact-storage-tests。完整推送范围和远端读回继续在PR5补记。

@@ -37,7 +37,9 @@
     "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/dev.txt": "fd985b494db7aea15126412a16723e5cad0626de8c22500ac57cfe74c163babf",
     "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format.txt": "0f9a2d565e9742527b509f86423e37939ad6159ff5c75d6c3ff808d0f4b9377f",
     "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format-check.txt": "483af9fe5704bd485aba5f30dcfc881fc0dfcca61ed5f7c3db8d617f37e57ef9",
-    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/final-dev.txt": "4741151c91ae06ccbf4a543951796d543046f9c601c30eb7b1612ae00b2a39ab"
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/final-dev.txt": "4741151c91ae06ccbf4a543951796d543046f9c601c30eb7b1612ae00b2a39ab",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/staged-gate-report.json": "c27f25a5e77d6addae95f6299acfbcd4b751966e6af5b30a9a0af62b83b493ad",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/commit-hook-report.json": "6e34b65d4a5f5b9f14acb85c48fb78dca92d17da2adf6d6cbb6c90443c280c2b"
   },
   "evidence_redaction": {
     "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/initial-dev.txt": {
@@ -225,5 +227,22 @@
     "findings": 0,
     "diagnostics_limitation": "OMX LSP/AST Transport closed; actual JDK21 Maven compile/tests and manual SQL/diff review used",
     "existing_assertions_unchanged": true
+  },
+  "full_gate": {
+    "source_commit": "45a97c98e9f6134d7bb025ec29d65db669c2110b",
+    "checked_tree": "d77525cb8298d05437a1c212d3c30fea9b18e455",
+    "staged_task": "um6o82r2",
+    "commit_hook_task": "s54u4y57",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6040,
+    "java_executed": 5970,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "ui_failed": 0,
+    "types_ID_Node_builds": "PASS",
+    "ui_format_lint": "NOT_APPLICABLE no UI targets"
   }
 }
