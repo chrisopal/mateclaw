@@ -1572,3 +1572,43 @@ describe('solution and output presentation contracts', () => {
     },
   )
 })
+
+describe('editor navigation and unload protection', () => {
+  it('protects a dirty draft on unload and removes the listener after unmount', async () => {
+    await mount()
+    button('New project').click()
+    await settle()
+    const name = document.querySelector<HTMLInputElement>('[role="dialog"] input')!
+    name.value = 'Unsaved project'
+    name.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    const before = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(before)
+    expect(before.defaultPrevented).toBe(true)
+    app!.unmount()
+    app = undefined
+    const after = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(after)
+    expect(after.defaultPrevented).toBe(false)
+  })
+
+  it('uses the route-update guard to retain a cancelled draft on the same workbench route', async () => {
+    const confirm = vi.spyOn(ElMessageBox, 'confirm').mockRejectedValue('cancel')
+    try {
+      const router = await mount(`/presales/${project.id}`)
+      button('Edit project').click()
+      await settle()
+      const name = document.querySelector<HTMLInputElement>('[role="dialog"] input')!
+      name.value = 'Retain on route update'
+      name.dispatchEvent(new Event('input', { bubbles: true }))
+      await settle()
+      await router.push('/presales/90071992547409996')
+      await settle()
+      expect(router.currentRoute.value.params.projectId).toBe(project.id)
+      expect(name.value).toBe('Retain on route update')
+      expect(confirm).toHaveBeenCalledTimes(1)
+    } finally {
+      confirm.mockRestore()
+    }
+  })
+})

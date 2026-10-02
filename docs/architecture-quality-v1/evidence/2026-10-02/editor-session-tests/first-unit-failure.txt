@@ -1,0 +1,38 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/editorSession.test.ts (17 tests | 1 failed) 11ms
+     × aligns solution responses when the open baseline changes 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/editorSession.test.ts > presales editor session ownership > aligns solution responses when the open baseline changes
+AssertionError: expected [ { requirementId: 'req-1', …(2) } ] to deeply equal [ { requirementId: 'req-1', …(1) } ]
+
+- Expected
++ Received
+
+  [
+    {
++     "reason": "",
+      "requirementId": "req-1",
+      "status": "UNHANDLED",
+    },
+  ]
+
+ ❯ src/features/presales/__tests__/editorSession.test.ts:254:52
+    252|     editor.form.value.baselineId = 'b1'
+    253|     await nextTick()
+    254|     expect(editor.form.value.requirementResponses).toEqual([
+       |                                                    ^
+    255|       { requirementId: 'req-1', status: 'UNHANDLED' },
+    256|     ])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  14:59:58
+   Duration  293ms (transform 40ms, setup 0ms, import 78ms, tests 11ms, environment 113ms)
+

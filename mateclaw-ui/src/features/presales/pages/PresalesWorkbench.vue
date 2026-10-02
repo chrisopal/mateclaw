@@ -1360,9 +1360,7 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import {
   presalesApi,
   type PresalesCapabilities,
-  type PresalesEditorForm,
   type PresalesMember,
-  type PresalesSource,
   type PresalesEmployee,
   type PresalesTask,
   type PresalesProject,
@@ -1372,13 +1370,8 @@ import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, presalesError, operationReceipt } from '../shared/state'
-import {
-  createEditorForm,
-  prepareEditorSubmission,
-  requirementsForBaseline,
-  solutionResponses,
-  type PresalesEditorKind as Editor,
-} from '../shared/editorSubmission'
+import { usePresalesEditorSession } from '../composables/usePresalesEditorSession'
+import { prepareEditorSubmission } from '../shared/editorSubmission'
 const { t } = useI18n({ messages: presalesMessages })
 const narrowQuery = window.matchMedia('(max-width: 768px)')
 const isNarrow = ref(narrowQuery.matches)
@@ -1847,38 +1840,36 @@ function search() {
   page.value = 1
   void load()
 }
-const sourceOptions = ref<PresalesSource[]>([]),
-  statementOptions = ref<PresalesRecord[]>([]),
-  optionsLoading = ref(false)
-const editorOpen = ref(false),
-  editorKind = ref<Editor>('project'),
-  form = ref<PresalesEditorForm>({}),
-  editError = ref(''),
-  initialForm = ref('')
-let editorGeneration = 0
-watch(
+const editor = usePresalesEditorSession({
+  project,
+  canWrite: () => canWrite.value,
+  saving,
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  captureScope,
+  isActiveScope,
+  loadEmployees,
+  confirmDiscard: () =>
+    ElMessageBox.confirm(t('presales.discard_unsaved_changes'), t('presales.unsaved_changes_2'), {
+      type: 'warning',
+    }),
+})
+const {
+  sourceOptions,
+  statementOptions,
+  optionsLoading,
   editorOpen,
-  (open) => {
-    if (!open) {
-      editorGeneration++
-      sourceOptions.value = []
-      statementOptions.value = []
-      optionsLoading.value = false
-    }
-  },
-  { flush: 'sync' },
-)
-const editableRequirements = computed(() =>
-  requirementsForBaseline(project.value, form.value.baselineId),
-)
-watch(
-  () => form.value.baselineId,
-  () => {
-    if (editorKind.value !== 'solution' || !editorOpen.value) return
-    form.value.requirementResponses = solutionResponses(form.value, project.value)
-  },
-)
-const dirty = computed(() => editorOpen.value && JSON.stringify(form.value) !== initialForm.value)
+  editorKind,
+  form,
+  editError,
+  editableRequirements,
+  dirty,
+  openEditor,
+  selectSource,
+  selectStatement,
+  discard,
+  closeEditor,
+} = editor
 const editorTitle = computed(
   () =>
     ({
@@ -1895,103 +1886,9 @@ const editorTitle = computed(
       context: t('presales.context_draft'),
     })[editorKind.value],
 )
-function openEditor(kind: Editor, record?: PresalesRecord) {
-  if (
-    !canWrite.value ||
-    saving.value ||
-    (project.value?.sourceAccessRestricted && !['employee', 'material'].includes(kind))
-  )
-    return
-  editorGeneration++
-  editorKind.value = kind
-  editError.value = ''
-  if (kind === 'project' || kind === 'employee') void loadEmployees()
-  form.value = createEditorForm(kind, record, project.value)
-  initialForm.value = JSON.stringify(form.value)
-  editorOpen.value = true
-  if (kind === 'material' || kind === 'requirement') void loadOptions(kind)
-}
-async function loadOptions(kind: Editor) {
-  const scope = captureScope(),
-    session = editorGeneration
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value
-  if (!ws) return
-  const active = () =>
-    isActiveScope(scope) &&
-    session === editorGeneration &&
-    editorOpen.value &&
-    editorKind.value === kind
-  optionsLoading.value = true
-  sourceOptions.value = []
-  statementOptions.value = []
-  try {
-    const [sources, statements] =
-      kind === 'material'
-        ? [await presalesApi.sources(ws), undefined]
-        : [undefined, await presalesApi.statements(ws, id)]
-    if (!active() || (kind !== 'material' && project.value?.sourceAccessRestricted)) return
-    if (sources) sourceOptions.value = sources
-    if (statements) statementOptions.value = statements
-  } catch (e) {
-    if (active()) editError.value = presalesError(e).message
-  } finally {
-    if (active()) optionsLoading.value = false
-  }
-}
-function selectSource(kbId: string) {
-  const source = sourceOptions.value.find((item) => item.kbId === kbId)
-  form.value.graphId = source?.graphId || ''
-  form.value.name = source?.name || ''
-}
-function selectStatement(key: string) {
-  const statement = statementOptions.value.find((item) => `${item.graphId}:${item.id}` === key)
-  form.value.statementId = statement?.id || ''
-  form.value.statementRevision = statement?.revision || ''
-  form.value.graphId = statement?.graphId || ''
-  form.value.evidenceIds = statement?.evidenceIds || []
-}
-async function discard(): Promise<boolean> {
-  if (saving.value) return false
-  if (!dirty.value) {
-    editorOpen.value = false
-    return true
-  }
-  const scope = captureScope(),
-    session = editorGeneration,
-    draft = JSON.stringify(form.value)
-  try {
-    await ElMessageBox.confirm(
-      t('presales.discard_unsaved_changes'),
-      t('presales.unsaved_changes_2'),
-      { type: 'warning' },
-    )
-    if (
-      !isActiveScope(scope) ||
-      session !== editorGeneration ||
-      saving.value ||
-      draft !== JSON.stringify(form.value)
-    )
-      return false
-    editorOpen.value = false
-    return true
-  } catch {
-    return false
-  }
-}
-async function closeEditor(done: () => void) {
-  if ((await discard()) && !editorOpen.value) done()
-}
 onBeforeRouteLeave(discard)
 onBeforeRouteUpdate(discard)
 const unregister = workspace.registerBeforeSwitch(discard)
-function beforeUnload(event: BeforeUnloadEvent) {
-  if (dirty.value || saving.value) {
-    event.preventDefault()
-    event.returnValue = ''
-  }
-}
-window.addEventListener('beforeunload', beforeUnload)
 async function command(action: string, payload: object): Promise<boolean> {
   const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
@@ -2039,9 +1936,8 @@ async function command(action: string, payload: object): Promise<boolean> {
 async function save() {
   if (!canWrite.value || saving.value || conflict.value) return
   const scope = captureScope(),
-    session = editorGeneration,
+    active = editor.captureSession(),
     kind = editorKind.value
-  const active = () => isActiveScope(scope) && session === editorGeneration && editorOpen.value
   const submission = prepareEditorSubmission(
     kind,
     form.value,
@@ -2325,12 +2221,6 @@ watch(
     evidenceOpen.value = false
     evidence.value = undefined
     generationOpen.value = false
-    statementOptions.value = []
-    if (!current || !['employee', 'material'].includes(editorKind.value)) {
-      editorOpen.value = false
-      form.value = {}
-      initialForm.value = ''
-    }
     clearPresentationPreview()
   },
   { flush: 'sync' },
@@ -2354,7 +2244,6 @@ onBeforeUnmount(() => {
   clearPresentationPreview()
   unregister()
   narrowQuery.removeEventListener('change', updateViewport)
-  window.removeEventListener('beforeunload', beforeUnload)
 })
 </script>
 <style scoped>
