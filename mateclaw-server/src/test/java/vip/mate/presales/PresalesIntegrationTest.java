@@ -61,6 +61,253 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 200);
     }
 
+    @Test
+    void repairContextAllowsOnlySafeRepairAfterMaterialRevocation() throws Exception {
+        var p = (com.fasterxml.jackson.databind.node.ObjectNode) project();
+        p.withArray("materials")
+                .addObject()
+                .put("id", "binding-secret")
+                .put("kbId", "1001")
+                .put("role", "private source label")
+                .put("label", "private source label");
+        p.putObject("sourceSnapshot").put("sourceRef", "raw-secret");
+        p.put("privateProjectExtension", "do-not-leak");
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+        var revoked = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
+        revoked.setId(1001L);
+        revoked.setWorkspaceId(Long.valueOf(workspace));
+        revoked.setDeleted(1);
+        when(wikiKnowledgeBases.getById(1001L)).thenReturn(revoked);
+
+        var repair =
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + "/repair-context",
+                        "member",
+                        workspace,
+                        null,
+                        200);
+        assertTrue(repair.path("sourceAccessRestricted").asBoolean());
+        assertEquals("binding-secret", repair.path("repairBindings").get(0).path("id").asText());
+        assertEquals("UNKNOWN", repair.path("repairBindings").get(0).path("role").asText());
+        assertFalse(repair.path("repairBindings").get(0).has("kbId"));
+        assertFalse(repair.has("sourceSnapshot"));
+        assertFalse(repair.has("privateProjectExtension"));
+        assertFalse(repair.toString().contains("private source label"));
+        assertFalse(repair.toString().contains("raw-secret"));
+        for (String collection :
+                List.of(
+                        "materials",
+                        "requirements",
+                        "clarifications",
+                        "baselines",
+                        "fitGaps",
+                        "cases",
+                        "solutions",
+                        "reviews",
+                        "reviewDrafts",
+                        "releases",
+                        "tasks",
+                        "contextCards"))
+            assertTrue(repair.path(collection).isArray() && repair.path(collection).isEmpty());
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/repair-context",
+                "viewer",
+                workspace,
+                null,
+                403);
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/repair-context",
+                "owner",
+                otherWorkspace,
+                null,
+                404);
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/repair-context",
+                null,
+                workspace,
+                null,
+                401);
+        api(
+                "GET",
+                "/projects/" + p.path("id").asText() + "/repair-context",
+                "member",
+                otherWorkspace,
+                null,
+                403);
+        api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 403);
+
+        var deletedTarget =
+                Map.of(
+                        "expectedVersion",
+                        1,
+                        "operationId",
+                        "repair-deleted-target",
+                        "action",
+                        "BIND_MATERIAL",
+                        "payload",
+                        Map.of("kbId", "1001", "role", "PROJECT"));
+        api(
+                "POST",
+                "/projects/" + p.path("id").asText() + "/commands",
+                "member",
+                workspace,
+                deletedTarget,
+                404);
+        assertEquals(
+                1,
+                api(
+                                "GET",
+                                "/projects/" + p.path("id").asText() + "/repair-context",
+                                "member",
+                                workspace,
+                                null,
+                                200)
+                        .path("version")
+                        .asInt());
+
+        var unknownUpdate =
+                Map.of(
+                        "expectedVersion",
+                        1,
+                        "operationId",
+                        "repair-unknown-update",
+                        "action",
+                        "UPDATE_PROJECT",
+                        "payload",
+                        Map.of("agentId", "7", "sourceLabel", "do-not-accept"));
+        api(
+                "POST",
+                "/projects/" + p.path("id").asText() + "/commands",
+                "member",
+                workspace,
+                unknownUpdate,
+                403);
+        api(
+                "POST",
+                "/projects/" + p.path("id").asText() + "/commands",
+                "member",
+                workspace,
+                Map.of(
+                        "expectedVersion",
+                        1,
+                        "operationId",
+                        "repair-missing-payload",
+                        "action",
+                        "UPDATE_PROJECT"),
+                403);
+
+        var unbindPayload = Map.of("id", "binding-secret");
+        api(
+                "POST",
+                "/projects/" + p.path("id").asText() + "/commands",
+                "member",
+                workspace,
+                Map.of(
+                        "expectedVersion",
+                        99,
+                        "operationId",
+                        "repair-cas-conflict",
+                        "action",
+                        "UNBIND_MATERIAL",
+                        "payload",
+                        unbindPayload),
+                409);
+        assertEquals(
+                1,
+                api(
+                                "GET",
+                                "/projects/" + p.path("id").asText() + "/repair-context",
+                                "member",
+                                workspace,
+                                null,
+                                200)
+                        .path("version")
+                        .asInt());
+
+        var archived =
+                (com.fasterxml.jackson.databind.node.ObjectNode)
+                        json.readTree(
+                                jdbc.queryForObject(
+                                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                                        String.class,
+                                        p.path("id").asText()));
+        archived.put("status", "ARCHIVED");
+        jdbc.update(
+                "UPDATE mate_presales_project SET status=?, body_json=? WHERE id=?",
+                "ARCHIVED",
+                archived.toString(),
+                p.path("id").asText());
+        assertEquals(
+                "ARCHIVED",
+                api(
+                                "GET",
+                                "/projects/" + p.path("id").asText() + "/repair-context",
+                                "member",
+                                workspace,
+                                null,
+                                200)
+                        .path("status")
+                        .asText());
+        api(
+                "POST",
+                "/projects/" + p.path("id").asText() + "/commands",
+                "member",
+                workspace,
+                Map.of(
+                        "expectedVersion",
+                        1,
+                        "operationId",
+                        "repair-archived",
+                        "action",
+                        "UNBIND_MATERIAL",
+                        "payload",
+                        unbindPayload),
+                409);
+        archived.put("status", "ACTIVE");
+        jdbc.update(
+                "UPDATE mate_presales_project SET status=?, body_json=? WHERE id=?",
+                "ACTIVE",
+                archived.toString(),
+                p.path("id").asText());
+
+        var unbind =
+                Map.of(
+                        "expectedVersion",
+                        1,
+                        "operationId",
+                        "repair-unbind-once",
+                        "action",
+                        "UNBIND_MATERIAL",
+                        "payload",
+                        unbindPayload);
+        var after =
+                api(
+                        "POST",
+                        "/projects/" + p.path("id").asText() + "/commands",
+                        "member",
+                        workspace,
+                        unbind,
+                        200);
+        assertEquals(2, after.path("version").asInt());
+        assertTrue(after.path("materials").isArray() && after.path("materials").isEmpty());
+        assertEquals(
+                after,
+                api(
+                        "POST",
+                        "/projects/" + p.path("id").asText() + "/commands",
+                        "member",
+                        workspace,
+                        unbind,
+                        200));
+    }
+
     private JsonNode cmd(JsonNode p, String action, Map<String, ?> payload, String role, int status)
             throws Exception {
         return api(

@@ -259,6 +259,108 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         task = ((ObjectNode) project.path("tasks").get(0)).deepCopy();
     }
 
+    @Test
+    void revokedEmployeeCanBeReboundUsingOnlyRepairMetadataAndEligibleCurrentSourceScope() {
+        long kbId = com.baomidou.mybatisplus.core.toolkit.IdWorker.getId();
+        jdbc.update(
+                "INSERT INTO mate_wiki_knowledge_base(id,name,workspace_id,create_time,update_time,deleted) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
+                kbId,
+                "Repair fixture",
+                Long.valueOf(workspace));
+        var kb = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
+        kb.setId(kbId);
+        kb.setWorkspaceId(Long.valueOf(workspace));
+        kb.setDeleted(0);
+        when(wikiKnowledgeBases.getById(kbId)).thenReturn(kb);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                Long.valueOf(agentId),
+                kbId);
+        var bound =
+                service.command(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asInt(),
+                                UUID.randomUUID().toString(),
+                                "BIND_MATERIAL",
+                                json.createObjectNode()
+                                        .put("kbId", Long.toString(kbId))
+                                        .put("role", "PROJECT")));
+        jdbc.update("UPDATE mate_agent SET enabled=FALSE WHERE id=?", Long.valueOf(agentId));
+        assertEquals(
+                403,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.get(workspace, project.path("id").asText()))
+                        .status());
+        var repair = service.repairContext(workspace, project.path("id").asText());
+        assertTrue(repair.path("sourceAccessRestricted").asBoolean());
+        assertTrue(repair.path("materials").isEmpty());
+        assertTrue(repair.path("tasks").isEmpty());
+        var replacement = new AgentEntity();
+        replacement.setName("Replacement fixture");
+        replacement.setWorkspaceId(Long.valueOf(workspace));
+        replacement.setEnabled(false);
+        replacement.setDeleted(0);
+        replacement.setRuntimeType("native");
+        replacement.setWikiDisabled(false);
+        agentMapper.insert(replacement);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                replacement.getId(),
+                kbId);
+        String operation = UUID.randomUUID().toString();
+        var command =
+                new PresalesDtos.Command(
+                        repair.path("version").asInt(),
+                        operation,
+                        "UPDATE_PROJECT",
+                        json.createObjectNode().put("agentId", replacement.getId().toString()));
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () ->
+                                        service.command(
+                                                workspace, project.path("id").asText(), command))
+                        .status());
+        assertEquals(
+                bound.path("version").asInt(),
+                service.repairContext(workspace, project.path("id").asText())
+                        .path("version")
+                        .asInt());
+        replacement.setEnabled(true);
+        agentMapper.updateById(replacement);
+        var restored = service.command(workspace, project.path("id").asText(), command);
+        assertFalse(restored.path("sourceAccessRestricted").asBoolean());
+        assertEquals(replacement.getId().toString(), restored.path("agentId").asText());
+        assertEquals(1, restored.path("materials").size());
+        assertEquals(restored, service.get(workspace, project.path("id").asText()));
+        assertEquals(restored, service.command(workspace, project.path("id").asText(), command));
+        String receipt =
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation);
+        jdbc.update(
+                "UPDATE mate_agent_wiki_kb SET enabled=FALSE WHERE agent_id=? AND kb_id=?",
+                replacement.getId(),
+                kbId);
+        var replay = service.command(workspace, project.path("id").asText(), command);
+        assertTrue(replay.path("sourceAccessRestricted").asBoolean());
+        assertTrue(replay.path("materials").isEmpty());
+        assertTrue(replay.path("tasks").isEmpty());
+        assertEquals(
+                receipt,
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation));
+    }
+
     @AfterEach
     void clearIdentity() {
         SecurityContextHolder.clearContext();

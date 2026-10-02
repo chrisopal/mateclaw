@@ -1,6 +1,10 @@
 export const presalesMessages = {
   'zh-CN': {
     presales: {
+      unbind_material: '解绑资料',
+      repair_bindings: '修复资料绑定',
+      repair_bindings_help: '仅显示绑定 ID。解绑不会恢复已撤回历史来源的访问权限。',
+
       context_message_1:
         '记录已被更新。当前编辑内容已保留；请关闭编辑后刷新并核对新版本，再重新提交。',
       context_message_2: '售前功能未启用。历史数据不会被清空。',
@@ -271,6 +275,11 @@ export const presalesMessages = {
   },
   'en-US': {
     presales: {
+      unbind_material: 'Unbind material',
+      repair_bindings: 'Material bindings for repair',
+      repair_bindings_help:
+        'Only binding IDs are shown. Removing a binding does not restore access to withdrawn historical sources.',
+
       context_message_1:
         'The record changed. Your edits are retained. Close the editor, refresh and compare the latest version before resubmitting.',
       context_message_2: 'Presales is disabled. Existing data is retained.',

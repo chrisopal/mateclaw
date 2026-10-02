@@ -24,7 +24,7 @@
       >
       <el-button
         v-else
-        :disabled="!canWrite"
+        :disabled="!canWrite || project?.sourceAccessRestricted"
         @click="openEditor('project', project)"
         >{{ t('presales.edit_project') }}</el-button
       >
@@ -197,7 +197,7 @@
             plain
             size="small"
             type="danger"
-            :disabled="!canWrite"
+            :disabled="!canWrite || project.sourceAccessRestricted"
             @click="archive"
             >{{ t('presales.archive') }}</el-button
           >
@@ -230,7 +230,7 @@
           <div>
             <el-button
               :disabled="!canWrite"
-              @click="openEditor('project', project)"
+              @click="openEditor('employee', project)"
               >{{ t('presales.assign_employee') }}</el-button
             ><el-button
               type="primary"
@@ -239,6 +239,26 @@
               >{{ t('presales.delegate_to_employee') }}</el-button
             >
           </div>
+        </section>
+        <section
+          v-if="project.sourceAccessRestricted && project.repairBindings?.length"
+          class="repair-bindings"
+        >
+          <h2>{{ t('presales.repair_bindings') }}</h2>
+          <p>{{ t('presales.repair_bindings_help') }}</p>
+          <ul>
+            <li
+              v-for="binding in project.repairBindings"
+              :key="binding.id"
+            >
+              <span>{{ binding.id }} · {{ stateLabel(binding.role) }}</span>
+              <el-button
+                :disabled="!canWrite || saving"
+                @click="command('UNBIND_MATERIAL', { id: binding.id })"
+                >{{ t('presales.unbind_material') }}</el-button
+              >
+            </li>
+          </ul>
         </section>
         <nav
           class="project-pulse"
@@ -1111,6 +1131,38 @@
               type="textarea"
               :rows="3" /></el-form-item
         ></template>
+        <template v-else-if="editorKind === 'employee'">
+          <el-form-item :label="t('presales.presales_solution_employee')"
+            ><el-select
+              v-model="form.agentId"
+              clearable
+              :loading="employeesLoading"
+              :placeholder="t('presales.select_a_configured_workspace_employee')"
+              ><el-option
+                v-for="employee in employees"
+                :key="employee.id"
+                :value="employee.id"
+                :label="employee.name"
+                :disabled="employee.enabled === false" /></el-select
+            ><el-button
+              type="primary"
+              size="small"
+              @click="router.push('/agents')"
+              >{{ t('presales.manage_employees') }}</el-button
+            ></el-form-item
+          ><el-alert
+            v-if="employeeError"
+            :title="employeeError"
+            type="warning"
+            :closable="false"
+          />
+          <p
+            v-if="!employeesLoading && !employees.length"
+            class="muted"
+          >
+            {{ t('presales.context_message_14') }}
+          </p>
+        </template>
         <template v-else-if="editorKind === 'material'"
           ><el-form-item
             :label="t('presales.knowledge_base_2')"
@@ -1757,7 +1809,8 @@ const canWrite = computed(
 )
 const canGenerate = computed(() => canWrite.value && !project.value?.sourceAccessRestricted)
 const canApprove = computed(
-  () => canWrite.value && !!capabilities.value?.canApprove && !!capabilities.value?.semanticEnabled,
+  () =>
+    canGenerate.value && !!capabilities.value?.canApprove && !!capabilities.value?.semanticEnabled,
 )
 const evidenceOpen = ref(false),
   evidence = ref<PresalesRecord>()
@@ -1930,6 +1983,78 @@ let pollController: AbortController | undefined
 function waitForPoll(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
+async function readProject(ws: string, id: string, signal: AbortSignal): Promise<PresalesProject> {
+  try {
+    return await presalesApi.get(ws, id, signal)
+  } catch (e) {
+    if (
+      !presalesError(e).accessDenied ||
+      signal.aborted ||
+      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
+    )
+      throw e
+    project.value = undefined
+    if (!capabilities.value?.canWrite) throw e
+    try {
+      const repair = await presalesApi.repairContext(ws, id, signal)
+      const sourceCollections = [
+        'materials',
+        'requirements',
+        'clarifications',
+        'baselines',
+        'fitGaps',
+        'cases',
+        'solutions',
+        'reviews',
+        'reviewDrafts',
+        'releases',
+        'tasks',
+        'contextCards',
+      ] as const
+      const metadata = [
+        'id',
+        'workspaceId',
+        'version',
+        'name',
+        'customer',
+        'ownerId',
+        'industry',
+        'goal',
+        'status',
+        'stage',
+        'agentId',
+        'agentName',
+        'createdBy',
+        'createdAt',
+        'updatedBy',
+        'updatedAt',
+        'sourceAccessRestricted',
+        'repairBindings',
+      ]
+      const allowedKeys = new Set<string>([...metadata, ...sourceCollections])
+      if (
+        repair.sourceAccessRestricted !== true ||
+        repair.id !== id ||
+        repair.workspaceId !== ws ||
+        !Number.isInteger(repair.version) ||
+        Object.keys(repair).some((key) => !allowedKeys.has(key)) ||
+        sourceCollections.some((key) => !Array.isArray(repair[key]) || repair[key].length !== 0) ||
+        !Array.isArray(repair.repairBindings) ||
+        repair.repairBindings.some(
+          (binding) =>
+            typeof binding.id !== 'string' ||
+            !binding.id ||
+            !['PROJECT', 'PRODUCT', 'CASE', 'UNKNOWN'].includes(binding.role) ||
+            Object.keys(binding).some((key) => !['id', 'role'].includes(key)),
+        )
+      )
+        throw e
+      return { ...repair }
+    } catch {
+      throw e
+    }
+  }
+}
 function pollTask(operationId: string) {
   const pollWs = workspace.currentWorkspaceId,
     pollId = projectId.value,
@@ -1944,7 +2069,7 @@ function pollTask(operationId: string) {
       for (let attempt = 0; attempt < 600; attempt++) {
         await waitForPoll(1000)
         if (pollSignal.aborted) return
-        const detail = await presalesApi.get(pollWs, pollId, pollSignal)
+        const detail = await readProject(pollWs, pollId, pollSignal)
         if (!isCurrentRequest(pollWs, workspace.currentWorkspaceId, pollId, projectId.value)) return
         project.value = detail
         const task = (detail.tasks || []).find(
@@ -2004,7 +2129,7 @@ async function load() {
     void loadMembers(ws, signal)
     if (!id) void refreshPortfolio()
     if (id) {
-      const detail = await presalesApi.get(ws, id, signal)
+      const detail = await readProject(ws, id, signal)
       if (
         isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) &&
         !signal.aborted
@@ -2055,6 +2180,7 @@ function search() {
 }
 type Editor =
   | 'project'
+  | 'employee'
   | 'material'
   | 'requirement'
   | 'clarification'
@@ -2097,6 +2223,7 @@ const editorTitle = computed(
   () =>
     ({
       project: t('presales.project_details'),
+      employee: t('presales.assign_employee'),
       material: t('presales.bind_material'),
       requirement: t('presales.requirement_revision'),
       clarification: t('presales.clarification'),
@@ -2111,12 +2238,13 @@ const editorTitle = computed(
 function openEditor(kind: Editor, record?: PresalesRecord) {
   if (
     !canWrite.value ||
-    (project.value?.sourceAccessRestricted && !['project', 'material'].includes(kind))
+    (project.value?.sourceAccessRestricted && !['employee', 'material'].includes(kind))
   )
     return
   editorKind.value = kind
   editError.value = ''
-  if (kind === 'project') void loadEmployees()
+  if (kind === 'project' || kind === 'employee') void loadEmployees()
+  if (kind === 'employee') record = { agentId: record?.agentId || '' }
   form.value = JSON.parse(
     JSON.stringify(
       record ||
@@ -2129,6 +2257,7 @@ function openEditor(kind: Editor, record?: PresalesRecord) {
             industry: '',
             goal: '',
           },
+          employee: { agentId: '' },
           material: { kbId: '', graphId: '', role: 'PROJECT' },
           requirement: {
             title: '',
@@ -2261,6 +2390,18 @@ async function command(action: string, payload: object): Promise<boolean> {
   const ws = workspace.currentWorkspaceId,
     current = project.value
   if (!ws || !current || !canWrite.value || saving.value) return false
+  if (
+    current.sourceAccessRestricted &&
+    !(
+      action === 'BIND_MATERIAL' ||
+      action === 'UNBIND_MATERIAL' ||
+      (action === 'UPDATE_PROJECT' &&
+        Object.keys(payload).length === 1 &&
+        'agentId' in payload &&
+        typeof payload.agentId === 'string')
+    )
+  )
+    return false
   saving.value = true
   editError.value = ''
   error.value = ''
@@ -2314,6 +2455,10 @@ async function save() {
     (!data.answer?.trim() || !data.answerSourceId?.trim())
   ) {
     editError.value = t('presales.context_message_28')
+    return
+  }
+  if (editorKind.value === 'employee') {
+    if (await command('UPDATE_PROJECT', { agentId: data.agentId || '' })) editorOpen.value = false
     return
   }
   if (editorKind.value === 'project') {
@@ -2373,7 +2518,11 @@ async function save() {
     review: 'SAVE_REVIEW',
     context: 'SAVE_CONTEXT',
   }
-  if (await command(actions[editorKind.value], data)) {
+  const payload =
+    editorKind.value === 'material' && project.value?.sourceAccessRestricted
+      ? { kbId: data.kbId, graphId: data.graphId || '', role: data.role || 'PROJECT' }
+      : data
+  if (await command(actions[editorKind.value], payload)) {
     editorOpen.value = false
     if (
       editorKind.value === 'clarification' &&
@@ -2474,6 +2623,7 @@ function adopt(skill: string | undefined, item: PresalesRecord) {
     })
 }
 async function archive() {
+  if (!canWrite.value || project.value?.sourceAccessRestricted) return
   try {
     await ElMessageBox.confirm(
       t('presales.archive_this_project_and_make_it_read_only'),
@@ -2584,13 +2734,10 @@ watch(
     evidence.value = undefined
     generationOpen.value = false
     statementOptions.value = []
-    if (!current || !['project', 'material'].includes(editorKind.value)) {
+    if (!current || !['employee', 'material'].includes(editorKind.value)) {
       editorOpen.value = false
       form.value = {}
       initialForm.value = ''
-    } else if (editorKind.value === 'project') {
-      const { name, customer, ownerId, agentId, industry, goal } = form.value
-      form.value = { name, customer, ownerId, agentId, industry, goal }
     }
     clearPresentationPreview()
   },

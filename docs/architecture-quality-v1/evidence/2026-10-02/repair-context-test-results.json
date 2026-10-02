@@ -1,0 +1,46 @@
+{
+  "task": "AQ-02",
+  "head_before": "21c5a68413bafcc3bcbf74b3f1844f292aff6c9d",
+  "base": "origin/dev",
+  "java": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "ui": {
+    "tests": 35,
+    "failures": 0
+  },
+  "typecheck": "PASS",
+  "dev": "SCAN_PASS",
+  "independent_security_review": "NO_SECURITY_BLOCKERS after remediation",
+  "browser": "SIMULATED; INCOMPLETE: 10 PASS, 6 NOT_RUN, errors=[]",
+  "formal_acceptance": "NOT_RUN",
+  "logs": {
+    "java-all": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/java-all.log",
+      "sha256": "c1f4c1a1ee76649cbc0e0f8ca2d0a61f7080e1e76c679d5305028c81e508666b"
+    },
+    "ui-tests": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/ui-tests.log",
+      "sha256": "8769006d475bbdfedbe21d3f0c50c75987ac2510f44dab414a37fbbf58474ff1"
+    },
+    "ui-typecheck": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/ui-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dev": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/dev.log",
+      "sha256": "59a78c6ac36bbc703cddf3bf14f6974d21e04a5232be8d39eb884148dce74cfa"
+    },
+    "role-red": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/role-red.log",
+      "sha256": "2695e42fbb5658e0c302122b48d876ac40d3e269e83bcc357054090dd0a4417c"
+    },
+    "ui-red": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/repair-context-tests/ui-red.log",
+      "sha256": "069412caaa3dac966e9e8a3ebb951ae08a12a1f5615419d065e8826fd4635d1e"
+    }
+  }
+}

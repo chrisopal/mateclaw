@@ -1,0 +1,45 @@
+### Result
+{"simulation":"SIMULATED_HTTP_ACTUAL_COMPONENT","browser":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36","repairs":[{"action":"UNBIND_MATERIAL","payload":{"id":"binding-1"},"expectedVersion":3,"operationId":"daf7cee2-63ab-482c-91cc-e3b9ff15bc06"},{"action":"UPDATE_PROJECT","payload":{"agentId":"employee-2"},"expectedVersion":4,"operationId":"ac9ab4b2-9514-4779-84d3-c5462bcbb9d5"}],"fullReadDenied":true,"metadataFallback":true,"unbindRestored":true,"employeeRestored":true,"generalEditDisabled":true}
+### Ran Playwright code
+```js
+await (async (page) => {
+ const base={id:'90071992547409998',workspaceId:'90071992547409999',version:3,name:'Repair simulation',customer:'Customer',ownerId:'90071992547409997',agentId:'employee-1',status:'ACTIVE',materials:[],requirements:[],clarifications:[],baselines:[],fitGaps:[],solutions:[],reviews:[],releases:[],tasks:[]};
+ let available=false;let binding=true;const repairs=[];
+ await page.route('**/api/v1/**',async route=>{
+  const path=new URL(route.request().url()).pathname;let data=[];let status=200;
+  if(path.endsWith('/capabilities')) data={enabled:true,semanticEnabled:true,canWrite:true,canApprove:true};
+  else if(path.endsWith('/repair-context')) data={...base,sourceAccessRestricted:true,cases:[],contextCards:[],reviewDrafts:[],repairBindings:binding?[{id:'binding-1',role:'PROJECT'}]:[]};
+  else if(path.endsWith('/commands')) {
+   const request=route.request().postDataJSON();repairs.push(request);
+   if(request.action==='UNBIND_MATERIAL' && request.payload.id==='binding-1') {binding=false;available=true;}
+   else if(request.action==='UPDATE_PROJECT' && request.payload.agentId==='employee-2' && Object.keys(request.payload).length===1) {available=true;base.agentId='employee-2';}
+   else {status=422;}
+   base.version++;data=base;
+  }
+  else if(path.endsWith('/employees')) data=[{id:'employee-2',name:'Repair employee',enabled:true}];
+  else if(path.endsWith('/sources')) data=[];
+  else if(path.includes('/presales/projects/')) {if(!available)status=403;data=base;}
+  await route.fulfill({status,contentType:'application/json',body:JSON.stringify({code:status===200?200:status,data:status===200?data:null,msg:status===403?'Source access denied':'OK'})});
+ });
+ await page.setViewportSize({width:1440,height:1000});
+ await page.goto('http://127.0.0.1:5197/aq-restricted-ui.html');
+ const warning=page.getByText('Source access is restricted.',{exact:false});await warning.waitFor();
+ if(!await page.getByRole('button',{name:'Delegate to employee',exact:true}).isDisabled()) throw new Error('Generation enabled under restriction');
+ if(!await page.getByRole('button',{name:'Edit project',exact:true}).isDisabled()) throw new Error('General edit enabled under restriction');
+ await page.screenshot({path:'/tmp/mateclaw-aq-repair-restricted.png',fullPage:true});
+ await page.getByRole('button',{name:'Unbind material',exact:true}).click();await warning.waitFor({state:'hidden'});
+ if(await page.getByRole('button',{name:'Delegate to employee',exact:true}).isDisabled()) throw new Error('Unbinding did not restore simulation');
+ await page.screenshot({path:'/tmp/mateclaw-aq-repair-unbound.png',fullPage:true});
+ available=false;await page.goto('http://127.0.0.1:5197/aq-restricted-ui.html');await warning.waitFor();
+ await page.getByRole('button',{name:'Assign employee',exact:true}).click();
+ await page.getByRole('dialog').locator('.el-select__wrapper').click();
+ await page.getByRole('option',{name:'Repair employee',exact:true}).click();
+ await page.getByRole('button',{name:'Save',exact:true}).click();await warning.waitFor({state:'hidden'});
+ if(await page.getByRole('button',{name:'Delegate to employee',exact:true}).isDisabled()) throw new Error('Employee binding did not restore simulation');
+ await page.screenshot({path:'/tmp/mateclaw-aq-repair-employee.png',fullPage:true});
+ return {simulation:'SIMULATED_HTTP_ACTUAL_COMPONENT',browser:await page.evaluate(()=>navigator.userAgent),repairs,fullReadDenied:true,metadataFallback:true,unbindRestored:true,employeeRestored:true,generalEditDisabled:true};
+}
+)(page);
+```
+### Events
+- New console entries: .playwright-cli/console-2026-10-02T01-19-50-864Z.log#L17-L20

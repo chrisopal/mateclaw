@@ -128,6 +128,7 @@ export interface PresalesProject extends PresalesEntity {
   openClarificationCount?: number
   latestSolutionVersion?: number
   sourceAccessRestricted?: boolean
+  repairBindings?: { id: string; role: string }[]
   materials: PresalesEntity[]
   requirements: PresalesEntity[]
   clarifications: PresalesEntity[]
@@ -140,6 +141,38 @@ export interface PresalesProject extends PresalesEntity {
   context?: unknown
   contextCards?: PresalesEntity[]
   reviewDrafts?: PresalesEntity[]
+}
+export interface PresalesRepairContext {
+  id: string
+  workspaceId: string
+  version: number
+  name: string
+  customer: string
+  ownerId: string
+  status: string
+  industry?: string
+  goal?: string
+  stage?: string
+  agentId?: string
+  agentName?: string
+  createdBy?: string
+  createdAt?: string
+  updatedBy?: string
+  updatedAt?: string
+  sourceAccessRestricted: true
+  repairBindings: { id: string; role: string }[]
+  materials: never[]
+  requirements: never[]
+  clarifications: never[]
+  baselines: never[]
+  fitGaps: never[]
+  cases: never[]
+  solutions: never[]
+  reviews: never[]
+  reviewDrafts: never[]
+  releases: never[]
+  tasks: never[]
+  contextCards: never[]
 }
 export interface PresalesTask extends PresalesEntity {
   operationId?: string
@@ -195,6 +228,8 @@ export const presalesApi = {
     request<ProjectPage>(ws, { url: '/presales/projects', params }, signal),
   get: (ws: string, id: string, signal?: AbortSignal) =>
     request<PresalesProject>(ws, { url: projectPath(id) }, signal),
+  repairContext: (ws: string, id: string, signal?: AbortSignal) =>
+    request<PresalesRepairContext>(ws, { url: `${projectPath(id)}/repair-context` }, signal),
   create: (ws: string, data: object) =>
     request<PresalesProject>(ws, {
       url: '/presales/projects',

@@ -6,7 +6,7 @@ import { createApp, nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import ElementPlus from 'element-plus'
 import Workbench from '../pages/PresalesWorkbench.vue'
-import { presalesApi } from '../api/presalesApi'
+import { presalesApi, type PresalesRepairContext } from '../api/presalesApi'
 vi.mock('../api/presalesApi', () => ({
   presalesApi: Object.fromEntries(
     [
@@ -14,6 +14,7 @@ vi.mock('../api/presalesApi', () => ({
       'capabilities',
       'list',
       'get',
+      'repairContext',
       'create',
       'update',
       'command',
@@ -52,6 +53,14 @@ const project = {
   releases: [],
   tasks: [],
 }
+const repairProject: PresalesRepairContext = {
+  ...project,
+  sourceAccessRestricted: true,
+  repairBindings: [],
+  cases: [],
+  contextCards: [],
+  reviewDrafts: [],
+}
 let app: ReturnType<typeof createApp> | undefined
 let changeLocale: (locale: 'en-US' | 'zh-CN') => void
 async function settle() {
@@ -83,6 +92,7 @@ async function mount(path = '/presales') {
   app.use(translations)
   app.mount(root)
   await settle()
+  return router
 }
 function button(label: string): HTMLButtonElement {
   const result = [...document.querySelectorAll('button')].find(
@@ -104,6 +114,7 @@ beforeEach(() => {
   })
   vi.mocked(presalesApi.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 })
   vi.mocked(presalesApi.get).mockResolvedValue(structuredClone(project))
+  vi.mocked(presalesApi.repairContext).mockRejectedValue({ response: { status: 403 } })
   vi.mocked(presalesApi.employees).mockResolvedValue([])
   vi.mocked(presalesApi.sources).mockResolvedValue([])
   vi.mocked(presalesApi.statements).mockResolvedValue([])
@@ -113,6 +124,116 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 describe('presales workspace behavior', () => {
+  it('recovers a member repair view after full read denial and unbinds only the opaque binding', async () => {
+    vi.mocked(presalesApi.get).mockRejectedValue({
+      response: { status: 403, data: { msg: 'Source access denied' } },
+    })
+    vi.mocked(presalesApi.repairContext).mockResolvedValue({
+      ...repairProject,
+      repairBindings: [{ id: 'binding-1', role: 'PROJECT' }],
+    })
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4 })
+    await mount(`/presales/${project.id}`)
+    expect(presalesApi.repairContext).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.any(AbortSignal),
+    )
+    expect(document.body.textContent).toContain('Source access is restricted')
+    expect(button('Delegate to employee').disabled).toBe(true)
+    expect(button('Assign employee').disabled).toBe(false)
+    button('Unbind material').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.objectContaining({
+        action: 'UNBIND_MATERIAL',
+        payload: { id: 'binding-1' },
+        expectedVersion: 3,
+      }),
+    )
+    expect(document.body.textContent).not.toContain('Source access is restricted')
+  })
+
+  it('does not request repair metadata for a read-only viewer', async () => {
+    vi.mocked(presalesApi.capabilities).mockResolvedValue({
+      enabled: true,
+      semanticEnabled: true,
+      canWrite: false,
+      canApprove: false,
+    })
+    vi.mocked(presalesApi.get).mockRejectedValue({
+      response: { status: 403, data: { msg: 'Source access denied' } },
+    })
+    await mount(`/presales/${project.id}`)
+    expect(presalesApi.repairContext).not.toHaveBeenCalled()
+    expect(document.body.textContent).toContain('Source access denied')
+    expect(button('Edit project').disabled).toBe(true)
+  })
+
+  it('saves a restricted employee assignment without unrelated project fields', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({ ...project, sourceAccessRestricted: true })
+    vi.mocked(presalesApi.employees).mockResolvedValue([
+      { id: 'employee-2', name: 'Repair employee', enabled: true },
+    ])
+    vi.mocked(presalesApi.command).mockResolvedValue({
+      ...project,
+      version: 4,
+      agentId: 'employee-2',
+    })
+    await mount(`/presales/${project.id}`)
+    button('Assign employee').click()
+    await settle()
+    const wrapper = document.querySelector('.el-dialog .el-select__wrapper') as HTMLElement
+    wrapper.click()
+    await settle()
+    const option = [...document.querySelectorAll('.el-select-dropdown__item')].find((item) =>
+      item.textContent?.includes('Repair employee'),
+    ) as HTMLElement
+    option.click()
+    await settle()
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.objectContaining({ action: 'UPDATE_PROJECT', payload: { agentId: 'employee-2' } }),
+    )
+    expect(presalesApi.update).not.toHaveBeenCalled()
+    expect(document.body.textContent).not.toContain('Source access is restricted')
+  })
+
+  it('ignores a repair view arriving after navigation to another project', async () => {
+    let finish!: (value: PresalesRepairContext) => void
+    vi.mocked(presalesApi.get).mockRejectedValueOnce({ response: { status: 403 } })
+    vi.mocked(presalesApi.repairContext).mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve
+      }),
+    )
+    const router = await mount(`/presales/${project.id}`)
+    await router.push('/presales/next-project')
+    await settle()
+    finish({ ...repairProject, name: 'Old repair context' })
+    await settle()
+    expect(document.body.textContent).not.toContain('Old repair context')
+    expect(document.body.textContent).not.toContain('Source access is restricted')
+  })
+
+  it('rejects source-rich or cross-project repair responses', async () => {
+    vi.mocked(presalesApi.get).mockRejectedValue({
+      response: { status: 403, data: { msg: 'Source access denied' } },
+    })
+    vi.mocked(presalesApi.repairContext).mockResolvedValue(
+      Object.assign({ ...repairProject }, { context: { text: 'Leaked context' } }),
+    )
+    await mount(`/presales/${project.id}`)
+    expect(document.body.textContent).not.toContain('Leaked context')
+    expect(document.body.textContent).toContain('Source access denied')
+    expect(button('Edit project').disabled).toBe(true)
+  })
+
   it('explains restricted sources, prevents generation and preserves material repair', async () => {
     vi.mocked(presalesApi.get).mockResolvedValue({
       ...project,
@@ -123,7 +244,8 @@ describe('presales workspace behavior', () => {
     expect(document.body.textContent).toContain('Source access is restricted')
     expect(button('Delegate to employee').disabled).toBe(true)
     expect(button('Ask employee to analyze').disabled).toBe(true)
-    expect(button('Edit project').disabled).toBe(false)
+    expect(button('Edit project').disabled).toBe(true)
+    expect(button('Archive').disabled).toBe(true)
     expect(button('Assign employee').disabled).toBe(false)
     const materials = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find((item) =>
       item.textContent?.includes('Materials'),
@@ -146,6 +268,14 @@ describe('presales workspace behavior', () => {
       project.workspaceId,
       project.id,
       expect.objectContaining({ action: 'BIND_MATERIAL' }),
+    )
+    expect(presalesApi.command).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.objectContaining({
+        action: 'BIND_MATERIAL',
+        payload: { kbId: 'kb-1', graphId: '', role: 'PROJECT' },
+      }),
     )
     expect(document.body.textContent).not.toContain('Source access is restricted')
     expect(button('Delegate to employee').disabled).toBe(false)
@@ -284,6 +414,63 @@ describe('presales workspace behavior', () => {
         expect(click).not.toHaveBeenCalled()
       } finally {
         click.mockRestore()
+      }
+    },
+  )
+
+  it.each(['pending', 'opened'] as const)(
+    'clears %s presentation previews and releases their object URL on restriction',
+    async (state) => {
+      let finish!: () => void
+      const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:private-preview')
+      const revokeUrl = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+      try {
+        vi.mocked(presalesApi.file).mockReturnValue(
+          new Promise((resolve) => {
+            finish = () => resolve(new Blob(['<svg>private</svg>']))
+          }),
+        )
+        const presentation = {
+          artifactId: 'artifact-1',
+          skill: 'ppt-master-plus',
+          skillVersion: '1.0',
+          pageCount: 1,
+          slides: [{ filename: 'slide.svg', title: 'Private slide' }],
+        }
+        vi.mocked(presalesApi.get)
+          .mockResolvedValueOnce({
+            ...project,
+            solutions: [{ id: 'solution-1', presentation }],
+            tasks: [
+              {
+                id: 'task-1',
+                operationId: 'op-1',
+                status: 'RUNNING',
+                result: { solution: { presentation } },
+              },
+            ],
+          })
+          .mockResolvedValue({ ...project, sourceAccessRestricted: true })
+        await mount(`/presales/${project.id}`)
+        button('Preview Private slide').click()
+        await settle()
+        if (state === 'opened') {
+          finish()
+          await settle()
+          expect(document.querySelector('img[src="blob:private-preview"]')).not.toBeNull()
+          expect(createUrl).toHaveBeenCalledTimes(1)
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1100))
+        await settle()
+        if (state === 'pending') {
+          finish()
+          await settle()
+          expect(createUrl).not.toHaveBeenCalled()
+        } else expect(revokeUrl).toHaveBeenCalledWith('blob:private-preview')
+        expect(document.querySelector('img[src="blob:private-preview"]')).toBeNull()
+      } finally {
+        createUrl.mockRestore()
+        revokeUrl.mockRestore()
       }
     },
   )

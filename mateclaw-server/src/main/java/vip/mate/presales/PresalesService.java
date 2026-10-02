@@ -26,6 +26,25 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesService {
+    private static final List<String> REPAIR_METADATA_FIELDS =
+            List.of(
+                    "id",
+                    "workspaceId",
+                    "version",
+                    "name",
+                    "customer",
+                    "ownerId",
+                    "industry",
+                    "goal",
+                    "status",
+                    "stage",
+                    "agentId",
+                    "agentName",
+                    "createdBy",
+                    "createdAt",
+                    "updatedBy",
+                    "updatedAt");
+    private static final Set<String> REPAIR_BIND_FIELDS = Set.of("id", "kbId", "graphId", "role");
     private static final List<String> SOURCE_COLLECTIONS =
             List.of(
                     "materials",
@@ -221,6 +240,12 @@ public class PresalesService {
         return p;
     }
 
+    /** Returns only safe metadata and opaque binding handles after source access is revoked. */
+    public ObjectNode repairContext(String scope, String id) {
+        access.require(scope, "member");
+        return restrictedProject(load(scope, id, false));
+    }
+
     /** Read a project using the durable actor bound to a project execution. */
     public ObjectNode getForExecution(String scope, String id, String actorId) {
         access.requireActor(scope, actorId, "member");
@@ -307,7 +332,8 @@ public class PresalesService {
         if (r.expectedVersion() == null) throw bad("expectedVersion required");
         String hash = hash(List.of(projectId, r));
         ObjectNode p = load(scope, projectId, true);
-        authorizeMaterials(scope, p);
+        boolean repair = repairableCommand(r);
+        if (!repair) authorizeMaterials(scope, p);
         var replay = replay(scope, actor, r.operationId(), hash);
         if (replay != null) {
             return commandResponse(scope, p, replay);
@@ -517,11 +543,7 @@ public class PresalesService {
         } catch (SemanticApiException unavailable) {
             if (unavailable.status() != 403) throw unavailable;
             // Repair remains possible without returning source-rich historical data.
-            ObjectNode restricted = summary(response);
-            // Preserve required array contracts consumed by the workbench, with no source content.
-            for (String key : SOURCE_COLLECTIONS) restricted.putArray(key);
-            restricted.put("sourceAccessRestricted", true);
-            return restricted;
+            return restrictedProject(response);
         }
     }
 
@@ -672,7 +694,8 @@ public class PresalesService {
         var row = wiki.getById(parseId(kb));
         if (row == null
                 || row.getWorkspaceId() == null
-                || !scope.equals(row.getWorkspaceId().toString()))
+                || !scope.equals(row.getWorkspaceId().toString())
+                || (row.getDeleted() != null && row.getDeleted() != 0))
             throw new SemanticApiException(
                     404, "MATERIAL_UNAVAILABLE", "Knowledge base unavailable");
         String graph = v.path("graphId").asText();
@@ -683,6 +706,7 @@ public class PresalesService {
                 throw bad("Graph belongs to another knowledge base");
             v.put("ontologyRevisionId", g.getOntologyRevisionId());
         }
+        authorizeEmployeeKb(scope, p, kb);
         enumValue(v, "role", Set.of("PROJECT", "PRODUCT", "CASE"), "PROJECT");
         saveItem(p, "materials", v, actor, false);
     }
@@ -1372,6 +1396,52 @@ public class PresalesService {
                         scope);
         if (found.isEmpty()) throw new SemanticApiException(404, "NOT_FOUND", "Project not found");
         return found.getFirst();
+    }
+
+    private boolean repairableCommand(Command command) {
+        if (command == null || command.payload() == null || !command.payload().isObject())
+            return false;
+        Set<String> keys = new HashSet<>();
+        command.payload().fieldNames().forEachRemaining(keys::add);
+        return switch (Objects.toString(command.action(), "")) {
+            case "UPDATE_PROJECT" ->
+                    keys.equals(Set.of("agentId"))
+                            && command.payload().path("agentId").isTextual()
+                            && !command.payload().path("agentId").asText().isBlank();
+            case "BIND_MATERIAL" ->
+                    keys.stream().allMatch(REPAIR_BIND_FIELDS::contains)
+                            && command.payload().path("kbId").isTextual()
+                            && !command.payload().path("kbId").asText().isBlank();
+            case "UNBIND_MATERIAL" ->
+                    keys.equals(Set.of("id"))
+                            && command.payload().path("id").isTextual()
+                            && !command.payload().path("id").asText().isBlank();
+            default -> false;
+        };
+    }
+
+    private ObjectNode restrictedProject(ObjectNode project) {
+        ObjectNode view = json.createObjectNode();
+        for (String field : REPAIR_METADATA_FIELDS)
+            if (project.has(field)) view.set(field, project.path(field).deepCopy());
+        if (!view.has("stage")) view.put("stage", stage(project));
+        for (String collection : SOURCE_COLLECTIONS) view.putArray(collection);
+        ArrayNode bindings = view.putArray("repairBindings");
+        for (var material : project.path("materials")) {
+            String id = material.path("id").asText();
+            if (!id.isBlank()) {
+                String role = material.path("role").asText();
+                bindings.addObject()
+                        .put("id", id)
+                        .put(
+                                "role",
+                                Set.of("PROJECT", "PRODUCT", "CASE").contains(role)
+                                        ? role
+                                        : "UNKNOWN");
+            }
+        }
+        view.put("sourceAccessRestricted", true);
+        return view;
     }
 
     private void lockResultAuthority(
