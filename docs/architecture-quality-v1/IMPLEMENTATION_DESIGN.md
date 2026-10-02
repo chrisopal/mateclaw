@@ -213,3 +213,7 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 ### ADR-AQ-008：宿主主体与无缓存 Workspace 基础入口（Proposed）
 
 2026-10-02：ActorResolver/WorkspaceAccessService复用AuthService与原Mapper；售前/投标/语义保留解析、错误和领域批准政策，不借用语义内部身份类，不使用60秒成员缓存或归一化capability等级。投标明确收紧anonymous哨兵和批准第二次actor/workspace失效拒绝，不增加允许角色。H2/MyBatis、真实JWT/HTTP/事务与工具身份85项工程回归通过；测试夹具只增加宿主Bean，原断言保留。代价是明确的host事实接口与业务错误适配；拒绝通用批准政策、缓存授权或一次性全聚合迁移。正式QA/多方言仍待签收。见evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md。
+
+### ADR-AQ-009：售前工作台单循环轮询生命周期（Proposed）
+
+2026-10-02：AQ-09 页面拆分先处理已复现的轮询竞态，关联 AQ-04/AC-13 及 AQ-01/AC-21 工程证据。域内组合函数管理单实例/项目串行 GET，读取前后校验循环身份、取消和范围，拒绝旧版本及受限循环内的来源恢复；页面保留严格授权/修复读取和命令策略。保留1秒/600次、按全项目运行任务继续，成功命令或重载替换循环，卸载释放资源。拒绝通用框架/全局store及每个operation重复全项目GET。三个组件红例变绿，新增合同后50项工程回归通过；真实浏览器、服务端重启、其余编辑/预览路径与正式QA未完成。见evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md。

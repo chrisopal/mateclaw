@@ -1,0 +1,4 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT typecheck
+> vue-tsc --noEmit
+

@@ -20,6 +20,7 @@ vi.mock('../api/presalesApi', () => ({
       'command',
       'employees',
       'generate',
+      'cancelTask',
       'evidence',
       'file',
       'handoff',
@@ -321,6 +322,105 @@ describe('presales workspace behavior', () => {
     expect(document.body.textContent).toContain('Source access is restricted')
     expect(document.body.textContent).not.toContain('Private source')
     expect(document.body.textContent).not.toContain('Late private content')
+  })
+
+  it('ignores a cancelled same-project poll that resolves after a restricted reload', async () => {
+    const active = {
+      ...project,
+      context: { text: 'Old authorized content' },
+      tasks: [{ id: 'task-1', operationId: 'op-1', status: 'RUNNING' }],
+    }
+    let finish!: () => void
+    vi.mocked(presalesApi.get)
+      .mockResolvedValueOnce(active)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finish = () => resolve(active)
+          }),
+      )
+      .mockRejectedValue({
+        response: { status: 403, data: { msg: 'Source denied' } },
+      })
+    vi.mocked(presalesApi.repairContext).mockResolvedValue(repairProject)
+    vi.mocked(presalesApi.cancelTask).mockRejectedValue(new Error('Reload needed'))
+    await mount(`/presales/${project.id}`)
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    await settle()
+    const oldSignal = vi.mocked(presalesApi.get).mock.calls[1][2]!
+    expect(oldSignal.aborted).toBe(false)
+    button('Discard this run result').click()
+    await settle()
+    button('Reload').click()
+    await settle()
+    expect(oldSignal.aborted).toBe(true)
+    expect(document.body.textContent).toContain('Source access is restricted')
+    finish()
+    await settle()
+    expect(document.body.textContent).toContain('Source access is restricted')
+    expect(document.body.textContent).not.toContain('Old authorized content')
+    expect(button('Edit project').disabled).toBe(true)
+  })
+
+  it.each(['success', '403'] as const)(
+    'keeps a newer cancellation response after a late poll %s',
+    async (outcome) => {
+      const active = {
+        ...project,
+        context: { text: 'Old authorized content' },
+        tasks: [{ id: 'task-1', operationId: 'op-1', status: 'RUNNING' }],
+      }
+      let finish!: () => void
+      vi.mocked(presalesApi.get)
+        .mockResolvedValueOnce(active)
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve, reject) => {
+              finish = () =>
+                outcome === 'success'
+                  ? resolve(active)
+                  : reject({
+                      response: { status: 403, data: { msg: 'Late denied' } },
+                    })
+            }),
+        )
+        .mockResolvedValue({ ...project, version: 4, tasks: [] })
+      vi.mocked(presalesApi.cancelTask).mockResolvedValue({
+        ...project,
+        version: 4,
+        context: { text: 'Current cancellation state' },
+        tasks: [{ id: 'task-1', operationId: 'op-1', status: 'CANCELLED' }],
+      })
+      await mount(`/presales/${project.id}`)
+      await new Promise((resolve) => setTimeout(resolve, 1100))
+      await settle()
+      button('Discard this run result').click()
+      await settle()
+      expect(document.body.textContent).toContain('Current cancellation state')
+      finish()
+      await settle()
+      expect(document.body.textContent).toContain('Current cancellation state')
+      expect(document.body.textContent).not.toContain('Old authorized content')
+      expect(document.body.textContent).not.toContain('Discard this run result')
+      expect(presalesApi.repairContext).not.toHaveBeenCalled()
+      expect(document.body.textContent).not.toContain('Late denied')
+    },
+  )
+
+  it('uses one project read to poll multiple running operations', async () => {
+    vi.mocked(presalesApi.get)
+      .mockResolvedValueOnce({
+        ...project,
+        tasks: [
+          { id: 'task-1', operationId: 'op-1', status: 'RUNNING' },
+          { id: 'task-2', operationId: 'op-2', status: 'RUNNING' },
+        ],
+      })
+      .mockResolvedValue({ ...project, version: 4, tasks: [] })
+    await mount(`/presales/${project.id}`)
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    await settle()
+    expect(presalesApi.get).toHaveBeenCalledTimes(2)
   })
 
   it('clears a source-derived editor when a running task returns a restricted project', async () => {

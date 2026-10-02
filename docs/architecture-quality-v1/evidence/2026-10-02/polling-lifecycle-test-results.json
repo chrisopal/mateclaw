@@ -1,0 +1,69 @@
+{
+  "task": "AQ-09 polling lifecycle; AQ-04/AC-13 and AQ-01/AC-21 supporting evidence",
+  "start_head": "e0d3b26a398fc12e2e8c5e5ec5af283b7939369c",
+  "base": "origin/dev",
+  "base_sha": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "status": "ENGINEERING_PASS",
+  "formal_acceptance": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "counts": {
+    "baseline": 35,
+    "red_failed": 3,
+    "red_passed": 35,
+    "final_passed": 50,
+    "final_failed": 0
+  },
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "0463d33c51dbd20c9bc637b94dfcc12a871b53cde92f70d2b34ad824a9daf799",
+    "mateclaw-ui/src/features/presales/composables/usePresalesTaskPolling.ts": "d33d453c0eacffd30b7c5667e6e8d010d8419d85ef6c25152fe8f2c0b87eb9d4",
+    "mateclaw-ui/src/features/presales/__tests__/taskPolling.test.ts": "099b5a193338c43cd24381d9d34c2aba353fe4f8d68d7572d65d13aeae9f5a95",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "42cb90837d54abf1543e02e8cd8892782989e2c508c3d40e854214b1c97dab6a"
+  },
+  "logs": {
+    "before": {
+      "path": "polling-lifecycle-tests/before.log",
+      "sha256": "dd6386de7c3c7b8d451d533556ca3009d57112f7906c76f5143770ceb831b6a4"
+    },
+    "red": {
+      "path": "polling-lifecycle-tests/red.log",
+      "sha256": "0863d57432d812039d02769818527a98f5176ed2d1a4d438013a2cb9b0c00cdd"
+    },
+    "serial": {
+      "path": "polling-lifecycle-tests/serial.log",
+      "sha256": "b35c6123342c4d59f1a2f5f14c818034bbe57cb95ae2911ea0d23876c317005a"
+    },
+    "contract": {
+      "path": "polling-lifecycle-tests/contract.log",
+      "sha256": "ed548bf54ef1e592600789c04ee4f214386884e4d011aed5b50bc91a25ebe31e"
+    },
+    "final": {
+      "path": "polling-lifecycle-tests/final.log",
+      "sha256": "e7e3c0a4164f2df01676e19bbb6b379fa06e189c1f1159a023a0083f16bb7c77"
+    },
+    "typecheck": {
+      "path": "polling-lifecycle-tests/typecheck.log",
+      "sha256": "1d339738973fe37cb37bdbc16b9b7ac4dd98b991f4c34659d80a18ee493a39f8"
+    },
+    "lint": {
+      "path": "polling-lifecycle-tests/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": {
+      "path": "polling-lifecycle-tests/format.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "dev": {
+      "path": "polling-lifecycle-tests/dev.log",
+      "sha256": "7c4c23582e06e7a8096340be3549afaaa6a5264fdfc2e9d031b6e441037a7bdb"
+    },
+    "final-dev": {
+      "path": "polling-lifecycle-tests/final-dev.log",
+      "sha256": "0da1c26921fcfe7427339f234a6645f24173a3aac81bf5acd7f28de04ce35fb9"
+    }
+  },
+  "independent_review": {
+    "reviewer": "polling_boundary_review",
+    "verdict": "APPROVE scoped slice",
+    "limitations": "Read-only review and actual logs; did not run builds; APIs mocked, real backend/browser/QA pending."
+  }
+}

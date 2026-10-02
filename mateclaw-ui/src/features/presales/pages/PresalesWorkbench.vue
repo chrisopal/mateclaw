@@ -1616,6 +1616,7 @@ import {
   type PresalesRecord,
 } from '../api/presalesApi'
 import { label as l } from '../shared/locale'
+import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { isCurrentRequest, presalesError, coverageLabel, operationReceipt } from '../shared/state'
 const { t } = useI18n({ messages: presalesMessages })
 const narrowQuery = window.matchMedia('(max-width: 768px)')
@@ -1978,10 +1979,18 @@ function printable(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—'
 }
 let controller: AbortController | undefined
-const polling = new Map<string, AbortSignal>()
-let pollController: AbortController | undefined
-function waitForPoll(ms: number): Promise<void> {
-  return new Promise((resolve) => window.setTimeout(resolve, ms))
+const taskPolling = usePresalesTaskPolling({
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  project,
+  error,
+  read: readProject,
+})
+function acceptProject(detail: PresalesProject) {
+  taskPolling.reset()
+  project.value = detail
+  if (detail.tasks?.some((task) => task.status === 'RUNNING' && task.operationId))
+    taskPolling.start()
 }
 async function readProject(ws: string, id: string, signal: AbortSignal): Promise<PresalesProject> {
   try {
@@ -2055,48 +2064,11 @@ async function readProject(ws: string, id: string, signal: AbortSignal): Promise
     }
   }
 }
-function pollTask(operationId: string) {
-  const pollWs = workspace.currentWorkspaceId,
-    pollId = projectId.value,
-    pollSignal = pollController?.signal
-  if (!pollWs || !pollId || !pollSignal) return
-  const pollKey = `${pollWs}/${pollId}/${operationId}`
-  const previousSignal = polling.get(pollKey)
-  if (previousSignal && !previousSignal.aborted) return
-  polling.set(pollKey, pollSignal)
-  void (async () => {
-    try {
-      for (let attempt = 0; attempt < 600; attempt++) {
-        await waitForPoll(1000)
-        if (pollSignal.aborted) return
-        const detail = await readProject(pollWs, pollId, pollSignal)
-        if (!isCurrentRequest(pollWs, workspace.currentWorkspaceId, pollId, projectId.value)) return
-        project.value = detail
-        const task = (detail.tasks || []).find(
-          (item: PresalesRecord) => item.operationId === operationId,
-        )
-        if (!task || task.status !== 'RUNNING') return
-      }
-    } catch (e) {
-      if (
-        !pollSignal.aborted &&
-        isCurrentRequest(pollWs, workspace.currentWorkspaceId, pollId, projectId.value)
-      ) {
-        const issue = presalesError(e)
-        if (issue.accessDenied) project.value = undefined
-        error.value = issue.message
-      }
-    } finally {
-      if (polling.get(pollKey) === pollSignal) polling.delete(pollKey)
-    }
-  })()
-}
 async function load() {
   if (dirty.value) return
   controller?.abort()
   controller = new AbortController()
-  pollController?.abort()
-  pollController = new AbortController()
+  taskPolling.reset()
   const ws = workspace.currentWorkspaceId,
     id = projectId.value,
     signal = controller.signal
@@ -2134,10 +2106,7 @@ async function load() {
         isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) &&
         !signal.aborted
       ) {
-        project.value = detail
-        ;(detail.tasks || [])
-          .filter((task: PresalesRecord) => task.status === 'RUNNING' && task.operationId)
-          .forEach((task) => pollTask(task.operationId!))
+        acceptProject(detail)
       }
     } else {
       const result = await presalesApi.list(
@@ -2419,7 +2388,7 @@ async function command(action: string, payload: object): Promise<boolean> {
       }),
     })
     if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value))
-      project.value = result
+      acceptProject(result)
     return true
   } catch (e) {
     const issue = presalesError(e)
@@ -2487,7 +2456,7 @@ async function save() {
       editorOpen.value = false
       saving.value = false
       if (ws === workspace.currentWorkspaceId) {
-        project.value = result
+        acceptProject(result)
         if (projectId.value) await load()
         else await router.push(`/presales/${result.id}`)
       }
@@ -2520,7 +2489,11 @@ async function save() {
   }
   const payload =
     editorKind.value === 'material' && project.value?.sourceAccessRestricted
-      ? { kbId: data.kbId, graphId: data.graphId || '', role: data.role || 'PROJECT' }
+      ? {
+          kbId: data.kbId,
+          graphId: data.graphId || '',
+          role: data.role || 'PROJECT',
+        }
       : data
   if (await command(actions[editorKind.value], payload)) {
     editorOpen.value = false
@@ -2694,10 +2667,11 @@ async function generate() {
       expectedVersion: current.version,
       operationId,
     })
-    if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value))
-      project.value = result
+    if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value)) {
+      acceptProject(result)
+      taskPolling.start()
+    }
     generationOpen.value = false
-    pollTask(operationId)
   } catch (e) {
     const issue = presalesError(e)
     error.value = employeeError.value = employeeIssue(issue.message)
@@ -2716,7 +2690,7 @@ async function cancelTask(task: PresalesTask) {
       operationId: receipt({ ws, id, taskId: task.id, action: 'cancel' }),
     })
     if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value))
-      project.value = result
+      acceptProject(result)
   } catch (e) {
     const issue = presalesError(e)
     error.value = employeeError.value = employeeIssue(issue.message)
@@ -2756,7 +2730,7 @@ watch(
 onBeforeUnmount(() => {
   portfolioController?.abort()
   controller?.abort()
-  pollController?.abort()
+  taskPolling.reset()
   clearPresentationPreview()
   unregister()
   narrowQuery.removeEventListener('change', updateViewport)
