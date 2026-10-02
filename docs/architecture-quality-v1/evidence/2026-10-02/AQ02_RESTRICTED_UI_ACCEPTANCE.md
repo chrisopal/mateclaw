@@ -4,7 +4,7 @@ Base/HEAD aa0be8523ccd4a11b18afdd921118f2e74ed04ec，独立工作树起始干净
 
 ## 实现与边界
 
-PresalesProject增加可选boolean sourceAccessRestricted，原完整响应兼容。复用宿主i18n新增中英文提示；来源不可用不再仅凭空数组解释为无业务数据。canGenerate统一控制按钮和handler；canWrite保持材料和员工配置修复。受限或项目清除时清空来源详情、预览、来源编辑框、statement options；项目/材料修复保留。下载/精确handoff/预览/证据的异步响应同时核对捕获的project对象、Workspace与路由，不能在受限响应之后重开旧内容。实际任务轮询返回HTTP403时清除先前project及来源表面并显示真实错误，不填空成功。state错误分类新增accessDenied，409冲突政策保留。未调整后端授权、审批、依赖、数据库、门禁或测试配置。
+PresalesProject增加可选boolean sourceAccessRestricted，原完整响应兼容。使用售前模块局部i18n并继承宿主语言，保留原中英文文案；来源不可用不再仅凭空数组解释为无业务数据。canGenerate统一控制按钮和handler；canWrite保持材料和员工配置修复。受限或项目清除时清空来源详情、预览、来源编辑框、statement options；项目/材料修复保留。下载/精确handoff/预览/证据的异步响应同时核对捕获的project对象、Workspace与路由，不能在受限响应之后重开旧内容。实际任务轮询返回HTTP403时清除先前project及来源表面并显示真实错误，不填空成功。state错误分类新增accessDenied，409冲突政策保留。未调整后端授权、审批、依赖、数据库、门禁或测试配置。
 
 独立/root/restricted_ui_review曾指出来源编辑框和迟到下载两个HIGH问题；均修复并增加回归。最终限定审阅无阻断；独立component+state 22项、Vue类型检查通过。一般tsc/LSP不能正确处理.vue模块，未把该工具不适配报为类型通过或产品缺陷。正式维护人/QA/合并批准不由工程审阅提供。
 
@@ -32,3 +32,5 @@ coverage.json为声明范围3控件12检查：8 PASS、4 NOT_RUN，无记录格�
 ## Final format and type review
 
 Initial normal commit gate 2db85qdh failed ui-format; no commit was created. Fixed Prettier now formats the complete workbench. Explicit DTO/form fields replace any; opaque snapshots stay unknown. All 290 literal bilingual calls now use domain-local messages inheriting host locale; host locale files have no HEAD diff. Wire behavior is preserved; no runtime API validation added. Independent expanded review found no blocker, component/state23 and Vue typecheck passed; full presales28 passed including global locale switch. Browser simulation rerun on final sources passed; fingerprints/screens refreshed. Real server/roles and formal QA remain NOT_RUN.
+
+提交0cec2379472ff2a544843b252e974ab7c714a050通过正常门禁mateclaw-quality-conthpb1，submission_ready=true。两种UI构建、格式、lint、Vue类型、ID精度、全量UI测试均通过；Java固定影响规则判为NOT_APPLICABLE。浏览器台账的旧哈希在证据复核时发现不一致，现按实际重跑产物更新，日志纳入Git（只覆盖本次明确证据文件）；8PASS/4NOT_RUN保持不变。

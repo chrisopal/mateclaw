@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "scope": "SIMULATED restricted-source warning, generation availability and binding repair only; not whole workbench/business QA",
   "build": {
-    "fingerprint": "f27ed316e363e345c62fa8077b1562240d4483c6a23bad7d88158fa1578d5c8e"
+    "fingerprint": "b1711a4ef038334d2e9f0b6462cf5a371c5a780b22ecd60e4943e22787bd7dad"
   },
   "environment": {
     "url": "http://127.0.0.1:5197/aq-restricted-ui.html",
@@ -121,7 +121,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -129,7 +129,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -162,7 +162,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -170,7 +170,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -193,7 +193,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -201,7 +201,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -224,7 +224,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -232,7 +232,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -265,7 +265,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -273,7 +273,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -306,7 +306,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -314,7 +314,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -337,7 +337,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -345,7 +345,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -368,7 +368,7 @@
       "evidence": [
         {
           "path": "result.log",
-          "sha256": "92f8f05f507a6212ca55c767d418d1943b6de20fa106b1158aabfe768efc8eb9"
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
         },
         {
           "path": "restricted.png",
@@ -376,7 +376,7 @@
         },
         {
           "path": "restored.png",
-          "sha256": "c765675cfcc1fac73f3101c5905766f665b37e6000aa1230a9a7c997ef3161f4"
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
         }
       ]
     },
@@ -399,6 +399,6 @@
   ],
   "sourceEvidence": {
     "path": "sources.json",
-    "sha256": "7a408a56eb509b8c5872f62f4db565363c80a7e967a4dba1a2929a1988506f2a"
+    "sha256": "b1711a4ef038334d2e9f0b6462cf5a371c5a780b22ecd60e4943e22787bd7dad"
   }
 }
