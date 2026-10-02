@@ -253,3 +253,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：工作台概览混合context/baseline/任务结果展示与路由、取消、采纳、证据/预览执行，前序CSS提取未将baseline/revision规则绑定overview作用域。选用本域PresalesOverview消费原typed DTO/label事实，emit窄意图，页面沿用原执行与scope/授权/CAS/receipt守卫；任务样式归component，共享原common/solution样式并修复缺失scoped引用。
 
 取舍：页面减少186行、组件184行，不引入通用任务框架、store或新的执行权；article/table既有fallback差异保持。旧62项刻画/迁移149项工程回归、98源合同/七组件编译及实际概览规则归属证明该边界，不能据此声称像素不变或真实主题/角色/并发QA完成。回退无数据库操作但会恢复旧样式缺口；证据见AQ09_OVERVIEW_ACCEPTANCE及PR5。
+
+### ADR-AQ-017：项目持久化只返回SQL事实，事务与授权留在用例服务（Proposed）
+
+背景：PresalesService直接承载项目body、回执和修订SQL，锁/Workspace/CAS与授权/业务交错。选用本域PresalesProjectRepository封装七类原SQL，string ID/raw JSON及不可变row/receipt；Service保留成员/来源/修复政策、public事务、encoding、错误/版本判断、record/receipt时序和时间。没有DAO新事务/缓存/JSON策略或第二套批准权。
+
+取舍：服务减少31行、仓储111行，artifact SQL和查询摘要/命令业务仍待拆，不把全量读取当分页或V2迁移。旧53项/新58项真实H2+HTTP+Spring/双连接锁/回滚证明本片；多方言/生产重启/独立对象并发/正式QA仍未完成。拒绝通用JSON仓库和把整聚合移动到DAO。回退无数据库操作；证据见AQ03_PROJECT_STORAGE_ACCEPTANCE及PR5。

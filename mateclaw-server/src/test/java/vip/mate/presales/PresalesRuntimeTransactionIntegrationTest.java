@@ -57,6 +57,7 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
     PresalesRuntimeTransactionIntegrationTest.Boundaries.class,
     PresalesAccess.class,
     PresalesService.class,
+    vip.mate.presales.repository.PresalesProjectRepository.class,
     PresalesSourceAuthorization.class,
     vip.mate.wiki.service.WikiSourceReadService.class,
     vip.mate.wiki.repository.WikiSourceReadRepository.class,

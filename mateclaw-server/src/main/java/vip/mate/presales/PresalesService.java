@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import vip.mate.presales.repository.PresalesProjectRepository;
 import vip.mate.semantic.config.SemanticProperties;
 import vip.mate.semantic.graph.GraphApplicationService;
 import vip.mate.semantic.statement.StatementApplicationService;
@@ -59,6 +60,7 @@ public class PresalesService {
                     "tasks",
                     "contextCards");
     private final JdbcTemplate jdbc;
+    private final PresalesProjectRepository projects;
     private final ObjectMapper json;
     private final PresalesAccess access;
     private final WikiKnowledgeBaseService wiki;
@@ -73,6 +75,7 @@ public class PresalesService {
 
     public PresalesService(
             JdbcTemplate jdbc,
+            PresalesProjectRepository projects,
             ObjectMapper json,
             PresalesAccess access,
             WikiKnowledgeBaseService wiki,
@@ -88,6 +91,7 @@ public class PresalesService {
         this.employees = employees;
         this.authorityFence = authorityFence;
         this.jdbc = jdbc;
+        this.projects = projects;
         this.json = json;
         this.access = access;
         this.wiki = wiki;
@@ -164,12 +168,8 @@ public class PresalesService {
         if (page < 1 || size < 1 || size > 100) throw bad("Invalid pagination");
         String q = query == null ? "" : query.toLowerCase(Locale.ROOT);
         var all =
-                jdbc
-                        .query(
-                                "SELECT body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",
-                                (r, n) -> decode(r.getString(1)),
-                                scope)
-                        .stream()
+                projects.listBodies(scope).stream()
+                        .map(this::decode)
                         .filter(
                                 p ->
                                         p.path("name").asText().toLowerCase(Locale.ROOT).contains(q)
@@ -291,15 +291,9 @@ public class PresalesService {
                         "reviewDrafts",
                         "releases",
                         "tasks")) p.putArray(key);
-        jdbc.update(
-                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json)"
-                        + " VALUES(?,?,?,?,?,?)",
-                p.path("id").asText(),
-                scope,
-                1,
-                r.name(),
-                "ACTIVE",
-                encode(p));
+        projects.insert(
+                new PresalesProjectRepository.ProjectRow(
+                        p.path("id").asText(), scope, 1, r.name(), "ACTIVE", encode(p)));
         record(p, actor, "CREATE");
         receipt(scope, actor, r.operationId(), hash, p);
         return p;
@@ -515,15 +509,14 @@ public class PresalesService {
         p.put("version", r.expectedVersion() + 1)
                 .put("updatedBy", actor)
                 .put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
-        if (jdbc.update(
-                        "UPDATE mate_presales_project SET version=?,name=?,status=?,body_json=? WHERE id=? AND"
-                                + " workspace_id=? AND version=?",
-                        r.expectedVersion() + 1,
-                        p.path("name").asText(),
-                        p.path("status").asText(),
-                        encode(p),
-                        projectId,
-                        scope,
+        if (projects.update(
+                        new PresalesProjectRepository.ProjectRow(
+                                projectId,
+                                scope,
+                                r.expectedVersion() + 1,
+                                p.path("name").asText(),
+                                p.path("status").asText(),
+                                encode(p)),
                         r.expectedVersion())
                 != 1) throw conflict("VERSION_CONFLICT", "Concurrent update");
         record(p, actor, action);
@@ -1285,15 +1278,9 @@ public class PresalesService {
     }
 
     private ObjectNode load(String scope, String id, boolean lock) {
-        var found =
-                jdbc.query(
-                        "SELECT body_json FROM mate_presales_project WHERE id=? AND workspace_id=?"
-                                + (lock ? " FOR UPDATE" : ""),
-                        (rs, n) -> decode(rs.getString(1)),
-                        id,
-                        scope);
-        if (found.isEmpty()) throw new SemanticApiException(404, "NOT_FOUND", "Project not found");
-        return found.getFirst();
+        return projects.findBody(scope, id, lock)
+                .map(this::decode)
+                .orElseThrow(() -> new SemanticApiException(404, "NOT_FOUND", "Project not found"));
     }
 
     private boolean repairableCommand(Command command) {
@@ -1366,37 +1353,19 @@ public class PresalesService {
     }
 
     private ObjectNode replay(String scope, String actor, String operation, String hash) {
-        var rows =
-                jdbc.queryForList(
-                        "SELECT request_hash,response_json FROM mate_presales_operation WHERE workspace_id=?"
-                                + " AND actor_id=? AND operation_id=?",
-                        scope,
-                        actor,
-                        operation);
-        if (rows.isEmpty()) return null;
-        var row = rows.getFirst();
-        if (!hash.equals(row.get("request_hash")))
+        var row = projects.findReceipt(scope, actor, operation);
+        if (row.isEmpty()) return null;
+        if (!hash.equals(row.get().requestHash()))
             throw conflict("OPERATION_CONFLICT", "Operation id reused with different input");
-        return decode(row.get("response_json").toString());
+        return decode(row.get().responseJson());
     }
 
     private void receipt(String scope, String actor, String operation, String hash, ObjectNode p) {
-        jdbc.update(
-                "INSERT INTO"
-                        + " mate_presales_operation(workspace_id,actor_id,operation_id,request_hash,response_json)"
-                        + " VALUES(?,?,?,?,?)",
-                scope,
-                actor,
-                operation,
-                hash,
-                encode(p));
+        projects.insertReceipt(scope, actor, operation, hash, encode(p));
     }
 
     private void record(ObjectNode p, String actor, String action) {
-        jdbc.update(
-                "INSERT INTO"
-                        + " mate_presales_revision(project_id,version,actor_id,action,body_json,created_at)"
-                        + " VALUES(?,?,?,?,?,?)",
+        projects.insertRevision(
                 p.path("id").asText(),
                 p.path("version").asInt(),
                 actor,

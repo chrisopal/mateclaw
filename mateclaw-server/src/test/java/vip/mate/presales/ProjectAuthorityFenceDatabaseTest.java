@@ -251,6 +251,7 @@ class ProjectAuthorityFenceDatabaseTest {
         var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         return new PresalesService(
                 jdbc,
+                new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                 json,
                 access,
                 wiki,

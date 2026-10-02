@@ -89,6 +89,7 @@ class PresalesAtomicResultAcceptanceTest {
         var service =
                 new PresalesService(
                         jdbc,
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                         json,
                         access,
                         wiki,
@@ -216,6 +217,7 @@ class PresalesAtomicResultAcceptanceTest {
         var service =
                 new PresalesService(
                         jdbc,
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                         json,
                         access,
                         wiki,

@@ -1,0 +1,35 @@
+# AQ-03/05 项目持久化边界工程验收
+
+起始HEADdd4429619889e38719a8223357fd9e626fea5cdd，base origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93。独立工作树干净，原项目WIP未触碰。计划AQ03_PROJECT_STORAGE_PLAN.md。
+
+## 实施与兼容
+
+本域repository.PresalesProjectRepository拥有项目list/find/insert/update、操作回执find/insert和修订insert七类SQL，使用string ID、原始JSON字符串及不可变ProjectRow/OperationReceipt记录；不解析JSON、授予权限、校验批准或新开事务。查询保留Workspace条件、原ORDER BY name,id、FOR UPDATE、CAS version、actor+Workspace+operation复合身份及原参数顺序。仓储随presales模块开关安装，使用原JdbcTemplate/调用方事务连接。
+
+PresalesService保留入口actor/成员授权、来源/冻结/当前employee复核、严格修复allowlist、全部public事务传播和隔离、JSON编码、业务命令、404/operation hash冲突/零行CAS冲突错误及record→receipt顺序和UTC时间。artifact SQL/发布字节未改。服务1462→1431行，仓储111行；该片按持久化职责建立边界，不以减少行数或移动整聚合替代设计。列表仍全量读取再过滤，不宣称数据库分页/独立对象或V2迁移完成。
+
+四份既有测试仅新增真实仓储DI装配；删除新增import/constructor参数行后与旧文件逐字节相同，旧断言保留。无依赖、schema、Flyway或控制面改变。
+
+## 行为刻画与实际验证
+
+生产前新增三项真实JWT/HTTP/H2刻画：创建/命令的body/revision/receipt精确字节及未知历史扩展保持；同操作回放不新写/不同输入409、另一Workspace无权限403后授予viewer仍404、旧版本409不写；临时revision CHECK失败，真实ServletException原因DataIntegrityViolation与约束marker确认，项目更新/回执/修订整体回滚，finally移除测试库约束。新三项及原Integration/AtomicResult/Fence/RuntimeTransaction/SourceScope共53/53通过后才编辑生产。
+
+首次新增夹具错将另一个Workspace未授权请求期望为404，原服务正确先403；追加403并仅在测试授予viewer后验证404。强化回滚原因断言时H2 lower-case约束名称与大写预期不符，按实际大小写归一比对同一marker。两次FAIL保留，均不改生产政策、旧断言或测试配置。
+
+新仓储五项真实H2合同直接加载已有V211迁移：scope过滤/精确大字符串ID/JSON空白Unicode及原name/id排序；scope+version CAS零行保护；actor/workspace/operation回执身份和revision原字节/调用方时间；TransactionTemplate三写rollback；两个事务连接中的FOR UPDATE使writer等待，父事务结束后才成功。58/58定向Java七类通过，零失败/error/skip；使用项目JDK21、proc=full，failIfNoSpecifiedTests=false只允许无选中测试的上游模块继续，目标非零58由XML核验。dev l23qp7ze/ffzhjsgu SCAN_PASS，固定Spotless check exit0，精确树s5gpp6u8已PASS/submission_ready=true：Java6031总数/5961执行/既有70skip、零failure/error，UI846/846及type/ID/Node/两主题构建通过；UI formatter/lint因无变更目标NOT_APPLICABLE，不把整个UI工具链判NA。
+
+独立authority_review核查SQL/参数、权限/来源/错误与caller事务/时序，无问题，APPROVE bounded slice；其JDK21重跑七类58/58、零fail/error/skip。诊断器本环境仅报告无tsconfig，不作为Java类型依据；实际Maven编译/测试为证据。该审阅不是正式QA或submission_ready。
+
+八份源码/测试、七份脱敏日志hash及Surefire类计数见project-storage-test-results.json。日志仅脱敏测试JWT/password/token；其余字节及尾部空白保留，源码diff-check通过；完整commit/push及独立审核结果在PR5记录。
+
+## 剩余与回退
+
+H2及真实Spring/JWT回归不证明MySQL/Kingbase、生产同构重启或所有API角色。Service仍保留命令、摘要和冻结成果/渲染artifact SQL；独立对象修订/任务/精确依赖CAS、SQL分页、迁移备份/隔离恢复/单写切换、发布黄金字节、真实角色/UI/业务及维护人签收、remote required CI未闭合。AC16/17/18/31不由该工程片升级。
+
+回退DI/项目SQL委派可恢复旧代码，无数据迁移或生产操作；不得从DAO取消caller事务或把读取事实升级为授权。本片不宣称AQ03/P0/全架构完成。
+
+工程提交与门禁回读：源提交abee25a0ba3a7190f3d448f57642d1e3b6908079，树1b7bd4d84ea5d6bad8671fd437d9b5e7c588b1a8；精确暂存s5gpp6u8与正常commit钩子gf7t_x2s报告绑定同一树。计划初稿笼统UI NA已按实际java→ui保守规则修正，本次只修改文档和真实报告，不改变影响规则或跳过检查。完整push报告和远端回读继续记录在PR5。
+
+首次推送门禁hhj6u8ol运行期间，核对MockMvc失败输出发现synthetic测试凭据15处JWT。已确认远端仍dd442961，终止自有推送进程组并验证终止；不是远端已推送。最终证据脱敏并记录输入/输出SHA256及数量，原本地输出不发布。先前精确树/钩子报告仅作脱敏前历史工程证据；脱敏后的完整树需重新执行提交/推送门禁。本地两个自有未推送提交合并重建，不force推送或覆盖他人WIP。
+
+最终补充刻画：持久化body_json为JSON null时，原decode转换产生IllegalStateException（cause ClassCastException），不返回404。新增测试最初错误预期NPE，已按真实原行为校正，生产代码未修改；最终七类59/59、零failure/error/skip。该首次失败日志也脱敏保存，不修改既有断言。中途g6k5sr7h门禁主动终止，STOPPED_NOT_PASS，不作为提交依据；最终脱敏树需全量重验。上述s5gpp6u8/gf7t_x2s及abee提交仅为未发布的历史检查。
