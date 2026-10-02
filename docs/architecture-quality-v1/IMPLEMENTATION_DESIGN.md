@@ -296,3 +296,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 16个action建立内部CommandKind，CommandAction保留raw，未知为UNKNOWN+原文；null按原业务判断映射空字符串，HTTP字段仍保留null。Command四个record组件不变，package-private解析方法@JsonIgnore。Service批准角色分组、repair白名单、员工任务限定和业务switch共享kind；原raw用于错误/audit，原Command用于request hash/receipt。
 
 拒绝HTTP直接enum绑定或trim/uppercase：这些会提前改变授权、来源、重放/CAS和归档检查的错误顺序，也会改变operation同键请求。默认拒绝保留，将来有枚举但无handler也不能无操作地更新version成功。分类不授予权限，角色/来源/fence/事务仍在应用服务。旧12/最终72项真实HTTP/H2/事务与纯wire合同、限定独立审阅保护这一边界；无新依赖/SQL/迁移/Bean。完整payload/项目DTO、SQL分页、V2/多方言/浏览器/正式QA仍待完成。回退仅恢复字符串分类与DTO，证据见AQ05_COMMAND_KIND_ACCEPTANCE。
+
+### ADR-AQ-024：列表摘要与完整详情分离并接入宿主概览文案（Proposed）
+
+列表wire已删除12个业务集合，不能用完整PresalesProject声明掩盖未加载数据。Summary直接声明原共享元数据，Project继承并要求原集合；列表/portfolio/dashboard只依赖Summary，未知历史扩展和字符串ID保留。拒绝补空明细或保留多余Metadata空继承层：前者误导已加载，后者被lint拒绝且无独立职责。
+
+概览格式化触发原内联双语存量指纹变化，按现有规则将20对原文案接入presalesMessages/useI18n并跟随宿主locale，不改门禁或baseline。原7/最终155合同，完整UI852与两构建通过，独立限定审阅无问题；不改变来源授权/事务/发布或HTTP wire。回退只影响源码，无数据库操作。完整DTO/runtime unknown验证、SQL/V2及真实浏览器/业务QA仍待完成；证据见AQ05_PROJECT_SUMMARY_ACCEPTANCE。
