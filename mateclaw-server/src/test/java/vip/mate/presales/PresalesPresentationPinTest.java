@@ -39,7 +39,7 @@ class PresalesPresentationPinTest {
         when(bindings.getBoundSkillIds(7L)).thenReturn(Set.of(41L));
         var service =
                 new PresalesPresentationService(
-                        mock(org.springframework.jdbc.core.JdbcTemplate.class),
+                        mock(vip.mate.presales.repository.PresalesArtifactRepository.class),
                         new ObjectMapper(),
                         skills,
                         bindings,

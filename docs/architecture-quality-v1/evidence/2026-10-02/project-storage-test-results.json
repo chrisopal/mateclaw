@@ -82,17 +82,17 @@
   },
   "logs_sha256": {
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/initial-dev.txt": "5eccb0eeb1523cc969b20308ad4d3d30119d993f7307db37203c76d7b97e7f82",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": "8bd55dc7504588161c104f44a82b074f1b9ddd9184eae371dbd85f7409f2c2b1",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": "0499ca8abe7978c6e28e76c592fa32169135175c19c35f56cf2b7c25c2df339b",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-pass.txt": "84190d87448d5ae6f51b994028bffbea3c5f0501cf4e0f4d6ba395a683446ae9",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/after.txt": "185de340d6278969636767220aec8317fdd36c10a17ba23f1ed83d49cfdc52b3",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": "16ce8f36898fecf874e5d51a612a9503dc33b118f061e3a3065ef6ee01ac8aad",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": "26cc3cd8e478bfcf04db5eba18608dd6c513e07590b3b44d719593552c09f672",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-pass.txt": "b223c7ab494291f04034ea73393ca131770fe866dfbaa5885ef8378ff28bd644",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/after.txt": "1733c7a0afb504a0b29d8067d7953e68c9b9c7c919156146e08b5383ac3b571f",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/format.txt": "00a0241b090183b5f099a210b27e77ae13934262fb9a2046d372a7954c7d1336",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/dev.txt": "adc481aca80edb2c2f18d3865139dd6c520144f6d67c028f3ed85b85853b298c",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/staged-gate-report.json": "5fd37f1ee2eecda1503b9d8f20d365ecfede56f9255583369dea84227a9b933e",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/commit-hook-report.json": "182498be1dcc8b9173a2662148cf84928d6afc7f03158389858312e8a06d4b57",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-format.txt": "eea40f6fb0158508b35a5d67c1d46b05a63bdaa666196647ba2fa7e25ef4588d",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": "95e5f47bd612ac43f9ed56f534d5b1f54347c294f744dae6a193ba5aaf1543a3",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": "bbf2e618e2bfacba5faa72dd787263f212b99cc0b8e45428de3ffea581131c45",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": "0f6f1111f4190316947a941b5a1fcbbe88dc53c39f0de8925e561757e5806800",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": "bd2886bac660e609db84c2aea1814728a23e614f8468acc48f6f08c26e783c4f",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-dev.txt": "c75156d2d432fdad1e999221a07b5d1cd809e195945e33b7112e6b03e4d153bb",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-spotless.txt": "3ad4a1c7a6a5c7f110a00f943bcd72097e485a745e0b46b95ddbe3b84bdb4ab1",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-staged-gate-report.json": "4e34d9a947e2d340aa988e7da2ecfc0ec5424279521c560a8486c371fd991c5c",
@@ -215,5 +215,32 @@
     "ui_passed": 846,
     "ui_failed": 0,
     "ui_types_ID_Node_builds": "PASS"
-  }
+  },
+  "development_password_redaction_followup": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/after.txt": {
+      "input_sha256": "185de340d6278969636767220aec8317fdd36c10a17ba23f1ed83d49cfdc52b3",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-pass.txt": {
+      "input_sha256": "84190d87448d5ae6f51b994028bffbea3c5f0501cf4e0f4d6ba395a683446ae9",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": {
+      "input_sha256": "95e5f47bd612ac43f9ed56f534d5b1f54347c294f744dae6a193ba5aaf1543a3",
+      "count": 1
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": {
+      "input_sha256": "bbf2e618e2bfacba5faa72dd787263f212b99cc0b8e45428de3ffea581131c45",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": {
+      "input_sha256": "0499ca8abe7978c6e28e76c592fa32169135175c19c35f56cf2b7c25c2df339b",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": {
+      "input_sha256": "8bd55dc7504588161c104f44a82b074f1b9ddd9184eae371dbd85f7409f2c2b1",
+      "count": 2
+    }
+  },
+  "development_password_redaction_note": "Follow-up removes ephemeral Spring generated development passwords missed by the earlier JWT/JSON credential filter. Earlier source_commit/checked_tree reports remain historical candidate identities; no published history rewrite."
 }

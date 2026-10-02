@@ -58,6 +58,7 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
     PresalesAccess.class,
     PresalesService.class,
     vip.mate.presales.repository.PresalesProjectRepository.class,
+    vip.mate.presales.repository.PresalesArtifactRepository.class,
     PresalesSourceAuthorization.class,
     vip.mate.wiki.service.WikiSourceReadService.class,
     vip.mate.wiki.repository.WikiSourceReadRepository.class,

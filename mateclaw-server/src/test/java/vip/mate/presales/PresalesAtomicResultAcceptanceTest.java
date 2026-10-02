@@ -88,7 +88,7 @@ class PresalesAtomicResultAcceptanceTest {
         var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         var service =
                 new PresalesService(
-                        jdbc,
+                        new vip.mate.presales.repository.PresalesArtifactRepository(jdbc),
                         new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                         json,
                         access,
@@ -216,7 +216,7 @@ class PresalesAtomicResultAcceptanceTest {
         var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         var service =
                 new PresalesService(
-                        jdbc,
+                        new vip.mate.presales.repository.PresalesArtifactRepository(jdbc),
                         new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                         json,
                         access,

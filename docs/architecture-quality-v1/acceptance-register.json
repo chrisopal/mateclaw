@@ -265,7 +265,7 @@
         "evidence/2026-10-02/AQ03_PROJECT_STORAGE_ACCEPTANCE.md",
         "evidence/2026-10-02/project-storage-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/新58项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
     },
     {
       "id": "AC-17",
@@ -279,7 +279,7 @@
         "evidence/2026-10-02/AQ03_PROJECT_STORAGE_ACCEPTANCE.md",
         "evidence/2026-10-02/project-storage-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/新58项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
     },
     {
       "id": "AC-18",
@@ -293,7 +293,7 @@
         "evidence/2026-10-02/AQ03_PROJECT_STORAGE_ACCEPTANCE.md",
         "evidence/2026-10-02/project-storage-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/新58项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
     },
     {
       "id": "AC-19",
@@ -354,8 +354,11 @@
       "owner": "迁移负责人 + QA + 业务审核",
       "method": "迁移/恢复/真实数据库/字节对账",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-10-02/AQ03_ARTIFACT_STORAGE_ACCEPTANCE.md",
+        "evidence/2026-10-02/artifact-storage-test-results.json"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN"
     },
     {
       "id": "AC-24",
@@ -469,9 +472,11 @@
         "evidence/2026-10-02/AQ09_OVERVIEW_ACCEPTANCE.md",
         "evidence/2026-10-02/overview-test-results.json",
         "evidence/2026-10-02/AQ03_PROJECT_STORAGE_ACCEPTANCE.md",
-        "evidence/2026-10-02/project-storage-test-results.json"
+        "evidence/2026-10-02/project-storage-test-results.json",
+        "evidence/2026-10-02/AQ03_ARTIFACT_STORAGE_ACCEPTANCE.md",
+        "evidence/2026-10-02/artifact-storage-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/新58项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN"
     },
     {
       "id": "AC-32",

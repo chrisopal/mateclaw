@@ -259,3 +259,10 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：PresalesService直接承载项目body、回执和修订SQL，锁/Workspace/CAS与授权/业务交错。选用本域PresalesProjectRepository封装七类原SQL，string ID/raw JSON及不可变row/receipt；Service保留成员/来源/修复政策、public事务、encoding、错误/版本判断、record/receipt时序和时间。没有DAO新事务/缓存/JSON策略或第二套批准权。
 
 取舍：服务减少31行、仓储111行，artifact SQL和查询摘要/命令业务仍待拆，不把全量读取当分页或V2迁移。旧53项/最终59项真实H2+HTTP+Spring/双连接锁/回滚证明本片；多方言/生产重启/独立对象并发/正式QA仍未完成。拒绝通用JSON仓库和把整聚合移动到DAO。回退无数据库操作；证据见AQ03_PROJECT_STORAGE_ACCEPTANCE及PR5。
+
+
+### ADR-AQ-018：成果表使用同一领域仓储，渲染与授权仍由调用方负责（Proposed）
+
+背景：项目service与PPT compiler重复成果表写入，读SQL夹在发布/来源政策中。决定：PresalesArtifactRepository接四类原SQL，使用string三key及raw digest/base64事实；两个服务不再注入JdbcTemplate。public service事务及PPT原TransactionTemplate不变，授权/摘要/404/409/cardinality/冻结manifest/handoff仍在原调用方。仓储无条件安装与原PresentationService一致，避免关闭售前功能时Bean装配失败。
+
+取舍：Service1431→1401、仓储58行；不把摘要校验或发布政策藏进通用blob工具，不渲染已发布字节，也不引入DAO独立事务。33项旧实现刻画、66项迁移后H2/HTTP合同、实际已安装compiler1项及限定独立审阅验证边界；查询摘要/命令、SQL分页、V2单写迁移/黄金样本、多方言/生产重启/正式QA仍未闭合。回退只恢复DI/原SQL，无数据库操作。证据见AQ03_ARTIFACT_STORAGE_ACCEPTANCE及PR5。

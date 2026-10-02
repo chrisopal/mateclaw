@@ -11,19 +11,19 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import vip.mate.agent.binding.service.AgentBindingService;
+import vip.mate.presales.repository.PresalesArtifactRepository;
 import vip.mate.skill.runtime.SkillRuntimeService;
 
 /** Constrained SVG compiler adapter. No model-authored code or shell commands are executed. */
 @Service
 public class PresalesPresentationService implements PresalesPresentationHook {
-    private final JdbcTemplate jdbc;
+    private final PresalesArtifactRepository artifacts;
     private final ObjectMapper json;
     private final SkillRuntimeService skills;
     private final AgentBindingService bindings;
@@ -92,12 +92,12 @@ public class PresalesPresentationService implements PresalesPresentationHook {
                     "data-pptx-role");
 
     public PresalesPresentationService(
-            JdbcTemplate jdbc,
+            PresalesArtifactRepository artifacts,
             ObjectMapper json,
             SkillRuntimeService skills,
             AgentBindingService bindings,
             PlatformTransactionManager tx) {
-        this.jdbc = jdbc;
+        this.artifacts = artifacts;
         this.json = json;
         this.skills = skills;
         this.bindings = bindings;
@@ -254,8 +254,7 @@ public class PresalesPresentationService implements PresalesPresentationHook {
             transaction.executeWithoutResult(
                     status -> {
                         for (var page : pages.entrySet())
-                            jdbc.update(
-                                    "INSERT INTO mate_presales_artifact(project_id,release_id,filename,digest,content_base64) VALUES(?,?,?,?,?)",
+                            artifacts.insert(
                                     projectId,
                                     runId,
                                     page.getKey(),

@@ -250,7 +250,7 @@ class ProjectAuthorityFenceDatabaseTest {
                         org.mockito.ArgumentMatchers.any());
         var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         return new PresalesService(
-                jdbc,
+                new vip.mate.presales.repository.PresalesArtifactRepository(jdbc),
                 new vip.mate.presales.repository.PresalesProjectRepository(jdbc),
                 json,
                 access,

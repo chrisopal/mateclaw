@@ -568,7 +568,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 17:03:44.312 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
 17:03:44.379 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
 
-Using generated security password: 0dd468be-e0ed-471e-b4ac-a39f9f41babc
+Using generated security password: [REDACTED_TEST_PASSWORD]
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
@@ -842,7 +842,7 @@ This generated password is for development use only. Your security configuration
 17:03:45.351 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
 17:03:45.368 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
 
-Using generated security password: 9959d8d0-6ee3-40c6-8ad0-39ae5a1688e9
+Using generated security password: [REDACTED_TEST_PASSWORD]
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 

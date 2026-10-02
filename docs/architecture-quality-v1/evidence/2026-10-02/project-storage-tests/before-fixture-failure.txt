@@ -568,7 +568,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 16:08:07.333 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
 16:08:07.398 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
 
-Using generated security password: 6bd14a72-8fe3-40f6-8ba1-2fab6cd12bca
+Using generated security password: [REDACTED_TEST_PASSWORD]
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
@@ -1182,7 +1182,7 @@ org.opentest4j.AssertionFailedError: {"code":403,"msg":"Workspace role requires 
 16:08:08.411 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
 16:08:08.431 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
 
-Using generated security password: 6621cb6a-8fc6-450a-b187-0af45e921ea6
+Using generated security password: [REDACTED_TEST_PASSWORD]
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 

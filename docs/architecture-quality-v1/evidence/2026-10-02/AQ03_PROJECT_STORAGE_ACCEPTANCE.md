@@ -35,3 +35,5 @@ H2及真实Spring/JWT回归不证明MySQL/Kingbase、生产同构重启或所有
 最终补充刻画：持久化body_json为JSON null时，原decode转换产生IllegalStateException（cause ClassCastException），不返回404。新增测试最初错误预期NPE，已按真实原行为校正，生产代码未修改；最终七类59/59、零failure/error/skip。该首次失败日志也脱敏保存，不修改既有断言。中途g6k5sr7h门禁主动终止，STOPPED_NOT_PASS，不作为提交依据；最终脱敏树需全量重验。上述s5gpp6u8/gf7t_x2s及abee提交仅为未发布的历史检查。
 
 最终脱敏源提交bf728e648154c8afaa897708efc789fdb4836c7d，实际树2b0989a28a9f81ae60307a67e9af45f2651de4f0，g6kzd01e精确暂存与d7erjho6正常提交钩子均PASS/submission_ready=true，同一树。Java6032总数/5962执行/既有70skip、零failure/error；UI846/846、type/ID/Node/两主题构建通过。最终报告原件及hash见final-staged-gate-report.json、final-commit-hook-report.json和manifest。源码/最终定向59项/脱敏证据一致；推送和远端读回结果在PR5补记。
+
+后续成果切片证据复核：先前JWT/JSON脱敏未覆盖Spring启动自动生成的开发密码，六份当前日志追加移除11行值并更新SHA256，输入hash/数量见manifest development_password_redaction_followup。已有source_commit/tree与报告仍为对应历史候选，当前证据修改随成果切片重新门禁；未重写已推送Git历史。

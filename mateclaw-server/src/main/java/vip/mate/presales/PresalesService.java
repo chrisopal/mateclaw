@@ -10,11 +10,11 @@ import java.time.ZoneOffset;
 import java.util.*;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import vip.mate.presales.repository.PresalesArtifactRepository;
 import vip.mate.presales.repository.PresalesProjectRepository;
 import vip.mate.semantic.config.SemanticProperties;
 import vip.mate.semantic.graph.GraphApplicationService;
@@ -59,7 +59,7 @@ public class PresalesService {
                     "releases",
                     "tasks",
                     "contextCards");
-    private final JdbcTemplate jdbc;
+    private final PresalesArtifactRepository artifacts;
     private final PresalesProjectRepository projects;
     private final ObjectMapper json;
     private final PresalesAccess access;
@@ -74,7 +74,7 @@ public class PresalesService {
     private final PresalesSourceAuthorization sourceAuthorization;
 
     public PresalesService(
-            JdbcTemplate jdbc,
+            PresalesArtifactRepository artifacts,
             PresalesProjectRepository projects,
             ObjectMapper json,
             PresalesAccess access,
@@ -90,7 +90,7 @@ public class PresalesService {
         this.sourceAuthorization = sourceAuthorization;
         this.employees = employees;
         this.authorityFence = authorityFence;
-        this.jdbc = jdbc;
+        this.artifacts = artifacts;
         this.projects = projects;
         this.json = json;
         this.access = access;
@@ -1017,9 +1017,7 @@ public class PresalesService {
         ArrayNode manifest = v.putArray("files");
         for (var entry : files.entrySet()) {
             String digest = java.util.HexFormat.of().formatHex(sha(entry.getValue()));
-            jdbc.update(
-                    "INSERT INTO mate_presales_artifact(project_id,release_id,filename,digest,content_base64)"
-                            + " VALUES(?,?,?,?,?)",
+            artifacts.insert(
                     p.path("id").asText(),
                     releaseId,
                     entry.getKey(),
@@ -1036,11 +1034,7 @@ public class PresalesService {
         saveItem(p, "releases", v, actor, true);
         String storedReleaseId = v.path("id").asText();
         if (!releaseId.equals(storedReleaseId)) {
-            jdbc.update(
-                    "UPDATE mate_presales_artifact SET release_id=? WHERE project_id=? AND release_id=?",
-                    storedReleaseId,
-                    p.path("id").asText(),
-                    releaseId);
+            artifacts.reassignRelease(p.path("id").asText(), releaseId, storedReleaseId);
             releaseId = storedReleaseId;
         }
         ObjectNode handoff =
@@ -1110,21 +1104,14 @@ public class PresalesService {
     private void verifyArtifacts(String projectId, ObjectNode release) {
         for (var file : release.path("files")) {
             var rows =
-                    jdbc.queryForList(
-                            "SELECT digest,content_base64 FROM mate_presales_artifact WHERE project_id=? AND"
-                                    + " release_id=? AND filename=?",
-                            projectId,
-                            release.path("id").asText(),
-                            file.path("filename").asText());
+                    artifacts.find(
+                            projectId, release.path("id").asText(), file.path("filename").asText());
             if (rows.size() != 1) throw conflict("ARTIFACT_MISSING", "Candidate file missing");
             var row = rows.getFirst();
             String digest =
                     java.util.HexFormat.of()
-                            .formatHex(
-                                    sha(
-                                            Base64.getDecoder()
-                                                    .decode(row.get("content_base64").toString())));
-            if (!digest.equals(row.get("digest")) || !digest.equals(file.path("sha256").asText()))
+                            .formatHex(sha(Base64.getDecoder().decode(row.contentBase64())));
+            if (!digest.equals(row.digest()) || !digest.equals(file.path("sha256").asText()))
                 throw conflict("ARTIFACT_DIGEST_MISMATCH", "Candidate bytes changed");
         }
     }
@@ -1135,15 +1122,9 @@ public class PresalesService {
         var release = find(p, "releases", releaseId);
         releaseGate(scope, p, find(p, "solutions", release.path("solutionId").asText()));
         verifyArtifacts(projectId, release);
-        var rows =
-                jdbc.queryForList(
-                        "SELECT content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=?"
-                                + " AND filename=?",
-                        projectId,
-                        releaseId,
-                        filename);
+        var rows = artifacts.findContents(projectId, releaseId, filename);
         if (rows.isEmpty()) throw new SemanticApiException(404, "NOT_FOUND", "Artifact not found");
-        return Base64.getDecoder().decode(rows.getFirst().get("content_base64").toString());
+        return Base64.getDecoder().decode(rows.getFirst());
     }
 
     public byte[] draftArtifact(
@@ -1196,17 +1177,12 @@ public class PresalesService {
 
     private byte[] storedPresentationArtifact(
             String projectId, String artifactId, String filename, String expectedDigest) {
-        var rows =
-                jdbc.queryForList(
-                        "SELECT digest,content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=? AND filename=?",
-                        projectId,
-                        artifactId,
-                        filename);
+        var rows = artifacts.find(projectId, artifactId, filename);
         if (rows.size() != 1)
             throw new SemanticApiException(404, "NOT_FOUND", "Presentation artifact not found");
-        byte[] bytes = Base64.getDecoder().decode(rows.getFirst().get("content_base64").toString());
+        byte[] bytes = Base64.getDecoder().decode(rows.getFirst().contentBase64());
         String digest = java.util.HexFormat.of().formatHex(sha(bytes));
-        if (!digest.equals(rows.getFirst().get("digest").toString())
+        if (!digest.equals(rows.getFirst().digest())
                 || (!expectedDigest.isBlank() && !digest.equals(expectedDigest)))
             throw conflict("ARTIFACT_DIGEST_MISMATCH", "Presentation artifact integrity failure");
         return bytes;
@@ -1219,16 +1195,10 @@ public class PresalesService {
             throw new SemanticApiException(
                     403, "RELEASE_NOT_PUBLISHED", "Only published artifacts can be downloaded");
         releaseGate(scope, p, find(p, "solutions", release.path("solutionId").asText()));
-        var rows =
-                jdbc.queryForList(
-                        "SELECT digest,content_base64 FROM mate_presales_artifact WHERE project_id=? AND"
-                                + " release_id=? AND filename=?",
-                        projectId,
-                        releaseId,
-                        filename);
+        var rows = artifacts.find(projectId, releaseId, filename);
         if (rows.isEmpty()) throw new SemanticApiException(404, "NOT_FOUND", "Artifact not found");
-        byte[] bytes = Base64.getDecoder().decode(rows.getFirst().get("content_base64").toString());
-        if (!java.util.HexFormat.of().formatHex(sha(bytes)).equals(rows.getFirst().get("digest")))
+        byte[] bytes = Base64.getDecoder().decode(rows.getFirst().contentBase64());
+        if (!java.util.HexFormat.of().formatHex(sha(bytes)).equals(rows.getFirst().digest()))
             throw conflict("ARTIFACT_DIGEST_MISMATCH", "Artifact integrity failure");
         return bytes;
     }
