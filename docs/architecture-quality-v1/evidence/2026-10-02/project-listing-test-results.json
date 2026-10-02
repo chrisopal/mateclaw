@@ -67,7 +67,9 @@
     "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/intermediate-dev.txt": "a8d1267fcc49a2a63400e39d81a63cae5257b32e4305ae2615f28af25617f4b0",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/final-dev.txt": "0b95f9da97f249e8f3986283673c70438376c8e3a40cb47f1dd076f37c7769b1",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-final.txt": "da43e6c229f7e54abca6689eb867b8faa36826228c1c04e3cef8d77c346e2ff4",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-check.txt": "7296c395ec5c1907c69731575569bac94e7b49d8c05dcd5ec5cd227329e4d760"
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-check.txt": "7296c395ec5c1907c69731575569bac94e7b49d8c05dcd5ec5cd227329e4d760",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/staged-gate-report.json": "c762612ed4f4666e55bd4dbc852a292660498d47c942d3336f6aba98cb332d08",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/commit-hook-report.json": "67c8068b9dc33564a74a88f0c10332d0315da94775aa33b661835bf1bd77dd9c"
   },
   "evidence_redaction": {
     "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/initial-dev.txt": {
@@ -169,5 +171,21 @@
   "sql_pagination": "NOT_IMPLEMENTED_THIS_SLICE",
   "full_stable_project_dto": "NOT_IMPLEMENTED_THIS_SLICE",
   "mysql_kingbase": "NOT_RUN_THIS_SLICE",
-  "remote_required_ci": "NOT_VERIFIED"
+  "remote_required_ci": "NOT_VERIFIED",
+  "full_gate": {
+    "source_commit": "647e10519f1a7f4a2e3460988ae3ee558120ab3a",
+    "checked_tree": "aa596f4e8378504ad2d5c35f594a967d0619ba4c",
+    "staged_task": "5b1feeat",
+    "commit_hook_task": "diqyu6w2",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6048,
+    "java_executed": 5978,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "types_ID_Node_builds": "PASS",
+    "ui_format_lint": "NOT_APPLICABLE no UI targets"
+  }
 }

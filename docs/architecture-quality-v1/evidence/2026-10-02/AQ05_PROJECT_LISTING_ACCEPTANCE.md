@@ -23,3 +23,7 @@ JDK21 Maven真实HTTP/JWT/H2/Spring：旧实现15项通过，初稿57项通过�
 ## 范围、风险与回退
 
 本片完成列表投影边界，不代表完整稳定项目DTO、命令拆分、SQL分页、V2迁移、MySQL/Kingbase、真实浏览器/角色/重启/业务QA或维护人签收。ADR-AQ-019仍Proposed，正式AC保持NOT_RUN；远端required CI未验证。列表仍全量读取，在大数据集有既有性能限制。回退恢复Service原内联投影及stage，删除新helper/新增合同即可，无数据库操作。提交/推送门禁与精确tree证据单独追加，不用本报告自签代替门禁。
+
+## 精确提交树封口
+
+源提交 `647e10519f1a7f4a2e3460988ae3ee558120ab3a`，tree `aa596f4e8378504ad2d5c35f594a967d0619ba4c`；完整暂存5b1feeat与正常commit hook diqyu6w2均exit0/PASS/submission_ready=true且target_identity一致。Java6048总计/5978执行/既有70跳过，0失败/错误；UI846/846、类型/ID/Node/enterprise及classic构建通过。仅UI formatter/lint无变更目标为NOT_APPLICABLE。JSON报告及其SHA见同目录manifest，当前证据封口提交单独执行文档影响门禁。正式QA与远端required CI不由此升级。
