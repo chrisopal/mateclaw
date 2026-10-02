@@ -1,30 +1,19 @@
 package vip.mate.presales;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Service;
-import vip.mate.auth.service.AuthService;
-import vip.mate.semantic.security.SemanticPrincipalResolver;
+import vip.mate.auth.model.UserEntity;
+import vip.mate.auth.service.ActorResolver;
 import vip.mate.semantic.web.SemanticApiException;
-import vip.mate.workspace.core.model.WorkspaceMemberEntity;
-import vip.mate.workspace.core.repository.WorkspaceMapper;
-import vip.mate.workspace.core.repository.WorkspaceMemberMapper;
+import vip.mate.workspace.core.service.WorkspaceAccessService;
 
 @Service
 public class PresalesAccess {
-    private final SemanticPrincipalResolver principals;
-    private final AuthService auth;
-    private final WorkspaceMapper workspaces;
-    private final WorkspaceMemberMapper members;
+    private final ActorResolver actors;
+    private final WorkspaceAccessService workspaces;
 
-    public PresalesAccess(
-            SemanticPrincipalResolver principals,
-            AuthService auth,
-            WorkspaceMapper workspaces,
-            WorkspaceMemberMapper members) {
-        this.principals = principals;
-        this.auth = auth;
+    public PresalesAccess(ActorResolver actors, WorkspaceAccessService workspaces) {
+        this.actors = actors;
         this.workspaces = workspaces;
-        this.members = members;
     }
 
     /** Server-bound identity check for tool threads without an ambient web security context. */
@@ -38,28 +27,22 @@ public class PresalesAccess {
         } catch (RuntimeException e) {
             throw new SemanticApiException(401, "UNAUTHENTICATED", "Valid project actor required");
         }
-        var user = auth.findById(userId);
-        if (user == null
-                || !Boolean.TRUE.equals(user.getEnabled())
-                || (user.getDeleted() != null && user.getDeleted() != 0))
-            throw new SemanticApiException(401, "UNAUTHENTICATED", "Active user required");
-        var w = workspaces.selectById(workspace);
-        if (w == null || (w.getDeleted() != null && w.getDeleted() != 0))
-            throw new SemanticApiException(404, "NOT_FOUND", "Workspace not found");
-        if (!"admin".equalsIgnoreCase(user.getRole())) {
-            var member =
-                    members.selectOne(
-                            new LambdaQueryWrapper<WorkspaceMemberEntity>()
-                                    .eq(WorkspaceMemberEntity::getWorkspaceId, workspace)
-                                    .eq(WorkspaceMemberEntity::getUserId, userId)
-                                    .eq(WorkspaceMemberEntity::getDeleted, 0));
-            if (member == null || level(member.getRole()) < level(role))
-                throw new SemanticApiException(403, "FORBIDDEN", "Workspace role requires " + role);
+        UserEntity user;
+        try {
+            user = actors.requireActiveId(userId);
+        } catch (ActorResolver.Denied e) {
+            throw denied(e);
         }
+        requireRole(workspace, userId, user, role);
     }
 
     public String require(String scope, String role) {
-        var user = principals.require();
+        UserEntity user;
+        try {
+            user = actors.requireCurrent();
+        } catch (ActorResolver.Denied e) {
+            throw denied(e);
+        }
         long workspace;
         try {
             workspace = Long.parseLong(scope);
@@ -68,20 +51,16 @@ public class PresalesAccess {
             throw new SemanticApiException(
                     400, "WORKSPACE_REQUIRED", "Explicit workspace required");
         }
-        var w = workspaces.selectById(workspace);
-        if (w == null || (w.getDeleted() != null && w.getDeleted() != 0))
-            throw new SemanticApiException(404, "NOT_FOUND", "Workspace not found");
-        if (!"admin".equalsIgnoreCase(user.getRole())) {
-            var member =
-                    members.selectOne(
-                            new LambdaQueryWrapper<WorkspaceMemberEntity>()
-                                    .eq(WorkspaceMemberEntity::getWorkspaceId, workspace)
-                                    .eq(WorkspaceMemberEntity::getUserId, user.getId())
-                                    .eq(WorkspaceMemberEntity::getDeleted, 0));
-            if (member == null || level(member.getRole()) < level(role))
-                throw new SemanticApiException(403, "FORBIDDEN", "Workspace role requires " + role);
-        }
+        requireRole(workspace, user.getId(), user, role);
         return user.getId().toString();
+    }
+
+    private void requireRole(long workspace, long userId, UserEntity user, String role) {
+        if (workspaces.findActiveWorkspace(workspace) == null)
+            throw new SemanticApiException(404, "NOT_FOUND", "Workspace not found");
+        if (!"admin".equalsIgnoreCase(user.getRole())
+                && !workspaces.hasMinimumRole(workspace, userId, role))
+            throw new SemanticApiException(403, "FORBIDDEN", "Workspace role requires " + role);
     }
 
     public String owner(String scope, String requested, String fallback) {
@@ -93,13 +72,7 @@ public class PresalesAccess {
             throw new SemanticApiException(
                     400, "INVALID_OWNER", "Owner must be a workspace member");
         }
-        var membership =
-                members.selectOne(
-                        new LambdaQueryWrapper<WorkspaceMemberEntity>()
-                                .eq(WorkspaceMemberEntity::getWorkspaceId, Long.valueOf(scope))
-                                .eq(WorkspaceMemberEntity::getUserId, id)
-                                .eq(WorkspaceMemberEntity::getDeleted, 0));
-        if (membership == null)
+        if (workspaces.findActiveMembership(Long.valueOf(scope), id) == null)
             throw new SemanticApiException(
                     400, "INVALID_OWNER", "Owner must be a workspace member");
         return requested;
@@ -115,13 +88,12 @@ public class PresalesAccess {
         }
     }
 
-    private static int level(String r) {
-        return switch (r) {
-            case "owner" -> 4;
-            case "admin" -> 3;
-            case "member" -> 2;
-            case "viewer" -> 1;
-            default -> 0;
-        };
+    private static SemanticApiException denied(ActorResolver.Denied e) {
+        return new SemanticApiException(
+                401,
+                "UNAUTHENTICATED",
+                e.reason() == ActorResolver.Reason.AUTHENTICATION_REQUIRED
+                        ? "Authentication required"
+                        : "Active user required");
     }
 }

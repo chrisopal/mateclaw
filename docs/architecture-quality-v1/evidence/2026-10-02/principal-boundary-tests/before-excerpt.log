@@ -1,0 +1,27 @@
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.303 s -- in vip.mate.presales.ProjectAuthorityFenceDatabaseTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.085 s -- in vip.mate.presales.PresalesAccessPolicyTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.710 s -- in vip.mate.presales.PresalesIntegrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.088 s -- in vip.mate.presales.PresalesAccessActorTest
+[ERROR] Tests run: 4, Failures: 1, Errors: 1, Skipped: 0, Time elapsed: 0.053 s <<< FAILURE! -- in vip.mate.bidding.BiddingAccessPolicyTest
+[ERROR] vip.mate.bidding.BiddingAccessPolicyTest.workspaceOwnerBypassIsPreservedButProjectOwnerDoesNotBypassMembership -- Time elapsed: 0.005 s <<< FAILURE!
+[ERROR] vip.mate.bidding.BiddingAccessPolicyTest.projectOwnerApprovalRemainsSeparateFromWorkspaceRole -- Time elapsed: 0.002 s <<< ERROR!
+[ERROR] Failures: 
+[ERROR]   BiddingAccessPolicyTest.workspaceOwnerBypassIsPreservedButProjectOwnerDoesNotBypassMembership:62 Unexpected exception thrown: vip.mate.bidding.BiddingApiException: Active user required
+[ERROR] Errors: 
+[ERROR]   BiddingAccessPolicyTest.projectOwnerApprovalRemainsSeparateFromWorkspaceRole:71 » BiddingApi Active user required
+[ERROR] Tests run: 37, Failures: 1, Errors: 1, Skipped: 0
+[INFO] BUILD FAILURE
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project mateclaw-server: There are test failures.
+[ERROR] 
+[ERROR] See /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :mateclaw-server

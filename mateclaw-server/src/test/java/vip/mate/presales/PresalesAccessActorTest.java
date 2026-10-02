@@ -8,13 +8,14 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Test;
 import vip.mate.auth.model.UserEntity;
+import vip.mate.auth.service.ActorResolver;
 import vip.mate.auth.service.AuthService;
-import vip.mate.semantic.security.SemanticPrincipalResolver;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.workspace.core.model.WorkspaceEntity;
 import vip.mate.workspace.core.model.WorkspaceMemberEntity;
 import vip.mate.workspace.core.repository.WorkspaceMapper;
 import vip.mate.workspace.core.repository.WorkspaceMemberMapper;
+import vip.mate.workspace.core.service.WorkspaceAccessService;
 
 class PresalesAccessActorTest {
     @Test
@@ -26,6 +27,7 @@ class PresalesAccessActorTest {
         var workspace = mock(WorkspaceEntity.class);
         var membership = mock(WorkspaceMemberEntity.class);
         when(user.getEnabled()).thenReturn(true);
+        when(user.getId()).thenReturn(9L);
         when(user.getRole()).thenReturn("user");
         when(membership.getRole()).thenReturn("member");
         when(auth.findById(9L)).thenReturn(user);
@@ -33,7 +35,7 @@ class PresalesAccessActorTest {
         when(members.selectOne(org.mockito.ArgumentMatchers.any())).thenReturn(membership);
         var access =
                 new PresalesAccess(
-                        mock(SemanticPrincipalResolver.class), auth, workspaces, members);
+                        new ActorResolver(auth), new WorkspaceAccessService(workspaces, members));
 
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             var first = executor.submit(() -> access.requireActor("1", "9", "member"));

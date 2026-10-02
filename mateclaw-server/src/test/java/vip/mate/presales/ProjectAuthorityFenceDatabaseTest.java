@@ -27,12 +27,13 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import vip.mate.auth.model.UserEntity;
+import vip.mate.auth.service.ActorResolver;
 import vip.mate.auth.service.AuthService;
-import vip.mate.semantic.security.SemanticPrincipalResolver;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.workspace.core.repository.WorkspaceMapper;
 import vip.mate.workspace.core.repository.WorkspaceMemberMapper;
 import vip.mate.workspace.core.service.ProjectAuthorityFence;
+import vip.mate.workspace.core.service.WorkspaceAccessService;
 
 /** Real JDBC/MyBatis interleavings; external runs require an empty, disposable local database. */
 class ProjectAuthorityFenceDatabaseTest {
@@ -162,16 +163,17 @@ class ProjectAuthorityFenceDatabaseTest {
         user.setEnabled(true);
         user.setDeleted(0);
         user.setRole("user");
-        var principals = mock(SemanticPrincipalResolver.class);
-        when(principals.require()).thenReturn(user);
         var auth = mock(AuthService.class);
+        when(auth.findByUsername("fence-actor")).thenReturn(user);
         when(auth.findById(9L)).thenReturn(user);
+        var principals = org.mockito.Mockito.spy(new ActorResolver(auth));
+        org.mockito.Mockito.doReturn(user).when(principals).requireCurrent();
         access =
                 new PresalesAccess(
                         principals,
-                        auth,
-                        sessions.getMapper(WorkspaceMapper.class),
-                        sessions.getMapper(WorkspaceMemberMapper.class));
+                        new WorkspaceAccessService(
+                                sessions.getMapper(WorkspaceMapper.class),
+                                sessions.getMapper(WorkspaceMemberMapper.class)));
     }
 
     @AfterEach

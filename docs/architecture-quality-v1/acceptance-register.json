@@ -68,9 +68,11 @@
       "status": "NOT_RUN",
       "evidence": [
         "evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md",
-        "evidence/2026-10-01/runtime-test-results.json"
+        "evidence/2026-10-01/runtime-test-results.json",
+        "evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md",
+        "evidence/2026-10-02/principal-boundary-test-results.json"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；公共主体/无缓存成员入口与不同批准政策85项工程回归通过，正式角色浏览器/多方言/QA仍NOT_RUN"
     },
     {
       "id": "AC-07",
@@ -143,9 +145,11 @@
         "evidence/2026-10-02/repair-context-test-results.json",
         "evidence/2026-10-02/repair-context-browser/coverage.json",
         "evidence/2026-10-02/AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md",
-        "evidence/2026-10-02/source-boundary-test-results.json"
+        "evidence/2026-10-02/source-boundary-test-results.json",
+        "evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md",
+        "evidence/2026-10-02/principal-boundary-test-results.json"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变；公共主体/无缓存成员入口与不同批准政策85项工程回归通过，正式角色浏览器/多方言/QA仍NOT_RUN"
     },
     {
       "id": "AC-10",
@@ -155,8 +159,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md",
+        "evidence/2026-10-02/principal-boundary-test-results.json"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；公共主体/无缓存成员入口与不同批准政策85项工程回归通过，正式角色浏览器/多方言/QA仍NOT_RUN"
     },
     {
       "id": "AC-11",

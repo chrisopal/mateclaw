@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
 import vip.mate.auth.controller.AuthController;
 import vip.mate.auth.model.UserEntity;
 import vip.mate.auth.pat.PersonalAccessTokenService;
@@ -37,8 +36,6 @@ import vip.mate.i18n.I18nService;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
 import vip.mate.workspace.core.model.WorkspaceEntity;
 import vip.mate.workspace.core.service.WorkspaceService;
-
-import java.util.*;
 
 @SpringBootTest(
         classes = SemanticHttpFixture.App.class,
@@ -82,6 +79,8 @@ public abstract class SemanticHttpFixture {
     @Import({
         AuthController.class,
         AuthService.class,
+        vip.mate.auth.service.ActorResolver.class,
+        vip.mate.workspace.core.service.WorkspaceAccessService.class,
         WorkspaceService.class,
         JwtAuthFilter.class,
         MybatisPlusConfig.class,
@@ -147,15 +146,25 @@ public abstract class SemanticHttpFixture {
     protected String workspace, otherWorkspace;
     protected Map<String, String> tokens;
 
-    /** The semantic fixture mocks Wiki; production visibility semantics are tested by the Wiki suite. */
+    /**
+     * The semantic fixture mocks Wiki; production visibility semantics are tested by the Wiki
+     * suite.
+     */
     protected Long agentWithKnowledgeBase(String kbId) {
         Long id = com.baomidou.mybatisplus.core.toolkit.IdWorker.getId();
         var now = java.time.LocalDateTime.now();
-        jdbc.update("INSERT INTO mate_agent(id,name,workspace_id,create_time,update_time,enabled,deleted) VALUES(?,?,?,?,?,TRUE,0)",
-                id, "semantic-test-agent-" + id, Long.valueOf(workspace), now, now);
+        jdbc.update(
+                "INSERT INTO mate_agent(id,name,workspace_id,create_time,update_time,enabled,deleted) VALUES(?,?,?,?,?,TRUE,0)",
+                id,
+                "semantic-test-agent-" + id,
+                Long.valueOf(workspace),
+                now,
+                now);
         var kb = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
-        kb.setId(Long.valueOf(kbId)); kb.setWorkspaceId(Long.valueOf(workspace));
-        org.mockito.Mockito.when(wikiKnowledgeBases.findVisibleById(id, Long.valueOf(kbId))).thenReturn(kb);
+        kb.setId(Long.valueOf(kbId));
+        kb.setWorkspaceId(Long.valueOf(workspace));
+        org.mockito.Mockito.when(wikiKnowledgeBases.findVisibleById(id, Long.valueOf(kbId)))
+                .thenReturn(kb);
         return id;
     }
 
@@ -248,7 +257,8 @@ public abstract class SemanticHttpFixture {
     }
 
     protected Map<String, Object> definition() {
-        return owlDocument("""
+        return owlDocument(
+                """
             Ontology(<urn:test:equipment>
               Declaration(Class(<urn:test:Equipment>))
               Declaration(DataProperty(<urn:test:voltage>))
@@ -258,13 +268,33 @@ public abstract class SemanticHttpFixture {
               DataPropertyRange(<urn:test:voltage> <http://www.w3.org/2001/XMLSchema#decimal>))
             """);
     }
-    protected Map<String,Object> owlDocument(String text) {
-        return Map.of("modelSchema","owl-document-v1","syntax","FUNCTIONAL", "documentText",text,
-            "imports",List.of(),"policy",Map.of("version","v1","rules",List.of()));
+
+    protected Map<String, Object> owlDocument(String text) {
+        return Map.of(
+                "modelSchema",
+                "owl-document-v1",
+                "syntax",
+                "FUNCTIONAL",
+                "documentText",
+                text,
+                "imports",
+                List.of(),
+                "policy",
+                Map.of("version", "v1", "rules", List.of()));
     }
+
     protected Map<String, Object> saveBody(long version, Object document) {
-        return Map.of("expectedDraftVersion",version,"name","Equipment","description","initial",
-            "document",document,"operationId","save-"+UUID.randomUUID());
+        return Map.of(
+                "expectedDraftVersion",
+                version,
+                "name",
+                "Equipment",
+                "description",
+                "initial",
+                "document",
+                document,
+                "operationId",
+                "save-" + UUID.randomUUID());
     }
 
     protected JsonNode save(String id, long version) throws Exception {
@@ -285,14 +315,30 @@ public abstract class SemanticHttpFixture {
         // Replay is authorized and resolved before draft/report lookup. Probe publication first
         // so a retry after a consumed draft still returns its recorded result. A first attempt
         // requiring validation falls through to the real complete-report path.
-        var first = request("POST", "/ontologies/" + id + "/draft/publish", "owner", workspace,
-                publishBody(version, op));
-        if (first.getStatus() == 200)
-            return json.readTree(first.getContentAsString()).path("data");
+        var first =
+                request(
+                        "POST",
+                        "/ontologies/" + id + "/draft/publish",
+                        "owner",
+                        workspace,
+                        publishBody(version, op));
+        if (first.getStatus() == 200) return json.readTree(first.getContentAsString()).path("data");
         assertEquals(409, first.getStatus(), first.getContentAsString());
-        assertTrue(java.util.Set.of("VALIDATION_REQUIRED", "VALIDATION_STALE").contains(json.readTree(first.getContentAsString()).path("data").path("code").asText()), first.getContentAsString());
-        call("POST", "/ontologies/" + id + "/draft/validate", "member", workspace,
-                Map.of("expectedDraftVersion", version), 200);
+        assertTrue(
+                java.util.Set.of("VALIDATION_REQUIRED", "VALIDATION_STALE")
+                        .contains(
+                                json.readTree(first.getContentAsString())
+                                        .path("data")
+                                        .path("code")
+                                        .asText()),
+                first.getContentAsString());
+        call(
+                "POST",
+                "/ontologies/" + id + "/draft/validate",
+                "member",
+                workspace,
+                Map.of("expectedDraftVersion", version),
+                200);
         return call(
                 "POST",
                 "/ontologies/" + id + "/draft/publish",
