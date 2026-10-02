@@ -1612,3 +1612,149 @@ describe('editor navigation and unload protection', () => {
     }
   })
 })
+
+describe('editor field presentation contracts', () => {
+  it('keeps project field limits, required marks and host locale changes', async () => {
+    await mount()
+    button('New project').click()
+    await settle()
+    const form = document.querySelector('.el-dialog .el-form')!
+    const inputs = form.querySelectorAll('input[maxlength="200"]')
+    expect(inputs).toHaveLength(2)
+    expect(form.querySelectorAll('.el-form-item.is-required')).toHaveLength(2)
+    changeLocale('zh-CN')
+    await settle()
+    expect(form.textContent).toContain('项目名称')
+    expect(form.textContent).toContain('客户')
+  })
+  it('submits confirmed requirements with the original reason and exact version', async () => {
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4 })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Requirements & questions')!
+      .click()
+    await settle()
+    button('Confirm requirements').click()
+    await settle()
+    const reason = document.querySelector<HTMLTextAreaElement>('.el-dialog textarea')!
+    expect(reason.getAttribute('rows')).toBe('5')
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('.el-dialog')?.textContent).toContain('批准理由、条件与责任人')
+    changeLocale('en-US')
+    await settle()
+    reason.value = ' Customer confirmed exact scope '
+    reason.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(project.workspaceId, project.id, {
+      action: 'APPROVE_BASELINE',
+      payload: { reason: ' Customer confirmed exact scope ' },
+      expectedVersion: 3,
+      operationId: expect.any(String),
+    })
+  })
+
+  it('edits and adds solution sections in the same version-protected draft', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      requirements: [{ id: 'req-1', title: 'Confirmed requirement' }],
+      baselines: [{ id: 'b1', references: [{ requirementId: 'req-1' }] }],
+      solutions: [
+        {
+          id: '90071992547409991',
+          title: 'Latest',
+          baselineId: 'b1',
+          sections: [{ title: 'Original section', text: 'Body', requirementRefs: ['req-1'] }],
+        },
+      ],
+    })
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4 })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Solution design')!
+      .click()
+    await settle()
+    button('Revise this version').click()
+    await settle()
+    const dialog = document.querySelector('.el-dialog .el-form')!.closest('.el-dialog')!
+    changeLocale('zh-CN')
+    await settle()
+    expect(dialog.textContent).toContain('方案标题')
+    changeLocale('en-US')
+    await settle()
+    const title = dialog.querySelector<HTMLInputElement>('.section-editor input')!
+    title.value = 'Updated section'
+    title.dispatchEvent(new Event('input', { bubbles: true }))
+    button('Add section').click()
+    await settle()
+    expect(dialog.querySelectorAll('.section-editor')).toHaveLength(3)
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.objectContaining({
+        action: 'SAVE_SOLUTION',
+        expectedVersion: 3,
+        operationId: expect.any(String),
+        payload: expect.objectContaining({
+          title: 'Latest',
+          baselineId: 'b1',
+          sections: [
+            { title: 'Updated section', text: 'Body', requirementRefs: ['req-1'] },
+            { title: '', text: '', requirementRefs: [] },
+          ],
+          requirementResponses: [{ requirementId: 'req-1', status: 'UNHANDLED', reason: '' }],
+        }),
+      }),
+    )
+  })
+
+  it('adds review findings and keeps exact solution selection and original issue defaults', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      solutions: [{ id: '90071992547409991', title: 'Latest', sections: [] }],
+    })
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4 })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Review & outputs')!
+      .click()
+    await settle()
+    button('Record independent review').click()
+    await settle()
+    const dialog = document.querySelector('.el-dialog .el-form')!.closest('.el-dialog')!
+    ;(dialog.querySelector('.el-select') as HTMLElement).click()
+    await settle()
+    ;[...document.querySelectorAll<HTMLElement>('.el-select-dropdown__item')]
+      .find((item) => item.textContent?.trim() === 'Latest · V1')!
+      .click()
+    const summary = dialog.querySelector<HTMLTextAreaElement>('textarea')!
+    summary.value = 'Reviewed exact solution'
+    summary.dispatchEvent(new Event('input', { bubbles: true }))
+    button('Add finding').click()
+    await settle()
+    const issue = dialog.querySelector<HTMLTextAreaElement>('.section-editor textarea')!
+    issue.value = 'Evidence needed'
+    issue.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(
+      project.workspaceId,
+      project.id,
+      expect.objectContaining({
+        action: 'SAVE_REVIEW',
+        expectedVersion: 3,
+        operationId: expect.any(String),
+        payload: {
+          solutionId: '90071992547409991',
+          summary: 'Reviewed exact solution',
+          issues: [{ description: 'Evidence needed', severity: 'WARNING', status: 'OPEN' }],
+        },
+      }),
+    )
+  })
+})

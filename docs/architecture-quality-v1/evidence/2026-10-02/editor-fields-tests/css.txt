@@ -1,0 +1,1 @@
+{"status":"PASS","base":"1e8ec81fd946bd0d60551dfa480798140729925c","selector_declaration_media_contracts":98,"scoped_component_compilations":6,"visual_qa":"NOT_RUN"}

@@ -810,464 +810,45 @@
         label-position="top"
         @submit.prevent="save"
       >
-        <template v-if="editorKind === 'project'"
-          ><el-form-item
-            :label="t('presales.project_name')"
-            required
-            ><el-input
-              v-model="form.name"
-              maxlength="200" /></el-form-item
-          ><el-form-item
-            :label="t('presales.customer')"
-            required
-            ><el-input
-              v-model="form.customer"
-              maxlength="200" /></el-form-item
-          ><el-form-item :label="t('presales.owner')"
-            ><el-select
-              v-model="form.ownerId"
-              filterable
-              :loading="membersLoading"
-              :disabled="membersLoading || !!membersError"
-              :aria-label="t('presales.owner')"
-              :placeholder="t('presales.select_a_workspace_member')"
-              ><el-option
-                v-if="form.ownerId && !members.some((member) => member.userId === form.ownerId)"
-                :value="form.ownerId"
-                :label="ownerName(form.ownerId)"
-                disabled /><el-option
-                v-for="member in members"
-                :key="member.userId"
-                :value="member.userId"
-                :label="memberName(member)" /></el-select
-            ><span
-              v-if="membersError"
-              role="alert"
-              >{{ membersError }}</span
-            ></el-form-item
-          ><el-form-item :label="t('presales.presales_solution_employee')"
-            ><el-select
-              v-model="form.agentId"
-              clearable
-              :loading="employeesLoading"
-              :placeholder="t('presales.select_a_configured_workspace_employee')"
-              ><el-option
-                v-for="employee in employees"
-                :key="employee.id"
-                :value="employee.id"
-                :label="employee.name"
-                :disabled="employee.enabled === false" /></el-select
-            ><el-button
-              type="primary"
-              size="small"
-              @click="router.push('/agents')"
-              >{{ t('presales.manage_employees') }}</el-button
-            ></el-form-item
-          ><el-alert
-            v-if="employeeError"
-            :title="employeeError"
-            type="warning"
-            :closable="false" />
-          <p
-            v-if="!employeesLoading && !employees.length"
-            class="muted"
-          >
-            {{ t('presales.context_message_14') }}
-          </p>
-          <el-form-item :label="t('presales.industry')"
-            ><el-input v-model="form.industry" /></el-form-item
-          ><el-form-item :label="t('presales.goal')"
-            ><el-input
-              v-model="form.goal"
-              type="textarea"
-              :rows="3" /></el-form-item
-        ></template>
-        <template v-else-if="editorKind === 'employee'">
-          <el-form-item :label="t('presales.presales_solution_employee')"
-            ><el-select
-              v-model="form.agentId"
-              clearable
-              :loading="employeesLoading"
-              :placeholder="t('presales.select_a_configured_workspace_employee')"
-              ><el-option
-                v-for="employee in employees"
-                :key="employee.id"
-                :value="employee.id"
-                :label="employee.name"
-                :disabled="employee.enabled === false" /></el-select
-            ><el-button
-              type="primary"
-              size="small"
-              @click="router.push('/agents')"
-              >{{ t('presales.manage_employees') }}</el-button
-            ></el-form-item
-          ><el-alert
-            v-if="employeeError"
-            :title="employeeError"
-            type="warning"
-            :closable="false"
-          />
-          <p
-            v-if="!employeesLoading && !employees.length"
-            class="muted"
-          >
-            {{ t('presales.context_message_14') }}
-          </p>
-        </template>
-        <template v-else-if="editorKind === 'material'"
-          ><el-form-item
-            :label="t('presales.knowledge_base_2')"
-            required
-            ><el-select
-              v-model="form.kbId"
-              filterable
-              :loading="optionsLoading"
-              @change="selectSource"
-              ><el-option
-                v-for="source in sourceOptions"
-                :key="source.kbId"
-                :value="source.kbId"
-                :label="source.name" /></el-select
-          ></el-form-item>
-          <p
-            v-if="form.kbId"
-            class="muted"
-          >
-            {{ form.graphId ? t('presales.context_message_15') : t('presales.context_message_16') }}
-          </p>
-          <el-button
-            type="primary"
-            size="small"
-            @click="router.push('/wiki')"
-            >{{ t('presales.open_wiki_to_upload_and_parse_material') }}</el-button
-          >
-          <details>
-            <summary>
-              {{ t('presales.advanced_source_identifiers') }}
-            </summary>
-            <el-form-item :label="t('presales.knowledge_base_id')"
-              ><el-input v-model="form.kbId" /></el-form-item
-            ><el-form-item :label="t('presales.graph_id_optional')"
-              ><el-input v-model="form.graphId"
-            /></el-form-item>
-          </details>
-          <el-form-item :label="t('presales.source_role')"
-            ><el-select v-model="form.role"
-              ><el-option
-                v-for="role in ['PROJECT', 'PRODUCT', 'CASE']"
-                :key="role"
-                :value="role"
-                :label="stateLabel(role)" /></el-select></el-form-item
-        ></template>
-        <template v-else-if="editorKind === 'requirement'"
-          ><el-form-item
-            :label="t('presales.requirement_title')"
-            required
-            ><el-input v-model="form.title" /></el-form-item
-          ><el-form-item :label="t('presales.description')"
-            ><el-input
-              v-model="form.description"
-              type="textarea"
-              :rows="3" /></el-form-item
-          ><el-form-item :label="t('presales.origin_draft_not_accepted_fact')"
-            ><el-select v-model="form.originKind"
-              ><el-option
-                v-for="v in [
-                  'CUSTOMER_SOURCE',
-                  'PRODUCT_SOURCE',
-                  'INTERNAL_JUDGMENT',
-                  'ASSUMPTION',
-                  'AI_SUGGESTION',
-                ]"
-                :key="v"
-                :value="v"
-                :label="stateLabel(v)" /></el-select
-          ></el-form-item>
-          <div class="form-grid">
-            <el-form-item :label="t('presales.priority')"
-              ><el-select v-model="form.priority"
-                ><el-option
-                  v-for="v in ['HIGH', 'MEDIUM', 'LOW']"
-                  :key="v"
-                  :value="v"
-                  :label="stateLabel(v)" /></el-select></el-form-item
-            ><el-form-item :label="t('presales.scope')"
-              ><el-select v-model="form.scope"
-                ><el-option
-                  v-for="v in ['IN', 'OUT', 'UNKNOWN']"
-                  :key="v"
-                  :value="v"
-                  :label="stateLabel(v)" /></el-select
-            ></el-form-item>
-          </div>
-          <el-form-item :label="t('presales.context_message_17')"
-            ><el-select
-              :model-value="form.statementId ? `${form.graphId}:${form.statementId}` : ''"
-              filterable
-              clearable
-              :loading="optionsLoading"
-              @change="selectStatement"
-              ><el-option
-                v-for="statement in statementOptions"
-                :key="`${statement.graphId}:${statement.id}`"
-                :value="`${statement.graphId}:${statement.id}`"
-                :label="statement.label" /></el-select
-          ></el-form-item>
-          <p
-            v-if="!statementOptions.length"
-            class="muted"
-          >
-            {{ t('presales.context_message_18') }}
-          </p>
-          <details>
-            <summary>
-              {{ t('presales.advanced_exact_revision_references') }}
-            </summary>
-            <el-form-item :label="t('presales.graph_id')"
-              ><el-input v-model="form.graphId" /></el-form-item
-            ><el-form-item label="Statement ID"
-              ><el-input v-model="form.statementId" /></el-form-item
-            ><el-form-item :label="t('presales.statement_revision')"
-              ><el-input v-model="form.statementRevision"
-            /></el-form-item></details
-        ></template>
-        <template v-else-if="editorKind === 'clarification'"
-          ><el-alert
-            type="info"
-            :closable="false"
-            :title="
-              form.proposedByTaskId
-                ? t('presales.context_message_19')
-                : t('presales.context_message_20')
-            " />
-          <h3>{{ form.question }}</h3>
-          <p class="safe-content">{{ form.impact }}</p>
-          <p class="muted">
-            {{
-              project?.requirements.find((r) => r.id === form.requirementId)?.title ||
-              t('presales.project_wide_question')
-            }}
-          </p>
-          <el-form-item
-            :label="t('presales.answer')"
-            :required="form.status === 'ANSWERED'"
-            ><el-input
-              v-model="form.answer"
-              type="textarea" /></el-form-item
-          ><el-form-item
-            :label="t('presales.answer_source')"
-            :required="form.status === 'ANSWERED'"
-            ><el-input
-              v-model="form.answerSourceId"
-              maxlength="2000"
-              :placeholder="t('presales.context_message_21')"
-          /></el-form-item>
-          <p class="muted">
-            {{ t('presales.context_message_22') }}
-          </p>
-          <el-form-item :label="t('presales.status')"
-            ><el-select v-model="form.status"
-              ><el-option
-                v-for="v in ['OPEN', 'ANSWERED']"
-                :key="v"
-                :value="v"
-                :label="stateLabel(v)" /></el-select></el-form-item
-        ></template>
-        <template v-else-if="editorKind === 'baseline'"
-          ><el-alert
-            type="warning"
-            :closable="false"
-            :title="t('presales.context_message_23')" /><el-form-item
-            :label="t('presales.decision_reason_conditions_and_owner')"
-            required
-            ><el-input
-              v-model="form.reason"
-              type="textarea"
-              :rows="5" /></el-form-item
-        ></template>
-        <template v-else-if="editorKind === 'fitgap'"
-          ><el-form-item
-            :label="t('presales.requirement')"
-            required
-            ><el-select v-model="form.requirementId"
-              ><el-option
-                v-for="r in project?.requirements"
-                :key="r.id"
-                :value="r.id"
-                :label="r.title" /></el-select></el-form-item
-          ><el-form-item :label="t('presales.fulfillment_approach')"
-            ><el-select v-model="form.status"
-              ><el-option
-                v-for="v in ['FIT', 'CONFIG', 'EXTEND', 'PARTNER', 'GAP', 'UNKNOWN']"
-                :key="v"
-                :value="v"
-                :label="stateLabel(v)" /></el-select></el-form-item
-          ><el-form-item :label="t('presales.product_version')"
-            ><el-input v-model="form.productVersion" /></el-form-item
-          ><el-form-item :label="t('presales.basis_gap_and_response')"
-            ><el-input
-              v-model="form.reason"
-              type="textarea" /></el-form-item
-          ><el-form-item :label="t('presales.graph_id')"
-            ><el-input v-model="form.graphId" /></el-form-item
-          ><el-form-item :label="t('presales.evidence_ids_comma_separated')"
-            ><el-input v-model="form.evidenceText" /></el-form-item
-        ></template>
-        <template v-else-if="editorKind === 'solution'"
-          ><el-form-item
-            :label="t('presales.solution_title')"
-            required
-            ><el-input v-model="form.title" /></el-form-item
-          ><el-form-item :label="t('presales.confirmed_requirements_2')"
-            ><el-select
-              v-model="form.baselineId"
-              clearable
-              ><el-option
-                v-for="baseline in project?.baselines"
-                :key="baseline.id"
-                :value="baseline.id"
-                :label="baselineLabel(baseline.id)" /></el-select
-          ></el-form-item>
-          <div
-            v-for="(section, index) in form.sections"
-            :key="index"
-            class="section-editor"
-          >
-            <el-form-item :label="`${t('presales.section')} ${Number(index) + 1}`"
-              ><el-input v-model="section.title" /></el-form-item
-            ><el-form-item :label="t('presales.requirement_references')"
-              ><el-select
-                v-model="section.requirementRefs"
-                multiple
-                ><el-option
-                  v-for="requirement in editableRequirements"
-                  :key="requirement.id"
-                  :value="requirement.id"
-                  :label="requirement.title" /></el-select></el-form-item
-            ><el-form-item :label="t('presales.body')"
-              ><el-input
-                v-model="section.text"
-                type="textarea"
-                :rows="6"
-            /></el-form-item>
-          </div>
-          <el-button @click="form.sections!.push({ title: '', text: '', requirementRefs: [] })">{{
-            t('presales.add_section')
-          }}</el-button>
-          <h3>{{ t('presales.requirement_responses') }}</h3>
-          <section
-            v-for="response in form.requirementResponses"
-            :key="response.requirementId"
-            class="section-editor"
-          >
-            <strong>{{
-              project?.requirements.find((item) => item.id === response.requirementId)?.title ||
-              response.requirementId
-            }}</strong
-            ><el-form-item :label="t('presales.response_classification')"
-              ><el-select v-model="response.status"
-                ><el-option
-                  v-for="v in ['FULL', 'PARTIAL', 'CONDITIONAL', 'EXCLUDED', 'UNHANDLED']"
-                  :key="v"
-                  :value="v"
-                  :label="stateLabel(v)" /></el-select></el-form-item
-            ><el-form-item :label="t('presales.reason_remaining_gaps_or_conditions')"
-              ><el-input
-                v-model="response.reason"
-                type="textarea"
-            /></el-form-item></section
-        ></template>
-        <template v-else-if="editorKind === 'context'"
-          ><el-form-item
-            :label="t('presales.title')"
-            required
-            ><el-input v-model="form.title" /></el-form-item
-          ><el-form-item
-            :label="t('presales.context_not_accepted_facts')"
-            required
-            ><el-input
-              v-model="form.text"
-              type="textarea"
-              :rows="8"
-          /></el-form-item>
-          <p>{{ stateLabel(form.originKind) }}</p></template
-        >
-        <template v-else-if="editorKind === 'review'"
-          ><details class="inline-help">
-            <summary>{{ t('presales.review_rules') }}</summary>
-            <p>
-              {{ t('presales.context_message_24') }}
-            </p>
-          </details>
-          <el-form-item
-            :label="t('presales.exact_solution_version')"
-            required
-            ><el-select v-model="form.solutionId"
-              ><el-option
-                v-for="solution in project?.solutions"
-                :key="solution.id"
-                :value="solution.id"
-                :label="`${solution.title} · ${versionLabel('solutions', solution.id)}`" /></el-select></el-form-item
-          ><el-form-item
-            :label="t('presales.review_summary')"
-            required
-            ><el-input
-              v-model="form.summary"
-              type="textarea"
-              :rows="3"
-          /></el-form-item>
-          <section
-            v-for="(issue, index) in form.issues"
-            :key="index"
-            class="section-editor"
-          >
-            <el-form-item :label="t('presales.issue_and_remediation')"
-              ><el-input
-                v-model="issue.description"
-                type="textarea"
-            /></el-form-item>
-            <div class="form-grid">
-              <el-form-item :label="t('presales.severity')"
-                ><el-select v-model="issue.severity"
-                  ><el-option
-                    v-for="v in ['BLOCKER', 'WARNING', 'INFO']"
-                    :key="v"
-                    :value="v"
-                    :label="stateLabel(v)" /></el-select></el-form-item
-              ><el-form-item :label="t('presales.disposition')"
-                ><el-select v-model="issue.status"
-                  ><el-option
-                    v-for="v in ['OPEN', 'RESOLVED', 'ACCEPTED']"
-                    :key="v"
-                    :value="v"
-                    :label="stateLabel(v)" /></el-select
-              ></el-form-item>
-            </div>
-          </section>
-          <el-button
-            @click="
-              form.issues!.push({
-                description: '',
-                severity: 'WARNING',
-                status: 'OPEN',
-              })
-            "
-            >{{ t('presales.add_finding') }}</el-button
-          ></template
-        >
-        <template v-else-if="editorKind === 'release'"
-          ><el-form-item
-            :label="t('presales.solution_version')"
-            required
-            ><el-select v-model="form.solutionId"
-              ><el-option
-                v-for="solution in project?.solutions"
-                :key="solution.id"
-                :value="solution.id"
-                :label="`${solution.title} · ${versionLabel('solutions', solution.id)}`" /></el-select></el-form-item
-          ><el-form-item :label="t('presales.intended_use')"
-            ><el-input v-model="form.purpose" /></el-form-item
-        ></template>
+        <PresalesAssignmentFields
+          v-if="editorKind === 'project' || editorKind === 'employee'"
+          :kind="editorKind"
+          v-model:form="form"
+          :members="members"
+          :members-loading="membersLoading"
+          :members-error="membersError"
+          :employees="employees"
+          :employees-loading="employeesLoading"
+          :employee-error="employeeError"
+          :owner-name="ownerName"
+          :member-name="memberName"
+          @agents="router.push('/agents')"
+        />
+        <PresalesOutputFields
+          v-else-if="
+            editorKind === 'solution' || editorKind === 'review' || editorKind === 'release'
+          "
+          :kind="editorKind"
+          v-model:form="form"
+          :project="project"
+          :editable-requirements="editableRequirements"
+          :state-label="stateLabel"
+          :baseline-label="baselineLabel"
+          :version-label="versionLabel"
+        />
+        <PresalesDiscoveryFields
+          v-else
+          :kind="editorKind"
+          v-model:form="form"
+          :project="project"
+          :options-loading="optionsLoading"
+          :source-options="sourceOptions"
+          :statement-options="statementOptions"
+          :state-label="stateLabel"
+          @source="selectSource"
+          @statement="selectStatement"
+          @wiki="router.push('/wiki')"
+        />
         <el-alert
           v-if="editError"
           :title="editError"
@@ -1350,6 +931,9 @@
 import { presalesMessages } from '../shared/messages'
 import { useI18n } from 'vue-i18n'
 import PresalesDashboard from '../components/PresalesDashboard.vue'
+import PresalesAssignmentFields from '../components/PresalesAssignmentFields.vue'
+import PresalesDiscoveryFields from '../components/PresalesDiscoveryFields.vue'
+import PresalesOutputFields from '../components/PresalesOutputFields.vue'
 import PresalesSolutions from '../components/PresalesSolutions.vue'
 import PresalesOutputs from '../components/PresalesOutputs.vue'
 import { loadPortfolio } from '../shared/dashboard'
@@ -2292,24 +1876,9 @@ h1 {
   margin-top: 20px;
   justify-content: flex-end;
 }
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.section-editor {
-  border-top: 1px solid var(--el-border-color-light);
-  padding-top: 16px;
-}
-.el-form .el-select {
-  width: 100%;
-}
 @media (max-width: 768px) {
   .presales-workbench {
     padding: 16px;
-  }
-  .form-grid {
-    grid-template-columns: 1fr;
   }
   .page-heading {
     align-items: flex-start;
@@ -2529,3 +2098,4 @@ h1 {
 }
 </style>
 <style scoped src="../shared/workbenchSections.css"></style>
+<style scoped src="../shared/editorFields.css"></style>

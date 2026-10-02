@@ -1,0 +1,59 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (58 tests | 3 failed) 21063ms
+     × submits confirmed requirements with the original reason and exact version 62ms
+     × edits and adds solution sections in the same version-protected draft 282ms
+     × adds review findings and keeps exact solution selection and original issue defaults 114ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > editor field presentation contracts > submits confirmed requirements with the original reason and exact version
+AssertionError: expected '5' to be 5 // Object.is equality
+
+- Expected:
+5
+
++ Received:
+"5"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1627:25
+    1625|     await settle()
+    1626|     const reason = document.querySelector<HTMLTextAreaElement>('[role=…
+    1627|     expect(reason.rows).toBe(5)
+       |                         ^
+    1628|     reason.value = ' Customer confirmed exact scope '
+    1629|     reason.dispatchEvent(new Event('input', { bubbles: true }))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > editor field presentation contracts > edits and adds solution sections in the same version-protected draft
+TypeError: Cannot set properties of null (setting 'value')
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1665:11
+    1663|     const dialog = document.querySelector('[role="dialog"]')!
+    1664|     const title = dialog.querySelector<HTMLInputElement>('.section-edi…
+    1665|     title.value = 'Updated section'
+       |           ^
+    1666|     title.dispatchEvent(new Event('input', { bubbles: true }))
+    1667|     button('Add section').click()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > editor field presentation contracts > adds review findings and keeps exact solution selection and original issue defaults
+TypeError: Cannot read properties of null (reading 'click')
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1706:40
+    1704|     await settle()
+    1705|     const dialog = document.querySelector('[role="dialog"]')!
+    1706|     ;(dialog.querySelector('.el-select') as HTMLElement).click()
+       |                                        ^
+    1707|     await settle()
+    1708|     ;[...document.querySelectorAll<HTMLElement>('.el-select-dropdown__…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 55 passed (58)
+   Start at  15:20:02
+   Duration  22.03s (transform 439ms, setup 0ms, import 756ms, tests 21.06s, environment 112ms)
+

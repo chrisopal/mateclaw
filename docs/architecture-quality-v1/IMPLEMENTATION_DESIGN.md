@@ -241,3 +241,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：编辑草稿、只读选项、discard与save共用裸generation，工作台无法单独说明选项/确认生命周期。选用本域usePresalesEditorSession封装draft/options/baseline watcher/关闭与卸载，提供captureSession有效性predicate，复用原页面scope。页面保留guard注册、确认文案和create/update/command/CAS/receipt/409，不把predicate升级为授权。
 
 取舍：新增typed组合函数194行、页面减111行，完整用例和编辑模板仍待分离；拒绝把整页移动成god composable或第二套scope框架。同步撤权和employee/material repair保持；disposed拒绝卸载后capture和选项。旧55项与最终142项工程回归/独立审阅证明该边界，真实角色/浏览器/并发/重启和正式签收不由本片替代。证据见AQ09_EDITOR_SESSION_ACCEPTANCE及PR5。
+
+### ADR-AQ-015：字段组件共享原编辑草稿，提交权保留页面（Proposed）
+
+背景：11类编辑字段仍与页面执行协调混合，project/employee重复员工选择模板。选用三个本域typed字段组Assignment/Discovery/Output，required named form model复用原session draft，来源/statement/管理导航仅发意图；页面保留原dialog/el-form、批准/授权、scope/session/CAS/receipt/409。共享原scoped字段CSS，不创建通用表单框架、第二套store或执行权限。
+
+取舍：页面减少430行，字段组104/242/161行，完整用例及项目/任务展示仍待拆。原55项字节保持，旧实现59项刻画、迁移后146项工程回归及98项CSS合同/六组件编译、独立审阅证明该边界；真实两主题/窄屏/角色/并发/重启与正式QA仍NOT_RUN。回退仅恢复字段接入，无数据库操作。证据见AQ09_EDITOR_FIELDS_ACCEPTANCE及PR5。
