@@ -1,4 +1,9 @@
-import type { PresalesEditorForm, PresalesProject, PresalesRecord } from '../api/presalesApi'
+import type {
+  PresalesEditorForm,
+  PresalesProject,
+  PresalesRecord,
+  PresalesCommandAction,
+} from '../api/presalesApi'
 
 export type PresalesEditorKind =
   | 'project'
@@ -27,7 +32,10 @@ const actions = {
   release: 'CREATE_RELEASE',
   review: 'SAVE_REVIEW',
   context: 'SAVE_CONTEXT',
-} as const
+} as const satisfies Record<
+  Exclude<PresalesEditorKind, 'project' | 'employee'>,
+  PresalesCommandAction
+>
 export type EditorSubmission =
   | { kind: 'invalid'; issue: 'REQUIRED_FIELDS' | 'ANSWER_SOURCE' }
   | { kind: 'project'; data: PresalesEditorForm; metadata: ProjectMetadata }

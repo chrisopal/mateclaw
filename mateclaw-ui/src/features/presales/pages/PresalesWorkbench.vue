@@ -803,6 +803,8 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import {
   presalesApi,
   type PresalesCapabilities,
+  type PresalesCommandAction,
+  type PresalesSkill,
   type PresalesMember,
   type PresalesEmployee,
   type PresalesTask,
@@ -1333,7 +1335,10 @@ const editorTitle = computed(
 onBeforeRouteLeave(discard)
 onBeforeRouteUpdate(discard)
 const unregister = workspace.registerBeforeSwitch(discard)
-async function command(action: string, payload: object): Promise<boolean> {
+async function command(
+  action: PresalesCommandAction,
+  payload: Record<string, unknown>,
+): Promise<boolean> {
   const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     current = project.value
@@ -1413,7 +1418,7 @@ async function save() {
       }
       const result = project.value
         ? await presalesApi.update(ws, project.value.id, body)
-        : await presalesApi.create(ws, body)
+        : await presalesApi.create(ws, { ...body, expectedVersion: 0 })
       if (!active() || !acceptMutation(result, scope)) return
       editorOpen.value = false
       saving.value = false
@@ -1567,7 +1572,7 @@ const generationOpen = ref(false),
   employeeError = ref(''),
   employeesLoading = ref(false)
 let employeeRequest = 0
-const generation = ref({ skill: 'S1', taskGoal: '' })
+const generation = ref<{ skill: PresalesSkill; taskGoal: string }>({ skill: 'S1', taskGoal: '' })
 const skillNames = computed(() => ({
   S1: t('presales.analyze_project_context'),
   S2: t('presales.assess_requirements_and_missing_information'),
@@ -1596,7 +1601,7 @@ async function loadEmployees() {
     if (active()) employeesLoading.value = false
   }
 }
-async function openGeneration(skill: string, taskGoal = t('presales.context_message_30')) {
+async function openGeneration(skill: PresalesSkill, taskGoal = t('presales.context_message_30')) {
   if (dirty.value || saving.value || !canGenerate.value) return
   generation.value.skill = skill
   generation.value.taskGoal = taskGoal

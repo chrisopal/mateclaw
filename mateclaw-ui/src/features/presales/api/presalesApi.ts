@@ -194,6 +194,59 @@ export interface ProjectPage {
   page: number
   pageSize: number
 }
+/** UI intent contracts; payload JSON still requires the server's domain validation. */
+export interface PresalesVersionedMutation {
+  expectedVersion: number
+  operationId: string
+}
+export interface PresalesProjectWrite extends PresalesVersionedMutation {
+  name?: string
+  customer?: string
+  ownerId?: string
+  agentId?: string
+  industry?: string
+  goal?: string
+}
+export interface PresalesProjectCreate extends Omit<PresalesProjectWrite, 'expectedVersion'> {
+  expectedVersion: 0
+}
+export type PresalesCommandAction =
+  | 'UPDATE_PROJECT'
+  | 'ARCHIVE'
+  | 'BIND_MATERIAL'
+  | 'SAVE_REQUIREMENT'
+  | 'SAVE_CLARIFICATION'
+  | 'UNBIND_MATERIAL'
+  | 'CANCEL_AI_TASK'
+  | 'SAVE_AI_TASK'
+  | 'SAVE_CONTEXT'
+  | 'SAVE_REVIEW'
+  | 'CREATE_RELEASE'
+  | 'APPROVE_RELEASE'
+  | 'PUBLISH_RELEASE'
+  | 'APPROVE_BASELINE'
+  | 'SAVE_FIT_GAP'
+  | 'SAVE_SOLUTION'
+export interface PresalesCommandRequest extends PresalesVersionedMutation {
+  action: PresalesCommandAction
+  payload: Record<string, unknown>
+}
+export type PresalesSkill = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7' | 'S8'
+export interface PresalesGenerateRequest extends PresalesVersionedMutation {
+  skill: PresalesSkill
+  taskGoal: string
+}
+export interface PresalesCancelRequest {
+  operationId: string
+}
+export interface PresalesListQuery {
+  q?: string
+  status?: string
+  ownerId?: string
+  stage?: string
+  page?: number
+  pageSize?: number
+}
 async function request<T>(
   workspaceId: string,
   config: AxiosRequestConfig,
@@ -223,25 +276,25 @@ export const presalesApi = {
     }),
   capabilities: (ws: string, signal?: AbortSignal) =>
     request<PresalesCapabilities>(ws, { url: '/presales/capabilities' }, signal),
-  list: (ws: string, params: Record<string, string | number>, signal?: AbortSignal) =>
+  list: (ws: string, params: PresalesListQuery, signal?: AbortSignal) =>
     request<ProjectPage>(ws, { url: '/presales/projects', params }, signal),
   get: (ws: string, id: string, signal?: AbortSignal) =>
     request<PresalesProject>(ws, { url: projectPath(id) }, signal),
   repairContext: (ws: string, id: string, signal?: AbortSignal) =>
     request<PresalesRepairContext>(ws, { url: `${projectPath(id)}/repair-context` }, signal),
-  create: (ws: string, data: object) =>
+  create: (ws: string, data: PresalesProjectCreate) =>
     request<PresalesProject>(ws, {
       url: '/presales/projects',
       method: 'POST',
       data,
     }),
-  update: (ws: string, id: string, data: object) =>
+  update: (ws: string, id: string, data: PresalesProjectWrite) =>
     request<PresalesProject>(ws, {
       url: projectPath(id),
       method: 'PATCH',
       data,
     }),
-  command: (ws: string, id: string, data: object) =>
+  command: (ws: string, id: string, data: PresalesCommandRequest) =>
     request<PresalesProject>(ws, {
       url: `${projectPath(id)}/commands`,
       method: 'POST',
@@ -254,13 +307,13 @@ export const presalesApi = {
     }),
   employees: (ws: string, signal?: AbortSignal) =>
     request<PresalesEmployee[]>(ws, { url: '/presales/employees' }, signal),
-  generate: (ws: string, id: string, data: object) =>
+  generate: (ws: string, id: string, data: PresalesGenerateRequest) =>
     request<PresalesProject>(ws, {
       url: `${projectPath(id)}/generate`,
       method: 'POST',
       data,
     }),
-  cancelTask: (ws: string, id: string, taskId: string, data: object) =>
+  cancelTask: (ws: string, id: string, taskId: string, data: PresalesCancelRequest) =>
     request<PresalesProject>(ws, {
       url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`,
       method: 'POST',
