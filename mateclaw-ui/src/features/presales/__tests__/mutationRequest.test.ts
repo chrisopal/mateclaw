@@ -29,7 +29,21 @@ const metadata = {
   industry: 'Manufacturing',
   goal: 'Preserved goal',
 }
-const result = { id: '9223372036854775800', version: 8 }
+const result = {
+  ...metadata,
+  id: projectId,
+  workspaceId: workspace,
+  version: 8,
+  status: 'ACTIVE',
+  materials: [],
+  requirements: [],
+  clarifications: [],
+  baselines: [],
+  fitGaps: [],
+  solutions: [],
+  reviews: [],
+  releases: [],
+}
 const actions = [
   'UPDATE_PROJECT',
   'ARCHIVE',

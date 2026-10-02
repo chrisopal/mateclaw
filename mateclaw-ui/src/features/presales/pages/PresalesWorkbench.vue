@@ -1264,7 +1264,7 @@ async function load() {
         !signal.aborted
       ) {
         projects.value = result.items
-        total.value = result.total
+        total.value = Number(result.total)
       }
     }
   } catch (e) {

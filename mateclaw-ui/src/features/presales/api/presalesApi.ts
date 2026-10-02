@@ -1,3 +1,4 @@
+import { decodeProject, decodeProjectPage, decodeRepairContext } from './presalesResponse'
 import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
 // Heterogeneous historical records omit fields; opaque source snapshots remain unknown.
@@ -139,6 +140,7 @@ export interface PresalesProject extends PresalesProjectSummary {
   solutions: PresalesEntity[]
   reviews: PresalesEntity[]
   releases: PresalesEntity[]
+  cases?: PresalesEntity[]
   tasks?: PresalesTask[]
   context?: unknown
   contextCards?: PresalesEntity[]
@@ -190,7 +192,7 @@ export interface PresalesCapabilities {
 }
 export interface ProjectPage {
   items: PresalesProjectSummary[]
-  total: number
+  total: number | string
   page: number
   pageSize: number
 }
@@ -255,6 +257,14 @@ async function request<T>(
   const response = await workspaceRequest<{ data: T }>(workspaceId, config, signal)
   return response.data
 }
+async function requestProject(
+  ws: string,
+  config: AxiosRequestConfig,
+  id?: string,
+  signal?: AbortSignal,
+) {
+  return decodeProject(await request<unknown>(ws, config, signal), ws, id)
+}
 const projectPath = (id: string) => `/presales/projects/${encodeURIComponent(id)}`
 export const presalesApi = {
   members: (ws: string, signal?: AbortSignal) =>
@@ -277,29 +287,41 @@ export const presalesApi = {
   capabilities: (ws: string, signal?: AbortSignal) =>
     request<PresalesCapabilities>(ws, { url: '/presales/capabilities' }, signal),
   list: (ws: string, params: PresalesListQuery, signal?: AbortSignal) =>
-    request<ProjectPage>(ws, { url: '/presales/projects', params }, signal),
+    request<unknown>(ws, { url: '/presales/projects', params }, signal).then((value) =>
+      decodeProjectPage(value, ws),
+    ),
   get: (ws: string, id: string, signal?: AbortSignal) =>
-    request<PresalesProject>(ws, { url: projectPath(id) }, signal),
+    requestProject(ws, { url: projectPath(id) }, id, signal),
   repairContext: (ws: string, id: string, signal?: AbortSignal) =>
-    request<PresalesRepairContext>(ws, { url: `${projectPath(id)}/repair-context` }, signal),
+    request<unknown>(ws, { url: `${projectPath(id)}/repair-context` }, signal).then((value) =>
+      decodeRepairContext(value, ws, id),
+    ),
   create: (ws: string, data: PresalesProjectCreate) =>
-    request<PresalesProject>(ws, {
+    requestProject(ws, {
       url: '/presales/projects',
       method: 'POST',
       data,
     }),
   update: (ws: string, id: string, data: PresalesProjectWrite) =>
-    request<PresalesProject>(ws, {
-      url: projectPath(id),
-      method: 'PATCH',
-      data,
-    }),
+    requestProject(
+      ws,
+      {
+        url: projectPath(id),
+        method: 'PATCH',
+        data,
+      },
+      id,
+    ),
   command: (ws: string, id: string, data: PresalesCommandRequest) =>
-    request<PresalesProject>(ws, {
-      url: `${projectPath(id)}/commands`,
-      method: 'POST',
-      data,
-    }),
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/commands`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
   evidence: (ws: string, id: string, graphId: string, evidenceId: string) =>
     request<unknown>(ws, {
       url: `${projectPath(id)}/evidence`,
@@ -308,15 +330,23 @@ export const presalesApi = {
   employees: (ws: string, signal?: AbortSignal) =>
     request<PresalesEmployee[]>(ws, { url: '/presales/employees' }, signal),
   generate: (ws: string, id: string, data: PresalesGenerateRequest) =>
-    request<PresalesProject>(ws, {
-      url: `${projectPath(id)}/generate`,
-      method: 'POST',
-      data,
-    }),
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/generate`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
   cancelTask: (ws: string, id: string, taskId: string, data: PresalesCancelRequest) =>
-    request<PresalesProject>(ws, {
-      url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`,
-      method: 'POST',
-      data,
-    }),
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
 }

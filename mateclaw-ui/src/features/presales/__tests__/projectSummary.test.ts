@@ -75,6 +75,7 @@ describe('project summary consumer contract', () => {
   it('keeps detail collections only on the separate project read', async () => {
     const detail = {
       ...summary,
+      id: 'p/1',
       ...Object.fromEntries(collections.map((key) => [key, []])),
     }
     http.defaults.adapter = async (config) => {
