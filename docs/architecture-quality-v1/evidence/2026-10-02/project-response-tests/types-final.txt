@@ -1,0 +1,2 @@
+src/features/presales/__tests__/projectResponse.test.ts(169,17): error TS2339: Property 'contextCards' does not exist on type '{ id: string; workspaceId: string; version: number; name: string; customer: string; ownerId: string; status: string; }'.
+src/features/presales/__tests__/projectResponse.test.ts(170,10): error TS2339: Property 'solutions' does not exist on type '{ id: string; workspaceId: string; version: number; name: string; customer: string; ownerId: string; status: string; }'.

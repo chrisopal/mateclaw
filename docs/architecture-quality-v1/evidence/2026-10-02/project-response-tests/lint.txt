@@ -1,0 +1,83 @@
+$ eslint src --max-warnings=0
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/components/chat/MessageBubble.vue
+   611:9  warning  'blobUrls' is assigned a value but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+   829:7  warning  'showLoadingIndicator' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  1519:7  warning  'approvalSeverityClass' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/components/chat/MessageList.vue
+  198:7  warning  'emit' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/components/chat/TeamWorkerBanner.vue
+  11:7  warning  'props' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/components/live/LivePanel.vue
+  222:33  warning  'LiveSnapshot' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/composables/chat/useChat.ts
+    12:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1812:39  warning  'data' is defined but never used. Allowed unused args must match /^_/u                  @typescript-eslint/no-unused-vars
+  2006:29  warning  'agentId' is assigned a value but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  2006:38  warning  'attachments' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/composables/chat/useStickToBottom.ts
+  74:7  warning  'lastScrollTop' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/composables/chat/useStream.ts
+    5:15  warning  'computed' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  216:47  warning  'autoStart' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/composables/useAgentRunGroups.ts
+  185:5  error  'shared' is never reassigned. Use 'const' instead  prefer-const
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/utils/messageReconcile.ts
+  69:10  warning  'mergeContentParts' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Datasources.vue
+  236:36  warning  'watch' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Onboarding/OnboardingWizard.vue
+  65:10  warning  'http' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Security/AutoApproveGrants/index.vue
+  342:3  warning  'Delete' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Settings/Models/composables/useProviderEnablement.ts
+  1:20  warning  'Ref' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Settings/Models/modals/ManageModelsModal.vue
+  172:31  warning  Unexpected mutation of "modelForm" prop  vue/no-mutating-props
+  176:31  warning  Unexpected mutation of "modelForm" prop  vue/no-mutating-props
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Settings/Models/modals/ProviderConfigModal.vue
+   13:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   21:29  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   26:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   36:49  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   81:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   91:29  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+   96:24  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  114:49  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  121:32  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  146:33  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+  157:34  warning  Unexpected mutation of "form" prop  vue/no-mutating-props
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/SkillMarket.vue
+  1249:10  warning  'parseTags' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+  1722:10  warning  'toggleFindings' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1767:10  warning  'getRuntimeLabel' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  1783:10  warning  'getRuntimeBadgeClass' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  1853:10  warning  'getSecurityBadge' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  1864:10  warning  'getDependencyBadge' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  1882:10  warning  'getFeaturesBadge' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  1911:10  warning  'getSecurityFindingsSummary' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  1926:10  warning  'getSourceBadge' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  1999:10  warning  'getSkillTypeBadge' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  2003:10  warning  'getSkillTypeLabel' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+
+/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/views/Wiki/components/WikiConfigModels.vue
+  181:3  warning  Unexpected mutation of "stepModels" prop  vue/no-mutating-props
+
+✖ 44 problems (1 error, 43 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

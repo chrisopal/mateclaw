@@ -308,3 +308,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确VersionedMutation/ProjectWrite/Create/Command/Generate/Cancel，Create只允许0、取消按原Task接口仅operationId，ListQuery只声明原六个参数；16action与S1-S8同现有后端，编辑映射和工作台共享类型。部分metadata和unknown payload保留原语义，服务端领域校验/来源/事务/结果fence继续权威。
 
 拒绝运行时规范化/直接payload enum转换：会改变原wire、幂等输入及错误顺序。create显式0保持原分支属性顺序与receipt原输入，未动授权/请求helper或旧测试。旧24/最终178合同与完整UI工具链通过，限定独立审阅0缺陷；类型不是完整payload schema或授权。回退恢复类型/创建分支源码，无数据库操作；完整DTO/unknown校验、SQL/V2及真实浏览器/业务QA仍待完成，证据见AQ05_MUTATION_REQUEST_ACCEPTANCE。
+
+### ADR-AQ-026：项目响应在售前 API 边界运行时解码（Proposed）
+
+泛型声明不能证明响应身份或集合结构。详情/五类变更、列表及修复从 unknown 解码；复用 Workspace request，校验已有项目 ID 与捕获 Workspace。返回合法原对象，保留历史状态及 opaque context/sourceSnapshot/handoffSnapshot；nested record 不伪造实体 ID。修复依照后端16个 metadata、12个空集合和 id/role 白名单，不能成为授权凭据。分页保留真实 long 字符串，在安全整数验证后供工作台转换。
+
+拒绝归一化或补空集合：会隐藏畸形数据并改变历史 payload。已声明 optional 字段的错误类型/null 拒绝是明确新增准入限制，真实存量数据尚未抽样；独立 statements nullable evidence 契约未在本片冒充已完成。原26正例、新负例旧实现25失败、最终37响应/215售前/912全UI通过；独立限定审阅无剩余问题。完整检查因主机990秒维护休眠出现真实失败，保留日志并仅对检查进程临时保活后重跑成功，未弱化断言/超时/门禁。回退只涉及源码，无迁移。正式AC、完整DTO、SQL/V2、浏览器/live model和远端强制CI仍待完成；证据见AQ05_PROJECT_RESPONSE_ACCEPTANCE。
