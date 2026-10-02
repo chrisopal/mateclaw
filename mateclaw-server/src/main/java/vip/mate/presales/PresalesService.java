@@ -166,69 +166,12 @@ public class PresalesService {
             int size) {
         access.require(scope, "viewer");
         if (page < 1 || size < 1 || size > 100) throw bad("Invalid pagination");
-        String q = query == null ? "" : query.toLowerCase(Locale.ROOT);
-        var all =
-                projects.listBodies(scope).stream()
-                        .map(this::decode)
-                        .filter(
-                                p ->
-                                        p.path("name").asText().toLowerCase(Locale.ROOT).contains(q)
-                                                || p.path("customer")
-                                                        .asText()
-                                                        .toLowerCase(Locale.ROOT)
-                                                        .contains(q))
-                        .filter(
-                                p ->
-                                        status == null
-                                                || status.isBlank()
-                                                || status.equals(p.path("status").asText()))
-                        .filter(
-                                p ->
-                                        ownerId == null
-                                                || ownerId.isBlank()
-                                                || ownerId.equals(p.path("ownerId").asText()))
-                        .filter(
-                                p ->
-                                        stageFilter == null
-                                                || stageFilter.isBlank()
-                                                || stageFilter.equals(stage(p)))
-                        .map(this::summary)
-                        .toList();
-        return new Page(
-                all.stream().skip((long) (page - 1) * size).limit(size).toList(),
-                all.size(),
-                page,
-                size);
-    }
-
-    private ObjectNode summary(ObjectNode p) {
-        ObjectNode summary = p.deepCopy();
-        for (String key : SOURCE_COLLECTIONS) summary.remove(key);
-        summary.put("stage", stage(p))
-                .put(
-                        "openClarificationCount",
-                        java.util.stream.StreamSupport.stream(
-                                        p.withArray("clarifications").spliterator(), false)
-                                .filter(c -> !"ANSWERED".equals(c.path("status").asText()))
-                                .count())
-                .put(
-                        "latestSolutionVersion",
-                        p.withArray("solutions").isEmpty()
-                                ? 0
-                                : p.withArray("solutions")
-                                        .get(p.withArray("solutions").size() - 1)
-                                        .path("version")
-                                        .asInt());
-        return summary;
-    }
-
-    private String stage(ObjectNode p) {
-        if ("ARCHIVED".equals(p.path("status").asText())) return "ARCHIVED";
-        if (!p.withArray("releases").isEmpty()) return "RELEASE";
-        if (!p.withArray("solutions").isEmpty()) return "SOLUTION";
-        if (!p.withArray("baselines").isEmpty()) return "BASELINED";
-        if (!p.withArray("requirements").isEmpty()) return "REQUIREMENTS";
-        return "DISCOVERY";
+        var decoded = projects.listBodies(scope).stream().map(this::decode);
+        return PresalesProjectListing.page(
+                decoded,
+                new PresalesProjectListing.Criteria(
+                        query, status, ownerId, stageFilter, page, size),
+                SOURCE_COLLECTIONS);
     }
 
     public ObjectNode get(String scope, String id) {
@@ -505,7 +448,7 @@ public class PresalesService {
             case "SAVE_SOLUTION" -> saveSolutionDraft(p, value, actor, false);
             default -> throw bad("Unsupported command: " + action);
         }
-        p.put("stage", stage(p));
+        p.put("stage", PresalesProjectListing.stage(p));
         p.put("version", r.expectedVersion() + 1)
                 .put("updatedBy", actor)
                 .put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
@@ -1279,7 +1222,7 @@ public class PresalesService {
         ObjectNode view = json.createObjectNode();
         for (String field : REPAIR_METADATA_FIELDS)
             if (project.has(field)) view.set(field, project.path(field).deepCopy());
-        if (!view.has("stage")) view.put("stage", stage(project));
+        if (!view.has("stage")) view.put("stage", PresalesProjectListing.stage(project));
         for (String collection : SOURCE_COLLECTIONS) view.putArray(collection);
         ArrayNode bindings = view.putArray("repairBindings");
         for (var material : project.path("materials")) {

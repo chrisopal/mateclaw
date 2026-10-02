@@ -266,3 +266,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：项目service与PPT compiler重复成果表写入，读SQL夹在发布/来源政策中。决定：PresalesArtifactRepository接四类原SQL，使用string三key及raw digest/base64事实；两个服务不再注入JdbcTemplate。public service事务及PPT原TransactionTemplate不变，授权/摘要/404/409/cardinality/冻结manifest/handoff仍在原调用方。仓储无条件安装与原PresentationService一致，避免关闭售前功能时Bean装配失败。
 
 取舍：Service1431→1401、仓储58行；不把摘要校验或发布政策藏进通用blob工具，不渲染已发布字节，也不引入DAO独立事务。33项旧实现刻画、66项迁移后H2/HTTP合同、实际已安装compiler1项及限定独立审阅验证边界；查询摘要/命令、SQL分页、V2单写迁移/黄金样本、多方言/生产重启/正式QA仍未闭合。回退只恢复DI/原SQL，无数据库操作。证据见AQ03_ARTIFACT_STORAGE_ACCEPTANCE及PR5。
+
+### ADR-AQ-019：列表投影封装规则，服务保持惰性读取与授权（Proposed）
+
+背景：Service混合列表授权/校验与筛选/分页/摘要/stage。选用本域package-private PresalesProjectListing和内部Criteria，消费Stream解码结果及服务原来源inventory；服务保持viewer→pagination→Workspace查询→decode顺序。深副本/历史扩展/string IDs/原Page和阶段副作用保持，命令和受限视图复用同一stage。
+
+取舍：Service1401→1344、投影85行，不新增通用查询框架、DTO wire或SQL分页。拒绝eager toList：会改变早期stage错误与后续decode错误顺序，并保留全部完整body。旧15/最终58项HTTP/H2/事务与纯投影合同、限定独立审阅验证边界；完整DTO/命令、SQL分页、V2迁移、多方言/浏览器/正式QA待完成。回退无数据库操作；证据见AQ05_PROJECT_LISTING_ACCEPTANCE及PR5。
