@@ -176,7 +176,43 @@
     "scope": "Four Java files and plan: action exact matching, roles/repair/replay/CAS/serialization/default rejection",
     "diagnostics": "LSP/AST on four Java files attempted: Transport closed; Maven compilation and manual diff fallback"
   },
-  "full_gate": "NOT_RUN",
+  "full_gate": {
+    "source_commit": "7423f4f8dc47ca3f504f40b4478bc72d3708e171",
+    "source_tree": "bb655ce80cd6fccedc6b22bb7a27a11e22f4d39b",
+    "reports": {
+      "staged": {
+        "task": "w6e1tv8k",
+        "input_sha256": "89e763129c90e12c7a82b3163f8d668ae27e5cbfcfe35ddc65384d4f533999c4",
+        "target_identity": "bb655ce80cd6fccedc6b22bb7a27a11e22f4d39b",
+        "base_commit": "53d12d43f3380b1aee438e17fa5b3bdea588870b",
+        "status": "PASS",
+        "submission_ready": true,
+        "executed_tests": {
+          "java-tests": 6007,
+          "ui-vitest": 846
+        }
+      },
+      "commit-hook": {
+        "task": "tc63v5y_",
+        "input_sha256": "c6ca6181a365fdc16a8356a52138611a8839cddf2e92b9d5787cb4a90a359d88",
+        "target_identity": "bb655ce80cd6fccedc6b22bb7a27a11e22f4d39b",
+        "base_commit": "53d12d43f3380b1aee438e17fa5b3bdea588870b",
+        "status": "PASS",
+        "submission_ready": true,
+        "executed_tests": {
+          "java-tests": 6007,
+          "ui-vitest": 846
+        }
+      }
+    },
+    "java_total": 6077,
+    "java_executed": 6007,
+    "java_existing_skipped": 70,
+    "ui_executed": 846,
+    "failures": 0,
+    "errors": 0,
+    "other_checks": "Formatter, type checking, ID precision, Node tests, enterprise and classic builds PASS; UI formatter/lint NOT_APPLICABLE no UI targets"
+  },
   "application_acceptance": "NOT_RUN",
   "wire_change": "None; original four Command components and raw action/payload serialize unchanged",
   "limitations": [

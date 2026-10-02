@@ -18,7 +18,7 @@ JDK21：`mvn -B -pl mateclaw-server -am -Dmaven.compiler.proc=full -Dtest=<manif
 
 ## 提交
 
-精确tree完整commit门禁尚待实际执行，未记PASS。
+源码提交 `7423f4f8dc47ca3f504f40b4478bc72d3708e171` / tree `bb655ce80cd6fccedc6b22bb7a27a11e22f4d39b`。完整暂存门禁 w6e1tv8k、正常提交hook tc63v5y_ 均 exit0/PASS/submission_ready=true，target均绑定该tree。Java6077总数/6007实际执行/70既有跳过、零失败错误；UI846/846、类型/ID/Node及两模式构建通过。无UI formatter/lint目标由固定规则判NOT_APPLICABLE。原真实报告存于command-kind-tests；应用验收仍NOT_RUN。
 
 ## 未测与回退
 
