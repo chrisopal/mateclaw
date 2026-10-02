@@ -1,0 +1,12 @@
+src/features/presales/__tests__/editorSubmission.test.ts(343,11): error TS2322: Type '{ readonly title: "Exact"; readonly statementRevision: 9; readonly graphId: "graph/1"; } | { readonly reason: "Reviewed"; readonly references: readonly [{ readonly requirementId: "req-1"; }]; } | { ...; } | { ...; } | { ...; } | { ...; }' is not assignable to type 'PresalesEditorForm'.
+  Type '{ readonly reason: "Reviewed"; readonly references: readonly [{ readonly requirementId: "req-1"; }]; }' is not assignable to type 'PresalesEditorForm'.
+    Types of property 'references' are incompatible.
+      The type 'readonly [{ readonly requirementId: "req-1"; }]' is 'readonly' and cannot be assigned to the mutable type 'PresalesRecord[]'.
+src/features/presales/pages/PresalesWorkbench.vue(1394,20): error TS2322: Type 'string | undefined' is not assignable to type 'EpPropMergeType<(NumberConstructor | StringConstructor | BooleanConstructor | ObjectConstructor)[], unknown, unknown>'.
+  Type 'undefined' is not assignable to type 'EpPropMergeType<(NumberConstructor | StringConstructor | BooleanConstructor | ObjectConstructor)[], unknown, unknown>'.
+src/features/presales/pages/PresalesWorkbench.vue(2166,27): error TS2345: Argument of type 'PresalesProject | undefined' is not assignable to parameter of type 'PresalesProject | null'.
+  Type 'undefined' is not assignable to type 'PresalesProject | null'.
+src/features/presales/pages/PresalesWorkbench.vue(2172,69): error TS2345: Argument of type 'PresalesProject | undefined' is not assignable to parameter of type 'PresalesProject | null'.
+  Type 'undefined' is not assignable to type 'PresalesProject | null'.
+src/features/presales/pages/PresalesWorkbench.vue(2203,47): error TS2345: Argument of type 'PresalesProject | undefined' is not assignable to parameter of type 'PresalesProject | null'.
+  Type 'undefined' is not assignable to type 'PresalesProject | null'.
