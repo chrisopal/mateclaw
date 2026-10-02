@@ -247,3 +247,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：11类编辑字段仍与页面执行协调混合，project/employee重复员工选择模板。选用三个本域typed字段组Assignment/Discovery/Output，required named form model复用原session draft，来源/statement/管理导航仅发意图；页面保留原dialog/el-form、批准/授权、scope/session/CAS/receipt/409。共享原scoped字段CSS，不创建通用表单框架、第二套store或执行权限。
 
 取舍：页面减少430行，字段组104/242/161行，完整用例及项目/任务展示仍待拆。原55项字节保持，旧实现59项刻画、迁移后146项工程回归及98项CSS合同/六组件编译、独立审阅证明该边界；真实两主题/窄屏/角色/并发/重启与正式QA仍NOT_RUN。回退仅恢复字段接入，无数据库操作。证据见AQ09_EDITOR_FIELDS_ACCEPTANCE及PR5。
+
+### ADR-AQ-016：概览任务展示发出typed意图，保留宿主执行与样式归属（Proposed）
+
+背景：工作台概览混合context/baseline/任务结果展示与路由、取消、采纳、证据/预览执行，前序CSS提取未将baseline/revision规则绑定overview作用域。选用本域PresalesOverview消费原typed DTO/label事实，emit窄意图，页面沿用原执行与scope/授权/CAS/receipt守卫；任务样式归component，共享原common/solution样式并修复缺失scoped引用。
+
+取舍：页面减少186行、组件184行，不引入通用任务框架、store或新的执行权；article/table既有fallback差异保持。旧62项刻画/迁移149项工程回归、98源合同/七组件编译及实际概览规则归属证明该边界，不能据此声称像素不变或真实主题/角色/并发QA完成。回退无数据库操作但会恢复旧样式缺口；证据见AQ09_OVERVIEW_ACCEPTANCE及PR5。

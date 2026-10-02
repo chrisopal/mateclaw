@@ -280,172 +280,27 @@
             :label="t('presales.overview')"
             name="overview"
           >
-            <section class="section-heading">
-              <h2>{{ t('presales.context_and_open_items') }}</h2>
-              <el-button
-                :disabled="!canGenerate"
-                @click="openGeneration('S1')"
-                >{{ t('presales.ask_employee_to_analyze') }}</el-button
-              >
-            </section>
-            <el-descriptions
-              :column="isNarrow ? 1 : 2"
-              border
-              ><el-descriptions-item :label="t('presales.customer')">{{
-                project.customer
-              }}</el-descriptions-item
-              ><el-descriptions-item :label="t('presales.goal')">{{
-                project.goal || '—'
-              }}</el-descriptions-item
-              ><el-descriptions-item :label="t('presales.industry')">{{
-                project.industry || '—'
-              }}</el-descriptions-item
-              ><el-descriptions-item :label="t('presales.requirement_confirmation')"
-                ><details class="baseline-details">
-                  <summary>
-                    {{
-                      project.baselines.at(-1)?.id
-                        ? t('presales.confirmed')
-                        : t('presales.not_confirmed')
-                    }}
-                  </summary>
-                  <p
-                    v-if="project.baselines.at(-1)?.id"
-                    class="muted"
-                  >
-                    {{ project.baselines.at(-1)?.id }}
-                  </p>
-                </details></el-descriptions-item
-              ></el-descriptions
-            >
-            <template v-if="project.contextCards?.length || project.context"
-              ><h3>{{ t('presales.context_card') }}</h3>
-              <pre class="safe-content">{{
-                printable(project.contextCards?.at(-1) || project.context)
-              }}</pre></template
-            ><el-empty
-              v-else
-              :description="t('presales.no_project_context_yet')"
+            <PresalesOverview
+              :project="project"
+              :is-narrow="isNarrow"
+              :can-write="canWrite"
+              :can-generate="canGenerate"
+              :skill-names="skillNames"
+              :state-label="stateLabel"
+              :employee-issue="employeeIssue"
+              :printable="printable"
+              @generate="openGeneration('S1')"
+              @cancel="cancelTask"
+              @execution="
+                router.push({
+                  path: '/chat',
+                  query: { conversationId: $event.conversationId, agentId: $event.agentId },
+                })
+              "
+              @evidence="showEvidence"
+              @adopt="adopt"
+              @presentation="previewPresentation"
             />
-            <h3>{{ t('presales.employee_activity') }}</h3>
-            <article
-              v-for="task in project.tasks || []"
-              :key="task.id"
-              class="solution-revision"
-            >
-              <div class="task-heading">
-                <strong
-                  >{{ skillNames[task.skill as keyof typeof skillNames] || task.skill }} ·
-                  {{ stateLabel(task.status) }}</strong
-                >
-                <div class="task-actions">
-                  <el-button
-                    v-if="task.status === 'RUNNING'"
-                    :disabled="!canWrite"
-                    @click="cancelTask(task)"
-                    >{{ t('presales.discard_this_run_result') }}</el-button
-                  ><el-button
-                    v-if="task.conversationId && task.agentId"
-                    type="primary"
-                    size="small"
-                    @click="
-                      router.push({
-                        path: '/chat',
-                        query: {
-                          conversationId: task.conversationId,
-                          agentId: task.agentId,
-                        },
-                      })
-                    "
-                    >{{ t('presales.view_employee_execution') }}</el-button
-                  ><el-button
-                    type="primary"
-                    size="small"
-                    @click="showEvidence(task.contextSnapshot || task)"
-                    >{{ t('presales.input_snapshot') }}</el-button
-                  >
-                </div>
-              </div>
-              <el-alert
-                v-if="task.contextSnapshot?.truncated"
-                type="warning"
-                :closable="false"
-                :title="t('presales.context_message_5')"
-              />
-              <p class="muted">
-                {{ task.agentName || t('presales.legacy_generation')
-                }}<span v-if="task.conversationId">
-                  · {{ t('presales.execution') }} {{ task.runId }}</span
-                >
-              </p>
-              <p
-                v-if="task.queueState === 'QUEUED' && task.status === 'RUNNING'"
-                class="muted"
-              >
-                {{ t('presales.accepted_and_waiting_for_the_employee') }}
-              </p>
-              <p v-if="task.error">{{ employeeIssue(task.error) }}</p>
-              <div
-                v-for="(item, index) in task.result?.items || []"
-                :key="index"
-              >
-                <h4>{{ item.title }} · {{ stateLabel(item.originKind) }}</h4>
-                <pre class="safe-content">{{ item.text }}</pre>
-                <el-button
-                  v-if="['S1', 'S5', 'S6'].includes(task.skill!)"
-                  :disabled="!canWrite"
-                  @click="adopt(task.skill, item)"
-                  >{{ t('presales.review_proposal') }}</el-button
-                >
-              </div>
-              <div
-                v-if="task.result?.solution?.presentation"
-                class="presentation-result"
-              >
-                <strong>{{ t('presales.output_draft') }} · ppt-master-plus</strong
-                ><span class="muted"
-                  >{{ task.result.solution.presentation.skill }} ·
-                  {{ task.result.solution.presentation.skillVersion }} ·
-                  {{ task.result.solution.presentation.pageCount }}
-                  {{ t('presales.pages') }}</span
-                >
-                <div class="task-actions">
-                  <el-button
-                    v-for="slide in task.result.solution.presentation.slides || []"
-                    :key="slide.filename"
-                    type="primary"
-                    size="small"
-                    @click="previewPresentation(task.result.solution.presentation, slide.filename)"
-                    >{{ t('presales.preview') }} {{ slide.title || slide.filename }}</el-button
-                  >
-                </div>
-              </div>
-              <pre
-                v-if="task.result"
-                class="safe-content"
-                >{{
-                  printable({
-                    unknowns: task.result.unknowns,
-                    assumptions: task.result.assumptions,
-                  })
-                }}</pre
-              >
-            </article>
-            <el-table :data="project.tasks || []"
-              ><el-table-column :label="t('presales.work')"
-                ><template #default="{ row }">{{
-                  skillNames[row.skill as keyof typeof skillNames] || t('presales.previous_task')
-                }}</template></el-table-column
-              ><el-table-column
-                prop="agentName"
-                :label="t('presales.employee')" /><el-table-column :label="t('presales.status')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.status)
-                }}</template></el-table-column
-              ><el-table-column
-                prop="error"
-                :label="t('presales.failure_reason')"
-            /></el-table>
           </el-tab-pane>
           <el-tab-pane
             :label="t('presales.materials_evidence')"
@@ -936,6 +791,7 @@ import PresalesDiscoveryFields from '../components/PresalesDiscoveryFields.vue'
 import PresalesOutputFields from '../components/PresalesOutputFields.vue'
 import PresalesSolutions from '../components/PresalesSolutions.vue'
 import PresalesOutputs from '../components/PresalesOutputs.vue'
+import PresalesOverview from '../components/PresalesOverview.vue'
 import { loadPortfolio } from '../shared/dashboard'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
@@ -2035,45 +1891,9 @@ h1 {
   }
 }
 
-.task-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.task-heading > strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.task-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.task-actions .el-button + .el-button {
-  margin-left: 0;
-}
 .presales-workbench :deep(.el-button:focus-visible) {
   outline: 2px solid var(--el-color-primary);
   outline-offset: 3px;
-}
-.presentation-result {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 14px 0;
-  padding: 12px 14px;
-  border: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-lighter);
-}
-.presentation-result .task-actions {
-  width: 100%;
-  justify-content: flex-start;
 }
 .presentation-preview {
   display: block;
@@ -2089,12 +1909,6 @@ h1 {
 .project-pulse button > span::after {
   content: ' ↗';
   color: var(--el-color-primary);
-}
-@media (max-width: 768px) {
-  .task-actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
 }
 </style>
 <style scoped src="../shared/workbenchSections.css"></style>

@@ -1758,3 +1758,99 @@ describe('editor field presentation contracts', () => {
     )
   })
 })
+
+describe('overview task presentation contracts', () => {
+  it('keeps latest context, baseline, safe proposal text and task snapshot selection', async () => {
+    const task = {
+      id: '90071992547409990',
+      status: 'SUCCEEDED',
+      skill: 'S1',
+      contextSnapshot: { truncated: true, inputs: ['exact input'] },
+      result: {
+        items: [
+          { title: 'Context proposal', text: '<script>unsafe()</script>', originKind: 'INFERRED' },
+        ],
+        unknowns: ['Open question'],
+        assumptions: ['Pending confirmation'],
+      },
+    }
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      context: 'Old context',
+      contextCards: [{ id: 'context-latest', text: 'Latest context' }],
+      baselines: [{ id: '90071992547409989' }],
+      tasks: [task],
+    })
+    await mount(`/presales/${project.id}`)
+    const overview = document.querySelector('[id$="pane-overview"]')!
+    expect(overview.textContent).toContain('Latest context')
+    expect(overview.textContent).not.toContain('Old context')
+    expect(overview.textContent).toContain('90071992547409989')
+    expect(overview.textContent).toContain('<script>unsafe()</script>')
+    expect(overview.querySelector('script')).toBeNull()
+    expect(overview.querySelector('.el-alert')).not.toBeNull()
+    expect(overview.textContent).toContain('Open question')
+    button('Input snapshot').click()
+    await settle()
+    expect(document.querySelector('.el-drawer')?.textContent).toContain('exact input')
+    button('Review proposal').click()
+    await settle()
+    expect(document.querySelector<HTMLTextAreaElement>('.el-dialog textarea')?.value).toBe(
+      '<script>unsafe()</script>',
+    )
+    expect(presalesApi.command).not.toHaveBeenCalled()
+    changeLocale('zh-CN')
+    await settle()
+    expect(overview.textContent).toContain('员工')
+  })
+
+  it('keeps queued cancellation on the exact string task and accepts the returned version', async () => {
+    const task = { id: '90071992547409990', status: 'RUNNING', skill: 'S1', queueState: 'QUEUED' }
+    vi.mocked(presalesApi.get).mockResolvedValue({ ...project, tasks: [task] })
+    vi.mocked(presalesApi.cancelTask).mockResolvedValue({
+      ...project,
+      version: 4,
+      tasks: [{ ...task, status: 'CANCELLED' }],
+    })
+    await mount(`/presales/${project.id}`)
+    const overview = document.querySelector('[id$="pane-overview"]')!
+    expect(overview.textContent).toContain('Accepted and waiting for the employee')
+    button('Discard this run result').click()
+    await settle()
+    expect(presalesApi.cancelTask).toHaveBeenCalledWith(project.workspaceId, project.id, task.id, {
+      operationId: expect.any(String),
+    })
+    expect(overview.textContent).not.toContain('Discard this run result')
+    expect(overview.textContent).not.toContain('Accepted and waiting for the employee')
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it('keeps task write actions disabled for a read-only viewer', async () => {
+    vi.mocked(presalesApi.capabilities).mockResolvedValue({
+      enabled: true,
+      semanticEnabled: true,
+      canWrite: false,
+      canApprove: false,
+    })
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      tasks: [
+        {
+          id: 'task-readonly',
+          status: 'RUNNING',
+          skill: 'S6',
+          result: { items: [{ title: 'Proposal', text: 'Readonly draft' }] },
+        },
+      ],
+    })
+    await mount(`/presales/${project.id}`)
+    expect(button('Discard this run result').disabled).toBe(true)
+    expect(button('Review proposal').disabled).toBe(true)
+    expect(button('Ask employee to analyze').disabled).toBe(true)
+    button('Input snapshot').click()
+    await settle()
+    expect(document.querySelector('.el-drawer')?.textContent).toContain('task-readonly')
+    expect(presalesApi.cancelTask).not.toHaveBeenCalled()
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+})
