@@ -1,5 +1,4 @@
-import { http } from '@/api'
-import { scopedConfig } from '@/features/semantic/api/ontologyApi'
+import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
 // Heterogeneous historical records omit fields; opaque source snapshots remain unknown.
 export interface PresalesRecord {
@@ -197,10 +196,7 @@ async function request<T>(
   config: AxiosRequestConfig,
   signal?: AbortSignal,
 ): Promise<T> {
-  const response = await http.request<unknown, { data: T }>({
-    ...config,
-    ...scopedConfig(workspaceId, signal),
-  })
+  const response = await workspaceRequest<{ data: T }>(workspaceId, config, signal)
   return response.data
 }
 const projectPath = (id: string) => `/presales/projects/${encodeURIComponent(id)}`
@@ -218,10 +214,10 @@ export const presalesApi = {
     filename: string,
     kind: 'files' | 'preview' | 'draft',
   ) =>
-    http.get<unknown, Blob>(
-      `${projectPath(id)}/${kind === 'draft' ? 'solutions' : 'releases'}/${encodeURIComponent(versionId)}/${kind}/${encodeURIComponent(filename)}`,
-      { ...scopedConfig(ws), responseType: 'blob' },
-    ),
+    workspaceRequest<Blob>(ws, {
+      url: `${projectPath(id)}/${kind === 'draft' ? 'solutions' : 'releases'}/${encodeURIComponent(versionId)}/${kind}/${encodeURIComponent(filename)}`,
+      responseType: 'blob',
+    }),
   capabilities: (ws: string, signal?: AbortSignal) =>
     request<PresalesCapabilities>(ws, { url: '/presales/capabilities' }, signal),
   list: (ws: string, params: Record<string, string | number>, signal?: AbortSignal) =>

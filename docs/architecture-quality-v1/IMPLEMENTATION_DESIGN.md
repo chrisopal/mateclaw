@@ -221,3 +221,7 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 ### ADR-AQ-010：来源查看选择与命令确认范围（Proposed）
 
 2026-10-02：来源查看交给域内组合函数，选择/关闭/限制/卸载固定结果生命周期及URL释放；页面同步scope generation与editor session隔离旧确认、命令及选项。归档/发布确认固定原项目与版本，旧mutation不关闭新编辑器、写旧错误或解除新busy；较旧version按原冲突流程保留草稿。当前来源修复政策、回执和409保持；拒绝只有ID比较、确认后重取目标或通用请求框架。代价是失效确认需重发、本地拒收不取消已发送服务端动作。真实RouterView/Workspace夹具与77项工程回归及限定独立审核通过，业务环境与正式QA仍待签收。见evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md。
+
+### ADR-AQ-011：公共 Workspace 请求完整配置边界（Proposed）
+
+2026-10-02：宿主workspaceRequest选择调用者transform（含空列表）或默认转换，最后固定捕获Workspace并保留config.signal/独立signal、参数、headers/this和响应契约；三域各自处理envelope/errors，不跨借语义私有helper。直接FormData上传，传输层生成boundary；拒绝只设headers、复制helper或全局拦截器改动。四个旧实现红例变绿，七文件26项与实际loopback multipart/binary/取消工程回归通过；独立增量审核无阻断，无新依赖/配置变化。代价是自定义transform的合法序列化由调用者负责，公共捕获范围不替代服务端授权，正式浏览器/真实409并发/QA未完成。AR-003封口另需控制面审查。见evidence/2026-10-02/AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md。

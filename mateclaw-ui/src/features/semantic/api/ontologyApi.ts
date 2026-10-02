@@ -1,7 +1,8 @@
 import type { ModelEdit } from '../ontology/businessModel'
 import type { ProjectionView } from '../ontology/standardProjection'
 import { http } from '@/api'
-import type { AxiosRequestConfig, AxiosRequestTransformer } from 'axios'
+import { workspaceRequest } from '@/api/workspaceRequest'
+import type { AxiosRequestConfig } from 'axios'
 import { semanticError } from './semanticErrors'
 import type {
   Draft,
@@ -34,27 +35,13 @@ const editDraftRequest = (ws: string, id: string, body: EditDraft, signal?: Abor
     { url: `${path(id)}/draft/axioms`, method: 'PATCH', data: body },
     signal,
   )
-export function scopedConfig(workspaceId: string, signal?: AbortSignal): AxiosRequestConfig {
-  const defaults = http.defaults.transformRequest
-  const transforms = Array.isArray(defaults) ? defaults : defaults ? [defaults] : []
-  // Axios executes transforms after all request interceptors. Keep the captured
-  // workspace even when localStorage changes before dispatch.
-  const pinWorkspace: AxiosRequestTransformer = (data, headers) => {
-    headers.set('X-Workspace-Id', workspaceId)
-    return data
-  }
-  return { signal, transformRequest: [pinWorkspace, ...transforms] }
-}
 export async function semanticRequest<T>(
   workspaceId: string,
   config: AxiosRequestConfig,
   signal?: AbortSignal,
 ): Promise<T> {
   try {
-    const envelope = await http.request<unknown, { data: T }>({
-      ...config,
-      ...scopedConfig(workspaceId, signal),
-    })
+    const envelope = await workspaceRequest<{ data: T }>(workspaceId, config, signal)
     return envelope.data
   } catch (error) {
     throw semanticError(error)
@@ -194,11 +181,15 @@ export const ontologyApi = {
     syntax: OntologyDocumentSyntax,
     signal?: AbortSignal,
   ) => {
-    const response = await http.get<ArrayBuffer, ArrayBuffer>(`${path(id)}/draft/document`, {
-      ...scopedConfig(ws, signal),
-      params: { expectedDraftVersion, syntax },
-      responseType: 'arraybuffer',
-    })
+    const response = await workspaceRequest<ArrayBuffer>(
+      ws,
+      {
+        url: `${path(id)}/draft/document`,
+        params: { expectedDraftVersion, syntax },
+        responseType: 'arraybuffer',
+      },
+      signal,
+    )
     return response
   },
   exportDocument: async (
@@ -209,9 +200,14 @@ export const ontologyApi = {
     signal?: AbortSignal,
   ) => {
     try {
-      const response = await http.get<ArrayBuffer, ArrayBuffer>(
-        `${path(id)}/revisions/${encodeURIComponent(revisionId)}/document`,
-        { ...scopedConfig(ws, signal), params: { syntax }, responseType: 'arraybuffer' },
+      const response = await workspaceRequest<ArrayBuffer>(
+        ws,
+        {
+          url: `${path(id)}/revisions/${encodeURIComponent(revisionId)}/document`,
+          params: { syntax },
+          responseType: 'arraybuffer',
+        },
+        signal,
       )
       return response
     } catch (error) {

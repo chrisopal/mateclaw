@@ -1,6 +1,5 @@
-import type { AxiosRequestConfig, AxiosRequestTransformer } from 'axios'
-import { http } from '@/api'
-import { scopedConfig } from '@/features/semantic/api/ontologyApi'
+import type { AxiosRequestConfig } from 'axios'
+import { workspaceRequest } from '@/api/workspaceRequest'
 import type {
   AnalysisView,
   ArtifactApprovalContext,
@@ -32,10 +31,7 @@ async function request<T>(
   config: AxiosRequestConfig,
   signal?: AbortSignal,
 ): Promise<T> {
-  const response = await http.request<unknown, { data: T }>({
-    ...config,
-    ...scopedConfig(workspaceId, signal),
-  })
+  const response = await workspaceRequest<{ data: T }>(workspaceId, config, signal)
   return response.data
 }
 const base = '/bidding'
@@ -135,24 +131,16 @@ export const biddingApi = {
     data.append('sourceKind', sourceKind)
     data.append('operationId', operationId)
     if (supersedesRef) data.append('supersedesRef', supersedesRef)
-    const transforms = http.defaults.transformRequest
-    const defaults = Array.isArray(transforms) ? transforms : transforms ? [transforms] : []
-    const pin: AxiosRequestTransformer = (_value, headers) => {
-      headers.set('X-Workspace-Id', ws)
-      return data
-    }
-    return request<Source>(ws, {
-      url: `${projectPath(id)}/sources`,
-      method: 'POST',
-      data,
-      headers: { 'Content-Type': 'multipart/form-data' },
-      transformRequest: [pin, ...defaults],
-    })
+    return request<Source>(ws, { url: `${projectPath(id)}/sources`, method: 'POST', data })
   },
   content: (ws: string, id: string, sourceId: string, version: number, signal?: AbortSignal) =>
-    http.get<unknown, Blob>(
-      `${projectPath(id)}/sources/${encodeURIComponent(sourceId)}/versions/${version}/content`,
-      { ...scopedConfig(ws, signal), responseType: 'blob' },
+    workspaceRequest<Blob>(
+      ws,
+      {
+        url: `${projectPath(id)}/sources/${encodeURIComponent(sourceId)}/versions/${version}/content`,
+        responseType: 'blob',
+      },
+      signal,
     ),
   evidence: (
     ws: string,
@@ -195,8 +183,13 @@ export const biddingApi = {
     mode: 'candidate' | 'preview' | 'formal',
     signal?: AbortSignal,
   ): Promise<Blob> =>
-    http.get<unknown, Blob>(
-      `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/content`,
-      { ...scopedConfig(ws, signal), params: { mode }, responseType: 'blob' },
+    workspaceRequest<Blob>(
+      ws,
+      {
+        url: `${projectPath(id)}/artifacts/${encodeURIComponent(artifactId)}/content`,
+        params: { mode },
+        responseType: 'blob',
+      },
+      signal,
     ),
 }

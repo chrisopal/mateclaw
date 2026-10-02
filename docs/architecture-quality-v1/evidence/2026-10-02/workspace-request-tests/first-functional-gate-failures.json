@@ -1,0 +1,14 @@
+{
+  "total": 776,
+  "passed": 775,
+  "failed": 1,
+  "failures": [
+    {
+      "file": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/features/bidding/__tests__/biddingDownload.test.ts",
+      "test": "returns the binary body from the shared HTTP interceptor for artifact downloads",
+      "failureMessages": [
+        "TypeError: __vite_ssr_import_0__.http.request is not a function\n    at workspaceRequest (/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/api/workspaceRequest.ts:17:15)\n    at Object.download (/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/features/bidding/api/biddingApi.ts:186:5)\n    at /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/features/bidding/__tests__/biddingDownload.test.ts:11:39\n    at file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/node_modules/.pnpm/@vitest+runner@4.1.7/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)"
+      ]
+    }
+  ]
+}
