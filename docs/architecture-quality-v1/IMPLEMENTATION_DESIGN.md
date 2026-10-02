@@ -302,3 +302,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 列表wire已删除12个业务集合，不能用完整PresalesProject声明掩盖未加载数据。Summary直接声明原共享元数据，Project继承并要求原集合；列表/portfolio/dashboard只依赖Summary，未知历史扩展和字符串ID保留。拒绝补空明细或保留多余Metadata空继承层：前者误导已加载，后者被lint拒绝且无独立职责。
 
 概览格式化触发原内联双语存量指纹变化，按现有规则将20对原文案接入presalesMessages/useI18n并跟随宿主locale，不改门禁或baseline。原7/最终155合同，完整UI852与两构建通过，独立限定审阅无问题；不改变来源授权/事务/发布或HTTP wire。回退只影响源码，无数据库操作。完整DTO/runtime unknown验证、SQL/V2及真实浏览器/业务QA仍待完成；证据见AQ05_PROJECT_SUMMARY_ACCEPTANCE。
+
+### ADR-AQ-025：前端变更请求使用固定意图契约（Proposed）
+
+object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确VersionedMutation/ProjectWrite/Create/Command/Generate/Cancel，Create只允许0、取消按原Task接口仅operationId，ListQuery只声明原六个参数；16action与S1-S8同现有后端，编辑映射和工作台共享类型。部分metadata和unknown payload保留原语义，服务端领域校验/来源/事务/结果fence继续权威。
+
+拒绝运行时规范化/直接payload enum转换：会改变原wire、幂等输入及错误顺序。create显式0保持原分支属性顺序与receipt原输入，未动授权/请求helper或旧测试。旧24/最终178合同与完整UI工具链通过，限定独立审阅0缺陷；类型不是完整payload schema或授权。回退恢复类型/创建分支源码，无数据库操作；完整DTO/unknown校验、SQL/V2及真实浏览器/业务QA仍待完成，证据见AQ05_MUTATION_REQUEST_ACCEPTANCE。

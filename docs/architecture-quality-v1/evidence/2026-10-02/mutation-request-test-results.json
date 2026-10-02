@@ -1,0 +1,239 @@
+{
+  "task": "AQ-05 frontend mutation intent contracts",
+  "base": "2345f23ac2bae0390dedab08f54ecb94d824b2bb",
+  "source_commit": "2a509fecb19dde184535ae7f91eaad10b6af153f",
+  "source_tree": "e759075674d3594020cb16f720402aba2b2b35ae",
+  "old_wire_tests": 24,
+  "final_presales_tests": 178,
+  "full_ui_tests": 875,
+  "dev_tasks": [
+    "t0f_dsfa",
+    "as7lix0z",
+    "paxgp6yj"
+  ],
+  "source_files": [
+    {
+      "file": "mateclaw-ui/src/features/presales/api/presalesApi.ts",
+      "sha256": "92509e31bbdcbc42bcc2887382e5d2c5ad509090c99b6dc26b47a3579603c203"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/shared/editorSubmission.ts",
+      "sha256": "cd990ad8c19acf6f2d1aae4bd8776054120556b5fa6ad2a1940b196e5e1e271b"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+      "sha256": "2f99fdb607dc8463633450a787bceec00ff0e5090b026d896101602f319660ea"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/__tests__/mutationRequest.test.ts",
+      "sha256": "04d36bb82d021f43cc531af60219875b27ffe4e60371f70f5722ec24cee8da56"
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/initial-dev.txt",
+      "input_sha256": "4e6e13a799a1480f44b6da7e6dfa5f80307e2a8dfc5ffbdf223c2977b98178ee",
+      "sha256": "4e6e13a799a1480f44b6da7e6dfa5f80307e2a8dfc5ffbdf223c2977b98178ee",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/before.txt",
+      "input_sha256": "11ced2c67fe85af865fc1137353c2bbe02d335596911d80db267ec6d482ae644",
+      "sha256": "11ced2c67fe85af865fc1137353c2bbe02d335596911d80db267ec6d482ae644",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/format.txt",
+      "input_sha256": "0237fd93df80869973f60121e23d61846c3dbd9c245fe5436907fc867f19a571",
+      "sha256": "0237fd93df80869973f60121e23d61846c3dbd9c245fe5436907fc867f19a571",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/format-final.txt",
+      "input_sha256": "a8dff98471779e1643f1ca0541fbe3484bc51eb55f92ecb758be32ce854ba0ab",
+      "sha256": "a8dff98471779e1643f1ca0541fbe3484bc51eb55f92ecb758be32ce854ba0ab",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/tests.txt",
+      "input_sha256": "7ffa2bf348e7fe888ba45b3a873b362b13f604597d5f133308d0cb422ef0bfd7",
+      "sha256": "7ffa2bf348e7fe888ba45b3a873b362b13f604597d5f133308d0cb422ef0bfd7",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/tests-final.txt",
+      "input_sha256": "3cb73f3bc3f748c2890b6141e49a6a96d5271e6e7dabc10f6a2d4ebb646df741",
+      "sha256": "3cb73f3bc3f748c2890b6141e49a6a96d5271e6e7dabc10f6a2d4ebb646df741",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/typecheck-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/lint.txt",
+      "input_sha256": "782ab4b02ac1d8665582f29e9e22667aa742ea213d8df3f1a3b8df6833bf6e03",
+      "sha256": "782ab4b02ac1d8665582f29e9e22667aa742ea213d8df3f1a3b8df6833bf6e03",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/lint-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/dev.txt",
+      "input_sha256": "16b470e6af9389aed4cc181d5c5d68f3bf1491fa3eedb83cdbf23c922864f740",
+      "sha256": "16b470e6af9389aed4cc181d5c5d68f3bf1491fa3eedb83cdbf23c922864f740",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/dev-final.txt",
+      "input_sha256": "74c814a1b5c98abd147f7644fc9e2864779e6b1fb1512f942c3ec7334b9b2e65",
+      "sha256": "74c814a1b5c98abd147f7644fc9e2864779e6b1fb1512f942c3ec7334b9b2e65",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/staged-gate.txt",
+      "input_sha256": "a678f149920c3908982d17db292c018730797121df9158aca88201f141aee93f",
+      "sha256": "a678f149920c3908982d17db292c018730797121df9158aca88201f141aee93f",
+      "redactions": 0
+    }
+  ],
+  "gates": {
+    "staged": {
+      "task": "mateclaw-quality-jhezzkxs",
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/staged-gate-report.json",
+      "sha256": "6dcf26c0a479281f7f68c2b4f562e41f0264924634eb10d57d34a06abb9e33b6",
+      "tree": "e759075674d3594020cb16f720402aba2b2b35ae",
+      "steps": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS"
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS"
+        },
+        {
+          "name": "java-toolchain",
+          "status": "NOT_APPLICABLE"
+        },
+        {
+          "name": "ui-format",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-lint",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS"
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 875
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS"
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE"
+        }
+      ]
+    },
+    "commit_hook": {
+      "task": "mateclaw-quality-psvp6oco",
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/mutation-request-tests/commit_hook-gate-report.json",
+      "sha256": "f4f9ac1162be0ed1b92e23ee6fbae0f28361d88b8a1d134a886272ec2c9836b9",
+      "tree": "e759075674d3594020cb16f720402aba2b2b35ae",
+      "steps": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS"
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS"
+        },
+        {
+          "name": "java-toolchain",
+          "status": "NOT_APPLICABLE"
+        },
+        {
+          "name": "ui-format",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-lint",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS"
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 875
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS"
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS"
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE"
+        }
+      ]
+    }
+  },
+  "review": {
+    "verdict": "APPROVE_BOUNDED",
+    "issues": 0,
+    "lsp": "plain tsc zero diagnostics on4files; real vue-tsc exit0 validatesVue",
+    "ast": "NOT_AVAILABLE ast-grep not installed; bounded rg fallback"
+  },
+  "failure_preserved": "new test {} negative type lint FAIL; replaced with accurate Record<string,never>, assertion retained; final lint/type/dev/tests passed",
+  "payload_values": "UNKNOWN_UNVALIDATED server domain validation still required",
+  "formal_acceptance": "NOT_RUN",
+  "live_transport_browser": "NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED"
+}
