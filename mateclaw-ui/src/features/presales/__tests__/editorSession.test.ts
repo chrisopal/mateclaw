@@ -141,7 +141,12 @@ describe('presales editor session ownership', () => {
       expect(editor.sourceOptions.value).toEqual([])
       expect(editor.editError.value).toBe('')
       replacement.resolve([
-        { kbId: '90071992547409999', graphId: 'graph-new', name: 'Current option' },
+        {
+          kbId: '90071992547409999',
+          graphId: 'graph-new',
+          ontologyRevisionId: null,
+          name: 'Current option',
+        },
       ])
       await settle()
       expect(editor.optionsLoading.value).toBe(false)
@@ -154,9 +159,58 @@ describe('presales editor session ownership', () => {
     },
   )
 
+  it('keeps raw nullable fact evidence while admitting only actual IDs into a selected draft', async () => {
+    const raw = {
+      id: 'fact',
+      graphId: 'graph',
+      ontologyRevisionId: null,
+      label: 'Fact',
+      revision: 3,
+      evidenceIds: ['e2', null, 'e1', 'e2'],
+    }
+    vi.mocked(presalesApi.statements).mockResolvedValue([raw])
+    const editor = setup()
+    editor.openEditor('requirement')
+    await settle()
+    editor.selectStatement('graph:fact')
+    expect(editor.form.value.evidenceIds).toEqual(['e2', 'e1', 'e2'])
+    expect(editor.statementOptions.value[0].evidenceIds).toEqual(['e2', null, 'e1', 'e2'])
+    expect(raw.evidenceIds).toEqual(['e2', null, 'e1', 'e2'])
+    expect(editor.form.value).toMatchObject({
+      statementId: 'fact',
+      statementRevision: 3,
+      graphId: 'graph',
+    })
+  })
+
+  it('preserves null evidence-list semantics without copying null into the editor', async () => {
+    const raw = {
+      id: 'fact',
+      graphId: 'graph',
+      ontologyRevisionId: null,
+      label: 'Fact',
+      revision: 3,
+      evidenceIds: null,
+    }
+    vi.mocked(presalesApi.statements).mockResolvedValue([raw])
+    const editor = setup()
+    editor.openEditor('requirement')
+    await settle()
+    editor.selectStatement('graph:fact')
+    expect(editor.form.value.evidenceIds).toEqual([])
+    expect(editor.statementOptions.value[0].evidenceIds).toBeNull()
+  })
+
   it('copies exact statement identity/revision/evidence from the current option selection', async () => {
     vi.mocked(presalesApi.statements).mockResolvedValue([
-      { id: '90071992547409999', graphId: 'graph', revision: 17, evidenceIds: ['evidence'] },
+      {
+        id: '90071992547409999',
+        graphId: 'graph',
+        ontologyRevisionId: null,
+        label: 'Fact',
+        revision: 17,
+        evidenceIds: ['evidence'],
+      },
     ])
     const editor = setup()
     editor.openEditor('requirement')

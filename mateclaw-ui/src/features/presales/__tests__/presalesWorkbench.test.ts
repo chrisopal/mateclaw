@@ -125,7 +125,14 @@ beforeEach(() => {
   workspaceFixture.beforeSwitch = undefined
   workspaceFixture.current.currentWorkspaceId = project.workspaceId
   vi.mocked(presalesApi.members).mockResolvedValue([
-    { id: 'membership', userId: project.ownerId, nickname: 'Jane Doe', username: 'jane' },
+    {
+      id: 'membership',
+      workspaceId: project.workspaceId,
+      role: 'member',
+      userId: project.ownerId,
+      nickname: 'Jane Doe',
+      username: 'jane',
+    },
   ])
   vi.mocked(presalesApi.capabilities).mockResolvedValue({
     enabled: true,
@@ -764,7 +771,7 @@ describe('presales workspace behavior', () => {
   it('saves a restricted employee assignment without unrelated project fields', async () => {
     vi.mocked(presalesApi.get).mockResolvedValue({ ...project, sourceAccessRestricted: true })
     vi.mocked(presalesApi.employees).mockResolvedValue([
-      { id: 'employee-2', name: 'Repair employee', enabled: true },
+      { id: 'employee-2', name: 'Repair employee', enabled: true, available: true },
     ])
     vi.mocked(presalesApi.command).mockResolvedValue({
       ...project,
@@ -1350,7 +1357,7 @@ describe('employee-driven workbench', () => {
       agentName: 'Presales specialist',
     })
     vi.mocked(presalesApi.employees).mockResolvedValue([
-      { id: '90071992547409996', name: 'Presales specialist', enabled: true },
+      { id: '90071992547409996', name: 'Presales specialist', enabled: true, available: true },
     ])
     vi.mocked(presalesApi.generate).mockResolvedValue({
       ...project,

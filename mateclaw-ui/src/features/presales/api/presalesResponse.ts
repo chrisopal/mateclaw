@@ -1,4 +1,9 @@
 import type {
+  PresalesMember,
+  PresalesSource,
+  PresalesTrustedStatement,
+  PresalesEmployee,
+  PresalesCapabilities,
   PresalesProject,
   PresalesProjectSummary,
   PresalesRepairContext,
@@ -291,5 +296,84 @@ export function decodeRepairContext(
   projectId: string,
 ): PresalesRepairContext {
   repair(value, workspaceId, projectId)
+  return value
+}
+
+function nullableString(value: unknown) {
+  if (value !== null) string(value)
+}
+function members(value: unknown, workspaceId: string): asserts value is PresalesMember[] {
+  array(value)
+  for (const item of value) {
+    object(item)
+    for (const key of ['id', 'workspaceId', 'userId', 'role']) string(item[key])
+    if (item.workspaceId !== workspaceId) invalid()
+    optional(item, 'nickname', nullableString)
+    optional(item, 'username', nullableString)
+  }
+}
+function sources(value: unknown): asserts value is PresalesSource[] {
+  array(value)
+  for (const item of value) {
+    object(item)
+    string(item.kbId)
+    nullableString(item.name)
+    const graph = Object.hasOwn(item, 'graphId'),
+      revision = Object.hasOwn(item, 'ontologyRevisionId')
+    if (graph !== revision) invalid()
+    if (graph) {
+      nullableString(item.graphId)
+      nullableString(item.ontologyRevisionId)
+    }
+  }
+}
+function statements(value: unknown): asserts value is PresalesTrustedStatement[] {
+  array(value)
+  for (const item of value) {
+    object(item)
+    string(item.id)
+    integer(item.revision)
+    string(item.graphId)
+    nullableString(item.ontologyRevisionId)
+    string(item.label)
+    if (item.evidenceIds !== null) {
+      array(item.evidenceIds)
+      item.evidenceIds.forEach(nullableString)
+    }
+  }
+}
+function employees(value: unknown): asserts value is PresalesEmployee[] {
+  array(value)
+  for (const item of value) {
+    object(item)
+    string(item.id)
+    string(item.name)
+    boolean(item.enabled)
+    boolean(item.available)
+  }
+}
+function capabilities(value: unknown): asserts value is PresalesCapabilities {
+  object(value)
+  for (const key of ['enabled', 'semanticEnabled', 'canWrite', 'canApprove']) boolean(value[key])
+  optional(value, 'modelConfigured', boolean)
+}
+export function decodeMembers(value: unknown, workspaceId: string): PresalesMember[] {
+  members(value, workspaceId)
+  return value
+}
+export function decodeSources(value: unknown): PresalesSource[] {
+  sources(value)
+  return value
+}
+export function decodeStatements(value: unknown): PresalesTrustedStatement[] {
+  statements(value)
+  return value
+}
+export function decodeEmployees(value: unknown): PresalesEmployee[] {
+  employees(value)
+  return value
+}
+export function decodeCapabilities(value: unknown): PresalesCapabilities {
+  capabilities(value)
   return value
 }

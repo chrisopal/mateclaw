@@ -1,4 +1,13 @@
-import { decodeProject, decodeProjectPage, decodeRepairContext } from './presalesResponse'
+import {
+  decodeProject,
+  decodeProjectPage,
+  decodeRepairContext,
+  decodeMembers,
+  decodeSources,
+  decodeStatements,
+  decodeEmployees,
+  decodeCapabilities,
+} from './presalesResponse'
 import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
 // Heterogeneous historical records omit fields; opaque source snapshots remain unknown.
@@ -71,18 +80,45 @@ export interface PresalesRecord {
   contextSnapshot?: PresalesContextSnapshot
   result?: PresalesGenerationResult
 }
-export interface PresalesMember extends PresalesRecord {
+/** Query projections have their own nullability; they are not business records. */
+export interface PresalesMember {
+  [key: string]: unknown
+  id: string
+  workspaceId: string
   userId: string
+  role: string
+  nickname?: string | null
+  username?: string | null
 }
-export interface PresalesSource extends PresalesRecord {
+interface PresalesSourceMetadata {
+  [key: string]: unknown
   kbId: string
-  name: string
+  name: string | null
 }
-export interface PresalesEmployee extends PresalesRecord {
+export interface PresalesKnowledgeBaseSource extends PresalesSourceMetadata {
+  graphId?: never
+  ontologyRevisionId?: never
+}
+export interface PresalesGraphSource extends PresalesSourceMetadata {
+  graphId: string | null
+  ontologyRevisionId: string | null
+}
+export type PresalesSource = PresalesKnowledgeBaseSource | PresalesGraphSource
+export interface PresalesTrustedStatement {
+  [key: string]: unknown
+  id: string
+  revision: number
+  graphId: string
+  ontologyRevisionId: string | null
+  label: string
+  evidenceIds: (string | null)[] | null
+}
+export interface PresalesEmployee {
+  [key: string]: unknown
   id: string
   name: string
   enabled: boolean
-  available?: boolean
+  available: boolean
 }
 export interface PresalesEntity extends PresalesRecord {
   id: string
@@ -268,10 +304,12 @@ async function requestProject(
 const projectPath = (id: string) => `/presales/projects/${encodeURIComponent(id)}`
 export const presalesApi = {
   members: (ws: string, signal?: AbortSignal) =>
-    request<PresalesMember[]>(ws, { url: `/workspaces/${encodeURIComponent(ws)}/members` }, signal),
-  sources: (ws: string) => request<PresalesSource[]>(ws, { url: '/presales/sources' }),
+    request<unknown>(ws, { url: `/workspaces/${encodeURIComponent(ws)}/members` }, signal).then(
+      (value) => decodeMembers(value, ws),
+    ),
+  sources: (ws: string) => request<unknown>(ws, { url: '/presales/sources' }).then(decodeSources),
   statements: (ws: string, id: string) =>
-    request<PresalesRecord[]>(ws, { url: `${projectPath(id)}/statements` }),
+    request<unknown>(ws, { url: `${projectPath(id)}/statements` }).then(decodeStatements),
   handoff: (ws: string, id: string) => request<unknown>(ws, { url: `${projectPath(id)}/handoff` }),
   file: (
     ws: string,
@@ -285,7 +323,7 @@ export const presalesApi = {
       responseType: 'blob',
     }),
   capabilities: (ws: string, signal?: AbortSignal) =>
-    request<PresalesCapabilities>(ws, { url: '/presales/capabilities' }, signal),
+    request<unknown>(ws, { url: '/presales/capabilities' }, signal).then(decodeCapabilities),
   list: (ws: string, params: PresalesListQuery, signal?: AbortSignal) =>
     request<unknown>(ws, { url: '/presales/projects', params }, signal).then((value) =>
       decodeProjectPage(value, ws),
@@ -328,7 +366,7 @@ export const presalesApi = {
       params: { graphId, evidenceId },
     }),
   employees: (ws: string, signal?: AbortSignal) =>
-    request<PresalesEmployee[]>(ws, { url: '/presales/employees' }, signal),
+    request<unknown>(ws, { url: '/presales/employees' }, signal).then(decodeEmployees),
   generate: (ws: string, id: string, data: PresalesGenerateRequest) =>
     requestProject(
       ws,

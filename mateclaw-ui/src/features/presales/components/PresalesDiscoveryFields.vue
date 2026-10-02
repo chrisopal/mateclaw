@@ -12,7 +12,7 @@
           v-for="source in sourceOptions"
           :key="source.kbId"
           :value="source.kbId"
-          :label="source.name" /></el-select
+          :label="source.name ?? undefined" /></el-select
     ></el-form-item>
     <p
       v-if="form.kbId"
@@ -226,14 +226,14 @@ import type {
   PresalesEditorForm,
   PresalesProject,
   PresalesSource,
-  PresalesRecord,
+  PresalesTrustedStatement,
 } from '../api/presalesApi'
 defineProps<{
   kind: 'material' | 'requirement' | 'clarification' | 'baseline' | 'fitgap' | 'context'
   project: PresalesProject | undefined
   optionsLoading: boolean
   sourceOptions: PresalesSource[]
-  statementOptions: PresalesRecord[]
+  statementOptions: PresalesTrustedStatement[]
   stateLabel: (state: string | undefined) => string
 }>()
 const emit = defineEmits<{ source: [kbId: string]; statement: [key: string]; wiki: [] }>()

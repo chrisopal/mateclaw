@@ -853,7 +853,7 @@ function isActiveScope(scope: ReturnType<typeof captureScope>) {
 const members = ref<PresalesMember[]>([]),
   membersLoading = ref(false),
   membersError = ref('')
-function memberName(member: PresalesRecord): string {
+function memberName(member: PresalesMember): string {
   return member.nickname || member.username || t('presales.unnamed_member')
 }
 function ownerName(id?: string): string {

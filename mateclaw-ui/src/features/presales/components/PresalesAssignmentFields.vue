@@ -81,12 +81,7 @@ import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 const { t } = useI18n({ messages: presalesMessages })
 const form = defineModel<PresalesEditorForm>('form', { required: true })
-import type {
-  PresalesEditorForm,
-  PresalesMember,
-  PresalesEmployee,
-  PresalesRecord,
-} from '../api/presalesApi'
+import type { PresalesEditorForm, PresalesMember, PresalesEmployee } from '../api/presalesApi'
 defineProps<{
   kind: 'project' | 'employee'
   members: PresalesMember[]
@@ -96,7 +91,7 @@ defineProps<{
   employeesLoading: boolean
   employeeError: string
   ownerName: (id?: string) => string
-  memberName: (member: PresalesRecord) => string
+  memberName: (member: PresalesMember) => string
 }>()
 const emit = defineEmits<{ agents: [] }>()
 </script>

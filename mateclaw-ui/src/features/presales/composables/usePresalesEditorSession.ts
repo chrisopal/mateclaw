@@ -5,6 +5,7 @@ import {
   type PresalesProject,
   type PresalesRecord,
   type PresalesSource,
+  type PresalesTrustedStatement,
 } from '../api/presalesApi'
 import {
   createEditorForm,
@@ -29,7 +30,7 @@ interface EditorSessionOptions<Scope> {
 /** Draft and option results belong to one editor opening within the page scope. */
 export function usePresalesEditorSession<Scope>(options: EditorSessionOptions<Scope>) {
   const sourceOptions = ref<PresalesSource[]>([]),
-    statementOptions = ref<PresalesRecord[]>([]),
+    statementOptions = ref<PresalesTrustedStatement[]>([]),
     optionsLoading = ref(false)
   const editorOpen = ref(false),
     editorKind = ref<PresalesEditorKind>('project'),
@@ -123,7 +124,7 @@ export function usePresalesEditorSession<Scope>(options: EditorSessionOptions<Sc
     form.value.statementId = statement?.id || ''
     form.value.statementRevision = statement?.revision || ''
     form.value.graphId = statement?.graphId || ''
-    form.value.evidenceIds = statement?.evidenceIds || []
+    form.value.evidenceIds = statement?.evidenceIds?.filter((id): id is string => id !== null) || []
   }
 
   async function discard(): Promise<boolean> {
