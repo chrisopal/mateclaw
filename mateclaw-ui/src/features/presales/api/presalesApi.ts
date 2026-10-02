@@ -113,7 +113,8 @@ export interface PresalesEditorForm extends PresalesRecord {
   industry?: string
   goal?: string
 }
-export interface PresalesProject extends PresalesEntity {
+/** List items do not load the business collections required by project details. */
+export interface PresalesProjectSummary extends PresalesEntity {
   workspaceId: string
   version: number
   name: string
@@ -126,6 +127,8 @@ export interface PresalesProject extends PresalesEntity {
   updatedAt?: string
   openClarificationCount?: number
   latestSolutionVersion?: number
+}
+export interface PresalesProject extends PresalesProjectSummary {
   sourceAccessRestricted?: boolean
   repairBindings?: { id: string; role: string }[]
   materials: PresalesEntity[]
@@ -186,7 +189,7 @@ export interface PresalesCapabilities {
   modelConfigured?: boolean
 }
 export interface ProjectPage {
-  items: PresalesProject[]
+  items: PresalesProjectSummary[]
   total: number
   page: number
   pageSize: number

@@ -1,6 +1,27 @@
 export const presalesMessages = {
   'zh-CN': {
     presales: {
+      dashboard_overview: '售前推进总览',
+      dashboard_updating: '更新中…',
+      dashboard_refresh: '刷新统计',
+      dashboard_unavailable: '统计暂不可用，请刷新重试。项目台账仍可使用。',
+      dashboard_pipeline: '项目推进',
+      dashboard_attention: '优先跟进',
+      dashboard_loading: '正在汇总项目…',
+      dashboard_no_questions: '暂无待澄清事项。',
+      dashboard_open: '待澄清',
+      dashboard_discovery: '项目理解',
+      dashboard_requirements: '需求梳理',
+      dashboard_baseline: '需求基线',
+      dashboard_solution: '方案设计',
+      dashboard_release: '成果准备',
+      dashboard_active: '进行中项目',
+      dashboard_unit_projects: '个',
+      dashboard_questions: '待澄清事项',
+      dashboard_unit_items: '项',
+      dashboard_solutions: '已有方案项目',
+      dashboard_releases: '进入成果阶段',
+
       unbind_material: '解绑资料',
       repair_bindings: '修复资料绑定',
       repair_bindings_help: '仅显示绑定 ID。解绑不会恢复已撤回历史来源的访问权限。',
@@ -275,6 +296,28 @@ export const presalesMessages = {
   },
   'en-US': {
     presales: {
+      dashboard_overview: 'Presales overview',
+      dashboard_updating: 'Updating…',
+      dashboard_refresh: 'Refresh overview',
+      dashboard_unavailable:
+        'Overview unavailable. Refresh to retry; the project list remains available.',
+      dashboard_pipeline: 'Project pipeline',
+      dashboard_attention: 'Needs attention',
+      dashboard_loading: 'Loading projects…',
+      dashboard_no_questions: 'No open questions.',
+      dashboard_open: 'open',
+      dashboard_discovery: 'Discovery',
+      dashboard_requirements: 'Requirements',
+      dashboard_baseline: 'Baseline',
+      dashboard_solution: 'Solution',
+      dashboard_release: 'Release',
+      dashboard_active: 'Active projects',
+      dashboard_unit_projects: '',
+      dashboard_questions: 'Open questions',
+      dashboard_unit_items: '',
+      dashboard_solutions: 'Projects with solutions',
+      dashboard_releases: 'Projects in release',
+
       unbind_material: 'Unbind material',
       repair_bindings: 'Material bindings for repair',
       repair_bindings_help:

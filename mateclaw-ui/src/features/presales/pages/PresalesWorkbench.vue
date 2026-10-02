@@ -294,7 +294,10 @@
               @execution="
                 router.push({
                   path: '/chat',
-                  query: { conversationId: $event.conversationId, agentId: $event.agentId },
+                  query: {
+                    conversationId: $event.conversationId,
+                    agentId: $event.agentId,
+                  },
                 })
               "
               @evidence="showEvidence"
@@ -804,6 +807,7 @@ import {
   type PresalesEmployee,
   type PresalesTask,
   type PresalesProject,
+  type PresalesProjectSummary,
   type PresalesRecord,
 } from '../api/presalesApi'
 import { label as l } from '../shared/locale'
@@ -871,8 +875,8 @@ async function loadMembers(ws: string, signal: AbortSignal) {
 
 const capabilities = ref<PresalesCapabilities>(),
   project = ref<PresalesProject>(),
-  projects = ref<PresalesProject[]>([])
-const portfolio = ref<PresalesProject[]>([]),
+  projects = ref<PresalesProjectSummary[]>([])
+const portfolio = ref<PresalesProjectSummary[]>([]),
   portfolioLoading = ref(false),
   portfolioError = ref(false)
 let portfolioController: AbortController | undefined
