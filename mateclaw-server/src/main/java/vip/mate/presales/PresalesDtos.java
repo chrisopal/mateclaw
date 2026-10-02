@@ -1,5 +1,6 @@
 package vip.mate.presales;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 
@@ -17,7 +18,45 @@ public final class PresalesDtos {
             String operationId) {}
 
     public record Command(
-            Integer expectedVersion, String operationId, String action, ObjectNode payload) {}
+            Integer expectedVersion, String operationId, String action, ObjectNode payload) {
+        @JsonIgnore
+        CommandAction parsedAction() {
+            return CommandAction.from(action);
+        }
+    }
+
+    enum CommandKind {
+        UPDATE_PROJECT,
+        ARCHIVE,
+        BIND_MATERIAL,
+        SAVE_REQUIREMENT,
+        SAVE_CLARIFICATION,
+        UNBIND_MATERIAL,
+        CANCEL_AI_TASK,
+        SAVE_AI_TASK,
+        SAVE_CONTEXT,
+        SAVE_REVIEW,
+        CREATE_RELEASE,
+        APPROVE_RELEASE,
+        PUBLISH_RELEASE,
+        APPROVE_BASELINE,
+        SAVE_FIT_GAP,
+        SAVE_SOLUTION,
+        UNKNOWN
+    }
+
+    record CommandAction(CommandKind kind, String raw) {
+        static CommandAction from(String action) {
+            String raw = java.util.Objects.toString(action, "");
+            CommandKind kind;
+            try {
+                kind = CommandKind.valueOf(raw);
+            } catch (IllegalArgumentException unknown) {
+                kind = CommandKind.UNKNOWN;
+            }
+            return new CommandAction(kind, raw);
+        }
+    }
 
     public record Capabilities(
             boolean enabled, boolean semanticEnabled, boolean canWrite, boolean canApprove) {}

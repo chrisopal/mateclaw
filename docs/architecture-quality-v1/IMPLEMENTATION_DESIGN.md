@@ -290,3 +290,9 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 能力信息改为四个明确 boolean；来源使用知识库基础记录/启用图记录两种稳定形状，以保持缺省字段与显式 null 的差异；可信事实采用字符串 ID、int revision、原标签与证据列表快照。Controller 明确相同返回类型，应用服务仍先执行 Workspace/项目/来源权限检查，再调用现有公开语义端口。200/500 上限、图去重、顺序与原错误传播保持。
 
 拒绝开放 Map/ObjectNode 拼装及统一 NON_NULL：前者丢失类型边界，后者改变启用图的 null wire。证据列表复制保留 null 元素，避免序列化时看到上游后续修改。Java 返回类型改变但仓库消费者只有 Controller；HTTP形状由旧13/最终66项合同/事务回归保护。没有新增依赖、SQL、迁移或事务。完整项目/命令 DTO、SQL分页、V2、真实图/多方言/浏览器/正式 QA仍待完成。回退恢复三查询与DTO，无数据库操作。证据见 AQ05_QUERY_DTO_ACCEPTANCE。
+
+### ADR-AQ-023：命令分类类型化且保持原wire（Proposed）
+
+16个action建立内部CommandKind，CommandAction保留raw，未知为UNKNOWN+原文；null按原业务判断映射空字符串，HTTP字段仍保留null。Command四个record组件不变，package-private解析方法@JsonIgnore。Service批准角色分组、repair白名单、员工任务限定和业务switch共享kind；原raw用于错误/audit，原Command用于request hash/receipt。
+
+拒绝HTTP直接enum绑定或trim/uppercase：这些会提前改变授权、来源、重放/CAS和归档检查的错误顺序，也会改变operation同键请求。默认拒绝保留，将来有枚举但无handler也不能无操作地更新version成功。分类不授予权限，角色/来源/fence/事务仍在应用服务。旧12/最终72项真实HTTP/H2/事务与纯wire合同、限定独立审阅保护这一边界；无新依赖/SQL/迁移/Bean。完整payload/项目DTO、SQL分页、V2/多方言/浏览器/正式QA仍待完成。回退仅恢复字符串分类与DTO，证据见AQ05_COMMAND_KIND_ACCEPTANCE。

@@ -252,19 +252,24 @@ public class PresalesService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     public ObjectNode saveEmployeeTask(String scope, String projectId, Command r) {
-        if (!"SAVE_AI_TASK".equals(r.action())) throw bad("Employee task required");
+        if (r.parsedAction().kind() != CommandKind.SAVE_AI_TASK)
+            throw bad("Employee task required");
         return applyCommand(scope, projectId, r, true);
     }
 
     private ObjectNode applyCommand(
             String scope, String projectId, Command r, boolean employeeResult) {
         if (r == null) throw bad("Command required");
-        String action = Objects.toString(r.action(), "");
+        var parsedAction = r.parsedAction();
+        String action = parsedAction.raw();
         String actor =
                 access.require(
                         scope,
-                        Set.of("APPROVE_BASELINE", "APPROVE_RELEASE", "PUBLISH_RELEASE")
-                                        .contains(action)
+                        Set.of(
+                                                CommandKind.APPROVE_BASELINE,
+                                                CommandKind.APPROVE_RELEASE,
+                                                CommandKind.PUBLISH_RELEASE)
+                                        .contains(parsedAction.kind())
                                 ? "admin"
                                 : "member");
         operation(r.operationId());
@@ -282,8 +287,8 @@ public class PresalesService {
         if ("ARCHIVED".equals(p.path("status").asText()))
             throw conflict("PROJECT_ARCHIVED", "Archived projects are read only");
         ObjectNode value = r.payload() == null ? json.createObjectNode() : r.payload().deepCopy();
-        switch (action) {
-            case "UPDATE_PROJECT" -> {
+        switch (parsedAction.kind()) {
+            case UPDATE_PROJECT -> {
                 if (value.has("agentId")) bindEmployee(scope, p, value.path("agentId").asText());
                 if (value.has("ownerId"))
                     p.put(
@@ -298,16 +303,16 @@ public class PresalesService {
                         p.set(key, value.get(key));
                     }
             }
-            case "ARCHIVE" -> p.put("status", "ARCHIVED");
-            case "BIND_MATERIAL" -> bind(scope, p, value, actor);
-            case "SAVE_REQUIREMENT" -> {
+            case ARCHIVE -> p.put("status", "ARCHIVED");
+            case BIND_MATERIAL -> bind(scope, p, value, actor);
+            case SAVE_REQUIREMENT -> {
                 text(value.path("title").asText(), "title", 1000);
                 enumValue(value, "scope", Set.of("IN", "OUT", "UNKNOWN"), "UNKNOWN");
                 enumValue(value, "priority", Set.of("HIGH", "MEDIUM", "LOW"), "MEDIUM");
                 value.put("customerConfirmationStatus", "UNCONFIRMED");
                 saveItem(p, "requirements", value, actor, false);
             }
-            case "SAVE_CLARIFICATION" -> {
+            case SAVE_CLARIFICATION -> {
                 text(value.path("question").asText(), "question", 5000);
                 enumValue(value, "status", Set.of("OPEN", "ANSWERED"), "OPEN");
                 if (!value.path("requirementId").asText().isBlank())
@@ -325,7 +330,7 @@ public class PresalesService {
                 }
                 saveItem(p, "clarifications", value, actor, false);
             }
-            case "UNBIND_MATERIAL" -> {
+            case UNBIND_MATERIAL -> {
                 String materialId = value.path("id").asText();
                 find(p, "materials", materialId);
                 var items = p.withArray("materials");
@@ -335,13 +340,13 @@ public class PresalesService {
                         break;
                     }
             }
-            case "CANCEL_AI_TASK" -> {
+            case CANCEL_AI_TASK -> {
                 var task = find(p, "tasks", value.path("taskId").asText());
                 if (!"RUNNING".equals(task.path("status").asText()))
                     throw conflict("TASK_STATE", "Task is not running");
                 task.put("status", "CANCELLED");
             }
-            case "SAVE_AI_TASK" -> {
+            case SAVE_AI_TASK -> {
                 value.put("status", value.path("status").asText("DRAFT"))
                         .put("authority", "UNTRUSTED_DRAFT");
                 enumValue(
@@ -378,11 +383,11 @@ public class PresalesService {
                     projectEmployeeResult(p, value, actor);
                 }
             }
-            case "SAVE_CONTEXT" -> {
+            case SAVE_CONTEXT -> {
                 value.put("authority", "UNTRUSTED_DRAFT");
                 saveItem(p, "contextCards", value, actor, false);
             }
-            case "SAVE_REVIEW" -> {
+            case SAVE_REVIEW -> {
                 find(p, "solutions", value.path("solutionId").asText());
                 text(value.path("summary").asText(), "summary", 10000);
                 if (!value.path("issues").isArray()) throw bad("Review issues required");
@@ -395,8 +400,8 @@ public class PresalesService {
                 value.put("kind", "HUMAN_REVIEW").put("authority", "HUMAN_REVIEW");
                 saveItem(p, "reviews", value, actor, true);
             }
-            case "CREATE_RELEASE" -> createRelease(scope, p, value, actor);
-            case "APPROVE_RELEASE" -> {
+            case CREATE_RELEASE -> createRelease(scope, p, value, actor);
+            case APPROVE_RELEASE -> {
                 var release = find(p, "releases", value.path("releaseId").asText());
                 if (!"PENDING".equals(release.path("status").asText()))
                     throw conflict("RELEASE_STATE", "Release is not pending");
@@ -407,7 +412,7 @@ public class PresalesService {
                         .put("approvedBy", actor)
                         .put("approvalReason", value.path("reason").asText());
             }
-            case "PUBLISH_RELEASE" -> {
+            case PUBLISH_RELEASE -> {
                 var release = find(p, "releases", value.path("releaseId").asText());
                 if (!"APPROVED".equals(release.path("status").asText()))
                     throw conflict("RELEASE_STATE", "Exact release must be approved");
@@ -431,8 +436,8 @@ public class PresalesService {
                     snapshot.set("sourceRefs", refs);
                 }
             }
-            case "APPROVE_BASELINE" -> baseline(scope, p, value, actor);
-            case "SAVE_FIT_GAP" -> {
+            case APPROVE_BASELINE -> baseline(scope, p, value, actor);
+            case SAVE_FIT_GAP -> {
                 find(p, "requirements", value.path("requirementId").asText());
                 enumValue(
                         value,
@@ -448,7 +453,7 @@ public class PresalesService {
                 }
                 saveItem(p, "fitGaps", value, actor, true);
             }
-            case "SAVE_SOLUTION" -> saveSolutionDraft(p, value, actor, false);
+            case SAVE_SOLUTION -> saveSolutionDraft(p, value, actor, false);
             default -> throw bad("Unsupported command: " + action);
         }
         p.put("stage", PresalesProjectListing.stage(p));
@@ -1087,16 +1092,16 @@ public class PresalesService {
             return false;
         Set<String> keys = new HashSet<>();
         command.payload().fieldNames().forEachRemaining(keys::add);
-        return switch (Objects.toString(command.action(), "")) {
-            case "UPDATE_PROJECT" ->
+        return switch (command.parsedAction().kind()) {
+            case UPDATE_PROJECT ->
                     keys.equals(Set.of("agentId"))
                             && command.payload().path("agentId").isTextual()
                             && !command.payload().path("agentId").asText().isBlank();
-            case "BIND_MATERIAL" ->
+            case BIND_MATERIAL ->
                     keys.stream().allMatch(REPAIR_BIND_FIELDS::contains)
                             && command.payload().path("kbId").isTextual()
                             && !command.payload().path("kbId").asText().isBlank();
-            case "UNBIND_MATERIAL" ->
+            case UNBIND_MATERIAL ->
                     keys.equals(Set.of("id"))
                             && command.payload().path("id").isTextual()
                             && !command.payload().path("id").asText().isBlank();
