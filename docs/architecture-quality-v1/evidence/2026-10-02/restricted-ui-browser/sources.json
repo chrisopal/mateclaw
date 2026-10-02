@@ -1,0 +1,10 @@
+{
+  "mateclaw-ui/src/features/presales/api/presalesApi.ts": "ee0688bf27dd5867c06807fe72f64ceb768552988dddd8ed7439afb57ea06af1",
+  "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "26adc693e55d2d3cd16a91f5dbd28d37be9e20db2a0c05fd98cc172ff74ddfb9",
+  "mateclaw-ui/src/features/presales/shared/state.ts": "ccfc49287ffe10b82dca49c7f13b59f5eab44ccf57b36b3ed7d43bd42994197c",
+  "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "25cfbee69aa4f19039965715e1178e15e4865eb74db3e3278d068ad8341edab1",
+  "mateclaw-ui/src/features/presales/__tests__/state.test.ts": "b20d260e0453cb20c002189453a2ce3eed4a3d31b5cfa591f960244dcab561ff",
+  "mateclaw-ui/src/i18n/locales/en-US.ts": "d8070e3359bdeda2d8ae6a95681f955da05bf020699b63c5b3da7b6a32a8821d",
+  "mateclaw-ui/src/i18n/locales/zh-CN.ts": "c60a34eb97c8539a27f3fc3198c3a9bbc2bb3f5d44413c96bae9e0f8f588f0c7",
+  "mateclaw-ui/src/features/presales/shared/messages.ts": "311af4b6b7edc774652e99d23cbf078a2b9ff9c733bae8202299352144c243fa"
+}

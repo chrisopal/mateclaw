@@ -201,3 +201,5 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 2026-10-02 AQ-02历史/成果切片复用宿主ProjectSourceAccess，当前材料和既有baseline/task来源受当前项目员工KB权限约束，实际raw归属不信任快照kbId。H2真实HTTP47项定向回归通过；无员工旧项目、批准政策和发布字节保持。冻结release独有来源/material解绑/员工重绑定及完整历史交集仍未验收，详见evidence/2026-10-02/AQ02_HISTORY_SOURCE_ACCEPTANCE.md。
 
 2026-10-02 冻结来源第二片：复核所有对象型release快照，包括候选；绑定员工项目保留当前KB绑定交集。命令/回放按当前employee授权响应副本，受限时返回已有summary+sourceAccessRestricted而不改回执；修复绑定后恢复完整响应。48项H2定向回归和限定独立审阅通过，受限UI/多方言/并发/原执行pin仍待验收；见evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md。
+
+2026-10-02 受限响应UI：明确sourceAccessRestricted提示并禁用生成，保留授权绑定修复，清理来源编辑/详情/预览及迟到下载；实际403轮询丢弃旧数据。27项售前组件/状态回归、SIMULATED真实组件浏览器绑定修复通过，浏览器台账INCOMPLETE。GET403后的授权元数据/修复读取契约、真实角色/QA继续待设计验收；见evidence/2026-10-02/AQ02_RESTRICTED_UI_ACCEPTANCE.md。
