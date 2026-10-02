@@ -37,3 +37,7 @@ PresalesProjectItems75行拥有原find/save/text/enum规则：string ID、UUID�
 修复后dev5tb4lj9_ SCAN_PASS；核心12/OWL11/服务端74共97项、零失败/错误/跳过，包含原SemanticM2IntegrationTest7项和售前67项。原回执整响应断言未变，未更新snapshot或门禁/依赖配置。完整树必须在修复后重新检查；ADR-AQ-021仍Proposed，正式AC-20及多方言/迁移/业务QA仍NOT_RUN。
 
 独立authority_review扩大审阅：签名修复APPROVE_BOUNDED、零严重度发现；核心旧验证/语义回执/售前工程回归通过，格式化diff中唯一行为变动为排序构造器。LSP仍Transport closed。正式验收和完整树提交权限不由该意见授予。
+
+## 精确源码树封口
+
+源码提交 `05f3223de83be6b78e57624517225dd1b214a684`，tree `1166ebc3947187faf694cf127dc13a46767b7727`。修复后完整暂存s99n7uhq与正常commit hook qb4q38el均exit0/PASS/submission_ready=true并绑定此树。Java6063总数/5993实际执行/既有70跳过，零失败/错误；UI846/846、类型/ID/Node/enterprise/classic构建通过，仅无UI格式/lint目标为NOT_APPLICABLE。两份真实JSON报告与SHA归档；初次lojyxc1n FAIL仍保留。所有八份源码/测试与原日志SHA核对一致，正常源码提交后工作树干净。证据封口按固定文档影响另验，正式QA/远端required CI未升级。

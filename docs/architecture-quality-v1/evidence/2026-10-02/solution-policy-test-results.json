@@ -106,7 +106,9 @@
     "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format.txt": "351ea3e96a6c680bfb7e0ebbd8ed41c1b22fe7abfd91fc6b568b4dac53106273",
     "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/failed-full-java-summary.txt": "584ef001d46fcd8171800ca3e4314413d8b58abfa6a87194997e6d511ba1729a",
     "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/failed-full-gate-report.json": "383d8d76c11ce77582d4b37ee1626b089b5656cc44859c71cffe314ce4cc98d9",
-    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format-check.txt": "8e6096441cc1082251b34064a182f5faf8ad1d8788a5776aa0753132d7af4b98"
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format-check.txt": "8e6096441cc1082251b34064a182f5faf8ad1d8788a5776aa0753132d7af4b98",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/staged-gate-report.json": "9f82e6286f2063bf266da0e414dadd758bc6cba47ba19a394e6a0ca7b304222c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/commit-hook-report.json": "134a1b6910b80494ee652f963f08a21b20ec1e2669e037a62bd1efb5f3861368"
   },
   "evidence_redaction": {
     "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/initial-dev.txt": {
@@ -400,5 +402,21 @@
       "findings": 0,
       "diagnostics_limitation": "LSP Transport closed; actual JDK21 compile/tests and manual diff"
     }
+  },
+  "full_gate": {
+    "source_commit": "05f3223de83be6b78e57624517225dd1b214a684",
+    "checked_tree": "1166ebc3947187faf694cf127dc13a46767b7727",
+    "staged_task": "s99n7uhq",
+    "commit_hook_task": "qb4q38el",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6063,
+    "java_executed": 5993,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "types_ID_Node_builds": "PASS",
+    "ui_format_lint": "NOT_APPLICABLE no UI targets"
   }
 }
