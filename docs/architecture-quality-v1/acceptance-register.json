@@ -197,9 +197,11 @@
       "status": "NOT_RUN",
       "evidence": [
         "evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md",
-        "evidence/2026-10-02/polling-lifecycle-test-results.json"
+        "evidence/2026-10-02/polling-lifecycle-test-results.json",
+        "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
+        "evidence/2026-10-02/view-confirmation-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN"
     },
     {
       "id": "AC-14",
@@ -231,8 +233,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
+        "evidence/2026-10-02/view-confirmation-test-results.json"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN"
     },
     {
       "id": "AC-17",
@@ -290,9 +295,11 @@
         "evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md",
         "evidence/2026-10-01/runtime-test-results.json",
         "evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md",
-        "evidence/2026-10-02/polling-lifecycle-test-results.json"
+        "evidence/2026-10-02/polling-lifecycle-test-results.json",
+        "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
+        "evidence/2026-10-02/view-confirmation-test-results.json"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN"
     },
     {
       "id": "AC-22",
@@ -392,9 +399,11 @@
       "status": "NOT_RUN",
       "evidence": [
         "evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md",
-        "evidence/2026-10-02/polling-lifecycle-test-results.json"
+        "evidence/2026-10-02/polling-lifecycle-test-results.json",
+        "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
+        "evidence/2026-10-02/view-confirmation-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN"
     },
     {
       "id": "AC-31",

@@ -1,0 +1,11 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT typecheck
+> vue-tsc --noEmit
+
+src/features/presales/__tests__/presalesWorkbench.test.ts(180,53): error TS2739: Type '{ artifactId: string; slides: { filename: string; title: string; }[]; }' is missing the following properties from type 'PresalesPresentation': skill, skillVersion, pageCount
+src/features/presales/__tests__/presalesWorkbench.test.ts(181,76): error TS2739: Type '{ artifactId: string; slides: { filename: string; title: string; }[]; }' is missing the following properties from type 'PresalesPresentation': skill, skillVersion, pageCount
+src/features/presales/__tests__/presalesWorkbench.test.ts(211,53): error TS2739: Type '{ artifactId: string; slides: { filename: string; title: string; }[]; }' is missing the following properties from type 'PresalesPresentation': skill, skillVersion, pageCount
+src/features/presales/__tests__/presalesWorkbench.test.ts(212,76): error TS2739: Type '{ artifactId: string; slides: { filename: string; title: string; }[]; }' is missing the following properties from type 'PresalesPresentation': skill, skillVersion, pageCount
+src/features/presales/__tests__/presalesWorkbench.test.ts(231,31): error TS2345: Argument of type '"confirm"' is not assignable to parameter of type 'MessageBoxData | PromiseLike<MessageBoxData>'.
+src/features/presales/pages/PresalesWorkbench.vue(2481,21): error TS7053: Element implicitly has an 'any' type because expression of type 'Editor' can't be used to index type '{ material: string; requirement: string; clarification: string; baseline: string; fitgap: string; solution: string; release: string; review: string; context: string; }'.
+  Property 'project' does not exist on type '{ material: string; requirement: string; clarification: string; baseline: string; fitgap: string; solution: string; release: string; review: string; context: string; }'.

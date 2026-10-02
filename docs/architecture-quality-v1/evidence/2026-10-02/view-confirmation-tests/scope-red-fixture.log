@@ -1,0 +1,122 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT test
+> vitest run --run src/features/presales
+
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (35 tests | 6 failed) 14747ms
+     × keeps the latest evidence selection when two reads finish in reverse order 155ms
+     × keeps the latest presentation after a late success from the first selection 89ms
+     × keeps the latest presentation after a late error from the first selection 80ms
+     × does not retarget an archive confirmation after navigating to another project 101ms
+     × does not close or contaminate a replacement editor after an old command success 41ms
+     × does not close or contaminate a replacement editor after an old command 409 42ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest evidence selection when two reads finish in reverse order
+AssertionError: expected 'Evidence and referencesAbout displaye…' to contain 'Current second evidence'
+
+- Expected
++ Received
+
+- Current second evidence
++ Evidence and referencesAbout displayed evidenceOnly authorized server content is shown; external images and scripts are not executed. Wiki and semantic evidence records are authoritative for source text and snapshots.idreq-1titleFirstgraphIdgraph-1evidenceIds[
++   "evidence-1"
++ ]sourceSnapshot{
++   "text": "Late first evidence"
++ }
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:164:63
+    162|     finishFirst()
+    163|     await settle()
+    164|     expect(document.querySelector('.el-drawer')?.textContent).toContai…
+       |                                                               ^
+    165|     expect(document.querySelector('.el-drawer')?.textContent).not.toCo…
+    166|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late success from the first selection
+AssertionError: expected 'first.svg' to be 'second.svg' // Object.is equality
+
+Expected: "second.svg"
+Received: "first.svg"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:198:87
+    196|       finishFirst()
+    197|       await settle()
+    198|       expect(document.querySelector('img.presentation-preview')?.getAt…
+       |                                                                                       ^
+    199|       expect(document.body.textContent).not.toContain('Late first prev…
+    200|       expect(createUrl).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late error from the first selection
+AssertionError: expected '← ProjectsPlant AEdit projectLate fir…' not to contain 'Late first preview failure'
+
+Expected: "Late first preview failure"
+Received: "← ProjectsPlant AEdit projectLate first preview failureReloadActiveCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions1Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedNo project context yet.Employee activity · SucceededInput snapshotLegacy generationOutput draft · ppt-master-plus ·  ·  pagesPreview First slidePreview Second slide{}WorkEmployeeStatusFailure reasonPrevious taskSucceededAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeRequirement coverageDefinitionA section reference links a requirement to the solution; it does not by itself prove deliverability.Requirement responseNot applicableSection referencesNot applicable (zero denominator)RequirementScopeFulfillment approachResponseLatest solution sectionsNo Data · V1DraftRevise this versionDownload draftsolution.mdsolution.docxsolution.pptxConfirmed requirements · UnconfirmedThis version is not linked to confirmed requirements.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and referencessecond.svg"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:199:45
+    197|       await settle()
+    198|       expect(document.querySelector('img.presentation-preview')?.getAt…
+    199|       expect(document.body.textContent).not.toContain('Late first prev…
+       |                                             ^
+    200|       expect(createUrl).toHaveBeenCalledTimes(1)
+    201|       expect(revokeUrl).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not retarget an archive confirmation after navigating to another project
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "90071992547409999",
+      "90071992547409996",
+      Object {
+        "action": "ARCHIVE",
+        "expectedVersion": 3,
+        "operationId": "75223e4c-70de-41ad-b404-8afb0898b890",
+        "payload": Object {},
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:245:39
+    243|       confirm()
+    244|       await settle()
+    245|       expect(presalesApi.command).not.toHaveBeenCalled()
+       |                                       ^
+    246|     } finally { prompt.mockRestore() }
+    247|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not close or contaminate a replacement editor after an old command success
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not close or contaminate a replacement editor after an old command 409
+TypeError: Cannot read properties of undefined (reading 'click')
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:260:15
+    258|       (item) => item.textContent === 'Materials',
+    259|     )!
+    260|     materials.click()
+       |               ^
+    261|     await settle()
+    262|     button('Bind material').click()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  6 failed | 51 passed (57)
+   Start at  12:46:28
+   Duration  15.62s (transform 385ms, setup 0ms, import 800ms, tests 14.78s, environment 496ms)
+

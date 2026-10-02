@@ -1,0 +1,47 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT test
+> vitest run --run src/features/presales/__tests__/presalesWorkbench.test.ts -t replacement editor
+
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (35 tests | 2 failed | 33 skipped) 602ms
+     × does not close or contaminate a replacement editor after an old command success 348ms
+     × does not close or contaminate a replacement editor after an old command 409 253ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not close or contaminate a replacement editor after an old command success
+AssertionError: expected 'none' not to be 'none' // Object.is equality
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:287:77
+    285|     await settle()
+    286|     expect(document.body.textContent).not.toContain('Old command confl…
+    287|     expect(newInput.closest<HTMLElement>('.el-overlay')?.style.display…
+       |                                                                             ^
+    288|     expect(newInput.value).toBe('new-kb')
+    289|     expect(button('Save').disabled).toBe(false)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not close or contaminate a replacement editor after an old command 409
+AssertionError: expected '← ProjectsPlant AEdit projectOld comm…' not to contain 'Old command conflict'
+
+Expected: "Old command conflict"
+Received: "← ProjectsPlant AEdit projectOld command conflictThe record changed. Your edits are retained. Close the editor, refresh and compare the latest version before resubmitting.ReloadActiveCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions0Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedNo project context yet.Employee activityWorkEmployeeStatusFailure reasonNo DataAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeNo solution. Confirm the outline before drafting sections.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and referencesBind materialKnowledge basenew-kbNo fact review graph yet. Bind one before confirming requirements.Open Wiki to upload and parse materialAdvanced: source identifiersKnowledge base IDGraph ID (optional)Source roleProject materialOld command conflictUnsaved changesCancelSaveNo dataProject materialProduct materialCase material"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:286:43
+    284|     finish()
+    285|     await settle()
+    286|     expect(document.body.textContent).not.toContain('Old command confl…
+       |                                           ^
+    287|     expect(newInput.closest<HTMLElement>('.el-overlay')?.style.display…
+    288|     expect(newInput.value).toBe('new-kb')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 33 skipped (35)
+   Start at  12:48:28
+   Duration  1.42s (transform 323ms, setup 0ms, import 615ms, tests 602ms, environment 109ms)
+

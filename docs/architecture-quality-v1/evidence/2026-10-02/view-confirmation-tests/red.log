@@ -1,0 +1,123 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT test
+> vitest run --run src/features/presales
+
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest evidence selection when two reads finish in reverse order
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late success from the first selection
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late error from the first selection
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not retarget an archive confirmation after navigating to another project
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (33 tests | 4 failed) 14637ms
+     × keeps the latest evidence selection when two reads finish in reverse order 149ms
+     × keeps the latest presentation after a late success from the first selection 88ms
+     × keeps the latest presentation after a late error from the first selection 78ms
+     × does not retarget an archive confirmation after navigating to another project 96ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest evidence selection when two reads finish in reverse order
+AssertionError: expected 'Evidence and referencesAbout displaye…' to contain 'Current second evidence'
+
+- Expected
++ Received
+
+- Current second evidence
++ Evidence and referencesAbout displayed evidenceOnly authorized server content is shown; external images and scripts are not executed. Wiki and semantic evidence records are authoritative for source text and snapshots.idreq-1titleFirstgraphIdgraph-1evidenceIds[
++   "evidence-1"
++ ]sourceSnapshot{
++   "text": "Late first evidence"
++ }
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:158:63
+    156|     finishFirst()
+    157|     await settle()
+    158|     expect(document.querySelector('.el-drawer')?.textContent).toContai…
+       |                                                               ^
+    159|     expect(document.querySelector('.el-drawer')?.textContent).not.toCo…
+    160|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late success from the first selection
+AssertionError: expected 'first.svg' to be 'second.svg' // Object.is equality
+
+Expected: "second.svg"
+Received: "first.svg"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:192:87
+    190|       finishFirst()
+    191|       await settle()
+    192|       expect(document.querySelector('img.presentation-preview')?.getAt…
+       |                                                                                       ^
+    193|       expect(document.body.textContent).not.toContain('Late first prev…
+    194|       expect(createUrl).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps the latest presentation after a late error from the first selection
+AssertionError: expected '← ProjectsPlant AEdit projectLate fir…' not to contain 'Late first preview failure'
+
+Expected: "Late first preview failure"
+Received: "← ProjectsPlant AEdit projectLate first preview failureReloadActiveCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions1Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedNo project context yet.Employee activity · SucceededInput snapshotLegacy generationOutput draft · ppt-master-plus ·  ·  pagesPreview First slidePreview Second slide{}WorkEmployeeStatusFailure reasonPrevious taskSucceededAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeRequirement coverageDefinitionA section reference links a requirement to the solution; it does not by itself prove deliverability.Requirement responseNot applicableSection referencesNot applicable (zero denominator)RequirementScopeFulfillment approachResponseLatest solution sectionsNo Data · V1DraftRevise this versionDownload draftsolution.mdsolution.docxsolution.pptxConfirmed requirements · UnconfirmedThis version is not linked to confirmed requirements.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and referencessecond.svg"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:193:45
+    191|       await settle()
+    192|       expect(document.querySelector('img.presentation-preview')?.getAt…
+    193|       expect(document.body.textContent).not.toContain('Late first prev…
+       |                                             ^
+    194|       expect(createUrl).toHaveBeenCalledTimes(1)
+    195|       expect(revokeUrl).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > does not retarget an archive confirmation after navigating to another project
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "90071992547409999",
+      "90071992547409996",
+      Object {
+        "action": "ARCHIVE",
+        "expectedVersion": 3,
+        "operationId": "414db5de-9edd-46a3-9095-7cdb0783e6b3",
+        "payload": Object {},
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:239:39
+    237|       confirm()
+    238|       await settle()
+    239|       expect(presalesApi.command).not.toHaveBeenCalled()
+       |                                       ^
+    240|     } finally { prompt.mockRestore() }
+    241|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  4 failed | 51 passed (55)
+   Start at  12:44:10
+   Duration  15.49s (transform 378ms, setup 0ms, import 781ms, tests 14.67s, environment 492ms)
+

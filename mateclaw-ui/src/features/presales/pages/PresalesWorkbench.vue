@@ -1617,6 +1617,7 @@ import {
 } from '../api/presalesApi'
 import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
+import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, presalesError, coverageLabel, operationReceipt } from '../shared/state'
 const { t } = useI18n({ messages: presalesMessages })
 const narrowQuery = window.matchMedia('(max-width: 768px)')
@@ -1630,6 +1631,26 @@ const route = useRoute(),
   router = useRouter(),
   workspace = useWorkspaceStore()
 const projectId = computed(() => String(route.params.projectId || ''))
+let scopeGeneration = 0
+function captureScope() {
+  return {
+    workspaceId: workspace.currentWorkspaceId,
+    projectId: projectId.value,
+    generation: scopeGeneration,
+  }
+}
+function isActiveScope(scope: ReturnType<typeof captureScope>) {
+  return (
+    scope.generation === scopeGeneration &&
+    !!scope.workspaceId &&
+    isCurrentRequest(
+      scope.workspaceId,
+      workspace.currentWorkspaceId,
+      scope.projectId,
+      projectId.value,
+    )
+  )
+}
 const members = ref<PresalesMember[]>([]),
   membersLoading = ref(false),
   membersError = ref('')
@@ -1813,68 +1834,20 @@ const canApprove = computed(
   () =>
     canGenerate.value && !!capabilities.value?.canApprove && !!capabilities.value?.semanticEnabled,
 )
-const evidenceOpen = ref(false),
-  evidence = ref<PresalesRecord>()
-const presentationPreview = ref({ open: false, url: '', title: '' })
-async function previewPresentation(presentation: PresalesRecord, filename: string) {
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value,
-    artifactId = String(presentation.artifactId || '')
-  const current = project.value
-  const solutionId = project.value?.solutions?.find(
-    (solution: PresalesRecord) => solution.presentation?.artifactId === artifactId,
-  )?.id
-  if (!ws || !id || !solutionId || !filename) return
-  try {
-    const blob = await presalesApi.file(ws, id, solutionId, filename, 'draft')
-    if (
-      project.value !== current ||
-      project.value?.sourceAccessRestricted ||
-      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      return
-    if (presentationPreview.value.url) URL.revokeObjectURL(presentationPreview.value.url)
-    presentationPreview.value = {
-      open: true,
-      url: URL.createObjectURL(new Blob([blob], { type: 'image/svg+xml' })),
-      title: filename,
-    }
-  } catch (e) {
-    error.value = presalesError(e).message
-  }
-}
-function clearPresentationPreview() {
-  if (presentationPreview.value.url) URL.revokeObjectURL(presentationPreview.value.url)
-  presentationPreview.value = { open: false, url: '', title: '' }
-}
-async function showEvidence(record: PresalesRecord) {
-  if (project.value?.sourceAccessRestricted) return
-  const current = project.value
-  evidence.value = record
-  evidenceOpen.value = true
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value
-  const evidenceId = record.evidenceIds?.[0] || record.evidenceRefs?.[0]
-  if (!ws || !record.graphId || !evidenceId) return
-  try {
-    const result = await presalesApi.evidence(ws, id, record.graphId, String(evidenceId))
-    if (
-      project.value === current &&
-      isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      evidence.value = { ...record, sourceSnapshot: result }
-  } catch (e) {
-    if (
-      project.value === current &&
-      isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      evidence.value = {
-        id: record.id,
-        status: 'UNAVAILABLE',
-        error: presalesError(e).message,
-      }
-  }
-}
+const sourcePreview = usePresalesSourcePreview({
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  project,
+  error,
+})
+const {
+  evidenceOpen,
+  evidence,
+  presentationPreview,
+  showEvidence,
+  previewPresentation,
+  clearPresentationPreview,
+} = sourcePreview
 function versionLabel(kind: 'solutions' | 'releases', id: string): string {
   const index = project.value?.[kind].findIndex((item) => item.id === id) ?? -1
   return index < 0 ? '—' : `V${index + 1}`
@@ -1992,6 +1965,16 @@ function acceptProject(detail: PresalesProject) {
   if (detail.tasks?.some((task) => task.status === 'RUNNING' && task.operationId))
     taskPolling.start()
 }
+function acceptMutation(detail: PresalesProject, scope: ReturnType<typeof captureScope>) {
+  if (!isActiveScope(scope)) return false
+  if (detail.version < (project.value?.version || 0)) {
+    conflict.value = true
+    error.value = editError.value = t('presales.context_message_1')
+    return false
+  }
+  acceptProject(detail)
+  return true
+}
 async function readProject(ws: string, id: string, signal: AbortSignal): Promise<PresalesProject> {
   try {
     return await presalesApi.get(ws, id, signal)
@@ -2066,6 +2049,7 @@ async function readProject(ws: string, id: string, signal: AbortSignal): Promise
 }
 async function load() {
   if (dirty.value) return
+  scopeGeneration++
   controller?.abort()
   controller = new AbortController()
   taskPolling.reset()
@@ -2082,8 +2066,11 @@ async function load() {
   project.value = undefined
   projects.value = []
   capabilities.value = undefined
-  evidence.value = undefined
-  evidenceOpen.value = false
+  sourcePreview.reset()
+  saving.value = false
+  optionsLoading.value = false
+  employeesLoading.value = false
+  editError.value = ''
   compareId.value = ''
   if (!ws) {
     error.value = t('presales.select_a_workspace')
@@ -2167,6 +2154,19 @@ const editorOpen = ref(false),
   form = ref<PresalesEditorForm>({}),
   editError = ref(''),
   initialForm = ref('')
+let editorGeneration = 0
+watch(
+  editorOpen,
+  (open) => {
+    if (!open) {
+      editorGeneration++
+      sourceOptions.value = []
+      statementOptions.value = []
+      optionsLoading.value = false
+    }
+  },
+  { flush: 'sync' },
+)
 const editableRequirements = computed(() => {
   const baseline = project.value?.baselines.find((item) => item.id === form.value.baselineId)
   return (project.value?.requirements || []).filter(
@@ -2207,9 +2207,11 @@ const editorTitle = computed(
 function openEditor(kind: Editor, record?: PresalesRecord) {
   if (
     !canWrite.value ||
+    saving.value ||
     (project.value?.sourceAccessRestricted && !['employee', 'material'].includes(kind))
   )
     return
+  editorGeneration++
   editorKind.value = kind
   editError.value = ''
   if (kind === 'project' || kind === 'employee') void loadEmployees()
@@ -2286,9 +2288,16 @@ function openEditor(kind: Editor, record?: PresalesRecord) {
   if (kind === 'material' || kind === 'requirement') void loadOptions(kind)
 }
 async function loadOptions(kind: Editor) {
+  const scope = captureScope(),
+    session = editorGeneration
   const ws = workspace.currentWorkspaceId,
     id = projectId.value
   if (!ws) return
+  const active = () =>
+    isActiveScope(scope) &&
+    session === editorGeneration &&
+    editorOpen.value &&
+    editorKind.value === kind
   optionsLoading.value = true
   sourceOptions.value = []
   statementOptions.value = []
@@ -2297,19 +2306,13 @@ async function loadOptions(kind: Editor) {
       kind === 'material'
         ? [await presalesApi.sources(ws), undefined]
         : [undefined, await presalesApi.statements(ws, id)]
-    if (
-      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) ||
-      !editorOpen.value ||
-      editorKind.value !== kind ||
-      (kind !== 'material' && project.value?.sourceAccessRestricted)
-    )
-      return
+    if (!active() || (kind !== 'material' && project.value?.sourceAccessRestricted)) return
     if (sources) sourceOptions.value = sources
     if (statements) statementOptions.value = statements
   } catch (e) {
-    editError.value = presalesError(e).message
+    if (active()) editError.value = presalesError(e).message
   } finally {
-    optionsLoading.value = false
+    if (active()) optionsLoading.value = false
   }
 }
 function selectSource(kbId: string) {
@@ -2330,12 +2333,22 @@ async function discard(): Promise<boolean> {
     editorOpen.value = false
     return true
   }
+  const scope = captureScope(),
+    session = editorGeneration,
+    draft = JSON.stringify(form.value)
   try {
     await ElMessageBox.confirm(
       t('presales.discard_unsaved_changes'),
       t('presales.unsaved_changes_2'),
       { type: 'warning' },
     )
+    if (
+      !isActiveScope(scope) ||
+      session !== editorGeneration ||
+      saving.value ||
+      draft !== JSON.stringify(form.value)
+    )
+      return false
     editorOpen.value = false
     return true
   } catch {
@@ -2343,7 +2356,7 @@ async function discard(): Promise<boolean> {
   }
 }
 async function closeEditor(done: () => void) {
-  if (await discard()) done()
+  if ((await discard()) && !editorOpen.value) done()
 }
 onBeforeRouteLeave(discard)
 onBeforeRouteUpdate(discard)
@@ -2356,6 +2369,7 @@ function beforeUnload(event: BeforeUnloadEvent) {
 }
 window.addEventListener('beforeunload', beforeUnload)
 async function command(action: string, payload: object): Promise<boolean> {
+  const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     current = project.value
   if (!ws || !current || !canWrite.value || saving.value) return false
@@ -2387,20 +2401,23 @@ async function command(action: string, payload: object): Promise<boolean> {
         payload,
       }),
     })
-    if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value))
-      acceptProject(result)
-    return true
+    return acceptMutation(result, scope)
   } catch (e) {
+    if (!isActiveScope(scope)) return false
     const issue = presalesError(e)
     conflict.value = issue.conflict
     error.value = editError.value = issue.message
     return false
   } finally {
-    saving.value = false
+    if (isActiveScope(scope)) saving.value = false
   }
 }
 async function save() {
   if (!canWrite.value || saving.value || conflict.value) return
+  const scope = captureScope(),
+    session = editorGeneration,
+    kind = editorKind.value
+  const active = () => isActiveScope(scope) && session === editorGeneration && editorOpen.value
   const data = JSON.parse(JSON.stringify(form.value))
   const required: Partial<Record<Editor, string[]>> = {
     project: ['name', 'customer'],
@@ -2414,23 +2431,24 @@ async function save() {
     review: ['solutionId', 'summary'],
     context: ['title', 'text'],
   }
-  if (required[editorKind.value]?.some((key) => !String(data[key] || '').trim())) {
+  if (required[kind]?.some((key) => !String(data[key] || '').trim())) {
     editError.value = t('presales.complete_the_required_fields')
     return
   }
   if (
-    editorKind.value === 'clarification' &&
+    kind === 'clarification' &&
     data.status === 'ANSWERED' &&
     (!data.answer?.trim() || !data.answerSourceId?.trim())
   ) {
     editError.value = t('presales.context_message_28')
     return
   }
-  if (editorKind.value === 'employee') {
-    if (await command('UPDATE_PROJECT', { agentId: data.agentId || '' })) editorOpen.value = false
+  if (kind === 'employee') {
+    if ((await command('UPDATE_PROJECT', { agentId: data.agentId || '' })) && active())
+      editorOpen.value = false
     return
   }
-  if (editorKind.value === 'project') {
+  if (kind === 'project') {
     const ws = workspace.currentWorkspaceId
     if (!ws) return
     saving.value = true
@@ -2453,23 +2471,22 @@ async function save() {
       const result = project.value
         ? await presalesApi.update(ws, project.value.id, body)
         : await presalesApi.create(ws, body)
+      if (!active() || !acceptMutation(result, scope)) return
       editorOpen.value = false
       saving.value = false
-      if (ws === workspace.currentWorkspaceId) {
-        acceptProject(result)
-        if (projectId.value) await load()
-        else await router.push(`/presales/${result.id}`)
-      }
+      if (projectId.value) await load()
+      else await router.push(`/presales/${result.id}`)
     } catch (e) {
+      if (!active()) return
       const issue = presalesError(e)
       editError.value = error.value = issue.message
       conflict.value = issue.conflict
     } finally {
-      saving.value = false
+      if (isActiveScope(scope)) saving.value = false
     }
     return
   }
-  if (editorKind.value === 'fitgap') {
+  if (kind === 'fitgap') {
     data.evidenceIds = String(data.evidenceText || '')
       .split(',')
       .map((id: string) => id.trim())
@@ -2488,24 +2505,21 @@ async function save() {
     context: 'SAVE_CONTEXT',
   }
   const payload =
-    editorKind.value === 'material' && project.value?.sourceAccessRestricted
+    kind === 'material' && project.value?.sourceAccessRestricted
       ? {
           kbId: data.kbId,
           graphId: data.graphId || '',
           role: data.role || 'PROJECT',
         }
       : data
-  if (await command(actions[editorKind.value], payload)) {
+  if ((await command(actions[kind], payload)) && active()) {
     editorOpen.value = false
-    if (
-      editorKind.value === 'clarification' &&
-      data.status === 'ANSWERED' &&
-      project.value?.agentId
-    )
+    if (kind === 'clarification' && data.status === 'ANSWERED' && project.value?.agentId)
       await continueEmployee()
   }
 }
 async function downloadHandoff() {
+  const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     id = projectId.value
   const current = project.value
@@ -2513,6 +2527,7 @@ async function downloadHandoff() {
   try {
     const result = await presalesApi.handoff(ws, id)
     if (
+      !isActiveScope(scope) ||
       project.value !== current ||
       project.value?.sourceAccessRestricted ||
       !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
@@ -2528,10 +2543,11 @@ async function downloadHandoff() {
     link.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   } catch (e) {
-    error.value = presalesError(e).message
+    if (isActiveScope(scope) && project.value === current) error.value = presalesError(e).message
   }
 }
 async function download(versionId: string, filename: string, kind: 'files' | 'preview' | 'draft') {
+  const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     id = projectId.value
   const current = project.value
@@ -2539,6 +2555,7 @@ async function download(versionId: string, filename: string, kind: 'files' | 'pr
   try {
     const blob = await presalesApi.file(ws, id, versionId, filename, kind)
     if (
+      !isActiveScope(scope) ||
       project.value !== current ||
       project.value?.sourceAccessRestricted ||
       !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
@@ -2551,16 +2568,26 @@ async function download(versionId: string, filename: string, kind: 'files' | 'pr
     link.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   } catch (e) {
-    error.value = presalesError(e).message
+    if (isActiveScope(scope) && project.value === current) error.value = presalesError(e).message
   }
 }
 async function approveRelease(release: PresalesRecord) {
+  const scope = captureScope(),
+    current = project.value
+  if (!current || !canApprove.value || saving.value) return
   try {
     const result = await ElMessageBox.prompt(
       t('presales.context_message_29'),
       t('presales.approve_release'),
       { inputValidator: (value) => !!value?.trim() },
     )
+    if (
+      !isActiveScope(scope) ||
+      current.id !== project.value?.id ||
+      current.version !== project.value.version ||
+      !canApprove.value
+    )
+      return
     await command('APPROVE_RELEASE', {
       releaseId: release.id,
       reason: result.value,
@@ -2596,13 +2623,23 @@ function adopt(skill: string | undefined, item: PresalesRecord) {
     })
 }
 async function archive() {
-  if (!canWrite.value || project.value?.sourceAccessRestricted) return
+  const scope = captureScope(),
+    current = project.value
+  if (!current || !canWrite.value || current.sourceAccessRestricted || saving.value) return
   try {
     await ElMessageBox.confirm(
       t('presales.archive_this_project_and_make_it_read_only'),
       t('presales.archive_project'),
       { type: 'warning' },
     )
+    if (
+      !isActiveScope(scope) ||
+      current.id !== project.value?.id ||
+      current.version !== project.value.version ||
+      !canWrite.value ||
+      project.value.sourceAccessRestricted
+    )
+      return
     await command('ARCHIVE', {})
   } catch {
     /* Cancel leaves data unchanged. */
@@ -2612,6 +2649,7 @@ const generationOpen = ref(false),
   employees = ref<PresalesEmployee[]>([]),
   employeeError = ref(''),
   employeesLoading = ref(false)
+let employeeRequest = 0
 const generation = ref({ skill: 'S1', taskGoal: '' })
 const skillNames = computed(() => ({
   S1: t('presales.analyze_project_context'),
@@ -2624,33 +2662,35 @@ const skillNames = computed(() => ({
   S8: t('presales.prepare_handoff'),
 }))
 async function loadEmployees() {
+  const scope = captureScope(),
+    request = ++employeeRequest
   const ws = workspace.currentWorkspaceId
   if (!ws) return
+  const active = () => isActiveScope(scope) && request === employeeRequest
   employees.value = []
   employeeError.value = ''
   employeesLoading.value = true
   try {
     const result = await presalesApi.employees(ws)
-    if (ws === workspace.currentWorkspaceId) employees.value = result
+    if (active()) employees.value = result
   } catch (e) {
-    if (ws === workspace.currentWorkspaceId)
-      employeeError.value = employeeIssue(presalesError(e).message)
+    if (active()) employeeError.value = employeeIssue(presalesError(e).message)
   } finally {
-    if (ws === workspace.currentWorkspaceId) employeesLoading.value = false
+    if (active()) employeesLoading.value = false
   }
 }
-async function openGeneration(skill: string) {
-  if (dirty.value || !canGenerate.value) return
+async function openGeneration(skill: string, taskGoal = t('presales.context_message_30')) {
+  if (dirty.value || saving.value || !canGenerate.value) return
   generation.value.skill = skill
-  generation.value.taskGoal = t('presales.context_message_30')
+  generation.value.taskGoal = taskGoal
   generationOpen.value = true
   await loadEmployees()
 }
 async function continueEmployee() {
-  await openGeneration('S2')
-  generation.value.taskGoal = t('presales.context_message_31')
+  await openGeneration('S2', t('presales.context_message_31'))
 }
 async function generate() {
+  const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     current = project.value
   if (!ws || !current || dirty.value || saving.value || !canGenerate.value) return
@@ -2667,36 +2707,37 @@ async function generate() {
       expectedVersion: current.version,
       operationId,
     })
-    if (isCurrentRequest(ws, workspace.currentWorkspaceId, current.id, projectId.value)) {
-      acceptProject(result)
+    if (acceptMutation(result, scope)) {
       taskPolling.start()
+      generationOpen.value = false
     }
-    generationOpen.value = false
   } catch (e) {
+    if (!isActiveScope(scope)) return
     const issue = presalesError(e)
     error.value = employeeError.value = employeeIssue(issue.message)
     conflict.value = issue.conflict
   } finally {
-    saving.value = false
+    if (isActiveScope(scope)) saving.value = false
   }
 }
 async function cancelTask(task: PresalesTask) {
+  const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     id = projectId.value
-  if (!ws || !id || !canWrite.value || task.status !== 'RUNNING') return
+  if (!ws || !id || !canWrite.value || saving.value || task.status !== 'RUNNING') return
   saving.value = true
   try {
     const result = await presalesApi.cancelTask(ws, id, task.id, {
       operationId: receipt({ ws, id, taskId: task.id, action: 'cancel' }),
     })
-    if (isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value))
-      acceptProject(result)
+    acceptMutation(result, scope)
   } catch (e) {
+    if (!isActiveScope(scope)) return
     const issue = presalesError(e)
     error.value = employeeError.value = employeeIssue(issue.message)
     conflict.value = issue.conflict
   } finally {
-    saving.value = false
+    if (isActiveScope(scope)) saving.value = false
   }
 }
 watch(
@@ -2720,14 +2761,16 @@ watch(
 watch(
   [() => workspace.currentWorkspaceId, projectId],
   () => {
+    scopeGeneration++
     editorOpen.value = false
     generationOpen.value = false
     page.value = 1
     void load()
   },
-  { immediate: true },
+  { immediate: true, flush: 'sync' },
 )
 onBeforeUnmount(() => {
+  scopeGeneration++
   portfolioController?.abort()
   controller?.abort()
   taskPolling.reset()

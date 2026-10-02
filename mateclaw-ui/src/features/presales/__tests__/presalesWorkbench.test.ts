@@ -3,8 +3,8 @@ import { createI18n } from 'vue-i18n'
 import enMessages from '@/i18n/locales/en-US'
 import zhMessages from '@/i18n/locales/zh-CN'
 import { createApp, nextTick } from 'vue'
-import { createMemoryHistory, createRouter } from 'vue-router'
-import ElementPlus from 'element-plus'
+import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
+import ElementPlus, { ElMessageBox } from 'element-plus'
 import Workbench from '../pages/PresalesWorkbench.vue'
 import { presalesApi, type PresalesRepairContext } from '../api/presalesApi'
 vi.mock('../api/presalesApi', () => ({
@@ -30,12 +30,23 @@ vi.mock('../api/presalesApi', () => ({
   ),
 }))
 vi.mock('../shared/locale', () => ({ label: (_zh: string, en: string) => en }))
-vi.mock('@/stores/useWorkspaceStore', () => ({
-  useWorkspaceStore: () => ({
+const workspaceFixture = vi.hoisted(() => ({
+  beforeSwitch: undefined as (() => Promise<boolean>) | undefined,
+  current: {
     currentWorkspaceId: '90071992547409999',
-    registerBeforeSwitch: () => () => {},
-  }),
+    registerBeforeSwitch: (guard: () => Promise<boolean>) => {
+      workspaceFixture.beforeSwitch = guard
+      return () => {
+        if (workspaceFixture.beforeSwitch === guard) workspaceFixture.beforeSwitch = undefined
+      }
+    },
+  },
 }))
+vi.mock('@/stores/useWorkspaceStore', async () => {
+  const { reactive } = await import('vue')
+  workspaceFixture.current = reactive(workspaceFixture.current)
+  return { useWorkspaceStore: () => workspaceFixture.current }
+})
 const project = {
   id: '90071992547409998',
   workspaceId: '90071992547409999',
@@ -73,13 +84,16 @@ async function settle() {
 async function mount(path = '/presales') {
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/presales/:projectId?', component: Workbench }],
+    routes: [
+      { path: '/presales/:projectId?', component: Workbench },
+      { path: '/outside', component: { template: '<div>Outside page</div>' } },
+    ],
   })
   await router.push(path)
   await router.isReady()
   const root = document.createElement('div')
   document.body.append(root)
-  app = createApp(Workbench)
+  app = createApp(RouterView)
   app.use(router)
   app.use(ElementPlus)
   const translations = createI18n({
@@ -102,8 +116,14 @@ function button(label: string): HTMLButtonElement {
   if (!result) throw new Error(`Button not found: ${label}`)
   return result
 }
+function confirmed(value = ''): Awaited<ReturnType<typeof ElMessageBox.confirm>> {
+  // Element Plus declares input data intersected with Action; runtime prompts return this object.
+  return { action: 'confirm', value } as Awaited<ReturnType<typeof ElMessageBox.confirm>>
+}
 beforeEach(() => {
   vi.resetAllMocks()
+  workspaceFixture.beforeSwitch = undefined
+  workspaceFixture.current.currentWorkspaceId = project.workspaceId
   vi.mocked(presalesApi.members).mockResolvedValue([
     { id: 'membership', userId: project.ownerId, nickname: 'Jane Doe', username: 'jane' },
   ])
@@ -125,6 +145,506 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 describe('presales workspace behavior', () => {
+  it('keeps the latest evidence selection when two reads finish in reverse order', async () => {
+    let finishFirst!: () => void
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      requirements: [
+        { id: 'req-1', title: 'First', graphId: 'graph-1', evidenceIds: ['evidence-1'] },
+        { id: 'req-2', title: 'Second', graphId: 'graph-1', evidenceIds: ['evidence-2'] },
+      ],
+    })
+    vi.mocked(presalesApi.evidence)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishFirst = () => resolve({ text: 'Late first evidence' })
+          }),
+      )
+      .mockResolvedValue({ text: 'Current second evidence' })
+    await mount(`/presales/${project.id}`)
+    const tab = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find((item) =>
+      item.textContent?.includes('Requirements & questions'),
+    )!
+    tab.click()
+    await settle()
+    const evidenceButtons = [...document.querySelectorAll('button')].filter(
+      (item) => item.textContent?.trim() === 'Evidence',
+    )
+    evidenceButtons[0].click()
+    await settle()
+    evidenceButtons[1].click()
+    await settle()
+    expect(document.querySelector('.el-drawer')?.textContent).toContain('Current second evidence')
+    finishFirst()
+    await settle()
+    expect(document.querySelector('.el-drawer')?.textContent).toContain('Current second evidence')
+    expect(document.querySelector('.el-drawer')?.textContent).not.toContain('Late first evidence')
+  })
+
+  it.each(['success', 'error'] as const)(
+    'keeps the latest presentation after a late %s from the first selection',
+    async (outcome) => {
+      let finishFirst!: () => void
+      const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:current-preview')
+      const revokeUrl = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+      try {
+        const presentation = {
+          artifactId: 'artifact-1',
+          skill: 'ppt-master-plus',
+          skillVersion: '1.0',
+          pageCount: 2,
+          slides: [
+            { filename: 'first.svg', title: 'First slide' },
+            { filename: 'second.svg', title: 'Second slide' },
+          ],
+        }
+        vi.mocked(presalesApi.get).mockResolvedValue({
+          ...project,
+          solutions: [{ id: 'solution-1', presentation }],
+          tasks: [{ id: 'task-1', status: 'SUCCEEDED', result: { solution: { presentation } } }],
+        })
+        vi.mocked(presalesApi.file)
+          .mockImplementationOnce(
+            () =>
+              new Promise((resolve, reject) => {
+                finishFirst = () =>
+                  outcome === 'success'
+                    ? resolve(new Blob(['<svg>first</svg>']))
+                    : reject(new Error('Late first preview failure'))
+              }),
+          )
+          .mockResolvedValue(new Blob(['<svg>second</svg>']))
+        await mount(`/presales/${project.id}`)
+        button('Preview First slide').click()
+        await settle()
+        button('Preview Second slide').click()
+        await settle()
+        expect(document.querySelector('img.presentation-preview')?.getAttribute('alt')).toBe(
+          'second.svg',
+        )
+        finishFirst()
+        await settle()
+        expect(document.querySelector('img.presentation-preview')?.getAttribute('alt')).toBe(
+          'second.svg',
+        )
+        expect(document.body.textContent).not.toContain('Late first preview failure')
+        expect(createUrl).toHaveBeenCalledTimes(1)
+        expect(revokeUrl).not.toHaveBeenCalled()
+      } finally {
+        createUrl.mockRestore()
+        revokeUrl.mockRestore()
+      }
+    },
+  )
+
+  it('does not create a presentation URL after its component is unmounted', async () => {
+    let finish!: () => void
+    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:late-preview')
+    try {
+      const presentation = {
+        artifactId: 'artifact-1',
+        skill: 'ppt-master-plus',
+        skillVersion: '1.0',
+        pageCount: 2,
+        slides: [{ filename: 'first.svg', title: 'First slide' }],
+      }
+      vi.mocked(presalesApi.get).mockResolvedValue({
+        ...project,
+        solutions: [{ id: 'solution-1', presentation }],
+        tasks: [{ id: 'task-1', status: 'SUCCEEDED', result: { solution: { presentation } } }],
+      })
+      vi.mocked(presalesApi.file).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = () => resolve(new Blob(['<svg>late</svg>']))
+          }),
+      )
+      await mount(`/presales/${project.id}`)
+      button('Preview First slide').click()
+      await settle()
+      app!.unmount()
+      app = undefined
+      finish()
+      await settle()
+      expect(createUrl).not.toHaveBeenCalled()
+    } finally {
+      createUrl.mockRestore()
+    }
+  })
+
+  it('does not retarget an archive confirmation after navigating to another project', async () => {
+    let confirm!: () => void
+    const prompt = vi.spyOn(ElMessageBox, 'confirm').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          confirm = () => resolve(confirmed())
+        }),
+    )
+    try {
+      const router = await mount(`/presales/${project.id}`)
+      button('Archive').click()
+      await settle()
+      const nextProject = { ...project, id: '90071992547409996', name: 'Replacement project' }
+      vi.mocked(presalesApi.get).mockResolvedValue(nextProject)
+      expect(prompt).toHaveBeenCalledTimes(1)
+      await router.push(`/presales/${nextProject.id}`)
+      await settle()
+      expect(document.body.textContent).toContain('Replacement project')
+      confirm()
+      await settle()
+      expect(presalesApi.command).not.toHaveBeenCalled()
+    } finally {
+      prompt.mockRestore()
+    }
+  })
+
+  it.each(['success', '409'] as const)(
+    'does not close or contaminate a replacement editor after an old command %s',
+    async (outcome) => {
+      let finish!: () => void
+      vi.mocked(presalesApi.command).mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            finish = () =>
+              outcome === 'success'
+                ? resolve({ ...project, version: 4 })
+                : reject({ response: { status: 409, data: { msg: 'Old command conflict' } } })
+          }),
+      )
+      await mount(`/presales/${project.id}`)
+      const materials = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find((item) =>
+        item.textContent?.includes('Materials'),
+      )!
+      materials.click()
+      await settle()
+      button('Bind material').click()
+      await settle()
+      document.querySelector<HTMLDetailsElement>('.el-dialog details')!.open = true
+      const kbInput = document.querySelector<HTMLInputElement>('.el-dialog details input')!
+      kbInput.value = 'old-kb'
+      kbInput.dispatchEvent(new Event('input', { bubbles: true }))
+      button('Save').click()
+      await settle()
+      expect(presalesApi.command).toHaveBeenCalledTimes(1)
+      vi.mocked(presalesApi.get).mockResolvedValue({ ...project, workspaceId: '90071992547409995' })
+      workspaceFixture.current.currentWorkspaceId = '90071992547409995'
+      await settle()
+      ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+        .find((item) => item.textContent?.includes('Materials'))!
+        .click()
+      await settle()
+      button('Bind material').click()
+      await settle()
+      document.querySelector<HTMLDetailsElement>('.el-dialog details')!.open = true
+      const newInput = document.querySelector<HTMLInputElement>('.el-dialog details input')!
+      newInput.value = 'new-kb'
+      newInput.dispatchEvent(new Event('input', { bubbles: true }))
+      finish()
+      await settle()
+      expect(document.body.textContent).not.toContain('Old command conflict')
+      expect(newInput.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+      expect(newInput.value).toBe('new-kb')
+      expect(button('Save').disabled).toBe(false)
+    },
+  )
+
+  it('does not reuse an archive confirmation after leaving and returning to the same project', async () => {
+    let confirm!: () => void
+    const prompt = vi.spyOn(ElMessageBox, 'confirm').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          confirm = () => resolve(confirmed())
+        }),
+    )
+    try {
+      const router = await mount(`/presales/${project.id}`)
+      button('Archive').click()
+      await settle()
+      await router.push('/presales')
+      await settle()
+      await router.push(`/presales/${project.id}`)
+      await settle()
+      confirm()
+      await settle()
+      expect(presalesApi.command).not.toHaveBeenCalled()
+    } finally {
+      prompt.mockRestore()
+    }
+  })
+
+  it('keeps the confirmed target and exact version for a current archive', async () => {
+    const prompt = vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue(confirmed())
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4, status: 'ARCHIVED' })
+    try {
+      await mount(`/presales/${project.id}`)
+      button('Archive').click()
+      await settle()
+      expect(presalesApi.command).toHaveBeenCalledWith(
+        project.workspaceId,
+        project.id,
+        expect.objectContaining({ action: 'ARCHIVE', expectedVersion: 3, payload: {} }),
+      )
+      expect(button('Edit project').disabled).toBe(true)
+    } finally {
+      prompt.mockRestore()
+    }
+  })
+
+  it('rejects an approval confirmation when polling accepts a newer revision', async () => {
+    let confirm!: () => void
+    const prompt = vi.spyOn(ElMessageBox, 'prompt').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          confirm = () => resolve(confirmed('Reviewed exact files'))
+        }),
+    )
+    const active = {
+      ...project,
+      releases: [{ id: 'release-1', status: 'PENDING' }],
+      tasks: [{ id: 'task-1', operationId: 'op-1', status: 'RUNNING' }],
+    }
+    vi.mocked(presalesApi.get)
+      .mockResolvedValueOnce(active)
+      .mockResolvedValue({ ...active, version: 4, tasks: [] })
+    try {
+      await mount(`/presales/${project.id}`)
+      ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+        .find((item) => item.textContent?.includes('Review & outputs'))!
+        .click()
+      await settle()
+      button('Approve release').click()
+      await settle()
+      expect(prompt).toHaveBeenCalledTimes(1)
+      await new Promise((resolve) => setTimeout(resolve, 1100))
+      await settle()
+      expect(document.body.textContent).toContain('Record version 4')
+      confirm()
+      await settle()
+      expect(presalesApi.command).not.toHaveBeenCalled()
+    } finally {
+      prompt.mockRestore()
+    }
+  })
+
+  it('does not discard edits made while the unsaved-changes confirmation is pending', async () => {
+    let confirm!: () => void
+    const prompt = vi.spyOn(ElMessageBox, 'confirm').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          confirm = () => resolve(confirmed())
+        }),
+    )
+    try {
+      await mount(`/presales/${project.id}`)
+      button('Edit project').click()
+      await settle()
+      const name = document.querySelector<HTMLInputElement>('.el-dialog input')!
+      name.value = 'First draft'
+      name.dispatchEvent(new Event('input', { bubbles: true }))
+      const pending = workspaceFixture.beforeSwitch!()
+      await settle()
+      name.value = 'Updated draft'
+      name.dispatchEvent(new Event('input', { bubbles: true }))
+      confirm()
+      expect(await pending).toBe(false)
+      await settle()
+      expect(name.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+      expect(name.value).toBe('Updated draft')
+      expect(presalesApi.update).not.toHaveBeenCalled()
+    } finally {
+      prompt.mockRestore()
+    }
+  })
+
+  it('keeps a newer polled revision and the draft when an older command succeeds', async () => {
+    let finish!: () => void
+    const active = { ...project, tasks: [{ id: 'task-1', operationId: 'op-1', status: 'RUNNING' }] }
+    vi.mocked(presalesApi.get)
+      .mockResolvedValueOnce(active)
+      .mockResolvedValue({ ...project, version: 5, name: 'Latest project' })
+    vi.mocked(presalesApi.command).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = () => resolve({ ...project, version: 4, name: 'Old command result' })
+        }),
+    )
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent?.includes('Materials'))!
+      .click()
+    await settle()
+    button('Bind material').click()
+    await settle()
+    document.querySelector<HTMLDetailsElement>('.el-dialog details')!.open = true
+    const kb = document.querySelector<HTMLInputElement>('.el-dialog details input')!
+    kb.value = 'kb-draft'
+    kb.dispatchEvent(new Event('input', { bubbles: true }))
+    button('Save').click()
+    await settle()
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+    await settle()
+    expect(document.body.textContent).toContain('Record version 5')
+    finish()
+    await settle()
+    expect(document.body.textContent).toContain('Latest project')
+    expect(document.body.textContent).not.toContain('Old command result')
+    expect(kb.value).toBe('kb-draft')
+    expect(kb.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+    expect(button('Save').disabled).toBe(true)
+  })
+
+  it('does not release the replacement command busy state when an old command finishes', async () => {
+    let finishOld!: () => void, finishCurrent!: () => void
+    const newWorkspace = '90071992547409995'
+    vi.mocked(presalesApi.command)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishOld = () => resolve({ ...project, version: 4 })
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishCurrent = () => resolve({ ...project, workspaceId: newWorkspace, version: 4 })
+          }),
+      )
+    await mount(`/presales/${project.id}`)
+    const editMaterial = async (kbId: string) => {
+      ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+        .find((item) => item.textContent?.includes('Materials'))!
+        .click()
+      await settle()
+      button('Bind material').click()
+      await settle()
+      document.querySelector<HTMLDetailsElement>('.el-dialog details')!.open = true
+      const input = document.querySelector<HTMLInputElement>('.el-dialog details input')!
+      input.value = kbId
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      button('Save').click()
+      await settle()
+      return input
+    }
+    await editMaterial('old-kb')
+    vi.mocked(presalesApi.get).mockResolvedValue({ ...project, workspaceId: newWorkspace })
+    workspaceFixture.current.currentWorkspaceId = newWorkspace
+    await settle()
+    const currentInput = await editMaterial('new-kb')
+    expect(presalesApi.command).toHaveBeenCalledTimes(2)
+    finishOld()
+    await settle()
+    expect(button('Save').classList.contains('is-loading')).toBe(true)
+    expect(currentInput.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+    finishCurrent()
+    await settle()
+    expect(currentInput.closest<HTMLElement>('.el-overlay')?.style.display).toBe('none')
+  })
+
+  it.each(['success', '409'] as const)(
+    'rejects an old project update %s after Workspace replacement',
+    async (outcome) => {
+      let finish!: () => void
+      vi.mocked(presalesApi.update).mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            finish = () =>
+              outcome === 'success'
+                ? resolve({ ...project, version: 4, name: 'Old update result' })
+                : reject({ response: { status: 409, data: { msg: 'Old update conflict' } } })
+          }),
+      )
+      await mount(`/presales/${project.id}`)
+      button('Edit project').click()
+      await settle()
+      const oldInput = document.querySelector<HTMLInputElement>('.el-dialog input')!
+      oldInput.value = 'Old edit'
+      oldInput.dispatchEvent(new Event('input', { bubbles: true }))
+      button('Save').click()
+      await settle()
+      expect(presalesApi.update).toHaveBeenCalledTimes(1)
+      vi.mocked(presalesApi.get).mockResolvedValue({
+        ...project,
+        workspaceId: '90071992547409995',
+        name: 'Current project',
+      })
+      workspaceFixture.current.currentWorkspaceId = '90071992547409995'
+      await settle()
+      button('Edit project').click()
+      await settle()
+      const newInput = document.querySelector<HTMLInputElement>('.el-dialog input')!
+      newInput.value = 'Current draft'
+      newInput.dispatchEvent(new Event('input', { bubbles: true }))
+      finish()
+      await settle()
+      expect(document.body.textContent).toContain('Current project')
+      expect(document.body.textContent).not.toContain('Old update conflict')
+      expect(document.body.textContent).not.toContain('Old update result')
+      expect(newInput.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+      expect(newInput.value).toBe('Current draft')
+      expect(button('Save').disabled).toBe(false)
+    },
+  )
+
+  it('runs the real route-leave guard and retains a dirty draft when discard is cancelled', async () => {
+    const confirm = vi.spyOn(ElMessageBox, 'confirm').mockRejectedValue('cancel')
+    try {
+      const router = await mount(`/presales/${project.id}`)
+      button('Edit project').click()
+      await settle()
+      const name = document.querySelector<HTMLInputElement>('.el-dialog input')!
+      name.value = 'Retained draft'
+      name.dispatchEvent(new Event('input', { bubbles: true }))
+      await router.push('/outside')
+      await settle()
+      expect(confirm).toHaveBeenCalledTimes(1)
+      expect(router.currentRoute.value.path).toBe(`/presales/${project.id}`)
+      expect(name.value).toBe('Retained draft')
+      expect(name.closest<HTMLElement>('.el-overlay')?.style.display).not.toBe('none')
+      expect(document.body.textContent).not.toContain('Outside page')
+    } finally {
+      confirm.mockRestore()
+    }
+  })
+
+  it.each(['success', 'error'] as const)(
+    'keeps reopened material options after an old options %s',
+    async (outcome) => {
+      let finish!: () => void
+      vi.mocked(presalesApi.sources)
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve, reject) => {
+              finish = () =>
+                outcome === 'success'
+                  ? resolve([{ kbId: 'old-kb', name: 'Old source option' }])
+                  : reject(new Error('Old options failure'))
+            }),
+        )
+        .mockResolvedValue([{ kbId: 'current-kb', name: 'Current source option' }])
+      await mount(`/presales/${project.id}`)
+      ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+        .find((item) => item.textContent?.includes('Materials'))!
+        .click()
+      await settle()
+      button('Bind material').click()
+      await settle()
+      button('Cancel').click()
+      await settle()
+      button('Bind material').click()
+      await settle()
+      expect(presalesApi.sources).toHaveBeenCalledTimes(2)
+      document.querySelector<HTMLElement>('.el-dialog .el-select__wrapper')!.click()
+      await settle()
+      expect(document.body.textContent).toContain('Current source option')
+      finish()
+      await settle()
+      expect(document.body.textContent).toContain('Current source option')
+      expect(document.body.textContent).not.toContain('Old source option')
+      expect(document.body.textContent).not.toContain('Old options failure')
+    },
+  )
+
   it('recovers a member repair view after full read denial and unbinds only the opaque binding', async () => {
     vi.mocked(presalesApi.get).mockRejectedValue({
       response: { status: 403, data: { msg: 'Source access denied' } },
