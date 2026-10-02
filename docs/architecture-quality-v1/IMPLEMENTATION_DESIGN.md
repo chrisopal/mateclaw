@@ -314,3 +314,9 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 泛型声明不能证明响应身份或集合结构。详情/五类变更、列表及修复从 unknown 解码；复用 Workspace request，校验已有项目 ID 与捕获 Workspace。返回合法原对象，保留历史状态及 opaque context/sourceSnapshot/handoffSnapshot；nested record 不伪造实体 ID。修复依照后端16个 metadata、12个空集合和 id/role 白名单，不能成为授权凭据。分页保留真实 long 字符串，在安全整数验证后供工作台转换。
 
 拒绝归一化或补空集合：会隐藏畸形数据并改变历史 payload。已声明 optional 字段的错误类型/null 拒绝是明确新增准入限制，真实存量数据尚未抽样；独立 statements nullable evidence 契约未在本片冒充已完成。原26正例、新负例旧实现25失败、最终37响应/215售前/912全UI通过；独立限定审阅无剩余问题。完整检查因主机990秒维护休眠出现真实失败，保留日志并仅对检查进程临时保活后重跑成功，未弱化断言/超时/门禁。回退只涉及源码，无迁移。正式AC、完整DTO、SQL/V2、浏览器/live model和远端强制CI仍待完成；证据见AQ05_PROJECT_RESPONSE_ACCEPTANCE。
+
+### ADR-AQ-027：查询投影独立 DTO 并在用户选择时排除空证据（Proposed）
+
+成员/来源/可信事实/员工/能力从unknown按各自字段解码，复用已有售前校验原语与Workspace请求。查询不继承PresalesRecord：真实来源name/图修订与成员姓名可空，事实evidenceIds允许null列表/成员；元数据、缺省、字符串ID、扩展及原对象保持。成员Workspace比对只证明响应一致性，授权仍由服务器完成。来源label用既有Element Plus值回退，不新增业务占位数据。
+
+拒绝宽化所有项目记录或改写raw事实/快照。用户选择事实时只排除null证据项，保留有效ID顺序/重复和精确事实修订；全列表null仍沿用空草稿行为。这是显式修复旧UI把null复制为ID的行为，不在加载或历史回读时迁移数据。旧API27拒绝断言和旧编辑1条断言失败，最终42查询/19编辑/259售前/956全UI通过，独立限定复核无发现。来源/员工权限、事务/CAS/receipt、取消与迟到结果不变；Java按frontend-only规则不适用。完整领域DTO/UnknownStatus/SQL/V2、真实浏览器/存量/模型/正式QA与远端强制CI仍待完成，证据见AQ05_QUERY_RESPONSE_ACCEPTANCE。回退只影响本批查询类型/解码与选择投影，无数据库操作。

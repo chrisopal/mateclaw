@@ -330,7 +330,8 @@
         "evidence/2026-10-02/AQ05_COMMAND_KIND_ACCEPTANCE.md",
         "evidence/2026-10-02/command-kind-test-results.json",
         "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_MUTATION_REQUEST_ACCEPTANCE.md",
-        "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_RESPONSE_ACCEPTANCE.md"
+        "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_RESPONSE_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_QUERY_RESPONSE_ACCEPTANCE.md"
       ],
       "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；完整门禁发现语义回执signatureIris非确定性顺序，构造器排序修复，新3项旧实现2红例/修复后97定向通过含原整响应回放断言；正式幂等/多方言/QA仍NOT_RUN"
     },
@@ -506,7 +507,8 @@
         "evidence/2026-10-02/command-kind-test-results.json",
         "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_SUMMARY_ACCEPTANCE.md",
         "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_MUTATION_REQUEST_ACCEPTANCE.md",
-        "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_RESPONSE_ACCEPTANCE.md"
+        "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_RESPONSE_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_QUERY_RESPONSE_ACCEPTANCE.md"
       ],
       "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN；列表筛选/内存分页/摘要/stage职责提取，旧15/最终58项HTTP/H2/事务及纯投影合同通过，惰性decode和原Page保持；完整DTO/SQL分页/多方言/正式QA仍未完成；方案政策prepare/coverage及项目项修订职责提取，旧28/最终67項H2/HTTP/事务及纯合同通过，原Java错误和wire保持；完整DTO/SQL/V2/正式QA仍待完成"
     },
