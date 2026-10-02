@@ -205,3 +205,7 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 2026-10-02 受限响应UI：明确sourceAccessRestricted提示并禁用生成，保留授权绑定修复，清理来源编辑/详情/预览及迟到下载；实际403轮询丢弃旧数据。27项售前组件/状态回归、SIMULATED真实组件浏览器绑定修复通过，浏览器台账INCOMPLETE。GET403后的授权元数据/修复读取契约、真实角色/QA继续待设计验收；见evidence/2026-10-02/AQ02_RESTRICTED_UI_ACCEPTANCE.md。
 
 2026-10-02 AQ-02 安全修复读取：member 专用 repair-context 采用显式元数据白名单、空来源集合与不透明绑定 ID；只允许严格绑定/解绑/agentId-only 替换绕过旧来源复核，新目标授权、CAS、归档、回执保持。UI 在真实403后验证最小契约并清除来源状态。H2定向26项与UI35项通过，独立安全审阅无阻断；SIMULATED浏览器台账INCOMPLETE，正式QA不升级。见 `evidence/2026-10-02/AQ02_REPAIR_CONTEXT_ACCEPTANCE.md`。
+
+### ADR-AQ-007：来源授权策略与领域只读事实端口（Proposed，已实施工程切片）
+
+2026-10-02：PresalesService保留用例事务与旧错误适配，PresalesSourceAuthorization负责材料/历史/冻结发布和digest复核；Wiki/Semantic公共只读服务封装自身repository，不再由售前直接查询外域表。读取事实不授予成员或员工权限，调用者先完成真实主体和范围授权。治理读端口不随semantic功能开关移除，保留关闭模块后的历史撤回拒绝。代价是两个明确读契约与既有异常兼容适配；拒绝捕获快照的提取端口、业务integration中藏SQL、基础权限服务承担内容读取或一次性整聚合迁移。H2原50/新21共71项及独立增量安全审核通过；正式QA/多方言仍待签收。见 `evidence/2026-10-02/AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md`。

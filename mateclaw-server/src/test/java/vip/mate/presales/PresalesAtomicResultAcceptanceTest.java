@@ -85,12 +85,13 @@ class PresalesAtomicResultAcceptanceTest {
         ObjectProvider<PresalesEmployeeRuntime> employees = mock(ObjectProvider.class);
         when(employees.getIfAvailable()).thenReturn(runtime);
         when(employees.getObject()).thenReturn(runtime);
+        var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         var service =
                 new PresalesService(
                         jdbc,
                         json,
                         access,
-                        mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class),
+                        wiki,
                         mock(ObjectProvider.class),
                         mock(ObjectProvider.class),
                         mock(vip.mate.semantic.config.SemanticProperties.class),
@@ -99,7 +100,16 @@ class PresalesAtomicResultAcceptanceTest {
                         employees,
                         new ProjectAuthorityFence(
                                 jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)),
-                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
+                        new PresalesSourceAuthorization(
+                                json,
+                                wiki,
+                                new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc),
+                                new vip.mate.wiki.service.WikiSourceReadService(
+                                        new vip.mate.wiki.repository.WikiSourceReadRepository(
+                                                jdbc)),
+                                new vip.mate.semantic.source.SourceGovernanceReadService(
+                                        new vip.mate.semantic.source.repository
+                                                .SourceGovernanceReadRepository(jdbc))));
         var candidate =
                 (ObjectNode)
                         json.readTree(
@@ -202,12 +212,13 @@ class PresalesAtomicResultAcceptanceTest {
         ObjectProvider<PresalesEmployeeRuntime> employees = mock(ObjectProvider.class);
         when(employees.getIfAvailable()).thenReturn(runtime);
         when(employees.getObject()).thenReturn(runtime);
+        var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         var service =
                 new PresalesService(
                         jdbc,
                         json,
                         access,
-                        mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class),
+                        wiki,
                         mock(ObjectProvider.class),
                         mock(ObjectProvider.class),
                         mock(vip.mate.semantic.config.SemanticProperties.class),
@@ -216,7 +227,16 @@ class PresalesAtomicResultAcceptanceTest {
                         employees,
                         new ProjectAuthorityFence(
                                 jdbc, mock(org.mybatis.spring.SqlSessionTemplate.class)),
-                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
+                        new PresalesSourceAuthorization(
+                                json,
+                                wiki,
+                                new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc),
+                                new vip.mate.wiki.service.WikiSourceReadService(
+                                        new vip.mate.wiki.repository.WikiSourceReadRepository(
+                                                jdbc)),
+                                new vip.mate.semantic.source.SourceGovernanceReadService(
+                                        new vip.mate.semantic.source.repository
+                                                .SourceGovernanceReadRepository(jdbc))));
         var candidate =
                 (ObjectNode)
                         json.readTree(

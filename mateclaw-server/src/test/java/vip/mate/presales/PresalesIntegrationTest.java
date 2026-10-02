@@ -14,6 +14,11 @@ import vip.mate.semantic.support.SemanticHttpFixture;
 @Import({
     PresalesAccess.class,
     PresalesService.class,
+    PresalesSourceAuthorization.class,
+    vip.mate.wiki.service.WikiSourceReadService.class,
+    vip.mate.wiki.repository.WikiSourceReadRepository.class,
+    vip.mate.semantic.source.SourceGovernanceReadService.class,
+    vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,

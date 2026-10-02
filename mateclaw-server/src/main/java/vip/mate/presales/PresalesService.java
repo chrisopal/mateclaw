@@ -21,7 +21,6 @@ import vip.mate.semantic.statement.StatementApplicationService;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
 import vip.mate.workspace.core.service.ProjectAuthorityFence;
-import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
@@ -70,7 +69,7 @@ public class PresalesService {
     private final PresalesArtifactRenderer renderer;
     private final ObjectProvider<PresalesEmployeeRuntime> employees;
     private final ProjectAuthorityFence authorityFence;
-    private final ProjectSourceAccess sourceAccess;
+    private final PresalesSourceAuthorization sourceAuthorization;
 
     public PresalesService(
             JdbcTemplate jdbc,
@@ -84,8 +83,8 @@ public class PresalesService {
             PresalesArtifactRenderer renderer,
             ObjectProvider<PresalesEmployeeRuntime> employees,
             ProjectAuthorityFence authorityFence,
-            ProjectSourceAccess sourceAccess) {
-        this.sourceAccess = sourceAccess;
+            PresalesSourceAuthorization sourceAuthorization) {
+        this.sourceAuthorization = sourceAuthorization;
         this.employees = employees;
         this.authorityFence = authorityFence;
         this.jdbc = jdbc;
@@ -1090,130 +1089,29 @@ public class PresalesService {
         return refs;
     }
 
-    private void authorizeMaterials(String scope, ObjectNode p) {
-        for (var m : p.withArray("materials")) {
-            var kb = wiki.getById(parseId(m.path("kbId").asText()));
-            if (kb == null
-                    || kb.getWorkspaceId() == null
-                    || !scope.equals(kb.getWorkspaceId().toString())
-                    || (kb.getDeleted() != null && kb.getDeleted() != 0))
-                throw new SemanticApiException(
-                        403, "MATERIAL_UNAVAILABLE", "Project material access was revoked");
-            authorizeEmployeeKb(scope, p, m.path("kbId").asText());
-        }
-        for (var baseline : p.withArray("baselines"))
-            for (var ref : baseline.path("references"))
-                for (var source : ref.path("sources")) {
-                    authorizeHistoricalSource(scope, p, source.path("sourceRef").asText());
-                    int withdrawn =
-                            jdbc.queryForObject(
-                                    "SELECT COUNT(*) FROM mate_semantic_source_governance WHERE graph_id=? AND"
-                                            + " source_id=? AND state='WITHDRAWN'",
-                                    Integer.class,
-                                    ref.path("graphId").asText(),
-                                    source.path("sourceRef").asText());
-                    if (withdrawn > 0)
-                        throw new SemanticApiException(
-                                403, "SOURCE_UNAVAILABLE", "Historical evidence source withdrawn");
-                }
-        for (var task : p.withArray("tasks"))
-            for (var source : task.path("contextSnapshot").path("sources")) {
-                authorizeHistoricalSource(scope, p, source.path("sourceRef").asText());
-                String graph = source.path("graphId").asText();
-                if (!graph.isBlank()
-                        && jdbc.queryForObject(
-                                        "SELECT COUNT(*) FROM mate_semantic_source_governance WHERE graph_id=? AND source_id=? AND state='WITHDRAWN'",
-                                        Integer.class,
-                                        graph,
-                                        source.path("sourceRef").asText())
-                                > 0)
-                    throw new SemanticApiException(
-                            403, "SOURCE_UNAVAILABLE", "Task source withdrawn");
-            }
+    private void authorizeMaterials(String scope, ObjectNode project) {
+        checkSourceAccess(() -> sourceAuthorization.authorizeMaterials(scope, project));
     }
 
     private void authorizeReleaseSources(String scope, ObjectNode project) {
-        Set<String> boundKbs = new HashSet<>();
-        for (var material : project.path("materials")) boundKbs.add(material.path("kbId").asText());
-        for (var release : project.path("releases")) {
-            JsonNode snapshot = release.path("handoffSnapshot");
-            // Legacy releases without frozen provenance retain existing read gates.
-            if (!snapshot.isObject()) continue;
-            if (!project.path("agentId").asText().isBlank())
-                for (var material : snapshot.path("materials"))
-                    if (!boundKbs.contains(material.path("kbId").asText()))
-                        throw new SemanticApiException(
-                                403,
-                                "SOURCE_UNAVAILABLE",
-                                "Release source is no longer bound to the project");
-            // Project a read-only source view; never modify the frozen snapshot or rerender
-            // artifacts.
-            ObjectNode historical = json.createObjectNode();
-            historical.put("agentId", project.path("agentId").asText());
-            historical.set("materials", snapshot.path("materials").deepCopy());
-            var baselines = historical.putArray("baselines");
-            if (snapshot.path("baseline").isObject())
-                baselines.add(snapshot.path("baseline").deepCopy());
-            var references = baselines.addObject().putArray("references");
-            for (var ref : snapshot.path("sourceRefs")) {
-                if (ref.isObject() && ref.path("sources").isArray()) {
-                    references.add(ref.deepCopy());
-                    continue;
-                }
-                String sourceId = ref.isTextual() ? ref.asText() : ref.path("sourceRef").asText();
-                if (sourceId.isBlank())
-                    throw new SemanticApiException(
-                            403, "SOURCE_UNAVAILABLE", "Release source provenance is unavailable");
-                authorizeHistoricalSource(scope, project, sourceId);
-                // Scalar clarification refs inherit the frozen material graph scopes.
-                for (var material : snapshot.path("materials")) {
-                    var reference =
-                            references
-                                    .addObject()
-                                    .put("graphId", material.path("graphId").asText());
-                    reference.putArray("sources").addObject().put("sourceRef", sourceId);
-                }
-            }
-            authorizeMaterials(scope, historical);
-        }
-    }
-
-    private void authorizeHistoricalSource(String scope, ObjectNode project, String sourceId) {
-        currentSource(scope, sourceId, "", false);
-        String employeeId = project.path("agentId").asText();
-        if (!employeeId.isBlank()
-                && !sourceAccess.canEmployeeReadSource(scope, employeeId, sourceId))
-            throw new SemanticApiException(
-                    403, "SOURCE_UNAVAILABLE", "Project employee source access was revoked");
+        checkSourceAccess(() -> sourceAuthorization.authorizeReleaseSources(scope, project));
     }
 
     private void authorizeEmployeeKb(String scope, ObjectNode project, String kbId) {
-        String employeeId = project.path("agentId").asText();
-        // Legacy human-only projects retain their existing Workspace/source authorization.
-        if (!employeeId.isBlank() && !sourceAccess.canEmployeeReadKb(scope, employeeId, kbId))
-            throw new SemanticApiException(
-                    403, "SOURCE_UNAVAILABLE", "Project employee source access was revoked");
+        checkSourceAccess(() -> sourceAuthorization.authorizeEmployeeKb(scope, project, kbId));
     }
 
     private void currentSource(String scope, String sourceId, String digest, boolean checkDigest) {
-        var rows =
-                jdbc.queryForList(
-                        "SELECT COALESCE(NULLIF(r.extracted_text,''),r.original_content) AS source_text FROM"
-                                + " mate_wiki_raw_material r JOIN mate_wiki_knowledge_base k ON k.id=r.kb_id WHERE"
-                                + " r.id=? AND k.workspace_id=? AND r.deleted=0 AND k.deleted=0",
-                        sourceId,
-                        scope);
-        if (rows.size() != 1)
-            throw new SemanticApiException(
-                    403, "SOURCE_UNAVAILABLE", "Referenced source access revoked");
-        if (checkDigest
-                && !digest.equals(
-                        PresalesArtifactRenderer.digest(
-                                Objects.toString(rows.getFirst().get("source_text"), "")
-                                        .getBytes(java.nio.charset.StandardCharsets.UTF_8))))
-            throw conflict(
-                    "SOURCE_CHANGED",
-                    "Source changed since semantic snapshot; review fresh evidence");
+        checkSourceAccess(
+                () -> sourceAuthorization.currentSource(scope, sourceId, digest, checkDigest));
+    }
+
+    private static void checkSourceAccess(Runnable check) {
+        try {
+            check.run();
+        } catch (PresalesSourceAuthorization.Denied denied) {
+            throw new SemanticApiException(denied.status(), denied.code(), denied.getMessage());
+        }
     }
 
     private void verifyArtifacts(String projectId, ObjectNode release) {

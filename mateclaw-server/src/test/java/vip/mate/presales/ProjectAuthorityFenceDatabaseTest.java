@@ -246,11 +246,12 @@ class ProjectAuthorityFenceDatabaseTest {
                         org.mockito.ArgumentMatchers.any(),
                         org.mockito.ArgumentMatchers.any(),
                         org.mockito.ArgumentMatchers.any());
+        var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         return new PresalesService(
                 jdbc,
                 json,
                 access,
-                mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class),
+                wiki,
                 mock(ObjectProvider.class),
                 mock(ObjectProvider.class),
                 mock(vip.mate.semantic.config.SemanticProperties.class),
@@ -258,7 +259,15 @@ class ProjectAuthorityFenceDatabaseTest {
                 mock(PresalesArtifactRenderer.class),
                 employees,
                 observedFence,
-                new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc));
+                new PresalesSourceAuthorization(
+                        json,
+                        wiki,
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc),
+                        new vip.mate.wiki.service.WikiSourceReadService(
+                                new vip.mate.wiki.repository.WikiSourceReadRepository(jdbc)),
+                        new vip.mate.semantic.source.SourceGovernanceReadService(
+                                new vip.mate.semantic.source.repository
+                                        .SourceGovernanceReadRepository(jdbc))));
     }
 
     @ParameterizedTest
