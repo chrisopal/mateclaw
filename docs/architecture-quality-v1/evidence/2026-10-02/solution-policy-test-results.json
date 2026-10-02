@@ -1,0 +1,404 @@
+{
+  "task": "AQ-05 solution policy and project-item revision boundary",
+  "start_head": "ad0853831a4af313a67674f1cfa62b403694574a",
+  "before_tests": 28,
+  "after_tests": 59,
+  "final_targeted_tests": 67,
+  "classes": {
+    "PresalesProjectItemsTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesSolutionPolicyTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesSolutionPolicyContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesIntegrationTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesRuntimeTransactionIntegrationTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesAtomicResultAcceptanceTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ProjectAuthorityFenceDatabaseTest": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesArtifactPersistenceContractTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesProjectPersistenceContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "dev_tasks": [
+    "62gg9kaf",
+    "1tmbl58x",
+    "x395flpo",
+    "zo8yawkm"
+  ],
+  "rejected_dev_task": {
+    "id": "njw75fcz",
+    "status": "FAIL",
+    "rule": "AR-004",
+    "resolution": "Removed semantic-internal exception import; domain Rejected adapted at existing Service Java boundary. Policy and baseline unchanged."
+  },
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "4ba0186fecccc9da36eef583e9d4da8b779416fd472aeb406b5739cbba07a6f8",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectItems.java": "e3b214b431273dd83b0bc4a95d00139a6d82cd22935d2079e22d42e8017acd74",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesSolutionPolicy.java": "d1cf6bd2ca5c842b800d1d379df26a7f04dd0a362ceeb665fdf3ffc4552b0f4d",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectItemsTest.java": "c9b820458f00503b7cc925bdb9515d9635b7a6cd55d7ce7828f13cd59d168f59",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesSolutionPolicyTest.java": "58612eb546d6e17bd97b11d0ed312da2fdcecbe899b01a433d99e8f7a39d4c2b",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesSolutionPolicyContractTest.java": "1f6ec3170ed53b3bb2d93b5dd648f0f19d70486899c674d049c4e724f3796017",
+    "mateclaw-semantic-core/src/main/java/vip/mate/semantic/core/fact/AssertionPayload.java": "08248a8ba6fe2bd3287b1a419852c83317085ae05333c1fa577d1d3e476cfec0",
+    "mateclaw-semantic-core/src/test/java/vip/mate/semantic/core/fact/AssertionPayloadSignatureTest.java": "ac3d7cd9b7fd5da5043ec67f45b8e708c55d022c8ff320a46aebf4c49c3a57eb"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/initial-dev.txt": "3e498afea7094174514b9ac53ab39cdbe220c1e2349313c827fbafd671a3bad7",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-fixture-failure.txt": "573a671cf92d23bb8669e3534ae3cb75e1bf2505278b9177abccf1f5c581d475",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-contract-failure.txt": "de0c88880e69bbdac06e1191597c843d836bf002bf1ab6483286d9923d122d93",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-source-fixture-failure.txt": "759bcf5fcc028de7f012b15ae1c4aef8bffaf549077ba51c55231eafa222cc5c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before.txt": "3a028ea1a0706a8d16305fe35c2cb0c454aa5d8e77605b6c2754ca50a8558e2c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items.txt": "1dd71eefde4597ba99cb7b620e35b232252c7a9e2c7b1e85b8c305847c1c41f5",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-dev.txt": "9de0a08e5cd49eb36e3609f3d070d6a799d46ecc4aec356872afed90d08c6573",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-final.txt": "5a5b64e1ea25d1d7bd3a8378328f1961f3567e5ff22c90c0653ae4e20fa3d646",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-dev-final.txt": "f5b9261edccf403ff650277e6bbf0e3c730f99ff341ddfef23a7a6a4ffc142d1",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/after.txt": "49e0705b6d42b28b0e215dcaab14541cc8077f2e1c6d90ae32db4a3e587f2152",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/dev.txt": "16b2bda03066684f83fd4304dfebbdaa22807909f0014b7fa64650d57a9d5b24",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/pure-fixture-failure.txt": "c4a593d15fe7f21d50bd7b68ffd436e02f579bcb0a01f2467d0b71fd55548c58",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-targeted.txt": "5da40739aa89bb014f1bcc61db8d79bf9a75d87c6d6ea4f93a725a50e9efddd2",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-dev.txt": "e5947a3a371de1ba844f7f91c4fbfefb8e437a2f82063cd3977da2fc43bb5331",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-format.txt": "12029039d29e132c28358c0c492ed635950d2cdc7b66a728fb80da8eb2d139cc",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-format-check.txt": "ead3a0bb6dcc809475a464618d43810ffb99d94368be550cf6821a2c433ce6a6",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-missing-fixture.txt": "a024cd76c618c2808596b40a3039fe985735a03a033c9b8b996c7ac0878790c3",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-before.txt": "3eefe9803069c8582ff6a67068a1db41a44141040e524195dba6647c138cb638",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-after.txt": "d16fd73bf9d619ad2c258a093108dbdc25fedf1e2806cc85da0e16a4b1c1f5b4",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-dev.txt": "e91c85e10e0e1fd04d3d7f1400dd21b09ff55960a2e89f1a9425634880932e41",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format.txt": "351ea3e96a6c680bfb7e0ebbd8ed41c1b22fe7abfd91fc6b568b4dac53106273",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/failed-full-java-summary.txt": "584ef001d46fcd8171800ca3e4314413d8b58abfa6a87194997e6d511ba1729a",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/failed-full-gate-report.json": "383d8d76c11ce77582d4b37ee1626b089b5656cc44859c71cffe314ce4cc98d9",
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format-check.txt": "8e6096441cc1082251b34064a182f5faf8ad1d8788a5776aa0753132d7af4b98"
+  },
+  "evidence_redaction": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/initial-dev.txt": {
+      "input_sha256": "3e498afea7094174514b9ac53ab39cdbe220c1e2349313c827fbafd671a3bad7",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-fixture-failure.txt": {
+      "input_sha256": "573a671cf92d23bb8669e3534ae3cb75e1bf2505278b9177abccf1f5c581d475",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-contract-failure.txt": {
+      "input_sha256": "13739d8d7de35ea2f309090c024ca9bd3ac73e52f079a7af103a9d638477bef0",
+      "counts": {
+        "jwt": 21,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 15
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before-source-fixture-failure.txt": {
+      "input_sha256": "f973ee6636d081f1d339badd9898d20d1cdc547d2db47ae2aa45e0bd62820b62",
+      "counts": {
+        "jwt": 5,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 5
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/before.txt": {
+      "input_sha256": "7036baf5b8becbf44d3f439420a8e92ef3d8d75a2d732f4e42c6f3a2d9a2cb8a",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items.txt": {
+      "input_sha256": "792f16ce1f0193e36102938eca38fbe37cdc57f062346282861da675cc9a2624",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-dev.txt": {
+      "input_sha256": "9de0a08e5cd49eb36e3609f3d070d6a799d46ecc4aec356872afed90d08c6573",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-final.txt": {
+      "input_sha256": "b9ba56a882670b111cc6957c506b6124d0439912e3366138bb43381e16b75364",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/items-dev-final.txt": {
+      "input_sha256": "f5b9261edccf403ff650277e6bbf0e3c730f99ff341ddfef23a7a6a4ffc142d1",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/after.txt": {
+      "input_sha256": "9994451290507b2dad571393126ad9f35327f8bc6f5e01c1e1b09065d718d3f8",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/dev.txt": {
+      "input_sha256": "16b2bda03066684f83fd4304dfebbdaa22807909f0014b7fa64650d57a9d5b24",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/pure-fixture-failure.txt": {
+      "input_sha256": "a578ff64056384113ac69293e8797cadced970fd986de504b1023c0941ef9808",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-targeted.txt": {
+      "input_sha256": "0504838b6eee0056caf76396ed1107a36d0d5b9a1477ea4368e5d05da7b5c67c",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-dev.txt": {
+      "input_sha256": "e5947a3a371de1ba844f7f91c4fbfefb8e437a2f82063cd3977da2fc43bb5331",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-format.txt": {
+      "input_sha256": "12029039d29e132c28358c0c492ed635950d2cdc7b66a728fb80da8eb2d139cc",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/final-format-check.txt": {
+      "input_sha256": "ead3a0bb6dcc809475a464618d43810ffb99d94368be550cf6821a2c433ce6a6",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-missing-fixture.txt": {
+      "input_sha256": "a024cd76c618c2808596b40a3039fe985735a03a033c9b8b996c7ac0878790c3",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": false,
+      "selection": "full log"
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-before.txt": {
+      "input_sha256": "3eefe9803069c8582ff6a67068a1db41a44141040e524195dba6647c138cb638",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": false,
+      "selection": "full log"
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-after.txt": {
+      "input_sha256": "162f2a5afc5a45e59e3e20c98cb7caf8507775524163d0e0a34c32610231c0ca",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 3,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": false,
+      "selection": "full log"
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-dev.txt": {
+      "input_sha256": "e91c85e10e0e1fd04d3d7f1400dd21b09ff55960a2e89f1a9425634880932e41",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": false,
+      "selection": "full log"
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/signature-format.txt": {
+      "input_sha256": "351ea3e96a6c680bfb7e0ebbd8ed41c1b22fe7abfd91fc6b568b4dac53106273",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": false,
+      "selection": "full log"
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/solution-policy-tests/failed-full-java-summary.txt": {
+      "input_sha256": "11ffc2658cdfeb17ceee3f3140c20daee47540574738d9d6a795afb513126843",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      },
+      "excerpt": true,
+      "selection": "ERROR lines and INFO Tests run lines"
+    }
+  },
+  "service_lines": {
+    "before": 1344,
+    "after": 1248,
+    "solution_policy": 140,
+    "project_items": 75
+  },
+  "independent_review": {
+    "verdict": "APPROVE_BOUNDED",
+    "reviewer": "authority_review",
+    "findings": 0,
+    "diagnostics_limitation": "LSP/AST Transport closed on six Java files; actual JDK21 Maven compile/tests plus manual diff verification"
+  },
+  "existing_test_files_unchanged": true,
+  "formal_qa": "NOT_RUN",
+  "full_stable_project_dto": "NOT_IMPLEMENTED_THIS_SLICE",
+  "sql_pagination": "NOT_IMPLEMENTED_THIS_SLICE",
+  "v2_migration": "NOT_IMPLEMENTED_THIS_SLICE",
+  "mysql_kingbase": "NOT_RUN_THIS_SLICE",
+  "remote_required_ci": "NOT_VERIFIED",
+  "failed_full_gate": {
+    "task": "lojyxc1n",
+    "checked_tree": "bbd900f62b6ae50f942740083fa5be726f016619",
+    "status": "FAIL",
+    "submission_ready": false,
+    "failing_test": "SemanticM2IntegrationTest.immutableSourceCandidateReviewTrustedQueryAndSupportLossRoundTrip",
+    "reason": "Only signatureIris iteration order differed between accepted and replayed assertion JSON"
+  },
+  "signature_fix": {
+    "before": {
+      "executed": 3,
+      "failures": 2
+    },
+    "after_combined_executed": 97,
+    "classes": {
+      "AssertionPayloadSignatureTest": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "AssertionPayloadTest": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "StatementValidatorTest": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "OntologyAxiomDescriptorTest": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "OwlAssertionAdapterTest": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "SemanticM2IntegrationTest": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "dev_task": "5tb4lj9_",
+    "missing_fixture_probe": "NOT_RUN zero selected targets",
+    "wire_change": "Constructed/decoded signatureIris lexical order; no persistent JSON or published bytes rewritten",
+    "independent_review": {
+      "verdict": "APPROVE_BOUNDED",
+      "reviewer": "authority_review",
+      "findings": 0,
+      "diagnostics_limitation": "LSP Transport closed; actual JDK21 compile/tests and manual diff"
+    }
+  }
+}

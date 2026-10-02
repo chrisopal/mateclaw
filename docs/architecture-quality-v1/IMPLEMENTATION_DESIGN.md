@@ -272,3 +272,15 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 背景：Service混合列表授权/校验与筛选/分页/摘要/stage。选用本域package-private PresalesProjectListing和内部Criteria，消费Stream解码结果及服务原来源inventory；服务保持viewer→pagination→Workspace查询→decode顺序。深副本/历史扩展/string IDs/原Page和阶段副作用保持，命令和受限视图复用同一stage。
 
 取舍：Service1401→1344、投影85行，不新增通用查询框架、DTO wire或SQL分页。拒绝eager toList：会改变早期stage错误与后续decode错误顺序，并保留全部完整body。旧15/最终58项HTTP/H2/事务与纯投影合同、限定独立审阅验证边界；完整DTO/命令、SQL分页、V2迁移、多方言/浏览器/正式QA待完成。回退无数据库操作；证据见AQ05_PROJECT_LISTING_ACCEPTANCE及PR5。
+
+### ADR-AQ-020：方案政策纯模块与项目项修订保持用例错误适配（Proposed）
+
+背景：Service同时拥有草稿验证/来源引用/精确基线/覆盖规则和用例事务/批准。选用本域纯PresalesSolutionPolicy.prepare/coverage供人工草稿、已复核员工结果、发布检查复用；PresalesProjectItems负责原JSON项find/save/text/enum及不可变修订。模块只消费已授权事实，不读取来源或获得持久化/批准权限；Service继续授权/锁/CAS/回执及releaseGate，公开find不变。
+
+取舍：Service1344→1248，policy140/items75行；新增内部Rejected由Service映射原SemanticApiException，避免新模块跨借语义私有异常并保持原Java捕获契约。拒绝整服务平移、通用命令框架或eager policy改变校验顺序。旧28/最终67项真实HTTP/H2/事务及纯规则合同、限定独立审阅验证兼容；错误拒绝不写库。原ObjectNode wire/未知字段保留，完整DTO/SQL分页/V2/多方言/浏览器/正式QA仍待完成。回退恢复内联规则无数据库操作；证据见AQ05_SOLUTION_POLICY_ACCEPTANCE及PR5。
+
+### ADR-AQ-021：派生断言签名使用排序不可变集合稳定回执wire（Proposed）
+
+完整门禁lojyxc1n复现旧SemanticM2IntegrationTest accepted与operation replay整JSON不相等，唯一差异为signatureIris数组顺序。AssertionPayload的Set.copyOf允许构造与wire.decode结果遍历不同；成员相等不能保证幂等响应表示稳定。复用既有OntologyAxiomDescriptor的unmodifiableSortedSet(TreeSet)惯例，只调整派生签名排序，不改functionalSyntax权威文本、Set成员/equality或授权/事务。
+
+影响/取舍：所有新构造/解码AssertionPayload的签名数组按IRI词法序输出；这是明确的wire确定性修复，不声称该数组原顺序保持。旧持久化回执/快照/批准成果字节不写回或重新渲染。拒绝删除旧整响应断言、只重跑随机绿灯或全局Jackson配置变更。新3项旧实现2红例，修复后核心12/OWL11/服务端74共97项通过，包含旧7项语义M2及售前67项；完整候选重新门禁。回退恢复已复现非确定性问题，正式幂等/迁移/多方言签收仍未完成。证据见AQ05_ASSERTION_SIGNATURE_PLAN和方案政策验收/manifest。

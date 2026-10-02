@@ -62,6 +62,7 @@ public class PresalesService {
     private final PresalesArtifactRepository artifacts;
     private final PresalesProjectRepository projects;
     private final ObjectMapper json;
+    private final PresalesSolutionPolicy solutionPolicy;
     private final PresalesAccess access;
     private final WikiKnowledgeBaseService wiki;
     private final ObjectProvider<GraphApplicationService> graphs;
@@ -93,6 +94,7 @@ public class PresalesService {
         this.artifacts = artifacts;
         this.projects = projects;
         this.json = json;
+        this.solutionPolicy = new PresalesSolutionPolicy(json);
         this.access = access;
         this.wiki = wiki;
         this.graphs = graphs;
@@ -564,56 +566,12 @@ public class PresalesService {
 
     private void saveSolutionDraft(
             ObjectNode p, ObjectNode value, String actor, boolean employeeResult) {
-        text(value.path("title").asText(), "title", 1000);
-        if (!value.path("sections").isArray() || value.path("sections").isEmpty())
-            throw bad("Solution sections required");
-        for (var section : value.path("sections")) {
-            text(section.path("title").asText(), "section title", 1000);
-            text(section.path("text").asText(), "section text", 100000);
+        try {
+            solutionPolicy.prepare(p, value, employeeResult);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
         }
-        String base = value.path("baselineId").asText();
-        if (!employeeResult && value.has("presentation"))
-            throw PresalesModelAdapter.error(422, "PRESENTATION_METADATA_UNTRUSTED");
-        ObjectNode baseline = null;
-        if (!base.isBlank()) {
-            baseline = find(p, "baselines", base);
-            if (value.has("baselineVersion")
-                    && value.path("baselineVersion").asInt() != baseline.path("version").asInt())
-                throw conflict("BASELINE_STALE", "Solution baseline version is stale");
-            value.put("baselineVersion", baseline.path("version").asInt());
-        }
-        validateProjectSourceRefs(p, value);
-        if (base.isBlank()) value.remove("baselineVersion");
-        value.put("provisional", base.isBlank());
-        value.set("coverage", coverage(p, value));
-        var latestFits = new LinkedHashMap<String, String>();
-        for (var fit : p.withArray("fitGaps"))
-            latestFits.put(fit.path("requirementId").asText(), fit.path("id").asText());
-        value.set("fitGapRefs", json.valueToTree(latestFits.values()));
         saveItem(p, "solutions", value, actor, true);
-    }
-
-    private void validateProjectSourceRefs(ObjectNode p, ObjectNode value) {
-        Set<String> allowed = new HashSet<>();
-        for (var task : p.withArray("tasks"))
-            for (var source : task.path("contextSnapshot").path("sources"))
-                allowed.add(source.path("sourceRef").asText());
-        for (var baseline : p.withArray("baselines"))
-            for (var reference : baseline.path("references"))
-                for (var source : reference.path("sources"))
-                    allowed.add(source.path("sourceRef").asText());
-        validateSourceRefs(value.path("sourceRefs"), allowed);
-        for (var section : value.path("sections"))
-            validateSourceRefs(section.path("sourceRefs"), allowed);
-    }
-
-    private void validateSourceRefs(JsonNode refs, Set<String> allowed) {
-        if (refs.isMissingNode()) return;
-        if (!refs.isArray() || refs.size() > 100)
-            throw PresalesModelAdapter.error(422, "MODEL_FORMAT");
-        for (var ref : refs)
-            if (!ref.isTextual() || !allowed.contains(ref.asText()))
-                throw PresalesModelAdapter.error(422, "INVALID_SOURCE_REFERENCE");
     }
 
     private void bindEmployee(String scope, ObjectNode p, String agentId) {
@@ -737,63 +695,11 @@ public class PresalesService {
     }
 
     private ObjectNode coverage(ObjectNode p, ObjectNode solution) {
-        String baselineId = solution.path("baselineId").asText();
-        Map<String, String> scopes = new LinkedHashMap<>();
-        if (!baselineId.isBlank())
-            for (var ref : find(p, "baselines", baselineId).path("references"))
-                scopes.put(ref.path("requirementId").asText(), ref.path("scope").asText());
-        else
-            for (var ref : p.withArray("requirements"))
-                scopes.put(ref.path("id").asText(), ref.path("scope").asText());
-        Set<String> linked = new HashSet<>();
-        for (var section : solution.path("sections"))
-            for (var ref : section.path("requirementRefs")) {
-                if (!ref.isTextual() || !scopes.containsKey(ref.asText()))
-                    throw bad("Section requirementRefs must belong to selected baseline");
-                linked.add(ref.asText());
-            }
-        Map<String, ObjectNode> responses = new LinkedHashMap<>();
-        for (var response : solution.path("requirementResponses")) {
-            if (!(response instanceof ObjectNode item))
-                throw bad("Requirement response object required");
-            String rid = item.path("requirementId").asText();
-            if (!scopes.containsKey(rid) || responses.containsKey(rid))
-                throw bad("Unique baseline requirement response required");
-            enumValue(
-                    item,
-                    "status",
-                    Set.of("FULL", "PARTIAL", "CONDITIONAL", "EXCLUDED", "UNHANDLED"),
-                    "UNHANDLED");
-            if ("EXCLUDED".equals(item.path("status").asText()) && !"OUT".equals(scopes.get(rid)))
-                throw bad("Only out-of-scope requirements can be EXCLUDED");
-            if (Set.of("FULL", "PARTIAL", "CONDITIONAL").contains(item.path("status").asText())
-                    && !linked.contains(rid)) throw bad("Handled response must link to a section");
-            if (!"FULL".equals(item.path("status").asText())
-                    && !"UNHANDLED".equals(item.path("status").asText()))
-                text(item.path("reason").asText(), "response reason", 10000);
-            responses.put(rid, item);
+        try {
+            return solutionPolicy.coverage(p, solution);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
         }
-        ObjectNode result = json.createObjectNode();
-        ArrayNode list = result.putArray("responses");
-        int total = 0, handled = 0;
-        for (var entry : scopes.entrySet()) {
-            ObjectNode response = responses.get(entry.getKey());
-            if (response == null)
-                response =
-                        json.createObjectNode()
-                                .put("requirementId", entry.getKey())
-                                .put("status", "UNHANDLED");
-            list.add(response.deepCopy());
-            if ("IN".equals(entry.getValue())) {
-                total++;
-                if (Set.of("FULL", "PARTIAL", "CONDITIONAL")
-                        .contains(response.path("status").asText())) handled++;
-            }
-        }
-        result.put("applicable", total > 0).put("totalIn", total).put("handledIn", handled);
-        if (total == 0) result.putNull("percentage");
-        else result.put("percentage", Math.round(handled * 10000.0 / total) / 100.0);
-        return result;
     }
 
     public ObjectNode handoff(String scope, String projectId) {
@@ -1161,33 +1067,12 @@ public class PresalesService {
             throw conflict("SEMANTIC_DISABLED", "Semantic module is required for approval");
     }
 
-    private void saveItem(
-            ObjectNode p, String collection, ObjectNode v, String actor, boolean immutable) {
-        var items = p.withArray(collection);
-        String requested = v.path("id").asText();
-        int version = 1;
-        if (!requested.isBlank()) {
-            var old = find(p, collection, requested);
-            version = old.path("version").asInt() + 1;
-            if (immutable) v.put("previousId", requested);
-            else
-                for (int i = 0; i < items.size(); i++)
-                    if (requested.equals(items.get(i).path("id").asText())) {
-                        items.remove(i);
-                        break;
-                    }
-        }
-        v.put("id", immutable || requested.isBlank() ? id() : requested)
-                .put("version", version)
-                .put("authorId", actor)
-                .put("createdAt", LocalDateTime.now(ZoneOffset.UTC).toString());
-        items.add(v);
-    }
-
     public ObjectNode find(ObjectNode p, String collection, String id) {
-        for (var node : p.withArray(collection))
-            if (id.equals(node.path("id").asText())) return (ObjectNode) node;
-        throw new SemanticApiException(404, "NOT_FOUND", collection + " item not found");
+        try {
+            return PresalesProjectItems.find(p, collection, id);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
+        }
     }
 
     private ObjectNode load(String scope, String id, boolean lock) {
@@ -1323,15 +1208,34 @@ public class PresalesService {
         text(s, "operationId", 128);
     }
 
+    private void saveItem(
+            ObjectNode p, String collection, ObjectNode v, String actor, boolean immutable) {
+        try {
+            PresalesProjectItems.saveItem(p, collection, v, actor, immutable);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
+        }
+    }
+
     private static void text(String s, String label, int max) {
-        if (s == null || s.isBlank() || s.length() > max)
-            throw bad(label + " required, max " + max + " characters");
+        try {
+            PresalesProjectItems.text(s, label, max);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
+        }
     }
 
     private static void enumValue(ObjectNode v, String key, Set<String> allowed, String fallback) {
-        String value = v.path(key).asText(fallback);
-        if (!allowed.contains(value)) throw bad("Invalid " + key);
-        v.put(key, value);
+        try {
+            PresalesProjectItems.enumValue(v, key, allowed, fallback);
+        } catch (PresalesProjectItems.Rejected rejection) {
+            throw legacyRejection(rejection);
+        }
+    }
+
+    private static SemanticApiException legacyRejection(PresalesProjectItems.Rejected rejection) {
+        return new SemanticApiException(
+                rejection.status(), rejection.code(), rejection.getMessage());
     }
 
     private static SemanticApiException bad(String message) {
