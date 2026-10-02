@@ -33,3 +33,5 @@ H2及真实Spring/JWT回归不证明MySQL/Kingbase、生产同构重启或所有
 首次推送门禁hhj6u8ol运行期间，核对MockMvc失败输出发现synthetic测试凭据15处JWT。已确认远端仍dd442961，终止自有推送进程组并验证终止；不是远端已推送。最终证据脱敏并记录输入/输出SHA256及数量，原本地输出不发布。先前精确树/钩子报告仅作脱敏前历史工程证据；脱敏后的完整树需重新执行提交/推送门禁。本地两个自有未推送提交合并重建，不force推送或覆盖他人WIP。
 
 最终补充刻画：持久化body_json为JSON null时，原decode转换产生IllegalStateException（cause ClassCastException），不返回404。新增测试最初错误预期NPE，已按真实原行为校正，生产代码未修改；最终七类59/59、零failure/error/skip。该首次失败日志也脱敏保存，不修改既有断言。中途g6k5sr7h门禁主动终止，STOPPED_NOT_PASS，不作为提交依据；最终脱敏树需全量重验。上述s5gpp6u8/gf7t_x2s及abee提交仅为未发布的历史检查。
+
+最终脱敏源提交bf728e648154c8afaa897708efc789fdb4836c7d，实际树2b0989a28a9f81ae60307a67e9af45f2651de4f0，g6kzd01e精确暂存与d7erjho6正常提交钩子均PASS/submission_ready=true，同一树。Java6032总数/5962执行/既有70skip、零failure/error；UI846/846、type/ID/Node/两主题构建通过。最终报告原件及hash见final-staged-gate-report.json、final-commit-hook-report.json和manifest。源码/最终定向59项/脱敏证据一致；推送和远端读回结果在PR5补记。

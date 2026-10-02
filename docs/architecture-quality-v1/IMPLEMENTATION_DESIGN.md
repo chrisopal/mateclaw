@@ -258,4 +258,4 @@ AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB �
 
 背景：PresalesService直接承载项目body、回执和修订SQL，锁/Workspace/CAS与授权/业务交错。选用本域PresalesProjectRepository封装七类原SQL，string ID/raw JSON及不可变row/receipt；Service保留成员/来源/修复政策、public事务、encoding、错误/版本判断、record/receipt时序和时间。没有DAO新事务/缓存/JSON策略或第二套批准权。
 
-取舍：服务减少31行、仓储111行，artifact SQL和查询摘要/命令业务仍待拆，不把全量读取当分页或V2迁移。旧53项/新58项真实H2+HTTP+Spring/双连接锁/回滚证明本片；多方言/生产重启/独立对象并发/正式QA仍未完成。拒绝通用JSON仓库和把整聚合移动到DAO。回退无数据库操作；证据见AQ03_PROJECT_STORAGE_ACCEPTANCE及PR5。
+取舍：服务减少31行、仓储111行，artifact SQL和查询摘要/命令业务仍待拆，不把全量读取当分页或V2迁移。旧53项/最终59项真实H2+HTTP+Spring/双连接锁/回滚证明本片；多方言/生产重启/独立对象并发/正式QA仍未完成。拒绝通用JSON仓库和把整聚合移动到DAO。回退无数据库操作；证据见AQ03_PROJECT_STORAGE_ACCEPTANCE及PR5。

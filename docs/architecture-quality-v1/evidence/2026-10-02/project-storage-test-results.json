@@ -94,7 +94,9 @@
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": "95e5f47bd612ac43f9ed56f534d5b1f54347c294f744dae6a193ba5aaf1543a3",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": "bbf2e618e2bfacba5faa72dd787263f212b99cc0b8e45428de3ffea581131c45",
     "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-dev.txt": "c75156d2d432fdad1e999221a07b5d1cd809e195945e33b7112e6b03e4d153bb",
-    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-spotless.txt": "3ad4a1c7a6a5c7f110a00f943bcd72097e485a745e0b46b95ddbe3b84bdb4ab1"
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-spotless.txt": "3ad4a1c7a6a5c7f110a00f943bcd72097e485a745e0b46b95ddbe3b84bdb4ab1",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-staged-gate-report.json": "4e34d9a947e2d340aa988e7da2ecfc0ec5424279521c560a8486c371fd991c5c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-commit-hook-report.json": "78db084ae03c6774b092009a38162eb0787e49593f7d0bfe469102db2b448fac"
   },
   "dialects_tested": [
     "H2 MySQL mode"
@@ -197,5 +199,21 @@
     "task": "g6k5sr7h",
     "status": "STOPPED_NOT_PASS",
     "reason": "investigated JSON null compatibility; production behavior confirmed unchanged"
+  },
+  "final_sanitized_full_gate": {
+    "source_commit": "bf728e648154c8afaa897708efc789fdb4836c7d",
+    "checked_tree": "2b0989a28a9f81ae60307a67e9af45f2651de4f0",
+    "staged_task": "g6kzd01e",
+    "commit_hook_task": "d7erjho6",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6032,
+    "java_executed": 5962,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "ui_failed": 0,
+    "ui_types_ID_Node_builds": "PASS"
   }
 }
