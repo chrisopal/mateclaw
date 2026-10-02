@@ -1619,6 +1619,13 @@ import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, presalesError, coverageLabel, operationReceipt } from '../shared/state'
+import {
+  createEditorForm,
+  prepareEditorSubmission,
+  requirementsForBaseline,
+  solutionResponses,
+  type PresalesEditorKind as Editor,
+} from '../shared/editorSubmission'
 const { t } = useI18n({ messages: presalesMessages })
 const narrowQuery = window.matchMedia('(max-width: 768px)')
 const isNarrow = ref(narrowQuery.matches)
@@ -2134,18 +2141,6 @@ function search() {
   page.value = 1
   void load()
 }
-type Editor =
-  | 'project'
-  | 'employee'
-  | 'material'
-  | 'requirement'
-  | 'clarification'
-  | 'baseline'
-  | 'fitgap'
-  | 'solution'
-  | 'release'
-  | 'review'
-  | 'context'
 const sourceOptions = ref<PresalesSource[]>([]),
   statementOptions = ref<PresalesRecord[]>([]),
   optionsLoading = ref(false)
@@ -2167,24 +2162,14 @@ watch(
   },
   { flush: 'sync' },
 )
-const editableRequirements = computed(() => {
-  const baseline = project.value?.baselines.find((item) => item.id === form.value.baselineId)
-  return (project.value?.requirements || []).filter(
-    (item) =>
-      !baseline ||
-      baseline.references?.some((reference: PresalesRecord) => reference.requirementId === item.id),
-  )
-})
+const editableRequirements = computed(() =>
+  requirementsForBaseline(project.value, form.value.baselineId),
+)
 watch(
   () => form.value.baselineId,
   () => {
     if (editorKind.value !== 'solution' || !editorOpen.value) return
-    form.value.requirementResponses = editableRequirements.value.map(
-      (item) =>
-        form.value.requirementResponses?.find(
-          (response: PresalesRecord) => response.requirementId === item.id,
-        ) || { requirementId: item.id, status: 'UNHANDLED', reason: '' },
-    )
+    form.value.requirementResponses = solutionResponses(form.value, project.value)
   },
 )
 const dirty = computed(() => editorOpen.value && JSON.stringify(form.value) !== initialForm.value)
@@ -2215,74 +2200,7 @@ function openEditor(kind: Editor, record?: PresalesRecord) {
   editorKind.value = kind
   editError.value = ''
   if (kind === 'project' || kind === 'employee') void loadEmployees()
-  if (kind === 'employee') record = { agentId: record?.agentId || '' }
-  form.value = JSON.parse(
-    JSON.stringify(
-      record ||
-        {
-          project: {
-            name: '',
-            customer: '',
-            ownerId: '',
-            agentId: '',
-            industry: '',
-            goal: '',
-          },
-          employee: { agentId: '' },
-          material: { kbId: '', graphId: '', role: 'PROJECT' },
-          requirement: {
-            title: '',
-            description: '',
-            originKind: 'INTERNAL_JUDGMENT',
-            priority: 'MEDIUM',
-            scope: 'IN',
-            statementId: '',
-            statementRevision: '',
-            graphId: '',
-          },
-          clarification: {
-            question: '',
-            requirementId: '',
-            impact: '',
-            ownerId: '',
-            answer: '',
-            answerSourceId: '',
-            status: 'OPEN',
-          },
-          solution: {
-            title: '',
-            baselineId: project.value?.baselines.at(-1)?.id || '',
-            sections: [{ title: '', text: '' }],
-          },
-          fitgap: {
-            requirementId: '',
-            status: 'UNKNOWN',
-            reason: '',
-            evidenceText: '',
-            productVersion: '',
-            graphId: '',
-          },
-          baseline: { reason: '' },
-          release: { solutionId: '', purpose: '' },
-          review: { solutionId: '', summary: '', issues: [] },
-          context: {
-            title: '',
-            text: '',
-            originKind: 'AI_SUGGESTION',
-            sourceRefs: [],
-          },
-        }[kind],
-    ),
-  )
-  if (kind === 'solution') {
-    delete form.value.id
-    if (!form.value.requirementResponses)
-      form.value.requirementResponses = editableRequirements.value.map((item) => ({
-        requirementId: item.id,
-        status: 'UNHANDLED',
-        reason: '',
-      }))
-  }
+  form.value = createEditorForm(kind, record, project.value)
   initialForm.value = JSON.stringify(form.value)
   editorOpen.value = true
   if (kind === 'material' || kind === 'requirement') void loadOptions(kind)
@@ -2418,48 +2336,27 @@ async function save() {
     session = editorGeneration,
     kind = editorKind.value
   const active = () => isActiveScope(scope) && session === editorGeneration && editorOpen.value
-  const data = JSON.parse(JSON.stringify(form.value))
-  const required: Partial<Record<Editor, string[]>> = {
-    project: ['name', 'customer'],
-    material: ['kbId'],
-    requirement: ['title'],
-    clarification: ['question'],
-    baseline: ['reason'],
-    fitgap: ['requirementId'],
-    solution: ['title'],
-    release: ['solutionId'],
-    review: ['solutionId', 'summary'],
-    context: ['title', 'text'],
-  }
-  if (required[kind]?.some((key) => !String(data[key] || '').trim())) {
-    editError.value = t('presales.complete_the_required_fields')
+  const submission = prepareEditorSubmission(
+    kind,
+    form.value,
+    !!project.value?.sourceAccessRestricted,
+  )
+  if (submission.kind === 'invalid') {
+    editError.value = t(
+      submission.issue === 'REQUIRED_FIELDS'
+        ? 'presales.complete_the_required_fields'
+        : 'presales.context_message_28',
+    )
     return
   }
-  if (
-    kind === 'clarification' &&
-    data.status === 'ANSWERED' &&
-    (!data.answer?.trim() || !data.answerSourceId?.trim())
-  ) {
-    editError.value = t('presales.context_message_28')
-    return
-  }
-  if (kind === 'employee') {
-    if ((await command('UPDATE_PROJECT', { agentId: data.agentId || '' })) && active())
-      editorOpen.value = false
-    return
-  }
-  if (kind === 'project') {
+  if (submission.kind === 'project') {
+    const data = submission.data
     const ws = workspace.currentWorkspaceId
     if (!ws) return
     saving.value = true
     try {
       const body = {
-        name: data.name,
-        customer: data.customer,
-        ownerId: data.ownerId,
-        agentId: data.agentId ?? '',
-        industry: data.industry,
-        goal: data.goal,
+        ...submission.metadata,
         expectedVersion: project.value?.version || 0,
         operationId: receipt({
           ws,
@@ -2486,38 +2383,12 @@ async function save() {
     }
     return
   }
-  if (kind === 'fitgap') {
-    data.evidenceIds = String(data.evidenceText || '')
-      .split(',')
-      .map((id: string) => id.trim())
-      .filter(Boolean)
-    delete data.evidenceText
-  }
-  const actions = {
-    material: 'BIND_MATERIAL',
-    requirement: 'SAVE_REQUIREMENT',
-    clarification: 'SAVE_CLARIFICATION',
-    baseline: 'APPROVE_BASELINE',
-    fitgap: 'SAVE_FIT_GAP',
-    solution: 'SAVE_SOLUTION',
-    release: 'CREATE_RELEASE',
-    review: 'SAVE_REVIEW',
-    context: 'SAVE_CONTEXT',
-  }
-  const payload =
-    kind === 'material' && project.value?.sourceAccessRestricted
-      ? {
-          kbId: data.kbId,
-          graphId: data.graphId || '',
-          role: data.role || 'PROJECT',
-        }
-      : data
-  if ((await command(actions[kind], payload)) && active()) {
+  if ((await command(submission.action, submission.payload)) && active()) {
     editorOpen.value = false
-    if (kind === 'clarification' && data.status === 'ANSWERED' && project.value?.agentId)
-      await continueEmployee()
+    if (submission.continueEmployee && project.value?.agentId) await continueEmployee()
   }
 }
+
 async function downloadHandoff() {
   const scope = captureScope()
   const ws = workspace.currentWorkspaceId,

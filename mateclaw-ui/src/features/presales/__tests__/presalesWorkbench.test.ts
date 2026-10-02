@@ -145,6 +145,74 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 describe('presales workspace behavior', () => {
+  it('keeps project defaults and prevents empty required fields from reaching create', async () => {
+    await mount()
+    button('New project').click()
+    await settle()
+    const inputs = [...document.querySelectorAll<HTMLInputElement>('.el-dialog .el-input input')]
+    expect(inputs[0].value).toBe('')
+    expect(inputs[1].value).toBe('')
+    button('Save').click()
+    await settle()
+    expect(document.body.textContent).toContain('Complete the required fields.')
+    expect(presalesApi.create).not.toHaveBeenCalled()
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it('creates project metadata with original whitespace, string IDs and receipt', async () => {
+    vi.mocked(presalesApi.create).mockResolvedValue({ ...project, version: 1 })
+    await mount()
+    button('New project').click()
+    await settle()
+    const inputs = [...document.querySelectorAll<HTMLInputElement>('.el-dialog .el-input input')]
+    inputs[0].value = '  Exact project  '
+    inputs[0].dispatchEvent(new Event('input', { bubbles: true }))
+    inputs[1].value = '  Exact customer  '
+    inputs[1].dispatchEvent(new Event('input', { bubbles: true }))
+    button('Save').click()
+    await settle()
+    expect(presalesApi.create).toHaveBeenCalledWith(project.workspaceId, {
+      name: '  Exact project  ',
+      customer: '  Exact customer  ',
+      ownerId: '',
+      agentId: '',
+      industry: '',
+      goal: '',
+      expectedVersion: 0,
+      operationId: expect.any(String),
+    })
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it('keeps material defaults and exact source identifiers in the command payload', async () => {
+    vi.mocked(presalesApi.command).mockResolvedValue({ ...project, version: 4 })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent?.includes('Materials'))!
+      .click()
+    await settle()
+    button('Bind material').click()
+    await settle()
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).not.toHaveBeenCalled()
+    expect(document.body.textContent).toContain('Complete the required fields.')
+    document.querySelector<HTMLDetailsElement>('.el-dialog details')!.open = true
+    const inputs = [...document.querySelectorAll<HTMLInputElement>('.el-dialog details input')]
+    inputs[0].value = '9223372036854775800'
+    inputs[0].dispatchEvent(new Event('input', { bubbles: true }))
+    inputs[1].value = 'graph/exact'
+    inputs[1].dispatchEvent(new Event('input', { bubbles: true }))
+    button('Save').click()
+    await settle()
+    expect(presalesApi.command).toHaveBeenCalledWith(project.workspaceId, project.id, {
+      action: 'BIND_MATERIAL',
+      payload: { kbId: '9223372036854775800', graphId: 'graph/exact', role: 'PROJECT' },
+      expectedVersion: 3,
+      operationId: expect.any(String),
+    })
+  })
+
   it('keeps the latest evidence selection when two reads finish in reverse order', async () => {
     let finishFirst!: () => void
     vi.mocked(presalesApi.get).mockResolvedValue({

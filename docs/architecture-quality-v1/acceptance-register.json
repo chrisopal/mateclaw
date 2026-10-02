@@ -201,9 +201,11 @@
         "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
         "evidence/2026-10-02/view-confirmation-test-results.json",
         "evidence/2026-10-02/AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md",
-        "evidence/2026-10-02/workspace-request-test-results.json"
+        "evidence/2026-10-02/workspace-request-test-results.json",
+        "evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md",
+        "evidence/2026-10-02/editor-rules-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN"
     },
     {
       "id": "AC-14",
@@ -245,9 +247,11 @@
         "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
         "evidence/2026-10-02/view-confirmation-test-results.json",
         "evidence/2026-10-02/AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md",
-        "evidence/2026-10-02/workspace-request-test-results.json"
+        "evidence/2026-10-02/workspace-request-test-results.json",
+        "evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md",
+        "evidence/2026-10-02/editor-rules-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN"
     },
     {
       "id": "AC-17",
@@ -411,9 +415,11 @@
         "evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md",
         "evidence/2026-10-02/polling-lifecycle-test-results.json",
         "evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md",
-        "evidence/2026-10-02/view-confirmation-test-results.json"
+        "evidence/2026-10-02/view-confirmation-test-results.json",
+        "evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md",
+        "evidence/2026-10-02/editor-rules-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN"
     },
     {
       "id": "AC-31",
@@ -423,8 +429,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md",
+        "evidence/2026-10-02/editor-rules-test-results.json"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN"
     },
     {
       "id": "AC-32",
