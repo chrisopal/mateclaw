@@ -21,7 +21,7 @@ JDK21 Maven：`mvn -B -pl mateclaw-server -am -Dmaven.compiler.proc=full -Dtest=
 
 ## 提交与审阅
 
-独立审阅 APPROVE_BOUNDED，零 CRITICAL/HIGH/MEDIUM/LOW；覆盖字段/授权/顺序/上限/错误传播与Java调用方。LSP/AST实际尝试均Transport closed，使用Maven编译及人工diff证据，不报告LSP通过。精确tree完整commit门禁尚待实际执行，未记PASS。
+独立审阅 APPROVE_BOUNDED，零 CRITICAL/HIGH/MEDIUM/LOW；覆盖字段/授权/顺序/上限/错误传播与Java调用方。LSP/AST实际尝试均Transport closed，使用Maven编译及人工diff证据，不报告LSP通过。源码提交 `69f3ad51b2cb8f575b8d74d11cf465cf1eac3832` / tree `4c740228fe49c7252366599a9822841467dde0d0`。完整暂存门禁 g5a0h6h3、正常提交hook hsfdcz92 均 exit0/PASS/submission_ready=true，target均绑定该tree。Java6070总数/6000实际执行/70既有跳过、零失败错误；UI846/846、类型/ID/Node及两模式构建通过。无UI formatter/lint目标由固定规则判NOT_APPLICABLE。原真实报告存于query-dto-tests；应用验收仍NOT_RUN。
 
 ## 未测与回退
 
