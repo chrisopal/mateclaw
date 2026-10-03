@@ -1,0 +1,9 @@
+src/features/presales/__tests__/domainDto.test.ts(159,5): error TS2344: Type 'string | undefined' does not satisfy the constraint '"Expected: string, Actual: unknown" | "Expected: undefined, Actual: unknown"'.
+  Type 'undefined' is not assignable to type '"Expected: string, Actual: unknown" | "Expected: undefined, Actual: unknown"'.
+src/features/presales/__tests__/domainDto.test.ts(162,5): error TS2344: Type 'number | undefined' does not satisfy the constraint '"Expected: undefined, Actual: unknown" | "Expected: number, Actual: unknown"'.
+  Type 'undefined' is not assignable to type '"Expected: undefined, Actual: unknown" | "Expected: number, Actual: unknown"'.
+src/features/presales/__tests__/domainDto.test.ts(165,5): error TS2344: Type 'boolean | undefined' does not satisfy the constraint '"Expected: boolean, Actual: unknown"'.
+  Type 'undefined' is not assignable to type '"Expected: boolean, Actual: unknown"'.
+src/features/presales/__tests__/domainDto.test.ts(168,71): error TS2339: Property 'sha256' does not exist on type '{ filename: string; }'.
+src/features/presales/__tests__/domainDto.test.ts(171,67): error TS2339: Property 'percentage' does not exist on type 'PresalesCoverage'.
+src/features/presales/__tests__/domainDto.test.ts(173,76): error TS2344: Type '{ workspaceId: string; engagementId: string; caseRef: string; schemaVersion: number; }' does not satisfy the constraint '"Expected: ..., Actual: unknown"'.

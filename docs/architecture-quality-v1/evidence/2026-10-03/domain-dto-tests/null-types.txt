@@ -1,0 +1,17 @@
+src/features/presales/api/presalesResponse.ts(222,55): error TS2304: Cannot find name 'entryReference'.
+src/features/presales/api/presalesResponse.ts(225,15): error TS2304: Cannot find name 'entryReference'.
+src/features/presales/components/PresalesSolutions.vue(195,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: PresalesBaselineReference, index: number, obj: PresalesBaselineReference[]) => value is PresalesBaselineReference, thisArg?: any): PresalesBaselineReference | undefined', gave the following error.
+    Argument of type '(item: PresalesRecord) => boolean' is not assignable to parameter of type '(value: PresalesBaselineReference, index: number, obj: PresalesBaselineReference[]) => value is PresalesBaselineReference'.
+      Types of parameters 'item' and 'value' are incompatible.
+        Type 'PresalesBaselineReference' is not assignable to type 'PresalesRecord'.
+          Types of property 'ontologyRevisionId' are incompatible.
+            Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+              Type 'null' is not assignable to type 'string | undefined'.
+  Overload 2 of 2, '(predicate: (value: PresalesBaselineReference, index: number, obj: PresalesBaselineReference[]) => unknown, thisArg?: any): PresalesBaselineReference | undefined', gave the following error.
+    Argument of type '(item: PresalesRecord) => boolean' is not assignable to parameter of type '(value: PresalesBaselineReference, index: number, obj: PresalesBaselineReference[]) => unknown'.
+      Types of parameters 'item' and 'value' are incompatible.
+        Type 'PresalesBaselineReference' is not assignable to type 'PresalesRecord'.
+          Types of property 'ontologyRevisionId' are incompatible.
+            Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+              Type 'null' is not assignable to type 'string | undefined'.

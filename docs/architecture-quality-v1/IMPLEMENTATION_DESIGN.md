@@ -340,3 +340,10 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 16命令通过域内公开Payloads映射生成Intent判别联合；VersionedMutation组合CAS/operationId，编辑command分支和页面接受同一完整intent，剥离UI元数据后发送。拒绝继续使用action与Record并列，也不引入通用schema框架/新依赖。已声明ID保持string，嵌套字段/引用数组/版本有类型，模型result/contextSnapshot/presentation保留unknown。写字段optional和扩展unknown保留原部分请求、原始状态文本及服务器授权→source→receipt→CAS→业务校验顺序；前端类型不授予权限或批准。
 
 原125回归保持、16动作JSON逐字节合同及真实编译红例→绿例，独立description字段遗漏发现已关闭。精确源码门禁完整1037/Node/两主题构建通过。这里只修复原始写契约及调用关系，不声明完整领域DTO/status/runtime schema、SQL分页、V2迁移或真实浏览器验收完成。正式46AC保持NOT_RUN，维护者控制面/业务QA仍待。证据见evidence/2026-10-03/AQ05_COMMAND_PAYLOAD_ACCEPTANCE.md与command-payload-test-results.json。回退恢复源码，无持久化操作。
+
+
+## ADR-AQ-031（Proposed）：领域原始响应DTO与handoff准入
+
+域内纯类型模块区分Requirement/Clarification/SolutionRevision/GenerationTask/Artifact/Handoff及相关嵌套形状，旧API名称再导出。当前wire保留稀疏历史optional、raw状态、字符串ID、nullable coverage/基线事实元数据和opaque模型/冻结快照；拒绝从写payload推断全历史必填或用asText式服务检查假称节点规范化。现有迭代decoder检查新增已声明字段及handoff v1 scope/项目/核心结构，reference语境两个WeakSet避免nullable例外泛化到普通记录。发布sourceRefs混合基线对象与澄清原节点，保留unknown[]；独立发现纯对象限制后真实红例→修复→关闭。无通用schema框架/新依赖/生产数据变化，不由类型/解析替代授权、checksum或AI审批。
+
+56新合同、394售前、精确1093全UI/Node/两构建与独立限定复核通过；旧取消/撤权断言保留，fixture只补真实信封，组件只删错误类型注解。完整领域状态/error/server schema、SQL/V2迁移、生产历史抽样、真实浏览器/业务QA/维护者/required远端CI仍待，正式46AC保持NOT_RUN。证据见evidence/2026-10-03/AQ05_DOMAIN_DTO_ACCEPTANCE.md及domain-dto-test-results.json。回退仅恢复客户端类型/准入，不重写持久化/冻结字节。
