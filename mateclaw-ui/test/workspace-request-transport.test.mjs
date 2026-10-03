@@ -3,13 +3,14 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
-test('real workspace transport completes without late socket diagnostics', () => {
+test('real workspace transport and paged team fixture complete without late socket diagnostics', () => {
   const result = spawnSync(
     process.execPath,
     [
       'node_modules/vitest/vitest.mjs',
       'run',
       'src/features/bidding/__tests__/workspaceRequestTransport.test.ts',
+      'src/composables/chat/__tests__/useTeamRuns.test.ts',
       '--reporter=json',
     ],
     { cwd: fileURLToPath(new URL('..', import.meta.url)), encoding: 'utf8', timeout: 20_000 },
@@ -23,6 +24,7 @@ test('real workspace transport completes without late socket diagnostics', () =>
   assert.equal(report.numPendingTests, 0)
   const assertions = report.testResults.flatMap((file) => file.assertionResults)
   for (const title of [
+    'uses the paged conversation API for the first page and cursor continuation',
     'sends a real multipart boundary, exact fields and captured scope to loopback',
     'receives exact Blob and ArrayBuffer bytes through real transport',
     'cancels an in-flight real request after the loopback server receives it',
@@ -31,6 +33,6 @@ test('real workspace transport completes without late socket diagnostics', () =>
   ]) {
     assert.equal(assertions.find((item) => item.title === title)?.status, 'passed', title)
   }
-  assert.ok(report.numPassedTests >= 5)
+  assert.ok(report.numPassedTests >= 18)
   assert.doesNotMatch(result.stderr, /socket hang up|ECONNRESET/)
 })
