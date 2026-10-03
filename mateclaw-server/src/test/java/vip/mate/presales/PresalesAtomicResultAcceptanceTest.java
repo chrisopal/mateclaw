@@ -57,6 +57,10 @@ class PresalesAtomicResultAcceptanceTest {
         jdbc.execute(
                 "CREATE TABLE mate_presales_project(id VARCHAR PRIMARY KEY, workspace_id VARCHAR, "
                         + "version INT, name VARCHAR, status VARCHAR, body_json CLOB)");
+        new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+                        new org.springframework.core.io.ClassPathResource(
+                                "db/migration/h2/V217__presales_listing_projection.sql"))
+                .execute(dataSource);
         jdbc.execute(
                 "CREATE TABLE mate_presales_operation(workspace_id VARCHAR, actor_id VARCHAR, "
                         + "operation_id VARCHAR, request_hash VARCHAR, response_json CLOB)");
@@ -67,7 +71,7 @@ class PresalesAtomicResultAcceptanceTest {
                         ? ",\"sources\":[{\"kbId\":\"3\",\"sourceRef\":\"33\",\"graphId\":\"g\"}]"
                         : "";
         jdbc.update(
-                "INSERT INTO mate_presales_project VALUES(?,?,?,?,?,?)",
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
                 "p",
                 "1",
                 2,
@@ -184,6 +188,10 @@ class PresalesAtomicResultAcceptanceTest {
         jdbc.execute(
                 "CREATE TABLE mate_presales_project(id VARCHAR PRIMARY KEY, workspace_id VARCHAR, "
                         + "version INT, name VARCHAR, status VARCHAR, body_json CLOB)");
+        new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+                        new org.springframework.core.io.ClassPathResource(
+                                "db/migration/h2/V217__presales_listing_projection.sql"))
+                .execute(dataSource);
         jdbc.execute(
                 "CREATE TABLE mate_presales_operation(workspace_id VARCHAR, actor_id VARCHAR, "
                         + "operation_id VARCHAR, request_hash VARCHAR, response_json CLOB)");
@@ -199,7 +207,7 @@ class PresalesAtomicResultAcceptanceTest {
                                 "contextSnapshot":{"caseRef":"p","actorId":"9","projectVersion":2}}]}
                                 """);
         jdbc.update(
-                "INSERT INTO mate_presales_project VALUES(?,?,?,?,?,?)",
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
                 "p",
                 "1",
                 2,

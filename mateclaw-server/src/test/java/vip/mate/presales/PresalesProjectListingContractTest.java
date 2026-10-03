@@ -73,6 +73,7 @@ class PresalesProjectListingContractTest extends SemanticHttpFixture {
 
     private com.fasterxml.jackson.databind.JsonNode listing(
             String query, String role, String scope, int status) throws Exception {
+        backfill();
         var response =
                 mvc.perform(
                                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -171,5 +172,60 @@ class PresalesProjectListingContractTest extends SemanticHttpFixture {
         String id = UUID.randomUUID().toString();
         row(id, "Private " + id, "Private", "ACTIVE", "owner", "DISCOVERY");
         assertEquals(0, listing("?q=" + id, "owner", otherWorkspace, 200).path("total").asInt());
+    }
+
+    @Test
+    void bodyFiltersRemainIndependentFromDatabaseOrderingColumns() throws Exception {
+        String id = UUID.randomUUID().toString();
+        var p = row(id, "A column", "Customer", "ACTIVE", "owner ", "DISCOVERY");
+        p.put("name", "Body needle").put("status", "HISTORICAL");
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                json.writeValueAsString(p),
+                id);
+        var request =
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                "/api/v1/presales/projects")
+                        .param("q", "body needle")
+                        .param("status", "HISTORICAL")
+                        .param("ownerId", "owner ")
+                        .header("Authorization", tokens.get("viewer"))
+                        .header("X-Workspace-Id", workspace);
+        backfill();
+        var response = mvc.perform(request).andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        var data = json.readTree(response.getContentAsString()).path("data");
+        assertEquals(1, data.path("total").asLong());
+        assertEquals(id, data.path("items").get(0).path("id").asText());
+        assertEquals("Body needle", data.path("items").get(0).path("name").asText());
+        var mismatch =
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                "/api/v1/presales/projects")
+                        .param("q", "body needle")
+                        .param("ownerId", "owner")
+                        .header("Authorization", tokens.get("viewer"))
+                        .header("X-Workspace-Id", workspace);
+        var rejected = mvc.perform(mismatch).andReturn().getResponse();
+        assertEquals(200, rejected.getStatus());
+        assertEquals(
+                0,
+                json.readTree(rejected.getContentAsString()).path("data").path("total").asLong());
+    }
+
+    private void backfill() throws Exception {
+        try (var connection = jdbc.getDataSource().getConnection()) {
+            new db.migration.h2.V218__backfill_presales_listing_projection()
+                    .migrate(
+                            new org.flywaydb.core.api.migration.Context() {
+                                public java.sql.Connection getConnection() {
+                                    return connection;
+                                }
+
+                                public org.flywaydb.core.api.configuration.Configuration
+                                        getConfiguration() {
+                                    return null;
+                                }
+                            });
+        }
     }
 }

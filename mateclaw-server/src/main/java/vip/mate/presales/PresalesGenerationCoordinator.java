@@ -256,13 +256,16 @@ public class PresalesGenerationCoordinator {
                 int nextVersion = version + 1;
                 project.put("version", nextVersion);
                 if (cancellationRequested.containsKey(key)) return;
+                String body =
+                        PresalesListingProjectionV1.storageJson(json.writeValueAsString(project));
                 int changed =
                         projects.updateRuntimeBody(
                                 submission.scope(),
                                 submission.projectId(),
                                 version,
                                 nextVersion,
-                                json.writeValueAsString(project));
+                                body,
+                                PresalesListingProjectionV1.fromBody(body, json));
                 if (changed == 1) return;
             }
         } catch (Exception e) {
@@ -309,8 +312,15 @@ public class PresalesGenerationCoordinator {
             int nextVersion = version + 1;
             project.put("version", nextVersion);
             try {
-                String body = json.writeValueAsString(project);
-                projects.updateRuntimeBody(scope, projectId, version, nextVersion, body);
+                String body =
+                        PresalesListingProjectionV1.storageJson(json.writeValueAsString(project));
+                projects.updateRuntimeBody(
+                        scope,
+                        projectId,
+                        version,
+                        nextVersion,
+                        body,
+                        PresalesListingProjectionV1.fromBody(body, json));
             } catch (Exception e) {
                 log.warn("Unable to persist interrupted presales tasks: project={}", projectId, e);
             }

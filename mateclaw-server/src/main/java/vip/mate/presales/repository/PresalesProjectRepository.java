@@ -3,11 +3,14 @@ package vip.mate.presales.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import vip.mate.presales.PresalesListingProjectionV1.Projection;
 
 /** SQL facts only. Callers own authorization, JSON encoding, errors and transaction boundaries. */
 @Repository
@@ -25,7 +28,18 @@ public class PresalesProjectRepository {
             int version,
             String name,
             String status,
-            String bodyJson) {}
+            String bodyJson,
+            Projection listing) {
+        public ProjectRow(
+                String id,
+                String workspaceId,
+                int version,
+                String name,
+                String status,
+                String bodyJson) {
+            this(id, workspaceId, version, name, status, bodyJson, null);
+        }
+    }
 
     public record OperationReceipt(String requestHash, String responseJson) {}
 
@@ -54,16 +68,50 @@ public class PresalesProjectRepository {
                 .findFirst();
     }
 
+    private static final String LISTING_SET =
+            "listing_contract=?,listing_project_version=?,listing_name_key=?,listing_customer_key=?,"
+                    + "listing_status_key=?,listing_owner_key=?,listing_stage_key=?,listing_summary_json=?,"
+                    + "listing_decode_failure=?,listing_stage_failure=?,listing_summary_failure=?";
+
     /** Runtime envelope CAS preserves separately maintained name/status columns. */
     public int updateRuntimeBody(
-            String scope, String id, int expectedVersion, int nextVersion, String bodyJson) {
+            String scope,
+            String id,
+            int expectedVersion,
+            int nextVersion,
+            String bodyJson,
+            Projection listing) {
         return jdbc.update(
-                "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=? AND version=?",
-                bodyJson,
-                nextVersion,
-                id,
-                scope,
-                expectedVersion);
+                "UPDATE mate_presales_project SET body_json=?,version=?,"
+                        + LISTING_SET
+                        + " WHERE id=? AND workspace_id=? AND version=?",
+                parameters(
+                        new Object[] {bodyJson, nextVersion},
+                        listingArguments(listing, nextVersion),
+                        new Object[] {id, scope, expectedVersion}));
+    }
+
+    private static Object[] listingArguments(Projection p, int version) {
+        if (p == null) return new Object[11];
+        return new Object[] {
+            p.contractVersion(),
+            version,
+            p.nameKey(),
+            p.customerKey(),
+            p.statusKey(),
+            p.ownerKey(),
+            p.stageKey(),
+            p.summaryJson(),
+            p.decodeFailure(),
+            p.stageFailure(),
+            p.summaryFailure()
+        };
+    }
+
+    private static Object[] parameters(Object[]... parts) {
+        var out = new ArrayList<Object>();
+        for (Object[] part : parts) out.addAll(Arrays.asList(part));
+        return out.toArray();
     }
 
     private static ProjectRow projectRow(ResultSet row, int index) throws SQLException {
@@ -90,25 +138,137 @@ public class PresalesProjectRepository {
 
     public void insert(ProjectRow project) {
         jdbc.update(
-                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
-                project.id(),
-                project.workspaceId(),
-                project.version(),
-                project.name(),
-                project.status(),
-                project.bodyJson());
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json,"
+                        + "listing_contract,listing_project_version,listing_name_key,listing_customer_key,"
+                        + "listing_status_key,listing_owner_key,listing_stage_key,listing_summary_json,"
+                        + "listing_decode_failure,listing_stage_failure,listing_summary_failure) VALUES(?,?,?,?,?,?,"
+                        + "?,?,?,?,?,?,?,?,?,?,?)",
+                parameters(
+                        new Object[] {
+                            project.id(),
+                            project.workspaceId(),
+                            project.version(),
+                            project.name(),
+                            project.status(),
+                            project.bodyJson()
+                        },
+                        listingArguments(project.listing(), project.version())));
     }
 
     public int update(ProjectRow project, int expectedVersion) {
         return jdbc.update(
-                "UPDATE mate_presales_project SET version=?,name=?,status=?,body_json=? WHERE id=? AND workspace_id=? AND version=?",
-                project.version(),
-                project.name(),
-                project.status(),
-                project.bodyJson(),
-                project.id(),
-                project.workspaceId(),
-                expectedVersion);
+                "UPDATE mate_presales_project SET version=?,name=?,status=?,body_json=?,"
+                        + LISTING_SET
+                        + " WHERE id=? AND workspace_id=? AND version=?",
+                parameters(
+                        new Object[] {
+                            project.version(), project.name(), project.status(), project.bodyJson()
+                        },
+                        listingArguments(project.listing(), project.version()),
+                        new Object[] {project.id(), project.workspaceId(), expectedVersion}));
+    }
+
+    /** Pre-encoded application facts; no JSON interpretation, normalization or authority here. */
+    public record ListingQuery(
+            String queryKey,
+            String statusKey,
+            String ownerKey,
+            String stageKey,
+            long offset,
+            int size,
+            int contract) {}
+
+    public record ListingPage(
+            List<String> summaries, long total, String failureType, String failureDetail) {}
+
+    private record Predicate(String sql, Object[] arguments) {}
+
+    private static Predicate filters(ListingQuery query, boolean includeStage) {
+        var sql = new StringBuilder("1=1");
+        var arguments = new ArrayList<Object>();
+        if (query.queryKey() != null) {
+            sql.append(" AND (listing_name_key LIKE ? OR listing_customer_key LIKE ?)");
+            String pattern = "%" + query.queryKey() + "%";
+            arguments.add(pattern);
+            arguments.add(pattern);
+        }
+        if (query.statusKey() != null) {
+            sql.append(" AND listing_status_key=?");
+            arguments.add(query.statusKey());
+        }
+        if (query.ownerKey() != null) {
+            sql.append(" AND listing_owner_key=?");
+            arguments.add(query.ownerKey());
+        }
+        if (includeStage && query.stageKey() != null) {
+            sql.append(" AND listing_stage_key=?");
+            arguments.add(query.stageKey());
+        }
+        return new Predicate(sql.toString(), arguments.toArray());
+    }
+
+    /** One statement binds count, earliest eligible fault and page to the same database read. */
+    public ListingPage listProjected(String scope, ListingQuery query) {
+        var matching = filters(query, true);
+        var preceding = filters(query, false);
+        String missing =
+                "(listing_contract IS NULL OR listing_contract<>? OR listing_project_version IS NULL OR "
+                        + "listing_project_version<>version OR (listing_decode_failure IS NULL AND (listing_name_key "
+                        + "IS NULL OR listing_customer_key IS NULL OR listing_status_key IS NULL OR "
+                        + "listing_owner_key IS NULL OR (listing_stage_key IS NULL AND listing_stage_failure IS "
+                        + "NULL) OR (listing_summary_json IS NULL AND listing_stage_failure IS NULL AND "
+                        + "listing_summary_failure IS NULL))))";
+        String later =
+                "(listing_stage_failure IS NOT NULL OR "
+                        + (query.stageKey() == null
+                                ? "listing_summary_failure IS NOT NULL"
+                                : "(listing_stage_key=? AND listing_summary_failure IS NOT NULL)")
+                        + ")";
+        String sql =
+                "SELECT t.total_count,f.failure_type,f.failure_detail,p.page_id,p.summary_json FROM "
+                        + "(SELECT COUNT(*) AS total_count FROM mate_presales_project WHERE workspace_id=? AND "
+                        + matching.sql()
+                        + ") t LEFT JOIN "
+                        + "(SELECT CASE WHEN "
+                        + missing
+                        + " THEN 'NOT_READY' WHEN listing_decode_failure IS NOT NULL THEN 'DECODE' WHEN listing_stage_failure IS NOT NULL THEN 'STAGE' ELSE 'SUMMARY' END AS failure_type,"
+                        + "COALESCE(listing_decode_failure,listing_stage_failure,listing_summary_failure) AS failure_detail FROM mate_presales_project WHERE workspace_id=? AND ("
+                        + missing
+                        + " OR listing_decode_failure IS NOT NULL OR ("
+                        + preceding.sql()
+                        + " AND "
+                        + later
+                        + ")) ORDER BY name,id LIMIT 1) f ON 1=1 LEFT JOIN "
+                        + "(SELECT id AS page_id,name AS order_name,id AS order_id,listing_summary_json AS summary_json FROM mate_presales_project WHERE workspace_id=? AND "
+                        + matching.sql()
+                        + " ORDER BY name,id LIMIT ? OFFSET ?) p ON 1=1 ORDER BY p.order_name,p.order_id";
+        Object[] args =
+                parameters(
+                        new Object[] {scope},
+                        matching.arguments(),
+                        new Object[] {query.contract(), scope, query.contract()},
+                        preceding.arguments(),
+                        query.stageKey() == null ? new Object[0] : new Object[] {query.stageKey()},
+                        new Object[] {scope},
+                        matching.arguments(),
+                        new Object[] {query.size(), query.offset()});
+        return jdbc.query(
+                sql,
+                (org.springframework.jdbc.core.ResultSetExtractor<ListingPage>)
+                        rows -> {
+                            var summaries = new ArrayList<String>();
+                            long total = 0;
+                            String type = null, detail = null;
+                            while (rows.next()) {
+                                total = rows.getLong("total_count");
+                                type = rows.getString("failure_type");
+                                detail = rows.getString("failure_detail");
+                                if (rows.getString("page_id") != null)
+                                    summaries.add(rows.getString("summary_json"));
+                            }
+                            return new ListingPage(summaries, total, type, detail);
+                        },
+                args);
     }
 
     public Optional<OperationReceipt> findReceipt(String scope, String actor, String operation) {

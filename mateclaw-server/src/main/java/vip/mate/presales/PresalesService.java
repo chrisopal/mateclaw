@@ -46,19 +46,7 @@ public class PresalesService {
                     "updatedAt");
     private static final Set<String> REPAIR_BIND_FIELDS = Set.of("id", "kbId", "graphId", "role");
     private static final List<String> SOURCE_COLLECTIONS =
-            List.of(
-                    "materials",
-                    "requirements",
-                    "clarifications",
-                    "baselines",
-                    "fitGaps",
-                    "cases",
-                    "solutions",
-                    "reviews",
-                    "reviewDrafts",
-                    "releases",
-                    "tasks",
-                    "contextCards");
+            PresalesListingProjectionV1.SOURCE_COLLECTIONS;
     private final PresalesArtifactRepository artifacts;
     private final PresalesProjectRepository projects;
     private final ObjectMapper json;
@@ -169,12 +157,37 @@ public class PresalesService {
             int size) {
         access.require(scope, "viewer");
         if (page < 1 || size < 1 || size > 100) throw bad("Invalid pagination");
-        var decoded = projects.listBodies(scope).stream().map(this::decode);
-        return PresalesProjectListing.page(
-                decoded,
-                new PresalesProjectListing.Criteria(
-                        query, status, ownerId, stageFilter, page, size),
-                SOURCE_COLLECTIONS);
+        var rows =
+                projects.listProjected(
+                        scope,
+                        new PresalesProjectRepository.ListingQuery(
+                                query == null || query.isEmpty()
+                                        ? null
+                                        : PresalesListingProjectionV1.searchKey(query),
+                                listingFilterKey(status),
+                                listingFilterKey(ownerId),
+                                listingFilterKey(stageFilter),
+                                (long) (page - 1) * size,
+                                size,
+                                PresalesListingProjectionV1.CONTRACT_VERSION));
+        if (rows.failureType() != null) {
+            switch (rows.failureType()) {
+                case "STAGE", "SUMMARY" ->
+                        throw new IllegalArgumentException(
+                                "Invalid project listing collection: " + rows.failureDetail());
+                case "DECODE" ->
+                        throw new IllegalStateException(
+                                "Invalid project body (" + rows.failureDetail() + ")");
+                default ->
+                        throw new IllegalStateException("Project listing projection is not ready");
+            }
+        }
+        return new Page(
+                rows.summaries().stream().map(this::decode).toList(), rows.total(), page, size);
+    }
+
+    private static String listingFilterKey(String value) {
+        return value == null || value.isBlank() ? null : PresalesListingProjectionV1.key(value);
     }
 
     public ObjectNode get(String scope, String id) {
@@ -237,9 +250,16 @@ public class PresalesService {
                         "reviewDrafts",
                         "releases",
                         "tasks")) p.putArray(key);
+        String body = PresalesListingProjectionV1.storageJson(encode(p));
         projects.insert(
                 new PresalesProjectRepository.ProjectRow(
-                        p.path("id").asText(), scope, 1, r.name(), "ACTIVE", encode(p)));
+                        p.path("id").asText(),
+                        scope,
+                        1,
+                        r.name(),
+                        "ACTIVE",
+                        body,
+                        PresalesListingProjectionV1.fromBody(body, json)));
         record(p, actor, "CREATE");
         receipt(scope, actor, r.operationId(), hash, p);
         return p;
@@ -468,6 +488,7 @@ public class PresalesService {
         p.put("version", r.expectedVersion() + 1)
                 .put("updatedBy", actor)
                 .put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
+        String body = PresalesListingProjectionV1.storageJson(encode(p));
         if (projects.update(
                         new PresalesProjectRepository.ProjectRow(
                                 projectId,
@@ -475,7 +496,8 @@ public class PresalesService {
                                 r.expectedVersion() + 1,
                                 p.path("name").asText(),
                                 p.path("status").asText(),
-                                encode(p)),
+                                body,
+                                PresalesListingProjectionV1.fromBody(body, json)),
                         r.expectedVersion())
                 != 1) throw conflict("VERSION_CONFLICT", "Concurrent update");
         record(p, actor, action);
@@ -1173,7 +1195,8 @@ public class PresalesService {
     }
 
     private void receipt(String scope, String actor, String operation, String hash, ObjectNode p) {
-        projects.insertReceipt(scope, actor, operation, hash, encode(p));
+        projects.insertReceipt(
+                scope, actor, operation, hash, PresalesListingProjectionV1.storageJson(encode(p)));
     }
 
     private void record(ObjectNode p, String actor, String action) {
@@ -1182,7 +1205,7 @@ public class PresalesService {
                 p.path("version").asInt(),
                 actor,
                 action,
-                encode(p),
+                PresalesListingProjectionV1.storageJson(encode(p)),
                 LocalDateTime.now(ZoneOffset.UTC));
     }
 

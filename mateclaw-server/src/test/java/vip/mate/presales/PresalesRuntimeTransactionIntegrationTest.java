@@ -230,6 +230,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                 null,
                                 0,
                                 UUID.randomUUID().toString()));
+        assertListingVersion(project);
         snapshot = contexts.snapshot(workspace, project, "S1", "Clarify scope");
         snapshot.put("projectVersion", project.path("version").asInt() + 1);
         var pin = runtime.pin(workspace, agentId, "S1");
@@ -402,6 +403,19 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                 candidate);
     }
 
+    private void assertListingVersion(ObjectNode current) {
+        var page = service.list(workspace, null, null, null, null, 1, 100);
+        var listed =
+                page.items().stream()
+                        .filter(p -> p.path("id").asText().equals(current.path("id").asText()))
+                        .findFirst()
+                        .orElseThrow();
+        assertEquals(current.path("version"), listed.path("version"));
+        assertEquals(current.path("goal"), listed.path("goal"));
+        assertFalse(listed.has("tasks"));
+        assertFalse(listed.has("requirements"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"SUCCEEDED", "FAILED", "CANCELLED", "DRAFT"})
     void lateFailureCannotOverwriteTerminalTask(String status) throws Exception {
@@ -507,6 +521,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         assertTrue(saved.path("tasks").get(0).path("result").isMissingNode());
         assertEquals(receipts + 1, receiptCount());
         assertEquals(revisions + 1, revisionCount());
+        assertListingVersion(saved);
         noExternalCall();
     }
 
@@ -721,6 +736,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         assertEquals("SUCCEEDED", accepted.path("tasks").get(0).path("status").asText());
         assertEquals(
                 command.payload().path("result"), accepted.path("tasks").get(0).path("result"));
+        assertListingVersion(accepted);
         verify(agents, times(1))
                 .chatStructuredStream(
                         anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any());

@@ -32,7 +32,9 @@ class PresalesProjectRepositoryTest {
                         + UUID.randomUUID()
                         + ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=5000");
         new ResourceDatabasePopulator(
-                        new ClassPathResource("db/migration/h2/V211__presales_projects.sql"))
+                        new ClassPathResource("db/migration/h2/V211__presales_projects.sql"),
+                        new ClassPathResource(
+                                "db/migration/h2/V217__presales_listing_projection.sql"))
                 .execute(source);
         jdbc = new JdbcTemplate(source);
         repository = new PresalesProjectRepository(jdbc);

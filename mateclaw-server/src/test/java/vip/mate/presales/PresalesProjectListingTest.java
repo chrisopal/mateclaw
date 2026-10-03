@@ -159,4 +159,81 @@ class PresalesProjectListingTest {
         assertTrue(failure.getMessage().contains("releases"));
         assertEquals(1, decoded.get());
     }
+
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> substringCases() {
+        return java.util.stream.Stream.of(
+                org.junit.jupiter.params.provider.Arguments.of("A%_\\B", "%_\\", true),
+                org.junit.jupiter.params.provider.Arguments.of("A%B", "A_B", false),
+                org.junit.jupiter.params.provider.Arguments.of("Café", "cafe", false),
+                org.junit.jupiter.params.provider.Arguments.of("e\u0301", "é", false),
+                org.junit.jupiter.params.provider.Arguments.of("Σ", "ς", false),
+                org.junit.jupiter.params.provider.Arguments.of("Σ", "σ", true),
+                org.junit.jupiter.params.provider.Arguments.of("İ", "i", true),
+                org.junit.jupiter.params.provider.Arguments.of("İ", "i\u0307", true),
+                org.junit.jupiter.params.provider.Arguments.of("İ", "ı", false),
+                org.junit.jupiter.params.provider.Arguments.of("I", "ı", false),
+                org.junit.jupiter.params.provider.Arguments.of("ß", "SS", false),
+                org.junit.jupiter.params.provider.Arguments.of("\ud83d\ude00", "\ud83d", true),
+                org.junit.jupiter.params.provider.Arguments.of("\ud83d\ude00", "\ude00", true),
+                org.junit.jupiter.params.provider.Arguments.of("x\ud800y", "?", false),
+                org.junit.jupiter.params.provider.Arguments.of("x\ud800y", "\ud800", true),
+                org.junit.jupiter.params.provider.Arguments.of(" Title ", " title ", true),
+                org.junit.jupiter.params.provider.Arguments.of(" Title ", "  ", false),
+                org.junit.jupiter.params.provider.Arguments.of("", "", true));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("substringCases")
+    void substringIsLiteralRootLocaleUtf16WithoutDatabaseCollation(
+            String name, String query, boolean matches) {
+        var p = project("original", name, "");
+        var page =
+                PresalesProjectListing.page(
+                        List.of(p).stream(),
+                        new PresalesProjectListing.Criteria(query, null, null, null, 1, 20),
+                        SOURCES);
+        assertEquals(matches ? 1 : 0, page.total());
+    }
+
+    @Test
+    void nullAndUnknownMetadataRemainRawWhileComputedKeysAreReplaced() {
+        var p = project("00007", "raw", "customer");
+        p.putNull("ownerId").putNull("customer");
+        p.put("stage", "raw-stage")
+                .put("openClarificationCount", -99)
+                .put("latestSolutionVersion", -99);
+        p.putObject("futureExtension").putNull("value").put("original", " Ω ");
+        p.withArray("clarifications").addObject().put("status", "answered");
+        p.withArray("clarifications").addNull();
+        var before = p.deepCopy();
+        var page =
+                PresalesProjectListing.page(
+                        List.of(p).stream(),
+                        new PresalesProjectListing.Criteria("null", null, "null", null, 1, 20),
+                        SOURCES);
+        assertEquals(1, page.total());
+        var result = page.items().getFirst();
+        assertTrue(result.path("customer").isNull());
+        assertTrue(result.path("ownerId").isNull());
+        assertEquals("DISCOVERY", result.path("stage").asText());
+        assertEquals(2, result.path("openClarificationCount").asInt());
+        assertEquals(0, result.path("latestSolutionVersion").asInt());
+        assertEquals(before.path("futureExtension"), result.path("futureExtension"));
+        assertEquals(before, p);
+    }
+
+    @Test
+    void storageEscapesOnlyIsolatedSurrogatesWithoutNormalizingJsonOrBusinessText()
+            throws Exception {
+        String normal = " {\"value\":\" Ω Café e\u0301 😀 \\\\uD800 \"} ";
+        assertEquals(normal, PresalesListingProjectionV1.storageJson(normal));
+        var body = project("id", "x\ud800y\udc00z😀", "Customer");
+        String encoded = json.writeValueAsString(body);
+        String stored = PresalesListingProjectionV1.storageJson(encoded);
+        assertTrue(stored.contains("\\ud800"));
+        assertTrue(stored.contains("\\udc00"));
+        assertTrue(stored.contains("😀"));
+        assertEquals(body, json.readTree(stored));
+        assertEquals(stored, PresalesListingProjectionV1.storageJson(stored));
+    }
 }

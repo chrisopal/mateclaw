@@ -193,6 +193,11 @@ class PresalesGenerationCoordinatorTest {
         coordinator.recoverStaleTasks();
         verify(projects)
                 .updateRuntimeBody(
-                        eq("w"), eq("p"), eq(4), eq(5), contains("\"INTERRUPTED_BY_RESTART\""));
+                        eq("w"),
+                        eq("p"),
+                        eq(4),
+                        eq(5),
+                        contains("\"INTERRUPTED_BY_RESTART\""),
+                        any(PresalesListingProjectionV1.Projection.class));
     }
 }

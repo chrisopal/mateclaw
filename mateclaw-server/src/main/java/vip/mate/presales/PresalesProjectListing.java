@@ -54,32 +54,10 @@ final class PresalesProjectListing {
     }
 
     private static ObjectNode summary(ObjectNode p, List<String> sourceCollections) {
-        ObjectNode summary = p.deepCopy();
-        for (String key : sourceCollections) summary.remove(key);
-        summary.put("stage", stage(p))
-                .put(
-                        "openClarificationCount",
-                        java.util.stream.StreamSupport.stream(
-                                        p.withArray("clarifications").spliterator(), false)
-                                .filter(c -> !"ANSWERED".equals(c.path("status").asText()))
-                                .count())
-                .put(
-                        "latestSolutionVersion",
-                        p.withArray("solutions").isEmpty()
-                                ? 0
-                                : p.withArray("solutions")
-                                        .get(p.withArray("solutions").size() - 1)
-                                        .path("version")
-                                        .asInt());
-        return summary;
+        return PresalesListingProjectionV1.summary(p, sourceCollections);
     }
 
     static String stage(ObjectNode p) {
-        if ("ARCHIVED".equals(p.path("status").asText())) return "ARCHIVED";
-        if (!p.withArray("releases").isEmpty()) return "RELEASE";
-        if (!p.withArray("solutions").isEmpty()) return "SOLUTION";
-        if (!p.withArray("baselines").isEmpty()) return "BASELINED";
-        if (!p.withArray("requirements").isEmpty()) return "REQUIREMENTS";
-        return "DISCOVERY";
+        return PresalesListingProjectionV1.stage(p);
     }
 }

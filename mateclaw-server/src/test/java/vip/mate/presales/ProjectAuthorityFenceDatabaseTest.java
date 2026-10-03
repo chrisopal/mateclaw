@@ -131,6 +131,10 @@ class ProjectAuthorityFenceDatabaseTest {
                 "CREATE TABLE mate_semantic_graph(id VARCHAR(64) PRIMARY KEY, workspace_id BIGINT, archived BOOLEAN)");
         jdbc.execute(
                 "CREATE TABLE mate_presales_project(id VARCHAR(64) PRIMARY KEY, workspace_id VARCHAR(64), version INT, name VARCHAR(100), status VARCHAR(20), body_json TEXT)");
+        new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+                        new org.springframework.core.io.ClassPathResource(
+                                "db/migration/h2/V217__presales_listing_projection.sql"))
+                .execute(dataSource);
         jdbc.execute(
                 "CREATE TABLE mate_presales_operation(workspace_id VARCHAR(64), actor_id VARCHAR(64), operation_id VARCHAR(64), request_hash VARCHAR(100), response_json TEXT)");
         jdbc.execute(
@@ -145,7 +149,7 @@ class ProjectAuthorityFenceDatabaseTest {
         jdbc.update("INSERT INTO mate_wiki_raw_material VALUES(33,3,0)");
         jdbc.update("INSERT INTO mate_semantic_graph VALUES('g',1,FALSE)");
         jdbc.update(
-                "INSERT INTO mate_presales_project VALUES('p','1',2,'case','ACTIVE',?)",
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES('p','1',2,'case','ACTIVE',?)",
                 project().toString());
         transaction = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
         transaction.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);

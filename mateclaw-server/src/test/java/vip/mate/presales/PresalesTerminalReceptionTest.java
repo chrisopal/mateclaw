@@ -44,6 +44,10 @@ class PresalesTerminalReceptionTest {
         storage.execute(
                 "CREATE TABLE mate_presales_project(id VARCHAR(100),workspace_id VARCHAR(100),"
                         + "version INT,name VARCHAR(100),status VARCHAR(100),body_json CLOB,PRIMARY KEY(id,workspace_id))");
+        new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+                        new org.springframework.core.io.ClassPathResource(
+                                "db/migration/h2/V217__presales_listing_projection.sql"))
+                .execute(source);
         accepted =
                 (ObjectNode)
                         json.readTree(
@@ -55,7 +59,7 @@ class PresalesTerminalReceptionTest {
                  "extension":{"unchanged":true}}]}
                 """);
         storage.update(
-                "INSERT INTO mate_presales_project VALUES(?,?,?,?,?,?)",
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
                 "p",
                 "w",
                 2,
@@ -68,7 +72,7 @@ class PresalesTerminalReceptionTest {
                 .put("runId", "other-run");
         otherWorkspaceBody = json.writeValueAsString(other);
         storage.update(
-                "INSERT INTO mate_presales_project VALUES(?,?,?,?,?,?)",
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
                 "p",
                 "w-other",
                 7,
@@ -99,6 +103,34 @@ class PresalesTerminalReceptionTest {
                 storage.queryForObject(
                         "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w-other'",
                         Integer.class));
+    }
+
+    private void assertRuntimeListing() throws Exception {
+        var access = mock(PresalesAccess.class);
+        when(access.require("w", "viewer")).thenReturn("viewer");
+        var listingService =
+                new PresalesService(
+                        null,
+                        new PresalesProjectRepository(storage),
+                        json,
+                        access,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+        var page = listingService.list("w", null, null, null, null, 1, 20);
+        var summary = page.items().getFirst();
+        assertEquals(1, page.total());
+        assertEquals(current().path("version"), summary.path("version"));
+        assertEquals(current().path("unknown"), summary.path("unknown"));
+        assertFalse(summary.has("tasks"));
+        assertFalse(summary.has("requirements"));
+        assertEquals("REQUIREMENTS", summary.path("stage").asText());
     }
 
     @SuppressWarnings("unchecked")
@@ -268,6 +300,7 @@ class PresalesTerminalReceptionTest {
                 accepted.path("tasks").get(0).path("extension"),
                 saved.path("tasks").get(0).path("extension"));
         if (drift) assertEquals("new goal", saved.path("goal").asText());
+        assertRuntimeListing();
         assertEquals(
                 "original",
                 storage.queryForObject(
@@ -308,11 +341,7 @@ class PresalesTerminalReceptionTest {
                 .when(runtimeJdbc)
                 .update(
                         contains("UPDATE mate_presales_project SET body_json=?"),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any());
+                        any(Object[].class));
         coordinator(runtimeJdbc).process(submission());
         assertTrue(conflict.get());
         assertEquals(replacement.get(), body());
@@ -374,11 +403,7 @@ class PresalesTerminalReceptionTest {
                 .when(runtimeJdbc)
                 .update(
                         contains("UPDATE mate_presales_project SET body_json=?"),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any());
+                        any(Object[].class));
         coordinator.process(submission());
         assertTrue(conflict.get());
         assertEquals(before, body());
@@ -464,6 +489,7 @@ class PresalesTerminalReceptionTest {
         assertTrue(recovered.path("tasks").get(0).path("finishedAt").isTextual());
         assertEquals(accepted.path("requirements"), recovered.path("requirements"));
         assertEquals(accepted.path("unknown"), recovered.path("unknown"));
+        assertRuntimeListing();
         assertEquals(
                 "original",
                 storage.queryForObject(
