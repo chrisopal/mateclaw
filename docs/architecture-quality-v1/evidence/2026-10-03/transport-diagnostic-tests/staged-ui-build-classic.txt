@@ -1,0 +1,293 @@
+$ bash ../scripts/check-snowflake-precision.sh && node --max-old-space-size=6144 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit && node --max-old-space-size=6144 ./node_modules/vite/bin/vite.js build --mode classic
+Snowflake numeric-conversion check passed
+vite v7.3.1 building client environment for classic...
+transforming...
+✓ 6578 modules transformed.
+rendering chunks...
+computing gzip size...
+../mateclaw-server/src/main/resources/static/index.html                                                        0.99 kB │ gzip:   0.49 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size3-Regular-CTq5MqoE.woff                          4.42 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2                         4.93 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2                         5.21 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2                         5.47 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size4-Regular-BF-4gkZK.woff                          5.98 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size2-Regular-oD1tc_U0.woff                          6.19 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size1-Regular-C195tn64.woff                          6.50 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2                   6.91 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2                      6.91 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf                           7.59 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff                    7.66 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff                       7.72 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Script-Regular-D3wIWfF6.woff2                        9.64 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2                    10.34 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size4-Regular-DWFBv043.ttf                          10.36 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Script-Regular-D5yQViql.woff                        10.59 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2                      11.32 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2                         11.35 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf                          11.51 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2                     12.03 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2                       12.22 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf                          12.23 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff                     12.32 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf                    12.34 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf                       12.37 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff                       13.21 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff                          13.30 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2                   13.57 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff                      14.11 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff                        14.41 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff                    16.03 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2                      16.40 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-Italic-t53AETM-.woff2                          16.44 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Script-Regular-C5JkGWo-.ttf                         16.65 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2                      16.78 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2                          16.99 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff                       18.67 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-Italic-DA0__PXp.woff                           18.75 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff                       19.41 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf                      19.44 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Regular-CB_wures.ttf                        19.57 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf                           19.58 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Italic-BMLOBm91.woff                           19.68 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf                       22.36 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf                         24.50 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Bold-Cx986IdX.woff2                            25.32 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Regular-B22Nviop.woff2                         26.27 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf                     27.56 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2                          28.08 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Bold-Jm3AIy58.woff                             29.91 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Regular-Dr94JaBh.woff                          30.77 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf                        31.20 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Math-Italic-flOr_0UB.ttf                            31.31 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf                        32.97 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_AMS-Regular-DMm9YOAa.woff                           33.52 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Italic-3WenGoN9.ttf                            33.58 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Bold-waoOVXN0.ttf                              51.34 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_Main-Regular-ypZvNtVU.ttf                           53.58 kB
+../mateclaw-server/src/main/resources/static/assets/KaTeX_AMS-Regular-DRggAlZN.ttf                            63.63 kB
+../mateclaw-server/src/main/resources/static/assets/codicon-ngg6Pgfi.ttf                                     121.97 kB
+../mateclaw-server/src/main/resources/static/assets/editor.worker-CdQrwHl8.js                                251.81 kB
+../mateclaw-server/src/main/resources/static/assets/json.worker-BoL8UZqY.js                                  383.07 kB
+../mateclaw-server/src/main/resources/static/assets/pdf.worker.min-DEtVeC4l.mjs                            1,255.07 kB
+../mateclaw-server/src/main/resources/static/assets/WorkflowJsonEditor-Diu0Rkyx.css                            0.28 kB │ gzip:   0.21 kB
+../mateclaw-server/src/main/resources/static/assets/HtmlPreview-BaOJmnbs.css                                   0.46 kB │ gzip:   0.28 kB
+../mateclaw-server/src/main/resources/static/assets/McTooltip-1g00X_DI.css                                     0.51 kB │ gzip:   0.30 kB
+../mateclaw-server/src/main/resources/static/assets/PdfPreview-B-hJeMud.css                                    0.51 kB │ gzip:   0.31 kB
+../mateclaw-server/src/main/resources/static/assets/DocxPreview-D58-1ls-.css                                   0.59 kB │ gzip:   0.32 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunRuntime-Ch1syqo5.css                                0.66 kB │ gzip:   0.35 kB
+../mateclaw-server/src/main/resources/static/assets/TextPreview-CDuQzkkc.css                                   0.74 kB │ gzip:   0.39 kB
+../mateclaw-server/src/main/resources/static/assets/ModelingTaskCreate-D3mqqPc2.css                            0.84 kB │ gzip:   0.34 kB
+../mateclaw-server/src/main/resources/static/assets/SkillIcon-BbGNgeyA.css                                     0.90 kB │ gzip:   0.34 kB
+../mateclaw-server/src/main/resources/static/assets/KnowledgeBindingPanel-Bv_Uis9V.css                         1.10 kB │ gzip:   0.40 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunStatus-BejM3jUt.css                                 1.27 kB │ gzip:   0.49 kB
+../mateclaw-server/src/main/resources/static/assets/SheetPreview-B4g46vRV.css                                  1.30 kB │ gzip:   0.54 kB
+../mateclaw-server/src/main/resources/static/assets/Forbidden-CckvGaBk.css                                     1.33 kB │ gzip:   0.50 kB
+../mateclaw-server/src/main/resources/static/assets/semantic-CwjQUhzY.css                                      1.70 kB │ gzip:   0.68 kB
+../mateclaw-server/src/main/resources/static/assets/BiddingProjects-CBom6Vxo.css                               2.06 kB │ gzip:   0.70 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyVersions-Bj9mD_lD.css                              2.16 kB │ gzip:   0.65 kB
+../mateclaw-server/src/main/resources/static/assets/DeviceCodeDialog-Cxjnkd5b.css                              2.18 kB │ gzip:   0.70 kB
+../mateclaw-server/src/main/resources/static/assets/index-CK8L7Wu7.css                                         2.20 kB │ gzip:   0.60 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelTypePicker-Bx5piPKp.css                             2.26 kB │ gzip:   0.78 kB
+../mateclaw-server/src/main/resources/static/assets/AgentGuideEditor-yw5yjd6q.css                              2.78 kB │ gzip:   0.76 kB
+../mateclaw-server/src/main/resources/static/assets/MemorySection-CNFE35Rw.css                                 2.79 kB │ gzip:   0.82 kB
+../mateclaw-server/src/main/resources/static/assets/Layout-CJDGUsvV.css                                        2.83 kB │ gzip:   0.82 kB
+../mateclaw-server/src/main/resources/static/assets/index-CfxXrenU.css                                         2.94 kB │ gzip:   0.86 kB
+../mateclaw-server/src/main/resources/static/assets/McPagination-MCFzXSM-.css                                  3.04 kB │ gzip:   0.85 kB
+../mateclaw-server/src/main/resources/static/assets/index-t38H5zdd.css                                         3.13 kB │ gzip:   0.87 kB
+../mateclaw-server/src/main/resources/static/assets/index-CEhbMpWz.css                                         3.13 kB │ gzip:   0.88 kB
+../mateclaw-server/src/main/resources/static/assets/index-C5vipQLI.css                                         3.13 kB │ gzip:   0.88 kB
+../mateclaw-server/src/main/resources/static/assets/index-B4Na4BZG.css                                         3.27 kB │ gzip:   0.98 kB
+../mateclaw-server/src/main/resources/static/assets/MateDrawer-BAbvDVY8.css                                    3.52 kB │ gzip:   1.10 kB
+../mateclaw-server/src/main/resources/static/assets/Layout-BnuSI_jt.css                                        3.76 kB │ gzip:   1.11 kB
+../mateclaw-server/src/main/resources/static/assets/index-lguPZxsO.css                                         3.79 kB │ gzip:   1.02 kB
+../mateclaw-server/src/main/resources/static/assets/index-DRUpgxcn.css                                         3.79 kB │ gzip:   1.02 kB
+../mateclaw-server/src/main/resources/static/assets/index-BbFtVxwk.css                                         3.80 kB │ gzip:   1.04 kB
+../mateclaw-server/src/main/resources/static/assets/index-CUB2TliW.css                                         3.83 kB │ gzip:   1.04 kB
+../mateclaw-server/src/main/resources/static/assets/index-CQe568CL.css                                         3.86 kB │ gzip:   1.02 kB
+../mateclaw-server/src/main/resources/static/assets/index-BZLCozU5.css                                         4.13 kB │ gzip:   1.13 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunAttention-BO7hCrxY.css                              4.23 kB │ gzip:   1.10 kB
+../mateclaw-server/src/main/resources/static/assets/index-B7yd_DTX.css                                         4.23 kB │ gzip:   1.13 kB
+../mateclaw-server/src/main/resources/static/assets/ProviderConfigModal-Bn4IihPi.css                           4.66 kB │ gzip:   1.26 kB
+../mateclaw-server/src/main/resources/static/assets/Login-DmD3gxXd.css                                         4.77 kB │ gzip:   1.36 kB
+../mateclaw-server/src/main/resources/static/assets/ModelSelector-BfQyCDOD.css                                 4.86 kB │ gzip:   1.38 kB
+../mateclaw-server/src/main/resources/static/assets/TokenUsage-Bbxwhz6z.css                                    4.91 kB │ gzip:   1.39 kB
+../mateclaw-server/src/main/resources/static/assets/ContentCalendar-DtefmrxT.css                               5.18 kB │ gzip:   1.43 kB
+../mateclaw-server/src/main/resources/static/assets/SkillTemplates-BB7Ne-GN.css                                5.27 kB │ gzip:   1.33 kB
+../mateclaw-server/src/main/resources/static/assets/AgentPickerDialog-DPb3PcUY.css                             5.62 kB │ gzip:   1.31 kB
+../mateclaw-server/src/main/resources/static/assets/Channels-loIeBo7L.css                                      5.69 kB │ gzip:   1.46 kB
+../mateclaw-server/src/main/resources/static/assets/WorkflowCanvas-QtvUkiPh.css                                6.13 kB │ gzip:   1.69 kB
+../mateclaw-server/src/main/resources/static/assets/AddProviderDrawer-CxxZo1Ei.css                             6.13 kB │ gzip:   1.63 kB
+../mateclaw-server/src/main/resources/static/assets/index-nE3XzIzC.css                                         6.45 kB │ gzip:   1.38 kB
+../mateclaw-server/src/main/resources/static/assets/Tools-D_YNkm-F.css                                         6.74 kB │ gzip:   1.61 kB
+../mateclaw-server/src/main/resources/static/assets/SemanticWorkbench-Ct3ix0Vr.css                             6.75 kB │ gzip:   1.63 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-vue-flow-BPc1C3PT.css                               6.77 kB │ gzip:   1.49 kB
+../mateclaw-server/src/main/resources/static/assets/index-BK4pcKm9.css                                         7.01 kB │ gzip:   1.72 kB
+../mateclaw-server/src/main/resources/static/assets/ManageModelsModal-0SwKfr1K.css                             7.47 kB │ gzip:   1.84 kB
+../mateclaw-server/src/main/resources/static/assets/SkillIconPicker-CXM9mr_W.css                               7.49 kB │ gzip:   1.85 kB
+../mateclaw-server/src/main/resources/static/assets/Plugins-CvrvCqHH.css                                       7.51 kB │ gzip:   1.80 kB
+../mateclaw-server/src/main/resources/static/assets/index-DYt5Man6.css                                         7.60 kB │ gzip:   1.85 kB
+../mateclaw-server/src/main/resources/static/assets/index-DjfkpjJC.css                                         7.70 kB │ gzip:   1.83 kB
+../mateclaw-server/src/main/resources/static/assets/index-uPKC7orc.css                                         7.92 kB │ gzip:   1.89 kB
+../mateclaw-server/src/main/resources/static/assets/Sessions-SAsHiyRP.css                                      8.70 kB │ gzip:   2.03 kB
+../mateclaw-server/src/main/resources/static/assets/AcpEndpoints-Ci8gxUdc.css                                  9.68 kB │ gzip:   2.13 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyEditor-lUnXx9L3.css                                9.87 kB │ gzip:   2.01 kB
+../mateclaw-server/src/main/resources/static/assets/index-W5YqSjv7.css                                        10.69 kB │ gzip:   2.27 kB
+../mateclaw-server/src/main/resources/static/assets/AgentCreateWizard-MSwJy7Ue.css                            10.79 kB │ gzip:   2.03 kB
+../mateclaw-server/src/main/resources/static/assets/Datasources-DRsu_dkP.css                                  10.94 kB │ gzip:   2.32 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelOnboardingWizard-Cz2R4JSX.css                      11.59 kB │ gzip:   2.45 kB
+../mateclaw-server/src/main/resources/static/assets/Dashboard-CiysGJ5D.css                                    11.94 kB │ gzip:   2.50 kB
+../mateclaw-server/src/main/resources/static/assets/index-tQjAah8l.css                                        12.76 kB │ gzip:   2.57 kB
+../mateclaw-server/src/main/resources/static/assets/index-CVVuG-fc.css                                        14.04 kB │ gzip:   2.75 kB
+../mateclaw-server/src/main/resources/static/assets/index-Dl3ZhU3g.css                                        14.52 kB │ gzip:   2.92 kB
+../mateclaw-server/src/main/resources/static/assets/McpServers-CLXWQgrr.css                                   15.12 kB │ gzip:   3.07 kB
+../mateclaw-server/src/main/resources/static/assets/PlanBoard-Weue-hhd.css                                    15.73 kB │ gzip:   3.00 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyModelWorkbench-DWSD0tJ1.css                       16.69 kB │ gzip:   2.99 kB
+../mateclaw-server/src/main/resources/static/assets/AgentContext-BusqlNS6.css                                 17.48 kB │ gzip:   3.44 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelEditModal-DKbDaJKp.css                             18.14 kB │ gzip:   2.96 kB
+../mateclaw-server/src/main/resources/static/assets/index-qdjeGbX9.css                                        21.15 kB │ gzip:   3.83 kB
+../mateclaw-server/src/main/resources/static/assets/PresalesWorkbench-5mnzNIfz.css                            24.26 kB │ gzip:   3.37 kB
+../mateclaw-server/src/main/resources/static/assets/Agents-CT2feNPF.css                                       25.36 kB │ gzip:   4.36 kB
+../mateclaw-server/src/main/resources/static/assets/Workflows-C6sXoo6W.css                                    26.25 kB │ gzip:   4.35 kB
+../mateclaw-server/src/main/resources/static/assets/BiddingWorkbench-8oBhNjeH.css                             26.69 kB │ gzip:   4.25 kB
+../mateclaw-server/src/main/resources/static/assets/katex-CfVKi3_s.css                                        29.27 kB │ gzip:   8.06 kB
+../mateclaw-server/src/main/resources/static/assets/Teams-o7L4P06x.css                                        29.50 kB │ gzip:   5.20 kB
+../mateclaw-server/src/main/resources/static/assets/index-FdpgM6rh.css                                        29.80 kB │ gzip:   5.02 kB
+../mateclaw-server/src/main/resources/static/assets/LivePanel-Bvm-UcuT.css                                    34.15 kB │ gzip:   6.11 kB
+../mateclaw-server/src/main/resources/static/assets/MainLayout-4GknpSux.css                                   35.16 kB │ gzip:   6.07 kB
+../mateclaw-server/src/main/resources/static/assets/index-D5UaT-Hg.css                                        38.00 kB │ gzip:   5.45 kB
+../mateclaw-server/src/main/resources/static/assets/SkillMarket-CPO2KmH1.css                                  52.10 kB │ gzip:   7.73 kB
+../mateclaw-server/src/main/resources/static/assets/index-BM_ELOtt.css                                        72.60 kB │ gzip:  14.64 kB
+../mateclaw-server/src/main/resources/static/assets/index-D2V0D9iw.css                                       111.36 kB │ gzip:  16.23 kB
+../mateclaw-server/src/main/resources/static/assets/ChatConsole-B2dRFoyv.css                                 114.60 kB │ gzip:  18.85 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-monaco-WGlpN-0L.css                               146.36 kB │ gzip:  23.05 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-element-BgqME4ST.css                              352.20 kB │ gzip:  47.23 kB
+../mateclaw-server/src/main/resources/static/assets/package-BjnPZBu0.js                                        0.04 kB │ gzip:   0.06 kB
+../mateclaw-server/src/main/resources/static/assets/mateclaw_logo_s-CVAfpjIT.js                                0.05 kB │ gzip:   0.07 kB
+../mateclaw-server/src/main/resources/static/assets/useFileDrop-CWpgWlYt.js                                    0.31 kB │ gzip:   0.24 kB
+../mateclaw-server/src/main/resources/static/assets/helpers-jPJU9Cmk.js                                        0.33 kB │ gzip:   0.19 kB
+../mateclaw-server/src/main/resources/static/assets/useSkillName-Bvhu50oD.js                                   0.34 kB │ gzip:   0.24 kB
+../mateclaw-server/src/main/resources/static/assets/clipboard-BGju8G_r.js                                      0.36 kB │ gzip:   0.24 kB
+../mateclaw-server/src/main/resources/static/assets/useSemanticScope-B17s9lAl.js                               0.42 kB │ gzip:   0.29 kB
+../mateclaw-server/src/main/resources/static/assets/useBreakpoint-C_2ZoDB9.js                                  0.42 kB │ gzip:   0.29 kB
+../mateclaw-server/src/main/resources/static/assets/channelSource-CFqyIyIx.js                                  0.43 kB │ gzip:   0.31 kB
+../mateclaw-server/src/main/resources/static/assets/graphApi-C6HQ0U8O.js                                       0.50 kB │ gzip:   0.27 kB
+../mateclaw-server/src/main/resources/static/assets/useStreamingMarkdown-B16Y0r1Q.js                           0.53 kB │ gzip:   0.36 kB
+../mateclaw-server/src/main/resources/static/assets/McTooltip.vue_vue_type_style_index_0_lang-BetMjhXv.js      0.58 kB │ gzip:   0.39 kB
+../mateclaw-server/src/main/resources/static/assets/useAgentStore-6FVJcx5j.js                                  0.68 kB │ gzip:   0.41 kB
+../mateclaw-server/src/main/resources/static/assets/HtmlPreview-D3b3LpFh.js                                    0.74 kB │ gzip:   0.48 kB
+../mateclaw-server/src/main/resources/static/assets/agentIconColor-DXtUysva.js                                 0.77 kB │ gzip:   0.35 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunRuntime-CprkAhnk.js                                 0.81 kB │ gzip:   0.50 kB
+../mateclaw-server/src/main/resources/static/assets/sourceIncrementalApi-DP8ZXMsV.js                           0.96 kB │ gzip:   0.47 kB
+../mateclaw-server/src/main/resources/static/assets/Forbidden-Cy8CAuMa.js                                      1.06 kB │ gzip:   0.58 kB
+../mateclaw-server/src/main/resources/static/assets/TextPreview-D2442oE7.js                                    1.17 kB │ gzip:   0.65 kB
+../mateclaw-server/src/main/resources/static/assets/DocxPreview-CkFa_9jj.js                                    1.26 kB │ gzip:   0.70 kB
+../mateclaw-server/src/main/resources/static/assets/providerIcons-BehflOXU.js                                  1.80 kB │ gzip:   0.48 kB
+../mateclaw-server/src/main/resources/static/assets/MateDrawer-DeXssG6i.js                                     1.90 kB │ gzip:   0.89 kB
+../mateclaw-server/src/main/resources/static/assets/PdfPreview-D3NAtE4y.js                                     1.95 kB │ gzip:   1.11 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelTypePicker-gObyvjaC.js                              1.95 kB │ gzip:   0.98 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-runtime-PV19FruI.js                                 2.08 kB │ gzip:   1.08 kB
+../mateclaw-server/src/main/resources/static/assets/modelingTaskApi-DTvr-bAt.js                                2.10 kB │ gzip:   1.30 kB
+../mateclaw-server/src/main/resources/static/assets/DeviceCodeDialog-2081BRpP.js                               2.10 kB │ gzip:   1.02 kB
+../mateclaw-server/src/main/resources/static/assets/index-DFEG098V.js                                          2.16 kB │ gzip:   0.98 kB
+../mateclaw-server/src/main/resources/static/assets/index-DRYcNbiS.js                                          2.42 kB │ gzip:   1.13 kB
+../mateclaw-server/src/main/resources/static/assets/index-pnbi-gId.js                                          2.80 kB │ gzip:   1.39 kB
+../mateclaw-server/src/main/resources/static/assets/SheetPreview-XYDh0JSp.js                                   2.92 kB │ gzip:   1.45 kB
+../mateclaw-server/src/main/resources/static/assets/state-CtgtSFgv.js                                          3.02 kB │ gzip:   1.08 kB
+../mateclaw-server/src/main/resources/static/assets/index-CE2WsLsx.js                                          3.59 kB │ gzip:   1.51 kB
+../mateclaw-server/src/main/resources/static/assets/index-Bh2x9Zd1.js                                          3.60 kB │ gzip:   1.24 kB
+../mateclaw-server/src/main/resources/static/assets/Layout-DTgZv0xK.js                                         3.65 kB │ gzip:   1.48 kB
+../mateclaw-server/src/main/resources/static/assets/AgentGuideEditor-DsjvJiTP.js                               3.72 kB │ gzip:   1.61 kB
+../mateclaw-server/src/main/resources/static/assets/McPagination-B8bROR_R.js                                   3.75 kB │ gzip:   1.57 kB
+../mateclaw-server/src/main/resources/static/assets/WorkflowJsonEditor-Cnz36Ceu.js                             3.93 kB │ gzip:   1.88 kB
+../mateclaw-server/src/main/resources/static/assets/index-uH_8vvOY.js                                          4.02 kB │ gzip:   1.37 kB
+../mateclaw-server/src/main/resources/static/assets/index-Dn8EkYVc.js                                          4.05 kB │ gzip:   1.52 kB
+../mateclaw-server/src/main/resources/static/assets/index-Cp_2_dsr.js                                          4.16 kB │ gzip:   1.59 kB
+../mateclaw-server/src/main/resources/static/assets/ContentCalendar-BvKyvwyY.js                                4.68 kB │ gzip:   2.02 kB
+../mateclaw-server/src/main/resources/static/assets/AddProviderDrawer-CrVe4YYq.js                              5.33 kB │ gzip:   1.98 kB
+../mateclaw-server/src/main/resources/static/assets/MemorySection-C5XCjBTx.js                                  5.46 kB │ gzip:   2.34 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunStatus-CwWo04LZ.js                                  5.81 kB │ gzip:   2.57 kB
+../mateclaw-server/src/main/resources/static/assets/index-BNTtIItT.js                                          5.91 kB │ gzip:   1.87 kB
+../mateclaw-server/src/main/resources/static/assets/presalesApi-CKgA3Shw.js                                    5.93 kB │ gzip:   2.25 kB
+../mateclaw-server/src/main/resources/static/assets/TokenUsage-DD35Ta_s.js                                     5.96 kB │ gzip:   1.97 kB
+../mateclaw-server/src/main/resources/static/assets/AgentPickerDialog-DCwbrDdl.js                              5.99 kB │ gzip:   2.15 kB
+../mateclaw-server/src/main/resources/static/assets/index-DWJO7J2L.js                                          6.04 kB │ gzip:   1.84 kB
+../mateclaw-server/src/main/resources/static/assets/SkillIconPicker-lgaIK7El.js                                6.13 kB │ gzip:   2.21 kB
+../mateclaw-server/src/main/resources/static/assets/ModelSelector-nzk1j_nF.js                                  6.16 kB │ gzip:   2.45 kB
+../mateclaw-server/src/main/resources/static/assets/KnowledgeBindingPanel-CCFSn-Q9.js                          6.66 kB │ gzip:   2.56 kB
+../mateclaw-server/src/main/resources/static/assets/index-Cs-YqxMz.js                                          6.70 kB │ gzip:   2.34 kB
+../mateclaw-server/src/main/resources/static/assets/wardley-RL74JXVD-KgJEy5xm.js                               7.35 kB │ gzip:   2.86 kB
+../mateclaw-server/src/main/resources/static/assets/index-bCtUYzxs.js                                          7.37 kB │ gzip:   3.07 kB
+../mateclaw-server/src/main/resources/static/assets/ModelingTaskCreate-DLeeVWVn.js                             7.65 kB │ gzip:   3.27 kB
+../mateclaw-server/src/main/resources/static/assets/index-XEK4bSdo.js                                          7.78 kB │ gzip:   2.14 kB
+../mateclaw-server/src/main/resources/static/assets/SkillTemplates-CNhLwSMf.js                                 7.88 kB │ gzip:   2.83 kB
+../mateclaw-server/src/main/resources/static/assets/index-DaWloSQY.js                                          7.89 kB │ gzip:   2.50 kB
+../mateclaw-server/src/main/resources/static/assets/ProviderConfigModal-YMM01QoL.js                            7.95 kB │ gzip:   2.28 kB
+../mateclaw-server/src/main/resources/static/assets/Plugins-CI39JsTm.js                                        8.05 kB │ gzip:   2.69 kB
+../mateclaw-server/src/main/resources/static/assets/Tools-CikM7npX.js                                          8.16 kB │ gzip:   2.83 kB
+../mateclaw-server/src/main/resources/static/assets/TeamRunAttention-DX0_f1yo.js                               8.35 kB │ gzip:   3.49 kB
+../mateclaw-server/src/main/resources/static/assets/Login-Btk0-JU4.js                                          8.78 kB │ gzip:   3.50 kB
+../mateclaw-server/src/main/resources/static/assets/index-Bijgpc4e.js                                          8.79 kB │ gzip:   3.06 kB
+../mateclaw-server/src/main/resources/static/assets/ManageModelsModal-CrQmNGIN.js                              8.99 kB │ gzip:   3.02 kB
+../mateclaw-server/src/main/resources/static/assets/BiddingProjects-VTr3fAhL.js                                9.00 kB │ gzip:   3.70 kB
+../mateclaw-server/src/main/resources/static/assets/Sessions-CMHTy1jH.js                                      10.18 kB │ gzip:   3.66 kB
+../mateclaw-server/src/main/resources/static/assets/useMarkdownRenderer-DR3FfC_a.js                           10.51 kB │ gzip:   4.25 kB
+../mateclaw-server/src/main/resources/static/assets/index-CAb1mUO7.js                                         10.66 kB │ gzip:   2.66 kB
+../mateclaw-server/src/main/resources/static/assets/Layout-CYgdmSTX.js                                        10.94 kB │ gzip:   3.08 kB
+../mateclaw-server/src/main/resources/static/assets/Channels-dymSfXDU.js                                      11.03 kB │ gzip:   3.93 kB
+../mateclaw-server/src/main/resources/static/assets/index-pWBX_zFP.js                                         11.50 kB │ gzip:   4.06 kB
+../mateclaw-server/src/main/resources/static/assets/AcpEndpoints-XkSeM_Xa.js                                  12.04 kB │ gzip:   4.06 kB
+../mateclaw-server/src/main/resources/static/assets/WorkflowCanvas-C-GAzKag.js                                13.71 kB │ gzip:   4.65 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyList-CoI0IlA_.js                                  13.71 kB │ gzip:   4.64 kB
+../mateclaw-server/src/main/resources/static/assets/index-MhCn0cdQ.js                                         13.83 kB │ gzip:   4.19 kB
+../mateclaw-server/src/main/resources/static/assets/index-2ygpVGvP.js                                         13.91 kB │ gzip:   4.54 kB
+../mateclaw-server/src/main/resources/static/assets/Datasources-BMCw63Xq.js                                   14.04 kB │ gzip:   3.91 kB
+../mateclaw-server/src/main/resources/static/assets/index-CkV1J_-i.js                                         14.76 kB │ gzip:   3.78 kB
+../mateclaw-server/src/main/resources/static/assets/PlanBoard-CxBzpscB.js                                     16.37 kB │ gzip:   5.49 kB
+../mateclaw-server/src/main/resources/static/assets/Dashboard-DwtkMuIL.js                                     16.41 kB │ gzip:   5.74 kB
+../mateclaw-server/src/main/resources/static/assets/AgentCreateWizard-IHSCerL1.js                             16.59 kB │ gzip:   4.89 kB
+../mateclaw-server/src/main/resources/static/assets/index-dE6vzRTX.js                                         17.26 kB │ gzip:   5.79 kB
+../mateclaw-server/src/main/resources/static/assets/useQqAppRegister-kFkmLRaA.js                              17.79 kB │ gzip:   5.66 kB
+../mateclaw-server/src/main/resources/static/assets/index-Or_KUlqp.js                                         18.16 kB │ gzip:   4.16 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelOnboardingWizard-DA_3GKW-.js                       19.04 kB │ gzip:   5.55 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyVersions-D33jcJlA.js                              20.02 kB │ gzip:   6.92 kB
+../mateclaw-server/src/main/resources/static/assets/AgentContext-DUMGi6Ko.js                                  20.44 kB │ gzip:   6.19 kB
+../mateclaw-server/src/main/resources/static/assets/ChannelEditModal-BY-VFwHK.js                              31.55 kB │ gzip:   7.64 kB
+../mateclaw-server/src/main/resources/static/assets/LivePanel-BDzP5cnv.js                                     32.29 kB │ gzip:  10.52 kB
+../mateclaw-server/src/main/resources/static/assets/index-sJWKIMOj.js                                         37.41 kB │ gzip:  11.58 kB
+../mateclaw-server/src/main/resources/static/assets/MainLayout-sI1rI4lh.js                                    41.02 kB │ gzip:  12.48 kB
+../mateclaw-server/src/main/resources/static/assets/Workflows-D3uL32cs.js                                     41.30 kB │ gzip:  11.14 kB
+../mateclaw-server/src/main/resources/static/assets/McpServers-Y1ccRKxU.js                                    46.97 kB │ gzip:  15.88 kB
+../mateclaw-server/src/main/resources/static/assets/Agents-CHd87H0R.js                                        47.88 kB │ gzip:  13.44 kB
+../mateclaw-server/src/main/resources/static/assets/index-zsxhh-ya.js                                         48.67 kB │ gzip:  13.58 kB
+../mateclaw-server/src/main/resources/static/assets/Teams-BtpVuVqR.js                                         51.28 kB │ gzip:  15.01 kB
+../mateclaw-server/src/main/resources/static/assets/index-7epxbWmz.js                                         58.14 kB │ gzip:  15.60 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyEditor-Dq786ZBh.js                                63.98 kB │ gzip:  20.44 kB
+../mateclaw-server/src/main/resources/static/assets/SkillMarket-CCeyySH4.js                                   66.50 kB │ gzip:  17.90 kB
+../mateclaw-server/src/main/resources/static/assets/index-qqiWmzFL.js                                         90.61 kB │ gzip:  31.67 kB
+../mateclaw-server/src/main/resources/static/assets/SemanticWorkbench-CRZpA32B.js                             90.64 kB │ gzip:  26.51 kB
+../mateclaw-server/src/main/resources/static/assets/OntologyModelWorkbench-DvdoM6Vg.js                        99.56 kB │ gzip:  30.37 kB
+../mateclaw-server/src/main/resources/static/assets/PresalesWorkbench-CwGVYK8l.js                            107.15 kB │ gzip:  29.71 kB
+../mateclaw-server/src/main/resources/static/assets/BiddingWorkbench-Bsy1tAH6.js                             136.45 kB │ gzip:  40.07 kB
+../mateclaw-server/src/main/resources/static/assets/SkillIcon-CBID4Txa.js                                    167.37 kB │ gzip:  24.65 kB
+../mateclaw-server/src/main/resources/static/assets/docx-preview-BAAu1FxP.js                                 172.76 kB │ gzip:  50.44 kB
+../mateclaw-server/src/main/resources/static/assets/zh-CN-Dg2ZjOGV.js                                        189.86 kB │ gzip:  71.85 kB
+../mateclaw-server/src/main/resources/static/assets/en-US-1LvJgFUb.js                                        193.47 kB │ gzip:  66.61 kB
+../mateclaw-server/src/main/resources/static/assets/index-C5faGlFv.js                                        196.58 kB │ gzip:  54.81 kB
+../mateclaw-server/src/main/resources/static/assets/index-BXb9cuPr.js                                        206.06 kB │ gzip:  68.16 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-vue-flow-GlNrs9FP.js                              217.37 kB │ gzip:  70.98 kB
+../mateclaw-server/src/main/resources/static/assets/ChatConsole-BqKM2-Yz.js                                  219.75 kB │ gzip:  67.99 kB
+../mateclaw-server/src/main/resources/static/assets/katex-DHMw6HUq.js                                        259.05 kB │ gzip:  76.68 kB
+../mateclaw-server/src/main/resources/static/assets/pdf-BjAALUVx.js                                          431.65 kB │ gzip: 128.29 kB
+../mateclaw-server/src/main/resources/static/assets/exceljs.min-iF79hOvI.js                                  936.77 kB │ gzip: 269.25 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-element-CkWHX8cM.js                               999.24 kB │ gzip: 327.58 kB
+../mateclaw-server/src/main/resources/static/assets/model-viewer-DVafQNgm.js                               1,012.87 kB │ gzip: 288.69 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-markdown-CaTTsWaC.js                            1,070.84 kB │ gzip: 341.61 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-echarts-BQ1JvBUn.js                             1,134.55 kB │ gzip: 380.54 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-mermaid-BIuZMn2Z.js                             2,619.34 kB │ gzip: 697.50 kB
+../mateclaw-server/src/main/resources/static/assets/vendor-monaco-Cdmji8qL.js                              3,727.55 kB │ gzip: 963.27 kB
+
+(!) Some chunks are larger than 1024 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 24.92s

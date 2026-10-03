@@ -1,0 +1,17 @@
+{"status": "PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-xov1mk_5/report.json", "submission_ready": true, "error": null}
+PASS: architecture-ratchet
+PASS: guard-self-tests
+NOT_APPLICABLE: java-toolchain No backend/control-plane changes
+PASS: ui-format
+PASS: ui-lint
+PASS: ui-typecheck
+PASS: id-precision
+PASS: ui-vitest
+PASS: ui-node-tests
+PASS: ui-build-enterprise
+PASS: ui-build-classic
+NOT_APPLICABLE: cost-tool No standalone cost tool change
+[codex/aq01b-execution 5af09818] Prevent expected HTTP cancellation from polluting engineering diagnostics
+ 5 files changed, 122 insertions(+), 10 deletions(-)
+ create mode 100644 docs/architecture-quality-v1/evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_PLAN.md
+ create mode 100644 mateclaw-ui/test/workspace-request-transport.test.mjs

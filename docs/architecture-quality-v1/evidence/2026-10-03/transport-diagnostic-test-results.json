@@ -1,0 +1,326 @@
+{
+  "task": "AQ-04 real transport cancellation diagnostics",
+  "start_head": "79106130dc8f4c90fc3b083a35557817d5f9ac62",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "source_commit": "5af0981885d4928de353ad7ff0e6123aaf0acf86",
+  "source_tree": "d977b18879cc20f844723e4358efb3db4a45e353",
+  "root_cause": "Happy DOM fetch abort destroys Node request, then onError logs expected ECONNRESET",
+  "original_http_tests": 3,
+  "diagnostic_filtered_runs": "cancel-only/success-only are diagnosis, not delivery acceptance",
+  "ordinary_console_spy": "old 3 tests pass yet stderr diagnostic remains; insufficient seam",
+  "child_red_failed": 1,
+  "native_initial_passed": 4,
+  "native_initial_failed": 1,
+  "native_initial_failure": "Original multipart boundary caught Axios Node header branch difference",
+  "initial_typecheck": "FAIL TS2304 setImmediate; final setTimeout resolved",
+  "final_http_tests": 5,
+  "final_child_tests": 1,
+  "related_tests": 438,
+  "full_ui_tests": 1020,
+  "reports": [
+    {
+      "name": "staged",
+      "task_id": "fmhp1t0y",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "d977b18879cc20f844723e4358efb3db4a45e353"
+    },
+    {
+      "name": "hook",
+      "task_id": "xov1mk_5",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "d977b18879cc20f844723e4358efb3db4a45e353"
+    }
+  ],
+  "source_files": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_PLAN.md",
+      "sha256": "fb0aa21beda82d7dd91467a11b80b7a644bd71924c30e499778f3dd9af7436bc"
+    },
+    {
+      "file": "mateclaw-ui/src/features/bidding/__tests__/workspaceRequestTransport.test.ts",
+      "sha256": "7a8847cbf68ca93615ed6c1e096b07ca177d80cf00fbf4f9ade17c2b699c475c"
+    },
+    {
+      "file": "mateclaw-ui/test/support/workspaceLoopback.d.mts",
+      "sha256": "fd9737ac0d1d93d3493af4045eaf0ca8787bc95237c7bb001a4e24424aa0066b"
+    },
+    {
+      "file": "mateclaw-ui/test/support/workspaceLoopback.mjs",
+      "sha256": "c7a2fe36ff074403128c5333c4d004eef1bf7d84992ffa50d0dccfeba572bc1b"
+    },
+    {
+      "file": "mateclaw-ui/test/workspace-request-transport.test.mjs",
+      "sha256": "32442d7108e73a85722c291692ec06e1f42dd3e4b22f932c1911952a1e10364d"
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/initial.txt",
+      "input_sha256": "b6c12dcb8c8330c756a9ec4ac8006c6549b2cbcfad6ab70b693cffc3a3210af1",
+      "sha256": "c199c6d56df1ffea7568efb6beaeae8bd637c8ea9fd7781639852e19c90ed9ef",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/repro.txt",
+      "input_sha256": "f8155bbc6c075daf9019c3dafaf72640b9488d7c71bdf818efdec96a5f7af011",
+      "sha256": "aa1283f7dcefec903552942328f8dd85414632f1627a975f240493e5785673dc",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/cancel-only.txt",
+      "input_sha256": "291e4e6ded556602611df8e1e5c36183148a019f71923f4b648789d83a91d79b",
+      "sha256": "719ed40986d470ae774994574610d8f68b6236e7e9f33367dbeaf74af5c94aee",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/success-only.txt",
+      "input_sha256": "d7b2f88abd50067947b74389e52176992a988a3b06d2fec5fd69c261033a7690",
+      "sha256": "660ead600a1fa60e8fd5f160f26991826a262d792cfbbf2a04bf5c9a078e95a6",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/red.txt",
+      "input_sha256": "0aa737337504c151004f1977e808064f36a41c87a9b627830257377fabd00cd2",
+      "sha256": "5d26453cd74887d84ff9937bce29e1c0889f12000f2a39064cf67259beb2973a",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/child-red.txt",
+      "input_sha256": "d57a00edd356e3d1765723eedfc4f15bb9b454ce1b28c43a106a51da90d20804",
+      "sha256": "208a1d1174aa5e313a47c250c1f1304d09d17d159cafce8c0b96c9cdbb081d71",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/green.txt",
+      "input_sha256": "25def21012f99d38a1b9aef5e7794b3126692617c847c703785714054ce62aa0",
+      "sha256": "469f24416c358a7156628f0a5f8df70d63399fdbb9b54e8f0a7d03e3672624ae",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/green-browser-contract.txt",
+      "input_sha256": "101d0cd811900d3b98144ccec7c0d2856511030126bee15400a2353125d01a5a",
+      "sha256": "0e0234ced1bf3f20b4a527f20b318a3df0adde2ddea556339206a75956604233",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/child-green.txt",
+      "input_sha256": "2de3f54892eece56e4925283ed2f38217ee736c3cda5c8682615cd60d5fe2be2",
+      "sha256": "2de3f54892eece56e4925283ed2f38217ee736c3cda5c8682615cd60d5fe2be2",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/related.txt",
+      "input_sha256": "84ed27c9f3de42419b790f4103d2716f68e854791ee75856716b5afe0dcff9a4",
+      "sha256": "9c472951ff97857348af5dd6605354689dd1144c4cf411cde84805f586e05aaf",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/types.txt",
+      "input_sha256": "95be90a33a6c5100b3b2a2ff312fdeca930cb50c2038e3e4cb8b755aff6d6690",
+      "sha256": "95be90a33a6c5100b3b2a2ff312fdeca930cb50c2038e3e4cb8b755aff6d6690",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/format.txt",
+      "input_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/dev.txt",
+      "input_sha256": "ef64ba30777f12c26cb18150713260487c1d7c7ca0e649e70ff514d96c085889",
+      "sha256": "b71b420a05f595ae190afd47500ad9687bafb2daffde3e18e24f03e7433bf456",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/final.txt",
+      "input_sha256": "aad0ba8c78600d0d5ae71a4cd3d9762162a93bf01539e2b915be690d7f7e3af1",
+      "sha256": "735a0deec776f69fca5056fc067baeed4167486b9aa1e1c3d6a0aada5ca0c223",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/child-final.txt",
+      "input_sha256": "257b44b60c44940119564c52b4a17b6a3fbbf6bf413ee2ce08d642849337f07f",
+      "sha256": "257b44b60c44940119564c52b4a17b6a3fbbf6bf413ee2ce08d642849337f07f",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/types-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/lint-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/dev-final.txt",
+      "input_sha256": "1ce8619fe897a91523fdbab77304ca4262788ffa668eab25c52f3fb55962832f",
+      "sha256": "9f571d95cdd854e18cd2750438113b0a420e119f83203a5030509e78e52836db",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged.txt",
+      "input_sha256": "88b1d56e38cc9fa874c6199cb8499dfb2986517c69c91400e3c9ec70b4075d4a",
+      "sha256": "d8f5fb6b3ff20fadf15e9d94dfbd45cac95c79f13915683e2348f32e6f28ad4f",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/hook.txt",
+      "input_sha256": "bab75bac9c3920ed509fb76f17fc4b3959da9a009147f6ea2066158daf1d8690",
+      "sha256": "d0304a70968c3eac98b7d38b31d137ec23cf23df38e2071fc2869d88132d993c",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/full-diagnostic.txt",
+      "input_sha256": "87a10bd4194cd4195919eed2589066815093699b41b3ed3cbe7d4a335b31b5ba",
+      "sha256": "64b3b3e60af3439333f57a7e0045c310d1701a340b5fcf4162fa1411e8fbdb53",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/full-diagnostic-retry.txt",
+      "input_sha256": "87a5e6463010a43a11f5ea1afeac60fcbcbecea4fb88f0cf8213539dd682b54e",
+      "sha256": "4d4458e4b32377b55c6ab8c750c0c927f93f084a4991b68156d66023ee9a8f78",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/full-diagnostic-fs.txt",
+      "input_sha256": "a43a59a8781e8af5fc3fb63e4d7ab45bda807243a656db478818f663f7f28fc0",
+      "sha256": "de4a55e1e7453e57e4eb487f8167491aac1048eafea6fd2f99128a7ff95dac6b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/independent-review.txt",
+      "input_sha256": "57382525efdddf9356ed539147b9310526351df359e3d354e815aab15309ad30",
+      "sha256": "57382525efdddf9356ed539147b9310526351df359e3d354e815aab15309ad30",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-report.json",
+      "input_sha256": "38b00f8838811c54e68113a55b8e99e61421bb6b232ae8e8a4162259340510f4",
+      "sha256": "38b00f8838811c54e68113a55b8e99e61421bb6b232ae8e8a4162259340510f4",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-guard-self-tests.txt",
+      "input_sha256": "22fa1e8a4a96d0e20a8629da5aec913be5bab90fec5d37c708659871210d3a78",
+      "sha256": "22fa1e8a4a96d0e20a8629da5aec913be5bab90fec5d37c708659871210d3a78",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-format.txt",
+      "input_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-vitest.txt",
+      "input_sha256": "5998a778cab4783e83c8e44d78e309ae206534d1467c79f9ccfd267f65f50f93",
+      "sha256": "5998a778cab4783e83c8e44d78e309ae206534d1467c79f9ccfd267f65f50f93",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-node-tests.txt",
+      "input_sha256": "66d54eb1b51afe3b03c35f53d420a0931d0b097de9a4633ef32c1c1b4f982d36",
+      "sha256": "66d54eb1b51afe3b03c35f53d420a0931d0b097de9a4633ef32c1c1b4f982d36",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-build-enterprise.txt",
+      "input_sha256": "5a1d1546abe1103d4a0da07cfa077ff6196fcc1d66e9001f312df2d3fbf2d3c3",
+      "sha256": "5a1d1546abe1103d4a0da07cfa077ff6196fcc1d66e9001f312df2d3fbf2d3c3",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-ui-build-classic.txt",
+      "input_sha256": "e84bf2f34c023fa4a4581f84d6868525ad5624920472702b5a488f73d62cc43d",
+      "sha256": "e84bf2f34c023fa4a4581f84d6868525ad5624920472702b5a488f73d62cc43d",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/staged-vitest.json",
+      "input_sha256": "c101665baf7b03c0845d6fc5e66e5047bc48d859f5e292d743998b15b9b12f54",
+      "sha256": "224eb0a67c862de68081ec36abf0ad0992352c25b84643755cbedc5450d151ca",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/transport-diagnostic-tests/hook-report.json",
+      "input_sha256": "9a2faee85259dff8fc2049d0f56d1ef1b1b77fcfc09315a62ad071afc71fed74",
+      "sha256": "9a2faee85259dff8fc2049d0f56d1ef1b1b77fcfc09315a62ad071afc71fed74",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    }
+  ],
+  "independent_review": "Both findings closed; final narrow review no defects; not maintainer approval",
+  "formal_acceptance": "NOT_RUN",
+  "maintainer_control_plane_review": "PENDING",
+  "required_remote_ci": "NOT_VERIFIED",
+  "browser_acceptance": "NOT_RUN",
+  "full_suite_diagnostic": "PERSISTS in unrelated useTeamRuns paged fixture; original full UI remains exit0/1020 pass; temporary diagnosis identifies unintended SSE to localhost",
+  "diagnosis_config_failures": "Two temporary setup runs fail before 134 suites load; not gate evidence; explicit fs allow repairs diagnosis config"
+}

@@ -1,0 +1,282 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/bidding/__tests__/biddingWorkbench.test.ts (0 test)
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (0 test)
+ ❯ src/composables/__tests__/useTeamEvents.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyManagement.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/modelSampleReview.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/sourceFactRevision.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingProjects.test.ts (0 test)
+ ❯ src/features/semantic/extraction/__tests__/suggestionRecovery.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingMaterials.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/businessPolicyPanel.test.ts (0 test)
+ ❯ src/composables/__tests__/streaming-render.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologySourceScope.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingTasks.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/sourceChangeReview.test.ts (0 test)
+ ❯ src/composables/__tests__/useAgentRunGroups.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyModelWorkbench.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/modelingTaskPanel.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingReview.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/migrationScope.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingWriting.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingHandoff.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/modelingTaskCreate.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/knowledgeBinding.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/workbenchEntityTypes.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyRestrictionForm.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/workbenchPagination.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/workbenchFocus.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingOutline.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingAnalysisContract.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/m4Frontend.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunComponents.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/businessModelForm.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyLifecycle.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingArtifacts.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyApplications.test.ts (0 test)
+ ❯ src/stores/__tests__/teamStoreGeneration.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/logicalConsistencyPanel.test.ts (0 test)
+ ❯ src/views/__tests__/AgentContext.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunsWorkspace.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyWorkbench.test.ts (0 test)
+ ❯ src/features/semantic/extraction/__tests__/extractionWizard.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyDefinitionForm.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingChangeImpact.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunProjectionPrimitives.test.ts (0 test)
+ ❯ src/views/__tests__/Login.enterprise.test.ts (0 test)
+ ❯ src/components/chat/__tests__/teamRunTimelineRendering.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/validationPanel.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/evidencePermissions.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/typedProposalUi.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyCanvasResize.test.ts (0 test)
+ ❯ src/features/presales/__tests__/dashboardContract.test.ts (0 test)
+ ❯ src/components/live/__tests__/AgentRunGroups.test.ts (0 test)
+ ❯ src/components/chat/__tests__/ChatInput.runningState.test.ts (0 test)
+ ❯ src/components/chat/__tests__/MessageBubble.stopIndicator.test.ts (0 test)
+ ❯ src/features/presales/__tests__/taskPolling.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/graphInteraction.test.ts (0 test)
+ ❯ src/utils/__tests__/wikiUpload.test.ts (0 test)
+ ❯ src/features/presales/__tests__/status.test.ts (0 test)
+ ❯ src/components/chat/__tests__/TeamWorkerBanner.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/useTeamRuns.test.ts (0 test)
+ ❯ src/features/presales/__tests__/projectResponse.test.ts (0 test)
+ ❯ src/features/presales/__tests__/queryResponse.test.ts (0 test)
+ ❯ src/features/presales/__tests__/mutationRequest.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyDraft.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/standardProjection.test.ts (0 test)
+ ❯ src/composables/__tests__/product-cards.test.ts (0 test)
+ ❯ src/composables/__tests__/wikilink.test.ts (0 test)
+ ❯ src/features/presales/__tests__/editorSession.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyGraphView.test.ts (0 test)
+ ❯ src/composables/__tests__/useTeamRunHistory.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/workspaceRequest.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/reviewFlow.test.ts (0 test)
+ ❯ src/api/__tests__/workspaceRequest.test.ts (0 test)
+ ❯ src/stores/__tests__/wikiStoreWorkspaceSwitch.test.ts (0 test)
+ ❯ src/features/semantic/extraction/__tests__/extractionWorkflow.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/workspaceRequest.test.ts (0 test)
+ ❯ src/features/presales/__tests__/workspaceRequest.test.ts (0 test)
+ ❯ src/features/presales/__tests__/sourcePreview.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyApi.test.ts (0 test)
+ ❯ src/composables/__tests__/useSearchProviderCatalog.test.ts (0 test)
+ ❯ src/styles/enterprise/__tests__/profile.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/useStreamEventId.test.ts (0 test)
+ ❯ src/features/presales/__tests__/editorSubmission.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/definitionEditing.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/restrictionEditing.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/useWorkerConversationGuard.test.ts (0 test)
+ ❯ src/features/presales/__tests__/projectSummary.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunPresentation.test.ts (0 test)
+ ❯ src/features/presales/__tests__/dashboard.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/teamEventOwnership.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/modelingTask.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyProjection.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyWorkspaceSwitch.test.ts (0 test)
+ ❯ src/composables/__tests__/useLiveSnapshot.test.ts (0 test)
+ ❯ src/api/__tests__/teamRuns.test.ts (0 test)
+ ❯ src/features/bidding/__tests__/biddingDownload.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/teamRunTimeline.test.ts (0 test)
+ ❯ src/utils/__tests__/wavEncoder.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/sourceChangeApi.test.ts (0 test)
+ ❯ src/views/__tests__/chatConsoleRouteHydration.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunAttentionHandlers.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/messageMetadata.test.ts (0 test)
+ ❯ src/utils/__tests__/generatedFileLinks.test.ts (0 test)
+ ❯ src/components/chat/preview/__tests__/previewKind.test.ts (0 test)
+ ❯ src/views/__tests__/chatConsoleModelSeed.test.ts (0 test)
+ ❯ src/utils/__tests__/viewerModelProviders.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/typedConflictApi.test.ts (0 test)
+ ❯ src/composables/__tests__/agentsLiveRouteState.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/labelEditing.test.ts (0 test)
+ ❯ src/components/common/__tests__/agentPickerLogic.test.ts (0 test)
+ ❯ src/components/chat/__tests__/toolCallDedup.test.ts (0 test)
+ ❯ src/api/__tests__/wikiUpload.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/supersede.test.ts (0 test)
+ ❯ src/components/team-run/__tests__/teamRunVisualContract.test.ts (0 test)
+ ❯ src/features/presales/__tests__/state.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/ontologyForm.test.ts (0 test)
+ ❯ src/views/Wiki/__tests__/failureOpen.test.ts (0 test)
+ ❯ src/utils/__tests__/livePanelLoading.test.ts (0 test)
+ ❯ src/views/Settings/Dsh/__tests__/configMapping.test.ts (0 test)
+ ❯ src/utils/__tests__/channelMessageFilter.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/importDocumentFile.test.ts (0 test)
+ ❯ src/views/__tests__/workerConversationWriteGuards.test.ts (0 test)
+ ❯ src/utils/__tests__/agentsPageLoading.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/planStepOutput.test.ts (0 test)
+ ❯ src/features/semantic/review/__tests__/statementLabel.test.ts (0 test)
+ ❯ src/composables/__tests__/sseEventIds.test.ts (0 test)
+ ❯ src/features/semantic/extraction/__tests__/extractionEvidence.test.ts (0 test)
+ ❯ src/composables/chat/__tests__/streamRequestBody.test.ts (0 test)
+ ❯ src/features/semantic/graph/__tests__/semanticWorkbench.test.ts (0 test)
+ ❯ src/components/chat/__tests__/jsonViewFormat.test.ts (0 test)
+ ❯ src/features/semantic/ontology/__tests__/publicationReport.test.ts (0 test)
+ ❯ src/utils/__tests__/conversationGovernance.test.ts (0 test)
+ ❯ src/components/chat/__tests__/supersededContentDisplay.test.ts (0 test)
+ ❯ src/features/semantic/shared/__tests__/formatValidity.test.ts (0 test)
+
+⎯⎯⎯⎯⎯ Failed Suites 134 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/__tests__/teamRuns.test.ts [ src/api/__tests__/teamRuns.test.ts ]
+ FAIL  src/api/__tests__/wikiUpload.test.ts [ src/api/__tests__/wikiUpload.test.ts ]
+ FAIL  src/api/__tests__/workspaceRequest.test.ts [ src/api/__tests__/workspaceRequest.test.ts ]
+ FAIL  src/composables/__tests__/agentsLiveRouteState.test.ts [ src/composables/__tests__/agentsLiveRouteState.test.ts ]
+ FAIL  src/composables/__tests__/product-cards.test.ts [ src/composables/__tests__/product-cards.test.ts ]
+ FAIL  src/composables/__tests__/sseEventIds.test.ts [ src/composables/__tests__/sseEventIds.test.ts ]
+ FAIL  src/composables/__tests__/streaming-render.test.ts [ src/composables/__tests__/streaming-render.test.ts ]
+ FAIL  src/composables/__tests__/useAgentRunGroups.test.ts [ src/composables/__tests__/useAgentRunGroups.test.ts ]
+ FAIL  src/composables/__tests__/useLiveSnapshot.test.ts [ src/composables/__tests__/useLiveSnapshot.test.ts ]
+ FAIL  src/composables/__tests__/useSearchProviderCatalog.test.ts [ src/composables/__tests__/useSearchProviderCatalog.test.ts ]
+ FAIL  src/composables/__tests__/useTeamEvents.test.ts [ src/composables/__tests__/useTeamEvents.test.ts ]
+ FAIL  src/composables/__tests__/useTeamRunHistory.test.ts [ src/composables/__tests__/useTeamRunHistory.test.ts ]
+ FAIL  src/composables/__tests__/wikilink.test.ts [ src/composables/__tests__/wikilink.test.ts ]
+ FAIL  src/stores/__tests__/teamStoreGeneration.test.ts [ src/stores/__tests__/teamStoreGeneration.test.ts ]
+ FAIL  src/stores/__tests__/wikiStoreWorkspaceSwitch.test.ts [ src/stores/__tests__/wikiStoreWorkspaceSwitch.test.ts ]
+ FAIL  src/utils/__tests__/agentsPageLoading.test.ts [ src/utils/__tests__/agentsPageLoading.test.ts ]
+ FAIL  src/utils/__tests__/channelMessageFilter.test.ts [ src/utils/__tests__/channelMessageFilter.test.ts ]
+ FAIL  src/utils/__tests__/conversationGovernance.test.ts [ src/utils/__tests__/conversationGovernance.test.ts ]
+ FAIL  src/utils/__tests__/generatedFileLinks.test.ts [ src/utils/__tests__/generatedFileLinks.test.ts ]
+ FAIL  src/utils/__tests__/livePanelLoading.test.ts [ src/utils/__tests__/livePanelLoading.test.ts ]
+ FAIL  src/utils/__tests__/viewerModelProviders.test.ts [ src/utils/__tests__/viewerModelProviders.test.ts ]
+ FAIL  src/utils/__tests__/wavEncoder.test.ts [ src/utils/__tests__/wavEncoder.test.ts ]
+ FAIL  src/utils/__tests__/wikiUpload.test.ts [ src/utils/__tests__/wikiUpload.test.ts ]
+ FAIL  src/views/__tests__/AgentContext.test.ts [ src/views/__tests__/AgentContext.test.ts ]
+ FAIL  src/views/__tests__/Login.enterprise.test.ts [ src/views/__tests__/Login.enterprise.test.ts ]
+ FAIL  src/views/__tests__/chatConsoleModelSeed.test.ts [ src/views/__tests__/chatConsoleModelSeed.test.ts ]
+ FAIL  src/views/__tests__/chatConsoleRouteHydration.test.ts [ src/views/__tests__/chatConsoleRouteHydration.test.ts ]
+ FAIL  src/views/__tests__/workerConversationWriteGuards.test.ts [ src/views/__tests__/workerConversationWriteGuards.test.ts ]
+ FAIL  src/components/chat/__tests__/ChatInput.runningState.test.ts [ src/components/chat/__tests__/ChatInput.runningState.test.ts ]
+ FAIL  src/components/chat/__tests__/MessageBubble.stopIndicator.test.ts [ src/components/chat/__tests__/MessageBubble.stopIndicator.test.ts ]
+ FAIL  src/components/chat/__tests__/TeamWorkerBanner.test.ts [ src/components/chat/__tests__/TeamWorkerBanner.test.ts ]
+ FAIL  src/components/chat/__tests__/jsonViewFormat.test.ts [ src/components/chat/__tests__/jsonViewFormat.test.ts ]
+ FAIL  src/components/chat/__tests__/supersededContentDisplay.test.ts [ src/components/chat/__tests__/supersededContentDisplay.test.ts ]
+ FAIL  src/components/chat/__tests__/teamRunTimelineRendering.test.ts [ src/components/chat/__tests__/teamRunTimelineRendering.test.ts ]
+ FAIL  src/components/chat/__tests__/toolCallDedup.test.ts [ src/components/chat/__tests__/toolCallDedup.test.ts ]
+ FAIL  src/components/common/__tests__/agentPickerLogic.test.ts [ src/components/common/__tests__/agentPickerLogic.test.ts ]
+ FAIL  src/components/live/__tests__/AgentRunGroups.test.ts [ src/components/live/__tests__/AgentRunGroups.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunAttentionHandlers.test.ts [ src/components/team-run/__tests__/teamRunAttentionHandlers.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunComponents.test.ts [ src/components/team-run/__tests__/teamRunComponents.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunPresentation.test.ts [ src/components/team-run/__tests__/teamRunPresentation.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunProjectionPrimitives.test.ts [ src/components/team-run/__tests__/teamRunProjectionPrimitives.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunVisualContract.test.ts [ src/components/team-run/__tests__/teamRunVisualContract.test.ts ]
+ FAIL  src/components/team-run/__tests__/teamRunsWorkspace.test.ts [ src/components/team-run/__tests__/teamRunsWorkspace.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingAnalysisContract.test.ts [ src/features/bidding/__tests__/biddingAnalysisContract.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingArtifacts.test.ts [ src/features/bidding/__tests__/biddingArtifacts.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingChangeImpact.test.ts [ src/features/bidding/__tests__/biddingChangeImpact.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingDownload.test.ts [ src/features/bidding/__tests__/biddingDownload.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingHandoff.test.ts [ src/features/bidding/__tests__/biddingHandoff.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingMaterials.test.ts [ src/features/bidding/__tests__/biddingMaterials.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingOutline.test.ts [ src/features/bidding/__tests__/biddingOutline.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingProjects.test.ts [ src/features/bidding/__tests__/biddingProjects.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingReview.test.ts [ src/features/bidding/__tests__/biddingReview.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingTasks.test.ts [ src/features/bidding/__tests__/biddingTasks.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingWorkbench.test.ts [ src/features/bidding/__tests__/biddingWorkbench.test.ts ]
+ FAIL  src/features/bidding/__tests__/biddingWriting.test.ts [ src/features/bidding/__tests__/biddingWriting.test.ts ]
+ FAIL  src/features/bidding/__tests__/workspaceRequest.test.ts [ src/features/bidding/__tests__/workspaceRequest.test.ts ]
+ FAIL  src/features/presales/__tests__/dashboard.test.ts [ src/features/presales/__tests__/dashboard.test.ts ]
+ FAIL  src/features/presales/__tests__/dashboardContract.test.ts [ src/features/presales/__tests__/dashboardContract.test.ts ]
+ FAIL  src/features/presales/__tests__/editorSession.test.ts [ src/features/presales/__tests__/editorSession.test.ts ]
+ FAIL  src/features/presales/__tests__/editorSubmission.test.ts [ src/features/presales/__tests__/editorSubmission.test.ts ]
+ FAIL  src/features/presales/__tests__/mutationRequest.test.ts [ src/features/presales/__tests__/mutationRequest.test.ts ]
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts [ src/features/presales/__tests__/presalesWorkbench.test.ts ]
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts [ src/features/presales/__tests__/projectResponse.test.ts ]
+ FAIL  src/features/presales/__tests__/projectSummary.test.ts [ src/features/presales/__tests__/projectSummary.test.ts ]
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts [ src/features/presales/__tests__/queryResponse.test.ts ]
+ FAIL  src/features/presales/__tests__/sourcePreview.test.ts [ src/features/presales/__tests__/sourcePreview.test.ts ]
+ FAIL  src/features/presales/__tests__/state.test.ts [ src/features/presales/__tests__/state.test.ts ]
+ FAIL  src/features/presales/__tests__/status.test.ts [ src/features/presales/__tests__/status.test.ts ]
+ FAIL  src/features/presales/__tests__/taskPolling.test.ts [ src/features/presales/__tests__/taskPolling.test.ts ]
+ FAIL  src/features/presales/__tests__/workspaceRequest.test.ts [ src/features/presales/__tests__/workspaceRequest.test.ts ]
+ FAIL  src/styles/enterprise/__tests__/profile.test.ts [ src/styles/enterprise/__tests__/profile.test.ts ]
+ FAIL  src/composables/chat/__tests__/messageMetadata.test.ts [ src/composables/chat/__tests__/messageMetadata.test.ts ]
+ FAIL  src/composables/chat/__tests__/planStepOutput.test.ts [ src/composables/chat/__tests__/planStepOutput.test.ts ]
+ FAIL  src/composables/chat/__tests__/streamRequestBody.test.ts [ src/composables/chat/__tests__/streamRequestBody.test.ts ]
+ FAIL  src/composables/chat/__tests__/supersede.test.ts [ src/composables/chat/__tests__/supersede.test.ts ]
+ FAIL  src/composables/chat/__tests__/teamEventOwnership.test.ts [ src/composables/chat/__tests__/teamEventOwnership.test.ts ]
+ FAIL  src/composables/chat/__tests__/teamRunTimeline.test.ts [ src/composables/chat/__tests__/teamRunTimeline.test.ts ]
+ FAIL  src/composables/chat/__tests__/useStreamEventId.test.ts [ src/composables/chat/__tests__/useStreamEventId.test.ts ]
+ FAIL  src/composables/chat/__tests__/useTeamRuns.test.ts [ src/composables/chat/__tests__/useTeamRuns.test.ts ]
+ FAIL  src/composables/chat/__tests__/useWorkerConversationGuard.test.ts [ src/composables/chat/__tests__/useWorkerConversationGuard.test.ts ]
+ FAIL  src/views/Wiki/__tests__/failureOpen.test.ts [ src/views/Wiki/__tests__/failureOpen.test.ts ]
+ FAIL  src/components/chat/preview/__tests__/previewKind.test.ts [ src/components/chat/preview/__tests__/previewKind.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/graphInteraction.test.ts [ src/features/semantic/graph/__tests__/graphInteraction.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/knowledgeBinding.test.ts [ src/features/semantic/graph/__tests__/knowledgeBinding.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/migrationScope.test.ts [ src/features/semantic/graph/__tests__/migrationScope.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/modelSampleReview.test.ts [ src/features/semantic/graph/__tests__/modelSampleReview.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/semanticWorkbench.test.ts [ src/features/semantic/graph/__tests__/semanticWorkbench.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/workbenchEntityTypes.test.ts [ src/features/semantic/graph/__tests__/workbenchEntityTypes.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/workbenchFocus.test.ts [ src/features/semantic/graph/__tests__/workbenchFocus.test.ts ]
+ FAIL  src/features/semantic/graph/__tests__/workbenchPagination.test.ts [ src/features/semantic/graph/__tests__/workbenchPagination.test.ts ]
+ FAIL  src/features/semantic/extraction/__tests__/extractionEvidence.test.ts [ src/features/semantic/extraction/__tests__/extractionEvidence.test.ts ]
+ FAIL  src/features/semantic/extraction/__tests__/extractionWizard.test.ts [ src/features/semantic/extraction/__tests__/extractionWizard.test.ts ]
+ FAIL  src/features/semantic/extraction/__tests__/extractionWorkflow.test.ts [ src/features/semantic/extraction/__tests__/extractionWorkflow.test.ts ]
+ FAIL  src/features/semantic/extraction/__tests__/suggestionRecovery.test.ts [ src/features/semantic/extraction/__tests__/suggestionRecovery.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/evidencePermissions.test.ts [ src/features/semantic/review/__tests__/evidencePermissions.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/reviewFlow.test.ts [ src/features/semantic/review/__tests__/reviewFlow.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/sourceChangeApi.test.ts [ src/features/semantic/review/__tests__/sourceChangeApi.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/sourceChangeReview.test.ts [ src/features/semantic/review/__tests__/sourceChangeReview.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/sourceFactRevision.test.ts [ src/features/semantic/review/__tests__/sourceFactRevision.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/statementLabel.test.ts [ src/features/semantic/review/__tests__/statementLabel.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/typedConflictApi.test.ts [ src/features/semantic/review/__tests__/typedConflictApi.test.ts ]
+ FAIL  src/features/semantic/review/__tests__/typedProposalUi.test.ts [ src/features/semantic/review/__tests__/typedProposalUi.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/businessModelForm.test.ts [ src/features/semantic/ontology/__tests__/businessModelForm.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/businessPolicyPanel.test.ts [ src/features/semantic/ontology/__tests__/businessPolicyPanel.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/definitionEditing.test.ts [ src/features/semantic/ontology/__tests__/definitionEditing.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/importDocumentFile.test.ts [ src/features/semantic/ontology/__tests__/importDocumentFile.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/labelEditing.test.ts [ src/features/semantic/ontology/__tests__/labelEditing.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/logicalConsistencyPanel.test.ts [ src/features/semantic/ontology/__tests__/logicalConsistencyPanel.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/m4Frontend.test.ts [ src/features/semantic/ontology/__tests__/m4Frontend.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/modelingTask.test.ts [ src/features/semantic/ontology/__tests__/modelingTask.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/modelingTaskCreate.test.ts [ src/features/semantic/ontology/__tests__/modelingTaskCreate.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/modelingTaskPanel.test.ts [ src/features/semantic/ontology/__tests__/modelingTaskPanel.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyApi.test.ts [ src/features/semantic/ontology/__tests__/ontologyApi.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyApplications.test.ts [ src/features/semantic/ontology/__tests__/ontologyApplications.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyCanvasResize.test.ts [ src/features/semantic/ontology/__tests__/ontologyCanvasResize.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyDefinitionForm.test.ts [ src/features/semantic/ontology/__tests__/ontologyDefinitionForm.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyDraft.test.ts [ src/features/semantic/ontology/__tests__/ontologyDraft.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyForm.test.ts [ src/features/semantic/ontology/__tests__/ontologyForm.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyGraphView.test.ts [ src/features/semantic/ontology/__tests__/ontologyGraphView.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyLifecycle.test.ts [ src/features/semantic/ontology/__tests__/ontologyLifecycle.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyManagement.test.ts [ src/features/semantic/ontology/__tests__/ontologyManagement.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyModelWorkbench.test.ts [ src/features/semantic/ontology/__tests__/ontologyModelWorkbench.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyProjection.test.ts [ src/features/semantic/ontology/__tests__/ontologyProjection.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyRestrictionForm.test.ts [ src/features/semantic/ontology/__tests__/ontologyRestrictionForm.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologySourceScope.test.ts [ src/features/semantic/ontology/__tests__/ontologySourceScope.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyWorkbench.test.ts [ src/features/semantic/ontology/__tests__/ontologyWorkbench.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/ontologyWorkspaceSwitch.test.ts [ src/features/semantic/ontology/__tests__/ontologyWorkspaceSwitch.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/publicationReport.test.ts [ src/features/semantic/ontology/__tests__/publicationReport.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/restrictionEditing.test.ts [ src/features/semantic/ontology/__tests__/restrictionEditing.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/standardProjection.test.ts [ src/features/semantic/ontology/__tests__/standardProjection.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/validationPanel.test.ts [ src/features/semantic/ontology/__tests__/validationPanel.test.ts ]
+ FAIL  src/features/semantic/ontology/__tests__/workspaceRequest.test.ts [ src/features/semantic/ontology/__tests__/workspaceRequest.test.ts ]
+ FAIL  src/features/semantic/shared/__tests__/formatValidity.test.ts [ src/features/semantic/shared/__tests__/formatValidity.test.ts ]
+ FAIL  src/views/Settings/Dsh/__tests__/configMapping.test.ts [ src/views/Settings/Dsh/__tests__/configMapping.test.ts ]
+Error: Cannot find module '/@fs/private/tmp/mateclaw-transport-diagnostic.setup.mjs'
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/134]⎯
+
+
+ Test Files  134 failed | 1 passed (135)
+      Tests  5 passed (5)
+   Start at  08:18:15
+   Duration  16.21s (transform 58ms, setup 36ms, import 84ms, tests 34ms, environment 18.31s)

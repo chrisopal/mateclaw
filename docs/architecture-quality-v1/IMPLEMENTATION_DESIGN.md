@@ -326,3 +326,10 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 工作台原Record<string,双语>在每次调用构造混合阶段/状态/来源/范围字典，未知raw无法单独识别，原型属性名还可能误判。采用本域纯KnownStatus/UnknownStatus{raw}/MissingStatus，finite KnownStatusValue从集中i18n原47标签key推导；Object.hasOwn分类，保留大小写/空格。页面所有原组件仍使用同一stateLabel回调，不建立新的执行/审批通道。
 
 取舍：原47对文案保持，接宿主locale；未知非空值显式标未知状态及原文，empty/undefined仍 —。这是明确展示行为变化，raw响应、冻结成果、request/receipt和已有批准/过滤/取消判断不改。词表混合原展示值，不作为任何业务对象的领域allowlist，完整领域DTO/对象状态仍须各自契约。拒绝Known|string、trim/uppercase/未知变DRAFT或将展示分类用于批准。旧62项/新增后旧实现2红例；59纯合同+3新增Vue/完整售前321及全UI1018、精确门禁和独立限定审阅验证本片。LSP不可用、日志socket诊断未定位；实际vue-tsc通过和门禁exit0不冒充这些问题已修复。没有依赖/SQL/迁移/事务变化，回退只恢复本批源码。真实浏览器/历史数据/模型/多方言/V2/独立维护者QA和远端requiredCI仍待完成；证据见AQ05_STATUS_BOUNDARY_ACCEPTANCE。
+
+
+## ADR-AQ-029（Proposed）：传输合同环境与分页订阅夹具
+
+非DOM真实HTTP合同使用原生Node网络及最小Axios browser FormData调用方事实；原multipart/binary/cancel断言保留并加入真实409/意外断连。拒绝消音、去掉取消或修改生产helper。完整进程stderr回归覆盖窄spy不能捕获的HappyDOM晚到reset。第一源码完整门禁仍有分页单测意外SSE，临时诊断定位后，文件局部订阅fixture保留默认分页API合同并断言无外发/释放，独立SSE协议合同继续保留。其余12项只固定格式，源后缀/独立AST验证保持。
+
+覆盖取舍：Node环境不证明浏览器CORS；分页fixture不证明真实SSE网络，HTTP409不证明真实并发CAS，取消断连不证明领域写入fence。第一boundary失败、子进程红例、TS2304、第二fetch红例全部保留；最终1020全UI/Node/两构建及限定独立复核通过且全日志socket诊断消失。无生产代码/runner配置/依赖/旧迁移变更；测试环境/fixture仍须维护者控制面批准，正式46AC不升级。见evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_ACCEPTANCE.md及两份manifest。回退恢复测试源码，不操作数据。

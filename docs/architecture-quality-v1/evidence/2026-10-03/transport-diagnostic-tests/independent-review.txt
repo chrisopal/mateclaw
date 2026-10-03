@@ -1,0 +1,7 @@
+Independent native read-only review: /root/project_response_wire_audit
+Scope: four transport/fixture test files and AQ04_TRANSPORT_DIAGNOSTIC_PLAN.md only.
+Initial REQUEST CHANGES: MEDIUM setImmediate is unavailable to project vue-tsc (TS2304); LOW mockRestore finally did not encompass preceding asynchronous cancellation waits.
+Final review: both findings closed; whole cancellation flow now inside try/finally; native setTimeout(resolve, 0) has supported types. No remaining defects in the final four-file scope.
+Independently rerun: 5 real transport tests, 1 Node child process regression, project vue-tsc and four-file lint, all actual exit 0; no socket diagnostic. Original multipart boundary/fields/scope, exact binary bytes and cancellation assertions retained.
+Axios installed resolveConfig confirms minimal hoisted window/document caller facts choose browser FormData header handling; native fetch/File/FormData/Blob/AbortSignal and loopback HTTP remain actual network. Child checks completed JSON and actual stderr without filtering.
+Limitations: LSP transport unavailable; extra standalone checkJs failed due unavailable Node types and is not PASS. Review provides technical evidence only, not maintainer control-plane approval, formal AC or business QA signoff. PR stays draft.
