@@ -23,3 +23,6 @@ scripts/quality/push-checked.sh -u origin <branch>
 ```
 
 dev 只证明词法增量与门禁自测，输出 SCAN_PASS 不等于架构合规或可提交。commit 模式拒绝部分暂存；不能通过清理用户材料、降低规则或跳过测试绕过。CI、CODEOWNERS 和分支保护需要实际合入、远端运行与独立签收；本地安装不是远端强制已生效。
+
+
+最新SQL列表投影片：[AQ06_LISTING_PROJECTION_ACCEPTANCE.md](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md) / [manifest](evidence/2026-10-03/listing-projection-test-results.json)。现有表派生事实、四类原子writers、旧筛选/故障顺序与wire保持；真实MySQL29项及205条mysqldump恢复证据不替代Kingbase/完整V2/生产回退/业务QA。已有孤立代理项请求hash碰撞及DB-001/DB-002仅识别SQL的Java冻结检查缺口进入下一兼容/控制面切片，46正式AC仍NOT_RUN。

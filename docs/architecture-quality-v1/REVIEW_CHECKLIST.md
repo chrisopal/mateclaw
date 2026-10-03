@@ -23,7 +23,7 @@
 | TS-001 / UI-001 | 同上 | 已安装 ratchet | AQ-05/09，any/内联双语 |
 | TEST-001 | 同上 | 已安装 ratchet | 防新增 skip/only；不能证明所有断言强度 |
 | STYLE-001 / STYLE-002 | 同上 | 已安装 | 长行存量 ratchet；修改行尾空白硬失败 |
-| DB-001 / DB-002 | 同上 | 已安装 | 旧迁移只读，新迁移三方言；不等于真实 DB 验证 |
+| DB-001 / DB-002 | 同上 | SQL 已安装；Java 入口/冻结闭包 NOT_IMPLEMENTED | 旧 SQL 迁移只读与三方言；实际反例证明 Java 变更/缺方言未触发；补强需独立控制面审核，不能当真实 DB 或完整不可变验收 |
 | Python 门禁自测 | verify 所有模式 | 已安装并执行 | 数量和日志见实测；非应用验收 |
 | Java 格式 | Spotless + AOSP，commit/CI 适用时 | 根 POM 已配置 | 增量格式，不格式化原文/历史字节 |
 | 前端格式 | Prettier 3.6.2 + 固定 config | package/lock 已配置 | 只检查适用变更文件；不自动 --write |
@@ -102,6 +102,12 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 | AC-44 | 改workflow/CODEOWNERS/测试配置削弱门禁 | AQ-08 | 仓库维护人 + 独立审核 / 远端临时违规PR/管理设置回读 | NOT_RUN |
 | AC-45 | 真实长文/模型质量 | AQ-08/AQ-11 | 业务负责人 + QA / 授权真实样本/真实模型/人工质量审核 | NOT_RUN |
 | AC-46 | 日志与测试环境 | AQ-08/AQ-11 | 领域开发 + QA / 行为/集成回归 | NOT_RUN |
+
+## Java 迁移与 SQL 投影的默认审核补充
+
+每次涉及此边界，核对 Java 入口及全部冻结闭包，不只看 SQL 文件；比较实际 checksum 与历史版本，检查 Flyway 所有方言的发现和 validate 配置。固定 V1 算法不能为新业务需求直接修改，未来语义须新版本/迁移；编译器、JDK、Jackson 变化也需兼容证据。核对所有正文 writer 同事务维护派生版本、故障顺序、Workspace/CAS及失败回滚；旧 writer 混跑和新增写入后直接回退未获验证时不能部署切换。
+
+本次调整是对 R-06 原只读约束及现有可执行覆盖范围的澄清，没有修改 gate、policy、baseline或豁免失败。原因/反例/实际MySQL与H2证据见 [AQ06_LISTING_PROJECTION_ACCEPTANCE](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md) 与 manifest。DB-001/002 Java/闭包补强、真实Kingbase、生产回退、版本化请求hash/历史回执政策及独立维护人审核仍待完成。
 
 ## 检查规则如何调整
 

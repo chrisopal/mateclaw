@@ -1,0 +1,20 @@
+-------------------------------------------------------------------------------
+Test set: vip.mate.presales.PresalesSqlListingTest
+-------------------------------------------------------------------------------
+Tests run: 28, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 29.47 s <<< FAILURE! -- in vip.mate.presales.PresalesSqlListingTest
+vip.mate.presales.PresalesSqlListingTest.actualApplicationWritesListTheDurableBodyIncludingUtf16AndReplay -- Time elapsed: 1.018 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <{"items":[{"id":"dc47368a-f230-4fe0-b1cf-640d696711e7","workspaceId":"scope","version":1,"name":"x?y","customer":"Customer","ownerId":"writer","industry":"","goal":"","status":"ACTIVE","stage":"DISCOVERY","createdBy":"actor","openClarificationCount":0,"latestSolutionVersion":0}],"total":1,"page":1,"pageSize":20}> but was: <{"items":[],"total":0,"page":1,"pageSize":20}>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at vip.mate.presales.PresalesSqlListingTest.assertWireEquals(PresalesSqlListingTest.java:219)
+	at vip.mate.presales.PresalesSqlListingTest.actualApplicationWritesListTheDurableBodyIncludingUtf16AndReplay(PresalesSqlListingTest.java:472)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+vip.mate.presales.PresalesSqlListingTest.sqlMatchesDurableLegacyUtf16Search(String, String, boolean)[15] -- Time elapsed: 1.009 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <{"items":[{"id":"edge","name":"x
