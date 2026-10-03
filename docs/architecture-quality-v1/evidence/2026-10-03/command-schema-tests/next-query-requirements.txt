@@ -1,0 +1,7 @@
+Next query/storage requirement inventory (read-only, 2026-10-03):
+- Repository.listBodies selects complete body_json for Workspace and orders by SQL name/id.
+- Listing filters on decoded name/customer/status/owner, ROOT Unicode lowercase, exact raw filters, stage array priority, preserves historical extensions and early malformed-row error order. Existing columns are not enough for body-free count/list.
+- Actual supported migration directories for V211 are h2/mysql/kingbase; lookup under nonexistent postgresql was a read-path error, not proof of missing migration support.
+- The referenced Presales V2/Delivery V1 named spec files were not found by filename in current docs or attached architecture spec folder. Missing final schema mapping still cannot be fabricated.
+- Projection design must account for all writers, not only PresalesService: GenerationCoordinator.persistFailureWithoutActor and recoverStaleTasks directly SELECT/UPDATE body/version with CAS; runtime tools also read project SQL. A projection maintained only by Service would miss alternate writes.
+- Next useful independent work remains: centralize coordinator storage facts under repository while retaining recovery/no-model/CAS behavior, audit terminal fallback/late results and live task identity, and complete server DTO/envelope coercion. Do not describe current command schema as SQL/migration/async acceptance.

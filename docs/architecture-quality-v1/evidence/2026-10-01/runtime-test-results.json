@@ -1,0 +1,168 @@
+{
+  "task": "AQ-01/AQ-02 runtime and Spring proxy acceptance slice",
+  "starting_head": "05bb9f5c646b5cea408c81cc045200c9f16f204e",
+  "formal_acceptance": "NOT_RUN",
+  "source": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java",
+  "source_sha256": "1694bdb87df9c52a7c37b9bc5864ba3fd84dff844981cb1f3cae6462e12cc5f2",
+  "mysql": {
+    "version": "8.0.46",
+    "image_digest": "mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+    "flyway_applied": 209,
+    "flyway_version": "216",
+    "database": "mateclaw_aq_acceptance_runtime20261001",
+    "isolation_verified": "READ_COMMITTED",
+    "container_removed": true
+  },
+  "runs": [
+    {
+      "dialect": "h2",
+      "counts": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[4]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[5]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[6]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[4]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[5]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[6]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback",
+          "status": "PASS"
+        },
+        {
+          "name": "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[2]",
+          "status": "PASS"
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-runtime-20261001/h2-final.xml",
+      "raw_xml_sha256": "b031065cca1feca01f46ce8fc7b2b431716ac0efbe7a91af1495ff9d0de18a39",
+      "log_path": "/tmp/mateclaw-aq-runtime-h2-final.log",
+      "log_sha256": "1a6741da14bf4ca8cd00f7aeaa76f2e500078650dd3c4a6060cd09f314c743c5"
+    },
+    {
+      "dialect": "mysql",
+      "counts": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[4]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[5]",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[6]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[2]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[3]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[4]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[5]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[6]",
+          "status": "PASS"
+        },
+        {
+          "name": "resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback",
+          "status": "PASS"
+        },
+        {
+          "name": "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[1]",
+          "status": "PASS"
+        },
+        {
+          "name": "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[2]",
+          "status": "PASS"
+        }
+      ],
+      "raw_xml_path": "/tmp/mateclaw-aq-runtime-20261001/mysql-final.xml",
+      "raw_xml_sha256": "5b3d685e74849121badce6e4cd87facd4f7d15d95632887540d89ceaadadf831",
+      "log_path": "/tmp/mateclaw-aq-runtime-mysql-final.log",
+      "log_sha256": "a7feb70a1b5ab4d3e4f7c35ec823aaa506abde61b98298cefff52996ab7d3c91"
+    }
+  ]
+}

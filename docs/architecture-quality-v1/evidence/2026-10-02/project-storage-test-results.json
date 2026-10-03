@@ -1,0 +1,246 @@
+{
+  "task": "AQ-03/AQ-05 project persistence boundary",
+  "start_head": "dd4429619889e38719a8223357fd9e626fea5cdd",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before": {
+    "tests": 53,
+    "passed": 53,
+    "new_http_characterizations": 3
+  },
+  "after": {
+    "tests": 59,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": {
+      "PresalesProjectPersistenceContractTest": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesProjectRepositoryTest": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesIntegrationTest": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesAtomicResultAcceptanceTest": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ProjectAuthorityFenceDatabaseTest": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesRuntimeTransactionIntegrationTest": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesSourceScopeTest": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "repository_tests": 5,
+  "existing_fixture_assertions_unchanged": true,
+  "service_lines": {
+    "before": 1462,
+    "after": 1431
+  },
+  "repository_lines": 111,
+  "dev_tasks": [
+    "l23qp7ze",
+    "ffzhjsgu",
+    "0k5vyb76"
+  ],
+  "format": "PASS",
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "be9fea44eae1573ff021d5e9328b47d885445b31b9677d96db0b9dace9f50d3d",
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesProjectRepository.java": "565630a8510d60bb83e5101acd6629854d23ce609dc77b77eb7282f7c1e94829",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectPersistenceContractTest.java": "ec956241733d1bd9c620875289270e170951f53bf82c1f48045d1ca65811ca71",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectRepositoryTest.java": "e3067acc96ce9bafcbfe6f95d38cd5091f50d0728a5a2276dbcc14d88e793459",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "0282ab44a408790afebf2933cc5131df8a2b85c9381035b9b37179b9deeff528",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java": "4a2b5e71a642450f33cb30f036ffaf76821f1629bb7b216f9bb98031f2b69478",
+    "mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java": "a2450fd49d3cca45e687993dd0f0abdb584384004b1349388d16a792234378d2",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java": "89b1f274e708beea247135514ed5680114703c96fa9553c3fa8871c74fa2fcd2"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/initial-dev.txt": "5eccb0eeb1523cc969b20308ad4d3d30119d993f7307db37203c76d7b97e7f82",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": "16ce8f36898fecf874e5d51a612a9503dc33b118f061e3a3065ef6ee01ac8aad",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": "26cc3cd8e478bfcf04db5eba18608dd6c513e07590b3b44d719593552c09f672",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-pass.txt": "b223c7ab494291f04034ea73393ca131770fe866dfbaa5885ef8378ff28bd644",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/after.txt": "1733c7a0afb504a0b29d8067d7953e68c9b9c7c919156146e08b5383ac3b571f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/format.txt": "00a0241b090183b5f099a210b27e77ae13934262fb9a2046d372a7954c7d1336",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/dev.txt": "adc481aca80edb2c2f18d3865139dd6c520144f6d67c028f3ed85b85853b298c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/staged-gate-report.json": "5fd37f1ee2eecda1503b9d8f20d365ecfede56f9255583369dea84227a9b933e",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/commit-hook-report.json": "182498be1dcc8b9173a2662148cf84928d6afc7f03158389858312e8a06d4b57",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-format.txt": "eea40f6fb0158508b35a5d67c1d46b05a63bdaa666196647ba2fa7e25ef4588d",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": "0f6f1111f4190316947a941b5a1fcbbe88dc53c39f0de8925e561757e5806800",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": "bd2886bac660e609db84c2aea1814728a23e614f8468acc48f6f08c26e783c4f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-dev.txt": "c75156d2d432fdad1e999221a07b5d1cd809e195945e33b7112e6b03e4d153bb",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-spotless.txt": "3ad4a1c7a6a5c7f110a00f943bcd72097e485a745e0b46b95ddbe3b84bdb4ab1",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-staged-gate-report.json": "4e34d9a947e2d340aa988e7da2ecfc0ec5424279521c560a8486c371fd991c5c",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-commit-hook-report.json": "78db084ae03c6774b092009a38162eb0787e49593f7d0bfe469102db2b448fac"
+  },
+  "dialects_tested": [
+    "H2 MySQL mode"
+  ],
+  "formal_qa": "NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED",
+  "mysql_kingbase": "NOT_RUN_THIS_SLICE",
+  "independent_review": "APPROVE_BOUNDED_PROJECT_STORAGE authority_review; independent JDK21 rerun58/58",
+  "evidence_redaction": {
+    "reason": "MockMvc failure output contains synthetic test credentials; values must not enter published history",
+    "files": {
+      "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": {
+        "original_sha256": "9d4cd08c41b7d6713a4f41b9ed03e475fed2fff626ac0e3903df702844711ebc",
+        "jwt_values_redacted": 9,
+        "password_values_redacted": 0,
+        "other_token_values_redacted": 0
+      },
+      "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": {
+        "original_sha256": "7590136ace0272c5abad11a654bf84a4959b7069c21514005375053f80377804",
+        "jwt_values_redacted": 6,
+        "password_values_redacted": 0,
+        "other_token_values_redacted": 0
+      },
+      "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": {
+        "original_sha256": "41c6d5b81f48b67640c2edf070880ee95adfac2bc9a3f715666776baef490adc",
+        "jwt_values_redacted": 6,
+        "password_values_redacted": 0,
+        "other_token_values_redacted": 5
+      }
+    },
+    "raw_originals": "unpublished local test output; not committed"
+  },
+  "pre_sanitization_full_gate": {
+    "task": "s5gpp6u8",
+    "commit_hook": "gf7t_x2s",
+    "checked_tree": "1b7bd4d84ea5d6bad8671fd437d9b5e7c588b1a8",
+    "source_commit": "abee25a0ba3a7190f3d448f57642d1e3b6908079",
+    "java_total": 6031,
+    "java_executed": 5961,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "ui_passed": 846,
+    "ui_failed": 0,
+    "ui_formatter_lint": "NOT_APPLICABLE no changed UI targets",
+    "ui_types_ID_Node_builds": "PASS",
+    "limitation": "historical code/toolchain check before synthetic credential redaction; not final sanitized tree submission authority"
+  },
+  "after_initial": {
+    "tests": 58,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": {
+      "PresalesProjectPersistenceContractTest": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesProjectRepositoryTest": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesIntegrationTest": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesAtomicResultAcceptanceTest": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "ProjectAuthorityFenceDatabaseTest": {
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesRuntimeTransactionIntegrationTest": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "PresalesSourceScopeTest": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "additional_characterization": "Persisted JSON null retains IllegalStateException caused by ClassCastException; original NEW test expectation corrected from observed error; no production change.",
+  "interrupted_gate": {
+    "task": "g6k5sr7h",
+    "status": "STOPPED_NOT_PASS",
+    "reason": "investigated JSON null compatibility; production behavior confirmed unchanged"
+  },
+  "final_sanitized_full_gate": {
+    "source_commit": "bf728e648154c8afaa897708efc789fdb4836c7d",
+    "checked_tree": "2b0989a28a9f81ae60307a67e9af45f2651de4f0",
+    "staged_task": "g6kzd01e",
+    "commit_hook_task": "d7erjho6",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6032,
+    "java_executed": 5962,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "ui_failed": 0,
+    "ui_types_ID_Node_builds": "PASS"
+  },
+  "development_password_redaction_followup": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/after.txt": {
+      "input_sha256": "185de340d6278969636767220aec8317fdd36c10a17ba23f1ed83d49cfdc52b3",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-pass.txt": {
+      "input_sha256": "84190d87448d5ae6f51b994028bffbea3c5f0501cf4e0f4d6ba395a683446ae9",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/null-body-expectation-failure.txt": {
+      "input_sha256": "95e5f47bd612ac43f9ed56f534d5b1f54347c294f744dae6a193ba5aaf1543a3",
+      "count": 1
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/final-targeted.txt": {
+      "input_sha256": "bbf2e618e2bfacba5faa72dd787263f212b99cc0b8e45428de3ffea581131c45",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-constraint-case-failure.txt": {
+      "input_sha256": "0499ca8abe7978c6e28e76c592fa32169135175c19c35f56cf2b7c25c2df339b",
+      "count": 2
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-storage-tests/before-fixture-failure.txt": {
+      "input_sha256": "8bd55dc7504588161c104f44a82b074f1b9ddd9184eae371dbd85f7409f2c2b1",
+      "count": 2
+    }
+  },
+  "development_password_redaction_note": "Follow-up removes ephemeral Spring generated development passwords missed by the earlier JWT/JSON credential filter. Earlier source_commit/checked_tree reports remain historical candidate identities; no published history rewrite."
+}

@@ -1,0 +1,834 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts (35 tests | 27 failed) 13ms
+   × rejects malformed member {"userId":3} 3ms
+   × rejects malformed member {"id":3} 1ms
+   × rejects malformed member {"workspaceId":"other"} 0ms
+   × rejects malformed member {"role":null} 0ms
+   × rejects malformed member {"nickname":3} 0ms
+   × rejects malformed member {} 0ms
+   × rejects malformed source {"kbId":3} 0ms
+   × rejects malformed source {"name":3} 0ms
+   × rejects malformed source {"graphId":3} 0ms
+   × rejects malformed source {"ontologyRevisionId":3} 0ms
+   × rejects malformed source {} 0ms
+   × rejects malformed trusted fact {"id":3} 0ms
+   × rejects malformed trusted fact {"revision":1.5} 0ms
+   × rejects malformed trusted fact {"revision":"3"} 0ms
+   × rejects malformed trusted fact {"evidenceIds":[3]} 0ms
+   × rejects malformed trusted fact {} 0ms
+   × rejects malformed trusted fact {"graphId":null} 0ms
+   × rejects malformed trusted fact {"label":3} 0ms
+   × rejects malformed employee {"id":3} 0ms
+   × rejects malformed employee {"name":null} 0ms
+   × rejects malformed employee {"enabled":"true"} 0ms
+   × rejects malformed employee {"available":"false"} 0ms
+   × rejects malformed capabilities {"enabled":"true"} 1ms
+   × rejects malformed capabilities {"semanticEnabled":null} 0ms
+   × rejects malformed capabilities {"canWrite":1} 0ms
+   × rejects malformed capabilities {} 0ms
+   × rejects malformed capabilities {"modelConfigured":"false"} 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 27 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {"userId":3}
+AssertionError: promise resolved "[ { id: '9223372036854775802', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": "9223372036854775802",
+    "nickname": null,
+    "role": "HISTORICAL_ROLE",
+    "userId": 3,
+    "username": null,
+    "workspaceId": "9223372036854775801",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {"id":3}
+AssertionError: promise resolved "[ { id: 3, …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": 3,
+    "nickname": null,
+    "role": "HISTORICAL_ROLE",
+    "userId": "9223372036854775803",
+    "username": null,
+    "workspaceId": "9223372036854775801",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {"workspaceId":"other"}
+AssertionError: promise resolved "[ { id: '9223372036854775802', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": "9223372036854775802",
+    "nickname": null,
+    "role": "HISTORICAL_ROLE",
+    "userId": "9223372036854775803",
+    "username": null,
+    "workspaceId": "other",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {"role":null}
+AssertionError: promise resolved "[ { id: '9223372036854775802', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": "9223372036854775802",
+    "nickname": null,
+    "role": null,
+    "userId": "9223372036854775803",
+    "username": null,
+    "workspaceId": "9223372036854775801",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {"nickname":3}
+AssertionError: promise resolved "[ { id: '9223372036854775802', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": "9223372036854775802",
+    "nickname": 3,
+    "role": "HISTORICAL_ROLE",
+    "userId": "9223372036854775803",
+    "username": null,
+    "workspaceId": "9223372036854775801",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed member {}
+AssertionError: promise resolved "[ { id: '9223372036854775802', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "id": "9223372036854775802",
+    "nickname": null,
+    "role": "HISTORICAL_ROLE",
+    "userId": "9223372036854775803",
+    "username": null,
+    "workspaceId": undefined,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:55:39
+     53| it.each([{ userId: 3 }, { id: 3 }, { workspaceId: 'other' }, { role: n…
+     54|   respond([{ ...member, ...patch }])
+     55|   await expect(presalesApi.members(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     56| })
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed source {"kbId":3}
+AssertionError: promise resolved "[ { kbId: 3, name: null, …(2) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "graphId": "g",
+    "kbId": 3,
+    "name": null,
+    "ontologyRevisionId": null,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:59:39
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+     58|   respond([{ ...source, ...patch }])
+     59|   await expect(presalesApi.sources(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     60| })
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed source {"name":3}
+AssertionError: promise resolved "[ { …(4) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "graphId": "g",
+    "kbId": "9223372036854775804",
+    "name": 3,
+    "ontologyRevisionId": null,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:59:39
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+     58|   respond([{ ...source, ...patch }])
+     59|   await expect(presalesApi.sources(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     60| })
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed source {"graphId":3}
+AssertionError: promise resolved "[ { …(4) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "graphId": 3,
+    "kbId": "9223372036854775804",
+    "name": null,
+    "ontologyRevisionId": null,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:59:39
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+     58|   respond([{ ...source, ...patch }])
+     59|   await expect(presalesApi.sources(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     60| })
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed source {"ontologyRevisionId":3}
+AssertionError: promise resolved "[ { …(4) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "graphId": "g",
+    "kbId": "9223372036854775804",
+    "name": null,
+    "ontologyRevisionId": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:59:39
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+     58|   respond([{ ...source, ...patch }])
+     59|   await expect(presalesApi.sources(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     60| })
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed source {}
+AssertionError: promise resolved "[ { …(4) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "graphId": undefined,
+    "kbId": "9223372036854775804",
+    "name": null,
+    "ontologyRevisionId": null,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:59:39
+     57| it.each([{ kbId: 3 }, { name: 3 }, { graphId: 3 }, { ontologyRevisionI…
+     58|   respond([{ ...source, ...patch }])
+     59|   await expect(presalesApi.sources(ws)).rejects.toMatchObject({ code: …
+       |                                       ^
+     60| })
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"id":3}
+AssertionError: promise resolved "[ { id: 3, revision: 3, …(4) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      "e2",
+      null,
+      "e1",
+      "e2",
+    ],
+    "graphId": "g",
+    "id": 3,
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"revision":1.5}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      "e2",
+      null,
+      "e1",
+      "e2",
+    ],
+    "graphId": "g",
+    "id": "9223372036854775805",
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": 1.5,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"revision":"3"}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      "e2",
+      null,
+      "e1",
+      "e2",
+    ],
+    "graphId": "g",
+    "id": "9223372036854775805",
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": "3",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"evidenceIds":[3]}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      3,
+    ],
+    "graphId": "g",
+    "id": "9223372036854775805",
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": undefined,
+    "graphId": "g",
+    "id": "9223372036854775805",
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"graphId":null}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      "e2",
+      null,
+      "e1",
+      "e2",
+    ],
+    "graphId": null,
+    "id": "9223372036854775805",
+    "label": "Trusted fact",
+    "ontologyRevisionId": null,
+    "revision": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed trusted fact {"label":3}
+AssertionError: promise resolved "[ { id: '9223372036854775805', …(5) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "evidenceIds": [
+      "e2",
+      null,
+      "e1",
+      "e2",
+    ],
+    "graphId": "g",
+    "id": "9223372036854775805",
+    "label": 3,
+    "ontologyRevisionId": null,
+    "revision": 3,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:63:53
+     61| it.each([{ id: 3 }, { revision: 1.5 }, { revision: '3' }, { evidenceId…
+     62|   respond([{ ...statement, ...patch }])
+     63|   await expect(presalesApi.statements(ws, projectId)).rejects.toMatchO…
+       |                                                     ^
+     64| })
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed employee {"id":3}
+AssertionError: promise resolved "[ { id: 3, name: 'Employee', …(2) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "available": false,
+    "enabled": true,
+    "id": 3,
+    "name": "Employee",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:67:41
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+     66|   respond([{ ...employee, ...patch }])
+     67|   await expect(presalesApi.employees(ws)).rejects.toMatchObject({ code…
+       |                                         ^
+     68| })
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed employee {"name":null}
+AssertionError: promise resolved "[ { id: '9223372036854775806', …(3) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "available": false,
+    "enabled": true,
+    "id": "9223372036854775806",
+    "name": null,
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:67:41
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+     66|   respond([{ ...employee, ...patch }])
+     67|   await expect(presalesApi.employees(ws)).rejects.toMatchObject({ code…
+       |                                         ^
+     68| })
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed employee {"enabled":"true"}
+AssertionError: promise resolved "[ { id: '9223372036854775806', …(3) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "available": false,
+    "enabled": "true",
+    "id": "9223372036854775806",
+    "name": "Employee",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:67:41
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+     66|   respond([{ ...employee, ...patch }])
+     67|   await expect(presalesApi.employees(ws)).rejects.toMatchObject({ code…
+       |                                         ^
+     68| })
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed employee {"available":"false"}
+AssertionError: promise resolved "[ { id: '9223372036854775806', …(3) } ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "available": "false",
+    "enabled": true,
+    "id": "9223372036854775806",
+    "name": "Employee",
+  },
+]
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:67:41
+     65| it.each([{ id: 3 }, { name: null }, { enabled: 'true' }, { available: …
+     66|   respond([{ ...employee, ...patch }])
+     67|   await expect(presalesApi.employees(ws)).rejects.toMatchObject({ code…
+       |                                         ^
+     68| })
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed capabilities {"enabled":"true"}
+AssertionError: promise resolved "{ enabled: 'true', …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canApprove": false,
++   "canWrite": false,
++   "enabled": "true",
++   "semanticEnabled": false,
+  }
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:71:44
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+     70|   respond({ ...capabilities, ...patch })
+     71|   await expect(presalesApi.capabilities(ws)).rejects.toMatchObject({ c…
+       |                                            ^
+     72| })
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed capabilities {"semanticEnabled":null}
+AssertionError: promise resolved "{ enabled: true, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canApprove": false,
++   "canWrite": false,
++   "enabled": true,
++   "semanticEnabled": null,
+  }
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:71:44
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+     70|   respond({ ...capabilities, ...patch })
+     71|   await expect(presalesApi.capabilities(ws)).rejects.toMatchObject({ c…
+       |                                            ^
+     72| })
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed capabilities {"canWrite":1}
+AssertionError: promise resolved "{ enabled: true, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canApprove": false,
++   "canWrite": 1,
++   "enabled": true,
++   "semanticEnabled": false,
+  }
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:71:44
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+     70|   respond({ ...capabilities, ...patch })
+     71|   await expect(presalesApi.capabilities(ws)).rejects.toMatchObject({ c…
+       |                                            ^
+     72| })
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed capabilities {}
+AssertionError: promise resolved "{ enabled: true, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canApprove": undefined,
++   "canWrite": false,
++   "enabled": true,
++   "semanticEnabled": false,
+  }
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:71:44
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+     70|   respond({ ...capabilities, ...patch })
+     71|   await expect(presalesApi.capabilities(ws)).rejects.toMatchObject({ c…
+       |                                            ^
+     72| })
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/27]⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > rejects malformed capabilities {"modelConfigured":"false"}
+AssertionError: promise resolved "{ enabled: true, …(4) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "canApprove": false,
++   "canWrite": false,
++   "enabled": true,
++   "modelConfigured": "false",
++   "semanticEnabled": false,
+  }
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:71:44
+     69| it.each([{ enabled: 'true' }, { semanticEnabled: null }, { canWrite: 1…
+     70|   respond({ ...capabilities, ...patch })
+     71|   await expect(presalesApi.capabilities(ws)).rejects.toMatchObject({ c…
+       |                                            ^
+     72| })
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/27]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  27 failed | 8 passed (35)
+   Start at  07:28:45
+   Duration  391ms (transform 56ms, setup 0ms, import 101ms, tests 13ms, environment 157ms)

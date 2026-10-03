@@ -1,5 +1,14 @@
 package vip.mate.wiki.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -9,31 +18,22 @@ import vip.mate.agent.model.AgentEntity;
 import vip.mate.agent.repository.AgentMapper;
 import vip.mate.wiki.model.WikiKnowledgeBaseEntity;
 import vip.mate.wiki.repository.WikiKnowledgeBaseMapper;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import vip.mate.wiki.repository.WikiRawMaterialMapper;
 
 /**
  * Unit tests for {@link WikiKnowledgeBaseService#resolvePrimaryKb(Long)}.
  *
- * <p>{@code listByAgentId} returns both the agent's own KBs and shared
- * (agent-less) KBs, ordered by {@code update_time} descending. A naive
- * {@code get(0)} pick therefore hands back whichever KB was touched most
- * recently — which can be an unrelated shared KB. {@code resolvePrimaryKb}
- * must still return the KB actually bound to the agent.
+ * <p>{@code listByAgentId} returns both the agent's own KBs and shared (agent-less) KBs, ordered by
+ * {@code update_time} descending. A naive {@code get(0)} pick therefore hands back whichever KB was
+ * touched most recently — which can be an unrelated shared KB. {@code resolvePrimaryKb} must still
+ * return the KB actually bound to the agent.
  */
 class WikiKnowledgeBaseServiceTest {
 
     private final WikiKnowledgeBaseMapper kbMapper = mock(WikiKnowledgeBaseMapper.class);
     private final AgentMapper agentMapper = mock(AgentMapper.class);
-    private final WikiKnowledgeBaseService service = new WikiKnowledgeBaseService(
-            kbMapper, null, null, null, null, null, agentMapper);
+    private final WikiKnowledgeBaseService service =
+            new WikiKnowledgeBaseService(kbMapper, null, null, null, null, null, agentMapper);
 
     private static WikiKnowledgeBaseEntity kb(long id, Long agentId) {
         return kb(id, agentId, null);
@@ -47,7 +47,8 @@ class WikiKnowledgeBaseServiceTest {
         return entity;
     }
 
-    private static WikiKnowledgeBaseEntity kb(long id, Long agentId, Long workspaceId, String name) {
+    private static WikiKnowledgeBaseEntity kb(
+            long id, Long agentId, Long workspaceId, String name) {
         WikiKnowledgeBaseEntity entity = kb(id, agentId, name);
         entity.setWorkspaceId(workspaceId);
         return entity;
@@ -66,10 +67,12 @@ class WikiKnowledgeBaseServiceTest {
     void prefersBoundKbOverNewerSharedKb() {
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 100L));
         // listByAgentId order is update_time DESC: two shared KBs precede the bound one.
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(900L, null, 1L, "Shared"),
-                kb(800L, 8L, 1L, "Legacy Other"),
-                kb(100L, null, 1L, "Primary")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(900L, null, 1L, "Shared"),
+                                kb(800L, 8L, 1L, "Legacy Other"),
+                                kb(100L, null, 1L, "Primary")));
 
         assertThat(service.resolvePrimaryKb(7L)).isNotNull();
         assertThat(service.resolvePrimaryKb(7L).getId()).isEqualTo(100L);
@@ -79,9 +82,8 @@ class WikiKnowledgeBaseServiceTest {
     @DisplayName("falls back to the most recent shared KB when the agent has no bound KB")
     void fallsBackToSharedKbWhenNoneBound() {
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, null));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(900L, 8L, 1L, "Most Recent"),
-                kb(800L, null, 1L, "Older")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(List.of(kb(900L, 8L, 1L, "Most Recent"), kb(800L, null, 1L, "Older")));
 
         assertThat(service.resolvePrimaryKb(7L).getId()).isEqualTo(900L);
     }
@@ -91,9 +93,11 @@ class WikiKnowledgeBaseServiceTest {
     void twoAgentsCanSharePrimaryKb() {
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 100L));
         when(agentMapper.selectById(8L)).thenReturn(agent(8L, 1L, 100L));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "Shared Primary"),
-                kb(900L, null, 1L, "Fallback")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(100L, null, 1L, "Shared Primary"),
+                                kb(900L, null, 1L, "Fallback")));
 
         assertThat(service.resolvePrimaryKb(7L).getId()).isEqualTo(100L);
         assertThat(service.resolvePrimaryKb(8L).getId()).isEqualTo(100L);
@@ -103,9 +107,11 @@ class WikiKnowledgeBaseServiceTest {
     @DisplayName("primary KB pointing outside the agent workspace falls back")
     void primaryKbOutsideWorkspaceFallsBack() {
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 200L));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(900L, null, 1L, "Workspace Fallback"),
-                kb(200L, null, 2L, "Wrong Workspace")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(900L, null, 1L, "Workspace Fallback"),
+                                kb(200L, null, 2L, "Wrong Workspace")));
 
         assertThat(service.resolvePrimaryKb(7L).getId()).isEqualTo(900L);
     }
@@ -130,9 +136,9 @@ class WikiKnowledgeBaseServiceTest {
     @Test
     @DisplayName("findByName matches by exact name within the agent's visible set")
     void findByNameMatchesVisibleKb() {
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(900L, null, "Shared Docs"),
-                kb(100L, 7L, "Agent Personal KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(kb(900L, null, "Shared Docs"), kb(100L, 7L, "Agent Personal KB")));
 
         WikiKnowledgeBaseEntity hit = service.findByName(7L, "Agent Personal KB");
         assertThat(hit).isNotNull();
@@ -146,9 +152,9 @@ class WikiKnowledgeBaseServiceTest {
     @Test
     @DisplayName("findByName returns null when name does not match any visible KB")
     void findByNameMissReturnsNull() {
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(900L, null, "Shared Docs"),
-                kb(100L, 7L, "Agent Personal KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(kb(900L, null, "Shared Docs"), kb(100L, 7L, "Agent Personal KB")));
 
         assertThat(service.findByName(7L, "Nonexistent KB")).isNull();
     }
@@ -156,8 +162,7 @@ class WikiKnowledgeBaseServiceTest {
     @Test
     @DisplayName("findByName is case-sensitive — LLM must copy the name verbatim")
     void findByNameIsCaseSensitive() {
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, 7L, "Agent Personal KB")));
+        when(kbMapper.selectList(any())).thenReturn(List.of(kb(100L, 7L, "Agent Personal KB")));
 
         assertThat(service.findByName(7L, "agent personal kb")).isNull();
         assertThat(service.findByName(7L, "Agent Personal KB")).isNotNull();
@@ -171,7 +176,8 @@ class WikiKnowledgeBaseServiceTest {
         assertThat(service.findByName(7L, "   ")).isNull();
     }
 
-    // ==================== findByName ambiguity + findAllByName + findVisibleById ====================
+    // ==================== findByName ambiguity + findAllByName + findVisibleById
+    // ====================
     //
     // mate_wiki_knowledge_base has no unique constraint on name (one DB row
     // per workspace + (name nullable + duplicates allowed) by design), so
@@ -183,9 +189,8 @@ class WikiKnowledgeBaseServiceTest {
     @Test
     @DisplayName("findByName returns null when more than one visible KB shares the name")
     void findByNameAmbiguousReturnsNull() {
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, 7L, "Docs"),
-                kb(900L, null, "Docs")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(List.of(kb(100L, 7L, "Docs"), kb(900L, null, "Docs")));
 
         assertThat(service.findByName(7L, "Docs"))
                 .as("ambiguous matches collapse to null — caller must use findAllByName")
@@ -195,10 +200,12 @@ class WikiKnowledgeBaseServiceTest {
     @Test
     @DisplayName("findAllByName returns every visible KB sharing the name")
     void findAllByNameReturnsAllMatches() {
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, 7L, "Docs"),
-                kb(900L, null, "Docs"),
-                kb(800L, null, "Other")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(100L, 7L, "Docs"),
+                                kb(900L, null, "Docs"),
+                                kb(800L, null, "Other")));
 
         List<WikiKnowledgeBaseEntity> hits = service.findAllByName(7L, "Docs");
         assertThat(hits).hasSize(2);
@@ -216,10 +223,12 @@ class WikiKnowledgeBaseServiceTest {
     @DisplayName("findVisibleById returns the KB only when it is in the agent's visibility set")
     void findVisibleByIdGate() {
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, null));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, 7L, "Bound KB"),
-                kb(900L, null, "Shared KB"),
-                kb(800L, 8L, "Other Agent Primary KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(100L, 7L, "Bound KB"),
+                                kb(900L, null, "Shared KB"),
+                                kb(800L, 8L, "Other Agent Primary KB")));
 
         // Visible: returned.
         assertThat(service.findVisibleById(7L, 100L)).isNotNull();
@@ -258,13 +267,16 @@ class WikiKnowledgeBaseServiceTest {
     void scopeRestrictsVisibleKbs() {
         bindScope(100L, 300L);
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 100L));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "Business KB"),
-                kb(200L, null, 1L, "Unrelated KB"),
-                kb(300L, null, 1L, "Other Business KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(100L, null, 1L, "Business KB"),
+                                kb(200L, null, 1L, "Unrelated KB"),
+                                kb(300L, null, 1L, "Other Business KB")));
 
         List<WikiKnowledgeBaseEntity> visible = service.listByAgentId(7L);
-        assertThat(visible).extracting(WikiKnowledgeBaseEntity::getId)
+        assertThat(visible)
+                .extracting(WikiKnowledgeBaseEntity::getId)
                 .containsExactlyInAnyOrder(100L, 300L);
         // The out-of-scope KB is invisible even when targeted by id directly.
         assertThat(service.findVisibleById(7L, 200L)).isNull();
@@ -276,12 +288,52 @@ class WikiKnowledgeBaseServiceTest {
     void noScopeMeansUnrestricted() {
         bindScope(); // empty → mapper returns no rows
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, null));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "KB A"),
-                kb(200L, null, 1L, "KB B")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(List.of(kb(100L, null, 1L, "KB A"), kb(200L, null, 1L, "KB B")));
 
-        assertThat(service.listByAgentId(7L)).extracting(WikiKnowledgeBaseEntity::getId)
+        assertThat(service.listByAgentId(7L))
+                .extracting(WikiKnowledgeBaseEntity::getId)
                 .containsExactlyInAnyOrder(100L, 200L);
+    }
+
+    @Test
+    @DisplayName("disabled-only binding rows do not restore workspace-wide visibility")
+    void disabledOnlyBindingsHideAllKbs() {
+        AgentWikiKbBindingMapper mapper = mock(AgentWikiKbBindingMapper.class);
+        AgentWikiKbBinding disabled = new AgentWikiKbBinding();
+        disabled.setKbId(100L);
+        disabled.setEnabled(false);
+        when(mapper.selectList(any()))
+                .thenAnswer(
+                        invocation -> {
+                            com.baomidou.mybatisplus.core.conditions.AbstractWrapper<?, ?, ?>
+                                    query = invocation.getArgument(0);
+                            return query.getParamNameValuePairs().containsValue(true)
+                                    ? List.of()
+                                    : List.of(disabled);
+                        });
+        ReflectionTestUtils.setField(service, "kbBindingMapper", mapper);
+        when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, null));
+        when(kbMapper.selectList(any()))
+                .thenReturn(List.of(kb(100L, null, 1L, "KB A"), kb(200L, null, 1L, "KB B")));
+
+        assertThat(service.listByAgentId(7L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("cascade delete locks the KB before reading children")
+    void cascadeDeleteLocksKbBeforeReadingChildren() {
+        WikiRawMaterialMapper raw = mock(WikiRawMaterialMapper.class);
+        WikiKnowledgeBaseService deleting =
+                new WikiKnowledgeBaseService(kbMapper, raw, null, null, null, null, agentMapper);
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class, () -> deleting.delete(100L));
+
+        var order = inOrder(kbMapper);
+        order.verify(kbMapper).lockForUpdate(100L);
+        order.verify(kbMapper).selectById(100L);
+        verify(raw, never()).delete(any());
     }
 
     @Test
@@ -289,11 +341,12 @@ class WikiKnowledgeBaseServiceTest {
     void staleScopeRowIsIntersectedAway() {
         bindScope(100L, 999L); // 999 no longer in the workspace
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 100L));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "Live KB"),
-                kb(200L, null, 1L, "Unrelated KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(kb(100L, null, 1L, "Live KB"), kb(200L, null, 1L, "Unrelated KB")));
 
-        assertThat(service.listByAgentId(7L)).extracting(WikiKnowledgeBaseEntity::getId)
+        assertThat(service.listByAgentId(7L))
+                .extracting(WikiKnowledgeBaseEntity::getId)
                 .containsExactly(100L);
     }
 
@@ -303,9 +356,11 @@ class WikiKnowledgeBaseServiceTest {
         bindScope(300L);
         // primary points at an out-of-scope KB → falls back to a scoped one.
         when(agentMapper.selectById(7L)).thenReturn(agent(7L, 1L, 100L));
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "Out Of Scope Primary"),
-                kb(300L, null, 1L, "Scoped KB")));
+        when(kbMapper.selectList(any()))
+                .thenReturn(
+                        List.of(
+                                kb(100L, null, 1L, "Out Of Scope Primary"),
+                                kb(300L, null, 1L, "Scoped KB")));
 
         assertThat(service.resolvePrimaryKb(7L).getId()).isEqualTo(300L);
     }
@@ -319,7 +374,8 @@ class WikiKnowledgeBaseServiceTest {
     // prompt keeps injecting wiki content.
 
     @Test
-    @DisplayName("wiki_disabled hides every KB: list, primary, and by-id lookups all come back empty")
+    @DisplayName(
+            "wiki_disabled hides every KB: list, primary, and by-id lookups all come back empty")
     void wikiDisabledHidesAllKbs() {
         AgentEntity optedOut = agent(7L, 1L, 100L);
         optedOut.setWikiDisabled(true);
@@ -338,8 +394,7 @@ class WikiKnowledgeBaseServiceTest {
         AgentEntity optedOut = agent(7L, 1L, 100L);
         optedOut.setWikiDisabled(true);
         when(agentMapper.selectById(7L)).thenReturn(optedOut);
-        when(kbMapper.selectList(any())).thenReturn(List.of(
-                kb(100L, null, 1L, "Bound KB")));
+        when(kbMapper.selectList(any())).thenReturn(List.of(kb(100L, null, 1L, "Bound KB")));
 
         assertThat(service.listByAgentId(7L)).isEmpty();
     }

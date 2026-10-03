@@ -1,0 +1,16 @@
+TAP version 13
+# Subtest: real workspace transport and paged team fixture complete without late socket diagnostics
+ok 1 - real workspace transport and paged team fixture complete without late socket diagnostics
+  ---
+  duration_ms: 609.890333
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 675.873458

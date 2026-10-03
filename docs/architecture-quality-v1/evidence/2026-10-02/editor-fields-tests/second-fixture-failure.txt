@@ -1,0 +1,33 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (58 tests | 1 failed) 21410ms
+     × submits confirmed requirements with the original reason and exact version 62ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > editor field presentation contracts > submits confirmed requirements with the original reason and exact version
+AssertionError: expected '5' to be 5 // Object.is equality
+
+- Expected:
+5
+
++ Received:
+"5"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1627:25
+    1625|     await settle()
+    1626|     const reason = document.querySelector<HTMLTextAreaElement>('.el-di…
+    1627|     expect(reason.rows).toBe(5)
+       |                         ^
+    1628|     reason.value = ' Customer confirmed exact scope '
+    1629|     reason.dispatchEvent(new Event('input', { bubbles: true }))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 57 passed (58)
+   Start at  15:22:40
+   Duration  22.35s (transform 437ms, setup 0ms, import 742ms, tests 21.41s, environment 110ms)
+

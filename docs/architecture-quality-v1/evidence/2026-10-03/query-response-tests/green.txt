@@ -1,0 +1,8 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+
+ Test Files  2 passed (2)
+      Tests  53 passed (53)
+   Start at  07:29:48
+   Duration  311ms (transform 104ms, setup 0ms, import 172ms, tests 15ms, environment 236ms)

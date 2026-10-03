@@ -1,0 +1,191 @@
+{
+  "task": "AQ-05 project listing projection",
+  "start_head": "b7a40deb8a99e06765a85a381fbf93c97260412e",
+  "before_tests": 15,
+  "initial_after_tests": 57,
+  "final_targeted_tests": 58,
+  "classes": {
+    "PresalesProjectListingTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesProjectListingContractTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesIntegrationTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesProjectPersistenceContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesRuntimeTransactionIntegrationTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesArtifactPersistenceContractTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ProjectAuthorityFenceDatabaseTest": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "dev_tasks": [
+    "9cfmcrxc",
+    "jvrkz12x"
+  ],
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "9a71203ee7a1a9a2f6380ec88087dd31edff010aa00436acec0103ba57625dd6",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectListing.java": "a36d91a5b137cf41bade7d94b6d200a010bdd659e0b8f0c02d089fc3039b4656",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectListingTest.java": "dcb29b620dcb067d550fc66b9f71c222d89419c03c1f4d0eb521aa96aada8a5f",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectListingContractTest.java": "b9cbea385269f9745b994efe6bf8717bbca8970c24f8e8d0e3b3c473fc95a1de"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/initial-dev.txt": "006c62eed596e664e78807aaacd309807fd9c3121974609e296ecfe6d12050cc",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/before.txt": "6d3f4db66630b8bc7cc5c55da3b75dfc74fb2e47343e1a19a6e90366b1e2f971",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/initial-after.txt": "1f759f521d1e13caada3420e47b6acfb6dfe527a3f1f2c9299f4c60ed311896b",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/stream-fixture-failure.txt": "8556a87c91fc75c78b7467afddb8920cd5927ced650652fb5a4a092cb0d99080",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/final-targeted.txt": "2a2ae33ac2a89874d2d46532da184fc6e641cdfd8a87a59023e85c574d13aa3f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/intermediate-dev.txt": "a8d1267fcc49a2a63400e39d81a63cae5257b32e4305ae2615f28af25617f4b0",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/final-dev.txt": "0b95f9da97f249e8f3986283673c70438376c8e3a40cb47f1dd076f37c7769b1",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-final.txt": "da43e6c229f7e54abca6689eb867b8faa36826228c1c04e3cef8d77c346e2ff4",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-check.txt": "7296c395ec5c1907c69731575569bac94e7b49d8c05dcd5ec5cd227329e4d760",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/staged-gate-report.json": "c762612ed4f4666e55bd4dbc852a292660498d47c942d3336f6aba98cb332d08",
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/commit-hook-report.json": "67c8068b9dc33564a74a88f0c10332d0315da94775aa33b661835bf1bd77dd9c"
+  },
+  "evidence_redaction": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/initial-dev.txt": {
+      "input_sha256": "006c62eed596e664e78807aaacd309807fd9c3121974609e296ecfe6d12050cc",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/before.txt": {
+      "input_sha256": "80086dec4c1490be9879500646e82d8466f46c79372a2f69cf8788deb2651f57",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 1,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/initial-after.txt": {
+      "input_sha256": "5bb7c80f7ff9208378e04d651416ab8b63af59ef2e3b25c7b07d95bbd1d75e0c",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/stream-fixture-failure.txt": {
+      "input_sha256": "8556a87c91fc75c78b7467afddb8920cd5927ced650652fb5a4a092cb0d99080",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/final-targeted.txt": {
+      "input_sha256": "698c2d2a028c62664c73aee088744794c772b6ff3de64dd9a81c5744cc6140a1",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/intermediate-dev.txt": {
+      "input_sha256": "a8d1267fcc49a2a63400e39d81a63cae5257b32e4305ae2615f28af25617f4b0",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/final-dev.txt": {
+      "input_sha256": "0b95f9da97f249e8f3986283673c70438376c8e3a40cb47f1dd076f37c7769b1",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-final.txt": {
+      "input_sha256": "da43e6c229f7e54abca6689eb867b8faa36826228c1c04e3cef8d77c346e2ff4",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/project-listing-tests/format-check.txt": {
+      "input_sha256": "7296c395ec5c1907c69731575569bac94e7b49d8c05dcd5ec5cd227329e4d760",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    }
+  },
+  "service_lines": {
+    "before": 1401,
+    "after": 1344,
+    "project_listing": 85
+  },
+  "independent_review": {
+    "reviewer": "authority_review",
+    "verdict": "APPROVE_BOUNDED",
+    "findings": 0,
+    "resolved": "Eager decoding changed exception order; final Stream preserves lazy per-row processing, covered by fifth pure test",
+    "diagnostics_limitation": "Java LSP Transport closed; JDK21 Maven compile/tests and manual review available"
+  },
+  "intermediate_failure": "New test callsites still passed List after Stream change; compilation failed in five callsites. Corrected new fixtures and added lazy-order regression, final 58 passed. No existing assertions removed.",
+  "formal_qa": "NOT_RUN",
+  "sql_pagination": "NOT_IMPLEMENTED_THIS_SLICE",
+  "full_stable_project_dto": "NOT_IMPLEMENTED_THIS_SLICE",
+  "mysql_kingbase": "NOT_RUN_THIS_SLICE",
+  "remote_required_ci": "NOT_VERIFIED",
+  "full_gate": {
+    "source_commit": "647e10519f1a7f4a2e3460988ae3ee558120ab3a",
+    "checked_tree": "aa596f4e8378504ad2d5c35f594a967d0619ba4c",
+    "staged_task": "5b1feeat",
+    "commit_hook_task": "diqyu6w2",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6048,
+    "java_executed": 5978,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "types_ID_Node_builds": "PASS",
+    "ui_format_lint": "NOT_APPLICABLE no UI targets"
+  }
+}

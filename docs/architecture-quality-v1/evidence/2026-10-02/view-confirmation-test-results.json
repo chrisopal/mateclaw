@@ -1,0 +1,80 @@
+{
+  "task": "AQ-09 source preview and confirmation lifecycle; AQ-04/AC-13 and AQ-01/AC-21 supporting evidence",
+  "start_head": "60d73b77f9434bf19ebaccacb4fe7f91881509b1",
+  "base": "origin/dev",
+  "base_sha": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "status": "ENGINEERING_PASS",
+  "formal_acceptance": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "counts": {
+    "baseline_passed": 50,
+    "first_red_failed": 4,
+    "first_red_passed": 51,
+    "command_red_failed": 2,
+    "command_red_unselected": 33,
+    "final_passed": 77,
+    "final_failed": 0
+  },
+  "fixture_failures": "scope-red-fixture first two new command cases failed due tab lookup; corrected selector then both command-red cases fail against unchanged production code. Not counted as production red examples.",
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "770ffc1be032708e2908bfb2c85c10fe1564adfd1694aa0c1285c0b0245827b8",
+    "mateclaw-ui/src/features/presales/composables/usePresalesSourcePreview.ts": "f2da05784230f0c84ea009bc05911f9a1ebe1985d8f171e605267ed73a9b401c",
+    "mateclaw-ui/src/features/presales/__tests__/sourcePreview.test.ts": "33a9e1e234fb83e0c5a9cfe5d4bb3219542b67ebac1dff3c0e71da3b134d8486",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "87bfb39b865f4aad6d632ce7343e9a63cb42333784a86089caed9d7467026f90"
+  },
+  "logs": {
+    "start": {
+      "path": "view-confirmation-tests/start.log",
+      "sha256": "223d5be4e057008ab274ed1c7a5b18d54868cf9ad126ea9c80ee58e887eb90ad"
+    },
+    "before": {
+      "path": "view-confirmation-tests/before.log",
+      "sha256": "5abe5b7c7341e5b0afab91a0cdffab0a44066b92566d4d089cfe3885b8912dd3"
+    },
+    "red": {
+      "path": "view-confirmation-tests/red.log",
+      "sha256": "89d93dba16ed8bba4c109d3d16f1fb63688a1c89a5339668f120e960e321bf46"
+    },
+    "scope-red-fixture": {
+      "path": "view-confirmation-tests/scope-red-fixture.log",
+      "sha256": "7064d1a54f394b33d5404fdec623729b4f54467221dd2812ef8686f0b4154089"
+    },
+    "command-red": {
+      "path": "view-confirmation-tests/command-red.log",
+      "sha256": "f013eb314697ea4aea789d27fc2dfcb560decc34be46839b444793f53df4ff11"
+    },
+    "final": {
+      "path": "view-confirmation-tests/final.log",
+      "sha256": "1e07e2bfd5b2bd0ac226bc0efc13259fd4d893d75e064b2136a5373ec14b17f5"
+    },
+    "type-initial": {
+      "path": "view-confirmation-tests/type-initial.log",
+      "sha256": "312373d31e8e3a9cdeca7107c7dfc8a8bc7173e29b3cf01c076c7d750c0dcf9f"
+    },
+    "type-intersection": {
+      "path": "view-confirmation-tests/type-intersection.log",
+      "sha256": "df493307e83498da6e500094933377f771e3e1a813f30ef64aecd15ae50c228d"
+    },
+    "type-final": {
+      "path": "view-confirmation-tests/type-final.log",
+      "sha256": "1d339738973fe37cb37bdbc16b9b7ac4dd98b991f4c34659d80a18ee493a39f8"
+    },
+    "lint": {
+      "path": "view-confirmation-tests/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": {
+      "path": "view-confirmation-tests/format.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "dev": {
+      "path": "view-confirmation-tests/dev.log",
+      "sha256": "c54f016456a2e2689808431d37311d97091e7d1069505c10d5af6fcedc500438"
+    }
+  },
+  "independent_review": {
+    "reviewer": "workbench_confirmation_audit",
+    "verdict": "APPROVE scoped change",
+    "limitations": "Read-only final diff and actual logs; no test/build rerun; plain tsc Vue import limitation, actual vue-tsc exit0; formal role/browser/server/QA pending."
+  }
+}

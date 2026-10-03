@@ -1,0 +1,18 @@
+{"status": "PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-4sgxbvmw/report.json", "submission_ready": true, "error": null}
+PASS: architecture-ratchet
+PASS: guard-self-tests
+NOT_APPLICABLE: java-toolchain No backend/control-plane changes
+PASS: ui-format
+PASS: ui-lint
+PASS: ui-typecheck
+PASS: id-precision
+PASS: ui-vitest
+PASS: ui-node-tests
+PASS: ui-build-enterprise
+PASS: ui-build-classic
+NOT_APPLICABLE: cost-tool No standalone cost tool change
+[codex/aq01b-execution 8fdb3d36] Prevent presales domain responses from losing their identity and shape
+ 7 files changed, 840 insertions(+), 140 deletions(-)
+ create mode 100644 docs/architecture-quality-v1/evidence/2026-10-03/AQ05_DOMAIN_DTO_PLAN.md
+ create mode 100644 mateclaw-ui/src/features/presales/__tests__/domainDto.test.ts
+ create mode 100644 mateclaw-ui/src/features/presales/api/presalesDomainTypes.ts

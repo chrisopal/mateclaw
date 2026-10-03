@@ -1,0 +1,248 @@
+{
+  "task": "AQ-03/AQ-05 shared artifact persistence boundary",
+  "start_head": "5cbc7a41926daec6be9d5e1e8b8fe6527c1479ea",
+  "before_tests": 33,
+  "final_targeted_tests": 66,
+  "compiler_tests": 1,
+  "compiler_skipped": 0,
+  "dev_tasks": [
+    "qq0nsw1x",
+    "8daqxktq",
+    "vha_wca0"
+  ],
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesPresentationService.java": "5f95a1db00dad77c253b4f7ded8e5622ceb794d4695286621e9cd2ccb1c0febc",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "c196c09ca6f3d5208ff5645db9fcfcc17ecbd66f2fbcb9980cbeec0d2f8124a6",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java": "100a3a21854884fe1d164c6fe761b477e7cb6b83586edac22c213eba19954e62",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "f51bb39f0ba4048155225a846277f1bf61b0dcbdf3d4342ac5c1643b7d965c33",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesPresentationCompilerTest.java": "faf2b65765a8243b813e811ebbdc4c699daeeb8712a491122d7cf2604001fc8a",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesPresentationPinTest.java": "2a3d406193dbccddd2142b720a60df9436fd0a97fdb5ee49978306a4da902b60",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectPersistenceContractTest.java": "f78a70008e663536f260ec96745eace40768239917e82718c56e6726b130ba34",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java": "7d4b16c058abba1ac0ba245c6098474a46d2fca8b09d8d2195648bfefddf0acf",
+    "mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java": "ba7c80b3a36e0563cf6e0f3a86083500363c5480f60abf8f19e69ab9aac69e5e",
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesArtifactRepository.java": "0a973bba250d6a56f57aa5fa45fac5195afe9c52e6676c0195a26708221f66b9",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesArtifactPersistenceContractTest.java": "45c39e83910fcd85cb6abe24c4388ec67130575cd53fc4056d25616c7976949f",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesArtifactRepositoryTest.java": "c9b3ea2d8886673294eb39f18b901b05b014eaebade5c9db6e8318b2a178a089"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/initial-dev.txt": "8a2ea415e9304364a775797d4a7b10498c1c1aca75efa871132fe5914958b817",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-helper-failure.txt": "910abbaed3b0670b5e10ec0370e3ad6b0637a7df16985568a350699a72110283",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-helper-replacement-failure.txt": "4ce4fbf831579cb4f4a47f74fa63c2fbf519733dcef072c6872693e61eecc4e3",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-create-fixture-failure.txt": "c88e3d75775215c25e9c13c5813b5a7f0c6e0239f8879b357f71ed10418b3f08",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-customer-fixture-failure.txt": "944e5a9e695e00a70a47dcda419585be4d87812632c659a29ec886494422c6ee",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-pass.txt": "4a636500f2af09543012f15813a4fe277d80a0cadb5264e2ee473899740d3cfb",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/after.txt": "f8af3c1c6cac7206b6995dee970610159ff8bc3a3d87718e9993eb9d3bc9a8b8",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/final-targeted.txt": "139d25c4e4b17ba6cb41ad54750d3cf79388ef5d5f2367d2e549961dcdf2eb78",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/compiler.txt": "e5ee0caa183e44a1c249afcd3a5cfe2f991efa001617954dde389c70a141fc05",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/dev.txt": "fd985b494db7aea15126412a16723e5cad0626de8c22500ac57cfe74c163babf",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format.txt": "0f9a2d565e9742527b509f86423e37939ad6159ff5c75d6c3ff808d0f4b9377f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format-check.txt": "483af9fe5704bd485aba5f30dcfc881fc0dfcca61ed5f7c3db8d617f37e57ef9",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/final-dev.txt": "4741151c91ae06ccbf4a543951796d543046f9c601c30eb7b1612ae00b2a39ab",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/staged-gate-report.json": "c27f25a5e77d6addae95f6299acfbcd4b751966e6af5b30a9a0af62b83b493ad",
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/commit-hook-report.json": "6e34b65d4a5f5b9f14acb85c48fb78dca92d17da2adf6d6cbb6c90443c280c2b"
+  },
+  "evidence_redaction": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/initial-dev.txt": {
+      "input_sha256": "8a2ea415e9304364a775797d4a7b10498c1c1aca75efa871132fe5914958b817",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-helper-failure.txt": {
+      "input_sha256": "910abbaed3b0670b5e10ec0370e3ad6b0637a7df16985568a350699a72110283",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-helper-replacement-failure.txt": {
+      "input_sha256": "4ce4fbf831579cb4f4a47f74fa63c2fbf519733dcef072c6872693e61eecc4e3",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-create-fixture-failure.txt": {
+      "input_sha256": "516ea7919963442dbb31782cf3d363a7966b3c3466f0080d1e1f43cd0364bc8b",
+      "counts": {
+        "jwt": 18,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 15
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-customer-fixture-failure.txt": {
+      "input_sha256": "2713ce2449fa64c70c189491eb6b26c263f7378d46c5fb66fdbdf4742a0e6539",
+      "counts": {
+        "jwt": 18,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 15
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/before-pass.txt": {
+      "input_sha256": "2a1ecf99c3a954571878fd65ebbe3e2dd2938de49a25654f0679aca3f50d3a28",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/after.txt": {
+      "input_sha256": "d84041acb9c9141063af0e98abd00c5c44d4e8ac1ce8894b1ab68872a27de1ac",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/final-targeted.txt": {
+      "input_sha256": "4b66372be2e72aafb85761d41df986c2f28a6a17ebac6c800a50a408f51af9c9",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 2,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/compiler.txt": {
+      "input_sha256": "e5ee0caa183e44a1c249afcd3a5cfe2f991efa001617954dde389c70a141fc05",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/dev.txt": {
+      "input_sha256": "fd985b494db7aea15126412a16723e5cad0626de8c22500ac57cfe74c163babf",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format.txt": {
+      "input_sha256": "0f9a2d565e9742527b509f86423e37939ad6159ff5c75d6c3ff808d0f4b9377f",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    },
+    "docs/architecture-quality-v1/evidence/2026-10-02/artifact-storage-tests/format-check.txt": {
+      "input_sha256": "483af9fe5704bd485aba5f30dcfc881fc0dfcca61ed5f7c3db8d617f37e57ef9",
+      "counts": {
+        "jwt": 0,
+        "generated_development_password": 0,
+        "password": 0,
+        "token": 0
+      }
+    }
+  },
+  "formal_qa": "NOT_RUN",
+  "mysql_kingbase": "NOT_RUN_THIS_SLICE",
+  "remote_required_ci": "NOT_VERIFIED",
+  "classes": {
+    "PresalesArtifactRepositoryTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesArtifactPersistenceContractTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesIntegrationTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesRuntimeTransactionIntegrationTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesPresentationPinTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesArtifactRendererTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesPresentationServiceTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesProjectPersistenceContractTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "PresalesAtomicResultAcceptanceTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ProjectAuthorityFenceDatabaseTest": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "service_lines": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesPresentationService.java": 388,
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": 1401,
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesArtifactRepository.java": 58
+  },
+  "independent_review": {
+    "verdict": "APPROVE_BOUNDED",
+    "reviewer": "authority_review",
+    "findings": 0,
+    "diagnostics_limitation": "OMX LSP/AST Transport closed; actual JDK21 Maven compile/tests and manual SQL/diff review used",
+    "existing_assertions_unchanged": true
+  },
+  "full_gate": {
+    "source_commit": "45a97c98e9f6134d7bb025ec29d65db669c2110b",
+    "checked_tree": "d77525cb8298d05437a1c212d3c30fea9b18e455",
+    "staged_task": "um6o82r2",
+    "commit_hook_task": "s54u4y57",
+    "status": "PASS",
+    "submission_ready": true,
+    "java_total": 6040,
+    "java_executed": 5970,
+    "java_existing_skipped": 70,
+    "java_failed": 0,
+    "java_errors": 0,
+    "ui_passed": 846,
+    "ui_failed": 0,
+    "types_ID_Node_builds": "PASS",
+    "ui_format_lint": "NOT_APPLICABLE no UI targets"
+  }
+}

@@ -1,0 +1,9 @@
+# 提交阻断：WebChat附件测试存储隔离计划
+
+来源边界候选tree 8d8899ffc1782d89ef7e210cc46c17f666f08150 在显式commit检查pf672h5q通过，但正常git commit的b981u6v9门禁返回FAIL（未产生提交）：WebChatAttachmentE2ETest 7项中4项因HTTP400 Too many files in this conversation (max50)失败。真实文件计数表明默认目录四个固定测试会话各50文件。
+
+已确认：数据库使用独立H2内存库；生产配额仍50；测试cleanup查找data/chat-uploads/webchat:testkey1，而实际存储是完整conversationId经sanitizeSegment后的兄弟目录。因此清理从未命中这些目录，多轮门禁累积导致上传拒绝。源码失败位置upload方法198与HTTP例271/316/379/407；与来源策略无调用关系。先用单个uploadThenStreamAttachesPath命令复现。
+
+范围仅WebChatAttachmentE2ETest及本隔离证据，属于测试存储配置影响，需独立控制面工程审阅。用JUnit静态TempDir与DynamicPropertySource设置mateclaw.chat.upload.base-dir，保留数据库/完整真实HTTP启动、JWT/visitor token/字节/路径/foreign attachment断言。每例开始验证私有目录与实际绑定，每例结束删除该临时目录内部文件且不吞异常，JUnit清理根；增加路径必须位于临时根的断言。生产代码、文件配额、默认目录文件都不更改/删除。
+
+拒绝：提高文件上限/随机会话ID逃避污染/删旧文件凑绿/跳过用例。验证原7项HTTP + WebChatFileServiceTest的配额/类型/traversal断言，独立进程重复运行确认无跨轮积累，再dev/固定formatter/独立审核/新的精确tree commit与正常钩子。旧FAIL必须保留，不复用旧PASS作为新tree授权。UI构建仍正常执行。

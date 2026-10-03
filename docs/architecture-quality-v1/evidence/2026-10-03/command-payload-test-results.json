@@ -1,0 +1,318 @@
+{
+  "task": "AQ-05 command payload correlation",
+  "start_head": "27410414be0994c0bbbbe0080dc07e87c1066587",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "source_commit": "0fd3d6b9450c51289c7ab3165d14e25ba143c328",
+  "source_tree": "2369bf4dbae59c0aac801b34f658c752ad3cf8b1",
+  "source_files": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_COMMAND_PAYLOAD_PLAN.md",
+      "sha256": "d7bd998611cf4d2bcf41ddc2f998058104f4c951913e5116bfb9b7e32354abc1"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/__tests__/commandPayload.test.ts",
+      "sha256": "1b3075227d0a3f910d84c563f2daa4cd9d2d8e29898c8c5a9a6f210431cc52a1"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/api/presalesApi.ts",
+      "sha256": "c1c89ea45755a586c701197f250e1216caef9049b2666f4c4ce287e9f4594160"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/api/presalesCommandTypes.ts",
+      "sha256": "8e14fbf290642b5546d1e46d2c9a0a6299a55aeb40431bae64cf832dd1908cf3"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+      "sha256": "f0887fec9834241676c6a8f18da647e25090a8301ecc0ac4153fac7308975be6"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/shared/editorSubmission.ts",
+      "sha256": "0559568b532c6e8bb0618fae9c4f6b90d2e316d4fc5b1c46dfbb7bab1e66c82e"
+    }
+  ],
+  "reports": [
+    {
+      "name": "staged",
+      "task_id": "lrbxkot_",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "2369bf4dbae59c0aac801b34f658c752ad3cf8b1",
+      "full_ui_tests": 1037
+    },
+    {
+      "name": "hook",
+      "task_id": "jfpcd5e3",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "2369bf4dbae59c0aac801b34f658c752ad3cf8b1",
+      "full_ui_tests": 1037
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/before.txt",
+      "input_sha256": "96db7fe6d9f338e92293cc06fbd799890a6942c4268f10fb111d6b7a869108d2",
+      "sha256": "a16b8b9c1178a0c6394be47218cb59a759ad9650c442f2b089160fb9a0c60959",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/description-red.txt",
+      "input_sha256": "900ba03b202525de3eb3daaa82038e3f0af89017ae8cb06c8e745825d86853db",
+      "sha256": "900ba03b202525de3eb3daaa82038e3f0af89017ae8cb06c8e745825d86853db",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/dev.txt",
+      "input_sha256": "c7a30eaa648a7c40ba7d7fce1825f1fb29751cf4b4b48a233c6c865ed5d93000",
+      "sha256": "04e77d26a83de1ac90b2706b84a309db683d5d5df5565c0ffb9e7d49209cc4d8",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/format-done.txt",
+      "input_sha256": "b88f51db0cbc6ff0eb33c4a7a4dd2601a69ec7d2fa348462f813867e7af3ea45",
+      "sha256": "b88f51db0cbc6ff0eb33c4a7a4dd2601a69ec7d2fa348462f813867e7af3ea45",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/format-final.txt",
+      "input_sha256": "2d00dd3958b31b5a7b2c0a6ef282d39ac00c4a6b1bf7015f2e864c52af3ffc21",
+      "sha256": "2d00dd3958b31b5a7b2c0a6ef282d39ac00c4a6b1bf7015f2e864c52af3ffc21",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/format-last.txt",
+      "input_sha256": "87296a9e5bc416875f757d1e5867b620fea7aa3349f1a0521ccd57165c30b204",
+      "sha256": "87296a9e5bc416875f757d1e5867b620fea7aa3349f1a0521ccd57165c30b204",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/format.txt",
+      "input_sha256": "b426071248b6897098be143be0e9ebfb8fa57483f7be44850a318e7d7198d736",
+      "sha256": "b426071248b6897098be143be0e9ebfb8fa57483f7be44850a318e7d7198d736",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/hook.txt",
+      "input_sha256": "7f564a5e31e31879253165e2eb6a8c2b032c38a115895dbc6619873d0b1a9747",
+      "sha256": "e375751f9058f913d4a0d2d81376d26900ecd17cfa93c16c4a6444fbad4e63aa",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/initial.txt",
+      "input_sha256": "f5b58027e88b721531a5089e2170520e3eae5f7c6a25213bc5b58721372c970b",
+      "sha256": "d76184f832dab84233f126d8dabd65ef9c5b41d58fc1d22bb98dd9fd10e8bb15",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/lint-done.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/lint-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/lint-last.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/presales-done.txt",
+      "input_sha256": "1b26c3badbb53b2444cfef3873005ef50f5ef286b48f88438d5e3185195a5de4",
+      "sha256": "7bb25aebbfa3ff1640d4526d0c227d9e63857e82bac990110f0ae9eaac123ee6",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/presales.txt",
+      "input_sha256": "0932e539bc13ebd77ba2ed22e1a4266e13ef121f8073ac93e4f165f6265a07cb",
+      "sha256": "0cdbe5b25f8e42d788044377c0a06621f610ed4f2e844a4d005a98bf7997f36e",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/review-red.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged.txt",
+      "input_sha256": "4e3104d3603c8451dc9f8a7f50e14ab2bf2c47e8c9370305bca0f93106da8d8e",
+      "sha256": "2a0c96af219c092f4a95b590e45831a9cf2a50e48786297b8d357a1eed016295",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/type-red-clean.txt",
+      "input_sha256": "5a6c531e12b7fe64a5e636df0bd95b633434abfd7f7cbeb6b57061f769b44ac4",
+      "sha256": "5a6c531e12b7fe64a5e636df0bd95b633434abfd7f7cbeb6b57061f769b44ac4",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/type-red.txt",
+      "input_sha256": "d2e0f6f9cb3098f80f8ecbd74e3dbe830cb1ead12f163cecf2a6c40b6b842c10",
+      "sha256": "d2e0f6f9cb3098f80f8ecbd74e3dbe830cb1ead12f163cecf2a6c40b6b842c10",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/types-done.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/types-final.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/types-last.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/types.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/independent-review.txt",
+      "input_sha256": "8a4c72ea22fc44eac445f78073b56d33c75f312fe9002fa9f8d41987273507f6",
+      "sha256": "8a4c72ea22fc44eac445f78073b56d33c75f312fe9002fa9f8d41987273507f6",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-report.json",
+      "input_sha256": "2b3153cf36aafe9c4e9a7b69eab23e43fd142619a5c0685e6e98d6c08a5b06c9",
+      "sha256": "2b3153cf36aafe9c4e9a7b69eab23e43fd142619a5c0685e6e98d6c08a5b06c9",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-guard-self-tests.txt",
+      "input_sha256": "437aababddd0d97993eb1a0ceadde1819e576c84062851db49142888e0a74955",
+      "sha256": "437aababddd0d97993eb1a0ceadde1819e576c84062851db49142888e0a74955",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-format.txt",
+      "input_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-vitest.txt",
+      "input_sha256": "2e3dc9066dae28038700e2c92af5e5be1d9afe8838bac2264ea8a4d92226f3b2",
+      "sha256": "2e3dc9066dae28038700e2c92af5e5be1d9afe8838bac2264ea8a4d92226f3b2",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-node-tests.txt",
+      "input_sha256": "1017af762c40ef85b9705d6f4f34c19920d4aa8b2aefc21403ff7f9e36371dda",
+      "sha256": "1017af762c40ef85b9705d6f4f34c19920d4aa8b2aefc21403ff7f9e36371dda",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-build-enterprise.txt",
+      "input_sha256": "cd951215530afedcdde5781e0e424f9861708233d448582a05b9b41b071b0621",
+      "sha256": "cd951215530afedcdde5781e0e424f9861708233d448582a05b9b41b071b0621",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-ui-build-classic.txt",
+      "input_sha256": "e6c17ee94586e9fb06a0457b1c5a5b5b27553df7a36f9459ebbb800c49027715",
+      "sha256": "e6c17ee94586e9fb06a0457b1c5a5b5b27553df7a36f9459ebbb800c49027715",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/staged-vitest.json",
+      "input_sha256": "847445cfdc5b7e1da83cf183833e2a3bd777cbc2194ba1f2b1c73ed9de976658",
+      "sha256": "118619c4c9a8b1d86530af71b4b1aa56621ab2d208f2b10538a0061aa1e51848",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/command-payload-tests/hook-report.json",
+      "input_sha256": "25c6b7097cf305c136448680d2ba15b735709a0991f54a5d4bb802b19b62220a",
+      "sha256": "25c6b7097cf305c136448680d2ba15b735709a0991f54a5d4bb802b19b62220a",
+      "redactions": 0,
+      "normalization": "Display copy trims trailing whitespace and terminal blank lines; input SHA retained"
+    }
+  ],
+  "old_regression_tests": 125,
+  "final_presales_tests": 338,
+  "new_command_tests": 17,
+  "full_ui_tests": 1037,
+  "type_red": "Old request contract: 17 compiler assertion failures after fixing contextual fixture; exit 2",
+  "description_red": "Undeclared actual editor description: one compiler assertion failure; exit 2",
+  "developer_failed_insertion": "First source-anchor assertion failed before inserting negative; review-red empty exit0 is NOT a red example",
+  "independent_review": "MEDIUM description closed; no remaining bounded findings; independent 17 tests/types/lint exit0; LSP unavailable",
+  "formal_acceptance": "NOT_RUN",
+  "maintainer_control_plane_review": "PENDING",
+  "browser_acceptance": "NOT_RUN",
+  "required_remote_ci": "NOT_VERIFIED",
+  "limits": "Optional/raw write contracts only, not full domain DTO/status/runtime schema; SQL/migrations/browser/QA pending"
+}

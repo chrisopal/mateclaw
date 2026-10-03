@@ -1,0 +1,329 @@
+{
+  "task": "AQ-00/46 warning test barrier failure closure",
+  "source_commit": "8d9ec356a32e474e00d1791eb3cb95049e005622",
+  "source_tree": "dcaa02e912f6817e40f37e925e8520c43a58d3aa",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "start_head": "010453ea2120af167ea08997f620a28e90b4d3c2",
+  "source_files": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/AQ00_WARNING_BARRIER_PLAN.md",
+      "sha256": "d1ba0a87b5269f221e4d55bc48a93b212ab766ac8801b5c6c84bb822d548bedf"
+    },
+    {
+      "file": "mateclaw-server/src/test/java/vip/mate/wiki/service/WikiProcessingServiceErrorCodeTest.java",
+      "sha256": "e2484b48a90e85086d4d6a0a6a08a680cace58b87954087f0f8745daaf1f0130"
+    }
+  ],
+  "failed_push": {
+    "task_id": "f1t0yr2g",
+    "target_identity": "010453ea2120af167ea08997f620a28e90b4d3c2",
+    "base_commit": "fc87d8eb413535fabac37650e1e82ca76368e460",
+    "status": "FAIL",
+    "submission_ready": false
+  },
+  "reports": [
+    {
+      "name": "staged",
+      "task_id": "qwdvtw8w",
+      "target_identity": "dcaa02e912f6817e40f37e925e8520c43a58d3aa",
+      "status": "PASS",
+      "submission_ready": true,
+      "checks": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-format",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-tests",
+          "status": "PASS",
+          "executed_tests": 6071
+        },
+        {
+          "name": "ui-format",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-lint",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 1093
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        }
+      ]
+    },
+    {
+      "name": "hook",
+      "task_id": "n12cddru",
+      "target_identity": "dcaa02e912f6817e40f37e925e8520c43a58d3aa",
+      "status": "PASS",
+      "submission_ready": true,
+      "checks": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-format",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-tests",
+          "status": "PASS",
+          "executed_tests": 6071
+        },
+        {
+          "name": "ui-format",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-lint",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 1093
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        }
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged.txt",
+      "input_sha256": "acde472a29749698c56fb4b4abdecda8114f07e1a5893920d40cfb708b0e6f97",
+      "sha256": "efb993fbc6442c633172cb68738caf56750ba6d81427f5e8786003fca2d91e75",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-report.json",
+      "input_sha256": "41347d92a86a2a36c7432c18a391afc1e08f4da1237a8c849d7db1ebb827da59",
+      "sha256": "41347d92a86a2a36c7432c18a391afc1e08f4da1237a8c849d7db1ebb827da59",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-guard-self-tests.txt",
+      "input_sha256": "d8cfafcd9fdfd067204b168d9c36e1f7af7c26b6caeb2b7ede992f165cccd069",
+      "sha256": "d8cfafcd9fdfd067204b168d9c36e1f7af7c26b6caeb2b7ede992f165cccd069",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-java-format.txt",
+      "input_sha256": "194e8a15af3f7a7eeaedfddf58612e050bf54f2159e78af2c64630b21c9beb27",
+      "sha256": "b0774d69936de662ea2c692bd4223c03dfc5904680c2e7f359eb3285a33fd5ff",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-java-tests.txt",
+      "input_sha256": "a99aceb974310910617ff8012b61f873f8f1f996837df392caaeefa6be666413",
+      "sha256": "f65fcb326a01b9fbb2823706ae3ebb781a6591545c3904dc25eb515a9af53ac7",
+      "redactions": 30,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-ui-vitest.txt",
+      "input_sha256": "d56320ee993b07cd0820b6cbb14e7ec703e7a782b0a73242b52354b8e654d04d",
+      "sha256": "d56320ee993b07cd0820b6cbb14e7ec703e7a782b0a73242b52354b8e654d04d",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-ui-node-tests.txt",
+      "input_sha256": "cfd1fc0d5cb2229dfd63651de20c1fd30572848af7411bd135a737f709149a12",
+      "sha256": "cfd1fc0d5cb2229dfd63651de20c1fd30572848af7411bd135a737f709149a12",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-ui-build-enterprise.txt",
+      "input_sha256": "f569e0a9cd0e1227b4823df70f0f81576bb65f03ebaa47a10462a5a791b6f07e",
+      "sha256": "f569e0a9cd0e1227b4823df70f0f81576bb65f03ebaa47a10462a5a791b6f07e",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/staged-ui-build-classic.txt",
+      "input_sha256": "f8315231b883278018e3e0767cf62617451e5be09e0077e375fdf1ed19febfbd",
+      "sha256": "f8315231b883278018e3e0767cf62617451e5be09e0077e375fdf1ed19febfbd",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/hook.txt",
+      "input_sha256": "e77f6c0cb0b97b9cd8699afa3c99866244e831d8ab7fe201ebab339d061b0a6b",
+      "sha256": "12772a92adfb4d8eb890dccbf4b1e870f707ff1b59d4020da22eecafcc7e243e",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/hook-report.json",
+      "input_sha256": "47bdfbbbaaf16dab9bb6c6696691a0ee1de12aa94ae6be339197aa9d40f87cb9",
+      "sha256": "47bdfbbbaaf16dab9bb6c6696691a0ee1de12aa94ae6be339197aa9d40f87cb9",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/failed-push-report.json",
+      "input_sha256": "66a6d6d20109d181c62178be6d14ba680ac8c5a4b998ec59773636cf4ad7afca",
+      "sha256": "66a6d6d20109d181c62178be6d14ba680ac8c5a4b998ec59773636cf4ad7afca",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/failed-push.txt",
+      "input_sha256": "fff69e2c71a2fc7b5cabdf0bcc9edd0a65bba4f2c4122a9694b2a9747ed93f9d",
+      "sha256": "6db79d382a4372876d9f66a989e84c54fff06d879da8cdc7fc6d12321d290f3b",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/failed-java-tests.txt",
+      "input_sha256": "c69f9b1b427588feba81d0bc409cb82ace4b1f51a0b3865f5ba4fce956f3b7f5",
+      "sha256": "3e0824c7f6402de4c1cb679e4b6d28a5714b62afd460588f76ed2f91fd73f060",
+      "redactions": 30,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/initial.txt",
+      "input_sha256": "7babba70b3d539da0d341908216aaca509b7ebc434ade7e37b312cc9eb97d899",
+      "sha256": "ea0222078014903889e4c11d78d8112cd1148228a53e9a6b851f9135ce40f3d7",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/targeted.txt",
+      "input_sha256": "3a537713bad7efdc5814271936675387817b9ba0d9069e8104bca2b8223c1c81",
+      "sha256": "b6e859bb0dffed9adb19fa19ac63fef717f29679893ef69c7cd74dc374421240",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/format.txt",
+      "input_sha256": "413530622dcffd585e64212f124cf29d8a4add48d4b52a0cba3ccce1618fe4b2",
+      "sha256": "515de910b5ebdfd2c4430792f98027e405eb4c5ac39bd1437a2513a4ae1518cc",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/dev.txt",
+      "input_sha256": "adc4958cdc5b2b95f3976adefc7983d324fa6511388d8a00ce039aba0dc59ff9",
+      "sha256": "025d5cef1bba9cca7a1699ae7f58af85f7a6fdb2dd1c4a66612993c0f1e02d27",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/warning-barrier-tests/independent-review.txt",
+      "input_sha256": "0daf0b9632bcc68e5dfe2cfdeeba5f477e31b4c505e98daa529391062034c3c5",
+      "sha256": "0daf0b9632bcc68e5dfe2cfdeeba5f477e31b4c505e98daa529391062034c3c5",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    }
+  ],
+  "targeted_tests": 3,
+  "independent_review": "COMMENT no actionable defects; no maintainer signoff",
+  "formal_acceptance": "NOT_RUN",
+  "required_remote_ci": "NOT_VERIFIED",
+  "push_retry": "Not yet run when this source evidence was archived; PR and remote SHA readback required",
+  "limits": "Unit mock barrier repair only. Production persistence and SSE transport are not end-to-end validated. No timeout increase, skipped assertions, new dependencies, gate or production changes."
+}

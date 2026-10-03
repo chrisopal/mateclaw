@@ -1,0 +1,30 @@
+20:58:31.897 [main] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:mysql://127.0.0.1:62634/mateclaw_aq_acceptance_listinglegacy?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8 (MySQL 8.0)
+20:58:31.992 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table `mateclaw_aq_acceptance_listinglegacy`.`flyway_schema_history` does not exist yet
+20:58:31.996 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 211 migrations (execution time 00:00.078s)
+20:58:32.009 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table `mateclaw_aq_acceptance_listinglegacy`.`flyway_schema_history` with baseline ...
+20:58:32.043 [main] INFO org.flywaydb.core.internal.command.DbBaseline -- Successfully baselined schema with version: 216
+20:58:32.057 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema `mateclaw_aq_acceptance_listinglegacy`: 216
+20:58:32.063 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema `mateclaw_aq_acceptance_listinglegacy` to version "217 - presales listing projection"
+20:58:32.161 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema `mateclaw_aq_acceptance_listinglegacy` to version "218 - backfill presales listing projection"
+20:58:32.432 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 2 migrations to schema `mateclaw_aq_acceptance_listinglegacy`, now at version v218 (execution time 00:00.340s)
+20:58:32.481 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.031s)
+20:58:32.560 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.026s)
+20:58:32.569 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema `mateclaw_aq_acceptance_listinglegacy`: 218
+20:58:32.569 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Schema `mateclaw_aq_acceptance_listinglegacy` is up to date. No migration necessary.
+20:58:32.609 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.025s)
+RESTORE_PROBE_PASS product=MySQL version=8.0.46 rows=205 page=7 legacy_snapshot_exact=true
+20:58:33.596 [main] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:mysql://127.0.0.1:62634/mateclaw_aq_acceptance_listingrestored?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8 (MySQL 8.0)
+20:58:33.668 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table `mateclaw_aq_acceptance_listingrestored`.`flyway_schema_history` does not exist yet
+20:58:33.673 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 211 migrations (execution time 00:00.055s)
+20:58:33.697 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table `mateclaw_aq_acceptance_listingrestored`.`flyway_schema_history` with baseline ...
+20:58:33.736 [main] INFO org.flywaydb.core.internal.command.DbBaseline -- Successfully baselined schema with version: 216
+20:58:33.750 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema `mateclaw_aq_acceptance_listingrestored`: 216
+20:58:33.756 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema `mateclaw_aq_acceptance_listingrestored` to version "217 - presales listing projection"
+20:58:33.863 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema `mateclaw_aq_acceptance_listingrestored` to version "218 - backfill presales listing projection"
+20:58:34.123 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 2 migrations to schema `mateclaw_aq_acceptance_listingrestored`, now at version v218 (execution time 00:00.339s)
+20:58:34.172 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.032s)
+20:58:34.253 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.027s)
+20:58:34.259 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema `mateclaw_aq_acceptance_listingrestored`: 218
+20:58:34.260 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Schema `mateclaw_aq_acceptance_listingrestored` is up to date. No migration necessary.
+20:58:34.313 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 212 migrations (execution time 00:00.038s)
+RESTORE_PROBE_PASS product=MySQL version=8.0.46 rows=205 page=7 legacy_snapshot_exact=true

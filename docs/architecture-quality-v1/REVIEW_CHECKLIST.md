@@ -23,12 +23,12 @@
 | TS-001 / UI-001 | 同上 | 已安装 ratchet | AQ-05/09，any/内联双语 |
 | TEST-001 | 同上 | 已安装 ratchet | 防新增 skip/only；不能证明所有断言强度 |
 | STYLE-001 / STYLE-002 | 同上 | 已安装 | 长行存量 ratchet；修改行尾空白硬失败 |
-| DB-001 / DB-002 | 同上 | 已安装 | 旧迁移只读，新迁移三方言；不等于真实 DB 验证 |
+| DB-001 / DB-002 | 同上 | SQL 已安装；Java 入口/冻结闭包 NOT_IMPLEMENTED | 旧 SQL 迁移只读与三方言；实际反例证明 Java 变更/缺方言未触发；补强需独立控制面审核，不能当真实 DB 或完整不可变验收 |
 | Python 门禁自测 | verify 所有模式 | 已安装并执行 | 数量和日志见实测；非应用验收 |
 | Java 格式 | Spotless + AOSP，commit/CI 适用时 | 根 POM 已配置 | 增量格式，不格式化原文/历史字节 |
 | 前端格式 | Prettier 3.6.2 + 固定 config | package/lock 已配置 | 只检查适用变更文件；不自动 --write |
 | Java 测试 | 根 reactor clean verify，解析 XML | wrapper 已配置 | 当前基线结果见实测，不忽略失败 |
-| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置 | 构建不是浏览器/人工验收 |
+| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置；Vitest 最多 2 个 worker、单测 20 秒超时 | 构建不是浏览器/人工验收；共享机器负载仍可能影响耗时 |
 | 独立成本分析工具 | Python 依赖探测、unittest、Python/JS 语法 | wrapper 已配置 | 模拟样本通过不等于真实经营数据验收；缺 openpyxl 阻断 |
 | ArchUnit | integration/WorkbenchArchitectureTest.java | 仅模板，NOT_INSTALLED | AQ-01/03 清零后接入 AQ-07；不能冻结新增违规 |
 | pre-commit / pre-push | 当前工作区 .githooks | 已安装 worktree-local | 可绕过；其他工作区需显式独立安装 |
@@ -38,11 +38,13 @@
 
 ## 阶段台账
 
+Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker 启动和跨文件用例超时，失败分布覆盖未改动的售前、语义和本体测试；定向 54/54 通过。将 worker 上限设为 2、单测超时设为 20 秒后，使用门禁相同的默认 Vitest 命令复跑 703/703 通过。调整只影响测试运行调度与超时，不删除、跳过或放宽断言；完整提交门禁和远端结果仍需按候选提交重新验证。
+
 | 任务 | 当前状态 | 下一道出口 |
 |---|---|---|
 | AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
 | AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
-| AQ-02–06 | DESIGNED / NOT_IMPLEMENTED | 按实施设计逐切片行为刻画与改造 |
+| AQ-02–06 | AQ-02 第一片工程实现，正式 AC-07–10 仍为 NOT_RUN；其余按各任务证据推进 | 补齐角色/来源权限矩阵、生产数据库并发验证与独立 QA 签收 |
 | AQ-07 | DESIGNED / NOT_IMPLEMENTED | 清零后 ArchUnit + policy 封口 |
 | AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
 | AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |
@@ -100,6 +102,12 @@
 | AC-44 | 改workflow/CODEOWNERS/测试配置削弱门禁 | AQ-08 | 仓库维护人 + 独立审核 / 远端临时违规PR/管理设置回读 | NOT_RUN |
 | AC-45 | 真实长文/模型质量 | AQ-08/AQ-11 | 业务负责人 + QA / 授权真实样本/真实模型/人工质量审核 | NOT_RUN |
 | AC-46 | 日志与测试环境 | AQ-08/AQ-11 | 领域开发 + QA / 行为/集成回归 | NOT_RUN |
+
+## Java 迁移与 SQL 投影的默认审核补充
+
+每次涉及此边界，核对 Java 入口及全部冻结闭包，不只看 SQL 文件；比较实际 checksum 与历史版本，检查 Flyway 所有方言的发现和 validate 配置。固定 V1 算法不能为新业务需求直接修改，未来语义须新版本/迁移；编译器、JDK、Jackson 变化也需兼容证据。核对所有正文 writer 同事务维护派生版本、故障顺序、Workspace/CAS及失败回滚；旧 writer 混跑和新增写入后直接回退未获验证时不能部署切换。
+
+本次调整是对 R-06 原只读约束及现有可执行覆盖范围的澄清，没有修改 gate、policy、baseline或豁免失败。原因/反例/实际MySQL与H2证据见 [AQ06_LISTING_PROJECTION_ACCEPTANCE](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md) 与 manifest。DB-001/002 Java/闭包补强、真实Kingbase、生产回退、版本化请求hash/历史回执政策及独立维护人审核仍待完成。
 
 ## 检查规则如何调整
 

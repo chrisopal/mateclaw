@@ -1,0 +1,18 @@
+{"status": "PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-lls2qw6r/report.json", "submission_ready": true, "error": null}
+PASS: architecture-ratchet
+PASS: guard-self-tests
+PASS: java-format
+PASS: java-tests
+NOT_APPLICABLE: ui-format No changed frontend formatter-supported files
+NOT_APPLICABLE: ui-lint No changed frontend lint targets
+PASS: ui-typecheck
+PASS: id-precision
+PASS: ui-vitest
+PASS: ui-node-tests
+PASS: ui-build-enterprise
+PASS: ui-build-classic
+NOT_APPLICABLE: cost-tool No standalone cost tool change
+[codex/aq01b-execution f7d6cf80] Prevent late presales failures from replacing completed or newer runs
+ 7 files changed, 762 insertions(+), 70 deletions(-)
+ create mode 100644 docs/architecture-quality-v1/evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_PLAN.md
+ create mode 100644 mateclaw-server/src/test/java/vip/mate/presales/PresalesTerminalReceptionTest.java

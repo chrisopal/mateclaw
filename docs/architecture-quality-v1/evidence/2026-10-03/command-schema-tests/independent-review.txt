@@ -1,0 +1,8 @@
+Independent bounded review /root/command_payload_contract_audit
+Scope: four Java source/test files and AQ05_COMMAND_SCHEMA_PLAN.md against fc87d8eb.
+Read-only contract inventory of all16 actions, runtime producers, frontend writes/raw domain responses and existing SolutionPolicy contracts; followed by bounded final static review.
+Verdict COMMENT: no actionable defects. This is not maintainer/control-plane/business acceptance.
+Confirmed placement after role/source/repair/replay/CAS/archive, before mutation; employeeResult bypass; unknown actions/archive retain service handling. Missing fields left to domain policy. Null default enums and raw string revision retained. Opaque extensions not traversed. Manual result/contextSnapshot object-only is explicit new admission; internal envelope remains opaque, pinned employee model/fence unchanged. Existing presentation/sourceRefs422 policy retained.
+Tests reviewed: HTTP exact status/code/path plus raw body/revision/receipt unchanged on rejection; authorization/repair/replay/hash conflict/CAS/archive; all16 pure valid shapes and nested negative cases. No duplicate tests run by reviewer. Main process Maven regression exit0 with103 tests.
+LSP attempted all4 Java files: actual backend tsc returned skipped no tsconfig found. Java LSP unavailable, not a Java PASS. Actual Maven compilation/gates are necessary evidence. Later formatting only; reviewer line numbers precede formatter.
+Remaining: full server DTO/domain status/model schema, arbitrary opaque extension admission, historical sampling, SQL/V2/migrations, live browsers/QA, maintainer signatures/required remote CI.

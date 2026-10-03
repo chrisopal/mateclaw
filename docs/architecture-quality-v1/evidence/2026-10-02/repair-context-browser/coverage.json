@@ -1,0 +1,536 @@
+{
+  "schemaVersion": 2,
+  "scope": "SIMULATED restricted refresh, opaque unbind and employee repair only; not full UI/server roles/business QA",
+  "build": {
+    "fingerprint": "edc89c655229cfe50b85bf3a5ee7d646baf02ab02c86e2facf8192968ff45166"
+  },
+  "environment": {
+    "url": "http://127.0.0.1:5197/aq-restricted-ui.html",
+    "browser": "HeadlessChrome154 macOS",
+    "role": "SIMULATED member capabilities",
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    }
+  },
+  "pages": [
+    {
+      "id": "workbench",
+      "url": "/aq-restricted-ui.html/90071992547409998",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "warning",
+      "page": "workbench",
+      "name": "warning",
+      "locator": "text=Source access is restricted.",
+      "checks": [
+        "warning-business",
+        "warning-interaction",
+        "warning-display",
+        "warning-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "warning-business"
+        ],
+        "interaction": [
+          "warning-interaction"
+        ],
+        "display": [
+          "warning-display"
+        ],
+        "layout": [
+          "warning-layout"
+        ]
+      }
+    },
+    {
+      "id": "generation",
+      "page": "workbench",
+      "name": "generation",
+      "locator": "button=Delegate to employee",
+      "checks": [
+        "generation-business",
+        "generation-interaction",
+        "generation-display",
+        "generation-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "generation-business"
+        ],
+        "interaction": [
+          "generation-interaction"
+        ],
+        "display": [
+          "generation-display"
+        ],
+        "layout": [
+          "generation-layout"
+        ]
+      }
+    },
+    {
+      "id": "unbind",
+      "page": "workbench",
+      "name": "unbind",
+      "locator": "button=Unbind material",
+      "checks": [
+        "unbind-business",
+        "unbind-interaction",
+        "unbind-display",
+        "unbind-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "unbind-business"
+        ],
+        "interaction": [
+          "unbind-interaction"
+        ],
+        "display": [
+          "unbind-display"
+        ],
+        "layout": [
+          "unbind-layout"
+        ]
+      }
+    },
+    {
+      "id": "employee",
+      "page": "workbench",
+      "name": "employee",
+      "locator": "button=Assign employee",
+      "checks": [
+        "employee-business",
+        "employee-interaction",
+        "employee-display",
+        "employee-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "employee-business"
+        ],
+        "interaction": [
+          "employee-interaction"
+        ],
+        "display": [
+          "employee-display"
+        ],
+        "layout": [
+          "employee-layout"
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "control": "warning",
+      "check": "warning-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Navigate full project while simulated GET returns403; wait for source warning",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Repair metadata appears with explicit source warning",
+      "actual": "fullReadDenied=true, metadataFallback=true and warning wait passed"
+    },
+    {
+      "control": "warning",
+      "check": "warning-interaction",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    },
+    {
+      "control": "warning",
+      "check": "warning-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Navigate full project while simulated GET returns403; wait for source warning",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Repair metadata appears with explicit source warning",
+      "actual": "fullReadDenied=true, metadataFallback=true and warning wait passed"
+    },
+    {
+      "control": "warning",
+      "check": "warning-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    },
+    {
+      "control": "generation",
+      "check": "generation-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Assert disabled generation and general project edit before repair",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Source restriction prevents generation and general editing",
+      "actual": "generation disabled and generalEditDisabled=true"
+    },
+    {
+      "control": "generation",
+      "check": "generation-interaction",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    },
+    {
+      "control": "generation",
+      "check": "generation-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Assert disabled generation and general project edit before repair",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Source restriction prevents generation and general editing",
+      "actual": "generation disabled and generalEditDisabled=true"
+    },
+    {
+      "control": "generation",
+      "check": "generation-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    },
+    {
+      "control": "unbind",
+      "check": "unbind-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Click Unbind material and wait for warning hidden; assert generation enabled",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Opaque binding ID is submitted and simulated full access restored",
+      "actual": "UNBIND_MATERIAL payload exactly id=binding-1; unbindRestored=true"
+    },
+    {
+      "control": "unbind",
+      "check": "unbind-interaction",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Click Unbind material and wait for warning hidden; assert generation enabled",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Opaque binding ID is submitted and simulated full access restored",
+      "actual": "UNBIND_MATERIAL payload exactly id=binding-1; unbindRestored=true"
+    },
+    {
+      "control": "unbind",
+      "check": "unbind-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Click Unbind material and wait for warning hidden; assert generation enabled",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Opaque binding ID is submitted and simulated full access restored",
+      "actual": "UNBIND_MATERIAL payload exactly id=binding-1; unbindRestored=true"
+    },
+    {
+      "control": "unbind",
+      "check": "unbind-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    },
+    {
+      "control": "employee",
+      "check": "employee-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Navigate isolated entry again; assign employee; select Repair employee; save",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Employee-only UPDATE_PROJECT restores simulated full access",
+      "actual": "UPDATE_PROJECT payload exactly agentId=employee-2; employeeRestored=true"
+    },
+    {
+      "control": "employee",
+      "check": "employee-interaction",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Navigate isolated entry again; assign employee; select Repair employee; save",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Employee-only UPDATE_PROJECT restores simulated full access",
+      "actual": "UPDATE_PROJECT payload exactly agentId=employee-2; employeeRestored=true"
+    },
+    {
+      "control": "employee",
+      "check": "employee-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "4db13a634b2ff80b091f0b780cbea16ce6845db54de5f3be42846c2619eca10a"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "15e461905934013a3a49299080b5be6dd52227b7eb95047d6c63cfefada364a7"
+        },
+        {
+          "path": "unbound.png",
+          "sha256": "112483b00dc3538577cfc144204261e9dfb3d835b1e484da3db6454cad186ae6"
+        },
+        {
+          "path": "employee.png",
+          "sha256": "dd480226dd73b792075cbab3a5ca79097cbfe0f5d53429adbf98ae3b5a0e2c0c"
+        }
+      ],
+      "steps": [
+        "Navigate isolated entry again; assign employee; select Repair employee; save",
+        "Save referenced result/screenshots"
+      ],
+      "expected": "Employee-only UPDATE_PROJECT restores simulated full access",
+      "actual": "UPDATE_PROJECT payload exactly agentId=employee-2; employeeRestored=true"
+    },
+    {
+      "control": "employee",
+      "check": "employee-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP API with writable member capabilities, actual Vue/router/Pinia and HTTP adapter; not live server identity",
+      "contractRefs": [
+        "../AQ02_REPAIR_CONTEXT_PLAN.md"
+      ],
+      "reason": "Not measured in this bounded simulation: full layout/keyboard/generation action combinations"
+    }
+  ],
+  "sourceEvidence": {
+    "path": "sources.json",
+    "sha256": "edc89c655229cfe50b85bf3a5ee7d646baf02ab02c86e2facf8192968ff45166"
+  },
+  "previousFailures": [
+    {
+      "path": "previous-fixture-failure.log",
+      "sha256": "c867b0a0198662aca0bce89a7ecce0c386a84adf15817dc11657cc9ada450d95"
+    },
+    {
+      "path": "previous-reload-failure.log",
+      "sha256": "06485e484d488731df95eb83be1c667cdbcf8e1872fa5215a15cbb968a486ba6"
+    }
+  ]
+}

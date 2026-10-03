@@ -1,0 +1,109 @@
+{
+  "task": "AQ-02 public actor and uncached workspace boundary",
+  "head_before": "929dd467882bed172a436fcc6774afa1e4881f70",
+  "base": "origin/dev",
+  "before_characterization": {
+    "tests": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "after_formatted": {
+    "tests": 85,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "breakdown": {
+      "vip.mate.presales.ProjectAuthorityFenceDatabaseTest": 19,
+      "vip.mate.presales.PresalesAccessPolicyTest": 5,
+      "vip.mate.presales.PresalesRuntimeTransactionIntegrationTest": 16,
+      "vip.mate.presales.PresalesIntegrationTest": 8,
+      "vip.mate.presales.PresalesAccessActorTest": 1,
+      "vip.mate.auth.service.ActorResolverTest": 4,
+      "vip.mate.workspace.core.service.WorkspaceAccessServiceTest": 4,
+      "vip.mate.bidding.BiddingProjectTest": 11,
+      "vip.mate.bidding.BiddingAccessPolicyTest": 7,
+      "vip.mate.semantic.SemanticAuthorizationTest": 5,
+      "vip.mate.semantic.SemanticPrincipalResolverTest": 3,
+      "vip.mate.semantic.SemanticFeatureFlagTest": 2
+    }
+  },
+  "failed_attempts": {
+    "before": "test Scope actor/project argument order corrected; original production unchanged",
+    "after": "BiddingHttpFixture missing newly required host beans; Import added, no assertions removed"
+  },
+  "unmatched_test_name": "earlier final80 command contained nonexistent SemanticSecurityTest; no claim it ran; formatted85 explicitly ran actual SemanticAuthorizationTest5",
+  "dev": "SCAN_PASS 0q6n7950; application toolchains NOT_RUN",
+  "source_hashes": {
+    "mateclaw-server/src/main/java/vip/mate/auth/service/ActorResolver.java": "1eeb15a68be5e8cada7f6a0790598bc97bee24bf7bd98b943335763069443d93",
+    "mateclaw-server/src/main/java/vip/mate/workspace/core/service/WorkspaceAccessService.java": "db9f258d5cc29cdf884974f2b56df20da18c505ae3d05e71c0d2b6a9fa1fad77",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesAccess.java": "946223d2f36824f7d8ffecda1b19d3323ae7f24dfef82dd5096ef44768067785",
+    "mateclaw-server/src/main/java/vip/mate/bidding/BiddingAccess.java": "059b45553c6d56fa2fde585637d234a789382e583915826398cd97a2a8fc421c",
+    "mateclaw-server/src/main/java/vip/mate/semantic/security/SemanticPrincipalResolver.java": "7ab788e4a3f3d3f55f79a451d3d605b3b31e199c3ec5fffd531c4c89e5ed0acf",
+    "mateclaw-server/src/main/java/vip/mate/semantic/security/SemanticAccessService.java": "8e68eb16b599e5dca3182e7544434c178f6366aac720f19307028fe08109febb"
+  },
+  "logs": {
+    "start": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/start.log",
+      "sha256": "3f2e71d18c573e83400e3ccdbf78a6308ebb22c5425253ec871bd110b050c9db",
+      "original_sha256": "3f2e71d18c573e83400e3ccdbf78a6308ebb22c5425253ec871bd110b050c9db",
+      "kind": "raw log"
+    },
+    "before": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/before-excerpt.log",
+      "sha256": "0ea403eb36f7df614dc99f496e1117443a7db504987ba58979d61ea1ac644b42",
+      "original_sha256": "a82de0293e411e5c871635397ff32c5e5bacfd07df611ac8535a26fae32b33fa",
+      "kind": "bounded failure excerpt"
+    },
+    "before-fixed": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/before-fixed.log",
+      "sha256": "8ea4913f51de41a7a05347ed9a3498c68195ed9da2592b6f1c961c57ace6b163",
+      "original_sha256": "8ea4913f51de41a7a05347ed9a3498c68195ed9da2592b6f1c961c57ace6b163",
+      "kind": "raw log"
+    },
+    "after": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/after-excerpt.log",
+      "sha256": "09b1bd27272ae861f43f483710f18e2e127fe4a4c506aeb55e984b05c0c5a080",
+      "original_sha256": "4ad7551ceb04ac6efc4d3014fb0cbaab9f188e7db352036f3aea3fecf9a0b482",
+      "kind": "bounded failure excerpt"
+    },
+    "after-fixed": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/after-fixed.log",
+      "sha256": "141a6b3f7d9cf525d5ef41c5f40c060b7e64ebb2724e01a289acab560a6b78d5",
+      "original_sha256": "141a6b3f7d9cf525d5ef41c5f40c060b7e64ebb2724e01a289acab560a6b78d5",
+      "kind": "raw log"
+    },
+    "final": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/final.log",
+      "sha256": "4ab0d26ff6d1ef5392f625fd449046217c39dae664064cdead83faed77ec08d1",
+      "original_sha256": "4ab0d26ff6d1ef5392f625fd449046217c39dae664064cdead83faed77ec08d1",
+      "kind": "raw log"
+    },
+    "format": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/format.log",
+      "sha256": "54d8be584df769233f6c1ec2daf1796e50c8cdbbcccaa7b954aa31ebf05b95f1",
+      "original_sha256": "54d8be584df769233f6c1ec2daf1796e50c8cdbbcccaa7b954aa31ebf05b95f1",
+      "kind": "raw log"
+    },
+    "formatted": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/formatted.log",
+      "sha256": "62013a493ecd40b3d8064d024a9a61aaa447238de8d22673c4d509714cecdcd2",
+      "original_sha256": "62013a493ecd40b3d8064d024a9a61aaa447238de8d22673c4d509714cecdcd2",
+      "kind": "raw log"
+    },
+    "dev-first": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/dev-first.log",
+      "sha256": "0f9358f580e66fb65bf51693d442fa034d454ddcfa75902e58b8cc958521dd27",
+      "original_sha256": "0f9358f580e66fb65bf51693d442fa034d454ddcfa75902e58b8cc958521dd27",
+      "kind": "raw log"
+    },
+    "dev-final": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/principal-boundary-tests/dev-final.log",
+      "sha256": "eaf6296cbb07c0ae81b6409d22e2f6a0d779780415f6baf5b5553d05d0e65fe1",
+      "original_sha256": "eaf6296cbb07c0ae81b6409d22e2f6a0d779780415f6baf5b5553d05d0e65fe1",
+      "kind": "raw log"
+    }
+  },
+  "formal_acceptance": "NOT_RUN",
+  "review": "independent principal_boundary_review: no blockers, scoped secret scan16 files clean, fixture executable tokens equal HEAD except two host Bean Imports; engineering only"
+}

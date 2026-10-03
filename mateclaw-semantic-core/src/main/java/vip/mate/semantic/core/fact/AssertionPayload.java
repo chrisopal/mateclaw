@@ -8,10 +8,9 @@ import java.util.Set;
 /**
  * JDK-only business assertion envelope.
  *
- * <p>The Functional Syntax text is authoritative. The remaining fields are
- * derived indexes used for governance, lookup, and conflict comparison; an
- * OWL adapter must verify that they agree with the text before accepting the
- * assertion.</p>
+ * <p>The Functional Syntax text is authoritative. The remaining fields are derived indexes used for
+ * governance, lookup, and conflict comparison; an OWL adapter must verify that they agree with the
+ * text before accepting the assertion.
  */
 public record AssertionPayload(
         AssertionKind kind,
@@ -27,17 +26,26 @@ public record AssertionPayload(
     public AssertionPayload {
         kind = Objects.requireNonNull(kind, "kind");
         functionalSyntax = requireText(functionalSyntax, "functionalSyntax");
-        signatureIris = Set.copyOf(Objects.requireNonNull(signatureIris, "signatureIris"));
+        signatureIris =
+                java.util.Collections.unmodifiableSortedSet(
+                        new java.util.TreeSet<>(
+                                Objects.requireNonNull(signatureIris, "signatureIris")));
         signatureIris.forEach(AssertionPayload::requireAbsoluteIri);
         subjectIri = normalizeIri(subjectIri, "subjectIri");
         predicateIri = normalizeIri(predicateIri, "predicateIri");
         objectIri = normalizeIri(objectIri, "objectIri");
         literal = literal == null ? Optional.empty() : literal;
-        classExpressionFunctionalSyntax = normalizeText(
-                classExpressionFunctionalSyntax, "classExpressionFunctionalSyntax");
+        classExpressionFunctionalSyntax =
+                normalizeText(classExpressionFunctionalSyntax, "classExpressionFunctionalSyntax");
         relatedIndividualIri = normalizeIri(relatedIndividualIri, "relatedIndividualIri");
-        validateShape(kind, subjectIri, predicateIri, objectIri, literal,
-                classExpressionFunctionalSyntax, relatedIndividualIri);
+        validateShape(
+                kind,
+                subjectIri,
+                predicateIri,
+                objectIri,
+                literal,
+                classExpressionFunctionalSyntax,
+                relatedIndividualIri);
     }
 
     public static AssertionPayload classAssertion(
@@ -65,7 +73,9 @@ public record AssertionPayload(
             boolean negative,
             Set<String> signatureIris) {
         return new AssertionPayload(
-                negative ? AssertionKind.NEGATIVE_OBJECT_PROPERTY : AssertionKind.POSITIVE_OBJECT_PROPERTY,
+                negative
+                        ? AssertionKind.NEGATIVE_OBJECT_PROPERTY
+                        : AssertionKind.POSITIVE_OBJECT_PROPERTY,
                 functionalSyntax,
                 signatureIris,
                 Optional.of(subjectIri),
@@ -84,7 +94,9 @@ public record AssertionPayload(
             boolean negative,
             Set<String> signatureIris) {
         return new AssertionPayload(
-                negative ? AssertionKind.NEGATIVE_DATA_PROPERTY : AssertionKind.POSITIVE_DATA_PROPERTY,
+                negative
+                        ? AssertionKind.NEGATIVE_DATA_PROPERTY
+                        : AssertionKind.POSITIVE_DATA_PROPERTY,
                 functionalSyntax,
                 signatureIris,
                 Optional.of(subjectIri),
@@ -129,8 +141,7 @@ public record AssertionPayload(
     }
 
     public boolean identityAssertion() {
-        return kind == AssertionKind.SAME_INDIVIDUAL
-                || kind == AssertionKind.DIFFERENT_INDIVIDUAL;
+        return kind == AssertionKind.SAME_INDIVIDUAL || kind == AssertionKind.DIFFERENT_INDIVIDUAL;
     }
 
     public enum AssertionKind {
@@ -143,17 +154,19 @@ public record AssertionPayload(
         DIFFERENT_INDIVIDUAL
     }
 
-    public record LiteralValue(String lexicalValue, String datatypeIri, Optional<String> languageTag) {
+    public record LiteralValue(
+            String lexicalValue, String datatypeIri, Optional<String> languageTag) {
         public LiteralValue {
             lexicalValue = Objects.requireNonNull(lexicalValue, "lexicalValue");
             datatypeIri = requireText(datatypeIri, "datatypeIri");
             requireAbsoluteIri(datatypeIri);
             languageTag = languageTag == null ? Optional.empty() : languageTag;
-            languageTag.ifPresent(value -> {
-                if (value.isBlank()) {
-                    throw new IllegalArgumentException("languageTag must not be blank");
-                }
-            });
+            languageTag.ifPresent(
+                    value -> {
+                        if (value.isBlank()) {
+                            throw new IllegalArgumentException("languageTag must not be blank");
+                        }
+                    });
         }
 
         public LiteralValue(String lexicalValue, String datatypeIri) {
@@ -170,22 +183,42 @@ public record AssertionPayload(
             Optional<String> classExpressionFunctionalSyntax,
             Optional<String> relatedIndividualIri) {
         switch (kind) {
-            case CLASS_ASSERTION -> requireShape("class assertion requires a subject and class expression",
-                    subjectIri.isPresent(), classExpressionFunctionalSyntax.isPresent(),
-                    predicateIri.isEmpty(), objectIri.isEmpty(), literal.isEmpty(), relatedIndividualIri.isEmpty());
-            case POSITIVE_OBJECT_PROPERTY, NEGATIVE_OBJECT_PROPERTY -> requireShape(
-                    "object property assertion requires subject, predicate, and object IRIs",
-                    subjectIri.isPresent(), predicateIri.isPresent(), objectIri.isPresent(),
-                    literal.isEmpty(), classExpressionFunctionalSyntax.isEmpty(), relatedIndividualIri.isEmpty());
-            case POSITIVE_DATA_PROPERTY, NEGATIVE_DATA_PROPERTY -> requireShape(
-                    "data property assertion requires subject, predicate, and literal",
-                    subjectIri.isPresent(), predicateIri.isPresent(), literal.isPresent(),
-                    objectIri.isEmpty(), classExpressionFunctionalSyntax.isEmpty(), relatedIndividualIri.isEmpty());
-            case SAME_INDIVIDUAL, DIFFERENT_INDIVIDUAL -> requireShape(
-                    "individual identity assertion requires two individual IRIs",
-                    subjectIri.isPresent(), relatedIndividualIri.isPresent(),
-                    predicateIri.isEmpty(), objectIri.isEmpty(), literal.isEmpty(),
-                    classExpressionFunctionalSyntax.isEmpty());
+            case CLASS_ASSERTION ->
+                    requireShape(
+                            "class assertion requires a subject and class expression",
+                            subjectIri.isPresent(),
+                            classExpressionFunctionalSyntax.isPresent(),
+                            predicateIri.isEmpty(),
+                            objectIri.isEmpty(),
+                            literal.isEmpty(),
+                            relatedIndividualIri.isEmpty());
+            case POSITIVE_OBJECT_PROPERTY, NEGATIVE_OBJECT_PROPERTY ->
+                    requireShape(
+                            "object property assertion requires subject, predicate, and object IRIs",
+                            subjectIri.isPresent(),
+                            predicateIri.isPresent(),
+                            objectIri.isPresent(),
+                            literal.isEmpty(),
+                            classExpressionFunctionalSyntax.isEmpty(),
+                            relatedIndividualIri.isEmpty());
+            case POSITIVE_DATA_PROPERTY, NEGATIVE_DATA_PROPERTY ->
+                    requireShape(
+                            "data property assertion requires subject, predicate, and literal",
+                            subjectIri.isPresent(),
+                            predicateIri.isPresent(),
+                            literal.isPresent(),
+                            objectIri.isEmpty(),
+                            classExpressionFunctionalSyntax.isEmpty(),
+                            relatedIndividualIri.isEmpty());
+            case SAME_INDIVIDUAL, DIFFERENT_INDIVIDUAL ->
+                    requireShape(
+                            "individual identity assertion requires two individual IRIs",
+                            subjectIri.isPresent(),
+                            relatedIndividualIri.isPresent(),
+                            predicateIri.isEmpty(),
+                            objectIri.isEmpty(),
+                            literal.isEmpty(),
+                            classExpressionFunctionalSyntax.isEmpty());
         }
     }
 
@@ -199,10 +232,11 @@ public record AssertionPayload(
 
     private static Optional<String> normalizeIri(Optional<String> value, String name) {
         Optional<String> normalized = value == null ? Optional.empty() : value;
-        normalized.ifPresent(item -> {
-            requireText(item, name);
-            requireAbsoluteIri(item);
-        });
+        normalized.ifPresent(
+                item -> {
+                    requireText(item, name);
+                    requireAbsoluteIri(item);
+                });
         return normalized;
     }
 

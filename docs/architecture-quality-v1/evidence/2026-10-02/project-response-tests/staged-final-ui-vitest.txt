@@ -1,0 +1,13 @@
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:548:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at _destroy (node:_http_client:959:15)
+    at onSocketNT (node:_http_client:983:5)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+JSON report written to /private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-10_99hoh/vitest.json

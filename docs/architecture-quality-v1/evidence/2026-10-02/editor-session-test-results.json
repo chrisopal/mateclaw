@@ -1,0 +1,48 @@
+{
+  "task": "AQ-05/AQ-09",
+  "start_head": "fb4b9ce7e38f4c8debb10fb5b2b3de0e577294be",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before": {
+    "component_tests": 55,
+    "passed": 55,
+    "new_characterizations": 2,
+    "existing_test_bytes_unchanged": true
+  },
+  "after": {
+    "files": 8,
+    "tests": 142,
+    "passed": 142,
+    "failed": 0,
+    "skipped": 0
+  },
+  "new_session_tests": 17,
+  "page_lines": {
+    "before": 2642,
+    "after": 2531
+  },
+  "typecheck": "PASS",
+  "nonfix_lint": "PASS",
+  "format": "PASS",
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "bd7b59c0836bba558ce5e6b07e6ee7f9cfbc23103fa766afcacdacb5a55c7a80",
+    "mateclaw-ui/src/features/presales/composables/usePresalesEditorSession.ts": "563664ade89f95320e4780af7c85238c67c676029d8f3eb62a5151811b0cc94e",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "4e41c15c5c2d307fe545d99a568af9782abc8d6c24ae635d8b507d315d800d5f",
+    "mateclaw-ui/src/features/presales/__tests__/editorSession.test.ts": "53f084e68284f4c3131824bb962fcae49aa4613513f9c2dd3356a7b0406ff2d3"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/initial-dev.txt": "cd6e5146c376f76d9f1448cacdc7dd4ce05e346aaf42e737c308933d78740fdd",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/before.txt": "0b491bd279ed388a000926c15a5e2d4b8fe643a3fcb93f02900d707c9954e254",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/after-first.txt": "8b511317b1edc910bb043013e5f309e2c2ff1b880e7eda98f965060c54b266ab",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/first-unit-failure.txt": "413084d31db06b4ea091f706103845794f7386a807fa768583e08b9d95af4057",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/final.txt": "be1f2a190c2344b2a4e77bbd3d0138b34a2d48f426c6455b9e08546f643e7423",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/format.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/dev.txt": "30d0ce89b97de93f78ceaa727e384633af6c63fdaee3ddf85e2f0d67b54ef652",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-session-tests/final-dev.txt": "2e1e652128e3623e90a522ff4f3dbb0b3c51ee33356d0df465f7497a4bc6da19"
+  },
+  "independent_review": "APPROVE_BOUNDED_EDITOR_SESSION_EXTRACTION workbench_confirmation_audit",
+  "formal_qa": "NOT_RUN",
+  "visual_qa": "NOT_RUN",
+  "submission": "Exact tree and normal commit/push gate results retained in PR5"
+}

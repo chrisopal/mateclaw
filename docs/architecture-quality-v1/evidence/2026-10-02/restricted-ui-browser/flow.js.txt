@@ -1,0 +1,30 @@
+async (page) => {
+ const base={id:'90071992547409998',workspaceId:'90071992547409999',version:4,name:'Restricted simulation',customer:'Customer',ownerId:'90071992547409997',agentId:'employee-1',status:'ACTIVE',materials:[],requirements:[],clarifications:[],baselines:[],fitGaps:[],solutions:[],reviews:[],releases:[],tasks:[]};
+ let restricted=true;
+ await page.route('**/api/v1/**',async route=>{
+  const path=new URL(route.request().url()).pathname; let data=[];
+  if(path.endsWith('/capabilities')) data={enabled:true,semanticEnabled:true,canWrite:true,canApprove:true};
+  else if(path.endsWith('/commands')) {restricted=false;data=base;}
+  else if(path.endsWith('/sources')) data=[{kbId:'kb-1',name:'Repair source'}];
+  else if(path.includes('/presales/projects/')) data={...base,sourceAccessRestricted:restricted};
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({code:200,data,msg:'OK'})});
+ });
+ await page.setViewportSize({width:1440,height:1000});
+ await page.goto('http://127.0.0.1:5197/aq-restricted-ui.html');
+ await page.getByText('Source access is restricted.',{exact:false}).waitFor();
+ if(!await page.getByRole('button',{name:'Delegate to employee',exact:true}).isDisabled()) throw new Error('Restricted generation enabled');
+ if(await page.getByRole('button',{name:'Assign employee',exact:true}).isDisabled()) throw new Error('Employee repair blocked');
+ const alert=page.getByText('Source access is restricted.',{exact:false});
+ const bounds=await alert.boundingBox();
+ if(!bounds || bounds.width<=0 || bounds.x<0 || bounds.x+bounds.width>1440) throw new Error('Warning outside viewport');
+ await page.screenshot({path:'/tmp/mateclaw-aq-ui-restricted.png',fullPage:true});
+ await page.getByRole('tab',{name:'Materials & evidence',exact:true}).click();
+ await page.getByRole('button',{name:'Bind material',exact:true}).click();
+ await page.getByRole('dialog').locator('.el-select__wrapper').first().click();
+ await page.getByRole('option',{name:'Repair source',exact:true}).click();
+ await page.getByRole('button',{name:'Save',exact:true}).click();
+ await page.getByText('Source access is restricted.',{exact:false}).waitFor({state:'hidden'});
+ if(await page.getByRole('button',{name:'Delegate to employee',exact:true}).isDisabled()) throw new Error('Restored generation disabled');
+ await page.screenshot({path:'/tmp/mateclaw-aq-ui-restored.png',fullPage:true});
+ return {browser:await page.evaluate(()=>navigator.userAgent),warningBounds:bounds,simulation:'SIMULATED_HTTP_ACTUAL_COMPONENT',restrictedWarning:true,generationBlocked:true,employeeRepairEnabled:true,bindingRepairRestored:true};
+}

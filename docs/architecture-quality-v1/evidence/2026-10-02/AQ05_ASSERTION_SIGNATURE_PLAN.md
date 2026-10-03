@@ -1,0 +1,9 @@
+# 稳定断言签名修复计划
+
+方案政策候选tree bbd900f62b6ae50f942740083fa5be726f016619完整门禁lojyxc1n真实FAIL：SemanticM2IntegrationTest既有accept回执重放整Json相等断言失败，唯一差异为AssertionPayload.signatureIris集合迭代顺序；Java失败1，无生产提交。UI检查仍完成通过。新增范围不是回避门禁，而是修复已复现的稳定wire/幂等错误。
+
+根因链：StatementApplicationService.command存result_json，review初次返回derive的AssertionPayload；replay由wire.decode还原同类型，紧凑构造器Set.copyOf不保证迭代顺序，hash碰撞/输入顺序可导致JSON数组差异。业务集合成员/equality不变不代表回执wire一致。同项目OntologyAxiomDescriptor已使用unmodifiableSortedSet(TreeSet)；采用同一已有惯例，不新增依赖或改Jackson/门禁配置。
+
+先新增JDK-only AssertionPayloadSignatureTest，构造含hash碰撞IRI的不同迭代输入，验证词法排序、重构造顺序、不可变/防原集合修改及输入空值/非法IRI仍拒绝；证明旧实现红例。再仅改AssertionPayload构造器。服务端原SemanticM2IntegrationTest断言不改，验证真实H2/JWT accept→operation replay、既有断言validator/Owl适配和售前来源快照回归。保存原完整FAIL报告/脱敏日志，最终候选重新全量检查，不能把复跑绿灯套旧树。
+
+影响：所有新构造/解码的AssertionPayload signature数组词法排序（明确wire稳定化），Set成员、functionalSyntax、授权、事务、ID和业务比较不变。旧持久化JSON/回执/raw/批准文件/冻结成果均不重写，历史对象读取时派生signature排序；无数据库/配置/依赖/控制面调整。回退会恢复已复现顺序不稳定问题，不以生产数据修复替代代码。

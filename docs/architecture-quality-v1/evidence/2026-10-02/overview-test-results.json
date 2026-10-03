@@ -1,0 +1,56 @@
+{
+  "task": "AQ-05/AQ-09",
+  "start_head": "545ad446aa1fd5634dd471145daa8f7ac7471ba4",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before": {
+    "tests": 62,
+    "passed": 62,
+    "new_characterizations": 3,
+    "existing_59_test_bytes_unchanged": true
+  },
+  "after": {
+    "files": 8,
+    "tests": 149,
+    "passed": 149,
+    "failed": 0,
+    "skipped": 0
+  },
+  "page_lines": {
+    "before": 2101,
+    "after": 1915
+  },
+  "css": {
+    "source_contracts": 98,
+    "scoped_compilations": 7,
+    "overview_rule_ownership": "PASS",
+    "style_repair": "Restore missing scoped baseline-details and solution-revision rules in overview",
+    "visual_qa": "NOT_RUN"
+  },
+  "typecheck": "PASS",
+  "nonfix_lint": "PASS",
+  "format": "PASS",
+  "dev_tasks": [
+    "b_f7g7tb",
+    "of17wk8m"
+  ],
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "037b00c784061d799e6e3dffe5578844d6f0872332ba4c8dec857a34b0999828",
+    "mateclaw-ui/src/features/presales/components/PresalesOverview.vue": "2545e68645873c3b7769c727c637e681f2dd177e46b5c52a456e256596a2ebe9",
+    "mateclaw-ui/src/features/presales/shared/taskActivity.css": "dc0dbc5835151b4bed6ac0f9de79d06e92e8a0cd471e68ea1c8c4b7378ac108e",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "3c9cc4737a59da9298fef77d76f660034df9274e9273d08822eda3755e018a91",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-css-contract.mjs": "907a0b8b534f7fa90bc6f76dafd500f2b96791d449b9de37605e6c85664c5bf1"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/initial-dev.txt": "0064a2e555480fd1f833ace17243efe5d7c0dc040f4ddb1668ec4e108c9125e9",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/before.txt": "fbfa77f452cc0d3e3398f2cc44decc0f7a799cffcf59c2df773bcd6fd9172e64",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/after.txt": "179609875b30ee7e1c5178e0ac47f42f7a0c42df55d099d2a856a08c52e5e25b",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/format.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/css.txt": "8eb21f22b63373416ec8fb8da0e123280dd5a3a852ca29ba0744418b049bdbbf",
+    "docs/architecture-quality-v1/evidence/2026-10-02/overview-tests/dev.txt": "5b58be3de12489d5b5e7ad3975b06b66133f65afb2e521dab4a7c82df67e7a5a"
+  },
+  "formal_qa": "NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED",
+  "independent_review": "APPROVE_BOUNDED_OVERVIEW_EXTRACTION workbench_confirmation_audit"
+}

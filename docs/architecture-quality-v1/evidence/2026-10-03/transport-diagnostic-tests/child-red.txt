@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: real workspace transport completes without late socket diagnostics
+not ok 1 - real workspace transport completes without late socket diagnostics
+  ---
+  duration_ms: 545.788291
+  type: 'test'
+  location: '/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/test/workspace-request-transport.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input was expected to not match the regular expression /socket hang up|ECONNRESET/. Input:
+
+    'Error: socket hang up\n' +
+      '    at Socket.socketCloseListener (node:_http_client:548:27)\n' +
+      '    at Socket.emit (node:events:531:35)\n' +
+      '    at TCP.<anonymous> (node:net:346:12) {\n' +
+      "  code: 'ECONNRESET'\n" +
+      '}\n'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    Error: socket hang up
+        at Socket.socketCloseListener (node:_http_client:548:27)
+        at Socket.emit (node:events:531:35)
+        at TCP.<anonymous> (node:net:346:12) {
+      code: 'ECONNRESET'
+    }
+
+  operator: 'doesNotMatch'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/test/workspace-request-transport.test.mjs:25:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 608.762125

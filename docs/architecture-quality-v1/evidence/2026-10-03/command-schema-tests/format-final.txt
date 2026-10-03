@@ -1,0 +1,48 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] MateClaw                                                           [pom]
+[INFO] MateClaw Plugin API                                                [jar]
+[INFO] MateClaw Semantic Core                                             [jar]
+[INFO] MateClaw Semantic OWL Adapter                                      [jar]
+[INFO] MateClaw Semantic Application                                      [jar]
+[INFO] MateClaw Server                                                    [jar]
+[INFO] MateClaw Sample Plugin                                             [jar]
+[INFO] MateClaw Search Provider Sample Plugin                             [jar]
+[INFO] MateClaw Mem0 Memory Provider Plugin                               [jar]
+[INFO]
+[INFO] -------------------------< vip.mate:mateclaw >--------------------------
+[INFO] Building MateClaw 2.3.0-SNAPSHOT                                   [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- spotless:3.5.0:apply (default-cli) @ mateclaw ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO]
+[INFO] MateClaw ........................................... FAILURE [  0.118 s]
+[INFO] MateClaw Plugin API ................................ SKIPPED
+[INFO] MateClaw Semantic Core ............................. SKIPPED
+[INFO] MateClaw Semantic OWL Adapter ...................... SKIPPED
+[INFO] MateClaw Semantic Application ...................... SKIPPED
+[INFO] MateClaw Server .................................... SKIPPED
+[INFO] MateClaw Sample Plugin ............................. SKIPPED
+[INFO] MateClaw Search Provider Sample Plugin ............. SKIPPED
+[INFO] MateClaw Mem0 Memory Provider Plugin ............... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.233 s
+[INFO] Finished at: 2026-10-03T18:18:43+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal com.diffplug.spotless:spotless-maven-plugin:3.5.0:apply (default-cli) on project mateclaw: Execution default-cli of goal com.diffplug.spotless:spotless-maven-plugin:3.5.0:apply failed: Dangling meta character '*' near index 0
+[ERROR] **/PresalesCommandPayload.java
+[ERROR] ^
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException

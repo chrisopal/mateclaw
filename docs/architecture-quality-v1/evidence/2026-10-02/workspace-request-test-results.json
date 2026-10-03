@@ -1,0 +1,81 @@
+{
+  "task": "AQ-04",
+  "start_head": "5d56b1db0c41919279005edb7948b1ed3ec28e60",
+  "format_commit": "b699abee0ef40328cac9dcf2298903d2e89550c5",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "red": {
+    "tests": 4,
+    "failed": 4,
+    "status": "FAIL_EXPECTED_OLD_IMPLEMENTATION"
+  },
+  "focused": {
+    "files": 7,
+    "tests": 26,
+    "failed": 0,
+    "unhandled_errors": 0,
+    "status": "PASS"
+  },
+  "typecheck": {
+    "exit_code": 0,
+    "status": "PASS"
+  },
+  "transport": {
+    "tests": 3,
+    "status": "PASS",
+    "environment": "Axios fetch adapter / happy-dom / random-port loopback HTTP",
+    "stderr": "Expected ECONNRESET on in-flight abort; raw retained"
+  },
+  "source_sha256": {
+    "mateclaw-ui/src/features/bidding/api/biddingApi.ts": "798df643d1d0ab239a683986736945876f2034f0ba062686961e86eacc567a86",
+    "mateclaw-ui/src/features/presales/api/presalesApi.ts": "15810f398d31487dc35f190621d1e3eab36fb73c49c081ee63f2adcaa74d321d",
+    "mateclaw-ui/src/features/semantic/api/ontologyApi.ts": "357bf897dddca495d1c4b3bed1148e8f6be5af4d6de8f3340161bdb8eacc0a7b",
+    "mateclaw-ui/src/api/__tests__/workspaceRequest.test.ts": "3aa6e67469af4fca55fedf2627e8bec80e47fe7789e61ac3f16b21096f9f6e33",
+    "mateclaw-ui/src/api/workspaceRequest.ts": "3655f73f4f573b0307cecf1ad68fa9154d0161c2c56a06d6a1a9ffbf7ee6563e",
+    "mateclaw-ui/src/features/bidding/__tests__/workspaceRequest.test.ts": "f6ae6f67d29ac4ae756713f8ea5bf4727c098a098d41ad47ef8c0480c6972bba",
+    "mateclaw-ui/src/features/bidding/__tests__/workspaceRequestTransport.test.ts": "09eba58131e24c7fbdd103b592140c657ccb8106e96a8193c3d00d2fda2c2f0d",
+    "mateclaw-ui/src/features/presales/__tests__/workspaceRequest.test.ts": "f7f56f73f18e0af91567e3f896ea0ef70627c670d65282339c15347682fba661",
+    "mateclaw-ui/src/features/semantic/ontology/__tests__/workspaceRequest.test.ts": "0651acaff1633cc261f1fa6c3dd6c0b2b5b50f95ba3cafdc7ce8f1c5cfeebf81",
+    "mateclaw-ui/test/support/workspaceLoopback.d.mts": "172ac80cb243136291bf6c6d975875cf3024529fc9cd967cfdb65ec27f7a8394",
+    "mateclaw-ui/test/support/workspaceLoopback.mjs": "83f985acc9aaa88bf6c208559d29917f1c358ed1cc56ebbd013dadf7b090d446",
+    "mateclaw-ui/src/features/bidding/__tests__/biddingDownload.test.ts": "34decd15c899c94c6ebceb8622aedcff3e2028c56efcd552e372f5cdfceb5404"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/final-dev.log": "8e2220bef5571891ff15f92357e6c9ece00f31216d752a0af57437fc6498ccf9",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/first-dev.log": "031a2a2c5feea4168e3d5cebf699610a5c58205739a56a6170c7a3fce153bf98",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/red.log": "930dfdfc09c3b6385d7129270e3cfc45c17d61fcefde64490223616b431e8606",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/first-functional-gate.log": "710b2f6e902ee29c930ef1e7ebc020bceddc7fb291b08c2e1d06b8cf310665fb",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/format-tree-gate.log": "ec2cc7529b9bd707a13f51586ea5b68985518253252f9344f21f53b72a9312e0",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/first-architecture.json": "1454fde1579665dd8daf2dbcaf4f12100294d9c148bdffc71c960b3a322198f3",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/pre-fixture-dev.log": "29d90cd200391b36ad47fa616dbb1a6950768e1a184b7fc08be6522d63308b72",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/first-functional-gate-report.json": "abc1640b072e601ccc44ea0990d3cecf45b064bfcc597f84bff204cd27e6f002",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/initial-dev.log": "eb43ddfe4cc9db8d990f919441f5527e81e0535616c4c7c19eb98ae01d6b588f",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/final-focused.log": "226d25e10b53d98d97eb086e4591997bbf8c621a07cd43bf734ce8f79c56cf7e",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/format-commit-hook.log": "8455f139dfbd528e7822b058ae32fb743cfcb42a8ea986483d50402d110397fb",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/first-functional-gate-failures.json": "7b64de7ace0ede6c0f242d2723d59c85e1e213dfad837558ae71741d2f26b143",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/format-equivalence.log": "08cf79695f335ab8aae6bf4a5190d5fc2457ea3afed43e454e83cc596d7143fa",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/focused.log": "ce19997a20d5b99d75b258541c8ccfc8b11a650ee106e2dca2b08f049f24683a",
+    "docs/architecture-quality-v1/evidence/2026-10-02/workspace-request-tests/post-fixture-dev.log": "9358712b88cef77cba2d7c10b00a149b188703631b423af1e392f60056dfd75d"
+  },
+  "independent_review": {
+    "agent": "workbench_confirmation_audit",
+    "verdict": "APPROVE_BOUNDED_ENGINEERING_SLICE",
+    "limits": "Formal maintainer and QA not signed off",
+    "fixture_migration": "APPROVE; original Blob/URL/responseType/mode assertions preserved; LSP zero errors"
+  },
+  "formal_acceptance": "NOT_RUN",
+  "final_submission": "Exact staged-tree and hook results recorded in PR #5 after actual execution",
+  "fixture_syntax": {
+    "command": "node --check mateclaw-ui/test/support/workspaceLoopback.mjs",
+    "exit_code": 0
+  },
+  "first_functional_gate": {
+    "report": "gt6qxkxk",
+    "status": "FAIL",
+    "total": 776,
+    "passed": 775,
+    "failed": 1,
+    "cause": "Existing download fixture only supplied mocked http.get; public helper dispatches http.request",
+    "checked_tree": "d1c57323b6d4412f75a7e8bb8c6ad8a79d50b9c9"
+  }
+}

@@ -1,0 +1,3 @@
+src/features/presales/api/presalesDomainTypes.ts 35ms (unchanged)
+src/features/presales/api/presalesResponse.ts 28ms (unchanged)
+src/features/presales/__tests__/domainDto.test.ts 13ms

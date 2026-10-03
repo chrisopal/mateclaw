@@ -1,0 +1,42 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts (42 tests | 1 failed) 14ms
+   × preserves scoped employee/capability signals and propagates server denial unchanged 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/queryResponse.test.ts > preserves scoped employee/capability signals and propagates server denial unchanged
+AssertionError: expected Error: Denied { response: { …(5) } } to be AxiosError: Denied { …(3) } // Object.is equality
+
+- Expected
++ Received
+
+@@ -1,10 +1,7 @@
+- AxiosError {
++ Error {
+    "message": "Denied",
+-   "name": "AxiosError",
+-   "isAxiosError": true,
+-   "code": "ERR_BAD_REQUEST",
+    "response": {
+      "config": {
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": undefined,
+
+ ❯ src/features/presales/__tests__/queryResponse.test.ts:188:53
+    186|     throw denied
+    187|   }
+    188|   await expect(presalesApi.statements(ws, projectId)).rejects.toBe(den…
+       |                                                     ^
+    189| })
+    190|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 12 passed (13)
+      Tests  1 failed | 258 passed (259)
+   Start at  07:30:46
+   Duration  21.90s (transform 624ms, setup 0ms, import 1.73s, tests 21.01s, environment 1.39s)

@@ -1,0 +1,23 @@
+src/features/presales/__tests__/commandPayload.test.ts(8,7): error TS2322: Type '({ expectedVersion: number; operationId: string; action: string; payload: { agentId: string; ownerId: string; goal: string; ignoredHistoricalField?: undefined; kbId?: undefined; graphId?: undefined; ... 26 more ...; requirementResponses?: undefined; }; } | ... 14 more ... | { ...; })[]' is not assignable to type 'readonly PresalesCommandRequest[]'.
+  Type '{ expectedVersion: number; operationId: string; action: string; payload: { agentId: string; ownerId: string; goal: string; ignoredHistoricalField?: undefined; kbId?: undefined; graphId?: undefined; ... 26 more ...; requirementResponses?: undefined; }; } | ... 14 more ... | { ...; }' is not assignable to type 'PresalesCommandRequest'.
+    Type '{ expectedVersion: number; operationId: string; action: string; payload: { agentId: string; ownerId: string; goal: string; ignoredHistoricalField?: undefined; kbId?: undefined; graphId?: undefined; ... 26 more ...; requirementResponses?: undefined; }; }' is not assignable to type 'PresalesCommandRequest'.
+      Types of property 'action' are incompatible.
+        Type 'string' is not assignable to type 'PresalesCommandAction'.
+src/features/presales/__tests__/commandPayload.test.ts(44,66): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(45,62): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(46,72): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(47,77): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(48,62): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(49,65): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(50,59): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(51,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(52,78): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(53,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(54,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(55,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(56,67): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(57,70): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(58,78): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(59,99): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(60,117): error TS2344: Type 'string | undefined' does not satisfy the constraint '"Expected: string, Actual: never" | "Expected: undefined, Actual: never"'.
+  Type 'undefined' is not assignable to type '"Expected: string, Actual: never" | "Expected: undefined, Actual: never"'.

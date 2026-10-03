@@ -1,0 +1,33 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts (41 tests | 1 failed) 11ms
+   × preserves frozen sourceRefs that combine baseline objects and raw clarification references 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > preserves frozen sourceRefs that combine baseline objects and raw clarification references
+Error: Unable to read project data. Reload and try again.
+ ❯ invalid src/features/presales/api/presalesResponse.ts:141:23
+    139|
+    140| function invalid(): never {
+    141|   throw Object.assign(new Error('Unable to read project data. Reload a…
+       |                       ^
+    142|     code: 'PRESALES_RESPONSE_INVALID',
+    143|   })
+ ❯ object src/features/presales/api/presalesResponse.ts:146:76
+ ❯ validateRecord src/features/presales/api/presalesResponse.ts:190:5
+ ❯ baselineReference src/features/presales/api/presalesResponse.ts:182:3
+ ❯ src/features/presales/api/presalesResponse.ts:515:11
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ handoff src/features/presales/api/presalesResponse.ts:513:3
+ ❯ decodeHandoff src/features/presales/api/presalesResponse.ts:476:3
+ ❯ src/features/presales/api/presalesApi.ts:210:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 40 passed (41)
+   Start at  09:06:43
+   Duration  292ms (transform 58ms, setup 0ms, import 89ms, tests 11ms, environment 105ms)

@@ -1,0 +1,56 @@
+package vip.mate.presales;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+import java.nio.file.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.core.io.ClassPathResource;
+import org.flywaydb.core.Flyway;
+import vip.mate.presales.repository.PresalesProjectRepository;
+public class MateclawListingRestoreProbe {
+ public static void main(String[] args) throws Exception {
+  String url=System.getenv("MATECLAW_ACCEPTANCE_JDBC_URL");
+  if(url==null||!url.matches("jdbc:mysql://127\\.0\\.0\\.1:[0-9]+/mateclaw_aq_acceptance_[a-z0-9]+(?:\\?.*)?")) throw new IllegalArgumentException("Disposable schema required");
+  var source=new DriverManagerDataSource(url,System.getenv("MATECLAW_ACCEPTANCE_JDBC_USER"),System.getenv("MATECLAW_ACCEPTANCE_JDBC_PASSWORD"));
+  var jdbc=new JdbcTemplate(source);var json=new ObjectMapper();
+  if(args[0].equals("seed")) {
+   try(var c=source.getConnection();var rows=c.getMetaData().getTables(c.getCatalog(),null,"%",new String[]{"TABLE"})) { if(rows.next()) throw new IllegalStateException("Schema must be empty"); }
+   new ResourceDatabasePopulator(new ClassPathResource("db/migration/mysql/V211__presales_projects.sql")).execute(source);
+   for(int i=0;i<205;i++) {
+    String id="p%03d".formatted(i);
+    var p=json.createObjectNode().put("id",id).put("workspaceId","w").put("version",i+1).put("name","Body "+id).put("customer",i==0?" Ω ".repeat(18000):"Customer").put("ownerId","owner").put("status","ACTIVE");
+    for(String k:PresalesListingProjectionV1.SOURCE_COLLECTIONS) p.putArray(k);
+    p.putObject("extension").put("raw",i==0?"未知 Ω ".repeat(20000):"legacy \\ud800");
+    p.withArray("requirements").addObject().put("original","Original requirement");
+    String body="  "+json.writeValueAsString(p)+"  ";
+    jdbc.update("INSERT INTO mate_presales_project VALUES(?,?,?,?,?,?)",id,"w",i+1,"Order "+id,"DB_STATUS",body);
+   }
+   jdbc.update("INSERT INTO mate_presales_operation VALUES('w','actor','op','old-hash','  {\"receipt\":true}  ')");
+   jdbc.update("INSERT INTO mate_presales_revision VALUES('p000',1,'actor','CREATE','  {\"history\":true}  ',CURRENT_TIMESTAMP)");
+   jdbc.update("INSERT INTO mate_presales_artifact VALUES('p000','release','file','old-digest','AAEC/w==')");
+   Files.writeString(Path.of(args[1]),json.writeValueAsString(snapshot(jdbc)));
+  } else {
+   String before=Files.readString(Path.of(args[1]));
+   if(!before.equals(json.writeValueAsString(snapshot(jdbc)))) throw new IllegalStateException("Backup/restore changed legacy bytes before migration");
+   var flyway=Flyway.configure().dataSource(source).locations("classpath:db/migration/mysql").baselineOnMigrate(true).baselineVersion("216").target("218").load();
+   flyway.migrate();flyway.validate();
+   if(!before.equals(json.writeValueAsString(snapshot(jdbc)))) throw new IllegalStateException("Upgrade rewrote legacy state");
+   var repo=new PresalesProjectRepository(jdbc);
+   var result=repo.listProjected("w",new PresalesProjectRepository.ListingQuery(null,null,null,null,14,7,1));
+   if(result.failureType()!=null||result.total()!=205||result.summaries().size()!=7||!json.readTree(result.summaries().getFirst()).path("id").asText().equals("p014")) throw new IllegalStateException("Page/count/order mismatch");
+   var first=repo.listProjected("w",new PresalesProjectRepository.ListingQuery(null,null,null,null,0,1,1));
+   if(json.readTree(first.summaries().getFirst()).path("extension").path("raw").asText().length()!="未知 Ω ".repeat(20000).length()) throw new IllegalStateException("Large summary truncated");
+   flyway.migrate();flyway.validate();
+   if(!before.equals(json.writeValueAsString(snapshot(jdbc)))) throw new IllegalStateException("Repeat migration rewrote legacy state");
+   try(var c=source.getConnection()) { System.out.println("RESTORE_PROBE_PASS product="+c.getMetaData().getDatabaseProductName()+" version="+c.getMetaData().getDatabaseProductVersion()+" rows=205 page=7 legacy_snapshot_exact=true"); }
+  }
+ }
+ static Map<String,Object> snapshot(JdbcTemplate jdbc) {
+  var r=new TreeMap<String,Object>();
+  r.put("projects",jdbc.query("SELECT id,workspace_id,version,name,status,body_json FROM mate_presales_project ORDER BY id",(rs,n)->List.of(rs.getString(1),rs.getString(2),rs.getInt(3),rs.getString(4),rs.getString(5),rs.getString(6))));
+  r.put("receipts",jdbc.query("SELECT request_hash,response_json FROM mate_presales_operation ORDER BY operation_id",(rs,n)->List.of(rs.getString(1),rs.getString(2))));
+  r.put("revisions",jdbc.query("SELECT body_json,created_at FROM mate_presales_revision ORDER BY project_id,version",(rs,n)->List.of(rs.getString(1),rs.getString(2))));
+  r.put("artifacts",jdbc.query("SELECT digest,content_base64 FROM mate_presales_artifact ORDER BY project_id,release_id,filename",(rs,n)->List.of(rs.getString(1),rs.getString(2))));return r;
+ }
+}

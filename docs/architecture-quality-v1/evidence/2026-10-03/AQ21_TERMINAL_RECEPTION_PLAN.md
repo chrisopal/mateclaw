@@ -1,0 +1,17 @@
+# AQ-01/03/06 AC-21 terminal reception and coordinator storage boundary
+
+Start HEAD3f0fbd4732efb80b1b9e42925264297c49cbdf01/treef0a8c143531ac35513885fdd258c586f78434186; fixed origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93. Clean isolated worktree, original project WIP untouched. Initial dev bi81bzqq actualexit0/SCAN_PASS.
+
+Scope: PresalesGenerationCoordinator, PresalesService, existing repository/PresalesProjectRepository, a small domain-local run identity policy if needed, existing coordinator/runtime tests and one H2 coordinator contract test. No controller/core/UI/public DTO, dependencies, gate/config, old Flyway or production action.
+
+Observed unproven gap: persistTerminal/fallback exclude CANCELLED only; service validates durable identity for SUCCEEDED only. Thus late FAILED may be admitted against terminal/replaced task. AC-21 and ARCHITECTURE_SPEC 5.2 require no second write/late overwrite. Prove this with actual red tests before calling it repaired.
+
+Plan before edits:
+1. Add real Spring transaction/H2 service rejection cases for terminal status and each execution identity change; compare body bytes, revision and operation counts. Preserve matching RUNNING failure diagnostics and project-version-drift failure. Add deterministic coordinator tests with H2 actual fallback SQL, controlled model callback and a real storage CAS conflict; test cancellation, replaced snapshot/run, early stale submission and all existing positive paths. No sleeps/timeouts/skips or old assertion removal.
+2. Repair run membership before model start, before terminal write and on every fallback re-read; service enforces same RUNNING identity for FAILED as well as existing success. Preserve the strict success identity policy, pinned authority fence and projection, role/source/replay/CAS/archive ordering, cancellation reservations, opaque extensions and diagnostics. Failure may write only the originally accepted running task, never become success or overwrite a terminal/replaced task.
+3. Move only coordinator SQL facts into the existing repository: typed version/body lookup, restart rows and body-only version CAS. Coordinator owns JSON, current-run policy, failure/recovery transitions and retry counts. Keep no-actor fallback failure-only and recovery without model calls; no new transaction/authority grant, metadata rewrite or all-row pagination claims. Test actual reads/CAS/storage across workspaces and recovery.
+4. After each coherent responsibility change run dev and applicable regression; explicit fixed formatting, independent final diff review, full exact-tree commit gate and normal hooks, credential-redacted/hash-bound archive, checked push full range and remote/PR readback.
+
+Run identity includes existing task envelope and context snapshot (pins, run/operation, actor-derived metadata, source refs, conversation and unknown extensions). Only terminal output fields are omitted for comparison; success keeps its existing strict comparison. Declared failure diagnostics are not identity. No full-V2 independent attempt tables, dependency revisions or billing claim: those remain unfinished along with migration/browser/live runtime/maintainer/QA/required CI. All46 formal AC remain NOT_RUN.
+
+Rollback restores the bounded source/test changes and evidence; no database migration. New late-result rejection is deliberate admission tightening. Existing matching RUNNING version drift must still become FAILED without replacing unrelated project edits.

@@ -1,0 +1,15 @@
+# AQ-05 查询响应与可空事实工程核验
+
+源码提交8682b4bb07c7990523d8d81227104016d2beaba4，tree12464188ccc529fc7ed0b4fd20eb454bd84be97b；起点b7bf1bbbb591122e9d81439dd7d05121880de541，origin/dev基线ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93。隔离工作树起点干净，原项目WIP未触碰；计划先于修改。
+
+五个查询从unknown进入同域presalesResponse的实际校验，复用原有object/string/integer/boolean/array原语和Workspace请求，不新造通用层。members固定字符串id/workspaceId/userId/role，核对请求Workspace，nickname/username可空，未知role原文保留；sources独立普通知识库/启用图投影，name可空，graphId/ontologyRevisionId同时存在或同时缺省，空值不归一化。TrustedStatement固定六字段，ontologyRevisionId可空，evidenceIds允许null列表和null成员，保持顺序、重复、原对象/数组和扩展；employees校验id/name/enabled/available，空列表与false值不被强行补true；capabilities四个boolean必需，已有可选modelConfigured出现时必须为boolean。
+
+查询DTO不继承宽泛PresalesRecord，避免把真实可空字段错误声明为非空或继承无关业务属性。严格项目业务记录和冻结snapshot未宽化。唯一意图行为修复是用户主动选择事实时，将null证据成员排除在草稿ID之外；字符串顺序/重复、精确statementId/revision/graphId保留，raw事实列表不修改。整个evidenceIds=null仍按旧行为得到空草稿；没有加载时重写历史数据。来源null名称在组件label处映射undefined，独立复核安装的Element Plus原有label/value回退；现有selectSource空字符串回退不变。成员姓名fallback复用旧文案/i18n。源码不改来源/员工授权、事务、幂等算法、批准、取消、迟到结果或CSS。
+
+真实Axios adapter旧正例8项通过，27个拒绝断言在旧API失败；旧编辑会话17项通过，新null证据成员草稿断言失败。最终查询42项、编辑19项，完整售前13文件259项通过。覆盖数值ID、错Workspace/缺字段、错误revision/evidence/boolean/root、真实null/缺省、未知角色、字符串64位ID、原对象恒等、capturedWorkspace/signal/编码项目路径及403状态/消息/错误码传播。既有member/employee/source/statement伪响应补真实必需字段，保留全部既有断言。
+
+真实新增夹具失败保留：403断言原本错误期待同一个AxiosError对象，宿主api/index.ts实际包装Error并保留response；初版fixture的默认headers也不满足InternalAxiosRequestConfig。改用adapter真实config并检查必然拒绝、Error/消息/原403响应结构，未修改宿主或弱化旧断言；最终全套及vue-tsc通过。独立wire/code审阅无发现，限定九文件lint及初53/最终61项复核通过。LSP九文件均transport closed，有界文本回退不能冒称AST检查通过。
+
+初始dev1fc7txrr、切片4chx277f、最终t3w1cnoc均SCAN_PASS/exit0。精确暂存uirmv719与正常commit hook ixbk4st6均PASS/submission_ready=true，对应同一source tree；全UI956项、固定format、修改文件零警告lint、vue-tsc、ID精度、Node及enterprise/classic构建通过。Java按既定frontend-only影响规则NOT_APPLICABLE，没有将旧Java成绩作为本批执行。caffeinate仅在检查进程期间临时保活，不改系统/超时/断言/门禁。原始输入SHA、展示规范化日志和source SHA见query-response-test-results.json；失败日志也保留。
+
+尚未验证真实服务历史数据/浏览器/异步重启/live model/Office/多方言和迁移。已声明类型错误的历史项目字段仍可能被拒绝，需要真实存量审计，不静默重写。完整业务对象及action payload DTO、Known/UnknownStatus、SQL分页、V2/Delivery规格衔接、独立维护者/QA签署和远端required CI仍待完成；handoff/evidence等opaque返回不冒称已有完整schema。46项正式AC仍NOT_RUN，ADR-AQ-027 Proposed；工程校验不等于业务验收或提交合并授权。回退恢复本批查询入口/DTO和事实选择投影，无数据库操作。

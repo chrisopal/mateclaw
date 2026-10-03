@@ -1,37 +1,288 @@
-import { http } from '@/api'
-import { scopedConfig } from '@/features/semantic/api/ontologyApi'
+import {
+  decodeProject,
+  decodeProjectPage,
+  decodeRepairContext,
+  decodeMembers,
+  decodeSources,
+  decodeStatements,
+  decodeEmployees,
+  decodeCapabilities,
+  decodeHandoff,
+} from './presalesResponse'
+import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
-export interface PresalesRecord { id: string; [key: string]: any }
-export interface PresalesProject extends PresalesRecord {
-  workspaceId: string; version: number; name: string; customer: string; ownerId: string; status: string
-  materials: PresalesRecord[]; requirements: PresalesRecord[]; clarifications: PresalesRecord[]
-  baselines: PresalesRecord[]; fitGaps: PresalesRecord[]; solutions: PresalesRecord[]
-  reviews: PresalesRecord[]; releases: PresalesRecord[]
+import type { PresalesCommandIntent } from './presalesCommandTypes'
+import type {
+  PresalesEntity,
+  PresalesTask,
+  PresalesMaterial,
+  PresalesRequirement,
+  PresalesClarification,
+  PresalesBaseline,
+  PresalesFitGap,
+  PresalesSolutionRevision,
+  PresalesReview,
+  PresalesRelease,
+} from './presalesDomainTypes'
+export type * from './presalesDomainTypes'
+export type {
+  PresalesCommandAction,
+  PresalesCommandIntent,
+  PresalesCommandPayloads,
+} from './presalesCommandTypes'
+/** Query projections have their own nullability; they are not business records. */
+export interface PresalesMember {
+  [key: string]: unknown
+  id: string
+  workspaceId: string
+  userId: string
+  role: string
+  nickname?: string | null
+  username?: string | null
 }
-export interface PresalesTask extends PresalesRecord {
-  operationId: string; status: 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | string
+interface PresalesSourceMetadata {
+  [key: string]: unknown
+  kbId: string
+  name: string | null
 }
-export interface PresalesCapabilities { enabled: boolean; semanticEnabled: boolean; canWrite: boolean; canApprove: boolean; modelConfigured?: boolean }
-export interface ProjectPage { items: PresalesProject[]; total: number; page: number; pageSize: number }
-async function request<T>(workspaceId: string, config: AxiosRequestConfig, signal?: AbortSignal): Promise<T> {
-  const response = await http.request<unknown, { data: T }>({ ...config, ...scopedConfig(workspaceId, signal) })
+export interface PresalesKnowledgeBaseSource extends PresalesSourceMetadata {
+  graphId?: never
+  ontologyRevisionId?: never
+}
+export interface PresalesGraphSource extends PresalesSourceMetadata {
+  graphId: string | null
+  ontologyRevisionId: string | null
+}
+export type PresalesSource = PresalesKnowledgeBaseSource | PresalesGraphSource
+export interface PresalesTrustedStatement {
+  [key: string]: unknown
+  id: string
+  revision: number
+  graphId: string
+  ontologyRevisionId: string | null
+  label: string
+  evidenceIds: (string | null)[] | null
+}
+export interface PresalesEmployee {
+  [key: string]: unknown
+  id: string
+  name: string
+  enabled: boolean
+  available: boolean
+}
+/** List items do not load the business collections required by project details. */
+export interface PresalesProjectSummary extends PresalesEntity {
+  workspaceId: string
+  version: number
+  name: string
+  customer: string
+  ownerId: string
+  status: string
+  industry?: string
+  goal?: string
+  stage?: string
+  updatedAt?: string
+  openClarificationCount?: number
+  latestSolutionVersion?: number
+}
+export interface PresalesProject extends PresalesProjectSummary {
+  sourceAccessRestricted?: boolean
+  repairBindings?: { id: string; role: string }[]
+  materials: PresalesMaterial[]
+  requirements: PresalesRequirement[]
+  clarifications: PresalesClarification[]
+  baselines: PresalesBaseline[]
+  fitGaps: PresalesFitGap[]
+  solutions: PresalesSolutionRevision[]
+  reviews: PresalesReview[]
+  releases: PresalesRelease[]
+  cases?: PresalesEntity[]
+  tasks?: PresalesTask[]
+  context?: unknown
+  contextCards?: PresalesEntity[]
+  reviewDrafts?: PresalesEntity[]
+}
+export interface PresalesRepairContext {
+  id: string
+  workspaceId: string
+  version: number
+  name: string
+  customer: string
+  ownerId: string
+  status: string
+  industry?: string
+  goal?: string
+  stage?: string
+  agentId?: string
+  agentName?: string
+  createdBy?: string
+  createdAt?: string
+  updatedBy?: string
+  updatedAt?: string
+  sourceAccessRestricted: true
+  repairBindings: { id: string; role: string }[]
+  materials: never[]
+  requirements: never[]
+  clarifications: never[]
+  baselines: never[]
+  fitGaps: never[]
+  cases: never[]
+  solutions: never[]
+  reviews: never[]
+  reviewDrafts: never[]
+  releases: never[]
+  tasks: never[]
+  contextCards: never[]
+}
+export interface PresalesCapabilities {
+  enabled: boolean
+  semanticEnabled: boolean
+  canWrite: boolean
+  canApprove: boolean
+  modelConfigured?: boolean
+}
+export interface ProjectPage {
+  items: PresalesProjectSummary[]
+  total: number | string
+  page: number
+  pageSize: number
+}
+/** UI intent contracts; payload JSON still requires the server's domain validation. */
+export interface PresalesVersionedMutation {
+  expectedVersion: number
+  operationId: string
+}
+export interface PresalesProjectWrite extends PresalesVersionedMutation {
+  name?: string
+  customer?: string
+  ownerId?: string
+  agentId?: string
+  industry?: string
+  goal?: string
+}
+export interface PresalesProjectCreate extends Omit<PresalesProjectWrite, 'expectedVersion'> {
+  expectedVersion: 0
+}
+export type PresalesCommandRequest = PresalesVersionedMutation & PresalesCommandIntent
+export type PresalesSkill = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7' | 'S8'
+export interface PresalesGenerateRequest extends PresalesVersionedMutation {
+  skill: PresalesSkill
+  taskGoal: string
+}
+export interface PresalesCancelRequest {
+  operationId: string
+}
+export interface PresalesListQuery {
+  q?: string
+  status?: string
+  ownerId?: string
+  stage?: string
+  page?: number
+  pageSize?: number
+}
+async function request<T>(
+  workspaceId: string,
+  config: AxiosRequestConfig,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await workspaceRequest<{ data: T }>(workspaceId, config, signal)
   return response.data
+}
+async function requestProject(
+  ws: string,
+  config: AxiosRequestConfig,
+  id?: string,
+  signal?: AbortSignal,
+) {
+  return decodeProject(await request<unknown>(ws, config, signal), ws, id)
 }
 const projectPath = (id: string) => `/presales/projects/${encodeURIComponent(id)}`
 export const presalesApi = {
-  members: (ws: string, signal?: AbortSignal) => request<PresalesRecord[]>(ws, { url: `/workspaces/${encodeURIComponent(ws)}/members` }, signal),
-  sources: (ws: string) => request<PresalesRecord[]>(ws, { url: '/presales/sources' }),
-  statements: (ws: string, id: string) => request<PresalesRecord[]>(ws, { url: `${projectPath(id)}/statements` }),
-  handoff: (ws: string, id: string) => request<PresalesRecord>(ws, { url: `${projectPath(id)}/handoff` }),
-  file: (ws: string, id: string, versionId: string, filename: string, kind: 'files' | 'preview' | 'draft') => http.get<unknown, Blob>(`${projectPath(id)}/${kind === 'draft' ? 'solutions' : 'releases'}/${encodeURIComponent(versionId)}/${kind}/${encodeURIComponent(filename)}`, { ...scopedConfig(ws), responseType: 'blob' }),
-  capabilities: (ws: string, signal?: AbortSignal) => request<PresalesCapabilities>(ws, { url: '/presales/capabilities' }, signal),
-  list: (ws: string, params: Record<string, string | number>, signal?: AbortSignal) => request<ProjectPage>(ws, { url: '/presales/projects', params }, signal),
-  get: (ws: string, id: string, signal?: AbortSignal) => request<PresalesProject>(ws, { url: projectPath(id) }, signal),
-  create: (ws: string, data: object) => request<PresalesProject>(ws, { url: '/presales/projects', method: 'POST', data }),
-  update: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: projectPath(id), method: 'PATCH', data }),
-  command: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/commands`, method: 'POST', data }),
-  evidence: (ws: string, id: string, graphId: string, evidenceId: string) => request<PresalesRecord>(ws, { url: `${projectPath(id)}/evidence`, params: { graphId, evidenceId } }),
-  employees: (ws: string, signal?: AbortSignal) => request<PresalesRecord[]>(ws, { url: '/presales/employees' }, signal),
-  generate: (ws: string, id: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/generate`, method: 'POST', data }),
-  cancelTask: (ws: string, id: string, taskId: string, data: object) => request<PresalesProject>(ws, { url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`, method: 'POST', data }),
+  members: (ws: string, signal?: AbortSignal) =>
+    request<unknown>(ws, { url: `/workspaces/${encodeURIComponent(ws)}/members` }, signal).then(
+      (value) => decodeMembers(value, ws),
+    ),
+  sources: (ws: string) => request<unknown>(ws, { url: '/presales/sources' }).then(decodeSources),
+  statements: (ws: string, id: string) =>
+    request<unknown>(ws, { url: `${projectPath(id)}/statements` }).then(decodeStatements),
+  handoff: (ws: string, id: string) =>
+    request<unknown>(ws, { url: `${projectPath(id)}/handoff` }).then((value) =>
+      decodeHandoff(value, ws, id),
+    ),
+  file: (
+    ws: string,
+    id: string,
+    versionId: string,
+    filename: string,
+    kind: 'files' | 'preview' | 'draft',
+  ) =>
+    workspaceRequest<Blob>(ws, {
+      url: `${projectPath(id)}/${kind === 'draft' ? 'solutions' : 'releases'}/${encodeURIComponent(versionId)}/${kind}/${encodeURIComponent(filename)}`,
+      responseType: 'blob',
+    }),
+  capabilities: (ws: string, signal?: AbortSignal) =>
+    request<unknown>(ws, { url: '/presales/capabilities' }, signal).then(decodeCapabilities),
+  list: (ws: string, params: PresalesListQuery, signal?: AbortSignal) =>
+    request<unknown>(ws, { url: '/presales/projects', params }, signal).then((value) =>
+      decodeProjectPage(value, ws),
+    ),
+  get: (ws: string, id: string, signal?: AbortSignal) =>
+    requestProject(ws, { url: projectPath(id) }, id, signal),
+  repairContext: (ws: string, id: string, signal?: AbortSignal) =>
+    request<unknown>(ws, { url: `${projectPath(id)}/repair-context` }, signal).then((value) =>
+      decodeRepairContext(value, ws, id),
+    ),
+  create: (ws: string, data: PresalesProjectCreate) =>
+    requestProject(ws, {
+      url: '/presales/projects',
+      method: 'POST',
+      data,
+    }),
+  update: (ws: string, id: string, data: PresalesProjectWrite) =>
+    requestProject(
+      ws,
+      {
+        url: projectPath(id),
+        method: 'PATCH',
+        data,
+      },
+      id,
+    ),
+  command: (ws: string, id: string, data: PresalesCommandRequest) =>
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/commands`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
+  evidence: (ws: string, id: string, graphId: string, evidenceId: string) =>
+    request<unknown>(ws, {
+      url: `${projectPath(id)}/evidence`,
+      params: { graphId, evidenceId },
+    }),
+  employees: (ws: string, signal?: AbortSignal) =>
+    request<unknown>(ws, { url: '/presales/employees' }, signal).then(decodeEmployees),
+  generate: (ws: string, id: string, data: PresalesGenerateRequest) =>
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/generate`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
+  cancelTask: (ws: string, id: string, taskId: string, data: PresalesCancelRequest) =>
+    requestProject(
+      ws,
+      {
+        url: `${projectPath(id)}/tasks/${encodeURIComponent(taskId)}/cancel`,
+        method: 'POST',
+        data,
+      },
+      id,
+    ),
 }

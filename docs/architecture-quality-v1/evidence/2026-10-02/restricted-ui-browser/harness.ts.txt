@@ -1,0 +1,17 @@
+import { createApp, h } from 'vue'
+import { createPinia } from 'pinia'
+import { createRouter, createWebHistory, RouterView } from 'vue-router'
+import { createI18n } from 'vue-i18n'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import Workbench from './src/features/presales/pages/PresalesWorkbench.vue'
+import messages from './src/i18n/locales/en-US'
+import { currentLocale } from './src/i18n'
+localStorage.setItem('mc-workspace-id', '90071992547409999')
+currentLocale.value = 'en-US'
+const router = createRouter({ history: createWebHistory(), routes: [{path:'/aq-restricted-ui.html', component:Workbench}] })
+// The production component expects the projectId route parameter.
+router.addRoute({path:'/aq-restricted-ui.html/:projectId', component:Workbench})
+await router.push('/aq-restricted-ui.html/90071992547409998')
+await router.isReady()
+createApp({ render: () => h(RouterView) }).use(createPinia()).use(router).use(ElementPlus).use(createI18n({legacy:false,locale:'en-US',messages:{'en-US':messages}})).mount('#app')

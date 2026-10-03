@@ -1,0 +1,62 @@
+{
+  "task": "AQ-05/AQ-09",
+  "start_head": "1e8ec81fd946bd0d60551dfa480798140729925c",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before": {
+    "tests": 59,
+    "passed": 59,
+    "new_characterizations": 4,
+    "existing_55_test_bytes_unchanged": true
+  },
+  "after": {
+    "files": 8,
+    "tests": 146,
+    "passed": 146,
+    "failed": 0,
+    "skipped": 0
+  },
+  "page_lines": {
+    "before": 2531,
+    "after": 2101
+  },
+  "css": {
+    "contracts": 98,
+    "scoped_compilations": 6,
+    "status": "PASS",
+    "visual_qa": "NOT_RUN"
+  },
+  "typecheck": "PASS",
+  "nonfix_lint": "PASS",
+  "format": "PASS",
+  "dev_tasks": [
+    "uvzuqbe5",
+    "dx36afsc",
+    "2k0sk2zm"
+  ],
+  "source_sha256": {
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "18722e29a24528568a4fc638d980778582fae194590d02ff1c3e938b058de98f",
+    "mateclaw-ui/src/features/presales/components/PresalesAssignmentFields.vue": "fe0c20a70fd6098b85a2c64fa8ada27d0f75a30defe90ef6b0c3602f206fa370",
+    "mateclaw-ui/src/features/presales/components/PresalesDiscoveryFields.vue": "3aaf4f4f644ac85e20b2fa1fa30a594543f78aadbd85a291a97009b5201afb5a",
+    "mateclaw-ui/src/features/presales/components/PresalesOutputFields.vue": "b0dcc94e9d2c5f3c928cfbb88afdecf20249d51f9d2d6e39f9e3d7b654c7bd06",
+    "mateclaw-ui/src/features/presales/shared/editorFields.css": "81ef224dc5abdca5b67bb3c78687e4639766658a94d9fbbc0d133d8863c21a3c",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "cab66627c4ea4c49986195b2c8b8fdc5b7c25a027e3d217e46b3d08e63baf6c7",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-css-contract.mjs": "276596dcee2d29e61bf6a76ef953aed909cb8085bed6764797f4915fc9fa2577"
+  },
+  "logs_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/initial-dev.txt": "4977357e468b063e7c34b16bc517d99d571290ba69adb7e817f875222c1df940",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/first-fixture-failure.txt": "32b2ac9f5cc8bf546fbb41d4bd72243aaa714c060b00016f2645ab12306f0004",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/second-fixture-failure.txt": "fd5283badaa8e4c39747d98c0f2c921b6c726485766c52e45a7b947fdcceeded",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/before-three.txt": "3ee54cac2f15458cf3c4cb04ff5d7ce3b6f29e6b201190f6e9f192350a1a1146",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/before-final.txt": "c3a5bf292de057bb4da5c3d289f36d8d61d5e5f995fc3ed7144b2460f985ef60",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/after.txt": "338ee489d252a8cd8b612d72cf2095b57c672defe4a3028844415f934b84cb28",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/format.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/css.txt": "34f1b80264ac1694c3d1476745702bbfbeb541a95c2ef7702bc384231073451a",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/dev.txt": "92f7747ff54cf6c227e277c7a41dcf11691a4c194792e8b17f32d0cee103ac25",
+    "docs/architecture-quality-v1/evidence/2026-10-02/editor-fields-tests/final-dev.txt": "670974376fe90e543d49fef9b0b5ed7d0fa62482810ae27875da79cee22218a1"
+  },
+  "independent_review": "APPROVE_BOUNDED_EDITOR_FIELDS_EXTRACTION workbench_confirmation_audit",
+  "formal_qa": "NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED"
+}
