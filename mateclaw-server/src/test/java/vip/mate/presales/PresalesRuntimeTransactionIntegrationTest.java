@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.aop.support.AopUtils;
@@ -399,6 +400,165 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                 UUID.randomUUID().toString(),
                 "SAVE_AI_TASK",
                 candidate);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SUCCEEDED", "FAILED", "CANCELLED", "DRAFT"})
+    void lateFailureCannotOverwriteTerminalTask(String status) throws Exception {
+        var live = task.deepCopy().put("status", status);
+        live.put("finishedAt", "already-finished");
+        live.set("result", json.createObjectNode().put("original", true));
+        replaceDurableTask(live);
+        assertFailureRejectedWithoutWrite("FAILED");
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "runId", "operationId", "agentId", "skill", "modelConfigId", "configDigest",
+                "skillName", "skillDigest", "presentationDigest", "conversationId",
+                        "contextSnapshot", "extension"
+            })
+    void failureCannotOverwriteChangedRunIdentity(String field) throws Exception {
+        var live = task.deepCopy();
+        if ("contextSnapshot".equals(field))
+            live.withObject("contextSnapshot").put("projectVersion", 999);
+        else live.put(field, "replacement");
+        replaceDurableTask(live);
+        assertFailureRejectedWithoutWrite("FAILED");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"RUNNING", "DRAFT"})
+    void employeeBoundaryRejectsNonTerminalCandidate(String status) {
+        assertFailureRejectedWithoutWrite(status);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"error", "rejectedOutput"})
+    void successIdentityStillRejectsAddedFailureDiagnostics(String field) {
+        var candidate = task.deepCopy().put("status", "SUCCEEDED");
+        candidate.set("result", json.createObjectNode().put("schemaVersion", 1));
+        candidate.put(field, "injected");
+        var before =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText());
+        int receipts = receiptCount(), revisions = revisionCount();
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.saveEmployeeTask(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        new PresalesDtos.Command(
+                                                project.path("version").asInt(),
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_AI_TASK",
+                                                candidate)));
+        assertEquals(409, error.status());
+        assertEquals("TASK_SCOPE_CHANGED", error.code());
+        assertEquals(
+                before,
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+        assertEquals(receipts, receiptCount());
+        assertEquals(revisions, revisionCount());
+        noExternalCall();
+    }
+
+    @Test
+    void matchingRunningFailureRetainsDiagnosticsAfterUnrelatedProjectEdit() {
+        project =
+                service.command(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asInt(),
+                                UUID.randomUUID().toString(),
+                                "UPDATE_PROJECT",
+                                json.createObjectNode().put("goal", "New user goal")));
+        int receipts = receiptCount(), revisions = revisionCount();
+        var candidate =
+                task.deepCopy()
+                        .put("status", "FAILED")
+                        .put("error", "PROJECT_CHANGED_DURING_GENERATION")
+                        .put("finishedAt", "finished");
+        candidate.set("rejectedOutput", json.createObjectNode().put("reason", "diagnostic"));
+        var saved =
+                service.saveEmployeeTask(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asInt(),
+                                UUID.randomUUID().toString(),
+                                "SAVE_AI_TASK",
+                                candidate));
+        assertEquals(project.path("version").asInt() + 1, saved.path("version").asInt());
+        assertEquals("New user goal", saved.path("goal").asText());
+        assertEquals("FAILED", saved.path("tasks").get(0).path("status").asText());
+        assertEquals(
+                candidate.path("rejectedOutput"),
+                saved.path("tasks").get(0).path("rejectedOutput"));
+        assertTrue(saved.path("tasks").get(0).path("result").isMissingNode());
+        assertEquals(receipts + 1, receiptCount());
+        assertEquals(revisions + 1, revisionCount());
+        noExternalCall();
+    }
+
+    private void replaceDurableTask(ObjectNode live) throws Exception {
+        project = project.deepCopy();
+        project.withArray("tasks").set(0, live);
+        project.put("version", project.path("version").asInt() + 1);
+        assertEquals(
+                1,
+                jdbc.update(
+                        "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=?",
+                        json.writeValueAsString(project),
+                        project.path("version").asInt(),
+                        project.path("id").asText(),
+                        workspace));
+    }
+
+    private void assertFailureRejectedWithoutWrite(String candidateStatus) {
+        String before =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText());
+        int receipts = receiptCount(), revisions = revisionCount();
+        var candidate =
+                task.deepCopy()
+                        .put("status", candidateStatus)
+                        .put("error", "LATE_FAILURE")
+                        .put("finishedAt", "late");
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.saveEmployeeTask(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        new PresalesDtos.Command(
+                                                project.path("version").asInt(),
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_AI_TASK",
+                                                candidate)));
+        assertEquals(409, error.status());
+        assertEquals("TASK_SCOPE_CHANGED", error.code());
+        assertEquals(
+                before,
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+        assertEquals(receipts, receiptCount());
+        assertEquals(revisions, revisionCount());
+        noExternalCall();
     }
 
     private void noExternalCall() {

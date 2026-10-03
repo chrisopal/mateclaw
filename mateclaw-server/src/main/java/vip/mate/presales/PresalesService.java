@@ -361,6 +361,12 @@ public class PresalesService {
                         "status",
                         Set.of("RUNNING", "SUCCEEDED", "FAILED", "DRAFT"),
                         "DRAFT");
+                if (employeeResult && !"SUCCEEDED".equals(value.path("status").asText())) {
+                    if (!"FAILED".equals(value.path("status").asText())
+                            || !matchesRunningTask(
+                                    find(p, "tasks", value.path("id").asText()), value))
+                        throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+                }
                 if (employeeResult && "SUCCEEDED".equals(value.path("status").asText())) {
                     if (!(value.path("result") instanceof ObjectNode result))
                         throw PresalesModelAdapter.error(422, "MODEL_FORMAT");
@@ -374,12 +380,7 @@ public class PresalesService {
                     ObjectNode activeTask = find(p, "tasks", value.path("id").asText());
                     if (!(activeTask.path("contextSnapshot") instanceof ObjectNode activeSnapshot))
                         throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
-                    ObjectNode durableIdentity = activeTask.deepCopy();
-                    ObjectNode candidateIdentity = value.deepCopy();
-                    durableIdentity.remove(List.of("status", "finishedAt", "result"));
-                    candidateIdentity.remove(List.of("status", "finishedAt", "result"));
-                    if (!"RUNNING".equals(activeTask.path("status").asText())
-                            || !durableIdentity.equals(candidateIdentity))
+                    if (!matchesRunningTask(activeTask, value))
                         throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
                     lockResultAuthority(scope, actor, activeTask, activeSnapshot);
                     employees.getObject().revalidate(scope, actor, value, snapshot);
@@ -1219,6 +1220,19 @@ public class PresalesService {
 
     private static void operation(String s) {
         text(s, "operationId", 128);
+    }
+
+    private static boolean matchesRunningTask(ObjectNode activeTask, ObjectNode candidate) {
+        if (!"RUNNING".equals(activeTask.path("status").asText())) return false;
+        ObjectNode durableIdentity = activeTask.deepCopy();
+        ObjectNode candidateIdentity = candidate.deepCopy();
+        var outputFields =
+                "FAILED".equals(candidate.path("status").asText())
+                        ? List.of("status", "finishedAt", "result", "error", "rejectedOutput")
+                        : List.of("status", "finishedAt", "result");
+        durableIdentity.remove(outputFields);
+        candidateIdentity.remove(outputFields);
+        return durableIdentity.equals(candidateIdentity);
     }
 
     private void saveItem(

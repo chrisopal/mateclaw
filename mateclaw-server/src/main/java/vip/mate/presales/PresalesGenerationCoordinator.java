@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import vip.mate.presales.repository.PresalesProjectRepository;
 import vip.mate.semantic.web.SemanticApiException;
 
 /**
@@ -41,7 +41,7 @@ public class PresalesGenerationCoordinator {
     private final PresalesContextProvider contexts;
     private final PresalesEmployeeRuntime model;
     private final ObjectMapper json;
-    private final JdbcTemplate jdbc;
+    private final PresalesProjectRepository projects;
     private final ObjectProvider<PresalesPresentationHook> presentation;
     private final Map<String, Boolean> active = new ConcurrentHashMap<>();
     private final Map<String, Boolean> cancellationRequested = new ConcurrentHashMap<>();
@@ -52,13 +52,13 @@ public class PresalesGenerationCoordinator {
             PresalesContextProvider contexts,
             PresalesEmployeeRuntime model,
             ObjectMapper json,
-            JdbcTemplate jdbc,
+            PresalesProjectRepository projects,
             ObjectProvider<PresalesPresentationHook> presentation) {
         this.service = service;
         this.contexts = contexts;
         this.model = model;
         this.json = json;
-        this.jdbc = jdbc;
+        this.projects = projects;
         this.presentation = presentation;
     }
 
@@ -112,7 +112,7 @@ public class PresalesGenerationCoordinator {
         try {
             ObjectNode current = service.get(submission.scope(), submission.projectId());
             ObjectNode live = service.find(current, "tasks", taskId);
-            if (!TASK_RUNNING.equals(live.path("status").asText())) return;
+            if (!matchesAcceptedRun(live, submission)) return;
 
             ObjectNode result =
                     model.execute(
@@ -190,8 +190,8 @@ public class PresalesGenerationCoordinator {
             try {
                 ObjectNode current = service.get(submission.scope(), submission.projectId());
                 ObjectNode live = service.find(current, "tasks", task.path("id").asText());
-                if (TASK_CANCELLED.equals(live.path("status").asText())
-                        || cancellationRequested.containsKey(key)) return;
+                if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
+                    return;
                 if (current.path("version").asInt() != submission.acceptedVersion()) {
                     task.put("status", "FAILED").put("error", "PROJECT_CHANGED_DURING_GENERATION");
                     task.remove("result");
@@ -224,20 +224,16 @@ public class PresalesGenerationCoordinator {
 
     /** Last-resort server-side CAS when the original actor context has disappeared. */
     private void persistFailureWithoutActor(Submission submission, ObjectNode task) {
-        if (jdbc == null) return;
+        if (projects == null) return;
+        String key = key(submission.scope(), submission.projectId(), task.path("id").asText());
         try {
             for (int attempt = 0; attempt < 3; attempt++) {
-                var rows =
-                        jdbc.queryForList(
-                                "SELECT version,body_json FROM mate_presales_project WHERE id=? AND workspace_id=?",
-                                submission.projectId(),
-                                submission.scope());
-                if (rows.size() != 1) return;
-                int version = ((Number) rows.getFirst().get("version")).intValue();
+                if (cancellationRequested.containsKey(key)) return;
+                var row = projects.findRuntimeRow(submission.scope(), submission.projectId());
+                if (row.isEmpty()) return;
+                int version = row.get().version();
                 ObjectNode project =
-                        (ObjectNode)
-                                json.readTree(
-                                        Objects.toString(rows.getFirst().get("body_json"), "{}"));
+                        (ObjectNode) json.readTree(Objects.toString(row.get().bodyJson(), "{}"));
                 ObjectNode live = null;
                 for (JsonNode candidate : project.path("tasks")) {
                     if (task.path("id").asText().equals(candidate.path("id").asText())) {
@@ -245,7 +241,8 @@ public class PresalesGenerationCoordinator {
                         break;
                     }
                 }
-                if (live == null || TASK_CANCELLED.equals(live.path("status").asText())) return;
+                if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
+                    return;
                 // A concurrent project edit invalidates the model snapshot; keep the task terminal
                 // and
                 // discard its output rather than overwriting the user's newer project body.
@@ -254,22 +251,18 @@ public class PresalesGenerationCoordinator {
                                 ? "TERMINAL_PERSISTENCE_FAILED"
                                 : "PROJECT_CHANGED_DURING_GENERATION";
                 task.put("status", "FAILED").put("error", error).remove("result");
-                for (JsonNode candidate : project.path("tasks")) {
-                    if (task.path("id").asText().equals(candidate.path("id").asText())) {
-                        ((ObjectNode) candidate).setAll(task);
-                        break;
-                    }
-                }
+                live.remove("result");
+                live.setAll(task);
                 int nextVersion = version + 1;
                 project.put("version", nextVersion);
+                if (cancellationRequested.containsKey(key)) return;
                 int changed =
-                        jdbc.update(
-                                "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=? AND version=?",
-                                json.writeValueAsString(project),
-                                nextVersion,
-                                submission.projectId(),
+                        projects.updateRuntimeBody(
                                 submission.scope(),
-                                version);
+                                submission.projectId(),
+                                version,
+                                nextVersion,
+                                json.writeValueAsString(project));
                 if (changed == 1) return;
             }
         } catch (Exception e) {
@@ -288,16 +281,14 @@ public class PresalesGenerationCoordinator {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void recoverStaleTasks() {
-        if (jdbc == null) return;
-        for (Map<String, Object> row :
-                jdbc.queryForList(
-                        "SELECT id,workspace_id,version,body_json FROM mate_presales_project")) {
-            String projectId = Objects.toString(row.get("id"), "");
-            String scope = Objects.toString(row.get("workspace_id"), "");
-            int version = ((Number) row.get("version")).intValue();
+        if (projects == null) return;
+        for (var row : projects.listRuntimeRows()) {
+            String projectId = row.id();
+            String scope = row.workspaceId();
+            int version = row.version();
             ObjectNode project;
             try {
-                project = (ObjectNode) json.readTree(Objects.toString(row.get("body_json"), "{}"));
+                project = (ObjectNode) json.readTree(Objects.toString(row.bodyJson(), "{}"));
             } catch (Exception e) {
                 log.warn("Unable to inspect presales project during recovery: {}", projectId, e);
                 continue;
@@ -319,13 +310,7 @@ public class PresalesGenerationCoordinator {
             project.put("version", nextVersion);
             try {
                 String body = json.writeValueAsString(project);
-                jdbc.update(
-                        "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=? AND version=?",
-                        body,
-                        nextVersion,
-                        projectId,
-                        scope,
-                        version);
+                projects.updateRuntimeBody(scope, projectId, version, nextVersion, body);
             } catch (Exception e) {
                 log.warn("Unable to persist interrupted presales tasks: project={}", projectId, e);
             }
@@ -341,6 +326,12 @@ public class PresalesGenerationCoordinator {
         } catch (RuntimeException e) {
             return true;
         }
+    }
+
+    private static boolean matchesAcceptedRun(ObjectNode live, Submission submission) {
+        return live != null
+                && TASK_RUNNING.equals(live.path("status").asText())
+                && live.equals(submission.task());
     }
 
     private static String key(String scope, String projectId, String taskId) {

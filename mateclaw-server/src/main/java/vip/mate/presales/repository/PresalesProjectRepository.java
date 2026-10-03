@@ -1,5 +1,7 @@
 package vip.mate.presales.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,46 @@ public class PresalesProjectRepository {
                 "SELECT body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",
                 (row, n) -> row.getString(1),
                 scope);
+    }
+
+    /** Server restart inspection; callers own recovery eligibility and transitions. */
+    public List<ProjectRow> listRuntimeRows() {
+        return jdbc.query(
+                "SELECT id,workspace_id,version,name,status,body_json FROM mate_presales_project",
+                PresalesProjectRepository::projectRow);
+    }
+
+    public Optional<ProjectRow> findRuntimeRow(String scope, String id) {
+        return jdbc
+                .query(
+                        "SELECT id,workspace_id,version,name,status,body_json FROM mate_presales_project WHERE id=? AND workspace_id=?",
+                        PresalesProjectRepository::projectRow,
+                        id,
+                        scope)
+                .stream()
+                .findFirst();
+    }
+
+    /** Runtime envelope CAS preserves separately maintained name/status columns. */
+    public int updateRuntimeBody(
+            String scope, String id, int expectedVersion, int nextVersion, String bodyJson) {
+        return jdbc.update(
+                "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=? AND version=?",
+                bodyJson,
+                nextVersion,
+                id,
+                scope,
+                expectedVersion);
+    }
+
+    private static ProjectRow projectRow(ResultSet row, int index) throws SQLException {
+        return new ProjectRow(
+                row.getString("id"),
+                row.getString("workspace_id"),
+                row.getInt("version"),
+                row.getString("name"),
+                row.getString("status"),
+                row.getString("body_json"));
     }
 
     public Optional<String> findBody(String scope, String id, boolean lock) {

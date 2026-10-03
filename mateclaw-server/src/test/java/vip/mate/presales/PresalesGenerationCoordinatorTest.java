@@ -6,9 +6,10 @@ import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Map;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
+import vip.mate.presales.repository.PresalesProjectRepository;
 
 class PresalesGenerationCoordinatorTest {
     @SuppressWarnings("unchecked")
@@ -168,18 +169,16 @@ class PresalesGenerationCoordinatorTest {
     @Test
     void recoveryMarksEvenRecentlyQueuedTasksInterrupted() throws Exception {
         var json = new ObjectMapper();
-        var jdbc = mock(org.springframework.jdbc.core.JdbcTemplate.class);
-        when(jdbc.queryForList(anyString()))
+        var projects = mock(PresalesProjectRepository.class);
+        when(projects.listRuntimeRows())
                 .thenReturn(
-                        java.util.List.of(
-                                Map.of(
-                                        "id",
+                        List.of(
+                                new PresalesProjectRepository.ProjectRow(
                                         "p",
-                                        "workspace_id",
                                         "w",
-                                        "version",
                                         4,
-                                        "body_json",
+                                        "original",
+                                        "ACTIVE",
                                         "{\"version\":4,\"tasks\":[{\"id\":\"t\",\"status\":\"RUNNING\",\"queuedAt\":\"%s\"}]}"
                                                 .formatted(
                                                         java.time.Instant.now().minusSeconds(1)))));
@@ -189,16 +188,11 @@ class PresalesGenerationCoordinatorTest {
                         mock(PresalesContextProvider.class),
                         mock(PresalesEmployeeRuntime.class),
                         json,
-                        jdbc,
+                        projects,
                         hooks());
         coordinator.recoverStaleTasks();
-        verify(jdbc)
-                .update(
-                        contains("UPDATE mate_presales_project SET body_json=?"),
-                        contains("\"INTERRUPTED_BY_RESTART\""),
-                        eq(5),
-                        eq("p"),
-                        eq("w"),
-                        eq(4));
+        verify(projects)
+                .updateRuntimeBody(
+                        eq("w"), eq("p"), eq(4), eq(5), contains("\"INTERRUPTED_BY_RESTART\""));
     }
 }
