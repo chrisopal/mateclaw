@@ -333,3 +333,10 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 非DOM真实HTTP合同使用原生Node网络及最小Axios browser FormData调用方事实；原multipart/binary/cancel断言保留并加入真实409/意外断连。拒绝消音、去掉取消或修改生产helper。完整进程stderr回归覆盖窄spy不能捕获的HappyDOM晚到reset。第一源码完整门禁仍有分页单测意外SSE，临时诊断定位后，文件局部订阅fixture保留默认分页API合同并断言无外发/释放，独立SSE协议合同继续保留。其余12项只固定格式，源后缀/独立AST验证保持。
 
 覆盖取舍：Node环境不证明浏览器CORS；分页fixture不证明真实SSE网络，HTTP409不证明真实并发CAS，取消断连不证明领域写入fence。第一boundary失败、子进程红例、TS2304、第二fetch红例全部保留；最终1020全UI/Node/两构建及限定独立复核通过且全日志socket诊断消失。无生产代码/runner配置/依赖/旧迁移变更；测试环境/fixture仍须维护者控制面批准，正式46AC不升级。见evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_ACCEPTANCE.md及两份manifest。回退恢复测试源码，不操作数据。
+
+
+## ADR-AQ-030（Proposed）：逐动作原始写载荷与编辑意图
+
+16命令通过域内公开Payloads映射生成Intent判别联合；VersionedMutation组合CAS/operationId，编辑command分支和页面接受同一完整intent，剥离UI元数据后发送。拒绝继续使用action与Record并列，也不引入通用schema框架/新依赖。已声明ID保持string，嵌套字段/引用数组/版本有类型，模型result/contextSnapshot/presentation保留unknown。写字段optional和扩展unknown保留原部分请求、原始状态文本及服务器授权→source→receipt→CAS→业务校验顺序；前端类型不授予权限或批准。
+
+原125回归保持、16动作JSON逐字节合同及真实编译红例→绿例，独立description字段遗漏发现已关闭。精确源码门禁完整1037/Node/两主题构建通过。这里只修复原始写契约及调用关系，不声明完整领域DTO/status/runtime schema、SQL分页、V2迁移或真实浏览器验收完成。正式46AC保持NOT_RUN，维护者控制面/业务QA仍待。证据见evidence/2026-10-03/AQ05_COMMAND_PAYLOAD_ACCEPTANCE.md与command-payload-test-results.json。回退恢复源码，无持久化操作。

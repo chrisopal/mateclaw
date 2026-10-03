@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: filterAgentBindingItems matches skills by name, description, and version
+ok 1 - filterAgentBindingItems matches skills by name, description, and version
+  ---
+  duration_ms: 1.078583
+  type: 'test'
+  ...
+# Subtest: filterAgentBindingItems keeps all skills in original order for an empty query
+ok 2 - filterAgentBindingItems keeps all skills in original order for an empty query
+  ---
+  duration_ms: 0.054375
+  type: 'test'
+  ...
+# Subtest: filterAgentToolGroups matches tools by group, source, raw name, and description
+ok 3 - filterAgentToolGroups matches tools by group, source, raw name, and description
+  ---
+  duration_ms: 0.159541
+  type: 'test'
+  ...
+# Subtest: filterAgentToolGroups keeps all groups and tools for an empty query
+ok 4 - filterAgentToolGroups keeps all groups and tools for an empty query
+  ---
+  duration_ms: 0.121458
+  type: 'test'
+  ...
+# Subtest: real workspace transport and paged team fixture complete without late socket diagnostics
+ok 5 - real workspace transport and paged team fixture complete without late socket diagnostics
+  ---
+  duration_ms: 611.754959
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 677.99725
