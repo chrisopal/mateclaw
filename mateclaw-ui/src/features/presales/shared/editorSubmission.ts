@@ -3,6 +3,7 @@ import type {
   PresalesProject,
   PresalesRecord,
   PresalesCommandAction,
+  PresalesCommandIntent,
 } from '../api/presalesApi'
 
 export type PresalesEditorKind =
@@ -39,12 +40,10 @@ const actions = {
 export type EditorSubmission =
   | { kind: 'invalid'; issue: 'REQUIRED_FIELDS' | 'ANSWER_SOURCE' }
   | { kind: 'project'; data: PresalesEditorForm; metadata: ProjectMetadata }
-  | {
-      kind: 'command'
-      action: (typeof actions)[keyof typeof actions] | 'UPDATE_PROJECT'
-      payload: PresalesEditorForm
-      continueEmployee: boolean
-    }
+  | ({ kind: 'command'; continueEmployee: boolean } & Extract<
+      PresalesCommandIntent,
+      { action: (typeof actions)[keyof typeof actions] | 'UPDATE_PROJECT' }
+    >)
 
 function copyForm(record: PresalesRecord): PresalesEditorForm {
   // Keep the historical JSON-copy semantics, including opaque extension fields.

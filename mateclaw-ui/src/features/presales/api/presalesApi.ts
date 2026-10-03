@@ -10,6 +10,12 @@ import {
 } from './presalesResponse'
 import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
+import type { PresalesCommandIntent } from './presalesCommandTypes'
+export type {
+  PresalesCommandAction,
+  PresalesCommandIntent,
+  PresalesCommandPayloads,
+} from './presalesCommandTypes'
 // Heterogeneous historical records omit fields; opaque source snapshots remain unknown.
 export interface PresalesRecord {
   id?: string
@@ -248,27 +254,7 @@ export interface PresalesProjectWrite extends PresalesVersionedMutation {
 export interface PresalesProjectCreate extends Omit<PresalesProjectWrite, 'expectedVersion'> {
   expectedVersion: 0
 }
-export type PresalesCommandAction =
-  | 'UPDATE_PROJECT'
-  | 'ARCHIVE'
-  | 'BIND_MATERIAL'
-  | 'SAVE_REQUIREMENT'
-  | 'SAVE_CLARIFICATION'
-  | 'UNBIND_MATERIAL'
-  | 'CANCEL_AI_TASK'
-  | 'SAVE_AI_TASK'
-  | 'SAVE_CONTEXT'
-  | 'SAVE_REVIEW'
-  | 'CREATE_RELEASE'
-  | 'APPROVE_RELEASE'
-  | 'PUBLISH_RELEASE'
-  | 'APPROVE_BASELINE'
-  | 'SAVE_FIT_GAP'
-  | 'SAVE_SOLUTION'
-export interface PresalesCommandRequest extends PresalesVersionedMutation {
-  action: PresalesCommandAction
-  payload: Record<string, unknown>
-}
+export type PresalesCommandRequest = PresalesVersionedMutation & PresalesCommandIntent
 export type PresalesSkill = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7' | 'S8'
 export interface PresalesGenerateRequest extends PresalesVersionedMutation {
   skill: PresalesSkill

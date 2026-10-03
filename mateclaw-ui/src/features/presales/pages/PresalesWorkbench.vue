@@ -254,7 +254,7 @@
               <span>{{ binding.id }} · {{ stateLabel(binding.role) }}</span>
               <el-button
                 :disabled="!canWrite || saving"
-                @click="command('UNBIND_MATERIAL', { id: binding.id })"
+                @click="command({ action: 'UNBIND_MATERIAL', payload: { id: binding.id } })"
                 >{{ t('presales.unbind_material') }}</el-button
               >
             </li>
@@ -347,7 +347,7 @@
                       size="small"
                       type="danger"
                       :disabled="!canWrite || row.status === 'WITHDRAWN'"
-                      @click="command('UNBIND_MATERIAL', { id: row.id })"
+                      @click="command({ action: 'UNBIND_MATERIAL', payload: { id: row.id } })"
                       >{{ t('presales.withdraw') }}</el-button
                     >
                   </div></template
@@ -617,7 +617,9 @@
               @handoff="downloadHandoff"
               @evidence="showEvidence"
               @approve="approveRelease"
-              @publish="(releaseId) => command('PUBLISH_RELEASE', { releaseId })"
+              @publish="
+                (releaseId) => command({ action: 'PUBLISH_RELEASE', payload: { releaseId } })
+              "
               @download="download"
             />
           </el-tab-pane>
@@ -803,7 +805,7 @@ import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import {
   presalesApi,
   type PresalesCapabilities,
-  type PresalesCommandAction,
+  type PresalesCommandIntent,
   type PresalesSkill,
   type PresalesMember,
   type PresalesEmployee,
@@ -1284,10 +1286,8 @@ const editorTitle = computed(
 onBeforeRouteLeave(discard)
 onBeforeRouteUpdate(discard)
 const unregister = workspace.registerBeforeSwitch(discard)
-async function command(
-  action: PresalesCommandAction,
-  payload: Record<string, unknown>,
-): Promise<boolean> {
+async function command(intent: PresalesCommandIntent): Promise<boolean> {
+  const { action, payload } = intent
   const scope = captureScope()
   const ws = workspace.currentWorkspaceId,
     current = project.value
@@ -1309,8 +1309,7 @@ async function command(
   error.value = ''
   try {
     const result = await presalesApi.command(ws, current.id, {
-      action,
-      payload,
+      ...intent,
       expectedVersion: current.version,
       operationId: receipt({
         ws,
@@ -1383,9 +1382,11 @@ async function save() {
     }
     return
   }
-  if ((await command(submission.action, submission.payload)) && active()) {
+  // Keep UI-only metadata out of the HTTP body and preserve the action/payload relationship.
+  const { kind: submissionKind, continueEmployee: resumeEmployee, ...intent } = submission
+  if (submissionKind === 'command' && (await command(intent)) && active()) {
     editorOpen.value = false
-    if (submission.continueEmployee && project.value?.agentId) await continueEmployee()
+    if (resumeEmployee && project.value?.agentId) await continueEmployee()
   }
 }
 
@@ -1459,9 +1460,9 @@ async function approveRelease(release: PresalesRecord) {
       !canApprove.value
     )
       return
-    await command('APPROVE_RELEASE', {
-      releaseId: release.id,
-      reason: result.value,
+    await command({
+      action: 'APPROVE_RELEASE',
+      payload: { releaseId: release.id, reason: result.value },
     })
   } catch {
     /* Cancel. */
@@ -1511,7 +1512,7 @@ async function archive() {
       project.value.sourceAccessRestricted
     )
       return
-    await command('ARCHIVE', {})
+    await command({ action: 'ARCHIVE', payload: {} })
   } catch {
     /* Cancel leaves data unchanged. */
   }
