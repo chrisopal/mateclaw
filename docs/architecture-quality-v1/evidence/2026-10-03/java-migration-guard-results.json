@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "task": "AQ-07 Java migration/source-freeze guard slice",
+  "base_head": "bf7a12f5406f46fcac1e3292a078f45414be3c6e",
+  "origin_dev": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "red": {
+    "exit": 1,
+    "tests": 19,
+    "assertion_or_subtest_failures": 35
+  },
+  "green": {
+    "exit": 0,
+    "guard_tests": 91
+  },
+  "published_source_cli": {
+    "scenarios": 18,
+    "checks": 36,
+    "all_expected_results": true
+  },
+  "independent_technical_review": {
+    "reviewer": "/root/java_migration_guard_review",
+    "verdict": "COMMENT",
+    "substantive_findings": 0,
+    "lsp": "NOT_RUN: tsc skipped; no tsconfig",
+    "ast_grep": "NOT_RUN: tool unavailable",
+    "python_ast": "PASS",
+    "maintainer_approval": "NOT_RUN",
+    "documentation_delta": "COMMENT: no material discrepancies; all 46 formal AC remain NOT_RUN; archive SHA and 18/36 CLI records checked."
+  },
+  "formal_ac_status": "NOT_RUN",
+  "remote_enforcement": "NOT_VERIFIED",
+  "archive_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/cli-probe.py": "f16dce0aa541e0eb480957cb4ceee72653b534937e88245b4a64cfd40c18ae69",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/cli-results.json": "1b51f820d67609ddaf465d695523bc61767dd1c334e28c3d153815dbb0829ff5",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/slice-dev.txt.gz": "cb5c6775c8389a4fd3fd83afda0aaed54e3302ab5dadcce370d131496e12d38e",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/red.txt.gz": "62f77f463f9e0d6f28e20953994d365758a4900ad27a16a7ee15aefec51da39d",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/green.txt.gz": "437a02e2c18572f34c9a63f81a76c2c33ac222c0b876cc0e077f77b14c0202d2",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/constraint-dev.txt.gz": "783b5c5761f4cb0eb793fe9a4ae8ab27ac87ca38688bbd9f2fd64ec1c0754ae7",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/initial-dev.txt.gz": "e9c2db66870a8fd630cd10a95624f79638f7a2ec1db715cc00e54bc2523a983e"
+  },
+  "archive_encoding": "Raw verification logs stored as lossless gzip; original whitespace/CRLF preserved. Initial staged diff whitespace check rejected plain log records; no rules changed."
+}

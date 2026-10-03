@@ -23,7 +23,8 @@
 | TS-001 / UI-001 | 同上 | 已安装 ratchet | AQ-05/09，any/内联双语 |
 | TEST-001 | 同上 | 已安装 ratchet | 防新增 skip/only；不能证明所有断言强度 |
 | STYLE-001 / STYLE-002 | 同上 | 已安装 | 长行存量 ratchet；修改行尾空白硬失败 |
-| DB-001 / DB-002 | 同上 | SQL 已安装；Java 入口/冻结闭包 NOT_IMPLEMENTED | 旧 SQL 迁移只读与三方言；实际反例证明 Java 变更/缺方言未触发；补强需独立控制面审核，不能当真实 DB 或完整不可变验收 |
+| DB-001 / DB-002 | 同上 | SQL/Java 入口已实现 | 旧入口只读与新入口三方言；源码规则不等于真实 DB 验收 |
+| DB-003 / DB-004 | 同上 | 冻结清单与基线项保护已实现 | 初装摘要/闭包人工核对；技术审阅不是维护人审批，远端强制仍 NOT_VERIFIED |
 | Python 门禁自测 | verify 所有模式 | 已安装并执行 | 数量和日志见实测；非应用验收 |
 | Java 格式 | Spotless + AOSP，commit/CI 适用时 | 根 POM 已配置 | 增量格式，不格式化原文/历史字节 |
 | 前端格式 | Prettier 3.6.2 + 固定 config | package/lock 已配置 | 只检查适用变更文件；不自动 --write |
@@ -45,7 +46,7 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 | AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
 | AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
 | AQ-02–06 | AQ-02 第一片工程实现，正式 AC-07–10 仍为 NOT_RUN；其余按各任务证据推进 | 补齐角色/来源权限矩阵、生产数据库并发验证与独立 QA 签收 |
-| AQ-07 | DESIGNED / NOT_IMPLEMENTED | 清零后 ArchUnit + policy 封口 |
+| AQ-07 | IN_PROGRESS：Java 迁移/冻结源码检查切片 | 独立维护人审批、远端强制；清零后 ArchUnit + policy 封口 |
 | AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
 | AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |
 | AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账 |
@@ -107,7 +108,9 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 
 每次涉及此边界，核对 Java 入口及全部冻结闭包，不只看 SQL 文件；比较实际 checksum 与历史版本，检查 Flyway 所有方言的发现和 validate 配置。固定 V1 算法不能为新业务需求直接修改，未来语义须新版本/迁移；编译器、JDK、Jackson 变化也需兼容证据。核对所有正文 writer 同事务维护派生版本、故障顺序、Workspace/CAS及失败回滚；旧 writer 混跑和新增写入后直接回退未获验证时不能部署切换。
 
-本次调整是对 R-06 原只读约束及现有可执行覆盖范围的澄清，没有修改 gate、policy、baseline或豁免失败。原因/反例/实际MySQL与H2证据见 [AQ06_LISTING_PROJECTION_ACCEPTANCE](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md) 与 manifest。DB-001/002 Java/闭包补强、真实Kingbase、生产回退、版本化请求hash/历史回执政策及独立维护人审核仍待完成。
+AQ06 当时仅澄清 R-06，未修改 gate；历史反例/真实 MySQL 与 H2 证据见 [AQ06_LISTING_PROJECTION_ACCEPTANCE](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md)。后续 AQ07 已补 Java/冻结源码检查，原因、覆盖差异、正反例及独立技术审阅见 [AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE](evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md)。无 baseline/policy 放宽或豁免。真实 Kingbase、生产回退、版本化请求 hash/历史回执政策、闭包人工审核及独立维护人批准仍待完成。
+
+Java 迁移审核须核对清单新增项与已发布 HEAD 源码摘要、全部直接/间接算法依赖及嵌套类型；不得只核对入口文件。清单移除、改摘要、同时修改历史源码应分别触发失败。验证使用 trusted base runner 的实际版本；未合入安装或未启用 required CI 不能宣称远端强制。AC-39/46 的正式状态不从门禁自测或 Agent 技术审阅自动升级。
 
 ## 检查规则如何调整
 

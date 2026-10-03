@@ -26,6 +26,8 @@ SCAN_PASS 不等于提交通过，NOT_RUN/BLOCKED 不等于 PASS。说明 NOT_AP
 
 原因、调整前后覆盖差异、影响路径、正反例、验证结果、同步更新的规则/脚本/台账、独立审阅人。不能为消除失败而删断言、降阈值或改 baseline。
 
+涉及 Java 迁移/冻结清单时，填写已发布 HEAD、初装/追加源码摘要、入口及完整算法依赖/嵌套类型、清单删项/重写摘要反例、trusted runner 版本和各方言 checksum/validate。Agent 技术审阅与维护人审批、远端 required CI 分别记录。
+
 ## 审核清单
 
 - [ ] 按 `docs/architecture-quality-v1/REVIEW_CHECKLIST.md` 检查本次影响范围

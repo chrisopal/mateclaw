@@ -661,7 +661,9 @@
       "owner": "工程门禁维护人 + 独立审核",
       "method": "门禁正反例 + 真实仓库流程",
       "status": "NOT_RUN",
-      "evidence": [],
+      "evidence": [
+        "evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md"
+      ],
       "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
     },
     {
@@ -757,7 +759,8 @@
         "evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md",
         "evidence/2026-10-03/terminal-reception-test-results.json",
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/listing-projection-test-results.json"
+        "evidence/2026-10-03/listing-projection-test-results.json",
+        "evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md"
       ],
       "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. Failed checked-push f1t0yr2g retained; final-event unit barrier repaired without weakening assertions. Independent technical review and exact source full gates are engineering evidence, not maintainer/QA acceptance. V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
     }
