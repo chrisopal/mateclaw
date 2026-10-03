@@ -347,3 +347,12 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 域内纯类型模块区分Requirement/Clarification/SolutionRevision/GenerationTask/Artifact/Handoff及相关嵌套形状，旧API名称再导出。当前wire保留稀疏历史optional、raw状态、字符串ID、nullable coverage/基线事实元数据和opaque模型/冻结快照；拒绝从写payload推断全历史必填或用asText式服务检查假称节点规范化。现有迭代decoder检查新增已声明字段及handoff v1 scope/项目/核心结构，reference语境两个WeakSet避免nullable例外泛化到普通记录。发布sourceRefs混合基线对象与澄清原节点，保留unknown[]；独立发现纯对象限制后真实红例→修复→关闭。无通用schema框架/新依赖/生产数据变化，不由类型/解析替代授权、checksum或AI审批。
 
 56新合同、394售前、精确1093全UI/Node/两构建与独立限定复核通过；旧取消/撤权断言保留，fixture只补真实信封，组件只删错误类型注解。完整领域状态/error/server schema、SQL/V2迁移、生产历史抽样、真实浏览器/业务QA/维护者/required远端CI仍待，正式46AC保持NOT_RUN。证据见evidence/2026-10-03/AQ05_DOMAIN_DTO_ACCEPTANCE.md及domain-dto-test-results.json。回退仅恢复客户端类型/准入，不重写持久化/冻结字节。
+
+
+## ADR-AQ-032 (Proposed): validate declared manual command fields after authority and replay
+
+Actual manual commands previously persisted coercive JSON nodes that client DTO admission cannot read. Choose a domain-local shape validator for the existing16 action branches; Service owns its placement after role/source/repair/replay/CAS/archive and before mutation, maps the existing Rejected error, and preserves its transaction. Missing fields and business policy remain in the current domain rules. No general schema framework/dependency, controller validation or database migration is introduced.
+
+New malformed field types receive400 INVALID_REQUEST and fixed field paths. Defaulted enum null, raw string revisions, extensions and original JSON order survive. Manual result/contextSnapshot top-level object admission is explicit, internals remain opaque; pinned employeeResult bypasses this manual schema. Solution presentation/sourceRefs retain policy422 and existing ordering. Old exact receipts replay before validation, persisted/frozen data is not rewritten. Other malformed multiple-field errors can become shape-first. Reject DTO-constructor validation because it changes authority/replay order; reject normalization because it changes hash/wire/history.
+
+64 new contracts and103 targeted regression tests, exact full Java reactor gates and bounded independent static review provide engineering evidence. This is declared write schema, not full server DTO/domain/model acceptance; all46 formal AC, maintainer/QA/required CI, SQL/V2/migration/browser/history remain pending. Source-only rollback has no database steps. See evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md and command-schema-test-results.json.
