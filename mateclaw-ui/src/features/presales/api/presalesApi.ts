@@ -7,85 +7,29 @@ import {
   decodeStatements,
   decodeEmployees,
   decodeCapabilities,
+  decodeHandoff,
 } from './presalesResponse'
 import { workspaceRequest } from '@/api/workspaceRequest'
 import type { AxiosRequestConfig } from 'axios'
 import type { PresalesCommandIntent } from './presalesCommandTypes'
+import type {
+  PresalesEntity,
+  PresalesTask,
+  PresalesMaterial,
+  PresalesRequirement,
+  PresalesClarification,
+  PresalesBaseline,
+  PresalesFitGap,
+  PresalesSolutionRevision,
+  PresalesReview,
+  PresalesRelease,
+} from './presalesDomainTypes'
+export type * from './presalesDomainTypes'
 export type {
   PresalesCommandAction,
   PresalesCommandIntent,
   PresalesCommandPayloads,
 } from './presalesCommandTypes'
-// Heterogeneous historical records omit fields; opaque source snapshots remain unknown.
-export interface PresalesRecord {
-  id?: string
-  [key: string]: unknown
-  version?: number
-  createdBy?: string
-  createdAt?: string
-  updatedBy?: string
-  updatedAt?: string
-  enabled?: boolean
-  artifactId?: string
-  files?: { filename: string }[]
-  name?: string
-  title?: string
-  text?: string
-  status?: string
-  role?: string
-  description?: string
-  originKind?: string
-  priority?: string
-  scope?: string
-  authority?: string
-  customerConfirmationStatus?: string
-  userId?: string
-  nickname?: string
-  username?: string
-  kbId?: string
-  graphId?: string
-  ontologyRevisionId?: string
-  revision?: number
-  label?: string
-  requirementId?: string
-  statementId?: string
-  statementRevision?: string | number
-  proposedByTaskId?: string
-  question?: string
-  impact?: string
-  ownerId?: string
-  answer?: string
-  answerSourceId?: string
-  reason?: string
-  evidenceText?: string
-  productVersion?: string
-  baselineId?: string
-  solutionId?: string
-  purpose?: string
-  summary?: string
-  severity?: string
-  operationId?: string
-  skill?: string
-  conversationId?: string
-  agentId?: string
-  agentName?: string
-  runId?: string
-  queueState?: string
-  error?: string
-  requirementRefs?: string[]
-  evidenceIds?: string[]
-  evidenceRefs?: string[]
-  sourceRefs?: string[]
-  sections?: PresalesRecord[]
-  references?: PresalesRecord[]
-  requirementResponses?: PresalesRecord[]
-  issues?: PresalesRecord[]
-  sourceSnapshot?: unknown
-  presentation?: PresalesPresentation
-  coverage?: PresalesCoverage
-  contextSnapshot?: PresalesContextSnapshot
-  result?: PresalesGenerationResult
-}
 /** Query projections have their own nullability; they are not business records. */
 export interface PresalesMember {
   [key: string]: unknown
@@ -126,36 +70,6 @@ export interface PresalesEmployee {
   enabled: boolean
   available: boolean
 }
-export interface PresalesEntity extends PresalesRecord {
-  id: string
-}
-export interface PresalesPresentation extends PresalesRecord {
-  artifactId: string
-  skill: string
-  skillVersion: string
-  pageCount: number
-  slides?: { filename: string; title?: string }[]
-}
-export interface PresalesCoverage {
-  applicable: boolean
-  handledIn: number
-  totalIn: number
-  responses?: PresalesRecord[]
-}
-export interface PresalesContextSnapshot extends PresalesRecord {
-  truncated?: boolean
-}
-export interface PresalesGenerationResult {
-  items?: PresalesRecord[]
-  solution?: PresalesRecord
-  unknowns?: unknown
-  assumptions?: unknown
-}
-export interface PresalesEditorForm extends PresalesRecord {
-  customer?: string
-  industry?: string
-  goal?: string
-}
 /** List items do not load the business collections required by project details. */
 export interface PresalesProjectSummary extends PresalesEntity {
   workspaceId: string
@@ -174,14 +88,14 @@ export interface PresalesProjectSummary extends PresalesEntity {
 export interface PresalesProject extends PresalesProjectSummary {
   sourceAccessRestricted?: boolean
   repairBindings?: { id: string; role: string }[]
-  materials: PresalesEntity[]
-  requirements: PresalesEntity[]
-  clarifications: PresalesEntity[]
-  baselines: PresalesEntity[]
-  fitGaps: PresalesEntity[]
-  solutions: PresalesEntity[]
-  reviews: PresalesEntity[]
-  releases: PresalesEntity[]
+  materials: PresalesMaterial[]
+  requirements: PresalesRequirement[]
+  clarifications: PresalesClarification[]
+  baselines: PresalesBaseline[]
+  fitGaps: PresalesFitGap[]
+  solutions: PresalesSolutionRevision[]
+  reviews: PresalesReview[]
+  releases: PresalesRelease[]
   cases?: PresalesEntity[]
   tasks?: PresalesTask[]
   context?: unknown
@@ -219,11 +133,6 @@ export interface PresalesRepairContext {
   releases: never[]
   tasks: never[]
   contextCards: never[]
-}
-export interface PresalesTask extends PresalesEntity {
-  operationId?: string
-  status: string
-  skill?: string
 }
 export interface PresalesCapabilities {
   enabled: boolean
@@ -296,7 +205,10 @@ export const presalesApi = {
   sources: (ws: string) => request<unknown>(ws, { url: '/presales/sources' }).then(decodeSources),
   statements: (ws: string, id: string) =>
     request<unknown>(ws, { url: `${projectPath(id)}/statements` }).then(decodeStatements),
-  handoff: (ws: string, id: string) => request<unknown>(ws, { url: `${projectPath(id)}/handoff` }),
+  handoff: (ws: string, id: string) =>
+    request<unknown>(ws, { url: `${projectPath(id)}/handoff` }).then((value) =>
+      decodeHandoff(value, ws, id),
+    ),
   file: (
     ws: string,
     id: string,

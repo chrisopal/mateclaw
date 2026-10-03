@@ -1077,7 +1077,23 @@ describe('presales workspace behavior', () => {
       else
         vi.mocked(presalesApi.handoff).mockReturnValue(
           new Promise((resolve) => {
-            finish = () => resolve({ id: 'handoff', text: 'Private handoff' })
+            finish = () =>
+              resolve({
+                id: 'handoff',
+                text: 'Private handoff',
+                schemaVersion: 1,
+                workspaceId: project.workspaceId,
+                engagementId: project.id,
+                caseRef: project.id,
+                baseline: { id: 'baseline-1' },
+                solution: { id: 'solution-1' },
+                release: { id: 'release-1' },
+                fitGaps: [],
+                clarifications: [],
+                risksAndUnknowns: [],
+                customerConfirmationStatus: 'UNCONFIRMED',
+                accessPolicy: 'WORKSPACE_REAUTHORIZE_ON_READ',
+              })
           }),
         )
       const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})

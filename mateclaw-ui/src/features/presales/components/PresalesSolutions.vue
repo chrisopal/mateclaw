@@ -191,9 +191,7 @@ const responseRows = computed(() =>
     )
     const solution = props.project?.solutions.at(-1)
     const baseline = props.project?.baselines.find((item) => item.id === solution?.baselineId)
-    const ref = baseline?.references?.find(
-      (item: PresalesRecord) => item.requirementId === requirement.id,
-    )
+    const ref = baseline?.references?.find((item) => item.requirementId === requirement.id)
     return {
       title: requirement.title,
       scope: ref?.scope || requirement.scope,

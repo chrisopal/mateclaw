@@ -8,6 +8,7 @@ import type {
   PresalesProjectSummary,
   PresalesRepairContext,
   ProjectPage,
+  PresalesHandoff,
 } from './presalesApi'
 
 const collections = [
@@ -54,6 +55,39 @@ const metadata = [
 ]
 const recordStrings = [
   'id',
+  'authorId',
+  'previousId',
+  'answeredBy',
+  'answeredAt',
+  'approvedBy',
+  'approvalReason',
+  'publishedBy',
+  'publishedAt',
+  'reviewId',
+  'templateVersion',
+  'kind',
+  'sourceSolutionId',
+  'requestHash',
+  'taskGoal',
+  'queuedAt',
+  'finishedAt',
+  'modelConfigId',
+  'configDigest',
+  'skillName',
+  'skillDigest',
+  'presentationDigest',
+  'workspaceId',
+  'caseRef',
+  'actorId',
+  'skillVersion',
+  'targetSolutionId',
+  'adapter',
+  'sha256',
+  'skillSha256',
+  'engineSha256',
+  'engineTreeSha256',
+  'inputSha256',
+  'qualityReportSha256',
   'createdBy',
   'createdAt',
   'updatedBy',
@@ -126,39 +160,79 @@ function array(value: unknown): asserts value is unknown[] {
 function optional(value: Record<string, unknown>, key: string, check: (item: unknown) => void) {
   if (Object.hasOwn(value, key)) check(value[key])
 }
-function records(value: unknown, pending: unknown[]) {
+interface PendingRecord {
+  value: unknown
+  reference: boolean
+}
+function records(value: unknown, pending: PendingRecord[], reference = false) {
   array(value)
-  for (const item of value) pending.push(item)
+  for (const item of value) pending.push({ value: item, reference })
+}
+function artifact(value: unknown) {
+  object(value)
+  string(value.filename)
+  optional(value, 'sha256', string)
+  optional(value, 'size', integer)
 }
 /** Validate only declared record fields. Frozen snapshots and extension JSON stay opaque. */
 function record(value: unknown) {
-  const pending: unknown[] = [value]
-  const visited = new WeakSet<object>()
+  validateRecord(value, false)
+}
+function validateRecord(value: unknown, reference: boolean) {
+  const pending: PendingRecord[] = [{ value, reference }]
+  const visited = { normal: new WeakSet<object>(), reference: new WeakSet<object>() }
   while (pending.length) {
-    const current = pending.pop()
+    const item = pending.pop()!
+    const current = item.value
     object(current)
-    if (visited.has(current)) continue
-    visited.add(current)
-    for (const key of recordStrings) optional(current, key, string)
-    for (const key of ['version', 'revision']) optional(current, key, integer)
-    optional(current, 'enabled', boolean)
+    const seen = item.reference ? visited.reference : visited.normal
+    if (seen.has(current)) continue
+    seen.add(current)
+    for (const key of recordStrings)
+      optional(current, key, (value) => {
+        if (item.reference && key === 'ontologyRevisionId' && value === null) return
+        string(value)
+      })
+    for (const key of [
+      'version',
+      'revision',
+      'baselineVersion',
+      'projectVersion',
+      'requirementVersion',
+      'schemaVersion',
+    ])
+      optional(current, key, integer)
+    for (const key of ['enabled', 'provisional', 'needsHumanReview'])
+      optional(current, key, boolean)
+    optional(current, 'sources', array)
     optional(current, 'statementRevision', (item) => {
       if (typeof item !== 'string') integer(item)
     })
-    for (const key of ['requirementRefs', 'evidenceIds', 'evidenceRefs', 'sourceRefs']) {
+    const entryReference = item.reference
+    for (const key of [
+      'requirementRefs',
+      'evidenceIds',
+      'evidenceRefs',
+      'sourceRefs',
+      'fitGapRefs',
+    ]) {
       optional(current, key, (item) => {
+        if (item === null && key === 'evidenceIds' && entryReference) return
         array(item)
-        item.forEach(string)
+        item.forEach((value) => {
+          if (entryReference && key === 'evidenceIds' && value === null) return
+          string(value)
+        })
       })
     }
     for (const key of ['sections', 'references', 'requirementResponses', 'issues']) {
-      optional(current, key, (item) => records(item, pending))
+      optional(current, key, (item) => records(item, pending, key === 'references'))
     }
     optional(current, 'files', (item) => {
       array(item)
       for (const file of item) {
         object(file)
-        string(file.filename)
+        artifact(file)
       }
     })
     optional(current, 'presentation', (item) => {
@@ -171,31 +245,43 @@ function record(value: unknown) {
         array(slides)
         for (const slide of slides) {
           object(slide)
-          string(slide.filename)
+          artifact(slide)
           optional(slide, 'title', string)
         }
       })
-      pending.push(item)
+      pending.push({ value: item, reference: false })
     })
     optional(current, 'coverage', (item) => {
       object(item)
       boolean(item.applicable)
       integer(item.handledIn)
       integer(item.totalIn)
+      optional(item, 'percentage', (percentage) => {
+        if (
+          percentage !== null &&
+          (typeof percentage !== 'number' ||
+            !Number.isFinite(percentage) ||
+            percentage < 0 ||
+            percentage > 100)
+        )
+          invalid()
+      })
       optional(item, 'responses', (responses) => records(responses, pending))
     })
     optional(current, 'contextSnapshot', (item) => {
       object(item)
       optional(item, 'truncated', boolean)
-      pending.push(item)
+      pending.push({ value: item, reference: false })
     })
     optional(current, 'result', (item) => {
       object(item)
-      optional(item, 'items', (items) => records(items, pending))
-      optional(item, 'solution', (solution) => {
-        object(solution)
-        pending.push(solution)
-      })
+      for (const key of ['items', 'capabilityMaps', 'cases'])
+        optional(item, key, (items) => records(items, pending))
+      for (const key of ['solution', 'solutionDraft', 'review', 'reviewDraft'])
+        optional(item, key, (draft) => {
+          object(draft)
+          pending.push({ value: draft, reference: false })
+        })
     })
   }
 }
@@ -376,4 +462,55 @@ export function decodeEmployees(value: unknown): PresalesEmployee[] {
 export function decodeCapabilities(value: unknown): PresalesCapabilities {
   capabilities(value)
   return value
+}
+
+/** Handoff admission preserves the original object; it does not verify artifacts or grant access. */
+export function decodeHandoff(
+  value: unknown,
+  workspaceId: string,
+  projectId: string,
+): PresalesHandoff {
+  handoff(value, workspaceId, projectId)
+  return value
+}
+function handoff(
+  value: unknown,
+  workspaceId: string,
+  projectId: string,
+): asserts value is PresalesHandoff {
+  object(value)
+  if (value.schemaVersion !== 1) invalid()
+  for (const key of [
+    'workspaceId',
+    'engagementId',
+    'caseRef',
+    'customerConfirmationStatus',
+    'accessPolicy',
+  ])
+    string(value[key])
+  if (
+    value.workspaceId !== workspaceId ||
+    value.engagementId !== projectId ||
+    value.caseRef !== projectId
+  )
+    invalid()
+  for (const key of ['baseline', 'solution', 'release']) entity(value[key])
+  for (const key of ['fitGaps', 'clarifications']) {
+    array(value[key])
+    value[key].forEach(entity)
+  }
+  array(value.risksAndUnknowns)
+  value.risksAndUnknowns.forEach(record)
+  optional(value, 'releaseId', string)
+  optional(value, 'historicalClarificationsAvailable', boolean)
+  optional(value, 'materials', (items) => {
+    array(items)
+    items.forEach(entity)
+  })
+  optional(value, 'sourceRefs', array)
+}
+function entity(value: unknown) {
+  object(value)
+  string(value.id)
+  record(value)
 }
