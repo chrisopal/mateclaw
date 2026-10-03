@@ -287,6 +287,13 @@ public class PresalesService {
         if ("ARCHIVED".equals(p.path("status").asText()))
             throw conflict("PROJECT_ARCHIVED", "Archived projects are read only");
         ObjectNode value = r.payload() == null ? json.createObjectNode() : r.payload().deepCopy();
+        if (!employeeResult) {
+            try {
+                PresalesCommandPayload.validate(parsedAction.kind(), value);
+            } catch (PresalesProjectItems.Rejected rejection) {
+                throw legacyRejection(rejection);
+            }
+        }
         switch (parsedAction.kind()) {
             case UPDATE_PROJECT -> {
                 if (value.has("agentId")) bindEmployee(scope, p, value.path("agentId").asText());
