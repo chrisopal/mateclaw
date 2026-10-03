@@ -1,4 +1,5 @@
-import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from 'vitest'
+// @vitest-environment node
+import { afterAll, afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import { http } from '@/api'
 import { workspaceRequest } from '@/api/workspaceRequest'
 import { biddingApi } from '@/features/bidding/api/biddingApi'
@@ -6,10 +7,23 @@ import { biddingApi } from '@/features/bidding/api/biddingApi'
 import { startWorkspaceLoopback } from '../../../../test/support/workspaceLoopback.mjs'
 import type { WorkspaceLoopback } from '../../../../test/support/workspaceLoopback.mjs'
 
+// Axios chooses browser FormData header rules when these globals exist at import time.
+// Keep that caller contract while using Node's actual fetch and byte classes.
+vi.hoisted(() => {
+  vi.stubGlobal('window', { location: { href: 'http://127.0.0.1/' } })
+  vi.stubGlobal('document', { cookie: '' })
+})
+
 let loopback: WorkspaceLoopback
 const originalBase = http.defaults.baseURL
 const originalAdapter = http.defaults.adapter
 beforeAll(async () => {
+  const storage = new Map<string, string>()
+  vi.stubGlobal('localStorage', {
+    clear: () => storage.clear(),
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+  } satisfies Pick<Storage, 'clear' | 'getItem' | 'setItem'>)
   loopback = await startWorkspaceLoopback()
 })
 beforeEach(() => {
@@ -24,7 +38,11 @@ afterEach(() => {
   http.defaults.adapter = originalAdapter
 })
 afterAll(async () => {
-  await loopback.close()
+  try {
+    await loopback.close()
+  } finally {
+    vi.unstubAllGlobals()
+  }
 })
 
 it('sends a real multipart boundary, exact fields and captured scope to loopback', async () => {
@@ -67,11 +85,35 @@ it('receives exact Blob and ArrayBuffer bytes through real transport', async () 
 })
 
 it('cancels an in-flight real request after the loopback server receives it', async () => {
-  const controller = new AbortController()
-  const started = loopback.waitForSlowRequest()
-  const promise = workspaceRequest('captured', { url: '/slow', signal: controller.signal })
-  const rejected = expect(promise).rejects.toThrow(/cancel/i)
-  await started
-  controller.abort()
-  await rejected
+  const errors = vi.spyOn(console, 'error')
+  try {
+    const disconnected = loopback.waitForSlowDisconnect()
+    const controller = new AbortController()
+    const started = loopback.waitForSlowRequest()
+    const promise = workspaceRequest('captured', { url: '/slow', signal: controller.signal })
+    const rejected = expect(promise).rejects.toThrow(/cancel/i)
+    await started
+    controller.abort()
+    await rejected
+    await disconnected
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    expect(errors).not.toHaveBeenCalled()
+  } finally {
+    errors.mockRestore()
+  }
+})
+
+it('preserves a real non-cancellation HTTP failure instead of swallowing it', async () => {
+  await expect(workspaceRequest('captured', { url: '/conflict' })).rejects.toMatchObject({
+    message: 'Retry conflict',
+    response: { status: 409 },
+  })
+  expect(loopback.received?.scope).toBe('captured')
+})
+
+it('rejects a real unexpected server disconnect instead of treating it as cancellation success', async () => {
+  await expect(workspaceRequest('captured', { url: '/disconnect' })).rejects.toThrow(
+    'Network Error',
+  )
+  expect(loopback.received?.scope).toBe('captured')
 })

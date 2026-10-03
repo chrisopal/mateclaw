@@ -3,6 +3,7 @@ import { createServer } from 'node:http'
 export async function startWorkspaceLoopback() {
   let received
   let slowStarted
+  let slowDisconnected
   const server = createServer(async (request, response) => {
     response.setHeader('Access-Control-Allow-Origin', '*')
     response.setHeader('Access-Control-Allow-Headers', 'X-Workspace-Id,Content-Type')
@@ -11,6 +12,7 @@ export async function startWorkspaceLoopback() {
       return
     }
     if (request.url === '/slow') {
+      response.once('close', () => slowDisconnected?.())
       slowStarted?.()
       return
     }
@@ -21,7 +23,13 @@ export async function startWorkspaceLoopback() {
       contentType: request.headers['content-type'],
       body: Buffer.concat(chunks).toString(),
     }
-    if (request.url === '/bytes') {
+    if (request.url === '/disconnect') {
+      response.destroy()
+    } else if (request.url === '/conflict') {
+      response.statusCode = 409
+      response.setHeader('Content-Type', 'application/json')
+      response.end(JSON.stringify({ code: 409, msg: 'Retry conflict' }))
+    } else if (request.url === '/bytes') {
       response.setHeader('Content-Type', 'application/octet-stream')
       response.end(Buffer.from([0, 1, 127, 128, 255]))
     } else {
@@ -40,10 +48,16 @@ export async function startWorkspaceLoopback() {
     reset() {
       received = undefined
       slowStarted = undefined
+      slowDisconnected = undefined
     },
     waitForSlowRequest() {
       return new Promise((resolve) => {
         slowStarted = resolve
+      })
+    },
+    waitForSlowDisconnect() {
+      return new Promise((resolve) => {
+        slowDisconnected = resolve
       })
     },
     async close() {
