@@ -1,0 +1,386 @@
+{
+  "task": "AQ-01/03/06 AC-21 terminal reception and coordinator storage boundary",
+  "source_commit": "f7d6cf80b433a659b6227009b606577cf5a86767",
+  "source_tree": "10b05cbc1587ca1ac852be827c346b3881396a2c",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "start_head": "3f0fbd4732efb80b1b9e42925264297c49cbdf01",
+  "source_files": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_PLAN.md",
+      "sha256": "20e43a2459743730815c8b1c6729ed6e2a6735edebc4cfd21fca51d1fb81ca41"
+    },
+    {
+      "file": "mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationCoordinator.java",
+      "sha256": "c1268a72689cd67b2ec302e38a581fbc5bb691e20d2ab527bc617313e6a1b280"
+    },
+    {
+      "file": "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+      "sha256": "98e354378e2171279f0fad99ec628d4dc2fccc0541de0978feb5cb2eb77962a8"
+    },
+    {
+      "file": "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesProjectRepository.java",
+      "sha256": "934d72f1877324c573faef918489e00acccb27272d335cb5a1d0783be7650f39"
+    },
+    {
+      "file": "mateclaw-server/src/test/java/vip/mate/presales/PresalesGenerationCoordinatorTest.java",
+      "sha256": "cdbd6ec54cd66f3126c49acd5fac7923e8e32b4c8e919633cb7e130175d7be7c"
+    },
+    {
+      "file": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java",
+      "sha256": "b1e6fcc72c0ef77637542da3424cc8f7c8a7e41a0c06577997ed29cf2a21d432"
+    },
+    {
+      "file": "mateclaw-server/src/test/java/vip/mate/presales/PresalesTerminalReceptionTest.java",
+      "sha256": "5e2227ad1336fb58296308f87381ad9d93f5409714217f44b10e06c0c8dc033f"
+    }
+  ],
+  "reports": [
+    {
+      "name": "staged",
+      "task_id": "6s_fjolw",
+      "target_identity": "10b05cbc1587ca1ac852be827c346b3881396a2c",
+      "status": "PASS",
+      "submission_ready": true,
+      "checks": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-format",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-tests",
+          "status": "PASS",
+          "executed_tests": 6114
+        },
+        {
+          "name": "ui-format",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-lint",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 1093
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        }
+      ]
+    },
+    {
+      "name": "hook",
+      "task_id": "lls2qw6r",
+      "target_identity": "10b05cbc1587ca1ac852be827c346b3881396a2c",
+      "status": "PASS",
+      "submission_ready": true,
+      "checks": [
+        {
+          "name": "architecture-ratchet",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "guard-self-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-format",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "java-tests",
+          "status": "PASS",
+          "executed_tests": 6114
+        },
+        {
+          "name": "ui-format",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-lint",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-typecheck",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "id-precision",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-vitest",
+          "status": "PASS",
+          "executed_tests": 1093
+        },
+        {
+          "name": "ui-node-tests",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-enterprise",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "ui-build-classic",
+          "status": "PASS",
+          "executed_tests": null
+        },
+        {
+          "name": "cost-tool",
+          "status": "NOT_APPLICABLE",
+          "executed_tests": null
+        }
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged.txt",
+      "input_sha256": "a35d6838decf38b02741f2cbcf84ae4f3bcfd7fa655dcc4f63f6de49edd632b9",
+      "sha256": "5475737b4d65d3490bd690ac8475d6e8a619a5602b6b5789221ea3cca3ee52e1",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-report.json",
+      "input_sha256": "cf8f6dd17a2acdeada301919552c6fd4b8c2f80de68503a36cdd954212ce4025",
+      "sha256": "cf8f6dd17a2acdeada301919552c6fd4b8c2f80de68503a36cdd954212ce4025",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-guard-self-tests.txt",
+      "input_sha256": "2b492bd4dbabe0ca3167c9367bf8d94c7c9c0acb3a2ee42d3d93556d2d3b0ae8",
+      "sha256": "2b492bd4dbabe0ca3167c9367bf8d94c7c9c0acb3a2ee42d3d93556d2d3b0ae8",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-java-format.txt",
+      "input_sha256": "f6b9622c2711905f39d2c94c15c6c1f861a543b1f63506c6f5340f1023591601",
+      "sha256": "23c352d42c2f66d830c0cf008bdb02732607534bacbab9723da69d3f37feffe9",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-java-tests.txt",
+      "input_sha256": "fd61bf4b323b900e8088ab6a4e3ac3eef39737e44d6a291e7366c52b5bad9899",
+      "sha256": "20dce5681ea68c50fa9da3b57fbd3e86f8e1d54640a0c9bc1d13d1637861b9a8",
+      "redactions": 30,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-ui-vitest.txt",
+      "input_sha256": "293d1b79b4cba3a7edfc6e180eae6f40cd07805bfd6bf7e683457c22d09b1aed",
+      "sha256": "293d1b79b4cba3a7edfc6e180eae6f40cd07805bfd6bf7e683457c22d09b1aed",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-ui-node-tests.txt",
+      "input_sha256": "8c84b9a64f654b65f5cb5e21079ec616bb99a76f1d05520c12b751fd467eea95",
+      "sha256": "8c84b9a64f654b65f5cb5e21079ec616bb99a76f1d05520c12b751fd467eea95",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-ui-build-enterprise.txt",
+      "input_sha256": "081d655c612b56889b2b0c193da878467ca6d843f3d2a109072d9e0eb9cbe02c",
+      "sha256": "081d655c612b56889b2b0c193da878467ca6d843f3d2a109072d9e0eb9cbe02c",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-ui-build-classic.txt",
+      "input_sha256": "1d465f2bc7179012a14fe702823b3cc9f139f983d1470c8c6e5d24b91125cd96",
+      "sha256": "1d465f2bc7179012a14fe702823b3cc9f139f983d1470c8c6e5d24b91125cd96",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/staged-vitest.json",
+      "input_sha256": "bb0cfdfd006f77ba78de267e81b1ea7bdd0e40ebd0571dfd35b05d46b90a8039",
+      "sha256": "10daf9e0895ad642a70390a7d92f4f1740f9a9e2c36aa3c34a3279f3c816ad6e",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/hook.txt",
+      "input_sha256": "e95230699482276666b26598ade05eb528fbe8170ce1b3f69108755de4707a0c",
+      "sha256": "c672c7c7dd40dcc0d9c70ff88b6909c58dd566f6ee249fe5d3e11f303c021ffc",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/hook-report.json",
+      "input_sha256": "63caf2b1cbb6062a5153ec1a69f914a32ebd0d229864bb818e74e06f628f4d73",
+      "sha256": "63caf2b1cbb6062a5153ec1a69f914a32ebd0d229864bb818e74e06f628f4d73",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/initial.txt",
+      "input_sha256": "8f4f1e58d6e75510d13ab14aa1c187e8cdfa215cf079ce510953fe3bd8627aba",
+      "sha256": "7b620f57f3f521c8adada69e9c297146f1f9e33a21d175b073bf4c73b6de0140",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/red.txt",
+      "input_sha256": "062e95920ef3eaf72152e9eff2bf75b5a83e5ca2a5bb88943e0b935d2c01a0f1",
+      "sha256": "3bd9fa28057a3931d5292becac2309142f06c613f9f1faa9fb2bfb16780ff5d9",
+      "redactions": 76,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/nonterminal-red.txt",
+      "input_sha256": "418ab86d9241105fa862e2e6d80094d5f85695e10906ccdeedb6c7f7294c0fce",
+      "sha256": "32cbfac14ec8d1ac7240e3868101cea49d6cbe4c8aa172ff181a77e170e720a2",
+      "redactions": 11,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/red-final.txt",
+      "input_sha256": "a61a207d4818527d079b2d1ce82c120d2008fecde7a3f2862d431f2b2de0095c",
+      "sha256": "59dd7b1a9312cf9a7c1623fbfeea6af7035a15abcfcf29241ca10254d3a6f277",
+      "redactions": 91,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/red-confirmed.txt",
+      "input_sha256": "6b1186544812a967727b52e3e1b4eaf2f7e7b75e528955638909bb47101bae47",
+      "sha256": "eb566781131128d5b5fdb5d3f8c1f30239e08a90273a18744e6ee7a18b721e6c",
+      "redactions": 91,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/guard-dev.txt",
+      "input_sha256": "60d6ec45ddb62ccb48dda59210dc8517a6b09bd268b7b2c8416dba2e90274089",
+      "sha256": "a24fca274a607893bdb6636137b758bb1a0e4d2658ab3250ee28e9bca585ee1b",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/guard-green.txt",
+      "input_sha256": "4bee83a39ff986c2ec6bf1ae8b73f02b3a816dcb81b70e8f613e4db099f18892",
+      "sha256": "369e0589ab84902522e482de5f8821dcca1d034f0b37604873fcbe55557fae5a",
+      "redactions": 1,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/repository-dev.txt",
+      "input_sha256": "00e5de891aa0be9392ba0ee924d6fafb1c2bd79d7bc0aa1eb42ad10c9b4e1d96",
+      "sha256": "07d0758c2132972408de4f4b43fe37895d877d95e4bc0da74e153cc91743b8ad",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/format.txt",
+      "input_sha256": "75bf1c7a1b804c4ca7ec90f97673cc6ce163f10cfcb1aa38e3544138526ceac9",
+      "sha256": "8c7ae2a93af550a00f5f52fd5c50fe1ac0ba80d09619fee627c921a43274a756",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/regression.txt",
+      "input_sha256": "076c2d6d118fed951b13652563d43801c8eec876073746117d8b51318f36e948",
+      "sha256": "91f5b7033755388e80d8177f89dced9793af8de76324d913f4559f3a0be2c081",
+      "redactions": 2,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/final-dev.txt",
+      "input_sha256": "48d9ce2d9df20ce9caece692a96fc5a55a5ddbd6417dd5987eb5b5246ef2df07",
+      "sha256": "ab6a8c6436e74ee5cdce6a7476bd7f2eadd4654b0e3d7b08090f11684290ebcf",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-03/terminal-reception-tests/independent-review.txt",
+      "input_sha256": "881d97f072d6e822ab342bbd7a47be225f3c9d33c77d931d74fe01293b304483",
+      "sha256": "881d97f072d6e822ab342bbd7a47be225f3c9d33c77d931d74fe01293b304483",
+      "redactions": 0,
+      "normalization": "Display-only line-end whitespace normalization; original input hash retained"
+    }
+  ],
+  "new_tests": 43,
+  "targeted_guard_tests": 63,
+  "targeted_final_tests": 119,
+  "red": {
+    "initial": "52 tests/27 failures/0 errors/0 skips actualexit1",
+    "nonterminal": "2 tests/2 failures/0 errors actualexit1",
+    "intermediate": "62 tests/32 failures/1 fixture error actualexit1; when restubbing invoked previous getter after deleting row, not production failure",
+    "confirmed": "63 tests/33 failures/0 errors/0 skips actualexit1 before production edits; actual H2 terminal/run/snapshot overwrite and CAS retry, cancellation reservation and obsolete result retention demonstrated"
+  },
+  "green": "Guard63 then final9classes119 passed, actualexit0, no assertion/skip/timeout weakening. Final actor-loss double follows model callback state rather than getter-call count.",
+  "independent_review": "COMMENT no actionable defects; all6 Java LSP unavailable/Transport closed; actual Maven compilation/test evidence, no maintainer signoff",
+  "formal_acceptance": "NOT_RUN",
+  "required_remote_ci": "NOT_VERIFIED",
+  "push_retry": "Not yet run when source evidence archived; final remote/PR readback required",
+  "limits": "V1 RUNNING membership and late-failure repair plus typed SQL facts only; legacy whole-project drift-to-failure retained, not independent dependency acceptance. Repository recovery still all-row scan, no SQL pagination/V2 migration/full attempt or billing schema. No real production dialect concurrency, browser/live model or maintainer/QA approval."
+}

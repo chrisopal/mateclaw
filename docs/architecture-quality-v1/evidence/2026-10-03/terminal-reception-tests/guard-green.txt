@@ -1,0 +1,714 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] MateClaw                                                           [pom]
+[INFO] MateClaw Plugin API                                                [jar]
+[INFO] MateClaw Semantic Core                                             [jar]
+[INFO] MateClaw Semantic OWL Adapter                                      [jar]
+[INFO] MateClaw Semantic Application                                      [jar]
+[INFO] MateClaw Server                                                    [jar]
+[INFO]
+[INFO] -------------------------< vip.mate:mateclaw >--------------------------
+[INFO] Building MateClaw 2.3.0-SNAPSHOT                                   [1/6]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw:pom:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --------------------< vip.mate:mateclaw-plugin-api >--------------------
+[INFO] Building MateClaw Plugin API 2.3.0-SNAPSHOT                        [2/6]
+[INFO]   from mateclaw-plugin-api/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-plugin-api ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-plugin-api/src/main/resources
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-plugin-api ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-plugin-api:jar:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-plugin-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-plugin-api ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-plugin-api/src/test/resources
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-plugin-api ---
+[INFO] No sources to compile
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-plugin-api ---
+[INFO] No tests to run.
+[INFO]
+[INFO] ------------------< vip.mate:mateclaw-semantic-core >-------------------
+[INFO] Building MateClaw Semantic Core 2.3.0-SNAPSHOT                     [3/6]
+[INFO]   from mateclaw-semantic-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-core ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-core/src/main/resources
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-core ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-core:jar:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-core ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-core/src/test/resources
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-core ---
+[INFO]
+[INFO] -------------------< vip.mate:mateclaw-semantic-owl >-------------------
+[INFO] Building MateClaw Semantic OWL Adapter 2.3.0-SNAPSHOT              [4/6]
+[INFO]   from mateclaw-semantic-owl/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-owl ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-owl/src/main/resources
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-owl ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-owl:jar:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-owl ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-owl ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-owl/src/test/resources
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-owl ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-owl ---
+[INFO]
+[INFO] ---------------< vip.mate:mateclaw-semantic-application >---------------
+[INFO] Building MateClaw Semantic Application 2.3.0-SNAPSHOT              [5/6]
+[INFO]   from mateclaw-semantic-application/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-application ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-application/src/main/resources
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-application ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-application:jar:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-application ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-application/src/test/resources
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-application ---
+[INFO]
+[INFO] ----------------------< vip.mate:mateclaw-server >----------------------
+[INFO] Building MateClaw Server 2.3.0-SNAPSHOT                            [6/6]
+[INFO]   from mateclaw-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- dependency:3.8.1:properties (resolve-test-classpath-properties) @ mateclaw-server ---
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-server ---
+[INFO] Copying 1657 resources from src/main/resources to target/classes
+[INFO]
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-server ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-server:jar:2.3.0-SNAPSHOT...
+[INFO]
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-server ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1631 source files with javac [debug parameters release 21] to target/classes
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/workspace/core/service/WorkspaceService.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/workspace/core/service/WorkspaceService.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/channel/feishu/FeishuChannelAdapter.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/channel/feishu/FeishuChannelAdapter.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-server ---
+[INFO] Copying 11 resources from src/test/resources to target/test-classes
+[INFO]
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-server ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 885 source files with javac [debug parameters release 21] to target/test-classes
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAccessPolicyTest.java:[187,63] 最后一个参数使用了不准确的变量类型的 varargs 方法的非 varargs 调用;
+  对于 varargs 调用, 应使用 vip.mate.workspace.core.model.WorkspaceEntity
+  对于非 varargs 调用, 应使用 vip.mate.workspace.core.model.WorkspaceEntity[], 这样也可以抑制此警告
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java:[162,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java:[162,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java:[162,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java:[162,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java:[162,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java:[28,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java:[28,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java:[28,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java:[28,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAnalysisTest.java:[28,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[52,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[52,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[52,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[52,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[52,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[57,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[57,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[57,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[57,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[57,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[58,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[58,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[58,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[58,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[58,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[59,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[59,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[59,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[59,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[59,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[60,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[60,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[60,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[60,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingApprovalTest.java:[60,48] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[44,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[44,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[44,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[44,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[44,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[48,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[48,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[48,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[48,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[48,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.SpyBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[57,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[57,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[57,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[57,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingArtifactTest.java:[57,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[33,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[33,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[33,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[33,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[33,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[34,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[34,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[34,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[34,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingChangeImpactTest.java:[34,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingContextBudgetEndToEndTest.java:[55,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingContextBudgetEndToEndTest.java:[55,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingContextBudgetEndToEndTest.java:[55,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingContextBudgetEndToEndTest.java:[55,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingContextBudgetEndToEndTest.java:[55,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeBindingsTest.java:[56,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[59,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[59,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[59,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[59,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[59,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[60,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[60,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[60,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[60,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEmployeeRuntimeTest.java:[60,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java:[78,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java:[78,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java:[78,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java:[78,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingEndToEndTest.java:[78,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffReceiptTest.java:[17,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffReceiptTest.java:[17,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffReceiptTest.java:[17,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffReceiptTest.java:[17,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHandoffReceiptTest.java:[17,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java:[26,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java:[26,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java:[26,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[WARNING] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java:[26,6] org.springframework.boot.test.mock.mockito 中的 org.springframework.boot.test.mock.mockito.MockBean 已过时, 且标记为待删除
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/agent/binding/service/AgentBindingServiceCuratorTest.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/agent/binding/service/AgentBindingServiceCuratorTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingMaterialsTest.java: 某些输入文件额外使用或覆盖了标记为待删除的已过时 API。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/agent/binding/AgentBindingServiceValidationTest.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/agent/binding/AgentBindingServiceValidationTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running vip.mate.presales.PresalesRuntimeTransactionIntegrationTest
+19:42:03,868 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [FILE_DEBUG] not referenced. Skipping further processing.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+19:42:03.883 INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+19:42:03.903 INFO  v.m.p.PresalesRuntimeTransactionIntegrationTest - Starting PresalesRuntimeTransactionIntegrationTest using Java 21.0.7 with PID 7567 (started by guojiexie in /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server)
+19:42:03.904 INFO  v.m.p.PresalesRuntimeTransactionIntegrationTest - The following 1 profile is active: "semantic-test"
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+ _ _   |_  _ _|_. ___ _ |    _
+| | |\/|_)(_| | |_\  |_)||_|_\
+     /               |
+                        3.5.16
+19:42:04.973 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+19:42:05.047 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:presales_runtime_transaction user=SA
+19:42:05.048 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+19:42:05.071 INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:presales_runtime_transaction (H2 2.3)
+19:42:05.119 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "public"."flyway_schema_history" does not exist yet
+19:42:05.122 INFO  o.f.core.internal.command.DbValidate - Successfully validated 209 migrations (execution time 00:00.040s)
+19:42:05.124 INFO  org.flywaydb.core.Flyway - All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+19:42:05.125 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "public"."flyway_schema_history" ...
+19:42:05.142 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+19:42:05.154 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "1 - baseline schema"
+19:42:05.185 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "2 - workspace base path"
+19:42:05.190 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "3 - register cron job tool"
+19:42:05.193 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "4 - agent thinking level"
+19:42:05.197 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "5 - conversation parent"
+19:42:05.201 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "6 - plugin table"
+19:42:05.204 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "7 - wiki last processed hash"
+19:42:05.208 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "8 - wiki raw progress"
+19:42:05.215 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "9 - usage cache tokens"
+19:42:05.219 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "10 - hook system"
+19:42:05.223 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "11 - skill synthesis"
+19:42:05.227 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "12 - wiki chunk table"
+19:42:05.230 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "13 - wiki chunk embedding"
+19:42:05.235 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "14 - embedding model config"
+19:42:05.239 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "15 - purge unavailable dashscope models"
+19:42:05.242 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "16 - purge dot version dashscope models"
+19:42:05.245 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "20 - purge soft deleted rows"
+19:42:05.248 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "21 - provider fallback priority"
+19:42:05.251 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "23 - wiki relation model"
+19:42:05.257 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "24 - wiki processing job"
+19:42:05.260 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "25 - agent provider preference"
+19:42:05.261 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "26 - dream report"
+19:42:05.263 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "27 - memory recall review fields"
+19:42:05.266 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "28 - morning card seen"
+19:42:05.268 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "29 - memory fact projection"
+19:42:05.272 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "30 - register collab skills"
+19:42:05.274 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "31 - register docx render tool"
+19:42:05.275 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "32 - bailian team provider"
+19:42:05.278 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "33 - expand api key column"
+19:42:05.281 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "34 - siliconflow opencode providers"
+19:42:05.285 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "35 - skill security scan result"
+19:42:05.288 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "36 - skill i18n name"
+19:42:05.293 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "37 - wiki page source entries"
+19:42:05.295 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "38 - wiki chunk content mediumtext"
+19:42:05.297 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "39 - rfc051 chunk metadata"
+19:42:05.301 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "40 - rfc051 page locked"
+19:42:05.304 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "41 - rfc051 page archived"
+19:42:05.306 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "42 - claude 47 gpt 55 models"
+19:42:05.308 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "43 - rfc062 claude code oauth provider"
+19:42:05.310 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "44 - fix claude sonnet 47 does not exist"
+19:42:05.311 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "45 - deepseek v4 models"
+19:42:05.312 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "46 - stt default enabled"
+19:42:05.315 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "47 - agent max iterations 100"
+19:42:05.317 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "48 - agent max iterations and agents md tools"
+19:42:05.320 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "49 - reenable write edit file tools"
+19:42:05.321 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "50 - fix agents md tool guidance concat"
+19:42:05.323 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "51 - remove write edit file from toolguard"
+19:42:05.324 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "52 - feishu default connection mode"
+19:42:05.325 INFO  o.f.c.i.s.DefaultSqlScriptExecutor - +---+
+| 1 |
++---+
+| 1 |
++---+
+
+19:42:05.326 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "53 - feishu connection mode recover"
+19:42:05.328 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "54 - channel names to chinese for zh locale"
+19:42:05.330 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "55 - provider enabled"
+19:42:05.336 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "56 - volcengine plan provider"
+19:42:05.338 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "57 - cron run delivery status"
+19:42:05.341 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "58 - cron channel binding"
+19:42:05.344 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "59 - approval chat origin snapshot"
+19:42:05.347 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "60 - fix invalid workspace member roles"
+19:42:05.349 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "61 - agent creator user id"
+19:42:05.351 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "62 - cron job workspace id"
+19:42:05.353 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "63 - channel identity json"
+19:42:05.354 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "64 - cleanup unused channel seeds"
+19:42:05.356 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "65 - seed tasks conversation per workspace"
+19:42:05.358 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "66 - add model capabilities"
+19:42:05.361 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "67 - add skill manifest"
+19:42:05.363 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "68 - add acp endpoints"
+19:42:05.365 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "69 - cron job dedup unique"
+19:42:05.367 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "70 - cron job dedup safety"
+19:42:05.369 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "71 - hunyuan 3d provider"
+19:42:05.371 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "72 - hunyuan 3d model config"
+19:42:05.372 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "73 - add skill secret"
+19:42:05.373 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "74 - shedlock table"
+19:42:05.375 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "75 - model config request timeout"
+19:42:05.377 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "76 - personal access token"
+19:42:05.379 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "77 - wiki relation table"
+19:42:05.381 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "78 - feature flag"
+19:42:05.383 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "79 - wiki image caption cache"
+19:42:05.385 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "80 - wiki raw material mime type"
+19:42:05.388 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "81 - refresh bailian qwen catalog"
+19:42:05.391 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "82 - wiki hot cache"
+19:42:05.393 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "84 - widen raw material mime type"
+19:42:05.395 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "85 - ckjia mcp seed"
+19:42:05.396 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "87 - skill usage stat"
+19:42:05.398 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "88 - convert default agent icons to pixelart"
+19:42:05.399 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "89 - chatgpt oauth model discovery"
+19:42:05.400 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "90 - zhipu coding plan provider"
+19:42:05.403 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "91 - widen message and skill content"
+19:42:05.405 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "92 - mcp server tools cache"
+19:42:05.408 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "93 - xiaomi mimo provider"
+19:42:05.410 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "94 - register office render tools"
+19:42:05.412 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "95 - wiki raw material cancel"
+19:42:05.414 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "96 - workflow foundations"
+19:42:05.416 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "97 - workflow purge tombstones"
+19:42:05.417 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "98 - trigger last error"
+19:42:05.420 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "99 - dashscope compat provider"
+19:42:05.421 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "100 - multimodal default models"
+19:42:05.423 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "101 - cleanup blank tool guard rule id"
+19:42:05.427 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "102 - agent unique name per workspace"
+19:42:05.429 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "103 - drop fact entity ref"
+19:42:05.430 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "104 - wiki chunk embedding text version"
+19:42:05.431 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "105 - wiki transformation"
+19:42:05.433 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "106 - wiki transformation output target"
+19:42:05.435 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "107 - wiki page embedding"
+19:42:05.439 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "108 - wiki transformation starter pack"
+19:42:05.442 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "109 - wiki transformation output format"
+19:42:05.445 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "110 - wiki transformation run tokens"
+19:42:05.448 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "111 - wiki transformation output schema"
+19:42:05.450 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "112 - skill file"
+19:42:05.452 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "113 - workspace memory search and async indexes"
+19:42:05.453 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "114 - conversation pinned"
+19:42:05.455 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "115 - xai grok provider"
+19:42:05.457 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "116 - conversation model"
+19:42:05.459 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "117 - skill lifecycle"
+19:42:05.462 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "118 - purge model config tombstones"
+19:42:05.463 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "119 - channel tool support"
+19:42:05.468 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "120 - agent goal"
+19:42:05.470 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "121 - tool disclosure tier"
+19:42:05.473 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "122 - fix generative tool tier names"
+19:42:05.474 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "123 - conversation progress ledger"
+19:42:05.477 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "124 - agent max iterations 150"
+19:42:05.478 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "125 - agent workspace base path"
+19:42:05.480 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "126 - agent binding disabled flags"
+19:42:05.482 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "127 - approval auto grant"
+19:42:05.484 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "128 - approval resolution log"
+19:42:05.485 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "129 - wiki page broken links"
+19:42:05.487 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "130 - agent primary kb"
+19:42:05.489 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "131 - claude 48 models"
+19:42:05.491 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "132 - memory consolidation cron tier discipline"
+19:42:05.492 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "133 - wiki agent page type permission"
+19:42:05.493 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "134 - wiki page type profile"
+19:42:05.497 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "135 - wiki layered knowledge"
+19:42:05.500 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "136 - wiki pipeline runtime"
+19:42:05.502 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "137 - memory owner scope"
+19:42:05.507 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "138 - rename search tool to web search"
+19:42:05.508 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "139 - mcp default read timeout 60s"
+19:42:05.509 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "140 - goal criteria checklist"
+19:42:05.511 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "141 - agent wiki kb scope"
+19:42:05.513 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "142 - wiki transformation target page type"
+19:42:05.514 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "143 - register code execute tool"
+19:42:05.518 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "144 - ckjia mcp fix production endpoint"
+19:42:05.519 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "145 - claude fable 5 models"
+19:42:05.520 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "146 - wiki kb watcher enabled"
+19:42:05.522 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "147 - wiki page aliases"
+19:42:05.523 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "148 - wiki entity"
+19:42:05.525 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "149 - wiki entity mention"
+19:42:05.526 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "150 - wiki entity relation"
+19:42:05.526 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "151 - webchat session id"
+19:42:05.528 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "152 - webchat archive and revocation"
+19:42:05.529 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "153 - zhipu glm 5 2"
+19:42:05.530 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "154 - agent wiki disabled"
+19:42:05.531 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "155 - plan conversation id"
+19:42:05.532 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "156 - sub plan assigned agent"
+19:42:05.534 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "157 - register session list tool"
+19:42:05.535 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "158 - register session send tool"
+19:42:05.536 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "159 - sso external identity"
+19:42:05.537 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "160 - register local tools"
+19:42:05.538 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "161 - agent provider preference model"
+19:42:05.539 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+19:42:05.540 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "163 - wiki raw material warning"
+19:42:05.542 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "164 - kb open api key"
+19:42:05.543 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "165 - wiki transformation starter pack global"
+19:42:05.544 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "166 - message usage detail"
+19:42:05.547 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "167 - volcengine agent plan provider"
+19:42:05.549 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "168 - content studio seed"
+19:42:05.551 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "169 - content item ledger"
+19:42:05.552 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "170 - guard audit auto approve outcome"
+19:42:05.553 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "171 - widen conversation id for channel scoping"
+19:42:05.554 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "172 - agent team foundation"
+19:42:05.555 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "173 - register team tasks tool"
+19:42:05.556 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "174 - team task event timeline"
+19:42:05.557 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "175 - register channel message tool"
+19:42:05.558 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "176 - skill routine candidate"
+19:42:05.559 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "177 - skill origin and snapshot"
+19:42:05.561 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "178 - skill curator seen at"
+19:42:05.562 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "179 - skill snapshot workspace"
+19:42:05.563 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "180 - team workspace isolation"
+19:42:05.564 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "181 - team run foundation"
+19:42:05.566 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "182 - team run stable history indexes"
+19:42:05.566 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "183 - conversation kind"
+19:42:05.568 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "184 - team task conversation index"
+19:42:05.569 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "185 - register officecli support"
+19:42:05.571 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "186 - agent runtime provider"
+19:42:05.573 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "187 - acp prompt timeout"
+19:42:05.574 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "188 - goal continuation"
+19:42:05.576 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "189 - goal attempt and input queue"
+19:42:05.578 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "190 - cron run heartbeat"
+19:42:05.580 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "191 - semantic ontology"
+19:42:05.581 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "192 - semantic graph"
+19:42:05.583 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "193 - semantic facts and sources"
+19:42:05.584 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "194 - register semantic tool"
+19:42:05.585 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "195 - semantic conflict member kind"
+19:42:05.587 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "196 - semantic governance events"
+19:42:05.588 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "197 - semantic extraction"
+19:42:05.590 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "198 - register ontology authoring tool"
+19:42:05.591 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "199 - semantic owl document"
+19:42:05.600 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "200 - semantic owl assertion"
+19:42:05.602 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "201 - semantic ontology sources"
+19:42:05.603 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "202 - register semantic context tool"
+19:42:05.604 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "203 - register semantic reasoning tool"
+19:42:05.605 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "204 - semantic source review snapshots"
+19:42:05.607 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "206 - semantic source change review"
+19:42:05.608 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "207 - semantic graph owl migration"
+19:42:05.609 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "208 - semantic modeling tasks"
+19:42:05.610 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "209 - semantic validation reports"
+19:42:05.611 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "210 - semantic ontology archive"
+19:42:05.612 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "211 - presales projects"
+19:42:05.613 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "212 - bidding foundation"
+19:42:05.614 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "213 - bidding source read state"
+19:42:05.617 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "214 - bidding task actor"
+19:42:05.618 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "215 - bidding materials"
+19:42:05.619 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "216 - bidding artifacts"
+19:42:05.622 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 209 migrations to schema "public", now at version v216 (execution time 00:00.136s)
+19:42:05.950 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+19:42:06.017 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration -
+
+[REDACTED]
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+19:42:06.121 INFO  c.b.m.e.s.MybatisPlusApplicationContextAware - Register ApplicationContext instances org.springframework.web.context.support.GenericWebApplicationContext@5dd903be
+19:42:06.137 INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+19:42:06.210 INFO  v.m.p.PresalesRuntimeTransactionIntegrationTest - Started PresalesRuntimeTransactionIntegrationTest in 2.508 seconds (process running for 2.961)
+19:42:06.376 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic c57750f0-5552-4716-a56f-5dddf22f4d6a (slug=semantic-c57750f0-5552-4716-a56f-5dddf22f4d6a, owner=2106349066834030594)
+19:42:06.379 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067190546434, workspaceId=2106349067282821122, role=admin
+19:42:06.380 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067211517953, workspaceId=2106349067282821122, role=member
+19:42:06.381 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067228295170, workspaceId=2106349067282821122, role=viewer
+19:42:06.382 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other f87582a7-fc11-4a47-8908-228d5b8c3390 (slug=other-f87582a7-fc11-4a47-8908-228d5b8c3390, owner=2106349066834030594)
+19:42:06.454 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic b7470ecf-fbd4-4f82-8a91-09f345386470 (slug=semantic-b7470ecf-fbd4-4f82-8a91-09f345386470, owner=2106349067551256578)
+19:42:06.455 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067572228098, workspaceId=2106349067630948354, role=admin
+19:42:06.456 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067589005314, workspaceId=2106349067630948354, role=member
+19:42:06.457 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067605782530, workspaceId=2106349067630948354, role=viewer
+19:42:06.462 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other f554f1fd-7064-468a-9c14-779b68e20ba1 (slug=other-f554f1fd-7064-468a-9c14-779b68e20ba1, owner=2106349067551256578)
+19:42:06.503 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic f7562f24-5129-4649-98db-c15dbed56c2f (slug=semantic-f7562f24-5129-4649-98db-c15dbed56c2f, owner=2106349067735805953)
+19:42:06.504 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067773554690, workspaceId=2106349067840663553, role=admin
+19:42:06.505 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067790331905, workspaceId=2106349067840663553, role=member
+19:42:06.506 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067807109121, workspaceId=2106349067840663553, role=viewer
+19:42:06.507 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other c7c174d6-a228-4b6a-bf62-16659f03d44d (slug=other-c7c174d6-a228-4b6a-bf62-16659f03d44d, owner=2106349067735805953)
+19:42:06.538 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 2731ddf7-dbc4-458e-830a-3e1091b50f47 (slug=semantic-2731ddf7-dbc4-458e-830a-3e1091b50f47, owner=2106349067903578113)
+19:42:06.539 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067924549634, workspaceId=2106349067983269889, role=admin
+19:42:06.540 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067941326850, workspaceId=2106349067983269889, role=member
+19:42:06.540 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349067958104066, workspaceId=2106349067983269889, role=viewer
+19:42:06.541 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 9df444af-49ba-4e3f-88e5-e090d9f5c722 (slug=other-9df444af-49ba-4e3f-88e5-e090d9f5c722, owner=2106349067903578113)
+19:42:06.574 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 7a0dd8ea-274a-4b24-a2a8-20d7e51e7e42 (slug=semantic-7a0dd8ea-274a-4b24-a2a8-20d7e51e7e42, owner=2106349068054573057)
+19:42:06.574 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068071350274, workspaceId=2106349068134264834, role=admin
+19:42:06.575 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068088127490, workspaceId=2106349068134264834, role=member
+19:42:06.575 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068104904705, workspaceId=2106349068134264834, role=viewer
+19:42:06.576 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 3a15f5b8-d98e-40c2-9dc9-3b70e871a28a (slug=other-3a15f5b8-d98e-40c2-9dc9-3b70e871a28a, owner=2106349068054573057)
+19:42:06.612 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 68fdea65-3063-4baf-b276-c955449f7f5d (slug=semantic-68fdea65-3063-4baf-b276-c955449f7f5d, owner=2106349068209762306)
+19:42:06.612 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068230733825, workspaceId=2106349068293648385, role=admin
+19:42:06.613 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068243316738, workspaceId=2106349068293648385, role=member
+19:42:06.613 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068260093954, workspaceId=2106349068293648385, role=viewer
+19:42:06.614 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 23cb1f58-6211-45e3-8f8d-6959ba114613 (slug=other-23cb1f58-6211-45e3-8f8d-6959ba114613, owner=2106349068209762306)
+19:42:06.646 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic e04bed16-459b-4927-8329-f8e49f40fa2b (slug=semantic-e04bed16-459b-4927-8329-f8e49f40fa2b, owner=2106349068369145857)
+19:42:06.647 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068385923074, workspaceId=2106349068440449026, role=admin
+19:42:06.647 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068402700289, workspaceId=2106349068440449026, role=member
+19:42:06.647 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068415283202, workspaceId=2106349068440449026, role=viewer
+19:42:06.648 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 98526a36-db00-48f1-a322-91571a0cdeca (slug=other-98526a36-db00-48f1-a322-91571a0cdeca, owner=2106349068369145857)
+19:42:06.679 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic f6f443d9-5b09-482f-9564-6e1d75af3851 (slug=semantic-f6f443d9-5b09-482f-9564-6e1d75af3851, owner=2106349068494974977)
+19:42:06.679 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068515946498, workspaceId=2106349068574666753, role=admin
+19:42:06.680 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068532723714, workspaceId=2106349068574666753, role=member
+19:42:06.680 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068549500929, workspaceId=2106349068574666753, role=viewer
+19:42:06.681 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other b041c309-2336-4a68-b6c1-79eb708d9d88 (slug=other-b041c309-2336-4a68-b6c1-79eb708d9d88, owner=2106349068494974977)
+19:42:06.709 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 09afe6b3-c20c-47a3-a24d-667698d5c7a7 (slug=semantic-09afe6b3-c20c-47a3-a24d-667698d5c7a7, owner=2106349068624998401)
+19:42:06.710 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068641775618, workspaceId=2106349068704690177, role=admin
+19:42:06.711 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068658552834, workspaceId=2106349068704690177, role=member
+19:42:06.711 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068675330049, workspaceId=2106349068704690177, role=viewer
+19:42:06.712 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 76fbcc77-f874-4511-8535-c64293b3bfc8 (slug=other-76fbcc77-f874-4511-8535-c64293b3bfc8, owner=2106349068624998401)
+19:42:06.740 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 4fdee3df-30d7-4c53-a60a-3746207e83b4 (slug=semantic-4fdee3df-30d7-4c53-a60a-3746207e83b4, owner=2106349068755021826)
+19:42:06.741 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068767604738, workspaceId=2106349068834713601, role=admin
+19:42:06.741 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068788576257, workspaceId=2106349068834713601, role=member
+19:42:06.742 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068805353474, workspaceId=2106349068834713601, role=viewer
+19:42:06.742 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 4f7ec986-0f52-4e84-81f9-71ef3ecd039d (slug=other-4f7ec986-0f52-4e84-81f9-71ef3ecd039d, owner=2106349068755021826)
+19:42:06.774 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic de6db469-d2bb-4d89-bd49-66d0e5effa39 (slug=semantic-de6db469-d2bb-4d89-bd49-66d0e5effa39, owner=2106349068885045250)
+19:42:06.774 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068906016770, workspaceId=2106349068973125633, role=admin
+19:42:06.774 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068926988290, workspaceId=2106349068973125633, role=member
+19:42:06.775 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349068943765505, workspaceId=2106349068973125633, role=viewer
+19:42:06.775 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 2fe73422-bd05-44d2-bbf7-a79d45feecf9 (slug=other-2fe73422-bd05-44d2-bbf7-a79d45feecf9, owner=2106349068885045250)
+19:42:06.802 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic ec83172c-f84f-447a-956b-db16385f63df (slug=semantic-ec83172c-f84f-447a-956b-db16385f63df, owner=2106349069015068674)
+19:42:06.802 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069031845889, workspaceId=2106349069086371842, role=admin
+19:42:06.803 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069048623106, workspaceId=2106349069086371842, role=member
+19:42:06.803 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069065400322, workspaceId=2106349069086371842, role=viewer
+19:42:06.803 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other c7db5b28-1243-4f71-87d5-e8d1cb288b03 (slug=other-c7db5b28-1243-4f71-87d5-e8d1cb288b03, owner=2106349069015068674)
+19:42:06.830 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 98545e8b-d556-4e8c-b03f-c5b483e454aa (slug=semantic-98545e8b-d556-4e8c-b03f-c5b483e454aa, owner=2106349069140897793)
+19:42:06.831 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069153480705, workspaceId=2106349069212200961, role=admin
+19:42:06.831 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069170257921, workspaceId=2106349069212200961, role=member
+19:42:06.831 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069182840833, workspaceId=2106349069212200961, role=viewer
+19:42:06.832 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other db5d95d0-ccef-4c74-86b3-b51e102ef45f (slug=other-db5d95d0-ccef-4c74-86b3-b51e102ef45f, owner=2106349069140897793)
+19:42:06.856 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 46b4d391-2e9f-463a-b6c7-4f7be3a68c53 (slug=semantic-46b4d391-2e9f-463a-b6c7-4f7be3a68c53, owner=2106349069258338305)
+19:42:06.856 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069270921218, workspaceId=2106349069321252866, role=admin
+19:42:06.857 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069283504129, workspaceId=2106349069321252866, role=member
+19:42:06.857 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069296087042, workspaceId=2106349069321252866, role=viewer
+19:42:06.857 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 1d784356-ab28-4d3d-825f-2d1c6d23e959 (slug=other-1d784356-ab28-4d3d-825f-2d1c6d23e959, owner=2106349069258338305)
+19:42:06.883 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 816373bd-1eee-499e-96ee-a91bb7034bf6 (slug=semantic-816373bd-1eee-499e-96ee-a91bb7034bf6, owner=2106349069359001602)
+19:42:06.883 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069375778817, workspaceId=2106349069430304770, role=admin
+19:42:06.884 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069392556033, workspaceId=2106349069430304770, role=member
+19:42:06.884 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069405138946, workspaceId=2106349069430304770, role=viewer
+19:42:06.885 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other ba54f97e-305f-41b3-b107-689eb9f2a10e (slug=other-ba54f97e-305f-41b3-b107-689eb9f2a10e, owner=2106349069359001602)
+19:42:06.909 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic c7f6f043-45cc-4f95-a306-d55c883455c7 (slug=semantic-c7f6f043-45cc-4f95-a306-d55c883455c7, owner=2106349069476442113)
+19:42:06.910 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069489025025, workspaceId=2106349069543550977, role=admin
+19:42:06.910 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069501607937, workspaceId=2106349069543550977, role=member
+19:42:06.911 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069518385154, workspaceId=2106349069543550977, role=viewer
+19:42:06.911 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 953ed10a-1291-4b3e-be5e-c24ad2a8867d (slug=other-953ed10a-1291-4b3e-be5e-c24ad2a8867d, owner=2106349069476442113)
+19:42:06.935 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic ddad055b-8172-459d-ada2-6b60e5afce8a (slug=semantic-ddad055b-8172-459d-ada2-6b60e5afce8a, owner=2106349069585494017)
+19:42:06.936 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069602271233, workspaceId=2106349069652602882, role=admin
+19:42:06.936 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069614854145, workspaceId=2106349069652602882, role=member
+19:42:06.937 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069627437058, workspaceId=2106349069652602882, role=viewer
+19:42:06.938 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 00a06968-d124-42c9-acce-3710c42fac74 (slug=other-00a06968-d124-42c9-acce-3710c42fac74, owner=2106349069585494017)
+19:42:06.960 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 3dcc237c-3c3d-4faf-acaa-b2bae9d1dfeb (slug=semantic-3dcc237c-3c3d-4faf-acaa-b2bae9d1dfeb, owner=2106349069694545921)
+19:42:06.961 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069711323137, workspaceId=2106349069757460482, role=admin
+19:42:06.961 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069723906050, workspaceId=2106349069757460482, role=member
+19:42:06.961 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069736488961, workspaceId=2106349069757460482, role=viewer
+19:42:06.962 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other b2116e63-538e-453a-b587-78d9f96da9d8 (slug=other-b2116e63-538e-453a-b587-78d9f96da9d8, owner=2106349069694545921)
+19:42:06.984 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 6d55e593-aa5c-4ea7-8748-bc4a0b74bdcd (slug=semantic-6d55e593-aa5c-4ea7-8748-bc4a0b74bdcd, owner=2106349069795209218)
+19:42:06.984 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069807792130, workspaceId=2106349069853929474, role=admin
+19:42:06.985 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069820375041, workspaceId=2106349069853929474, role=member
+19:42:06.985 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069832957953, workspaceId=2106349069853929474, role=viewer
+19:42:06.985 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other a0d0f11c-ade9-4640-9caf-65db715db44a (slug=other-a0d0f11c-ade9-4640-9caf-65db715db44a, owner=2106349069795209218)
+19:42:07.007 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 82593206-c1a2-488b-90ed-4afd28f21fa6 (slug=semantic-82593206-c1a2-488b-90ed-4afd28f21fa6, owner=2106349069891678209)
+19:42:07.008 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069904261122, workspaceId=2106349069950398466, role=admin
+19:42:07.008 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069916844033, workspaceId=2106349069950398466, role=member
+19:42:07.008 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349069929426945, workspaceId=2106349069950398466, role=viewer
+19:42:07.009 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other c45ae58d-7d59-448a-8ecb-c77be5a2e0b0 (slug=other-c45ae58d-7d59-448a-8ecb-c77be5a2e0b0, owner=2106349069891678209)
+19:42:07.030 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 3f0078ea-ad0b-4a91-a036-5779d07f2a8a (slug=semantic-3f0078ea-ad0b-4a91-a036-5779d07f2a8a, owner=2106349069988147201)
+19:42:07.030 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070004924418, workspaceId=2106349070046867457, role=admin
+19:42:07.030 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070017507329, workspaceId=2106349070046867457, role=member
+19:42:07.030 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070025895938, workspaceId=2106349070046867457, role=viewer
+19:42:07.031 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other bb54f48f-068d-4625-afd5-bc4f8a64a684 (slug=other-bb54f48f-068d-4625-afd5-bc4f8a64a684, owner=2106349069988147201)
+19:42:07.063 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 786ede3a-f9da-4ae1-a434-d43489aa9639 (slug=semantic-786ede3a-f9da-4ae1-a434-d43489aa9639, owner=2106349070126559233)
+19:42:07.063 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070139142146, workspaceId=2106349070185279489, role=admin
+19:42:07.063 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070151725058, workspaceId=2106349070185279489, role=member
+19:42:07.063 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070164307969, workspaceId=2106349070185279489, role=viewer
+19:42:07.064 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 4344ff21-eab4-4f28-a833-0fe6c0e4ce57 (slug=other-4344ff21-eab4-4f28-a833-0fe6c0e4ce57, owner=2106349070126559233)
+19:42:07.086 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 3b922980-5ec9-4301-bd1c-9ddbd22bb69e (slug=semantic-3b922980-5ec9-4301-bd1c-9ddbd22bb69e, owner=2106349070223028225)
+19:42:07.086 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070235611138, workspaceId=2106349070281748481, role=admin
+19:42:07.086 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070248194050, workspaceId=2106349070281748481, role=member
+19:42:07.086 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070260776961, workspaceId=2106349070281748481, role=viewer
+19:42:07.087 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 84fd5f76-1e32-4226-8f29-324e1c60568a (slug=other-84fd5f76-1e32-4226-8f29-324e1c60568a, owner=2106349070223028225)
+19:42:07.114 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 5f1a2325-400b-4021-a824-422133640f64 (slug=semantic-5f1a2325-400b-4021-a824-422133640f64, owner=2106349070344663042)
+19:42:07.114 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070357245953, workspaceId=2106349070399188994, role=admin
+19:42:07.114 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070369828865, workspaceId=2106349070399188994, role=member
+19:42:07.114 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070382411777, workspaceId=2106349070399188994, role=viewer
+19:42:07.115 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other ab006c68-2b28-4314-94c7-7a96eb695b70 (slug=other-ab006c68-2b28-4314-94c7-7a96eb695b70, owner=2106349070344663042)
+19:42:07.140 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 8d635641-cfbc-492a-99e9-3c70ac2b37a6 (slug=semantic-8d635641-cfbc-492a-99e9-3c70ac2b37a6, owner=2106349070449520641)
+19:42:07.140 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070466297857, workspaceId=2106349070508240897, role=admin
+19:42:07.140 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070474686465, workspaceId=2106349070508240897, role=member
+19:42:07.140 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070487269378, workspaceId=2106349070508240897, role=viewer
+19:42:07.141 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 5f0542ad-623a-4276-bb9e-74768b28488c (slug=other-5f0542ad-623a-4276-bb9e-74768b28488c, owner=2106349070449520641)
+19:42:07.173 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 4dc08df1-2da9-439e-bb0f-41bc3ce15b69 (slug=semantic-4dc08df1-2da9-439e-bb0f-41bc3ce15b69, owner=2106349070575349762)
+19:42:07.173 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070592126978, workspaceId=2106349070646652929, role=admin
+19:42:07.173 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070604709889, workspaceId=2106349070646652929, role=member
+19:42:07.173 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070625681409, workspaceId=2106349070646652929, role=viewer
+19:42:07.174 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 656442cb-a53b-4118-a82a-03826201e328 (slug=other-656442cb-a53b-4118-a82a-03826201e328, owner=2106349070575349762)
+19:42:07.196 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 95207121-1962-4684-818b-9363da1594a0 (slug=semantic-95207121-1962-4684-818b-9363da1594a0, owner=2106349070688595969)
+19:42:07.197 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070701178882, workspaceId=2106349070747316225, role=admin
+19:42:07.197 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070713761794, workspaceId=2106349070747316225, role=member
+19:42:07.197 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070726344706, workspaceId=2106349070747316225, role=viewer
+19:42:07.198 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 0a4da4f7-7637-43e9-8362-d4f14c98702f (slug=other-0a4da4f7-7637-43e9-8362-d4f14c98702f, owner=2106349070688595969)
+19:42:07.221 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 133ac6ca-aeec-4240-9ebe-22819515d2df (slug=semantic-133ac6ca-aeec-4240-9ebe-22819515d2df, owner=2106349070785064961)
+19:42:07.221 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070797647874, workspaceId=2106349070847979522, role=admin
+19:42:07.221 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070810230785, workspaceId=2106349070847979522, role=member
+19:42:07.222 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070827008002, workspaceId=2106349070847979522, role=viewer
+19:42:07.222 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other f17bbd63-5c8d-4f21-8dea-08dbbf77a9d8 (slug=other-f17bbd63-5c8d-4f21-8dea-08dbbf77a9d8, owner=2106349070785064961)
+19:42:07.246 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic bbd4e9bd-aff3-4a08-aefb-82d31137b4c5 (slug=semantic-bbd4e9bd-aff3-4a08-aefb-82d31137b4c5, owner=2106349070889922561)
+19:42:07.246 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070902505473, workspaceId=2106349070952837121, role=admin
+19:42:07.246 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070919282690, workspaceId=2106349070952837121, role=member
+19:42:07.247 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349070931865602, workspaceId=2106349070952837121, role=viewer
+19:42:07.247 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other c6936e15-23fb-46af-8929-7ba0be41605d (slug=other-c6936e15-23fb-46af-8929-7ba0be41605d, owner=2106349070889922561)
+19:42:07.275 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic ec03aced-39c5-46d9-a657-9a05a0d070e6 (slug=semantic-ec03aced-39c5-46d9-a657-9a05a0d070e6, owner=2106349071019945985)
+19:42:07.276 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349071032528898, workspaceId=2106349071074471937, role=admin
+19:42:07.276 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349071045111809, workspaceId=2106349071074471937, role=member
+19:42:07.276 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349071053500417, workspaceId=2106349071074471937, role=viewer
+19:42:07.276 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other cc3439fd-250e-407c-8eab-8666f0639329 (slug=other-cc3439fd-250e-407c-8eab-8666f0639329, owner=2106349071019945985)
+19:42:07.514 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic de4a927a-42f0-4c71-ac45-7a037449be1c (slug=semantic-de4a927a-42f0-4c71-ac45-7a037449be1c, owner=2106349072001413121)
+19:42:07.515 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349072018190338, workspaceId=2106349072081104897, role=admin
+19:42:07.515 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349072034967554, workspaceId=2106349072081104897, role=member
+19:42:07.515 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349072051744770, workspaceId=2106349072081104897, role=viewer
+19:42:07.516 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other f766ea28-8295-46a0-8a55-1167ca3440e2 (slug=other-f766ea28-8295-46a0-8a55-1167ca3440e2, owner=2106349072001413121)
+19:42:07.755 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 0cb42496-06e6-42a1-8d75-f5603856dbfe (slug=semantic-0cb42496-06e6-42a1-8d75-f5603856dbfe, owner=2106349073003851778)
+19:42:07.755 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073024823298, workspaceId=2106349073087737857, role=admin
+19:42:07.755 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073045794818, workspaceId=2106349073087737857, role=member
+19:42:07.755 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073062572033, workspaceId=2106349073087737857, role=viewer
+19:42:07.757 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 685d57a4-6513-44c7-b4fa-71502bac22a1 (slug=other-685d57a4-6513-44c7-b4fa-71502bac22a1, owner=2106349073003851778)
+19:42:07.778 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic fd65fff7-22d3-4a69-a198-39e11939ed71 (slug=semantic-fd65fff7-22d3-4a69-a198-39e11939ed71, owner=2106349073129680897)
+19:42:07.779 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073146458114, workspaceId=2106349073188401153, role=admin
+19:42:07.779 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073159041025, workspaceId=2106349073188401153, role=member
+19:42:07.779 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073171623937, workspaceId=2106349073188401153, role=viewer
+19:42:07.779 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 3bb0e6c3-7f92-41bd-8910-b478174d68fc (slug=other-3bb0e6c3-7f92-41bd-8910-b478174d68fc, owner=2106349073129680897)
+19:42:07.800 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic 447c806f-5761-4f74-8136-e7b46c6f4f2f (slug=semantic-447c806f-5761-4f74-8136-e7b46c6f4f2f, owner=2106349073221955586)
+19:42:07.800 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073234538497, workspaceId=2106349073280675841, role=admin
+19:42:07.801 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073247121409, workspaceId=2106349073280675841, role=member
+19:42:07.801 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073259704321, workspaceId=2106349073280675841, role=viewer
+19:42:07.801 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 020b27ac-5401-4080-ad2a-ddb9ca1406fe (slug=other-020b27ac-5401-4080-ad2a-ddb9ca1406fe, owner=2106349073221955586)
+19:42:07.823 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic b42bf143-c260-4ee7-a6bb-73b7bbfe57de (slug=semantic-b42bf143-c260-4ee7-a6bb-73b7bbfe57de, owner=2106349073318424577)
+19:42:07.823 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073335201794, workspaceId=2106349073377144834, role=admin
+19:42:07.823 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073347784705, workspaceId=2106349073377144834, role=member
+19:42:07.823 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073356173314, workspaceId=2106349073377144834, role=viewer
+19:42:07.824 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other 0bae8fe2-79b4-4560-bcff-eecb19db4f03 (slug=other-0bae8fe2-79b4-4560-bcff-eecb19db4f03, owner=2106349073318424577)
+19:42:07.844 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic bf0bfff6-9384-4db8-974b-d042442c6cc4 (slug=semantic-bf0bfff6-9384-4db8-974b-d042442c6cc4, owner=2106349073406504961)
+19:42:07.844 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073419087873, workspaceId=2106349073465225217, role=admin
+19:42:07.845 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073431670786, workspaceId=2106349073465225217, role=member
+19:42:07.845 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073444253698, workspaceId=2106349073465225217, role=viewer
+19:42:07.845 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other ce8e35f4-5b02-4f5f-bb19-7eb6dd429373 (slug=other-ce8e35f4-5b02-4f5f-bb19-7eb6dd429373, owner=2106349073406504961)
+19:42:07.864 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Semantic bb6721a8-ece9-4a59-bba0-1ec4f70b6aa0 (slug=semantic-bb6721a8-ece9-4a59-bba0-1ec4f70b6aa0, owner=2106349073494585346)
+19:42:07.865 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073507168258, workspaceId=2106349073549111297, role=admin
+19:42:07.865 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073515556866, workspaceId=2106349073549111297, role=member
+19:42:07.865 INFO  v.m.w.core.service.WorkspaceService - Added member to workspace: userId=2106349073528139778, workspaceId=2106349073549111297, role=viewer
+19:42:07.865 INFO  v.m.w.core.service.WorkspaceService - Created workspace: Other e542285f-cdea-4953-a8c6-08cad223044b (slug=other-e542285f-cdea-4953-a8c6-08cad223044b, owner=2106349073494585346)
+[INFO] Tests run: 37, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.298 s -- in vip.mate.presales.PresalesRuntimeTransactionIntegrationTest
+[INFO] Running vip.mate.presales.PresalesGenerationCoordinatorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.207 s -- in vip.mate.presales.PresalesGenerationCoordinatorTest
+[INFO] Running vip.mate.presales.PresalesTerminalReceptionTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in vip.mate.presales.PresalesTerminalReceptionTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 63, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO]
+[INFO] MateClaw ........................................... SUCCESS [  0.090 s]
+[INFO] MateClaw Plugin API ................................ SUCCESS [  0.197 s]
+[INFO] MateClaw Semantic Core ............................. SUCCESS [  0.039 s]
+[INFO] MateClaw Semantic OWL Adapter ...................... SUCCESS [  0.116 s]
+[INFO] MateClaw Semantic Application ...................... SUCCESS [  0.026 s]
+[INFO] MateClaw Server .................................... SUCCESS [ 20.101 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  20.678 s
+[INFO] Finished at: 2026-10-03T19:42:08+08:00
+[INFO] ------------------------------------------------------------------------

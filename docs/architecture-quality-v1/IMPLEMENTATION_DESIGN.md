@@ -356,3 +356,16 @@ Actual manual commands previously persisted coercive JSON nodes that client DTO 
 New malformed field types receive400 INVALID_REQUEST and fixed field paths. Defaulted enum null, raw string revisions, extensions and original JSON order survive. Manual result/contextSnapshot top-level object admission is explicit, internals remain opaque; pinned employeeResult bypasses this manual schema. Solution presentation/sourceRefs retain policy422 and existing ordering. Old exact receipts replay before validation, persisted/frozen data is not rewritten. Other malformed multiple-field errors can become shape-first. Reject DTO-constructor validation because it changes authority/replay order; reject normalization because it changes hash/wire/history.
 
 64 new contracts and103 targeted regression tests, exact full Java reactor gates and bounded independent static review provide engineering evidence. This is declared write schema, not full server DTO/domain/model acceptance; all46 formal AC, maintainer/QA/required CI, SQL/V2/migration/browser/history remain pending. Source-only rollback has no database steps. See evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md and command-schema-test-results.json.
+
+
+## ADR-AQ-033: Reject obsolete employee terminals and centralize coordinator SQL facts (Proposed)
+
+Context: actual H2 and Spring regressions show FAILED could overwrite completed/replaced runs, fallback CAS reread could resurrect old pins/snapshot, pending cancellation was ignored and obsolete RUNNING result retained. Success already had a strict transactional fence; weakening it to a shared permissive identity would be unsafe.
+
+Decision: coordinator checks full original accepted RUNNING task before execution, terminal submission and every fallback reread; cancellation reservations block observed failure writes. Employee service FAILED checks the durable RUNNING envelope while admitting only diagnostic output differences; SUCCEEDED preserves the original strict three-field comparison and fence order. Move scoped runtime row/recovery list/body-CAS facts to existing ProjectRow repository, retain JSON/policy/retries at coordinator.
+
+Rejected: taskId/project-version-only identity because it cannot distinguish replacement pins/snapshot/unknown envelope. A new generic runtime policy or repository-owned recovery transitions would duplicate domain responsibility. Weakening success comparison to failure diagnostics would widen accepted success input.
+
+Tradeoffs: no-actor matching-run failure remains an internal failure-only CAS; V1 project-version drift and all-row recovery scan persist pending independent V2 objects/dependencies/projection. Single-process reservations are not distributed attempt fencing or full cancellation/billing proof. No migration, authority expansion, dependencies or control-plane changes.
+
+Evidence: evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md and terminal-reception-test-results.json; actual red63/33 failures, guard63 and final119 pass, exact source full gates and independent technical COMMENT. Stakeholder/maintainer/QA approval remains pending. Rollback restores bounded source/tests; no database action.
