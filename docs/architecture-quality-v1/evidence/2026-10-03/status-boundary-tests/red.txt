@@ -1,0 +1,46 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (65 tests | 2 failed) 21882ms
+     × marks unknown historical state while preserving and safely rendering its exact raw text 47ms
+     × tracks host locale for known states while keeping the original wire values 51ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > status display boundary > marks unknown historical state while preserving and safely rendering its exact raw text
+AssertionError: expected '← ProjectsPlant AEdit project<img src…' to contain 'Unknown status: <img src=x onerror="a…'
+
+Expected: "Unknown status: <img src=x onerror="alert(1)">  LEGACY"
+Received: "← ProjectsPlant AEdit project<img src=x onerror="alert(1)">  LEGACYCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions0Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedNo project context yet.Employee activityWorkEmployeeStatusFailure reasonNo DataAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeNo solution. Confirm the outline before drafting sections.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and references"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1882:39
+    1880|     vi.mocked(presalesApi.get).mockResolvedValue(detail)
+    1881|     await mount(`/presales/${project.id}`)
+    1882|     expect(document.body.textContent).toContain(`Unknown status: ${raw…
+       |                                       ^
+    1883|     expect(document.querySelector('img[src="x"]')).toBeNull()
+    1884|     expect(detail.stage).toBe(raw)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > status display boundary > tracks host locale for known states while keeping the original wire values
+AssertionError: expected '← 项目列表Plant A编辑档案DiscoveryCustomer负责人…' to contain '已完成'
+
+Expected: "已完成"
+Received: "← 项目列表Plant A编辑档案DiscoveryCustomer负责人: Jane Doe记录版本 3归档负责此项目的数字员工尚未绑定售前员工配置负责员工交给员工执行需求00 open资料来源0方案迭代0已发布成果0项目概览资料与证据需求与澄清能力与案例方案设计评审与成果项目理解与未决事项让员工分析项目客户Customer目标—行业—本轮需求确认尚未确认尚未生成项目理解。员工执行记录理解项目与资料 · Succeeded输入快照历史生成记录工作内容执行员工状态失败原因理解项目与资料Succeeded授权来源绑定资料用途知识库语义图状态操作No Data需求矩阵让员工梳理需求确认本轮需求确认流程说明事实审核、本轮需求确认和客户确认是三个独立步骤。请先核对数字员工整理的需求与依据，再确认本轮范围。需求来源性质优先级范围客户确认操作No Data员工待补充信息让员工继续处理全部 0待处理 0已答复 0问题关联需求 / 影响负责人答复与出处状态操作No Data需求确认记录ID批准依据创建时间No Data需求与能力匹配匹配能力能力判断说明缺少依据时标记为待核实。案例相似不等于当前产品可交付。需求引用满足方式产品版本依据 / 缺口操作No Data版本化方案让员工编制方案暂无方案。先确认目录，再编写章节。独立评审让员工检查方案录入独立评审创建发布候选方案版本结论评审发现No Data成果版本导出内部交接包版本状态文件操作No Data发布规则每个成果版本须经审批后发布；审批针对该版本的具体文件。发布不会自动发送给客户。证据与引用链"
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:1899:39
+    1897|     await settle()
+    1898|     expect(document.body.textContent).toContain('项目理解')
+    1899|     expect(document.body.textContent).toContain('已完成')
+       |                                       ^
+    1900|     expect(detail.tasks[0]?.status).toBe('SUCCEEDED')
+    1901|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 63 passed (65)
+   Start at  07:50:41
+   Duration  22.87s (transform 463ms, setup 0ms, import 776ms, tests 21.88s, environment 114ms)

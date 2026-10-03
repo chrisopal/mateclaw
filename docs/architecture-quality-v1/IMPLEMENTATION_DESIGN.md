@@ -320,3 +320,9 @@ object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确Vers
 成员/来源/可信事实/员工/能力从unknown按各自字段解码，复用已有售前校验原语与Workspace请求。查询不继承PresalesRecord：真实来源name/图修订与成员姓名可空，事实evidenceIds允许null列表/成员；元数据、缺省、字符串ID、扩展及原对象保持。成员Workspace比对只证明响应一致性，授权仍由服务器完成。来源label用既有Element Plus值回退，不新增业务占位数据。
 
 拒绝宽化所有项目记录或改写raw事实/快照。用户选择事实时只排除null证据项，保留有效ID顺序/重复和精确事实修订；全列表null仍沿用空草稿行为。这是显式修复旧UI把null复制为ID的行为，不在加载或历史回读时迁移数据。旧API27拒绝断言和旧编辑1条断言失败，最终42查询/19编辑/259售前/956全UI通过，独立限定复核无发现。来源/员工权限、事务/CAS/receipt、取消与迟到结果不变；Java按frontend-only规则不适用。完整领域DTO/UnknownStatus/SQL/V2、真实浏览器/存量/模型/正式QA与远端强制CI仍待完成，证据见AQ05_QUERY_RESPONSE_ACCEPTANCE。回退只影响本批查询类型/解码与选择投影，无数据库操作。
+
+### ADR-AQ-028：历史状态使用展示判别联合且不改领域权威（Proposed）
+
+工作台原Record<string,双语>在每次调用构造混合阶段/状态/来源/范围字典，未知raw无法单独识别，原型属性名还可能误判。采用本域纯KnownStatus/UnknownStatus{raw}/MissingStatus，finite KnownStatusValue从集中i18n原47标签key推导；Object.hasOwn分类，保留大小写/空格。页面所有原组件仍使用同一stateLabel回调，不建立新的执行/审批通道。
+
+取舍：原47对文案保持，接宿主locale；未知非空值显式标未知状态及原文，empty/undefined仍 —。这是明确展示行为变化，raw响应、冻结成果、request/receipt和已有批准/过滤/取消判断不改。词表混合原展示值，不作为任何业务对象的领域allowlist，完整领域DTO/对象状态仍须各自契约。拒绝Known|string、trim/uppercase/未知变DRAFT或将展示分类用于批准。旧62项/新增后旧实现2红例；59纯合同+3新增Vue/完整售前321及全UI1018、精确门禁和独立限定审阅验证本片。LSP不可用、日志socket诊断未定位；实际vue-tsc通过和门禁exit0不冒充这些问题已修复。没有依赖/SQL/迁移/事务变化，回退只恢复本批源码。真实浏览器/历史数据/模型/多方言/V2/独立维护者QA和远端requiredCI仍待完成；证据见AQ05_STATUS_BOUNDARY_ACCEPTANCE。

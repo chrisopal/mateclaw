@@ -1,0 +1,8 @@
+Native agent project_response_wire_audit: read-only scoped review.
+Verdict COMMENT: no findings; subject to root gate evidence, not formal AC or maintainer approval.
+Final five source/test files inspected. Finite known union and UnknownStatus raw match spec section 8.
+Object.hasOwn excludes prototype keys; unknown raw is interpolation data. Both languages preserve 47 original labels; empty remains em dash.
+Workbench changes import and stateLabel only; no request, persisted wire, permission or action condition changes.
+Original workbench test prefix restored after format noise.
+Independent executed: 59 status tests and 3 added Vue tests PASS; five-file ESLint exit 0.
+LSP on five files: Transport closed. No usable LSP or AST PASS evidence. Main-thread vue-tsc supplies actual typecheck evidence.
