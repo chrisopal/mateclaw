@@ -17,7 +17,11 @@ The base and candidate declarations are both checked. Removing the manifest/item
 - Copied published source CLI probe: 18 scenarios × worktree/index = 36 actual CLI checks with expected exits. Scenarios include each Java dialect's edit/delete, both shared algorithm edits and rehashes, rename, removed/invalid manifest, missing new dialects, a complete new version and existing SQL edit. Temporary Git repositories are isolated and removed; no database is contacted.
 - Independent read-only reviewer `/root/java_migration_guard_review`: COMMENT, no substantive defect in four-file implementation/plan scope. Independently ran 91 tests, dev exit 0 / SCAN_PASS (`i1muzumi`), Python AST parse, diff whitespace and published-source hash comparison. LSP returned `tsc skipped: no tsconfig found`; ast-grep absent. These diagnostics are NOT_RUN, not successful type/AST-tool checks. This review is not maintainer or merge approval.
 
-Full exact-staged, normal hook and checked-push evidence will be recorded from their actual outputs after execution; none is claimed here in advance.
+Source commit: `6992bf9e2387aaeb554cd866a22b9ba4f0f11e95`, tree `a2797580d24cf75b82feb2eb278ff0905313c16b`, parent `bf7a12f5406f46fcac1e3292a078f45414be3c6e`.
+
+Exact staged full gate `kkn2cd20` and normal pre-commit hook `05efgipv`: both actual exit 0 / PASS / submission_ready=true, same exact tree. Each executed Java 6,171 (6,241 total with 70 existing condition skips), UI 1,093, Node 5, cost-tool 16 and guard 91; formatter, typecheck, ID precision and enterprise/classic builds passed. UI lint/format are NOT_APPLICABLE by fixed no-frontend-change mapping. Original condition skips are not counted as executed. No new skips or assertion weakening.
+
+Machine reports, original log SHA-256, redacted full source Java log, Vitest results, other tool logs and hook summary are archived in [results manifest](java-migration-guard-results.json). Initial raw log whitespace was rejected by staged diff check; lossless gzip preserves original whitespace/CRLF without changing the guard. A separate documentation commit records this actual evidence; its exact gate and subsequent full-range checked push are reported from actual terminal output/PR read-back, not predeclared here.
 
 ## Review and remaining boundary
 
