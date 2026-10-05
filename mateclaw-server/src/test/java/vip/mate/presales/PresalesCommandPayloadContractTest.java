@@ -198,15 +198,20 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                         operation));
     }
 
-    @Test
-    void authorizationReplayCasAndArchiveStillPrecedeShapeValidation() throws Exception {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "UPDATE_PROJECT,name",
+        "SAVE_CLARIFICATION,question"
+    })
+    void authorizationReplayCasAndArchiveStillPrecedeShapeValidation(String action, String field)
+            throws Exception {
         var p = project();
-        var payload = json.createObjectNode().put("name", 123);
+        var payload = json.createObjectNode().put(field, 123);
         String operation = UUID.randomUUID().toString();
-        var c = cmd(1, operation, "UPDATE_PROJECT", payload);
+        var c = cmd(1, operation, action, payload);
         command(p, c, "viewer", 403);
         error(
-                command(p, cmd(0, operation, "UPDATE_PROJECT", payload), "member", 409),
+                command(p, cmd(0, operation, action, payload), "member", 409),
                 "VERSION_CONFLICT",
                 null);
         // A historical matching receipt is replayed without validating or re-writing its request.
@@ -224,7 +229,7 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                 hash,
                 p.toString());
         assertEquals(p, command(p, c, "member", 200).path("data"));
-        payload.put("name", 456);
+        payload.put(field, 456);
         error(command(p, c, "member", 409), "OPERATION_CONFLICT", null);
         p =
                 (ObjectNode)
@@ -239,17 +244,18 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                                         200)
                                 .path("data");
         error(
-                command(
-                        p,
-                        cmd(2, UUID.randomUUID().toString(), "UPDATE_PROJECT", payload),
-                        "member",
-                        409),
+                command(p, cmd(2, UUID.randomUUID().toString(), action, payload), "member", 409),
                 "PROJECT_ARCHIVED",
                 null);
     }
 
-    @Test
-    void revokedSourceStillPrecedesMalformedPayloadAndRepairIsNotWidened() throws Exception {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "UPDATE_PROJECT,name",
+        "SAVE_CLARIFICATION,question"
+    })
+    void revokedSourceStillPrecedesMalformedPayloadAndRepairIsNotWidened(
+            String action, String field) throws Exception {
         var p = project();
         p.withArray("materials")
                 .addObject()
@@ -267,8 +273,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                         cmd(
                                 1,
                                 UUID.randomUUID().toString(),
-                                "UPDATE_PROJECT",
-                                json.createObjectNode().put("name", 123)),
+                                action,
+                                json.createObjectNode().put(field, 123)),
                         "member",
                         403),
                 "MATERIAL_UNAVAILABLE",
@@ -327,6 +333,147 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                                 .path("data");
         assertEquals("DRAFT", p.path("tasks").get(0).path("status").asText());
         assertEquals(task.path("result"), p.path("tasks").get(0).path("result"));
+        assertEquals(p.toString(), stored(p));
+    }
+
+    @Test
+    void clarificationMultipleErrorsKeepDomainOrderAndLeaveAllRowsUntouched() throws Exception {
+        var p = project();
+        var cases =
+                List.of(
+                        new String[] {
+                            "{\"question\":\"\",\"status\":\"UNKNOWN\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "question required, max 5000 characters"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"UNKNOWN\",\"requirementId\":\"foreign\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid status"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"ANSWERED\",\"requirementId\":\"foreign\",\"ownerId\":\"999999999\"}",
+                            "404",
+                            "NOT_FOUND",
+                            "requirements item not found"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"ANSWERED\",\"ownerId\":\"999999999\"}",
+                            "400",
+                            "INVALID_OWNER",
+                            "Owner must be a workspace member"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"question\":\"q\",\"status\":\"ANSWERED\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "answer required, max 10000 characters"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"question\":\"q\",\"status\":\"ANSWERED\",\"answer\":\"a\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "answer source required, max 2000 characters"
+                        });
+        var before = stored(p);
+        var revisions =
+                jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_revision", Long.class);
+        var receipts =
+                jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_operation", Long.class);
+        for (var sample : cases) {
+            var payload = (ObjectNode) json.readTree(sample[0]);
+            var result =
+                    command(
+                            p,
+                            cmd(1, UUID.randomUUID().toString(), "SAVE_CLARIFICATION", payload),
+                            "member",
+                            Integer.parseInt(sample[1]));
+            error(result, sample[2], sample[3]);
+            assertEquals(before, stored(p));
+            assertEquals(
+                    revisions,
+                    jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_revision", Long.class));
+            assertEquals(
+                    receipts,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation", Long.class));
+        }
+    }
+
+    @Test
+    void clarificationCodecPreservesOpaqueFieldsReplayAndReplacementOrder() throws Exception {
+        var p = project();
+        var payload = json.createObjectNode().put("question", "Question 1").putNull("status");
+        payload.put("answer", "retained draft").put("answerSourceId", "raw source");
+        payload.put("answeredBy", "forged").put("answeredAt", "forged");
+        payload.putObject("extension").putNull("raw").put("number", "90071992547409999");
+        var input = payload.deepCopy();
+        var c = cmd(1, UUID.randomUUID().toString(), "SAVE_CLARIFICATION", payload);
+        p = (ObjectNode) command(p, c, "member", 200).path("data");
+        var first = p.path("clarifications").get(0);
+        assertEquals("OPEN", first.path("status").asText());
+        assertFalse(first.has("answeredBy"));
+        assertFalse(first.has("answeredAt"));
+        assertFalse(first.has("ownerId"));
+        assertFalse(first.has("requirementId"));
+        assertEquals("retained draft", first.path("answer").asText());
+        assertEquals("raw source", first.path("answerSourceId").asText());
+        assertEquals(input.path("extension"), first.path("extension"));
+        var fields = new ArrayList<String>();
+        first.fieldNames().forEachRemaining(fields::add);
+        assertEquals(
+                List.of(
+                        "question",
+                        "status",
+                        "answer",
+                        "answerSourceId",
+                        "extension",
+                        "id",
+                        "version",
+                        "authorId",
+                        "createdAt"),
+                fields);
+        assertEquals(input, payload);
+        assertEquals(p, command(p, c, "member", 200).path("data"));
+        var firstId = first.path("id").asText();
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                2,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_CLARIFICATION",
+                                                json.createObjectNode()
+                                                        .put("question", "Question 2")),
+                                        "member",
+                                        200)
+                                .path("data");
+        var secondId = p.path("clarifications").get(1).path("id").asText();
+        var replacement = json.createObjectNode().put("id", firstId).put("question", "Replaced");
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                3,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_CLARIFICATION",
+                                                replacement),
+                                        "member",
+                                        200)
+                                .path("data");
+        assertEquals(secondId, p.path("clarifications").get(0).path("id").asText());
+        var saved = p.path("clarifications").get(1);
+        assertEquals(firstId, saved.path("id").asText());
+        assertEquals(2, saved.path("version").asInt());
+        assertFalse(saved.has("extension"));
+        assertFalse(saved.has("answer"));
+        assertEquals(
+                p,
+                api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
         assertEquals(p.toString(), stored(p));
     }
 }

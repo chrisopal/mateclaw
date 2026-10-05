@@ -231,20 +231,16 @@ public class PresalesService {
                 saveItem(p, "requirements", value, actor, false);
             }
             case SAVE_CLARIFICATION -> {
-                text(value.path("question").asText(), "question", 5000);
-                enumValue(value, "status", Set.of("OPEN", "ANSWERED"), "OPEN");
-                if (!value.path("requirementId").asText().isBlank())
-                    find(p, "requirements", value.path("requirementId").asText());
-                if (!value.path("ownerId").asText().isBlank())
-                    value.put(
-                            "ownerId", access.owner(scope, value.path("ownerId").asText(), actor));
-                if ("ANSWERED".equals(value.path("status").asText())) {
-                    text(value.path("answer").asText(), "answer", 10000);
-                    text(value.path("answerSourceId").asText(), "answer source", 2000);
-                    value.put("answeredBy", actor)
-                            .put("answeredAt", LocalDateTime.now(ZoneOffset.UTC).toString());
-                } else {
-                    value.remove(List.of("answeredBy", "answeredAt"));
+                try {
+                    var decision =
+                            PresalesClarificationSave.decide(
+                                    PresalesClarificationCodec.decode(value),
+                                    actor,
+                                    id -> find(p, "requirements", id),
+                                    id -> access.owner(scope, id, actor));
+                    PresalesClarificationCodec.apply(value, decision);
+                } catch (PresalesRejected rejection) {
+                    throw legacyRejection(rejection);
                 }
                 saveItem(p, "clarifications", value, actor, false);
             }

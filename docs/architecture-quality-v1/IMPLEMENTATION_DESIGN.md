@@ -443,3 +443,11 @@ GenerationService不再按字符串键拼装18个任务字段，改用包内Pres
 拒绝用新DTO重写历史任务、扩展另一个Task表，或把命名相近的字段当作完整V2迁移。它仅定义新任务写入边界，历史未知状态和旧序列化仍由原路径读取。增加65行生产声明换取类型与快照边界，不以减行数评价此决定。
 
 原Service先通过含4个独立wire刻画的62项合同；替换后64/64，扩展744项（743通过/1既有PPT环境skip）。默认/真实宿主/省略null/属性排序四种mapper下保持原wire；证据见evidence/2026-10-06/AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md。正式QA/维护人仍待签收，回退只恢复before生成服务并移除本片DTO/测试，无数据库动作。
+
+## ADR-AQ-042：澄清保存使用类型化领域规则与旧JSON兼容codec（Proposed）
+
+SAVE_CLARIFICATION以Draft/Status/Decision明确输入和决定，领域顺序集中PresalesClarificationSave；PresalesClarificationCodec仅读写旧载荷。Service保留角色、来源、幂等、CAS、事务和item持久化。requirement查找及owner解析通过两个窄协作者复用原实现，无新bean/依赖/权限服务。
+
+不在解码时提前校验状态、回答或加载旧item；保留question/status/requirement/owner/answer/source/item version顺序。OPEN不清除原answer/source，ANSWERED覆盖客户端伪造回答人/时间。未知扩展、null/缺失及字段顺序保留，不用record序列化重建整份旧JSON。取舍是增加两个小类换取真正的类型业务边界；尚未消除ProjectItems内JSON聚合存储，不能等同完整领域DTO或V2数据迁移。
+
+证据见evidence/2026-10-06/AQ05_CLARIFICATION_DTO_ACCEPTANCE.md。旧行为刻画先通过，扩展753项中752通过/1既有环境skip，追加字段顺序后37合同通过。正式维护人/QA签收仍开放；回退仅恢复分支及删除两个新类，无数据库操作。
