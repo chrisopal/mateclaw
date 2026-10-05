@@ -42,8 +42,12 @@ class PresalesProjectRepositoryTest {
     }
 
     @AfterEach
-    void close() {
-        jdbc.execute("SHUTDOWN");
+    void close() throws java.sql.SQLException {
+        // JdbcTemplate probes warnings in DEBUG after SHUTDOWN has closed H2.
+        try (var connection = jdbc.getDataSource().getConnection();
+                var statement = connection.createStatement()) {
+            statement.execute("SHUTDOWN");
+        }
     }
 
     private ProjectRow row(

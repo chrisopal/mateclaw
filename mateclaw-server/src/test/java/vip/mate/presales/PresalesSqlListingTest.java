@@ -173,7 +173,7 @@ class PresalesSqlListingTest {
     }
 
     @AfterEach
-    void close() {
+    void close() throws java.sql.SQLException {
         if (!ownsTables) return;
         if (external)
             for (String table :
@@ -183,7 +183,13 @@ class PresalesSqlListingTest {
                             "mate_presales_operation",
                             "mate_presales_project",
                             "flyway_schema_history")) jdbc.execute("DROP TABLE IF EXISTS " + table);
-        else jdbc.execute("SHUTDOWN");
+        else {
+            // JdbcTemplate probes warnings in DEBUG after SHUTDOWN has closed H2.
+            try (var connection = jdbc.getDataSource().getConnection();
+                    var statement = connection.createStatement()) {
+                statement.execute("SHUTDOWN");
+            }
+        }
     }
 
     @Test
