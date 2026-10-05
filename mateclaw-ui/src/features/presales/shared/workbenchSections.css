@@ -72,3 +72,7 @@ h3 {
   margin: 0;
   flex-shrink: 0;
 }
+.navigation-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

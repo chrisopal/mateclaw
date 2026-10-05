@@ -97,3 +97,7 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 澄清保存类型化见 [AQ05_CLARIFICATION_DTO_ACCEPTANCE.md](evidence/2026-10-06/AQ05_CLARIFICATION_DTO_ACCEPTANCE.md)：Draft/Status/Decision集中状态、回答及协作者顺序，旧JSON兼容由codec负责；Service保持事务、来源、幂等及CAS。旧合同先通过，扩展753项中752通过/1既有环境skip，追加字段顺序37/37；独立COMMENT无剩余发现。完整项目DTO/V2迁移及正式验收继续开放。
 
 人工评审保存类型边界见 [AQ05_REVIEW_DTO_ACCEPTANCE.md](evidence/2026-10-06/AQ05_REVIEW_DTO_ACCEPTANCE.md)：类型化等级/状态及有序校验与旧 JSON codec 分离；原授权、事务、回放和不可变修订不变。旧实现41合同通过，迁移后67/67；未重写历史格式或升级发布许可。完整 DTO、V2 单写迁移、坏版本任务恢复及正式验收仍开放。
+
+项目台账展示职责见 [AQ09_PROJECT_LEDGER_ACCEPTANCE.md](evidence/2026-10-06/AQ09_PROJECT_LEDGER_ACCEPTANCE.md)：工作台1226→1062行，required model 与事件保留父级查询/Workspace/权限生命周期；旧页面89、最终售前500项通过，类型/lint/格式通过。两主题×两视口合成浏览器呈现和交互验证通过，独立COMMENT无发现；完整架构与正式业务验收仍开放。
+
+真实远端 CI 见 [AQ08_REMOTE_CI_ACCEPTANCE.md](evidence/2026-10-06/AQ08_REMOTE_CI_ACCEPTANCE.md)：run37376295073/source08acb836/merge7d2ed26f 的验证和Required汇总均success；远端Java6652通过/71跳过、UI1195、Node5、cost16及适用检查通过，报告与GitHub身份已下载回读。目标分支protected=false；该结果不代表强制生效、正式AC关闭或后续提交已通过。

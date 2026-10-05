@@ -457,3 +457,9 @@ SAVE_CLARIFICATION以Draft/Status/Decision明确输入和决定，领域顺序�
 SAVE_REVIEW 的 solution/summary/issues 检查顺序与等级、处理状态收敛到 PresalesReviewSave；合法结果是不可变类型列表。PresalesReviewCodec 仅负责旧字段默认值和必要写回，保留未知扩展、null/缺失、字段顺序与原输入。Service 继续控制授权、来源、原请求回放、CAS、事务，最后复用 ProjectItems 的不可变修订保存。人工评审标记仍不等于发布批准。
 
 拒绝直接将整份 JSON 反序列化为固定 record 再重写，也不创建通用状态引擎或第二套版本/权限规则。新增 95 行包内代码而 Service 仅少 1 行，是类型和兼容边界的取舍，不能宣称总复杂度或全部领域 DTO 已完成。旧 Service 的 41 项合同先通过，迁移后 67/67；证据见 evidence/2026-10-06/AQ05_REVIEW_DTO_ACCEPTANCE.md。完整聚合 DTO、V2 迁移及正式验收继续开放。回退恢复原分支并移除两个包内类，无数据库变更。
+
+## ADR-AQ-044：台账展示与查询会话分离（Proposed）
+
+PresalesProjectLedger 只承担筛选表单、摘要列表、日期/阶段及分页展示；required model 保留父页 query/ownerFilter/statusFilter/page，search/reload/open 交回既有查询会话和路由。Workspace、权限、abort、版本接纳与 Dashboard 继续在父级，不复制缓存或新建 store/API。fragment 和原样式保持，导航链接规则复用既有同域 CSS。
+
+页面 1226→1062 行，新组件207行、共享CSS增加4行，总生产增加47行，是明确展示边界的取舍。原页面新增刻画89/89，最终售前500/500、类型/lint/格式通过；真实浏览器合成夹具的两主题×两视口布局及交互通过，细微文字色差在旧旧控制对比重现，不宣称像素一致或真实业务签收。证据见 evidence/2026-10-06/AQ09_PROJECT_LEDGER_ACCEPTANCE.md。独立COMMENT无发现；完整架构与正式验收继续开放。回退恢复旧页面台账并删除组件，无数据动作。

@@ -152,6 +152,131 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 describe('presales workspace behavior', () => {
+  it('keeps ledger filter models, pagination and dashboard stage selection in the query session', async () => {
+    vi.mocked(presalesApi.list).mockImplementation(async (_ws, params) =>
+      params.pageSize === 100
+        ? { items: [], total: 0, page: 1, pageSize: 100 }
+        : { items: [project], total: 41, page: params.page ?? 1, pageSize: 20 },
+    )
+    await mount()
+    const input = document.querySelector<HTMLInputElement>('.toolbar .el-input input')!
+    input.value = '  Exact customer Ω  '
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    const select = document.querySelector<HTMLElement>('.toolbar .el-select')!
+    select.click()
+    await settle()
+    const owner = [...document.querySelectorAll<HTMLElement>('.el-select-dropdown__item')].find(
+      (item) => item.textContent?.trim() === 'Jane Doe',
+    )!
+    owner.click()
+    await settle()
+    document.querySelector<HTMLButtonElement>('.el-pagination .btn-next')!.click()
+    await settle()
+    expect(presalesApi.list).toHaveBeenLastCalledWith(
+      project.workspaceId,
+      {
+        q: '  Exact customer Ω  ',
+        ownerId: project.ownerId,
+        stage: '',
+        page: 2,
+        pageSize: 20,
+      },
+      expect.any(AbortSignal),
+    )
+    document
+      .querySelector('form.toolbar')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle()
+    expect(presalesApi.list).toHaveBeenLastCalledWith(
+      project.workspaceId,
+      {
+        q: '  Exact customer Ω  ',
+        ownerId: project.ownerId,
+        stage: '',
+        page: 1,
+        pageSize: 20,
+      },
+      expect.any(AbortSignal),
+    )
+    document.querySelectorAll<HTMLButtonElement>('.pipeline-stage')[1]!.click()
+    await settle()
+    expect(presalesApi.list).toHaveBeenLastCalledWith(
+      project.workspaceId,
+      {
+        q: '  Exact customer Ω  ',
+        ownerId: project.ownerId,
+        stage: 'REQUIREMENTS',
+        page: 1,
+        pageSize: 20,
+      },
+      expect.any(AbortSignal),
+    )
+    expect(document.querySelectorAll('.toolbar .el-select')[1]?.textContent).toContain(
+      'Requirements',
+    )
+    document.querySelectorAll<HTMLButtonElement>('.pipeline-stage')[1]!.click()
+    await settle()
+    expect(presalesApi.list).toHaveBeenLastCalledWith(
+      project.workspaceId,
+      {
+        q: '  Exact customer Ω  ',
+        ownerId: project.ownerId,
+        stage: '',
+        page: 1,
+        pageSize: 20,
+      },
+      expect.any(AbortSignal),
+    )
+  })
+
+  it.each(['link', 'double-click'] as const)(
+    'keeps ledger fallback text and exact string-ID navigation via %s',
+    async (kind) => {
+      const row = {
+        ...project,
+        stage: 'FUTURE_STAGE',
+        ownerId: 'unavailable-owner',
+        updatedAt: 'invalid-date',
+      }
+      vi.mocked(presalesApi.list).mockResolvedValue({
+        items: [row],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      })
+      const router = await mount()
+      const ledger = document.querySelector('.project-ledger')!
+      expect(ledger.textContent).toContain('Member unavailable')
+      expect(ledger.textContent).toContain('FUTURE_STAGE')
+      expect(ledger.textContent).toContain('Not started')
+      expect(ledger.textContent).toContain('—')
+      if (kind === 'link') ledger.querySelector<HTMLButtonElement>('.navigation-link')!.click()
+      else
+        ledger
+          .querySelector('.el-table__row')!
+          .dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+      await settle()
+      expect(router.currentRoute.value.params.projectId).toBe(project.id)
+      expect(presalesApi.get).toHaveBeenLastCalledWith(
+        project.workspaceId,
+        project.id,
+        expect.any(AbortSignal),
+      )
+    },
+  )
+
+  it('keeps the ledger load failure distinct from its empty state', async () => {
+    vi.mocked(presalesApi.list).mockImplementation(async (_ws, params) => {
+      if (params.pageSize === 20) throw { response: { status: 500 } }
+      return { items: [], total: 0, page: 1, pageSize: 100 }
+    })
+    await mount()
+    expect(document.querySelector('.project-ledger')?.textContent).toContain(
+      'Loading failed. Retry.',
+    )
+    expect(document.querySelector('.project-ledger')?.textContent).not.toContain('No projects.')
+  })
+
   it.each(['resolve', 'reject'] as const)(
     'ends loading when workspace is cleared before capabilities %s late',
     async (completion) => {
