@@ -59,7 +59,7 @@ class PresalesQueuedTaskContractTest {
                         });
         var generation =
                 new PresalesGenerationService(service, access, contexts, model, json, coordinator);
-        var input = new PresalesDtos.Generate(1, "operation", "S1", "理解需求");
+        var input = new PresalesDtos.Generate(1L, "operation", "S1", "理解需求");
         var response = generation.generate("workspace", "project", input);
         var write = ArgumentCaptor.forClass(PresalesDtos.Command.class);
         verify(service).command(eq("workspace"), eq("project"), write.capture());

@@ -54,7 +54,7 @@ class PresalesGenerationControllerTest {
                 new PresalesGenerationController(
                         new PresalesGenerationService(
                                 service, access, contexts, model, json, coordinator));
-        var input = new PresalesDtos.Generate(version, "operation", "S1", "理解需求");
+        var input = new PresalesDtos.Generate((long) version, "operation", "S1", "理解需求");
         var accepted = controller.generate("w", "p", input);
         assertEquals(200, accepted.getCode());
         assertEquals(
@@ -100,7 +100,7 @@ class PresalesGenerationControllerTest {
                 vip.mate.semantic.web.SemanticApiException.class,
                 () ->
                         controller.generate(
-                                "w", "p", new PresalesDtos.Generate(1, "op", "S1", "分析")));
+                                "w", "p", new PresalesDtos.Generate(1L, "op", "S1", "分析")));
         verify(service, never()).command(any(), any(), any());
     }
 

@@ -138,6 +138,6 @@ class PresalesRepairPolicyTest {
     }
 
     private Command command(String action, ObjectNode payload) {
-        return new Command(2, "operation", action, payload);
+        return new Command(2L, "operation", action, payload);
     }
 }

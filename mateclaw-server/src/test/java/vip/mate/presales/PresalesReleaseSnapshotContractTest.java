@@ -314,6 +314,14 @@ class PresalesReleaseSnapshotContractTest {
         verifyNoInteractions(renderer, artifacts);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"2", "2147483648"})
+    void baselineCapturesExactHistoricalProjectRevisionText(String version) throws Exception {
+        var p = baselineProject().put("version", version);
+        var baseline = approveBaseline(p);
+        assertEquals(Long.parseLong(version), baseline.path("projectVersion").longValue());
+    }
+
     private ObjectNode approveBaseline(ObjectNode p) throws Exception {
         return approveBaseline(p, json.createObjectNode().put("reason", "Checked"));
     }

@@ -512,7 +512,7 @@ class PresalesSqlListingTest {
                                 jdbc.getDataSource()));
         var request =
                 new PresalesDtos.Create(
-                        "x\ud800y", "Customer", null, null, null, null, 0, "create-writer");
+                        "x\ud800y", "Customer", null, null, null, null, 0L, "create-writer");
         var created = tx.execute(status -> service.create("scope", request));
         assertEquals(created, tx.execute(status -> service.create("scope", request)));
         for (String q : List.of("?", "\ud800", "x"))
@@ -521,7 +521,7 @@ class PresalesSqlListingTest {
                     queryService.list("scope", q, null, "writer", null, 1, 20));
         var command =
                 new PresalesDtos.Command(
-                        1,
+                        1L,
                         "manual-writer",
                         "UPDATE_PROJECT",
                         json.createObjectNode().put("name", "Renamed Ω"));
@@ -566,7 +566,7 @@ class PresalesSqlListingTest {
                                                 "scope",
                                                 created.path("id").asText(),
                                                 new PresalesDtos.Command(
-                                                        2,
+                                                        2L,
                                                         "rollback-writer",
                                                         "UPDATE_PROJECT",
                                                         json.createObjectNode()
@@ -594,10 +594,10 @@ class PresalesSqlListingTest {
         when(access.owner(eq("scope"), any(), eq("actor"))).thenReturn("writer");
         var first =
                 new PresalesDtos.Create(
-                        "x\ud800y", "Customer", null, null, null, null, 0, "legacy-hash");
+                        "x\ud800y", "Customer", null, null, null, null, 0L, "legacy-hash");
         var different =
                 new PresalesDtos.Create(
-                        "x?y", "Customer", null, null, null, null, 0, "legacy-hash");
+                        "x?y", "Customer", null, null, null, null, 0L, "legacy-hash");
         assertNotEquals(first, different);
         assertEquals(
                 vip.mate.semantic.statement.StatementApplicationService.hash(

@@ -193,15 +193,15 @@ public class PresalesService {
         if (replay != null) {
             return commandResponse(scope, p, replay);
         }
-        if (!PresalesProjectItems.matchesRevision(p.path("version"), r.expectedVersion()))
+        if (!PresalesProjectRevision.matchesRevision(p.path("version"), r.expectedVersion()))
             throw conflict("VERSION_CONFLICT", "Project has changed; reload before saving");
         if ("ARCHIVED".equals(p.path("status").asText()))
             throw conflict("PROJECT_ARCHIVED", "Archived projects are read only");
         ObjectNode value = r.payload() == null ? json.createObjectNode() : r.payload().deepCopy();
-        int nextVersion;
+        long nextVersion;
         try {
             if (!employeeResult) PresalesCommandPayload.validate(parsedAction.kind(), value);
-            nextVersion = PresalesProjectItems.nextRevision(r.expectedVersion());
+            nextVersion = PresalesProjectRevision.nextRevision(r.expectedVersion());
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
@@ -344,9 +344,8 @@ public class PresalesService {
             default -> throw bad("Unsupported command: " + action);
         }
         p.put("stage", PresalesProjectListing.stage(p));
-        p.put("version", nextVersion)
-                .put("updatedBy", actor)
-                .put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
+        p.set("version", PresalesProjectRevision.number(nextVersion));
+        p.put("updatedBy", actor).put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
         String body = PresalesListingProjectionV1.storageJson(encode(p));
         if (projects.update(
                         new PresalesProjectRepository.ProjectRow(
@@ -715,7 +714,7 @@ public class PresalesService {
     private void record(ObjectNode p, String actor, String action) {
         projects.insertRevision(
                 p.path("id").asText(),
-                p.path("version").asInt(),
+                p.path("version").longValue(),
                 actor,
                 action,
                 PresalesListingProjectionV1.storageJson(encode(p)),

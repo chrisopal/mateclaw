@@ -471,3 +471,11 @@ PresalesProjectLedger 只承担筛选表单、摘要列表、日期/阶段及分
 OPEN 只表示明确待处理；旧冻结 summary 的非 ANSWERED 数量保留，汇总和详情指标改称未答复并说明未知/缺失。取舍是未知记录不再出现在 OPEN，但 ALL 始终可查看和人工修订；不改冻结 V1 投影。错误投影在原函数内验证 unknown 对象及有效字符串，保留 code/message 优先级和合法业务409语义，不新增错误框架。
 
 页面 RED2、错误 RED9、跨页面计数 RED1 后，最终售前528/528、类型检查和四组实际组件浏览器检查通过；独立 P2 口径问题已关闭，技术COMMENT不是维护人批准。详见 evidence/2026-10-06/AQ05_DOMAIN_STATE_ACCEPTANCE.md。回退仅源码，不触及存储。solution/material/project 旧标签、本批外状态及正式 AC 不由本片宣称全部完成。
+
+### ADR-AQ-046：项目修订容量扩展保持整数 wire 与任务身份（Proposed）
+
+合法项目达到 int 上限后，原防溢出保护会使已有 RUNNING 任务无法恢复终态。项目修订专用边界采用 long/BIGINT，限制在 JavaScript 安全整数 2^53-1；请求、项目/列表/历史三列、生成 acceptedVersion、上下文及工具作用域同步扩大。条目和 semantic 修订仍维持原 int 契约，冻结迁移与投影不修改，V220 只扩三列。没有版本重置、回绕、同版本写入或新的数据权威。
+
+两个实测兼容陷阱决定实现：Jackson 的 LongNode/IntNode 读回差异会破坏完整任务信封 equals，故小值保持 IntNode；宿主 Long 默认转字符串会改变 DTO wire 和两类请求 hash，故仅 expectedVersion 显式数值序列化，全局 ID 规则不变。历史整数字符串通过精确解析捕获基线，不能用 TextNode.longValue() 得到 0。旧回执先回放、权限与事务/CAS顺序保持；原字节断言不放宽。
+
+拒绝全 long 范围（前端精度）、版本改字符串（wire/hash变化）、取消任务完整身份比较、扩大全部对象修订或重跑冻结回填。部署前需停止全部旧 writer 并完成隔离恢复；新范围写入后不能切回旧 int 二进制或缩列，需暂停写入并前向修复。新上限仍有限，坏/不一致历史记录缺修复权威时继续拒写。实际计划与验证见 evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md；技术证据不关闭 AQ06 对象迁移、真实 Kingbase、生产切换或正式 AC。

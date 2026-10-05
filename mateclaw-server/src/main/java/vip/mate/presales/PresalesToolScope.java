@@ -15,7 +15,7 @@ public record PresalesToolScope(
         String operationId,
         List<String> inputRefs,
         String employeeId,
-        int projectVersion)
+        long projectVersion)
         implements ProjectToolPolicy {
     private static final Set<String> ALLOWED = PresalesToolPolicy.PROJECT_VISIBLE_TOOLS;
 
@@ -36,7 +36,8 @@ public record PresalesToolScope(
                 || inputRefs.stream().anyMatch(ref -> ref.isBlank())
                 || employeeId == null
                 || employeeId.isBlank()
-                || projectVersion < 1) {
+                || projectVersion < 1
+                || projectVersion > PresalesProjectRevision.MAX_VALUE) {
             throw new IllegalArgumentException("Incomplete presales task scope");
         }
     }

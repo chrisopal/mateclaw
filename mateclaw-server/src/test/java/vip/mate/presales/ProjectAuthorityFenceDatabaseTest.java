@@ -463,7 +463,7 @@ class ProjectAuthorityFenceDatabaseTest {
                                                                                             "p",
                                                                                             new PresalesDtos
                                                                                                     .Command(
-                                                                                                    2,
+                                                                                                    2L,
                                                                                                     "finish",
                                                                                                     "SAVE_AI_TASK",
                                                                                                     candidate)));

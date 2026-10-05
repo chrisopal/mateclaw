@@ -1,0 +1,846 @@
+{
+  "archive": "project-revision-capacity.tar.gz",
+  "archive_sha256": "a07972251e81ab1c035f00b547cdb6511102dd5a986fa6f8c27f10cd768bd952",
+  "files": [
+    {
+      "path": "dev-eza14022/architecture.json",
+      "original_sha256": "b8503b8ab96b21b66331014bce3ffbfe3ca63ece0576de35e9db24b1a8d6c65b",
+      "archived_sha256": "b8503b8ab96b21b66331014bce3ffbfe3ca63ece0576de35e9db24b1a8d6c65b",
+      "redactions": 0
+    },
+    {
+      "path": "dev-eza14022/guard-self-tests.log",
+      "original_sha256": "77ec190c6f802eb63770ee0ba078fc3f7280e18efd107437b2133aa5ee075419",
+      "archived_sha256": "77ec190c6f802eb63770ee0ba078fc3f7280e18efd107437b2133aa5ee075419",
+      "redactions": 0
+    },
+    {
+      "path": "dev-eza14022/report.json",
+      "original_sha256": "44fc41b5d5cb6d61a63b4736f1ca73c5aa1332babd242e3567fd06578e2d4c92",
+      "archived_sha256": "44fc41b5d5cb6d61a63b4736f1ca73c5aa1332babd242e3567fd06578e2d4c92",
+      "redactions": 0
+    },
+    {
+      "path": "dev-tk_wm4ic/architecture.json",
+      "original_sha256": "7a6f00684cdccad3ca83ef47a1fffe50ef35ffcb89fc53a82e5b97fe6918a009",
+      "archived_sha256": "7a6f00684cdccad3ca83ef47a1fffe50ef35ffcb89fc53a82e5b97fe6918a009",
+      "redactions": 0
+    },
+    {
+      "path": "dev-tk_wm4ic/guard-self-tests.log",
+      "original_sha256": "581ee5bb6ca3f274dd42ae5e731cc4b5ceee9192ee3affec2ba3e0652437ccdd",
+      "archived_sha256": "581ee5bb6ca3f274dd42ae5e731cc4b5ceee9192ee3affec2ba3e0652437ccdd",
+      "redactions": 0
+    },
+    {
+      "path": "dev-tk_wm4ic/report.json",
+      "original_sha256": "8ae2dd96221bb58441f3be7f25878d87b773b6217b2395e74cae78bbc5420d5f",
+      "archived_sha256": "8ae2dd96221bb58441f3be7f25878d87b773b6217b2395e74cae78bbc5420d5f",
+      "redactions": 0
+    },
+    {
+      "path": "dev-wml29bnj/architecture.json",
+      "original_sha256": "27ae3ee34a222297af75436dfb44e79017b0365ab550de402dc1acef0fadc308",
+      "archived_sha256": "27ae3ee34a222297af75436dfb44e79017b0365ab550de402dc1acef0fadc308",
+      "redactions": 0
+    },
+    {
+      "path": "dev-wml29bnj/guard-self-tests.log",
+      "original_sha256": "43f3961cf6b7e4e72bbcff5f66c67ac38ddc51f7621dca6adeec744f64eeb4fc",
+      "archived_sha256": "43f3961cf6b7e4e72bbcff5f66c67ac38ddc51f7621dca6adeec744f64eeb4fc",
+      "redactions": 0
+    },
+    {
+      "path": "dev-wml29bnj/report.json",
+      "original_sha256": "4d818dd29f1029ffab43306852056a14afeb28c82dbaa3ea1a5b40fd36cefaea",
+      "archived_sha256": "4d818dd29f1029ffab43306852056a14afeb28c82dbaa3ea1a5b40fd36cefaea",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-dev.log",
+      "original_sha256": "c4c9f343df3c25bf97901c1761cac59ddc7b4b279c7f0ecf1f9ee06f7ab073e4",
+      "archived_sha256": "c4c9f343df3c25bf97901c1761cac59ddc7b4b279c7f0ecf1f9ee06f7ab073e4",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-final-dev.log",
+      "original_sha256": "0b7e21052148fc6ca37ea298f70b96355aebf8082b49dd2f7eb48027b7b4b9b1",
+      "archived_sha256": "0b7e21052148fc6ca37ea298f70b96355aebf8082b49dd2f7eb48027b7b4b9b1",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-first-green.log",
+      "original_sha256": "7bf8e267c906c980b836c47fbd9a4d0c71b8def14e55a06619ad6d5fb4e147b4",
+      "archived_sha256": "7bf8e267c906c980b836c47fbd9a4d0c71b8def14e55a06619ad6d5fb4e147b4",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-format.log",
+      "original_sha256": "db4c350dfba3286fcdc621cc58969a65f880fdf3d4232247168e66e08181fe48",
+      "archived_sha256": "db4c350dfba3286fcdc621cc58969a65f880fdf3d4232247168e66e08181fe48",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-format2.log",
+      "original_sha256": "ea0ebeb158894101a95b9a3f68fda29dae7758d399ddba73238cbd10736ef3f4",
+      "archived_sha256": "ea0ebeb158894101a95b9a3f68fda29dae7758d399ddba73238cbd10736ef3f4",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-format3.log",
+      "original_sha256": "42f87eb9f7038fc1aa84cdd03f0b88953a05ea04a93031ac216e7ddff8b2ae5d",
+      "archived_sha256": "42f87eb9f7038fc1aa84cdd03f0b88953a05ea04a93031ac216e7ddff8b2ae5d",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-green-and-review-red.log",
+      "original_sha256": "1f1c9204f59dd80d93b64b7fa19be724fa6044ba6b24e5472c2a85da4aa761db",
+      "archived_sha256": "cc35a7b560b7604d624c287042c4784968a58f1ec46a5f71498620d27f33ba8c",
+      "redactions": 20
+    },
+    {
+      "path": "logs/aq-capacity-green2.log",
+      "original_sha256": "a9d990fd5ef9d62da7505e0ecfbd9d5f10fffd748df375b5009485d75637b9cf",
+      "archived_sha256": "ddc9b86e618e723bc9e73939d308570c70ff8cee83fc770fd0999325b571b192",
+      "redactions": 2
+    },
+    {
+      "path": "logs/aq-capacity-migration.log",
+      "original_sha256": "abf592a543ff535ae18c73b78eb0c8bb7e4814d8dd5c730d7b121466b339c78a",
+      "archived_sha256": "abf592a543ff535ae18c73b78eb0c8bb7e4814d8dd5c730d7b121466b339c78a",
+      "redactions": 0
+    },
+    {
+      "path": "logs/aq-capacity-presales-final.log",
+      "original_sha256": "ad06c610c0bd6e4930a32dc4c93eab05d69ab41a2588b95800c0a7efce7a3209",
+      "archived_sha256": "bc975e74c25cfdbb6f358dc2509d669d6f318c184655ec45a75fb2a10e8eed42",
+      "redactions": 5
+    },
+    {
+      "path": "logs/aq-capacity-presales-full.log",
+      "original_sha256": "fff122463a620b6dabbe367085e0c9f535ab75e277d9187236f361e816b6f9a7",
+      "archived_sha256": "439273d2b24ad176025b334e5ee38f1433ab675fb874bec8c6c2d5557ab80a8c",
+      "redactions": 5
+    },
+    {
+      "path": "logs/aq-capacity-red.log",
+      "original_sha256": "3fd3f770ab7150cc0a8dc326db79836fbf36d88cd8052665af7f56be7d521823",
+      "archived_sha256": "670aba399c5d4e510498c96bcf2236305f66fee11f04c48a168717b7b2655ec8",
+      "redactions": 8
+    },
+    {
+      "path": "logs/aq-capacity-runtime-wide.log",
+      "original_sha256": "8fff3a528113d9cf1401fb361e759f16a32412efcfe58182bd84ba8c0a7172d4",
+      "archived_sha256": "28a2b032655d88b584833d4f2170b7e8715464df6543907b91450e2ff0cff784",
+      "redactions": 1
+    },
+    {
+      "path": "logs/initial-dev.log",
+      "original_sha256": "594e9dee4c19dbcc6bc1a2a9bf1b7ae5e6665db06661d4b47afb17fa781add5f",
+      "archived_sha256": "594e9dee4c19dbcc6bc1a2a9bf1b7ae5e6665db06661d4b47afb17fa781add5f",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/aq_revision_upgrade.sql",
+      "original_sha256": "7faf56130060893ab2293b647f838d64c2f9e847dbce81efa950939c0a2a5cca",
+      "archived_sha256": "7faf56130060893ab2293b647f838d64c2f9e847dbce81efa950939c0a2a5cca",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/checks.tsv",
+      "original_sha256": "9776a02d2580ce1fcdacfd18bef7ae2f531d4ce115f8cbd824b007b420ad6a05",
+      "archived_sha256": "9776a02d2580ce1fcdacfd18bef7ae2f531d4ce115f8cbd824b007b420ad6a05",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/migration-sources.tsv",
+      "original_sha256": "6d7ad04cbf8df6adfb1603deee24e0e207247a582367a138886f45f4774a0d4d",
+      "archived_sha256": "6d7ad04cbf8df6adfb1603deee24e0e207247a582367a138886f45f4774a0d4d",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/migrations/V211__presales_projects.sql",
+      "original_sha256": "13d098a4ca54d82ea3375f3b7692530100a4968241e793e35259c61e01c7d162",
+      "archived_sha256": "13d098a4ca54d82ea3375f3b7692530100a4968241e793e35259c61e01c7d162",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/migrations/V217__presales_listing_projection.sql",
+      "original_sha256": "ed5cddfb79b88fef68087e0f6f8820e093e6a90bcbf7cc6db03cca36fce6bf90",
+      "archived_sha256": "ed5cddfb79b88fef68087e0f6f8820e093e6a90bcbf7cc6db03cca36fce6bf90",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/migrations/V219__presales_versioned_request_hash.sql",
+      "original_sha256": "c86934050fff1944c355194314fb8267b712ca27821581153bbbcb4f1830971a",
+      "archived_sha256": "c86934050fff1944c355194314fb8267b712ca27821581153bbbcb4f1830971a",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/migrations/V220__presales_project_revision_capacity.sql",
+      "original_sha256": "30a579cfb02c7b08ef31914a847e78c5bb4727cd950d30a3d621e8591befae1f",
+      "archived_sha256": "30a579cfb02c7b08ef31914a847e78c5bb4727cd950d30a3d621e8591befae1f",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/post-v220-before-boundaries.tsv",
+      "original_sha256": "a4c89dc19b621037b692b2709f2a472502cfb5fd2bdb7001a47c8547be42ec6c",
+      "archived_sha256": "a4c89dc19b621037b692b2709f2a472502cfb5fd2bdb7001a47c8547be42ec6c",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/pre-v220.tsv",
+      "original_sha256": "a4c89dc19b621037b692b2709f2a472502cfb5fd2bdb7001a47c8547be42ec6c",
+      "archived_sha256": "a4c89dc19b621037b692b2709f2a472502cfb5fd2bdb7001a47c8547be42ec6c",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/probe.log",
+      "original_sha256": "7ab4f6c9dfd6c88b9f1f297bc127b76c2aef8f870b1ae69f8e3ccd4f76c324d7",
+      "archived_sha256": "7ab4f6c9dfd6c88b9f1f297bc127b76c2aef8f870b1ae69f8e3ccd4f76c324d7",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/probe.sh",
+      "original_sha256": "d184b55cc5dcb9128655c8144a82c980ab32209ca4924d68b927717a76adf235",
+      "archived_sha256": "d184b55cc5dcb9128655c8144a82c980ab32209ca4924d68b927717a76adf235",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/restore.tsv",
+      "original_sha256": "38cfcc662968ab76969fe0b4c4fd018a74b8953e75e88adbe37914782dc60cca",
+      "archived_sha256": "38cfcc662968ab76969fe0b4c4fd018a74b8953e75e88adbe37914782dc60cca",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/results.json",
+      "original_sha256": "be6a9045e549a86434e34572d9cb62ecb2ac5adc4197ca889271cb9287dcdb05",
+      "archived_sha256": "be6a9045e549a86434e34572d9cb62ecb2ac5adc4197ca889271cb9287dcdb05",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/schema-columns.tsv",
+      "original_sha256": "0762d60002f75793b62cc1a46d9505ae9263be35899737774a56bbdb072fa6ee",
+      "archived_sha256": "0762d60002f75793b62cc1a46d9505ae9263be35899737774a56bbdb072fa6ee",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-final/source-final.tsv",
+      "original_sha256": "38cfcc662968ab76969fe0b4c4fd018a74b8953e75e88adbe37914782dc60cca",
+      "archived_sha256": "38cfcc662968ab76969fe0b4c4fd018a74b8953e75e88adbe37914782dc60cca",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/aq_revision_upgrade.sql",
+      "original_sha256": "db91aea92c91392dd196463e942b1d2c4b6673be08cf5ccc370f5e8f1b6f6483",
+      "archived_sha256": "db91aea92c91392dd196463e942b1d2c4b6673be08cf5ccc370f5e8f1b6f6483",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/checks.tsv",
+      "original_sha256": "d11a3ae14976109291e8c00340320810e76496088b8de36bb6b7953bb635dbe7",
+      "archived_sha256": "d11a3ae14976109291e8c00340320810e76496088b8de36bb6b7953bb635dbe7",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/post-v220-before-boundaries.tsv",
+      "original_sha256": "5438a198968329df2c1432f4f17111e75170394b8afa4eadc6a2011bcbaa0b3c",
+      "archived_sha256": "5438a198968329df2c1432f4f17111e75170394b8afa4eadc6a2011bcbaa0b3c",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/pre-v220.tsv",
+      "original_sha256": "5438a198968329df2c1432f4f17111e75170394b8afa4eadc6a2011bcbaa0b3c",
+      "archived_sha256": "5438a198968329df2c1432f4f17111e75170394b8afa4eadc6a2011bcbaa0b3c",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/probe.log",
+      "original_sha256": "e73fe8ec060cebbd29938304e4bb62b0594e8881b7a25cd9f3d37aac85433d88",
+      "archived_sha256": "e73fe8ec060cebbd29938304e4bb62b0594e8881b7a25cd9f3d37aac85433d88",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/probe.sh",
+      "original_sha256": "3ee7208db8dc9f58d8ba03876191e2b48c35007c3653174c9b0ab0f1adecb4b4",
+      "archived_sha256": "3ee7208db8dc9f58d8ba03876191e2b48c35007c3653174c9b0ab0f1adecb4b4",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/restore.tsv",
+      "original_sha256": "9c01872476ccb4961b9302543727e290d944484d3fa186c4ac91191a5df771f2",
+      "archived_sha256": "9c01872476ccb4961b9302543727e290d944484d3fa186c4ac91191a5df771f2",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/results.json",
+      "original_sha256": "c625b115d23267a3df4afc4f6a93ff748da4bc9e31456cad17a5f7409b2486fb",
+      "archived_sha256": "c625b115d23267a3df4afc4f6a93ff748da4bc9e31456cad17a5f7409b2486fb",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/schema-columns.tsv",
+      "original_sha256": "0762d60002f75793b62cc1a46d9505ae9263be35899737774a56bbdb072fa6ee",
+      "archived_sha256": "0762d60002f75793b62cc1a46d9505ae9263be35899737774a56bbdb072fa6ee",
+      "redactions": 0
+    },
+    {
+      "path": "mysql-first/source-final.tsv",
+      "original_sha256": "9c01872476ccb4961b9302543727e290d944484d3fa186c4ac91191a5df771f2",
+      "archived_sha256": "9c01872476ccb4961b9302543727e290d944484d3fa186c4ac91191a5df771f2",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesAccessActorTest.xml",
+      "original_sha256": "8f813e54763f8d3f52f765fe46a84c2145a7f9304c40c0f0347f23bec1baf256",
+      "archived_sha256": "8f813e54763f8d3f52f765fe46a84c2145a7f9304c40c0f0347f23bec1baf256",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesAccessPolicyTest.xml",
+      "original_sha256": "0aea1a668b24d840d7dae233760f100c88360b46930bbb051fae6f4d41dd31d1",
+      "archived_sha256": "0aea1a668b24d840d7dae233760f100c88360b46930bbb051fae6f4d41dd31d1",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml",
+      "original_sha256": "35d0aa9d63b5966238e39936723280d3a894153692704892f6d27354d94b1cef",
+      "archived_sha256": "e9b5d47027c5bd3e48c51b0cac7783effec13f140a99b67c2a2a8da357543af1",
+      "redactions": 1
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml",
+      "original_sha256": "c30c6fc7ea4f2edea5f838d0c7f87f9eae91d764939d0974fae034f8b551bb6c",
+      "archived_sha256": "c30c6fc7ea4f2edea5f838d0c7f87f9eae91d764939d0974fae034f8b551bb6c",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesArtifactRendererTest.xml",
+      "original_sha256": "3e5e8657ac725ec42a4593de8be4069146117a55fc0a8a5d909fa5616ab970ec",
+      "archived_sha256": "3e5e8657ac725ec42a4593de8be4069146117a55fc0a8a5d909fa5616ab970ec",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml",
+      "original_sha256": "bee3767a8d80590c6eafe0eacf2aba58eb1e47b18fb0557a03872372d4c47cc1",
+      "archived_sha256": "bee3767a8d80590c6eafe0eacf2aba58eb1e47b18fb0557a03872372d4c47cc1",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml",
+      "original_sha256": "68fdcd85370a938206123f261215a44bd4afc6ab109bfa6134c983608faaed3a",
+      "archived_sha256": "68fdcd85370a938206123f261215a44bd4afc6ab109bfa6134c983608faaed3a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesClarificationSaveTest.xml",
+      "original_sha256": "831bafb92a10ea5f839aa2739cb394ddabe20b1c0bed699273af6c551f454468",
+      "archived_sha256": "831bafb92a10ea5f839aa2739cb394ddabe20b1c0bed699273af6c551f454468",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesCommandKindContractTest.xml",
+      "original_sha256": "9d70490265ba1f97eafbe297cea43298286a87ad57066fbcd2a5b281f0d2365b",
+      "archived_sha256": "9d70490265ba1f97eafbe297cea43298286a87ad57066fbcd2a5b281f0d2365b",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesCommandKindsTest.xml",
+      "original_sha256": "509237a35b6d347edac29a67974da82449a06cc0b092c342918ae5def292a77a",
+      "archived_sha256": "509237a35b6d347edac29a67974da82449a06cc0b092c342918ae5def292a77a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml",
+      "original_sha256": "e561dd9f2c2edca9eea8105c1d5ca0e9014c583c4ac1f5e844acb6cabc08a354",
+      "archived_sha256": "e561dd9f2c2edca9eea8105c1d5ca0e9014c583c4ac1f5e844acb6cabc08a354",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesCommandPayloadTest.xml",
+      "original_sha256": "aaae3b031e5a55958a7f9e02ed495af8c29fdbc23808ac0f97cba15a4cc6d83a",
+      "archived_sha256": "aaae3b031e5a55958a7f9e02ed495af8c29fdbc23808ac0f97cba15a4cc6d83a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesContextProviderTest.xml",
+      "original_sha256": "b309ff63f21e3b4c4548c9f6a163dd3f75aa4ff58fb2e2a3df517f19a118a074",
+      "archived_sha256": "b309ff63f21e3b4c4548c9f6a163dd3f75aa4ff58fb2e2a3df517f19a118a074",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesDisabledStartupReadContractTest.xml",
+      "original_sha256": "98257588dc01a76a27f2413184dd012593abd9a23740a5dfe2cfe7bba5a13aa8",
+      "archived_sha256": "260acea35b92bdd73d87bfbd7e1c8ec277052fb0350dc0722cd85ffcd3f40c39",
+      "redactions": 1
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesEmployeeQueryContractTest.xml",
+      "original_sha256": "4138b33c9aa4d26e185d0c1ced09d4e3a170f27e04743b16948fb88aa10029d2",
+      "archived_sha256": "4138b33c9aa4d26e185d0c1ced09d4e3a170f27e04743b16948fb88aa10029d2",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml",
+      "original_sha256": "3593c0ee5da0ea66c4c257040274e4a9b32df48a0c082822727450fffadfd763",
+      "archived_sha256": "3593c0ee5da0ea66c4c257040274e4a9b32df48a0c082822727450fffadfd763",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml",
+      "original_sha256": "a5967d2987a46a28c9f7c7c8d7e5ed420316044c3618e3c7d7221626a4506640",
+      "archived_sha256": "a5967d2987a46a28c9f7c7c8d7e5ed420316044c3618e3c7d7221626a4506640",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesErrorContractTest.xml",
+      "original_sha256": "9484ae8f98569fd4886b5b507290dab70735f9460fff83f63fe26cfe06ea2160",
+      "archived_sha256": "9484ae8f98569fd4886b5b507290dab70735f9460fff83f63fe26cfe06ea2160",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml",
+      "original_sha256": "5176b963085ff9dfed5b95848336ba2daa196f1a8e9d963980fa104d0715e668",
+      "archived_sha256": "5176b963085ff9dfed5b95848336ba2daa196f1a8e9d963980fa104d0715e668",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesExecutionVersionContractTest.xml",
+      "original_sha256": "e35610737aefc6546fc58bec34ece05307132889453bb7c0f004fa97cd395f4e",
+      "archived_sha256": "e35610737aefc6546fc58bec34ece05307132889453bb7c0f004fa97cd395f4e",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesGenerationControllerTest.xml",
+      "original_sha256": "e42ae0bedc6b5225a835776ad7dfb24231b87f6ac781dfc5f1eb9ed24442e717",
+      "archived_sha256": "e42ae0bedc6b5225a835776ad7dfb24231b87f6ac781dfc5f1eb9ed24442e717",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml",
+      "original_sha256": "90ede64e16515932ff0bf09ae85a6073ec23d9e5f1ddc9a2181a7969aad17bc1",
+      "archived_sha256": "90ede64e16515932ff0bf09ae85a6073ec23d9e5f1ddc9a2181a7969aad17bc1",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesHandoffReadContractTest.xml",
+      "original_sha256": "f22ee0121bcbc5b8ace2f36d26a8e72e48169f7a85e08420ba022535ab3980fb",
+      "archived_sha256": "f22ee0121bcbc5b8ace2f36d26a8e72e48169f7a85e08420ba022535ab3980fb",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesIntegrationTest.xml",
+      "original_sha256": "f786ae8b2f9a807de882efd64da4f0bf1f064a8be6b847a3520d8650935245ce",
+      "archived_sha256": "f786ae8b2f9a807de882efd64da4f0bf1f064a8be6b847a3520d8650935245ce",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml",
+      "original_sha256": "56afa04877f5d5859c79bc0e194c5cdbd2709816c9ad27187bf93d3fae8d5c21",
+      "archived_sha256": "56afa04877f5d5859c79bc0e194c5cdbd2709816c9ad27187bf93d3fae8d5c21",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesModelAdapterTest.xml",
+      "original_sha256": "fa66ffb694aa155782354b876a0ba3240a7cb0946c98aa32800da91616a7607b",
+      "archived_sha256": "fa66ffb694aa155782354b876a0ba3240a7cb0946c98aa32800da91616a7607b",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml",
+      "original_sha256": "9646cf8546caa961057c4b66ed68f8d341f91d52c209924748aa1ecdb23a8823",
+      "archived_sha256": "9646cf8546caa961057c4b66ed68f8d341f91d52c209924748aa1ecdb23a8823",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesPresentationPinTest.xml",
+      "original_sha256": "f454cdd8326c6ad08db100c348aa6b6c634eeaa0f1d99996d0cf025f3622cc31",
+      "archived_sha256": "f454cdd8326c6ad08db100c348aa6b6c634eeaa0f1d99996d0cf025f3622cc31",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesPresentationServiceTest.xml",
+      "original_sha256": "3e59f1577b22f31c9e95b4eb2a95a38703c5f33bfbc23a86ce4e16d9d4d5e26a",
+      "archived_sha256": "3e59f1577b22f31c9e95b4eb2a95a38703c5f33bfbc23a86ce4e16d9d4d5e26a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectItemsTest.xml",
+      "original_sha256": "a27f2e9b9fe2fcc30a5931b4b3bc6854fc312b616bbc6a04e7f3c6487e16071c",
+      "archived_sha256": "a27f2e9b9fe2fcc30a5931b4b3bc6854fc312b616bbc6a04e7f3c6487e16071c",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectListingContractTest.xml",
+      "original_sha256": "f103f2281075d4e79c6112bd8865eb18a089e237ea14f4a56102a684ce9da167",
+      "archived_sha256": "f103f2281075d4e79c6112bd8865eb18a089e237ea14f4a56102a684ce9da167",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectListingTest.xml",
+      "original_sha256": "f91e85020141758da64befd3ead2fc7d4b728676e23a9f5d1fe7454cc2b2d3b8",
+      "archived_sha256": "f91e85020141758da64befd3ead2fc7d4b728676e23a9f5d1fe7454cc2b2d3b8",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml",
+      "original_sha256": "6880a964a2190be1fc377615222b24ea11701f96ab2554b7cf04220e541bf67a",
+      "archived_sha256": "6880a964a2190be1fc377615222b24ea11701f96ab2554b7cf04220e541bf67a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml",
+      "original_sha256": "8bc1cfcfff71428bf053a80a20aaf7890830e02326468fd02198be7656c5506b",
+      "archived_sha256": "8bc1cfcfff71428bf053a80a20aaf7890830e02326468fd02198be7656c5506b",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectRevisionMigrationTest.xml",
+      "original_sha256": "30e0fb2a8e3114480749893ba1cbadec18309b11efe7948bf8285b59558837b1",
+      "archived_sha256": "30e0fb2a8e3114480749893ba1cbadec18309b11efe7948bf8285b59558837b1",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesProjectRevisionTest.xml",
+      "original_sha256": "8aadd0703d4818f0a44b167ebbddee441ce9868fc0a10c30c3ad1dec30687745",
+      "archived_sha256": "8aadd0703d4818f0a44b167ebbddee441ce9868fc0a10c30c3ad1dec30687745",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml",
+      "original_sha256": "a504f8378d20293dfeebc480b7668e317309596a3c619e54c2bdad56c7252157",
+      "archived_sha256": "407856251e011c8ebcf915f1a0ca15cfb13c2fd3f7905addbe944b4109d89b6a",
+      "redactions": 1
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesQueryDtosTest.xml",
+      "original_sha256": "0a29eb4eb369fbecfd01eb559b1b05c4fa7d26f276b1d5db6acdbd5b8f1cbeec",
+      "archived_sha256": "0a29eb4eb369fbecfd01eb559b1b05c4fa7d26f276b1d5db6acdbd5b8f1cbeec",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesQueuedTaskContractTest.xml",
+      "original_sha256": "973c43a84b79c4479ce6767e7b05edcc0abb31a078f446177d614ea0c4b9dc5b",
+      "archived_sha256": "973c43a84b79c4479ce6767e7b05edcc0abb31a078f446177d614ea0c4b9dc5b",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesQueuedTaskTest.xml",
+      "original_sha256": "042e073c2607f517c7873dab81b5e618cee752575ad1961358c2a3af2fee437b",
+      "archived_sha256": "042e073c2607f517c7873dab81b5e618cee752575ad1961358c2a3af2fee437b",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesReleaseAuthorizationTest.xml",
+      "original_sha256": "a6a490e43a9f9ecb2cecd641c942b373adb63affeed7f95f1f03822bf30cd263",
+      "archived_sha256": "a6a490e43a9f9ecb2cecd641c942b373adb63affeed7f95f1f03822bf30cd263",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesReleaseSnapshotContractTest.xml",
+      "original_sha256": "939ce51e25cc8393c9c165a904ee6585374cd24a2325b274ff2b366b5cf45cf4",
+      "archived_sha256": "939ce51e25cc8393c9c165a904ee6585374cd24a2325b274ff2b366b5cf45cf4",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesRepairPolicyTest.xml",
+      "original_sha256": "193fa738cfb301c2b17034345daaafad555a699c929babf0da6a6c8814feb38d",
+      "archived_sha256": "193fa738cfb301c2b17034345daaafad555a699c929babf0da6a6c8814feb38d",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml",
+      "original_sha256": "5bcbd0b51402810504b363b10ffa487a4cc463fb39df11166240efb7c81bd003",
+      "archived_sha256": "5bcbd0b51402810504b363b10ffa487a4cc463fb39df11166240efb7c81bd003",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesRequestHashReplayTest.xml",
+      "original_sha256": "01090d02e5358eafffa0e90554292647713a1e2f7a05fea541101cd24acf7dd3",
+      "archived_sha256": "01090d02e5358eafffa0e90554292647713a1e2f7a05fea541101cd24acf7dd3",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesRequestHashV2Test.xml",
+      "original_sha256": "8a4147472d043dbe2a59d0206e3d8d13e2cb2957d224c303a386841bff37d193",
+      "archived_sha256": "8a4147472d043dbe2a59d0206e3d8d13e2cb2957d224c303a386841bff37d193",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesReviewSaveTest.xml",
+      "original_sha256": "6dbe40e69df3b238ccca9f53617c30ec101e82798126497c36c39d9301c32f0c",
+      "archived_sha256": "6dbe40e69df3b238ccca9f53617c30ec101e82798126497c36c39d9301c32f0c",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml",
+      "original_sha256": "c5b4457b5c97870ffbc18868b8a2339abbedee632139224f8f260c997f374aab",
+      "archived_sha256": "6a2fd4b8d12e8a109442660c0ec269ba458a5cac26fdbc2d2339aeee6ae3b797",
+      "redactions": 1
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml",
+      "original_sha256": "0720497d1cd458e05a7406b8526a62350fcc0e6d0b4a295d2d1003da88e2fdf1",
+      "archived_sha256": "0720497d1cd458e05a7406b8526a62350fcc0e6d0b4a295d2d1003da88e2fdf1",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml",
+      "original_sha256": "0dc8cbb2d0c14830e8ef6d13b1c5559c27f82a43199941ddab6f3f4e182ac631",
+      "archived_sha256": "0dc8cbb2d0c14830e8ef6d13b1c5559c27f82a43199941ddab6f3f4e182ac631",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml",
+      "original_sha256": "83cf1667b72d95603c5503098b84e08474ac0eae0a8362a89730aa2c15219d1c",
+      "archived_sha256": "83cf1667b72d95603c5503098b84e08474ac0eae0a8362a89730aa2c15219d1c",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesSourceScopeTest.xml",
+      "original_sha256": "2194aaff2cddcd1f805689966136b69f47b30dd80fb5697579d74b56be8fdf69",
+      "archived_sha256": "2194aaff2cddcd1f805689966136b69f47b30dd80fb5697579d74b56be8fdf69",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesSqlListingTest.xml",
+      "original_sha256": "fa8c280874dc7104d4c63c476eabd0a6c9cf617ba4dd03167dd11d4f10a4fd6c",
+      "archived_sha256": "fa8c280874dc7104d4c63c476eabd0a6c9cf617ba4dd03167dd11d4f10a4fd6c",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesTaskAcceptanceTest.xml",
+      "original_sha256": "76ba5dd1b3ef9ac0287e4bd036c55aa9b07fdcab7fb612369ef1c41ef2181b0a",
+      "archived_sha256": "76ba5dd1b3ef9ac0287e4bd036c55aa9b07fdcab7fb612369ef1c41ef2181b0a",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml",
+      "original_sha256": "6b51148207eb6eb09a22a5b9a2ca53ad59ee3bf6d48d4ce0bdc4a29749262501",
+      "archived_sha256": "6b51148207eb6eb09a22a5b9a2ca53ad59ee3bf6d48d4ce0bdc4a29749262501",
+      "redactions": 0
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.PresalesVersionInputContractTest.xml",
+      "original_sha256": "d8e2173b27b3704b2a06707087123ab6557177b97058682ee459f73f50db1ef3",
+      "archived_sha256": "b2af1d4950ed27233eb3b0d0166073818e35d0aaf5d86f367be9fd94f0cb8d18",
+      "redactions": 1
+    },
+    {
+      "path": "presales-767/TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml",
+      "original_sha256": "3b63534d244e3e50c7ae2951496897739eec5b61f65d0094ba9962110ce135c3",
+      "archived_sha256": "3b63534d244e3e50c7ae2951496897739eec5b61f65d0094ba9962110ce135c3",
+      "redactions": 0
+    },
+    {
+      "path": "review-summary.txt",
+      "original_sha256": "ee20c42b91203df00a46d2a195b588e96fab6a7e6ac950123a0a4a4a88bd1995",
+      "archived_sha256": "ee20c42b91203df00a46d2a195b588e96fab6a7e6ac950123a0a4a4a88bd1995",
+      "redactions": 0
+    },
+    {
+      "path": "runtime-wide-final.xml",
+      "original_sha256": "eee1067a938059c16278cb945d80c73812dbba570ab64931c8a36fd9c70def40",
+      "archived_sha256": "c167f76fee626ee129ba4632a5398301c39296b8748d4f85c3b6393f2a455d54",
+      "redactions": 1
+    },
+    {
+      "path": "source-hashes.json",
+      "original_sha256": "6acb5455597fa63ca8b5473b588291f477caa24e87ca6368dd808fb6cc573ae4",
+      "archived_sha256": "6acb5455597fa63ca8b5473b588291f477caa24e87ca6368dd808fb6cc573ae4",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesBaselineApproval.java",
+      "original_sha256": "6e7c771ed49aeb1290956cf205cd11b866adf2cd0b197d1c3344401c4de3733c",
+      "archived_sha256": "6e7c771ed49aeb1290956cf205cd11b866adf2cd0b197d1c3344401c4de3733c",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesContextProvider.java",
+      "original_sha256": "293ffc337947b4396a0ab98b6c3213fbc906f785736f8eea7b10843dd103ca1a",
+      "archived_sha256": "293ffc337947b4396a0ab98b6c3213fbc906f785736f8eea7b10843dd103ca1a",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesDtos.java",
+      "original_sha256": "9ce176ed3d1f41c913b7323f9558174b1cbab64fc0201e46f70d9cfb97ee1a06",
+      "archived_sha256": "9ce176ed3d1f41c913b7323f9558174b1cbab64fc0201e46f70d9cfb97ee1a06",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeRuntime.java",
+      "original_sha256": "2600318c32cf5d43e8fcbd41e5f3dc03f991fd31ce618e293af9278b23eaba97",
+      "archived_sha256": "2600318c32cf5d43e8fcbd41e5f3dc03f991fd31ce618e293af9278b23eaba97",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesExecutionRevalidationProvider.java",
+      "original_sha256": "bfd7ecf1ef2612fdf94d18debdb2fc7ae77d5c2c3dcecf29b6dfaf261195872d",
+      "archived_sha256": "bfd7ecf1ef2612fdf94d18debdb2fc7ae77d5c2c3dcecf29b6dfaf261195872d",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesExpectedVersion.java",
+      "original_sha256": "ed1ed21ee3fa10c63179c8f56d21c020a6454f5e0b99ccdbc7db1a59ca8286ad",
+      "archived_sha256": "ed1ed21ee3fa10c63179c8f56d21c020a6454f5e0b99ccdbc7db1a59ca8286ad",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationCoordinator.java",
+      "original_sha256": "35f6a1d7da36832dd22b31e0a2ccfe0eef97800296fc18e50618ed97fd8cf94e",
+      "archived_sha256": "35f6a1d7da36832dd22b31e0a2ccfe0eef97800296fc18e50618ed97fd8cf94e",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationService.java",
+      "original_sha256": "32144364fe2c0d2612cecdcfd1c92e5d5eafc159e91a5b86c0e9283ae2f0aedb",
+      "archived_sha256": "32144364fe2c0d2612cecdcfd1c92e5d5eafc159e91a5b86c0e9283ae2f0aedb",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectRevision.java",
+      "original_sha256": "a1a38786216ae746e0c04f991305ff9202ae15366abe5bd1169e7e0dcc022da4",
+      "archived_sha256": "a1a38786216ae746e0c04f991305ff9202ae15366abe5bd1169e7e0dcc022da4",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+      "original_sha256": "ef52a0ca0788ef23327beee0a0375de36a7be866f4d98da688926a3600e0ae9f",
+      "archived_sha256": "ef52a0ca0788ef23327beee0a0375de36a7be866f4d98da688926a3600e0ae9f",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/PresalesToolScope.java",
+      "original_sha256": "39c943bd3385c18b08a7e25a207ca402c9e6abd5a6c387faf3613305b235a581",
+      "archived_sha256": "39c943bd3385c18b08a7e25a207ca402c9e6abd5a6c387faf3613305b235a581",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesProjectRepository.java",
+      "original_sha256": "2702956525d0ddd7a841ab6dae9f031c257355e39b43437c9f4eb6f18a8098a8",
+      "archived_sha256": "2702956525d0ddd7a841ab6dae9f031c257355e39b43437c9f4eb6f18a8098a8",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/resources/db/migration/h2/V220__presales_project_revision_capacity.sql",
+      "original_sha256": "585b1e74baaaf986a123bac4ceb2b310006d09cd9bb5b577e343e2feed7e3e0f",
+      "archived_sha256": "585b1e74baaaf986a123bac4ceb2b310006d09cd9bb5b577e343e2feed7e3e0f",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/resources/db/migration/kingbase/V220__presales_project_revision_capacity.sql",
+      "original_sha256": "95ce33b55fb461952acbdde21e416a516f8798530f470c78a40fe167b2a906ed",
+      "archived_sha256": "95ce33b55fb461952acbdde21e416a516f8798530f470c78a40fe167b2a906ed",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/main/resources/db/migration/mysql/V220__presales_project_revision_capacity.sql",
+      "original_sha256": "30a579cfb02c7b08ef31914a847e78c5bb4727cd950d30a3d621e8591befae1f",
+      "archived_sha256": "30a579cfb02c7b08ef31914a847e78c5bb4727cd950d30a3d621e8591befae1f",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java",
+      "original_sha256": "fc5c6649221d9b70a06773ae7816e27cd3431e7ef4204b3b1875f644b3d15371",
+      "archived_sha256": "fc5c6649221d9b70a06773ae7816e27cd3431e7ef4204b3b1875f644b3d15371",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesCommandKindsTest.java",
+      "original_sha256": "0dd622fcff24ce87d0c7d2654b35150a9bea944ebe6bdca891db7af3b8e51d54",
+      "archived_sha256": "0dd622fcff24ce87d0c7d2654b35150a9bea944ebe6bdca891db7af3b8e51d54",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesExecutionVersionContractTest.java",
+      "original_sha256": "6bec53a203f5173fd0ec37bce72823ebc2cc03d18901ac646871d281e38e739d",
+      "archived_sha256": "6bec53a203f5173fd0ec37bce72823ebc2cc03d18901ac646871d281e38e739d",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesGenerationControllerTest.java",
+      "original_sha256": "c6306c44791bfa20ac57e7c52a763180bc1a4fd87046ddde96c3cff40eb61d77",
+      "archived_sha256": "c6306c44791bfa20ac57e7c52a763180bc1a4fd87046ddde96c3cff40eb61d77",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesGenerationCoordinatorTest.java",
+      "original_sha256": "dab1eb131a92170ad32bdf27001c4a5d1d8c2599f3f123612dffea5cc4439705",
+      "archived_sha256": "dab1eb131a92170ad32bdf27001c4a5d1d8c2599f3f123612dffea5cc4439705",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectRevisionMigrationTest.java",
+      "original_sha256": "6248de068fd045ce3f079affb900ddab80a75b7bd7ff8e2db90c14ac47d7bf3b",
+      "archived_sha256": "6248de068fd045ce3f079affb900ddab80a75b7bd7ff8e2db90c14ac47d7bf3b",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesProjectRevisionTest.java",
+      "original_sha256": "355290e8df64e4b610e7fdc5d0ef24e306339040a00955d718cecb0f0bebc6c2",
+      "archived_sha256": "355290e8df64e4b610e7fdc5d0ef24e306339040a00955d718cecb0f0bebc6c2",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesQueuedTaskContractTest.java",
+      "original_sha256": "6aee617dd2e4f3f639877a7e6f2cb5dd04acaa4eec531f0a31a938785871747d",
+      "archived_sha256": "6aee617dd2e4f3f639877a7e6f2cb5dd04acaa4eec531f0a31a938785871747d",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesReleaseSnapshotContractTest.java",
+      "original_sha256": "60fedc0165844796b8ba7698f7cf960baea392425117fe0d536c3a4c313ef8a0",
+      "archived_sha256": "60fedc0165844796b8ba7698f7cf960baea392425117fe0d536c3a4c313ef8a0",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesRepairPolicyTest.java",
+      "original_sha256": "473babc7309df07d68a0fd31e5e30bfb39dcf40b994b2d48c82a53c19f82f774",
+      "archived_sha256": "473babc7309df07d68a0fd31e5e30bfb39dcf40b994b2d48c82a53c19f82f774",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashReplayTest.java",
+      "original_sha256": "6e3ce836a680ca242140e0b2d7db74c75b9a74c505f4731c9c47d557b8e5da0b",
+      "archived_sha256": "6e3ce836a680ca242140e0b2d7db74c75b9a74c505f4731c9c47d557b8e5da0b",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashV2Test.java",
+      "original_sha256": "785aa5360b3ecac53460af42b7709c94c820bcd35976313561411063a25a5e13",
+      "archived_sha256": "785aa5360b3ecac53460af42b7709c94c820bcd35976313561411063a25a5e13",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java",
+      "original_sha256": "ea12969d0c1e51967a4944df368a3ff0c1f31a374dedd57274d800de696c7436",
+      "archived_sha256": "ea12969d0c1e51967a4944df368a3ff0c1f31a374dedd57274d800de696c7436",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesSqlListingTest.java",
+      "original_sha256": "197c0da87163d730e6fad7de2239747828ac1a3972ada4f5fb1c08dacdfc11be",
+      "archived_sha256": "197c0da87163d730e6fad7de2239747828ac1a3972ada4f5fb1c08dacdfc11be",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesTerminalReceptionTest.java",
+      "original_sha256": "feaf6e488853612f03055882fd0281c16c38119e2c7c6dffd97f97caee1ebb72",
+      "archived_sha256": "feaf6e488853612f03055882fd0281c16c38119e2c7c6dffd97f97caee1ebb72",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/PresalesVersionInputContractTest.java",
+      "original_sha256": "2d12048d77b6300e15e6e3c595dbd5f2ffa0641261a6549826d4e5859d65d60d",
+      "archived_sha256": "2d12048d77b6300e15e6e3c595dbd5f2ffa0641261a6549826d4e5859d65d60d",
+      "redactions": 0
+    },
+    {
+      "path": "sources/mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java",
+      "original_sha256": "6edb3d7aca0316bd7b8ff4b24ad806cb28f20a30db00dd93406fbbd568ce0401",
+      "archived_sha256": "6edb3d7aca0316bd7b8ff4b24ad806cb28f20a30db00dd93406fbbd568ce0401",
+      "redactions": 0
+    }
+  ]
+}

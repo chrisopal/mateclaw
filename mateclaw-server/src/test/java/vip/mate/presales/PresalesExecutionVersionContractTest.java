@@ -33,7 +33,7 @@ class PresalesExecutionVersionContractTest {
             strings = {
                 "2.5",
                 "2.0",
-                "4294967298",
+                "9007199254740992",
                 "-4294967294",
                 "\"2.5\"",
                 "0",
@@ -99,7 +99,7 @@ class PresalesExecutionVersionContractTest {
             strings = {
                 "2.5",
                 "2.0",
-                "4294967298",
+                "9007199254740992",
                 "-4294967294",
                 "\"2.5\"",
                 "0",
@@ -165,7 +165,7 @@ class PresalesExecutionVersionContractTest {
                         service, access, contexts, runtime, json, coordinator);
         assertCode(
                 "VERSION_CONFLICT",
-                () -> app.generate("1", "p", new PresalesDtos.Generate(1, "op", "S1", "goal")));
+                () -> app.generate("1", "p", new PresalesDtos.Generate(1L, "op", "S1", "goal")));
         verifyNoInteractions(coordinator);
     }
 
@@ -174,7 +174,7 @@ class PresalesExecutionVersionContractTest {
             strings = {
                 "2.5",
                 "2.0",
-                "4294967298",
+                "9007199254740992",
                 "-4294967294",
                 "\"2.5\"",
                 "0",
@@ -204,7 +204,7 @@ class PresalesExecutionVersionContractTest {
             strings = {
                 "2.5",
                 "2.0",
-                "4294967298",
+                "9007199254740992",
                 "-4294967294",
                 "\"2.5\"",
                 "0",
@@ -231,27 +231,40 @@ class PresalesExecutionVersionContractTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2", "\"2\"", "\" 2 \""})
+    @ValueSource(
+            strings = {
+                "2",
+                "\"2\"",
+                "\" 2 \"",
+                "2147483647",
+                "2147483648",
+                "4294967298",
+                "9007199254740991",
+                "\"2147483648\""
+            })
     void exactVersionsAndHistoricalIntegerTextStillPass(String value) throws Exception {
+        long version = json.readTree(value).asLong();
         ObjectNode project = wireProject();
         project.set("version", json.readTree(value));
         ObjectNode task = (ObjectNode) project.path("tasks").get(0);
         ((ObjectNode) task.path("contextSnapshot")).set("projectVersion", json.readTree(value));
         when(runtime.pin("1", "7", "S1")).thenReturn(pin);
         new PresalesExecutionRevalidationProvider(access, service, runtime, contexts)
-                .requireActive(options());
+                .requireActive(options(version));
         verify(contexts).revalidate(eq("1"), eq(project), any());
         var actualContext =
                 new PresalesContextProvider(
                         mock(JdbcTemplate.class), json, access, mock(ProjectSourceAccess.class));
         assertEquals(
-                2,
+                version,
                 actualContext
                         .snapshot("1", project, "S1", "goal")
                         .path("projectVersion")
-                        .intValue());
+                        .longValue());
         actualContext.revalidate("1", project, (ObjectNode) task.path("contextSnapshot"));
-        project.put("version", 3);
+        project.put(
+                "version",
+                version == PresalesProjectRevision.MAX_VALUE ? version - 1 : version + 1);
         assertCode(
                 "VERSION_CONFLICT",
                 () ->
@@ -294,6 +307,10 @@ class PresalesExecutionVersionContractTest {
     }
 
     private ProjectExecutionOptions options() {
+        return options(2);
+    }
+
+    private ProjectExecutionOptions options(long version) {
         return new ProjectExecutionOptions(
                 "run",
                 "17",
@@ -302,7 +319,7 @@ class PresalesExecutionVersionContractTest {
                 "skill",
                 Map.of("SKILL.md", "content"),
                 PresalesToolPolicy.PROJECT_VISIBLE_TOOLS,
-                new PresalesToolScope("1", "9", "p", "t", "run", "op", List.of(), "7", 2),
+                new PresalesToolScope("1", "9", "p", "t", "run", "op", List.of(), "7", version),
                 0,
                 false,
                 false,

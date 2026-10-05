@@ -128,7 +128,7 @@ public class PresalesEmployeeRuntime {
                         "presales:" + scope + ":" + projectId + ":" + runId)
                 || !task.path("skill").asText().equals(snapshot.path("skill").asText()))
             throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
-        Integer version = PresalesProjectItems.positiveRevision(snapshot.path("projectVersion"));
+        Long version = PresalesProjectRevision.positiveRevision(snapshot.path("projectVersion"));
         if (version == null) throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
         var toolScope =
                 new PresalesToolScope(

@@ -55,8 +55,8 @@ class PresalesTerminalReceptionTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {Integer.MAX_VALUE, 0, -1})
-    void actorLossFallbackNeverWrapsOrRepairsInvalidVersion(int version) throws Exception {
+    @ValueSource(longs = {PresalesProjectRevision.MAX_VALUE, 0, -1})
+    void actorLossFallbackNeverWrapsOrRepairsInvalidVersion(long version) throws Exception {
         store(current().put("version", version));
         String before = body();
         runActorLossFallback();
@@ -65,12 +65,12 @@ class PresalesTerminalReceptionTest {
                 version,
                 storage.queryForObject(
                         "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
-                        Integer.class));
+                        Long.class));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {Integer.MAX_VALUE, 0, -1})
-    void recoverySkipsExhaustedOrInvalidVersionAndContinuesOtherProjects(int version)
+    @ValueSource(longs = {PresalesProjectRevision.MAX_VALUE, 0, -1})
+    void recoverySkipsExhaustedOrInvalidVersionAndContinuesOtherProjects(long version)
             throws Exception {
         store(current().put("version", version));
         String before = body();
@@ -89,7 +89,7 @@ class PresalesTerminalReceptionTest {
                 version,
                 storage.queryForObject(
                         "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
-                        Integer.class));
+                        Long.class));
         var restored =
                 json.readTree(
                         storage.queryForObject(
@@ -102,10 +102,21 @@ class PresalesTerminalReceptionTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void lastRuntimeVersionCanStillPersistTerminalState(boolean recovery) throws Exception {
-        store(current().put("version", Integer.MAX_VALUE - 1));
+        store(current().put("version", PresalesProjectRevision.MAX_VALUE - 1));
         if (recovery) coordinator(storage).recoverStaleTasks();
         else runActorLossFallback();
-        assertEquals(Integer.MAX_VALUE, current().path("version").intValue());
+        assertEquals(PresalesProjectRevision.MAX_VALUE, current().path("version").longValue());
+        assertEquals("FAILED", current().path("tasks").get(0).path("status").asText());
+        assertRuntimeListing();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void legitimateOldProjectLimitCanPersistTerminalState(boolean recovery) throws Exception {
+        store(current().put("version", Integer.MAX_VALUE));
+        if (recovery) coordinator(storage).recoverStaleTasks();
+        else runActorLossFallback();
+        assertEquals(2147483648L, current().path("version").longValue());
         assertEquals("FAILED", current().path("tasks").get(0).path("status").asText());
         assertRuntimeListing();
     }
@@ -147,6 +158,10 @@ class PresalesTerminalReceptionTest {
                         new org.springframework.core.io.ClassPathResource(
                                 "db/migration/h2/V217__presales_listing_projection.sql"))
                 .execute(source);
+        storage.execute(
+                "ALTER TABLE mate_presales_project ALTER COLUMN version SET DATA TYPE BIGINT");
+        storage.execute(
+                "ALTER TABLE mate_presales_project ALTER COLUMN listing_project_version SET DATA TYPE BIGINT");
         accepted =
                 (ObjectNode)
                         json.readTree(
@@ -258,7 +273,7 @@ class PresalesTerminalReceptionTest {
         storage.update(
                 "UPDATE mate_presales_project SET body_json=?,version=? WHERE id='p' AND workspace_id='w'",
                 json.writeValueAsString(project),
-                project.path("version").asInt());
+                project.path("version").longValue());
     }
 
     private void change(String kind) throws Exception {
@@ -601,7 +616,7 @@ class PresalesTerminalReceptionTest {
                             return call.callRealMethod();
                         })
                 .when(projects)
-                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+                .updateRuntimeBody(eq("w"), eq("p"), anyLong(), anyLong(), anyString(), any());
         var coordinator =
                 new PresalesGenerationCoordinator(
                         service, contexts, model, json, projects, hooks());
@@ -624,7 +639,7 @@ class PresalesTerminalReceptionTest {
             assertEquals(concurrentBody.get(), body());
         }
         verify(projects, times("EDIT".equals(change) ? 2 : 1))
-                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+                .updateRuntimeBody(eq("w"), eq("p"), anyLong(), anyLong(), anyString(), any());
         verifyNoInteractions(model, contexts, service);
     }
 
@@ -654,7 +669,7 @@ class PresalesTerminalReceptionTest {
                             return call.callRealMethod();
                         })
                 .when(projects)
-                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+                .updateRuntimeBody(eq("w"), eq("p"), anyLong(), anyLong(), anyString(), any());
         new PresalesGenerationCoordinator(service, contexts, model, json, projects, hooks())
                 .recoverStaleTasks();
 

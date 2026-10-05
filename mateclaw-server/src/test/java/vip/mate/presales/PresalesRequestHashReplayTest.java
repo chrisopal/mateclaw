@@ -90,7 +90,7 @@ class PresalesRequestHashReplayTest extends SemanticHttpFixture {
                 method.equals("POST")
                         ? json.treeToValue(body, PresalesDtos.Command.class)
                         : new PresalesDtos.Command(
-                                body.path("expectedVersion").intValue(),
+                                body.path("expectedVersion").longValue(),
                                 body.path("operationId").asText(),
                                 "UPDATE_PROJECT",
                                 body);

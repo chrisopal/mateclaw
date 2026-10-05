@@ -103,3 +103,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 真实远端 CI 见 [AQ08_REMOTE_CI_ACCEPTANCE.md](evidence/2026-10-06/AQ08_REMOTE_CI_ACCEPTANCE.md)：run37376295073/source08acb836/merge7d2ed26f 的验证和Required汇总均success；远端Java6652通过/71跳过、UI1195、Node5、cost16及适用检查通过，报告与GitHub身份已下载回读。目标分支protected=false；该结果不代表强制生效、正式AC关闭或后续提交已通过。
 
 对象状态和错误消费者修复见 [AQ05_DOMAIN_STATE_ACCEPTANCE.md](evidence/2026-10-06/AQ05_DOMAIN_STATE_ACCEPTANCE.md)：七组对象状态不再从全局翻译词表认定合法；未知不归OPEN，未答复汇总保持冻结投影口径，错误unknown经字符串校验。真实RED后售前528/528、类型和四组组件浏览器通过，独立P2修复后COMMENT/0发现。原wire和存储未变；聚合对象迁移属于AQ-06，不能用无限新增DTO wrapper替代，正式AC与本批外状态仍开放。
+
+项目修订容量扩展实施见 [计划](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md) 与 [工程记录](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_ACCEPTANCE.md)：仅项目 long/BIGINT、安全整数上限和 V220 三列；保留原数值 wire、低位任务信封、历史回执及条目 int 规则。合法旧上限 RUNNING 可恢复，坏/不一致版本仍拒写；部署须停止旧 writer，出现新范围写入后不能回滚旧二进制。具体测试、方言和提交状态按工程记录/PR分别核对，不代表完整对象迁移或正式业务验收。

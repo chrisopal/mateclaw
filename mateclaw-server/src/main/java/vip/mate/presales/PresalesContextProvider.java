@@ -29,14 +29,14 @@ public class PresalesContextProvider {
 
     public ObjectNode snapshot(String scope, ObjectNode project, String skill, String goal) {
         String actor = access.require(scope, "member");
-        Integer version = PresalesProjectItems.positiveRevision(project.path("version"));
+        Long version = PresalesProjectRevision.positiveRevision(project.path("version"));
         if (version == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         ObjectNode out = json.createObjectNode();
         out.put("workspaceId", scope)
                 .put("caseRef", project.path("id").asText())
                 .put("actorId", actor)
-                .put("projectVersion", version)
-                .put("skill", skill)
+                .set("projectVersion", PresalesProjectRevision.number(version));
+        out.put("skill", skill)
                 .put("taskGoal", goal)
                 .put("skillVersion", "1.0.0")
                 .put("schemaVersion", 1);
@@ -118,9 +118,10 @@ public class PresalesContextProvider {
 
     public void revalidate(String scope, ObjectNode project, ObjectNode snapshot) {
         access.requireActor(scope, snapshot.path("actorId").asText(), "member");
-        Integer version = PresalesProjectItems.positiveRevision(project.path("version"));
+        Long version = PresalesProjectRevision.positiveRevision(project.path("version"));
         if (version == null
-                || !PresalesProjectItems.matchesRevision(snapshot.path("projectVersion"), version))
+                || !PresalesProjectRevision.matchesRevision(
+                        snapshot.path("projectVersion"), version))
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         for (var source : snapshot.path("sources")) {
             if (!sourceAccess.canEmployeeReadKb(

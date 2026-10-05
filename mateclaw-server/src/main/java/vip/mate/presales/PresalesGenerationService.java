@@ -69,13 +69,14 @@ public class PresalesGenerationService {
                 // A retry returns the durable task envelope and never submits another model run.
                 return project;
             }
-        if (!PresalesProjectItems.matchesRevision(project.path("version"), input.expectedVersion()))
+        if (!PresalesProjectRevision.matchesRevision(
+                project.path("version"), input.expectedVersion()))
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
-        int acceptedVersion;
+        long acceptedVersion;
         try {
-            acceptedVersion = PresalesProjectItems.nextRevision(input.expectedVersion());
+            acceptedVersion = PresalesProjectRevision.nextRevision(input.expectedVersion());
             // Starting a real run also needs room to persist its terminal state.
-            PresalesProjectItems.nextRevision(acceptedVersion);
+            PresalesProjectRevision.nextRevision(acceptedVersion);
         } catch (PresalesRejected rejection) {
             throw PresalesModelAdapter.error(rejection.status(), rejection.code());
         }
@@ -84,7 +85,7 @@ public class PresalesGenerationService {
         var pin = model.pin(scope, employee.getId().toString(), input.skill());
         // SAVE_AI_TASK advances the project version exactly once. Persist that accepted
         // version in the task snapshot so tool-time revalidation can compare it.
-        snapshot.put("projectVersion", acceptedVersion);
+        snapshot.set("projectVersion", PresalesProjectRevision.number(acceptedVersion));
         String runId = UUID.randomUUID().toString();
         var queuedTask =
                 new PresalesQueuedTask(
@@ -119,8 +120,8 @@ public class PresalesGenerationService {
         ObjectNode stored =
                 (ObjectNode) project.path("tasks").get(project.path("tasks").size() - 1);
         task = stored.deepCopy();
-        if (!PresalesProjectItems.matchesRevision(project.path("version"), acceptedVersion)
-                || !PresalesProjectItems.matchesRevision(
+        if (!PresalesProjectRevision.matchesRevision(project.path("version"), acceptedVersion)
+                || !PresalesProjectRevision.matchesRevision(
                         snapshot.path("projectVersion"), acceptedVersion))
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         coordinator.enqueue(
@@ -144,7 +145,7 @@ public class PresalesGenerationService {
         ObjectNode task = service.find(project, "tasks", taskId);
         if (!"RUNNING".equals(task.path("status").asText()))
             throw PresalesModelAdapter.error(409, "TASK_STATE");
-        Integer version = PresalesProjectItems.positiveRevision(project.path("version"));
+        Long version = PresalesProjectRevision.positiveRevision(project.path("version"));
         if (version == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         String operationId =
                 input == null || input.operationId() == null || input.operationId().isBlank()

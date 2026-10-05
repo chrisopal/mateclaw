@@ -100,10 +100,10 @@ class PresalesRequestHashV2Test {
                         null,
                         null,
                         null,
-                        0,
+                        0L,
                         "operation");
         var different =
-                new PresalesDtos.Create("x?y", "customer", null, null, null, null, 0, "operation");
+                new PresalesDtos.Create("x?y", "customer", null, null, null, null, 0L, "operation");
         assertNotEquals(
                 candidateHash(json.writeValueAsString(first)),
                 candidateHash(json.writeValueAsString(different)));

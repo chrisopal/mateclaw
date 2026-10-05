@@ -195,8 +195,8 @@ class PresalesGenerationCoordinatorTest {
                 .updateRuntimeBody(
                         eq("w"),
                         eq("p"),
-                        eq(4),
-                        eq(5),
+                        eq(4L),
+                        eq(5L),
                         contains("\"INTERRUPTED_BY_RESTART\""),
                         any(PresalesListingProjectionV1.Projection.class));
     }

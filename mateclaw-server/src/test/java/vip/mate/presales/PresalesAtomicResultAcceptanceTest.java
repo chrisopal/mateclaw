@@ -148,7 +148,7 @@ class PresalesAtomicResultAcceptanceTest {
                                                                             "p",
                                                                             new PresalesDtos
                                                                                     .Command(
-                                                                                    2,
+                                                                                    2L,
                                                                                     "finish",
                                                                                     "SAVE_AI_TASK",
                                                                                     candidate)))));
@@ -270,7 +270,7 @@ class PresalesAtomicResultAcceptanceTest {
                                                 "1",
                                                 "p",
                                                 new PresalesDtos.Command(
-                                                        2, "finish", "SAVE_AI_TASK", candidate))));
+                                                        2L, "finish", "SAVE_AI_TASK", candidate))));
 
         verify(runtime).revalidate(any(), any(), any(), any());
         assertEquals(
@@ -307,7 +307,7 @@ class PresalesAtomicResultAcceptanceTest {
                                                         "1",
                                                         "p",
                                                         new PresalesDtos.Command(
-                                                                2,
+                                                                2L,
                                                                 "finish-changed",
                                                                 "SAVE_AI_TASK",
                                                                 candidate))));

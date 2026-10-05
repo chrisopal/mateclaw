@@ -230,7 +230,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                 agentId,
                                 null,
                                 null,
-                                0,
+                                0L,
                                 UUID.randomUUID().toString()));
         assertListingVersion(project);
         snapshot = contexts.snapshot(workspace, project, "S1", "Clarify scope");
@@ -263,7 +263,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         workspace,
                         project.path("id").asText(),
                         new PresalesDtos.Command(
-                                project.path("version").asInt(),
+                                project.path("version").asLong(),
                                 UUID.randomUUID().toString(),
                                 "SAVE_AI_TASK",
                                 task));
@@ -293,7 +293,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         workspace,
                         project.path("id").asText(),
                         new PresalesDtos.Command(
-                                project.path("version").asInt(),
+                                project.path("version").asLong(),
                                 UUID.randomUUID().toString(),
                                 "BIND_MATERIAL",
                                 json.createObjectNode()
@@ -326,7 +326,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         String operation = UUID.randomUUID().toString();
         var command =
                 new PresalesDtos.Command(
-                        repair.path("version").asInt(),
+                        repair.path("version").asLong(),
                         operation,
                         "UPDATE_PROJECT",
                         json.createObjectNode().put("agentId", replacement.getId().toString()));
@@ -399,7 +399,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         var candidate = task.deepCopy().put("status", "SUCCEEDED");
         candidate.set("result", execute());
         return new PresalesDtos.Command(
-                project.path("version").asInt(),
+                project.path("version").asLong(),
                 UUID.randomUUID().toString(),
                 "SAVE_AI_TASK",
                 candidate);
@@ -470,7 +470,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                         workspace,
                                         project.path("id").asText(),
                                         new PresalesDtos.Command(
-                                                project.path("version").asInt(),
+                                                project.path("version").asLong(),
                                                 UUID.randomUUID().toString(),
                                                 "SAVE_AI_TASK",
                                                 candidate)));
@@ -494,7 +494,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         workspace,
                         project.path("id").asText(),
                         new PresalesDtos.Command(
-                                project.path("version").asInt(),
+                                project.path("version").asLong(),
                                 UUID.randomUUID().toString(),
                                 "UPDATE_PROJECT",
                                 json.createObjectNode().put("goal", "New user goal")));
@@ -510,7 +510,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         workspace,
                         project.path("id").asText(),
                         new PresalesDtos.Command(
-                                project.path("version").asInt(),
+                                project.path("version").asLong(),
                                 UUID.randomUUID().toString(),
                                 "SAVE_AI_TASK",
                                 candidate));
@@ -561,7 +561,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                         workspace,
                                         project.path("id").asText(),
                                         new PresalesDtos.Command(
-                                                project.path("version").asInt(),
+                                                project.path("version").asLong(),
                                                 UUID.randomUUID().toString(),
                                                 "SAVE_AI_TASK",
                                                 candidate)));
@@ -643,7 +643,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                 workspace,
                                 project.path("id").asText(),
                                 new PresalesDtos.Command(
-                                        project.path("version").asInt(),
+                                        project.path("version").asLong(),
                                         UUID.randomUUID().toString(),
                                         invalid == InvalidExecution.CANCELLED
                                                 ? "CANCEL_AI_TASK"
@@ -695,8 +695,25 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any());
     }
 
-    @Test
-    void resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback() {
+    @ParameterizedTest
+    @ValueSource(longs = {2L, 2147483647L, 2147483648L, 9007199254740990L})
+    void resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback(long version) {
+        long originalVersion = project.path("version").longValue();
+        project.set("version", PresalesProjectRevision.number(version));
+        snapshot.set("projectVersion", PresalesProjectRevision.number(version));
+        task.set("contextSnapshot", snapshot.deepCopy());
+        project.withArray("tasks").set(0, task.deepCopy());
+        String body = project.toString();
+        assertEquals(
+                1,
+                new vip.mate.presales.repository.PresalesProjectRepository(jdbc)
+                        .updateRuntimeBody(
+                                workspace,
+                                project.path("id").asText(),
+                                originalVersion,
+                                version,
+                                body,
+                                PresalesListingProjectionV1.fromBody(body, json)));
         assertTrue(AopUtils.isAopProxy(service));
         var command = resultCommand();
         var outerResource = new AtomicReference<Object>();
@@ -734,7 +751,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         String.class,
                         otherWorkspace));
         var accepted = service.get(workspace, project.path("id").asText());
-        assertEquals(project.path("version").asInt() + 1, accepted.path("version").asInt());
+        assertEquals(version + 1, accepted.path("version").longValue());
         assertEquals("SUCCEEDED", accepted.path("tasks").get(0).path("status").asText());
         assertEquals(
                 command.payload().path("result"), accepted.path("tasks").get(0).path("result"));

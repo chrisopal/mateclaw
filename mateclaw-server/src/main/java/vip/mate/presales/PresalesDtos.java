@@ -3,6 +3,7 @@ package vip.mate.presales;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 
@@ -16,11 +17,15 @@ public final class PresalesDtos {
             String agentId,
             String industry,
             String goal,
-            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
+            @JsonDeserialize(using = PresalesExpectedVersion.class)
+                    @JsonSerialize(using = PresalesExpectedVersion.NumericSerializer.class)
+                    Long expectedVersion,
             String operationId) {}
 
     public record Command(
-            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
+            @JsonDeserialize(using = PresalesExpectedVersion.class)
+                    @JsonSerialize(using = PresalesExpectedVersion.NumericSerializer.class)
+                    Long expectedVersion,
             String operationId,
             String action,
             ObjectNode payload) {
@@ -31,14 +36,20 @@ public final class PresalesDtos {
     }
 
     public record Generate(
-            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
+            @JsonDeserialize(using = PresalesExpectedVersion.class)
+                    @JsonSerialize(using = PresalesExpectedVersion.NumericSerializer.class)
+                    Long expectedVersion,
             String operationId,
             String skill,
             String taskGoal) {}
 
     public record Cancel(String operationId) {}
 
-    public record Update(Integer expectedVersion, String operationId, ObjectNode payload) {
+    public record Update(
+            @JsonSerialize(using = PresalesExpectedVersion.NumericSerializer.class)
+                    Long expectedVersion,
+            String operationId,
+            ObjectNode payload) {
         @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
         public static Update fromJson(ObjectNode payload) {
             return new Update(

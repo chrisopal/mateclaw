@@ -81,7 +81,7 @@ public class PresalesGenerationCoordinator {
             String taskGoal,
             ObjectNode task,
             ObjectNode snapshot,
-            int acceptedVersion) {}
+            long acceptedVersion) {}
 
     /**
      * Submit after the RUNNING task has been durably saved. @Async is intentionally on this public
@@ -192,7 +192,7 @@ public class PresalesGenerationCoordinator {
                 ObjectNode live = service.find(current, "tasks", task.path("id").asText());
                 if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
                     return;
-                Integer version = PresalesProjectItems.positiveRevision(current.path("version"));
+                Long version = PresalesProjectRevision.positiveRevision(current.path("version"));
                 if (version == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
                 if (version != submission.acceptedVersion()) {
                     task.put("status", "FAILED").put("error", "PROJECT_CHANGED_DURING_GENERATION");
@@ -233,7 +233,7 @@ public class PresalesGenerationCoordinator {
                 if (cancellationRequested.containsKey(key)) return;
                 var row = projects.findRuntimeRow(submission.scope(), submission.projectId());
                 if (row.isEmpty()) return;
-                int version = row.get().version();
+                long version = row.get().version();
                 ObjectNode project =
                         (ObjectNode) json.readTree(Objects.toString(row.get().bodyJson(), "{}"));
                 ObjectNode live = null;
@@ -245,10 +245,10 @@ public class PresalesGenerationCoordinator {
                 }
                 if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
                     return;
-                if (!PresalesProjectItems.matchesRevision(project.path("version"), version))
+                if (!PresalesProjectRevision.matchesRevision(project.path("version"), version))
                     throw new PresalesRejected(
                             409, "VERSION_CONFLICT", "Stored project versions do not match");
-                int nextVersion = PresalesProjectItems.nextRevision(version);
+                long nextVersion = PresalesProjectRevision.nextRevision(version);
                 // A concurrent project edit invalidates the model snapshot; keep the task terminal
                 // and
                 // discard its output rather than overwriting the user's newer project body.
@@ -259,7 +259,7 @@ public class PresalesGenerationCoordinator {
                 task.put("status", "FAILED").put("error", error).remove("result");
                 live.remove("result");
                 live.setAll(task);
-                project.put("version", nextVersion);
+                project.set("version", PresalesProjectRevision.number(nextVersion));
                 if (cancellationRequested.containsKey(key)) return;
                 String body =
                         PresalesListingProjectionV1.storageJson(json.writeValueAsString(project));
@@ -298,7 +298,7 @@ public class PresalesGenerationCoordinator {
         String scope = row.workspaceId();
         for (int attempt = 0; attempt < 3; attempt++) {
             try {
-                int version = row.version();
+                long version = row.version();
                 ObjectNode project =
                         (ObjectNode) json.readTree(Objects.toString(row.bodyJson(), "{}"));
                 boolean changed = false;
@@ -314,11 +314,11 @@ public class PresalesGenerationCoordinator {
                     }
                 }
                 if (!changed) return;
-                if (!PresalesProjectItems.matchesRevision(project.path("version"), version))
+                if (!PresalesProjectRevision.matchesRevision(project.path("version"), version))
                     throw new PresalesRejected(
                             409, "VERSION_CONFLICT", "Stored project versions do not match");
-                int nextVersion = PresalesProjectItems.nextRevision(version);
-                project.put("version", nextVersion);
+                long nextVersion = PresalesProjectRevision.nextRevision(version);
+                project.set("version", PresalesProjectRevision.number(nextVersion));
                 String body =
                         PresalesListingProjectionV1.storageJson(json.writeValueAsString(project));
                 if (projects.updateRuntimeBody(

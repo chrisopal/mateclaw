@@ -25,7 +25,7 @@ public class PresalesProjectRepository {
     public record ProjectRow(
             String id,
             String workspaceId,
-            int version,
+            long version,
             String name,
             String status,
             String bodyJson,
@@ -33,7 +33,7 @@ public class PresalesProjectRepository {
         public ProjectRow(
                 String id,
                 String workspaceId,
-                int version,
+                long version,
                 String name,
                 String status,
                 String bodyJson) {
@@ -77,8 +77,8 @@ public class PresalesProjectRepository {
     public int updateRuntimeBody(
             String scope,
             String id,
-            int expectedVersion,
-            int nextVersion,
+            long expectedVersion,
+            long nextVersion,
             String bodyJson,
             Projection listing) {
         return jdbc.update(
@@ -91,7 +91,7 @@ public class PresalesProjectRepository {
                         new Object[] {id, scope, expectedVersion}));
     }
 
-    private static Object[] listingArguments(Projection p, int version) {
+    private static Object[] listingArguments(Projection p, long version) {
         if (p == null) return new Object[11];
         return new Object[] {
             p.contractVersion(),
@@ -118,7 +118,7 @@ public class PresalesProjectRepository {
         return new ProjectRow(
                 row.getString("id"),
                 row.getString("workspace_id"),
-                row.getInt("version"),
+                row.getLong("version"),
                 row.getString("name"),
                 row.getString("status"),
                 row.getString("body_json"));
@@ -155,7 +155,7 @@ public class PresalesProjectRepository {
                         listingArguments(project.listing(), project.version())));
     }
 
-    public int update(ProjectRow project, int expectedVersion) {
+    public int update(ProjectRow project, long expectedVersion) {
         return jdbc.update(
                 "UPDATE mate_presales_project SET version=?,name=?,status=?,body_json=?,"
                         + LISTING_SET
@@ -296,7 +296,7 @@ public class PresalesProjectRepository {
 
     public void insertRevision(
             String projectId,
-            int version,
+            long version,
             String actor,
             String action,
             String bodyJson,

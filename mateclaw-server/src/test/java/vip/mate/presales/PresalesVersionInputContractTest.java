@@ -47,12 +47,23 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     @ValueSource(strings = {"Generate", "Generate?"})
     void generationIsCommittedBeforeEnqueueAndOriginalRequestReplaysWithoutAnotherRun(String goal)
             throws Exception {
-        var p = project();
+        generationRoundTrip(goal, 1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {2147483646L, 2147483647L, 2147483648L, 9007199254740989L})
+    void wideGenerationPreservesDurableTaskIdentity(long version) throws Exception {
+        generationRoundTrip("Wide generation", version);
+    }
+
+    private void generationRoundTrip(String goal, long version) throws Exception {
+        var p = (ObjectNode) project();
+        seedVersion(p, version);
         String projectId = p.path("id").asText();
         String operation = UUID.randomUUID().toString();
         var body =
                 json.createObjectNode()
-                        .put("expectedVersion", 1)
+                        .put("expectedVersion", version)
                         .put("operationId", operation)
                         .put("skill", "S1")
                         .put("taskGoal", goal);
@@ -85,16 +96,20 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
                                 query.setString(1, projectId);
                                 try (var rows = query.executeQuery()) {
                                     assertTrue(rows.next());
-                                    assertEquals(2, rows.getInt(1));
+                                    assertEquals(version + 1, rows.getLong(1));
                                     var task =
                                             json.readTree(rows.getString(2)).path("tasks").get(0);
+                                    assertEquals(submission.task(), task);
+                                    assertEquals(
+                                            submission.snapshot(), task.path("contextSnapshot"));
+                                    assertEquals(version + 1, submission.acceptedVersion());
                                     assertEquals(operation, task.path("operationId").asText());
                                     assertEquals("RUNNING", task.path("status").asText());
                                     assertEquals(
-                                            2,
+                                            version + 1,
                                             task.path("contextSnapshot")
                                                     .path("projectVersion")
-                                                    .intValue());
+                                                    .longValue());
                                 }
                             }
                             assertEquals(
@@ -124,7 +139,7 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
             throws Exception {
         var p = (ObjectNode) project();
         var original =
-                new PresalesDtos.Generate(1, "historical-generation", "S1", "What is required?");
+                new PresalesDtos.Generate(1L, "historical-generation", "S1", "What is required?");
         String archivedHash =
                 java.util.HexFormat.of()
                         .formatHex(
@@ -159,16 +174,37 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     }
 
     @Test
+    void projectWriteCrossesOldLimitAndReplaysTheExactReceipt() throws Exception {
+        var p = (ObjectNode) project();
+        seedVersion(p, Integer.MAX_VALUE);
+        var body = commandBody().put("expectedVersion", Integer.MAX_VALUE);
+        var saved = api("POST", path(p) + "/commands", "member", body, 200).path("data");
+        assertEquals(2147483648L, saved.path("version").longValue());
+        var after = facts();
+        assertEquals(saved, api("POST", path(p) + "/commands", "member", body, 200).path("data"));
+        assertEquals(after, facts());
+        body.put("expectedVersion", 2147483648L).put("operationId", UUID.randomUUID().toString());
+        var next = api("POST", path(p) + "/commands", "member", body, 200).path("data");
+        assertEquals(2147483649L, next.path("version").longValue());
+        assertEquals(
+                2147483649L,
+                jdbc.queryForObject(
+                        "SELECT MAX(version) FROM mate_presales_revision WHERE project_id=?",
+                        Long.class,
+                        p.path("id").asText()));
+    }
+
+    @Test
     void lastProjectWriteAndReceiptReplayRemainValidButFurtherWritesAreRejected() throws Exception {
         var p = (ObjectNode) project();
-        seedVersion(p, Integer.MAX_VALUE - 1);
-        var body = commandBody().put("expectedVersion", Integer.MAX_VALUE - 1);
+        seedVersion(p, PresalesProjectRevision.MAX_VALUE - 1);
+        var body = commandBody().put("expectedVersion", PresalesProjectRevision.MAX_VALUE - 1);
         var saved = api("POST", path(p) + "/commands", "member", body, 200).path("data");
-        assertEquals(Integer.MAX_VALUE, saved.path("version").intValue());
+        assertEquals(PresalesProjectRevision.MAX_VALUE, saved.path("version").longValue());
         var before = facts();
         assertEquals(saved, api("POST", path(p) + "/commands", "member", body, 200).path("data"));
         assertEquals(before, facts());
-        body.put("expectedVersion", Integer.MAX_VALUE)
+        body.put("expectedVersion", PresalesProjectRevision.MAX_VALUE)
                 .put("operationId", UUID.randomUUID().toString());
         error(api("POST", path(p) + "/commands", "member", body, 409), "VERSION_EXHAUSTED");
         assertEquals(before, facts());
@@ -189,8 +225,8 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {Integer.MAX_VALUE, Integer.MAX_VALUE - 1})
-    void generationNeedsRoomForStartAndFinishBeforeCallingExecutionDependencies(int version)
+    @ValueSource(longs = {PresalesProjectRevision.MAX_VALUE, PresalesProjectRevision.MAX_VALUE - 1})
+    void generationNeedsRoomForStartAndFinishBeforeCallingExecutionDependencies(long version)
             throws Exception {
         var p = (ObjectNode) project();
         seedVersion(p, version);
@@ -231,7 +267,7 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
         }
     }
 
-    private void seedVersion(ObjectNode p, int version) {
+    private void seedVersion(ObjectNode p, long version) {
         p.put("version", version);
         jdbc.update(
                 "UPDATE mate_presales_project SET version=?,body_json=? WHERE id=?",
@@ -241,7 +277,7 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"0.5", "0.0", "\"0\"", "\"\"", "true", "{}", "[]", "2147483648"})
+    @ValueSource(strings = {"0.5", "0.0", "\"0\"", "\"\"", "true", "{}", "[]", "9007199254740992"})
     void createRejectsNonIntegerVersionWithoutWrites(String raw) throws Exception {
         var body = createBody();
         body.set("expectedVersion", json.readTree(raw));
@@ -251,7 +287,7 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"1.5", "1.0", "\"1\"", "\"\"", "true", "{}", "[]", "2147483648"})
+    @ValueSource(strings = {"1.5", "1.0", "\"1\"", "\"\"", "true", "{}", "[]", "9007199254740992"})
     void commandRejectsNonIntegerVersionWithoutWrites(String raw) throws Exception {
         var project = project();
         var body = commandBody();
@@ -271,9 +307,9 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
                 "true",
                 "{}",
                 "[]",
-                "2147483648",
-                "4294967297",
-                "-4294967295"
+                "9007199254740992",
+                "9223372036854775808",
+                "-9007199254740992"
             })
     void patchRejectsNonIntegerAndWrappedVersionsWithoutWrites(String raw) throws Exception {
         var project = project();
@@ -285,7 +321,7 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"1.5", "1.0", "\"1\"", "\"\"", "true", "{}", "[]", "2147483648"})
+    @ValueSource(strings = {"1.5", "1.0", "\"1\"", "\"\"", "true", "{}", "[]", "9007199254740992"})
     void generationRejectsNonIntegerBeforeExecutionDependencies(String raw) throws Exception {
         var project = project();
         var body =

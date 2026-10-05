@@ -34,7 +34,7 @@ class PresalesCommandKindsTest {
                         .map(Enum::name)
                         .collect(java.util.stream.Collectors.toSet()));
         for (String raw : names) {
-            var action = new PresalesDtos.Command(1, "op", raw, null).parsedAction();
+            var action = new PresalesDtos.Command(1L, "op", raw, null).parsedAction();
             assertEquals(PresalesDtos.CommandKind.valueOf(raw), action.kind());
             assertEquals(raw, action.raw());
         }
@@ -44,7 +44,7 @@ class PresalesCommandKindsTest {
     void unknownIsStructuredWithoutTrimmingOrCaseNormalization() {
         for (String input :
                 Arrays.asList(null, "", "unknown", "UNKNOWN", "archive", " ARCHIVE ", "归档")) {
-            var action = new PresalesDtos.Command(1, "op", input, null).parsedAction();
+            var action = new PresalesDtos.Command(1L, "op", input, null).parsedAction();
             assertEquals(PresalesDtos.CommandKind.UNKNOWN, action.kind());
             assertEquals(Objects.toString(input, ""), action.raw());
         }

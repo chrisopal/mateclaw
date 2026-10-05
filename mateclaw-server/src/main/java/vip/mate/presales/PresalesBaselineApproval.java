@@ -100,9 +100,10 @@ final class PresalesBaselineApproval {
             refs.add(ref);
         }
         v.set("references", refs);
-        v.put("approvedBy", actor)
-                .put("customerConfirmationStatus", "UNCONFIRMED")
-                .put("projectVersion", p.path("version").asInt());
+        v.put("approvedBy", actor).put("customerConfirmationStatus", "UNCONFIRMED");
+        Long projectVersion = PresalesProjectRevision.positiveRevision(p.path("version"));
+        if (projectVersion == null) throw conflict("VERSION_CONFLICT", "Stored version is invalid");
+        v.set("projectVersion", PresalesProjectRevision.number(projectVersion));
     }
 
     private static PresalesRejected bad(String message) {
