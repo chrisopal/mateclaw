@@ -1,0 +1,31 @@
+{
+  "control_review": {
+    "agent": "/root/cumulative_control_review",
+    "verdict": "COMMENT",
+    "issues": 0,
+    "reviewed_control_files": 7,
+    "supporting_canaries": 5,
+    "guard_tests_passed": 72,
+    "sealed_findings": 0,
+    "manifest_sha256": "3e651ac3d4601b6f231bd43e93f005b1f58edd883770189845cc51e5d0a62ce8",
+    "limitations": [
+      "Java LSP NOT_RUN",
+      "Maven/full gate delegated to parent",
+      "Maintainer and remote CI not verified"
+    ]
+  },
+  "runtime_review": {
+    "agent": "/root/cumulative_runtime_review",
+    "verdict": "COMMENT",
+    "issues": 0,
+    "reviewed_production_files": 19,
+    "staged_files": 3672,
+    "staged_diff_sha256": "b9ddf26c644a409d53e232185b27b4ee8ceb4a52479add4db74ed90fd842b0c0",
+    "focused_source_manifest_sha256": "3796966af1e82e9efd2fd910e78f906a3cf2b15ea03c3e124cd741f926c91319",
+    "limitations": [
+      "jdtls unavailable",
+      "ast-grep unavailable",
+      "Maven/full gate delegated to parent"
+    ]
+  }
+}
