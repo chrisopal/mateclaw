@@ -54,7 +54,7 @@ describe('summary dashboard rendering and host locale', () => {
     for (const text of [
       'Refresh overview',
       'Active projects',
-      'Open questions',
+      'Unanswered questions',
       'Projects with solutions',
       'Projects in release',
       'Project pipeline',
@@ -80,7 +80,7 @@ describe('summary dashboard rendering and host locale', () => {
     for (const text of [
       '刷新统计',
       '进行中项目',
-      '待澄清事项',
+      '未答复事项',
       '已有方案项目',
       '进入成果阶段',
       '项目推进',

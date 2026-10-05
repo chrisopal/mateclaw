@@ -25,7 +25,9 @@
       :label="t('presales.requirement_2')"
       min-width="190"
     /><el-table-column :label="t('presales.fulfillment_approach')"
-      ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.status, 'fitGap')
+      }}</template></el-table-column
     ><el-table-column
       prop="productVersion"
       :label="t('presales.product_version')"
@@ -50,6 +52,7 @@
   >
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 import type { PresalesProject, PresalesFitGap } from '../api/presalesApi'
@@ -57,7 +60,7 @@ const { t } = useI18n({ messages: presalesMessages })
 defineProps<{
   project: PresalesProject
   canGenerate: boolean
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
 }>()
 const emit = defineEmits<{
   generate: []

@@ -1722,6 +1722,90 @@ describe('untrusted content and scope invariants', () => {
 })
 
 describe('clarification workflow', () => {
+  it('keeps the unanswered summary consistent while OPEN excludes unknown states', async () => {
+    const legacy = {
+      ...project,
+      clarifications: [{ id: 'unknown', question: 'Unknown clarification', status: 'RUNNING' }],
+    }
+    vi.mocked(presalesApi.list).mockResolvedValue({
+      items: [{ ...project, openClarificationCount: 1 }],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+    })
+    vi.mocked(presalesApi.get).mockResolvedValue(legacy)
+    const router = await mount()
+    const metric = [...document.querySelectorAll('.metric')].find((item) =>
+      item.textContent?.includes('Unanswered'),
+    )!
+    expect(metric).toBeDefined()
+    expect(metric.querySelector('strong')?.textContent).toContain('1')
+    expect(document.querySelector('.project-ledger')?.textContent).toContain('Unanswered')
+    await router.push(`/presales/${project.id}`)
+    await settle()
+    expect(document.body.textContent).toContain('1 unanswered')
+    document.querySelector<HTMLElement>('#tab-requirements')!.click()
+    await settle()
+    expect(
+      document.querySelector('[aria-label="Filter clarification status"]')?.textContent,
+    ).toContain('Open 0')
+    expect(document.body.textContent).toContain('Unknown status: RUNNING')
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it('keeps cross-domain and missing clarification states out of the OPEN filter', async () => {
+    const clarifications = [
+      { id: 'open', question: 'Known open', status: 'OPEN' },
+      { id: 'answered', question: 'Known answered', status: 'ANSWERED' },
+      { id: 'cross', question: 'Foreign lifecycle', status: 'RUNNING' },
+      { id: 'legacy', question: 'Legacy lifecycle', status: ' OLD ' },
+      { id: 'missing', question: 'Missing lifecycle' },
+    ]
+    vi.mocked(presalesApi.get).mockResolvedValue({ ...project, clarifications })
+    await mount(`/presales/${project.id}`)
+    ;[...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((item) => item.textContent === 'Requirements & questions')!
+      .click()
+    await settle()
+    expect(document.body.textContent).toContain('Unknown status: RUNNING')
+    expect(document.body.textContent).toContain('Unknown status:  OLD ')
+    const filter = document.querySelector('[aria-label="Filter clarification status"]')!
+    const open = [...filter.querySelectorAll<HTMLElement>('.el-radio-button')].find(
+      (item) => item.textContent?.trim() === 'Open 1',
+    )!
+    expect(open).toBeDefined()
+    open.click()
+    await settle()
+    expect(document.body.textContent).toContain('Known open')
+    expect(document.body.textContent).not.toContain('Foreign lifecycle')
+    expect(document.body.textContent).not.toContain('Missing lifecycle')
+    expect(document.body.textContent).not.toContain('Legacy lifecycle')
+    const all = [...filter.querySelectorAll<HTMLElement>('.el-radio-button')].find(
+      (item) => item.textContent?.trim() === 'All 5',
+    )!
+    all.click()
+    await settle()
+    expect(document.body.textContent).toContain('Foreign lifecycle')
+    expect(document.body.textContent).toContain('Missing lifecycle')
+    expect(clarifications[2].status).toBe('RUNNING')
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+  it('does not treat a clarification state as a known task state or enable cancellation', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      tasks: [{ id: 'task-foreign', status: 'ANSWERED', skill: 'S1', operationId: 'opaque' }],
+    })
+    await mount(`/presales/${project.id}`)
+    expect(document.body.textContent).toContain('Unknown status: ANSWERED')
+    expect(presalesApi.cancelTask).not.toHaveBeenCalled()
+    expect(
+      [...document.querySelectorAll('button')].some(
+        (item) => item.textContent?.trim() === 'Discard this run result' && !item.disabled,
+      ),
+    ).toBe(false)
+    expect(presalesApi.get).toHaveBeenCalledTimes(1)
+  })
+
   it('blocks answered records without source and submits the recorded source with version protection', async () => {
     const clarification = {
       id: 'question-1',
@@ -2449,7 +2533,7 @@ describe('discovery panel boundaries', () => {
     return document.querySelector<HTMLElement>(`#pane-${name}`)!
   }
 
-  it('keeps unknown clarifications open and retains the selected filter across project navigation', async () => {
+  it('keeps unknown clarifications separate and retains the selected filter across project navigation', async () => {
     const questions = [
       { id: 'open', question: 'Open question', status: 'OPEN', ownerId: project.ownerId },
       { id: 'unknown', question: 'Legacy question', status: 'LEGACY_PENDING' },
@@ -2466,11 +2550,11 @@ describe('discovery panel boundaries', () => {
     const open = [...pane.querySelectorAll<HTMLElement>('.el-radio-button')].find((item) =>
       item.textContent?.trim().startsWith('Open'),
     )!
-    expect(open.textContent).toContain('2')
+    expect(open.textContent?.trim()).toBe('Open 1')
     open.querySelector<HTMLInputElement>('input')!.click()
     await settle()
     expect(pane.textContent).toContain('Open question')
-    expect(pane.textContent).toContain('Legacy question')
+    expect(pane.textContent).not.toContain('Legacy question')
     expect(pane.textContent).not.toContain('Answered question')
     expect(pane.textContent).toContain('Jane Doe')
     vi.mocked(presalesApi.get).mockResolvedValue({
@@ -2481,9 +2565,14 @@ describe('discovery panel boundaries', () => {
     await router.push('/presales/second-project')
     await settle()
     const replacement = await selectPanel('requirements')
-    expect(replacement.textContent).toContain('Legacy question')
+    expect(replacement.textContent).not.toContain('Legacy question')
     expect(replacement.textContent).not.toContain('Answered question')
     expect(replacement.querySelector<HTMLInputElement>('input[value="OPEN"]')?.checked).toBe(true)
+    replacement.querySelector<HTMLInputElement>('input[value="ALL"]')!.click()
+    await settle()
+    expect(replacement.textContent).toContain('Legacy question')
+    expect(replacement.textContent).toContain('Unknown status: LEGACY_PENDING')
+    expect(questions[1].status).toBe('LEGACY_PENDING')
   })
 
   it('keeps withdrawn materials disabled and unbinds the exact selected string ID', async () => {

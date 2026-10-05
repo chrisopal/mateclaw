@@ -127,3 +127,49 @@ it('has matching finite display vocabulary for both languages', () => {
     previousLabels.map(([key]) => key).sort(),
   )
 })
+
+it('classifies equal wire text by object contract, not by translated vocabulary', async () => {
+  const { classifyDomainStatus, isDomainStatus } = await import('../shared/status')
+  const running = classifyDomainStatus('RUNNING', 'task')
+  const foreign = classifyDomainStatus('RUNNING', 'clarification')
+  expect(running).toEqual({ kind: 'known', value: 'RUNNING' })
+  expect(foreign).toEqual({ kind: 'unknown', raw: 'RUNNING' })
+  expect(classifyDomainStatus('ANSWERED', 'task')).toEqual({ kind: 'unknown', raw: 'ANSWERED' })
+  expect(isDomainStatus('clarification', 'RUNNING', 'OPEN')).toBe(false)
+  if (foreign.kind === 'known') expectTypeOf(foreign.value).toEqualTypeOf<'OPEN' | 'ANSWERED'>()
+  if (running.kind === 'known') {
+    expectTypeOf(running.value).toEqualTypeOf<
+      'DRAFT' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED'
+    >()
+  }
+})
+
+it.each([
+  ['clarification', ['OPEN', 'ANSWERED']],
+  ['task', ['DRAFT', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCELLED']],
+  ['release', ['PENDING', 'APPROVED', 'PUBLISHED']],
+  ['fitGap', ['FIT', 'CONFIG', 'EXTEND', 'PARTNER', 'GAP', 'UNKNOWN']],
+  ['reviewIssue', ['OPEN', 'RESOLVED', 'ACCEPTED']],
+  ['reviewSeverity', ['BLOCKER', 'WARNING', 'INFO']],
+  ['response', ['FULL', 'PARTIAL', 'CONDITIONAL', 'EXCLUDED', 'UNHANDLED']],
+] as const)(
+  'limits %s to its own contract and preserves unknown raw text',
+  async (domain, allowed) => {
+    const { classifyDomainStatus } = await import('../shared/status')
+    const i18n = createI18n({ legacy: false, locale: 'en-US', messages: presalesMessages })
+    for (const [raw, zh, en] of previousLabels) {
+      const state = classifyDomainStatus(raw, domain)
+      const known = allowed.some((value) => value === raw)
+      expect(state).toEqual(known ? { kind: 'known', value: raw } : { kind: 'unknown', raw })
+      i18n.global.locale.value = 'en-US'
+      expect(statusLabel(state, i18n.global.t)).toBe(known ? en : `Unknown status: ${raw}`)
+      i18n.global.locale.value = 'zh-CN'
+      expect(statusLabel(state, i18n.global.t)).toBe(known ? zh : `未知状态：${raw}`)
+    }
+    for (const raw of [' OPEN ', 'open', '__proto__', '<b>unknown</b>', ' ']) {
+      expect(classifyDomainStatus(raw, domain)).toEqual({ kind: 'unknown', raw })
+    }
+    for (const raw of ['', undefined])
+      expect(classifyDomainStatus(raw, domain)).toEqual({ kind: 'missing' })
+  },
+)

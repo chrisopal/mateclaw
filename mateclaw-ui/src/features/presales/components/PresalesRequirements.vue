@@ -21,6 +21,7 @@
     <p>
       {{ t('presales.context_message_6') }}
     </p>
+    <p>{{ t('presales.unanswered_explanation') }}</p>
   </details>
   <el-table :data="project.requirements"
     ><el-table-column
@@ -80,10 +81,17 @@
         >{{ t('presales.all') }} {{ project.clarifications.length }}</el-radio-button
       ><el-radio-button value="OPEN"
         >{{ t('presales.open') }}
-        {{ project.clarifications.filter((c) => c.status !== 'ANSWERED').length }}</el-radio-button
+        {{
+          project.clarifications.filter((c) => isDomainStatus('clarification', c.status, 'OPEN'))
+            .length
+        }}</el-radio-button
       ><el-radio-button value="ANSWERED"
         >{{ t('presales.answered') }}
-        {{ project.clarifications.filter((c) => c.status === 'ANSWERED').length }}</el-radio-button
+        {{
+          project.clarifications.filter((c) =>
+            isDomainStatus('clarification', c.status, 'ANSWERED'),
+          ).length
+        }}</el-radio-button
       ></el-radio-group
     >
   </div>
@@ -114,7 +122,9 @@
         </div></template
       ></el-table-column
     ><el-table-column :label="t('presales.status')"
-      ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.status, 'clarification')
+      }}</template></el-table-column
     ><el-table-column
       :label="t('presales.actions')"
       min-width="224"
@@ -131,7 +141,7 @@
             :disabled="!canWrite"
             @click="emit('reviseClarification', row)"
             >{{
-              row.status === 'ANSWERED'
+              isDomainStatus('clarification', row.status, 'ANSWERED')
                 ? t('presales.revise_answer')
                 : t('presales.provide_information')
             }}</el-button
@@ -152,6 +162,7 @@
   /></el-table>
 </template>
 <script setup lang="ts">
+import { isDomainStatus, type StateLabel } from '../shared/status'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
@@ -166,7 +177,7 @@ const props = defineProps<{
   canWrite: boolean
   canGenerate: boolean
   canApprove: boolean
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
   ownerName: (id?: string) => string
 }>()
 const clarificationFilter = defineModel<string>('clarificationFilter', { required: true })
@@ -174,7 +185,9 @@ const filteredClarifications = computed(() =>
   props.project.clarifications.filter(
     (c) =>
       clarificationFilter.value === 'ALL' ||
-      (clarificationFilter.value === 'OPEN' ? c.status !== 'ANSWERED' : c.status === 'ANSWERED'),
+      (clarificationFilter.value === 'OPEN'
+        ? isDomainStatus('clarification', c.status, 'OPEN')
+        : isDomainStatus('clarification', c.status, 'ANSWERED')),
   ),
 )
 const emit = defineEmits<{

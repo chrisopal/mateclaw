@@ -29,7 +29,7 @@
           :key="metric.label"
           class="metric"
         >
-          <span>{{ metric.label }}</span
+          <span :title="metric.hint">{{ metric.label }}</span
           ><strong
             >{{ loading ? '—' : metric.value }}<small>{{ metric.unit }}</small></strong
           >
@@ -129,6 +129,7 @@ const metrics = computed(() => [
   },
   {
     label: t('presales.dashboard_questions'),
+    hint: t('presales.unanswered_explanation'),
     value: summary.value.questions,
     unit: t('presales.dashboard_unit_items'),
   },

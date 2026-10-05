@@ -44,6 +44,7 @@
   >
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 import type { PresalesProject, PresalesMaterial } from '../api/presalesApi'
@@ -51,7 +52,7 @@ const { t } = useI18n({ messages: presalesMessages })
 defineProps<{
   project: PresalesProject
   canWrite: boolean
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
 }>()
 const emit = defineEmits<{
   bind: []

@@ -56,7 +56,7 @@
             v-for="v in ['FULL', 'PARTIAL', 'CONDITIONAL', 'EXCLUDED', 'UNHANDLED']"
             :key="v"
             :value="v"
-            :label="stateLabel(v)" /></el-select></el-form-item
+            :label="stateLabel(v, 'response')" /></el-select></el-form-item
       ><el-form-item :label="t('presales.reason_remaining_gaps_or_conditions')"
         ><el-input
           v-model="response.reason"
@@ -105,14 +105,14 @@
               v-for="v in ['BLOCKER', 'WARNING', 'INFO']"
               :key="v"
               :value="v"
-              :label="stateLabel(v)" /></el-select></el-form-item
+              :label="stateLabel(v, 'reviewSeverity')" /></el-select></el-form-item
         ><el-form-item :label="t('presales.disposition')"
           ><el-select v-model="issue.status"
             ><el-option
               v-for="v in ['OPEN', 'RESOLVED', 'ACCEPTED']"
               :key="v"
               :value="v"
-              :label="stateLabel(v)" /></el-select
+              :label="stateLabel(v, 'reviewIssue')" /></el-select
         ></el-form-item>
       </div>
     </section>
@@ -143,6 +143,7 @@
   </template>
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 const { t } = useI18n({ messages: presalesMessages })
@@ -152,7 +153,7 @@ defineProps<{
   kind: 'solution' | 'review' | 'release'
   project: PresalesProject | undefined
   editableRequirements: PresalesProject['requirements']
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
   baselineLabel: (id: string) => string
   versionLabel: (kind: 'solutions' | 'releases', id: string) => string
 }>()

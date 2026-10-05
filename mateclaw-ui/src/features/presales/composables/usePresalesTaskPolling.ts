@@ -1,3 +1,4 @@
+import { isDomainStatus } from '../shared/status'
 import { onScopeDispose, type Ref } from 'vue'
 import type { PresalesProject } from '../api/presalesApi'
 import { isCurrentRequest, presalesError } from '../shared/state'
@@ -65,7 +66,12 @@ export function usePresalesTaskPolling(options: PollingOptions) {
         )
           continue
         options.project.value = detail
-        if (!detail.tasks?.some((task) => task.status === 'RUNNING' && task.operationId)) return
+        if (
+          !detail.tasks?.some(
+            (task) => isDomainStatus('task', task.status, 'RUNNING') && task.operationId,
+          )
+        )
+          return
       }
     } catch (error) {
       if (isActive(current)) {

@@ -1,3 +1,4 @@
+import { isDomainStatus } from '../shared/status'
 import { onScopeDispose, ref, type Ref } from 'vue'
 import {
   presalesApi,
@@ -120,7 +121,7 @@ export function usePresalesExecutionSession<Scope>(options: ExecutionSessionOpti
       !id ||
       !options.canWrite() ||
       options.saving.value ||
-      task.status !== 'RUNNING'
+      !isDomainStatus('task', task.status, 'RUNNING')
     )
       return
     options.saving.value = true

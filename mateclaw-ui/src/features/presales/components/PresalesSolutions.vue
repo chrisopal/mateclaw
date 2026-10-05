@@ -43,9 +43,13 @@
         min-width="200" /><el-table-column :label="t('presales.scope')"
         ><template #default="{ row }">{{ stateLabel(row.scope) }}</template></el-table-column
       ><el-table-column :label="t('presales.fulfillment_approach')"
-        ><template #default="{ row }">{{ stateLabel(row.fit) }}</template></el-table-column
+        ><template #default="{ row }">{{
+          stateLabel(row.fit, 'fitGap')
+        }}</template></el-table-column
       ><el-table-column :label="t('presales.response')"
-        ><template #default="{ row }">{{ stateLabel(row.response) }}</template></el-table-column
+        ><template #default="{ row }">{{
+          stateLabel(row.response, 'response')
+        }}</template></el-table-column
       ><el-table-column
         prop="sections"
         :label="t('presales.latest_solution_sections')"
@@ -163,6 +167,7 @@
   </article>
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { computed } from 'vue'
 import { coverageLabel } from '../shared/state'
 import { useI18n } from 'vue-i18n'
@@ -173,7 +178,7 @@ const props = defineProps<{
   project: PresalesProject
   canWrite: boolean
   canGenerate: boolean
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
   versionLabel: (kind: 'solutions' | 'releases', id: string) => string
 }>()
 const emit = defineEmits<{

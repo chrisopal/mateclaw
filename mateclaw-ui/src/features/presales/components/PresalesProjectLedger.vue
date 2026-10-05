@@ -84,6 +84,10 @@
     ><el-table-column
       :label="t('presales.open_questions')"
       width="110"
+      ><template #header
+        ><span :title="t('presales.unanswered_explanation')">{{
+          t('presales.open_questions')
+        }}</span></template
       ><template #default="{ row }">{{
         row.openClarificationCount ?? '—'
       }}</template></el-table-column
@@ -107,6 +111,7 @@
   />
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import type { PresalesMember, PresalesProjectSummary } from '../api/presalesApi'
 import { presalesMessages } from '../shared/messages'
@@ -120,7 +125,7 @@ defineProps<{
   membersLoading: boolean
   memberName: (member: PresalesMember) => string
   ownerName: (id?: string) => string
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
 }>()
 const emit = defineEmits<{
   search: []

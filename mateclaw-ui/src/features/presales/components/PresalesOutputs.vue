@@ -47,7 +47,9 @@
         versionLabel('releases', row.id)
       }}</template></el-table-column
     ><el-table-column :label="t('presales.status')"
-      ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.status, 'release')
+      }}</template></el-table-column
     ><el-table-column
       :label="t('presales.files')"
       width="90"
@@ -67,7 +69,7 @@
             :key="file.filename"
             type="primary"
             size="small"
-            :disabled="row.status !== 'PUBLISHED' && !canApprove"
+            :disabled="!isDomainStatus('release', row.status, 'PUBLISHED') && !canApprove"
             @click="
               emit(
                 'download',
@@ -83,13 +85,13 @@
           ><el-button
             type="primary"
             size="small"
-            :disabled="!canApprove || row.status !== 'PENDING'"
+            :disabled="!canApprove || !isDomainStatus('release', row.status, 'PENDING')"
             @click="emit('approve', row)"
             >{{ t('presales.approve_release') }}</el-button
           ><el-button
             type="primary"
             size="small"
-            :disabled="!canApprove || row.status !== 'APPROVED'"
+            :disabled="!canApprove || !isDomainStatus('release', row.status, 'APPROVED')"
             @click="emit('publish', row.id)"
             >{{ t('presales.publish') }}</el-button
           >
@@ -105,6 +107,7 @@
   </details>
 </template>
 <script setup lang="ts">
+import { isDomainStatus, type StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 import type { PresalesProject, PresalesRecord } from '../api/presalesApi'
@@ -114,7 +117,7 @@ defineProps<{
   canWrite: boolean
   canGenerate: boolean
   canApprove: boolean
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
   versionLabel: (kind: 'solutions' | 'releases', id: string) => string
   printable: (value: unknown) => string
 }>()

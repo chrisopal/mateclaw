@@ -71,6 +71,22 @@ async function settle() {
 }
 
 describe('presales editor session ownership', () => {
+  it('keeps a dirty draft and renders fallback text after a malformed option error', async () => {
+    const load = deferred<PresalesSource[]>()
+    vi.mocked(presalesApi.sources).mockReturnValue(load.promise)
+    const editor = setup()
+    editor.openEditor('material')
+    editor.form.value.name = 'Unsaved source choice'
+    load.reject({
+      response: { data: { msg: { unexpected: 'object' }, message: 'Source list unavailable' } },
+    })
+    await settle()
+    expect(editor.editError.value).toBe('Source list unavailable')
+    expect(editor.form.value.name).toBe('Unsaved source choice')
+    expect(editor.editorOpen.value).toBe(true)
+    expect(editor.optionsLoading.value).toBe(false)
+  })
+
   it('invalidates captures on close/reopen without exposing its generation', () => {
     const editor = setup()
     editor.openEditor('project')

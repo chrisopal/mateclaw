@@ -51,11 +51,11 @@
     <div class="task-heading">
       <strong
         >{{ skillNames[task.skill as keyof typeof skillNames] || task.skill }} ·
-        {{ stateLabel(task.status) }}</strong
+        {{ stateLabel(task.status, 'task') }}</strong
       >
       <div class="task-actions">
         <el-button
-          v-if="task.status === 'RUNNING'"
+          v-if="isDomainStatus('task', task.status, 'RUNNING')"
           :disabled="!canWrite"
           @click="emit('cancel', task)"
           >{{ t('presales.discard_this_run_result') }}</el-button
@@ -84,7 +84,7 @@
       }}<span v-if="task.conversationId"> · {{ t('presales.execution') }} {{ task.runId }}</span>
     </p>
     <p
-      v-if="task.queueState === 'QUEUED' && task.status === 'RUNNING'"
+      v-if="task.queueState === 'QUEUED' && isDomainStatus('task', task.status, 'RUNNING')"
       class="muted"
     >
       {{ t('presales.accepted_and_waiting_for_the_employee') }}
@@ -144,13 +144,14 @@
     ><el-table-column
       prop="agentName"
       :label="t('presales.employee')" /><el-table-column :label="t('presales.status')"
-      ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column
+      ><template #default="{ row }">{{ stateLabel(row.status, 'task') }}</template></el-table-column
     ><el-table-column
       prop="error"
       :label="t('presales.failure_reason')"
   /></el-table>
 </template>
 <script setup lang="ts">
+import { isDomainStatus, type StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 import type {
@@ -166,7 +167,7 @@ defineProps<{
   canWrite: boolean
   canGenerate: boolean
   skillNames: Record<string, string>
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
   employeeIssue: (code: string) => string
   printable: (value: unknown) => string
 }>()

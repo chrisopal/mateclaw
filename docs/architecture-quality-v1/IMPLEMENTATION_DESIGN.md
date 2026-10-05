@@ -463,3 +463,11 @@ SAVE_REVIEW 的 solution/summary/issues 检查顺序与等级、处理状态收�
 PresalesProjectLedger 只承担筛选表单、摘要列表、日期/阶段及分页展示；required model 保留父页 query/ownerFilter/statusFilter/page，search/reload/open 交回既有查询会话和路由。Workspace、权限、abort、版本接纳与 Dashboard 继续在父级，不复制缓存或新建 store/API。fragment 和原样式保持，导航链接规则复用既有同域 CSS。
 
 页面 1226→1062 行，新组件207行、共享CSS增加4行，总生产增加47行，是明确展示边界的取舍。原页面新增刻画89/89，最终售前500/500、类型/lint/格式通过；真实浏览器合成夹具的两主题×两视口布局及交互通过，细微文字色差在旧旧控制对比重现，不宣称像素一致或真实业务签收。证据见 evidence/2026-10-06/AQ09_PROJECT_LEDGER_ACCEPTANCE.md。独立COMMENT无发现；完整架构与正式验收继续开放。回退恢复旧页面台账并删除组件，无数据动作。
+
+### ADR-AQ-045：对象状态和错误的消费者投影（Proposed）
+
+全局状态翻译词表不能证明某个对象状态合法：澄清 RUNNING、任务 ANSWERED 均会被错误显示为已知。复用现有 status.ts，七组有限契约独立于词表，返回 known/unknown/missing；显示、筛选、轮询与操作入口使用对应对象投影，raw DTO/wire/历史字节不变。拒绝新增后端 wrapper 来代替实际消费者整改，也不将聚合 JSON 清零作为 AQ-05 的完成条件；单写对象迁移仍归 AQ-06。
+
+OPEN 只表示明确待处理；旧冻结 summary 的非 ANSWERED 数量保留，汇总和详情指标改称未答复并说明未知/缺失。取舍是未知记录不再出现在 OPEN，但 ALL 始终可查看和人工修订；不改冻结 V1 投影。错误投影在原函数内验证 unknown 对象及有效字符串，保留 code/message 优先级和合法业务409语义，不新增错误框架。
+
+页面 RED2、错误 RED9、跨页面计数 RED1 后，最终售前528/528、类型检查和四组实际组件浏览器检查通过；独立 P2 口径问题已关闭，技术COMMENT不是维护人批准。详见 evidence/2026-10-06/AQ05_DOMAIN_STATE_ACCEPTANCE.md。回退仅源码，不触及存储。solution/material/project 旧标签、本批外状态及正式 AC 不由本片宣称全部完成。

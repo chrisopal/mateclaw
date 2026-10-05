@@ -156,7 +156,7 @@
           v-for="v in ['OPEN', 'ANSWERED']"
           :key="v"
           :value="v"
-          :label="stateLabel(v)" /></el-select
+          :label="stateLabel(v, 'clarification')" /></el-select
     ></el-form-item>
   </template>
   <template v-else-if="kind === 'baseline'">
@@ -189,7 +189,7 @@
           v-for="v in ['FIT', 'CONFIG', 'EXTEND', 'PARTNER', 'GAP', 'UNKNOWN']"
           :key="v"
           :value="v"
-          :label="stateLabel(v)" /></el-select></el-form-item
+          :label="stateLabel(v, 'fitGap')" /></el-select></el-form-item
     ><el-form-item :label="t('presales.product_version')"
       ><el-input v-model="form.productVersion" /></el-form-item
     ><el-form-item :label="t('presales.basis_gap_and_response')"
@@ -218,6 +218,7 @@
   </template>
 </template>
 <script setup lang="ts">
+import type { StateLabel } from '../shared/status'
 import { useI18n } from 'vue-i18n'
 import { presalesMessages } from '../shared/messages'
 const { t } = useI18n({ messages: presalesMessages })
@@ -234,7 +235,7 @@ defineProps<{
   optionsLoading: boolean
   sourceOptions: PresalesSource[]
   statementOptions: PresalesTrustedStatement[]
-  stateLabel: (state: string | undefined) => string
+  stateLabel: StateLabel
 }>()
 const emit = defineEmits<{ source: [kbId: string]; statement: [key: string]; wiki: [] }>()
 </script>

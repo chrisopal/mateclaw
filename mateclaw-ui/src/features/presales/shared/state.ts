@@ -3,26 +3,34 @@ export function presalesError(error: unknown): {
   accessDenied: boolean
   message: string
 } {
-  const value = error as {
-    message?: string
-    response?: {
-      status?: number
-      data?: { msg?: string; message?: string; code?: string; data?: { code?: string } }
-    }
-  }
-  const code = value?.response?.data?.data?.code || value?.response?.data?.code
+  const value = errorRecord(error)
+  const response = errorRecord(value?.response)
+  const data = errorRecord(response?.data)
+  const detail = errorRecord(data?.data)
+  const code = errorText(detail?.code) || errorText(data?.code)
   return {
-    accessDenied: value?.response?.status === 403,
+    accessDenied: response?.status === 403,
     conflict: code
       ? ['VERSION_CONFLICT', 'OPERATION_CONFLICT', 'OPERATION_REPLAY_UNVERIFIABLE'].includes(code)
-      : value?.response?.status === 409,
+      : response?.status === 409,
     message:
-      value?.response?.data?.msg ||
-      value?.response?.data?.message ||
-      value?.message ||
+      errorText(data?.msg) ||
+      errorText(data?.message) ||
+      errorText(value?.message) ||
       'Request failed',
   }
 }
+
+function errorRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined
+}
+
+function errorText(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
 export function coverageLabel(inScope: number, responded: number): string {
   return inScope === 0 ? '—' : `${responded}/${inScope}`
 }

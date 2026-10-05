@@ -487,7 +487,13 @@ import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, operationReceipt } from '../shared/state'
-import { classifyStatus, statusLabel } from '../shared/status'
+import {
+  classifyStatus,
+  classifyDomainStatus,
+  isDomainStatus,
+  statusLabel,
+  type StatusDomain,
+} from '../shared/status'
 import { usePresalesExecutionSession } from '../composables/usePresalesExecutionSession'
 import { usePresalesEditorSession } from '../composables/usePresalesEditorSession'
 import { usePresalesMutationSession } from '../composables/usePresalesMutationSession'
@@ -585,10 +591,11 @@ const projectMetrics = computed(() => {
       tab: 'requirements',
       label: t('presales.requirements_2'),
       value: p.requirements.length,
-      secondary: l(
-        `${p.clarifications.filter((c) => c.status !== 'ANSWERED').length} 项待澄清`,
-        `${p.clarifications.filter((c) => c.status !== 'ANSWERED').length} open`,
-      ),
+      secondary: t('presales.unanswered_count', {
+        count: p.clarifications.filter(
+          (c) => !isDomainStatus('clarification', c.status, 'ANSWERED'),
+        ).length,
+      }),
     },
     {
       tab: 'materials',
@@ -683,8 +690,8 @@ function employeeIssue(code: string): string {
   const message = messages[code]
   return message ? l(...message) : code
 }
-function stateLabel(state: string | undefined): string {
-  return statusLabel(classifyStatus(state), t)
+function stateLabel(state: string | undefined, domain?: StatusDomain): string {
+  return statusLabel(domain ? classifyDomainStatus(state, domain) : classifyStatus(state), t)
 }
 function printable(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—'
@@ -699,7 +706,9 @@ const taskPolling = usePresalesTaskPolling({
 function acceptProject(detail: PresalesProject) {
   taskPolling.reset()
   project.value = detail
-  if (detail.tasks?.some((task) => task.status === 'RUNNING' && task.operationId))
+  if (
+    detail.tasks?.some((task) => isDomainStatus('task', task.status, 'RUNNING') && task.operationId)
+  )
     taskPolling.start()
 }
 function acceptMutation(detail: PresalesProject, scope: ReturnType<typeof captureScope>) {
