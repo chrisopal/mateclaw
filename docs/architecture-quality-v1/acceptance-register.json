@@ -11,8 +11,10 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_ORDINARY_CHAT_ACCEPTANCE.md"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-05普通聊天八组合工程证据已补充（有限H2观察/合成单模型），正式签收仍NOT_RUN"
     },
     {
       "id": "AC-02",
@@ -55,8 +57,13 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "evidence/2026-10-05/AQ01_FULL_CONTEXT_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_ORDINARY_CHAT_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ05_SOURCE_QUERY_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md"
+      ],
+      "note": "待初始化模式真实应用八组合及隔离owner HTTP依赖不可用工程验证8/8；默认seed/普通聊天/方言/领域QA未验收，正式状态不变。；2026-10-05普通聊天八组合工程证据已补充（有限H2观察/合成单模型），正式签收仍NOT_RUN；2026-10-05四个来源查询独立bean后，53类695项（694通过/1既有PPTskip）及真实main八组合加重启9/9；来源/角色/绑定拒绝顺序和DTO保持，正式QA不升级。；2026-10-06发布实时授权拆分补充模块/精确修订/独立评审局部工程证据，非该AC全场景签收"
     },
     {
       "id": "AC-06",
@@ -120,9 +127,11 @@
         "evidence/2026-10-02/repair-context-test-results.json",
         "evidence/2026-10-02/repair-context-browser/coverage.json",
         "evidence/2026-10-02/AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md",
-        "evidence/2026-10-02/source-boundary-test-results.json"
+        "evidence/2026-10-02/source-boundary-test-results.json",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ05_REPAIR_POLICY_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_TASK_ACCEPTANCE_ACCEPTANCE.md"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；2026-10-02追加H2真实HTTP历史/成果员工来源权限切片，完整来源交集和正式QA仍NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变；2026-10-05撤权修复策略提取，既有HTTP/事务84项及13策略项通过，51类680项中679通过/1既有skip；窄字段/受限投影/权限与回放保持，正式QA仍NOT_RUN。；2026-10-06任务结果接收职责隔离及原事务/撤权合同与新增17项通过，正式签收仍NOT_RUN"
     },
     {
       "id": "AC-09",
@@ -149,9 +158,12 @@
         "evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md",
         "evidence/2026-10-02/principal-boundary-test-results.json",
         "evidence/2026-10-02/AQ05_COMMAND_KIND_ACCEPTANCE.md",
-        "evidence/2026-10-02/command-kind-test-results.json"
+        "evidence/2026-10-02/command-kind-test-results.json",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ05_REPAIR_POLICY_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ05_SOURCE_QUERY_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ09_DISCOVERY_PANELS_ACCEPTANCE.md"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变；公共主体/无缓存成员入口与不同批准政策85项工程回归通过，正式角色浏览器/多方言/QA仍NOT_RUN"
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；冻结候选/发布来源及当前employee的命令/回放响应切片H2通过，完整UI/方言/并发/QA仍NOT_RUN；追加受限工作台组件与SIMULATED浏览器修复恢复证据，真实角色/服务端及正式QA仍NOT_RUN；追加member白名单修复读取、严格安全命令、H2 26项/UI 35项与独立安全审阅；真实角色浏览器/完整矩阵/正式QA仍NOT_RUN；来源授权策略/领域只读端口拆分的H2 71项及独立工程审阅通过，正式QA状态不变；公共主体/无缓存成员入口与不同批准政策85项工程回归通过，正式角色浏览器/多方言/QA仍NOT_RUN；2026-10-05撤权修复策略提取，既有HTTP/事务84项及13策略项通过，51类680项中679通过/1既有skip；窄字段/受限投影/权限与回放保持，正式QA仍NOT_RUN。；2026-10-05四个来源查询独立bean后，53类695项（694通过/1既有PPTskip）及真实main八组合加重启9/9；来源/角色/绑定拒绝顺序和DTO保持，正式QA不升级。；2026-10-06三业务面板拆分补只读/筛选/安全文本局部工程证据，正式全场景签收不变"
     },
     {
       "id": "AC-10",
@@ -227,9 +239,13 @@
         "evidence/2026-10-03/AQ05_COMMAND_PAYLOAD_ACCEPTANCE.md",
         "evidence/2026-10-03/command-payload-test-results.json",
         "evidence/2026-10-03/AQ05_DOMAIN_DTO_ACCEPTANCE.md",
-        "evidence/2026-10-03/domain-dto-test-results.json"
+        "evidence/2026-10-03/domain-dto-test-results.json",
+        "evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_EXECUTION_SESSION_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_REVIEW.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；2026-10-05查询生命周期拆分与空Workspace遮罩修复：真实RouterView两项RED、最终售前416/416及全UI1115/1115、Node5/5与两模式构建通过，模板/style字节不变。仅工程回归，真实角色/并发/浏览器主题/正式QA仍NOT_RUN。；2026-10-05员工执行会话提取：原实现6项真实RouterView增量、模块26项，最终售前448/448与全UI1147/1147、Node5/5及双构建通过。shared scope/receipt/saving和409保护保持，模板/style相同；真实浏览器/后端角色/正式QA仍NOT_RUN。；2026-10-06工作台提交/下载切片：页面及模块覆盖Workspace/项目代次、旧成功/错误隔离，正式浏览器范围切换仍未验收。"
     },
     {
       "id": "AC-14",
@@ -261,9 +277,11 @@
         "evidence/2026-10-02/workspace-request-test-results.json",
         "evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_ACCEPTANCE.md",
         "evidence/2026-10-03/transport-diagnostic-test-results.json",
-        "evidence/2026-10-03/team-fixture-test-results.json"
+        "evidence/2026-10-03/team-fixture-test-results.json",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_REVIEW.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；2026-10-06工作台提交/下载切片：file/preview/draft原Blob、UNAPPROVED命名、handoff JSON和1000ms URL释放及来源限制/晚到/卸载有DOM与模块合同；真实浏览器下载未验收。"
     },
     {
       "id": "AC-16",
@@ -296,9 +314,13 @@
         "evidence/2026-10-03/AQ05_DOMAIN_DTO_ACCEPTANCE.md",
         "evidence/2026-10-03/domain-dto-test-results.json",
         "evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md",
-        "evidence/2026-10-03/command-schema-test-results.json"
+        "evidence/2026-10-03/command-schema-test-results.json",
+        "evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_EXECUTION_SESSION_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_REVIEW.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；AQ-04公共请求入口与三域适配七文件26项工程回归、真实loopback multipart/binary/取消通过，独立增量审核无阻断；服务端角色/真实409并发/浏览器及正式QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED.；2026-10-05查询生命周期拆分与空Workspace遮罩修复：真实RouterView两项RED、最终售前416/416及全UI1115/1115、Node5/5与两模式构建通过，模板/style字节不变。仅工程回归，真实角色/并发/浏览器主题/正式QA仍NOT_RUN。；2026-10-05员工执行会话提取：原实现6项真实RouterView增量、模块26项，最终售前448/448与全UI1147/1147、Node5/5及双构建通过。shared scope/receipt/saving和409保护保持，模板/style相同；真实浏览器/后端角色/正式QA仍NOT_RUN。；2026-10-06工作台提交/下载切片：保持409含摘要歧义码的草稿与禁重提、共享saving锁、旧版本接纳/新范围busy保护；不替代真实并发服务端验收。"
     },
     {
       "id": "AC-17",
@@ -314,9 +336,10 @@
         "evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md",
         "evidence/2026-10-03/terminal-reception-test-results.json",
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/listing-projection-test-results.json"
+        "evidence/2026-10-03/listing-projection-test-results.json",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_RECOVERY_CAS_ACCEPTANCE.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.；2026-10-05重启恢复CAS冲突有界重读，真实H2确定交错7项通过；非真实进程重启/多实例/正式QA。"
     },
     {
       "id": "AC-18",
@@ -340,8 +363,11 @@
       "owner": "领域开发 + QA",
       "method": "行为/集成回归",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_TASK_ACCEPTANCE_ACCEPTANCE.md"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-06发布实时授权拆分补充模块/精确修订/独立评审局部工程证据，非该AC全场景签收；2026-10-06任务结果接收职责隔离及原事务/撤权合同与新增17项通过，正式签收仍NOT_RUN"
     },
     {
       "id": "AC-20",
@@ -367,9 +393,14 @@
         "evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md",
         "evidence/2026-10-03/command-schema-test-results.json",
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/listing-projection-test-results.json"
+        "evidence/2026-10-03/listing-projection-test-results.json",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_COMPATIBILITY_DESIGN.md",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_REVIEW.md",
+        "evidence/2026-10-05/request-hash-integration-tests/results.json.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；完整门禁发现语义回执signatureIris非确定性顺序，构造器排序修复，新3项旧实现2红例/修复后97定向通过含原整响应回放断言；正式幂等/多方言/QA仍NOT_RUN Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. Known engineering violation: isolated surrogate and literal question mark can share the existing UTF-8 request hash; the different Create request replays the first receipt in actual MySQL/H2 characterization. Full formal acceptance is NOT_RUN, not PASS; versioned hashing and legacy replay policy remain unresolved."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；完整门禁发现语义回执signatureIris非确定性顺序，构造器排序修复，新3项旧实现2红例/修复后97定向通过含原整响应回放断言；正式幂等/多方言/QA仍NOT_RUN Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. Known engineering violation: isolated surrogate and literal question mark can share the existing UTF-8 request hash; the different Create request replays the first receipt in actual MySQL/H2 characterization. Full formal acceptance is NOT_RUN, not PASS; versioned hashing and legacy replay policy remain unresolved.；2026-10-05补版本化请求摘要兼容设计与独立审核/编码探针，Service旧hash碰撞仍存在，尚未接入V2或关闭本项。；2026-10-06：历史注记所述Service碰撞现已完成工程修复：V2新写/legacy双读，歧义回执409，HTTP143定向、MySQL17及UI1151通过；真实旧请求档案、多实例、QA仍未验收。; 2026-10-06 queued-task DTO wire/replay: 4 mapper contracts, 64 targeted tests pass; formal acceptance remains NOT_RUN"
     },
     {
       "id": "AC-21",
@@ -392,9 +423,17 @@
         "evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md",
         "evidence/2026-10-03/terminal-reception-test-results.json",
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/listing-projection-test-results.json"
+        "evidence/2026-10-03/listing-projection-test-results.json",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_EXECUTION_VERSION_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_RECOVERY_CAS_ACCEPTANCE.md",
+        "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_PROCESS_RESTART_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_EXECUTION_SESSION_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_REVIEW.md",
+        "evidence/2026-10-05/request-hash-integration-tests/results.json.gz"
       ],
-      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
+      "note": "真实 runtime/策略复核与 Spring 代理事务工程切片在 H2/隔离 MySQL 8.0.46 通过；覆盖执行前和生成后停用/降权/pin变化/取消及锁等待撤权。完整角色/API/UI、图执行器/异步重启、来源/历史/导出、真实模型和独立 QA 尚未正式签收，保留 NOT_RUN；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.；2026-10-05执行快照/工具重验/入队/取消/终态CAS精确版本修复新增75项通过，50类660项中659通过/1既有skip，仅该边界工程证据；完整重启/计费/QA仍NOT_RUN。；2026-10-05重启恢复CAS冲突有界重读，真实H2确定交错7项通过；非真实进程重启/多实例/正式QA。；2026-10-05真实main三进程H2文件库重启工程验证通过，RUNNING版本2→FAILED/INTERRUPTED_BY_RESTART版本3→重复重启原字节不变；八组合加重启共9/9。合成模型/单实例，不替代真实厂商计费、多方言重启、坏版本恢复或正式QA。；2026-10-05查询生命周期拆分与空Workspace遮罩修复：真实RouterView两项RED、最终售前416/416及全UI1115/1115、Node5/5与两模式构建通过，模板/style字节不变。仅工程回归，真实角色/并发/浏览器主题/正式QA仍NOT_RUN。；2026-10-05员工执行会话提取：原实现6项真实RouterView增量、模块26项，最终售前448/448与全UI1147/1147、Node5/5及双构建通过。shared scope/receipt/saving和409保护保持，模板/style相同；真实浏览器/后端角色/正式QA仍NOT_RUN。；2026-10-06：本片重跑真实三个生产入口JVM：RUNNING/version2→FAILED/version3→version3，最终无重复写入；Generation byte-writer问号历史任务零enqueue回放通过。坏/耗尽版本、多实例及正式QA仍开放。"
     },
     {
       "id": "AC-22",
@@ -461,9 +500,12 @@
       "status": "NOT_RUN",
       "evidence": [
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/listing-projection-test-results.json"
+        "evidence/2026-10-03/listing-projection-test-results.json",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ06_REQUEST_HASH_REVIEW.md",
+        "evidence/2026-10-05/request-hash-integration-tests/results.json.gz"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.；2026-10-06：本片隔离MySQL8.0.46真实迁移至既有V219、validate/pending/67列宽及HTTP共17/17；本片未修改迁移。Kingbase真实执行与正式多方言签收仍未完成。"
     },
     {
       "id": "AC-27",
@@ -498,8 +540,10 @@
       "owner": "迁移负责人 + QA + 业务审核",
       "method": "迁移/恢复/真实数据库/字节对账",
       "status": "NOT_RUN",
-      "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "evidence": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md"
+      ],
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-06发布实时授权拆分补充模块/精确修订/独立评审局部工程证据，非该AC全场景签收"
     },
     {
       "id": "AC-30",
@@ -525,9 +569,14 @@
         "evidence/2026-10-02/AQ09_OVERVIEW_ACCEPTANCE.md",
         "evidence/2026-10-02/overview-test-results.json",
         "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_SUMMARY_ACCEPTANCE.md",
-        "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_STATUS_BOUNDARY_ACCEPTANCE.md"
+        "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_STATUS_BOUNDARY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_EXECUTION_SESSION_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md",
+        "evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_REVIEW.md",
+        "docs/architecture-quality-v1/evidence/2026-10-06/AQ09_DISCOVERY_PANELS_ACCEPTANCE.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；追加工作台单循环轮询/取消/迟到结果的50项组件与组合函数工程回归，真实浏览器、服务端重启及正式QA未执行，状态不升级；来源查看/确认固定范围、旧命令与409/版本/草稿保护及真实RouterView的77项工程回归通过，真实角色浏览器/服务端/重启/QA仍NOT_RUN；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；2026-10-05查询生命周期拆分与空Workspace遮罩修复：真实RouterView两项RED、最终售前416/416及全UI1115/1115、Node5/5与两模式构建通过，模板/style字节不变。仅工程回归，真实角色/并发/浏览器主题/正式QA仍NOT_RUN。；2026-10-05员工执行会话提取：原实现6项真实RouterView增量、模块26项，最终售前448/448与全UI1147/1147、Node5/5及双构建通过。shared scope/receipt/saving和409保护保持，模板/style相同；真实浏览器/后端角色/正式QA仍NOT_RUN。；2026-10-06工作台提交/下载切片：页面提交/审批/下载职责拆出，template/style逐字节不变；两主题构建和DOM测试不替代真实两主题/窄屏验收。；2026-10-06三业务面板拆分补只读/筛选/安全文本局部工程证据，正式全场景签收不变"
     },
     {
       "id": "AC-31",
@@ -572,9 +621,11 @@
         "evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md",
         "evidence/2026-10-03/command-schema-test-results.json",
         "evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md",
-        "evidence/2026-10-03/terminal-reception-test-results.json"
+        "evidence/2026-10-03/terminal-reception-test-results.json",
+        "evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md",
+        "evidence/2026-10-05/AQ09_EXECUTION_SESSION_ACCEPTANCE.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN；列表筛选/内存分页/摘要/stage职责提取，旧15/最终58项HTTP/H2/事务及纯投影合同通过，惰性decode和原Page保持；完整DTO/SQL分页/多方言/正式QA仍未完成；方案政策prepare/coverage及项目项修订职责提取，旧28/最终67項H2/HTTP/事务及纯合同通过，原Java错误和wire保持；完整DTO/SQL/V2/正式QA仍待完成 Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；编辑业务规则提取、49项旧实现刻画/最终119项组件及pure合同工程回归通过，wire/授权/CAS/receipt及模板字符保持；真实角色/两主题浏览器/并发与正式QA仍NOT_RUN；方案/评审展示职责提取、原53项刻画及123项售前回归、两个比较model/locale交互和98项CSS合同/scoped编译通过；真实浏览器和正式QA仍NOT_RUN；编辑会话generation/options/discard/unload职责提取，旧55项刻画和最终142项工程回归通过，原scope/CAS/receipt/修复保持；角色/API/真实浏览器/并发/正式QA仍NOT_RUN；11类编辑字段提取为三个typed草稿组件，旧59项刻画/迁移后146项回归和98项CSS合同/六组件编译、独立工程审阅通过；页面执行权保持，真实角色/两主题窄屏/并发/正式QA仍NOT_RUN；概览/任务展示typed intent职责提取，原62刻画与迁移149回归、98CSS源合同/七组件编译和概览样式归属修复通过，页面执行守卫保持；真实角色/并发/浏览器主题/正式QA仍NOT_RUN；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN；列表筛选/内存分页/摘要/stage职责提取，旧15/最终58项HTTP/H2/事务及纯投影合同通过，惰性decode和原Page保持；完整DTO/SQL分页/多方言/正式QA仍未完成；方案政策prepare/coverage及项目项修订职责提取，旧28/最终67項H2/HTTP/事务及纯合同通过，原Java错误和wire保持；完整DTO/SQL/V2/正式QA仍待完成 Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED.；2026-10-05查询生命周期拆分与空Workspace遮罩修复：真实RouterView两项RED、最终售前416/416及全UI1115/1115、Node5/5与两模式构建通过，模板/style字节不变。仅工程回归，真实角色/并发/浏览器主题/正式QA仍NOT_RUN。；2026-10-05员工执行会话提取：原实现6项真实RouterView增量、模块26项，最终售前448/448与全UI1147/1147、Node5/5及双构建通过。shared scope/receipt/saving和409保护保持，模板/style相同；真实浏览器/后端角色/正式QA仍NOT_RUN。"
     },
     {
       "id": "AC-32",

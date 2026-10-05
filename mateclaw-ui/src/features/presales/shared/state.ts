@@ -14,7 +14,7 @@ export function presalesError(error: unknown): {
   return {
     accessDenied: value?.response?.status === 403,
     conflict: code
-      ? ['VERSION_CONFLICT', 'OPERATION_CONFLICT'].includes(code)
+      ? ['VERSION_CONFLICT', 'OPERATION_CONFLICT', 'OPERATION_REPLAY_UNVERIFIABLE'].includes(code)
       : value?.response?.status === 409,
     message:
       value?.response?.data?.msg ||

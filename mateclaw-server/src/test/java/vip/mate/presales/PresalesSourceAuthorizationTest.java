@@ -46,6 +46,14 @@ class PresalesSourceAuthorizationTest {
                 "CREATE TABLE mate_agent_wiki_kb(agent_id BIGINT,kb_id BIGINT,enabled BOOLEAN,deleted INT)");
         jdbc.execute(
                 "CREATE TABLE mate_semantic_source_governance(graph_id VARCHAR,source_kind VARCHAR,source_id VARCHAR,state VARCHAR)");
+        jdbc.execute(
+                "CREATE TABLE mate_semantic_graph(id VARCHAR,workspace_id BIGINT,kb_id BIGINT)");
+        jdbc.execute(
+                "CREATE TABLE mate_semantic_evidence(id VARCHAR,graph_id VARCHAR,snapshot_id VARCHAR)");
+        jdbc.execute(
+                "CREATE TABLE mate_semantic_source_snapshot(id VARCHAR,graph_id VARCHAR,source_kind VARCHAR,source_id VARCHAR)");
+        jdbc.execute(
+                "CREATE TABLE mate_semantic_snapshot_exclusion(graph_id VARCHAR,snapshot_id VARCHAR)");
         jdbc.update("INSERT INTO mate_wiki_knowledge_base VALUES(1,10,0),(2,10,0),(3,20,0)");
         jdbc.update(
                 "INSERT INTO mate_wiki_raw_material VALUES(101,1,0,'','original'),(102,2,0,'second','original'),(103,3,0,'foreign','foreign')");
@@ -240,6 +248,27 @@ class PresalesSourceAuthorizationTest {
                                 "SOURCE_UNAVAILABLE",
                                 () -> authorization.authorizeReleaseSources("10", project))
                         .getMessage());
+    }
+
+    @Test
+    void frozenFitEvidenceFailsClosedWhenTheEvidenceIsUnavailable() {
+        var project = project(false);
+        var snapshot = project.withArray("releases").addObject().putObject("handoffSnapshot");
+        snapshot.putArray("materials").addObject().put("kbId", "1").put("graphId", "g");
+        snapshot.putArray("sourceRefs");
+        snapshot.putArray("fitGaps")
+                .addObject()
+                .put("id", "fit")
+                .put("status", "FIT")
+                .put("graphId", "g")
+                .putArray("evidenceIds")
+                .add("evidence");
+        var before = project.deepCopy();
+        assertEquals(
+                "Frozen evidence is unavailable",
+                denied(404, "NOT_FOUND", () -> authorization.authorizeReleaseSources("10", project))
+                        .getMessage());
+        assertEquals(before, project);
     }
 
     private ObjectNode project(boolean employee) {

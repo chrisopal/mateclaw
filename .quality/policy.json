@@ -1,6 +1,20 @@
 {
   "version": 1,
   "source_limit_bytes": 5000000,
-  "zero_tolerance": {},
-  "comment": "Initial ratchet compares immutable base code. After each fix, seal the relevant rule+path in a separately reviewed change. No regenerate-baseline command is provided."
+  "zero_tolerance": {
+    "AR-001": [
+      "mateclaw-server/src/main/java/vip/mate/agent/",
+      "mateclaw-server/src/main/java/vip/mate/common/",
+      "mateclaw-server/src/main/java/vip/mate/auth/",
+      "mateclaw-server/src/main/java/vip/mate/workspace/",
+      "mateclaw-server/src/main/java/vip/mate/tool/",
+      "mateclaw-server/src/main/java/vip/mate/skill/"
+    ],
+    "AR-002": [
+      "mateclaw-server/src/main/java/vip/mate/presales/",
+      "mateclaw-server/src/main/java/vip/mate/bidding/",
+      "mateclaw-server/src/main/java/vip/mate/delivery/"
+    ]
+  },
+  "comment": "Cleared AR-001 host and AR-002 workbench main-source scopes are sealed. Other debt still compares immutable base; never regenerate the baseline. Local technical review does not constitute maintainer approval or remote required CI."
 }

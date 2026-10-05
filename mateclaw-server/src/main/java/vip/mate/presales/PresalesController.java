@@ -2,30 +2,37 @@ package vip.mate.presales;
 
 import static vip.mate.presales.PresalesDtos.*;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 import vip.mate.common.result.R;
+import vip.mate.semantic.query.SemanticQueryDtos.EvidenceResult;
 
 @RestController
 @RequestMapping("/api/v1/presales")
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesController {
     private final PresalesService service;
+    private final PresalesProjectQueryService projects;
+    private final PresalesSourceQueryService sources;
 
-    public PresalesController(PresalesService service) {
+    public PresalesController(
+            PresalesService service,
+            PresalesProjectQueryService projects,
+            PresalesSourceQueryService sources) {
         this.service = service;
+        this.projects = projects;
+        this.sources = sources;
     }
 
     @GetMapping("/capabilities")
     public R<Capabilities> capabilities(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
-        return R.ok(service.capabilities(scope));
+        return R.ok(sources.capabilities(scope));
     }
 
     @GetMapping("/projects")
-    public R<?> list(
+    public R<Page> list(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
             @RequestParam(defaultValue = "") String q,
             @RequestParam(required = false) String status,
@@ -33,7 +40,7 @@ public class PresalesController {
             @RequestParam(required = false) String stage,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
-        return R.ok(service.list(scope, q, status, ownerId, stage, page, pageSize));
+        return R.ok(projects.list(scope, q, status, ownerId, stage, page, pageSize));
     }
 
     @PostMapping("/projects")
@@ -69,27 +76,25 @@ public class PresalesController {
     public R<?> update(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
             @PathVariable String id,
-            @RequestBody ObjectNode request) {
+            @RequestBody Update request) {
         return R.ok(
                 service.command(
                         scope,
                         id,
                         new Command(
-                                request.has("expectedVersion")
-                                        ? request.path("expectedVersion").asInt()
-                                        : null,
-                                request.path("operationId").asText(),
+                                request.expectedVersion(),
+                                request.operationId(),
                                 "UPDATE_PROJECT",
-                                request)));
+                                request.payload())));
     }
 
     @GetMapping("/projects/{id}/evidence")
-    public R<?> evidence(
+    public R<EvidenceResult> evidence(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
             @PathVariable String id,
             @RequestParam String graphId,
             @RequestParam String evidenceId) {
-        return R.ok(service.evidence(scope, id, graphId, evidenceId));
+        return R.ok(sources.evidence(scope, id, graphId, evidenceId));
     }
 
     @GetMapping("/projects/{id}/releases/{releaseId}/files/{filename}")
@@ -151,13 +156,13 @@ public class PresalesController {
     @GetMapping("/sources")
     public R<List<Source>> sources(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope) {
-        return R.ok(service.sources(scope));
+        return R.ok(sources.sources(scope));
     }
 
     @GetMapping("/projects/{id}/statements")
     public R<List<TrustedStatement>> statements(
             @RequestHeader(value = "X-Workspace-Id", required = false) String scope,
             @PathVariable String id) {
-        return R.ok(service.trustedStatements(scope, id));
+        return R.ok(sources.trustedStatements(scope, id));
     }
 }

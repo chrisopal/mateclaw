@@ -192,7 +192,9 @@ public class PresalesGenerationCoordinator {
                 ObjectNode live = service.find(current, "tasks", task.path("id").asText());
                 if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
                     return;
-                if (current.path("version").asInt() != submission.acceptedVersion()) {
+                Integer version = PresalesProjectItems.positiveRevision(current.path("version"));
+                if (version == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
+                if (version != submission.acceptedVersion()) {
                     task.put("status", "FAILED").put("error", "PROJECT_CHANGED_DURING_GENERATION");
                     task.remove("result");
                 }
@@ -200,7 +202,7 @@ public class PresalesGenerationCoordinator {
                         submission.scope(),
                         submission.projectId(),
                         new PresalesDtos.Command(
-                                current.path("version").asInt(),
+                                version,
                                 submission.operationId() + ":finish",
                                 "SAVE_AI_TASK",
                                 task));
@@ -243,6 +245,10 @@ public class PresalesGenerationCoordinator {
                 }
                 if (!matchesAcceptedRun(live, submission) || cancellationRequested.containsKey(key))
                     return;
+                if (!PresalesProjectItems.matchesRevision(project.path("version"), version))
+                    throw new PresalesRejected(
+                            409, "VERSION_CONFLICT", "Stored project versions do not match");
+                int nextVersion = PresalesProjectItems.nextRevision(version);
                 // A concurrent project edit invalidates the model snapshot; keep the task terminal
                 // and
                 // discard its output rather than overwriting the user's newer project body.
@@ -253,7 +259,6 @@ public class PresalesGenerationCoordinator {
                 task.put("status", "FAILED").put("error", error).remove("result");
                 live.remove("result");
                 live.setAll(task);
-                int nextVersion = version + 1;
                 project.put("version", nextVersion);
                 if (cancellationRequested.containsKey(key)) return;
                 String body =
@@ -285,46 +290,58 @@ public class PresalesGenerationCoordinator {
     @EventListener(ApplicationReadyEvent.class)
     public void recoverStaleTasks() {
         if (projects == null) return;
-        for (var row : projects.listRuntimeRows()) {
-            String projectId = row.id();
-            String scope = row.workspaceId();
-            int version = row.version();
-            ObjectNode project;
+        for (var row : projects.listRuntimeRows()) recoverStaleProject(row);
+    }
+
+    private void recoverStaleProject(PresalesProjectRepository.ProjectRow row) {
+        String projectId = row.id();
+        String scope = row.workspaceId();
+        for (int attempt = 0; attempt < 3; attempt++) {
             try {
-                project = (ObjectNode) json.readTree(Objects.toString(row.bodyJson(), "{}"));
-            } catch (Exception e) {
-                log.warn("Unable to inspect presales project during recovery: {}", projectId, e);
-                continue;
-            }
-            boolean changed = false;
-            for (JsonNode node : project.path("tasks")) {
-                if (node instanceof ObjectNode task
-                        && TASK_RUNNING.equals(task.path("status").asText())
-                        && isRecoveryStale(task, scope, projectId)) {
-                    task.put("status", "FAILED")
-                            .put("error", INTERRUPTED_BY_RESTART)
-                            .put("finishedAt", Instant.now().toString());
-                    task.remove("result");
-                    changed = true;
+                int version = row.version();
+                ObjectNode project =
+                        (ObjectNode) json.readTree(Objects.toString(row.bodyJson(), "{}"));
+                boolean changed = false;
+                for (JsonNode node : project.path("tasks")) {
+                    if (node instanceof ObjectNode task
+                            && TASK_RUNNING.equals(task.path("status").asText())
+                            && isRecoveryStale(task, scope, projectId)) {
+                        task.put("status", "FAILED")
+                                .put("error", INTERRUPTED_BY_RESTART)
+                                .put("finishedAt", Instant.now().toString());
+                        task.remove("result");
+                        changed = true;
+                    }
                 }
-            }
-            if (!changed) continue;
-            int nextVersion = version + 1;
-            project.put("version", nextVersion);
-            try {
+                if (!changed) return;
+                if (!PresalesProjectItems.matchesRevision(project.path("version"), version))
+                    throw new PresalesRejected(
+                            409, "VERSION_CONFLICT", "Stored project versions do not match");
+                int nextVersion = PresalesProjectItems.nextRevision(version);
+                project.put("version", nextVersion);
                 String body =
                         PresalesListingProjectionV1.storageJson(json.writeValueAsString(project));
-                projects.updateRuntimeBody(
-                        scope,
-                        projectId,
-                        version,
-                        nextVersion,
-                        body,
-                        PresalesListingProjectionV1.fromBody(body, json));
+                if (projects.updateRuntimeBody(
+                                scope,
+                                projectId,
+                                version,
+                                nextVersion,
+                                body,
+                                PresalesListingProjectionV1.fromBody(body, json))
+                        == 1) return;
+                // Re-evaluate task eligibility in the newest body; never retry the mutated
+                // snapshot, which could overwrite edits or a newly queued run.
+                if (attempt < 2) {
+                    var current = projects.findRuntimeRow(scope, projectId);
+                    if (current.isEmpty()) return;
+                    row = current.get();
+                }
             } catch (Exception e) {
-                log.warn("Unable to persist interrupted presales tasks: project={}", projectId, e);
+                log.warn("Unable to recover interrupted presales tasks: project={}", projectId, e);
+                return;
             }
         }
+        log.warn("Presales restart recovery exhausted 3 CAS attempts: project={}", projectId);
     }
 
     private boolean isRecoveryStale(ObjectNode task, String scope, String projectId) {

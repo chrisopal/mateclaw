@@ -1,20 +1,18 @@
 package vip.mate.agent.graph.state;
 
+import static vip.mate.agent.graph.state.MateClawStateKeys.*;
+
 import com.alibaba.cloud.ai.graph.OverAllState;
+import java.util.*;
 import org.springframework.ai.chat.messages.Message;
 import vip.mate.agent.GraphEventPublisher;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.graph.NodeStreamingChatHelper;
 
-import java.util.*;
-
-import static vip.mate.agent.graph.state.MateClawStateKeys.*;
-
 /**
  * 类型安全的状态访问器
- * <p>
- * 封装 {@link OverAllState} 的字符串 key 读写，
- * 提供带默认值的强类型方法，避免业务代码散落 state.value("xxx") 调用。
+ *
+ * <p>封装 {@link OverAllState} 的字符串 key 读写， 提供带默认值的强类型方法，避免业务代码散落 state.value("xxx") 调用。
  *
  * @author MateClaw Team
  */
@@ -80,7 +78,9 @@ public final class MateClawStateAccessor {
         return state.value(LLM_CALL_COUNT, 0);
     }
 
-    /** Iterations refunded this run for setup-only (progressive-disclosure) rounds (0 at run start). */
+    /**
+     * Iterations refunded this run for setup-only (progressive-disclosure) rounds (0 at run start).
+     */
     public int iterationRefundCount() {
         return state.value(ITERATION_REFUND_COUNT, 0);
     }
@@ -92,9 +92,7 @@ public final class MateClawStateAccessor {
         return state.<List<String>>value(OBSERVATION_HISTORY).orElse(List.of());
     }
 
-    /**
-     * 计算所有观察记录的总字符数
-     */
+    /** 计算所有观察记录的总字符数 */
     public int totalObservationChars() {
         return observationHistory().stream().mapToInt(String::length).sum();
     }
@@ -217,11 +215,13 @@ public final class MateClawStateAccessor {
     }
 
     public SourceEvidenceLedger sourceEvidenceLedger() {
-        return state.<SourceEvidenceLedger>value(SOURCE_EVIDENCE_LEDGER).orElse(SourceEvidenceLedger.empty());
+        return state.<SourceEvidenceLedger>value(SOURCE_EVIDENCE_LEDGER)
+                .orElse(SourceEvidenceLedger.empty());
     }
 
     public ActionExecutionLedger actionExecutionLedger() {
-        return state.<ActionExecutionLedger>value(ACTION_EXECUTION_LEDGER).orElse(ActionExecutionLedger.empty());
+        return state.<ActionExecutionLedger>value(ACTION_EXECUTION_LEDGER)
+                .orElse(ActionExecutionLedger.empty());
     }
 
     public boolean actionCompletionRequired() {
@@ -245,9 +245,9 @@ public final class MateClawStateAccessor {
     // ===== RFC-063r: ChatOrigin =====
 
     /**
-     * RFC-063r §2.5: the {@link ChatOrigin} written into graph state by the
-     * top-level agent. Returns {@link ChatOrigin#EMPTY} when the entry path
-     * did not supply one (e.g., legacy callers using the bridge overloads).
+     * RFC-063r §2.5: the {@link ChatOrigin} written into graph state by the top-level agent.
+     * Returns {@link ChatOrigin#EMPTY} when the entry path did not supply one (e.g., legacy callers
+     * using the bridge overloads).
      */
     public ChatOrigin chatOrigin() {
         return state.<ChatOrigin>value(CHAT_ORIGIN).orElse(ChatOrigin.EMPTY);
@@ -255,14 +255,15 @@ public final class MateClawStateAccessor {
 
     public vip.mate.agent.execution.ProjectExecutionOptions projectExecutionOptions() {
         return state.<vip.mate.agent.execution.ProjectExecutionOptions>value(
-                MateClawStateKeys.PROJECT_EXECUTION_OPTIONS).orElse(null);
+                        MateClawStateKeys.PROJECT_EXECUTION_OPTIONS)
+                .orElse(null);
     }
 
     // ===== Skill progressive disclosure =====
 
     /**
-     * Skills loaded via {@code load_skill} so far this run. Empty when none
-     * have been loaded (the common first-iteration case).
+     * Skills loaded via {@code load_skill} so far this run. Empty when none have been loaded (the
+     * common first-iteration case).
      */
     @SuppressWarnings("unchecked")
     public Set<String> loadedSkills() {
@@ -270,8 +271,8 @@ public final class MateClawStateAccessor {
     }
 
     /**
-     * Extension tools activated via {@code enable_tool} so far this run. Empty
-     * when none have been enabled (the common case).
+     * Extension tools activated via {@code enable_tool} so far this run. Empty when none have been
+     * enabled (the common case).
      */
     @SuppressWarnings("unchecked")
     public Set<String> enabledExtensionTools() {
@@ -280,12 +281,11 @@ public final class MateClawStateAccessor {
 
     // ===== Tool-call loop guard =====
 
-    /**
-     * Loop-guard counters accumulated so far this run. Empty at run start.
-     */
+    /** Loop-guard counters accumulated so far this run. Empty at run start. */
     @SuppressWarnings("unchecked")
     public java.util.Map<String, Object> toolLoopStats() {
-        return state.<java.util.Map<String, Object>>value(TOOL_LOOP_STATS).orElse(java.util.Map.of());
+        return state.<java.util.Map<String, Object>>value(TOOL_LOOP_STATS)
+                .orElse(java.util.Map.of());
     }
 
     /** Whether the one-shot post-mutation verification reminder was already injected this run. */
@@ -314,9 +314,9 @@ public final class MateClawStateAccessor {
     // ===== Persistent goal accessors =====
 
     /**
-     * Active goal snapshot or empty. The injected object is the
-     * {@code vip.mate.goal.model.GoalEntity}; we reference it by Object
-     * here to avoid pulling the goal package into core graph state.
+     * Active goal snapshot or empty. The injected object is the {@code
+     * vip.mate.goal.model.GoalEntity}; we reference it by Object here to avoid pulling the goal
+     * package into core graph state.
      */
     public Optional<Object> activeGoal() {
         return state.<Object>value(ACTIVE_GOAL);
@@ -354,12 +354,11 @@ public final class MateClawStateAccessor {
     }
 
     /**
-     * Bridge across ReAct and Plan-Execute: ReAct writes the terminal text
-     * to {@link MateClawStateKeys#FINAL_ANSWER} via FinalAnswerNode;
-     * Plan-Execute writes to {@code PlanStateKeys.FINAL_SUMMARY} (long
-     * path) or {@code PlanStateKeys.DIRECT_ANSWER} (short path). The
-     * GoalEvaluationNode reads whichever is populated without having to
-     * know which graph it's inside.
+     * Bridge across ReAct and Plan-Execute: ReAct writes the terminal text to {@link
+     * MateClawStateKeys#FINAL_ANSWER} via FinalAnswerNode; Plan-Execute writes to {@code
+     * PlanStateKeys.FINAL_SUMMARY} (long path) or {@code PlanStateKeys.DIRECT_ANSWER} (short path).
+     * The GoalEvaluationNode reads whichever is populated without having to know which graph it's
+     * inside.
      */
     public String terminalAnswer() {
         String fa = state.value(FINAL_ANSWER, "");
@@ -379,17 +378,16 @@ public final class MateClawStateAccessor {
 
     // ===== 输出构建器 =====
 
-    /**
-     * 创建一个 fluent 输出构建器，用于 NodeAction.apply() 返回值
-     */
+    /** 创建一个 fluent 输出构建器，用于 NodeAction.apply() 返回值 */
     public static OutputBuilder output() {
         return new OutputBuilder();
     }
 
     /**
      * Fluent 输出构建器
-     * <p>
-     * 使用示例：
+     *
+     * <p>使用示例：
+     *
      * <pre>
      * return MateClawStateAccessor.output()
      *     .iterationCount(3)
@@ -401,8 +399,7 @@ public final class MateClawStateAccessor {
     public static final class OutputBuilder {
         private final Map<String, Object> map = new HashMap<>();
 
-        private OutputBuilder() {
-        }
+        private OutputBuilder() {}
 
         public OutputBuilder put(String key, Object value) {
             map.put(key, value);
@@ -600,19 +597,31 @@ public final class MateClawStateAccessor {
         // ---- Token Usage ----
 
         /** 将本次 LLM 调用的 usage 累加到 state 已有值上 */
-        public OutputBuilder mergeUsage(OverAllState currentState,
-                                        NodeStreamingChatHelper.StreamResult result) {
+        public OutputBuilder runtimeIdentity(NodeStreamingChatHelper.RuntimeIdentity identity) {
+            if (identity != null) {
+                map.put(RUNTIME_MODEL_NAME, identity.modelName());
+                map.put(RUNTIME_PROVIDER_ID, identity.providerId());
+                map.put(MODEL_RESPONSE_OBSERVED, true);
+            }
+            return this;
+        }
+
+        public OutputBuilder mergeUsage(
+                OverAllState currentState, NodeStreamingChatHelper.StreamResult result) {
             int existingPrompt = currentState.value(PROMPT_TOKENS, 0);
             int existingCompletion = currentState.value(COMPLETION_TOKENS, 0);
             map.put(PROMPT_TOKENS, existingPrompt + result.promptTokens());
             map.put(COMPLETION_TOKENS, existingCompletion + result.completionTokens());
-            map.put(CACHE_READ_TOKENS,
+            map.put(
+                    CACHE_READ_TOKENS,
                     currentState.value(CACHE_READ_TOKENS, 0) + result.cacheReadTokens());
-            map.put(CACHE_WRITE_TOKENS,
+            map.put(
+                    CACHE_WRITE_TOKENS,
                     currentState.value(CACHE_WRITE_TOKENS, 0) + result.cacheWriteTokens());
-            map.put(REASONING_TOKENS,
+            map.put(
+                    REASONING_TOKENS,
                     currentState.value(REASONING_TOKENS, 0) + result.reasoningTokens());
-            return this;
+            return runtimeIdentity(result.runtimeIdentity());
         }
 
         // ---- Persistent goal ----
@@ -645,8 +654,10 @@ public final class MateClawStateAccessor {
             return put(GOAL_HARD_CONTINUATION_COUNT, n);
         }
 
-        /** Wipe FINAL_ANSWER on follow-up so the next graph pass doesn't
-         *  immediately re-terminate via the existing final text. */
+        /**
+         * Wipe FINAL_ANSWER on follow-up so the next graph pass doesn't immediately re-terminate
+         * via the existing final text.
+         */
         public OutputBuilder clearFinalAnswer() {
             return put(FINAL_ANSWER, "");
         }
@@ -657,21 +668,21 @@ public final class MateClawStateAccessor {
         }
 
         /**
-         * Wipe the limit-exceeded draft + flag. Required before a hard
-         * continuation re-enters the ReAct loop: FinalAnswerNode prefers
-         * FINAL_ANSWER_DRAFT over a freshly reasoned answer, so a stale draft
-         * left by LimitExceededNode would otherwise resurface as the next
-         * segment's answer.
+         * Wipe the limit-exceeded draft + flag. Required before a hard continuation re-enters the
+         * ReAct loop: FinalAnswerNode prefers FINAL_ANSWER_DRAFT over a freshly reasoned answer, so
+         * a stale draft left by LimitExceededNode would otherwise resurface as the next segment's
+         * answer.
          */
         public OutputBuilder clearLimitExceededDraft() {
             put(FINAL_ANSWER_DRAFT, "");
             return put(LIMIT_EXCEEDED, false);
         }
 
-        /** Plan-Execute follow-up: clear the terminal-side plan summary so
-         *  the next PlanGeneration pass starts clean. Identifier is the
-         *  string literal "final_summary" to avoid a compile-time link to
-         *  the plan sub-package from core graph state. */
+        /**
+         * Plan-Execute follow-up: clear the terminal-side plan summary so the next PlanGeneration
+         * pass starts clean. Identifier is the string literal "final_summary" to avoid a
+         * compile-time link to the plan sub-package from core graph state.
+         */
         public OutputBuilder clearPlanFinalSummary() {
             return put("final_summary", "");
         }
@@ -680,8 +691,10 @@ public final class MateClawStateAccessor {
             return put("direct_answer", "");
         }
 
-        /** Plan-Execute follow-up: wipe the mid-pass plan state so the next
-         *  PlanGenerationNode pass re-derives everything from scratch. */
+        /**
+         * Plan-Execute follow-up: wipe the mid-pass plan state so the next PlanGenerationNode pass
+         * re-derives everything from scratch.
+         */
         public OutputBuilder clearPlanId() {
             return put("plan_id", null);
         }

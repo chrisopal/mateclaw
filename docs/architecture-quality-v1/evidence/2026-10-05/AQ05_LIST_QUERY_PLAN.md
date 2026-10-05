@@ -1,0 +1,13 @@
+# AQ05 项目列表查询用例拆分计划
+
+HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2 / base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93；初始dev es6839uz SCAN_PASS，保留全部累计WIP与主checkout。本批使用已有architecture-designer/工程门禁/ai-slop-cleaner流程。
+
+检查发现列表持久化投影通过既有合同明确保留未知扩展与null，V218及PresalesListingProjectionV1又在冻结迁移闭包内。暂不把历史宽响应强制转换为固定字段DTO；该目标仍开放，需结合版本化读契约/历史迁移处理。禁止修改冻结算法或吞掉未知值让类型检查变绿。
+
+实施：将PresalesService.list及其专用过滤键函数移入本域PresalesProjectQueryService，依赖现有PresalesAccess、PresalesProjectRepository、ObjectMapper。应用服务拥有viewer授权→分页校验→单次投影查询→原故障映射→解码→Page组装。Controller直接调用此查询服务并将R<?>改为R<Page>，原写服务不保留转发、不依赖查询服务；查询服务也不依赖写服务或Controller。无通用查询框架、接口套层、缓存、SQL重写、新依赖或事务变化。单独小解码函数保留原IllegalStateException包装，避免为共享6行代码创建通用工具。
+
+先增强SQL实际读取台账，证明授权拒绝和非法分页都不查询数据库；原SQL影子比对、未知值/null、故障优先级、UTF16、原子writers/回放、真实HTTP角色/分页及事务可见性回归在旧实现先运行归档。迁移后仅改测试fixture接线和读取调用，原断言不删除。显式Import新服务到现有Controller测试上下文；真实写服务仍独立，所有write路径不变。
+
+原行为测试→归档→源迁移→适用格式→售前/架构/来源/投标相关回归→归档→正式base格式检查→dev。对测试接线及权限入口做独立技术审阅，不作为维护人批准。执行期间不编辑仓库。真实数据库方言/全浏览器/正式AC及精确commit门禁继续开放。回退恢复Service.list、Controller单服务构造及测试接线，不需数据库操作。
+
+门禁修正：首次最终dev zs3tnns3捕获AR-004，新QueryService不能搬入旧Service对semantic.web.SemanticApiException的存量引用。复用本域PresalesRejected，HTTP Advice增加明确映射，保持status/code/message；原语义异常映射保留。先添加领域拒绝HTTP合同并观察RED，再改生产。SQL直接调用的非法分页断言改为本域异常类型，401/403等Access拒绝仍保留原异常。不能放宽AR-004或增加豁免。补充生产文件ExceptionHandler及测试ErrorContract，旧异常适配调用者保持。

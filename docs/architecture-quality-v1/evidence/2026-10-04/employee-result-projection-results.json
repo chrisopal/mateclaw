@@ -1,0 +1,315 @@
+{
+  "task": "AQ05 employee-result projection responsibility",
+  "status": "ENGINEERING_SLICE_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "candidate_source_files": [
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+      "sha256": "bd2925098d96d6f564a0eab01062c76d09b0062ffebd3d8d7003009569069672"
+    },
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeResultProjection.java",
+      "sha256": "6e4c552fff76fca4642b7ada148d84b8b8c4f8a6e0637f9be3e92ed984406150"
+    },
+    {
+      "path": "mateclaw-server/src/test/java/vip/mate/presales/PresalesEmployeeResultProjectionTest.java",
+      "sha256": "ff188db80572c130847c8ddccaa7f9640d65b7317ebf59552fdf9fc751668a39"
+    },
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesRequestHashV2.java",
+      "sha256": "b365bac533aa93e44b4dd3892cd078477a143b86dbed597edadcc83d8cdebdfd"
+    },
+    {
+      "path": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashV2Test.java",
+      "sha256": "a99622a98f2962dc17da18f83bb106e556fe75d4967f1268ce9b037d83c15a4a"
+    },
+    {
+      "path": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashMigrationTest.java",
+      "sha256": "11adc7ee9692394147881634e763f43d3ff3f257fdbbe93a8de2dfe492bd4897"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/h2/V219__presales_versioned_request_hash.sql",
+      "sha256": "2817cd290115cd0dd204f461a3fcbb82627384dfd0aaeb603f8789d623de9082"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/mysql/V219__presales_versioned_request_hash.sql",
+      "sha256": "c86934050fff1944c355194314fb8267b712ca27821581153bbbcb4f1830971a"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/kingbase/V219__presales_versioned_request_hash.sql",
+      "sha256": "755a7c937bad1e2c31a80ba20da601a473a18d41c3f7e645026430a9c3a49f78"
+    }
+  ],
+  "service_line_count": {
+    "before": 1298,
+    "after": 1228
+  },
+  "before": {
+    "exit": 0,
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "projection_characterization": 7
+  },
+  "final": {
+    "exit": 0,
+    "tests": 339,
+    "actual": 338,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skip": "PRESALES_PPT_SKILL_ROOT absent",
+    "projection_characterization": 7,
+    "authority_database": 19,
+    "atomic_acceptance": 5,
+    "hash_V2": 18,
+    "hash_migration": 7
+  },
+  "project_format_check": {
+    "exit": 0,
+    "rule": "unchanged project Spotless pipeline",
+    "earlier_failure_retained": true,
+    "candidate_regex_corrected": true
+  },
+  "review": {
+    "agent": "/root/authority_writer_audit",
+    "verdict": "COMMENT",
+    "substantive_findings": 0,
+    "Java_LSP": "NOT_RUN"
+  },
+  "unchanged_receipt_methods": [
+    {
+      "method": "private ObjectNode replay(",
+      "sha256": "f92fdfbab7390fcc3ef86f647a634219f3ad5453932d55d19143cca3e8f619f1",
+      "same_as_HEAD": true
+    },
+    {
+      "method": "private void receipt(",
+      "sha256": "fd5f63a08c25beb0149166227ee36846662b718879465be0963e225e014a8f43",
+      "same_as_HEAD": true
+    },
+    {
+      "method": "private String hash(",
+      "sha256": "f5741c13959ce02b33f4c9867b2c5a4b7e6a7e0be4d90710daf32bc10a68645a",
+      "same_as_HEAD": true
+    }
+  ],
+  "hash_integration": "NOT_IMPLEMENTED: user legacy policy remains pending",
+  "frozen_sources_unchanged": true,
+  "not_run": [
+    "exact staged commit gate/full-range push",
+    "full AQ05 DTO/runtime schema",
+    "real-model/business/customer review",
+    "Kingbase/production migration and recovery",
+    "whole-system fresh install",
+    "remote required CI"
+  ],
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/before-maven.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-before.log",
+      "sha256": "e67737a38aae6f55a77f84d148bbe5422fe361ceda21dea8e7bafd3778e2b537",
+      "decoded_sha256": "6cbdef95b3836554ef2608d9f83c32c16b1eb4b0955b71c0375b52d0ffb07d01",
+      "redactions": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/after-first-maven.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-after.log",
+      "sha256": "a962d36727cdebd1b7355daa942333d5fe068e97f4a5f3a11d9c66a7459dc046",
+      "decoded_sha256": "91a1c10b7272c27f24b8bcfaa7916301c62c5a8a529ee53249c6867ddf48dbf6",
+      "redactions": 3
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-maven.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-final.log",
+      "sha256": "8f79c15223d192a82d1166b22416e00fd8c4563e5ed10cf268aa0c891df20540",
+      "decoded_sha256": "577a1bcb49d77ed52dd9eaac36cd1b68575d713a2717c924b9a644181ce541a6",
+      "redactions": 3
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/initial-project-format-failure.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-spotless-check.log",
+      "sha256": "b702b44b7866528a59d69984f114f52ab58929cacba6c948caa78f3fb95e756d",
+      "decoded_sha256": "72e94e74b82feec7024f371f166edbedd7af6b3efe67ed6a537550d246577826",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/initial-regex-selection-failure.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-scoped-spotless-apply.log",
+      "sha256": "eda77065ef2641b7ef809e359d6aec9649c0c9447b6a32ee360c25c794a6ae08",
+      "decoded_sha256": "f6e5428c9a5b8c1576568611e0960e0df357756594f64b66dafe685106906406",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/scoped-project-format.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-scoped-format.log",
+      "sha256": "d426c3301426af79eed10bf2be019a4e827a3b1ee01f3df7da3cbe2e77f9051a",
+      "decoded_sha256": "9683540fc1f511e3dfaab9a30c5efaf119a786ac1df320b04c6beca33e9c73b4",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-project-format.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-project-format-final.log",
+      "sha256": "82927caf9e6dfca0471fd7c04781e954a1b317c0d5503a7392b75514624d654e",
+      "decoded_sha256": "16c11f84054445b93402953878ff486d377cf6b29872f2ad9f501a68f49314c6",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/initial-dev.log.gz",
+      "source": "/tmp/mateclaw-next-slice-initial-dev.log",
+      "sha256": "109b25db93d088714fdeaf2532bc828523053645cc9bc81345739929b8e6ca87",
+      "decoded_sha256": "6be08d637f3818ce695dfbe447423fd86241412c2c2c40f80b060f1b0f4c7d20",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/slice-dev.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-slice-dev.log",
+      "sha256": "0042c1c6cf1297860a84abf1c03293858f1a3f1512daac6914fedb8379c6c464",
+      "decoded_sha256": "6b02f3fc7e3f7eec931fff9452a572328320c9e7e4e5ffb0d0977bba27501937",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/before-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+      "source": "/tmp/mateclaw-employee-projection-before-reports/TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml",
+      "sha256": "afea93ae1271b62cbf46f15c88908ca5297da0a2710a0aeae59364144992b37a",
+      "decoded_sha256": "2058e4ced9c651af4a0791aae2d77547a6ac15b72f13f69e2b4c117943d200c8",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/before-vip.mate.presales.PresalesEmployeeResultProjectionTest.txt.gz",
+      "source": "/tmp/mateclaw-employee-projection-before-reports/vip.mate.presales.PresalesEmployeeResultProjectionTest.txt",
+      "sha256": "e2f796fc87ec805489750f5a616cbeae68fb1504de4b145cc6a9ee2e2e5af95f",
+      "decoded_sha256": "e4a1321d9a31bd36055739212b92e400f28e686d74ceeab634c3cd0b1935d7f7",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml",
+      "sha256": "f1e51e06da9289e643cdc603a2d1699fda72848ed293a15c0b99416e72e52375",
+      "decoded_sha256": "f19ce2a5b6a5213392667b0ad1fd82be45c7880e028791d1352ea0a82123056a",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml",
+      "sha256": "29b07e1caa964784bc8c5d9cd0831edaed966d064c1c70942b9eea5d17e00774",
+      "decoded_sha256": "4b64ca7a3e63f53fe2de897cf52b6f68913390de892a3db3c61e8e9ad7b0849f",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml",
+      "sha256": "81bb426e2a92c354b239a237b9e6b4b59c26481c3184faa9ab2a2260bad23e31",
+      "decoded_sha256": "633acae9c80a99916067f870758e68a8ced855bc3d12646cd7ac476911587607",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesRequestHashV2Test.xml",
+      "sha256": "d6fc8b78f25dbf9587d6743b359fd6061876fd4ab4a60f53a96d3bd49462c3df",
+      "decoded_sha256": "38530b5010a997ec556f7f7be67e9cde048cd1a1b41d236ac4dc0f776535168d",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml",
+      "sha256": "233f311727339c6349c73340b1fedc5c77d1f43ab47d55b0c9a08ed73bf67dec",
+      "decoded_sha256": "0241f323800495a53bbaa38d6d0b50bea187c0cc15a6a4054da3eb25b90f6830",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesService.java.gz",
+      "source": "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+      "sha256": "ac38619703e664ceb9f46694c5e442b48bc1481db6ea1b8b54db3d842116ef20",
+      "decoded_sha256": "bd2925098d96d6f564a0eab01062c76d09b0062ffebd3d8d7003009569069672",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesEmployeeResultProjection.java.gz",
+      "source": "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeResultProjection.java",
+      "sha256": "d797f153dd6a8ff444e6728bc9ebe74f7340a88f7e88e287c570102e042089bb",
+      "decoded_sha256": "6e4c552fff76fca4642b7ada148d84b8b8c4f8a6e0637f9be3e92ed984406150",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesEmployeeResultProjectionTest.java.gz",
+      "source": "mateclaw-server/src/test/java/vip/mate/presales/PresalesEmployeeResultProjectionTest.java",
+      "sha256": "7e21bb410e207caf5c10be5aefc4d7c539673888defc34282726d571b7c4c120",
+      "decoded_sha256": "ff188db80572c130847c8ddccaa7f9640d65b7317ebf59552fdf9fc751668a39",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesRequestHashV2.java.gz",
+      "source": "mateclaw-server/src/main/java/vip/mate/presales/PresalesRequestHashV2.java",
+      "sha256": "3d675a4dc1c8278e41d2e4d88d9217181fba8661945e6dfe442205b88ef59585",
+      "decoded_sha256": "b365bac533aa93e44b4dd3892cd078477a143b86dbed597edadcc83d8cdebdfd",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesRequestHashV2Test.java.gz",
+      "source": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashV2Test.java",
+      "sha256": "139d61cf8e482289929f166055873f64f4b2804501c639488b1108120b5a32ff",
+      "decoded_sha256": "a99622a98f2962dc17da18f83bb106e556fe75d4967f1268ce9b037d83c15a4a",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-presales-PresalesRequestHashMigrationTest.java.gz",
+      "source": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashMigrationTest.java",
+      "sha256": "ac5275e929f2365bf23f260f155eaa10651bfe64b14fcb6713464b9ed97aa918",
+      "decoded_sha256": "11adc7ee9692394147881634e763f43d3ff3f257fdbbe93a8de2dfe492bd4897",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-h2-V219__presales_versioned_request_hash.sql.gz",
+      "source": "mateclaw-server/src/main/resources/db/migration/h2/V219__presales_versioned_request_hash.sql",
+      "sha256": "5083d16ced071f6ed2670b8316616095c845deddb69c19d5ba6a8b87ded762f0",
+      "decoded_sha256": "2817cd290115cd0dd204f461a3fcbb82627384dfd0aaeb603f8789d623de9082",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-mysql-V219__presales_versioned_request_hash.sql.gz",
+      "source": "mateclaw-server/src/main/resources/db/migration/mysql/V219__presales_versioned_request_hash.sql",
+      "sha256": "19cf6a59f51d47b84610e597776420da96a2f396a163a690a189892284957876",
+      "decoded_sha256": "c86934050fff1944c355194314fb8267b712ca27821581153bbbcb4f1830971a",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/candidate-kingbase-V219__presales_versioned_request_hash.sql.gz",
+      "source": "mateclaw-server/src/main/resources/db/migration/kingbase/V219__presales_versioned_request_hash.sql",
+      "sha256": "76c57355c8e0d1f126bae11bc038d2d601808b34d8328cfbfc56eaa7c539bf80",
+      "decoded_sha256": "755a7c937bad1e2c31a80ba20da601a473a18d41c3f7e645026430a9c3a49f78",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/published-before-PresalesService.java.gz",
+      "source": "HEAD:mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+      "sha256": "19f08001e3e6476415e06a23f269f97680291e3dca2fe845b37b566519b4761f",
+      "decoded_sha256": "51d00b96ee3a1f3eb173afd29626ef01fdb4bb66df2692d1f7bfb4c24c5ed957",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-dev.log.gz",
+      "source": "/tmp/mateclaw-employee-projection-final-dev.log",
+      "sha256": "3ed184760a1eddb151f99b07cbfd17339fd0b50061829136bb74dcb5a729b379",
+      "decoded_sha256": "b5d192cb4d3a73455653cd42d3858dd0ed97c30e0b100ac7bdaa91e266d9c001",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/employee-result-projection-tests/final-dev-report.json.gz",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-kt6i6pia/report.json",
+      "sha256": "664e97ebfcf8208849207bf44d9216e010d83fe3a01cb355166b1e56b5c15e10",
+      "decoded_sha256": "d6dfa224878c3a3635175d0f2a8240d6307b693b6ab05d4df6fe6b0ceee81685",
+      "redactions": 0
+    }
+  ],
+  "final_dev": {
+    "task": "kt6i6pia",
+    "exit": 0,
+    "status": "SCAN_PASS",
+    "submission_ready": false,
+    "application_toolchains": "NOT_RUN"
+  }
+}

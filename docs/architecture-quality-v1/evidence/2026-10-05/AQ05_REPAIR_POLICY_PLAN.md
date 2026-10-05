@@ -1,0 +1,11 @@
+# AQ-05：来源撤权修复策略职责拆分
+
+起点HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93；89条工作树状态保留，初始dev 25g_5une SCAN_PASS/submission_ready=false。上一轮真实重启验证为进展。本轮先核查坏版本恢复，现有TerminalReception合同已覆盖耗尽/无效版本继续其他项目；不伪造缺陷或绕过正版本/CAS，坏记录的受控迁移仍开放。
+
+PresalesService目前1024行，内部混合修复命令的白名单政策与撤权后安全投影。本片提取一个包内纯PresalesRepairPolicy，承接repairableCommand及restrictedProject和对应字段常量，使用既有ObjectMapper、Command解析、Listing stage/source collections；Service三个调用点直接使用策略，删除旧私有方法和常量。不是新的Spring服务，无数据库/授权依赖，无新依赖或迁移。事务、Workspace/member校验、source复核、CAS、回执/回放、归档拒绝均留在原用例位置，策略不能自行授予权限。
+
+先运行原HTTP/H2 PresalesIntegrationTest、真实Spring事务PresalesRuntimeTransactionIntegrationTest及TerminalReceptionTest，归档原生产源码/XML；已有HTTP合同覆盖撤权后私有字段不泄漏、12集合清空、opaque binding、viewer/跨工作区/匿名拒绝、越界字段/空payload拒绝、版本冲突/归档保护、unbind回放，事务合同覆盖重新绑定员工。再提取，补策略正反输入和深复制/不变性测试，避免逐行复刻实现。全售前/架构/authority/execution回归、Spotless及dev，独立审阅权限边界与测试变更，证据归档后报告。Maven运行期间不编辑源文件。
+
+不改变公开HTTP/DTO/i18n/theme/Workspace，不声称完成全部Service拆分或正式验收。回退只还原三个委托及纯策略/新增测试，无DB操作；保留其他WIP。不提交/推送/部署。
+
+新增策略测试暴露旧restrictedProject在缺stage的稀疏历史对象上调用Listing.stage时会补空集合，属于输入修改。首次13项两失败：一个夹具误把合法字符串role视为类型拒绝，修正为对象role后13项仅1个输入不变性失败。保持共享stage/输出逻辑不变，仅在fallback推导时传深副本；不改全局listing或序列化。此处是本片唯一有意行为差异，修复视图不再修改传入project；不推断存在持久化污染。

@@ -38,7 +38,7 @@ public class PresalesExecutionRevalidationProvider implements ProjectExecutionRe
         access.requireActor(scope.workspaceId(), scope.actorId(), "member");
         ObjectNode project =
                 service.getForExecution(scope.workspaceId(), scope.projectId(), scope.actorId());
-        if (project.path("version").asInt() != scope.projectVersion()
+        if (!PresalesProjectItems.matchesRevision(project.path("version"), scope.projectVersion())
                 || !scope.employeeId().equals(project.path("agentId").asText()))
             throw PresalesModelAdapter.error(409, "PROJECT_CHANGED_DURING_GENERATION");
         ObjectNode task = service.find(project, "tasks", scope.taskId());
@@ -48,7 +48,8 @@ public class PresalesExecutionRevalidationProvider implements ProjectExecutionRe
                 || !scope.runId().equals(options.attemptId())
                 || !scope.employeeId().equals(task.path("agentId").asText())
                 || !(task.path("contextSnapshot") instanceof ObjectNode snapshot)
-                || snapshot.path("projectVersion").asInt() != scope.projectVersion()
+                || !PresalesProjectItems.matchesRevision(
+                        snapshot.path("projectVersion"), scope.projectVersion())
                 || !scope.projectId().equals(snapshot.path("caseRef").asText())
                 || !scope.inputRefs().equals(PresalesToolScope.inputRefs(snapshot))
                 || !task.path("conversationId")

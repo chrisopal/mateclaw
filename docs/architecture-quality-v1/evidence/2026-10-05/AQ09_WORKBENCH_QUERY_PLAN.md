@@ -1,0 +1,11 @@
+# AQ-09 售前工作台查询生命周期拆分
+
+HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93；94条WIP保留。初始dev yl84bzyn SCAN_PASS/submission_ready=false。上轮四个后端读取用例拆分有真实回归证据。本轮聚焦1874行PresalesWorkbench.vue的请求/状态生命周期，不修改模板布局、样式、后端或新增依赖。
+
+将列表/详情/能力加载、受限repair回退校验、成员目录和portfolio查询及其AbortController/对应refs收敛到usePresalesWorkbenchQuery。页面保留编辑/生成/取消等业务动作、视图标签、router/Workspace未保存guard、mutation scopeGeneration、任务轮询及预览生命周期；通过最少的类型化回调衔接失效通知、页面UI复位和acceptProject，避免将页面全部状态以万能context传入或构造通用请求框架。load/refresh/read方法保持原单向调用。分页/filter/列表/详情/能力/成员/portfolio状态由查询模块拥有，callback仅处理页面编辑/预览/轮询，不赋予授权。dispose停止所有所属请求，停止后晚到结果不得覆盖状态。
+
+先跑并归档原全部售前Vitest、页面源码和JSON报告。原页面load在上次loading=true时切到空Workspace分支会return且旧请求finally因abort跳过，可能留下loading遮罩；先补真实RouterView组件回归：挂起capabilities→Workspace置空→旧请求晚到，断言遮罩结束、选择Workspace提示保留且不接受旧数据；观察RED后修复。不要把静态推测当已复现。
+
+提取时保留dirty挡加载、创建请求时Workspace/项目固定、load先abort旧请求和reset轮询、来源撤权清空敏感详情及严格repair元数据/空集合/opaque binding校验、capabilities404禁用、portfolio每页100条、最多50页及总数/去重一致性检查、取消与late resolve/reject丢弃、generation计数与409草稿/回放顺序。额外补模块合同覆盖并发load、停用/缺Workspace、成员与portfolio失败/晚到、dispose及修复回退；不得用只mock新composable的组件测试代替真实接线。
+
+每轮保全日志/JSON/源快照后重跑：全售前回归、UI typecheck、非修复ESLint/Prettier、precision，必要全UI测试与classic/enterprise构建以最终改动范围为准。独立审阅异步生命周期/敏感数据拒收和页面接线，再dev检查精确工作树。预置真实浏览器/后端角色验收不在Vitest证据内，未执行就NOT_RUN。回退恢复原页面逻辑和本批模块/test改动，无DB/生产操作，不覆盖其他WIP，不提交/推送。

@@ -1,0 +1,70 @@
+{
+  "snapshot_identity_before_seal": "d4a2d7face90ea466e578399de97dd2a6090ba0b9cbeaecafc26db1fefbb2fa7",
+  "cleared_selected_findings": 0,
+  "fixtures": [
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/agent/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/common/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/auth/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/workspace/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/tool/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-001",
+      "path": "mateclaw-server/src/main/java/vip/mate/skill/RatchetCanary.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-002",
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/RatchetCanaryController.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-002",
+      "path": "mateclaw-server/src/main/java/vip/mate/bidding/RatchetCanaryController.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    },
+    {
+      "rule": "AR-002",
+      "path": "mateclaw-server/src/main/java/vip/mate/delivery/RatchetCanaryController.java",
+      "unchanged_legacy_without_seal": "PASS",
+      "unchanged_legacy_with_seal": "FAIL",
+      "new_with_seal": "FAIL"
+    }
+  ],
+  "adjacent_prefixes_not_sealed": true
+}

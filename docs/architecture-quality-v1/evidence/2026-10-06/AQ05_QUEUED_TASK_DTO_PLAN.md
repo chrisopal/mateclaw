@@ -1,0 +1,11 @@
+# AQ-05 新建生成任务的类型边界计划
+
+工作树仅architecture-quality；HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2、origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93、初始117项dirty。初始dev rww8z5mg SCAN_PASS/submission_ready=false。上一片任务结果接收已完成局部验证，本片继续AQ-05内部ObjectNode到类型边界，不改变完整整改范围。
+
+现有GenerationService通过字符串键逐项拼装任务身份、Skill/模型固定版本、队列状态、会话和contextSnapshot。新增包内PresalesQueuedTask固定DTO，在生成用例中以命名类型创建；仅在调用既有JSON命令持久化边界转换为ObjectNode。字符串ID、字段顺序、显式null、时间与runId格式、RUNNING/QUEUED/needsHumanReview均保持。contextSnapshot仍是原版本化JSON快照，禁止重新解释历史字段或伪称完整任务领域已类型化。
+
+先在原GenerationService路径加刻画：捕获真正SAVE_AI_TASK命令，逐字段及序列化顺序核对普通/空名称与null pin字段；确认上下文未知字段/null/大ID文本不丢，acceptedVersion固定，存储回读任务而非草稿交给coordinator，重试不重复排队。跑原实现通过后再替换拼装。新增DTO合同验证脱离调用者的快照拷贝、序列化显式null与准确名字/顺序、真实Jackson配置兼容。输出结果/历史task反序列化不在本片更改；不生成第二套Task表或另设公共runtime字段。
+
+Service继续拥有原输入校验、member权限、项目读取/来源、requestHash、回放、版本容量、employee/context/pin调用顺序、事务提交后排队。DTO不获得权限、不写库、不启动任务、不缓存，不新加依赖、bean、迁移或API。记录生产行数取舍而非仅以变短作为收益。
+
+验证：原生成Controller合同和实际RuntimeTransaction/DisabledStartup合同；新增强类型边界合同；扩展presales/runtime/ArchUnit，Spotless与dev；独立审阅新增测试及序列化兼容。完整46项AC继续NOT_RUN，remote required CI/业务验收与V2规范迁移另验。回退恢复本片before Service和测试、删除新DTO/直接测试，保留此前接收、回放、事务修复。

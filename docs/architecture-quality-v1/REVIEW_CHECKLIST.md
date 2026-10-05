@@ -31,7 +31,8 @@
 | Java 测试 | 根 reactor clean verify，解析 XML | wrapper 已配置 | 当前基线结果见实测，不忽略失败 |
 | UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置；Vitest 最多 2 个 worker、单测 20 秒超时 | 构建不是浏览器/人工验收；共享机器负载仍可能影响耗时 |
 | 独立成本分析工具 | Python 依赖探测、unittest、Python/JS 语法 | wrapper 已配置 | 模拟样本通过不等于真实经营数据验收；缺 openpyxl 阻断 |
-| ArchUnit | integration/WorkbenchArchitectureTest.java | 仅模板，NOT_INSTALLED | AQ-01/03 清零后接入 AQ-07；不能冻结新增违规 |
+| ArchUnit | mateclaw-server/src/test/java/vip/mate/architecture/WorkbenchArchitectureTest.java | LOCAL_COMPILED；生产字节码 + 非空聚合 + 正反例 | AQ07_ARCHUNIT_INSTALL_ACCEPTANCE；逐包完整性、维护人批准和远端强制另验 |
+| policy 封口 | .quality/policy.json | AR-001 六个宿主 main 路径、AR-002 三个工作台 main 路径零容忍 | 9 个源快照反例拒绝旧违规；未改 baseline，独立技术审核不是维护人批准 |
 | pre-commit / pre-push | 当前工作区 .githooks | 已安装 worktree-local | 可绕过；其他工作区需显式独立安装 |
 | 远端 CI | 所有 pull_request + merge_group | workflow 已写入 | 首次 trusted base bootstrap 未完成 |
 | 控制面审核 | CODEOWNERS + PR 模板 + 根 AGENTS/Skill | 文件已设置 | 账号候选 @chrisopal；独立审阅人可用性待维护人核实 |
@@ -46,9 +47,10 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 | AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
 | AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
 | AQ-02–06 | AQ-02 第一片工程实现，正式 AC-07–10 仍为 NOT_RUN；其余按各任务证据推进 | 补齐角色/来源权限矩阵、生产数据库并发验证与独立 QA 签收 |
-| AQ-07 | IN_PROGRESS：Java 迁移/冻结源码检查切片 | 独立维护人审批、远端强制；清零后 ArchUnit + policy 封口 |
+| AQ-07 | IN_PROGRESS：Java 迁移/冻结源码及编译 ArchUnit/路径封口切片 | 独立维护人审批、远端强制；未来路径映射与全量正式验收 |
 | AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
-| AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |
+| AQ-09 | IN_PROGRESS：工作台查询生命周期等结构切片与适用前端工具链已验证，见AQ09_WORKBENCH_QUERY_ACCEPTANCE与AQ09_EXECUTION_SESSION_ACCEPTANCE | 真实浏览器两主题/窄屏、命令职责后续拆分及正式QA；不能以构建代替AC-30 |
+| AQ-10 | DESIGNED / NOT_IMPLEMENTED | P0之后性能整改与真实负载测量 |
 | AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账 |
 
 ## AC 全量追踪

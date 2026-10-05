@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import vip.mate.semantic.support.SemanticHttpFixture;
@@ -21,6 +23,8 @@ import vip.mate.semantic.support.SemanticHttpFixture;
     vip.mate.semantic.source.SourceGovernanceReadService.class,
     vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
     vip.mate.workspace.core.service.ProjectSourceAccess.class,
@@ -28,6 +32,87 @@ import vip.mate.semantic.support.SemanticHttpFixture;
 })
 @TestPropertySource(properties = "mateclaw.presales.enabled=true")
 class PresalesSolutionPolicyContractTest extends SemanticHttpFixture {
+    @ParameterizedTest
+    @ValueSource(strings = {"4294967297", "8589934593"})
+    void wrappedBaselineRevisionCannotMatchVersionOne(String raw) throws Exception {
+        var p = project();
+        p.withArray("baselines")
+                .addObject()
+                .put("id", "base")
+                .put("version", 1)
+                .putArray("references");
+        seed(p);
+        var d = draft().put("baselineId", "base");
+        d.set("baselineVersion", json.readTree(raw));
+        var before = revisionFacts(p);
+        rejected(p, d, 409, "BASELINE_STALE", "Solution baseline version is stale");
+        assertEquals(before, revisionFacts(p));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"4294967297", "1.5", "\"1.5\"", "null", "true", "{}", "[]", "0", "-1"})
+    void malformedStoredBaselineRevisionCannotBeCapturedAsValid(String raw) throws Exception {
+        var p = project();
+        var baseline = p.withArray("baselines").addObject().put("id", "base");
+        baseline.set("version", json.readTree(raw));
+        baseline.putArray("references");
+        seed(p);
+        var before = revisionFacts(p);
+        rejected(
+                p,
+                draft().put("baselineId", "base"),
+                409,
+                "BASELINE_STALE",
+                "Solution baseline version is stale");
+        assertEquals(before, revisionFacts(p));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, Integer.MAX_VALUE})
+    void exactBaselineRevisionKeepsValidIntegerWire(int revision) throws Exception {
+        var p = project();
+        p.withArray("baselines")
+                .addObject()
+                .put("id", "base")
+                .put("version", revision)
+                .putArray("references");
+        seed(p);
+        var d = draft().put("baselineId", "base").put("baselineVersion", revision);
+        var solution = save(p, d, 200).path("data").path("solutions").get(0);
+        assertTrue(solution.path("baselineVersion").isIntegralNumber());
+        assertEquals(revision, solution.path("baselineVersion").intValue());
+        assertEquals("keep", solution.path("legacyExtension").asText());
+    }
+
+    private List<?> revisionFacts(ObjectNode p) {
+        String id = p.path("id").asText();
+        return List.of(
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?", id),
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_revision WHERE project_id=? ORDER BY version",
+                        id),
+                jdbc.queryForList(
+                        "SELECT operation_id,request_hash,response_json FROM mate_presales_operation WHERE workspace_id=? ORDER BY operation_id",
+                        workspace));
+    }
+
+    @Test
+    void historicalIntegerTextBaselineIsCapturedAsIntegerWithoutRewritingHistory()
+            throws Exception {
+        var p = project();
+        p.withArray("baselines")
+                .addObject()
+                .put("id", "base")
+                .put("version", " +01 ")
+                .putArray("references");
+        seed(p);
+        var saved = save(p, draft().put("baselineId", "base"), 200).path("data");
+        assertEquals(p.path("baselines"), saved.path("baselines"));
+        assertTrue(saved.path("solutions").get(0).path("baselineVersion").isIntegralNumber());
+        assertEquals(1, saved.path("solutions").get(0).path("baselineVersion").intValue());
+    }
+
     private JsonNode api(String method, String path, Object body, int status) throws Exception {
         var request =
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(

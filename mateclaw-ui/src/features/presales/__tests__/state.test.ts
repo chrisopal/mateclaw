@@ -15,6 +15,22 @@ it('recognizes conflicts while preserving the actionable server error', () => {
   ).toEqual({ conflict: true, accessDenied: false, message: 'Reload before saving' })
 })
 
+it.each(['nested', 'top-level'])(
+  'recognizes an unverifiable legacy receipt from the %s error code',
+  (shape) => {
+    const code = 'OPERATION_REPLAY_UNVERIFIABLE'
+    const msg = 'Stored operation cannot be safely verified; review before retrying'
+    expect(
+      presalesError({
+        response: {
+          status: 409,
+          data: shape === 'nested' ? { msg, data: { code } } : { msg, code },
+        },
+      }),
+    ).toEqual({ conflict: true, accessDenied: false, message: msg })
+  },
+)
+
 it('retries identical mutations with the same receipt but isolates changed input', () => {
   const receipt = operationReceipt()
   const original = receipt({ ws: 'a', version: 2, name: 'First' })

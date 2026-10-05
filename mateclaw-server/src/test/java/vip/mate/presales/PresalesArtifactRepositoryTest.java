@@ -52,11 +52,19 @@ class PresalesArtifactRepositoryTest {
         assertEquals(
                 List.of(new StoredArtifact("raw digest Ω", RAW)),
                 artifacts.find(PROJECT, RELEASE, "solution.pptx"));
-        assertEquals(List.of(RAW), artifacts.findContents(PROJECT, RELEASE, "solution.pptx"));
+        assertEquals(
+                List.of(RAW),
+                artifacts.find(PROJECT, RELEASE, "solution.pptx").stream()
+                        .map(StoredArtifact::contentBase64)
+                        .toList());
         assertTrue(artifacts.find("missing", RELEASE, "solution.pptx").isEmpty());
         assertTrue(artifacts.find(PROJECT, "missing", "solution.pptx").isEmpty());
         assertTrue(artifacts.find(PROJECT, RELEASE, "missing").isEmpty());
-        assertTrue(artifacts.findContents(PROJECT, RELEASE, "missing").isEmpty());
+        assertTrue(
+                artifacts.find(PROJECT, RELEASE, "missing").stream()
+                        .map(StoredArtifact::contentBase64)
+                        .toList()
+                        .isEmpty());
     }
 
     @Test
@@ -71,11 +79,21 @@ class PresalesArtifactRepositoryTest {
         assertEquals(
                 List.of(new StoredArtifact("digest", RAW)),
                 artifacts.find(PROJECT, "stored", "solution.pptx"));
-        assertEquals(List.of("md-body"), artifacts.findContents(PROJECT, "stored", "solution.md"));
         assertEquals(
-                List.of("private-body"), artifacts.findContents("other", RELEASE, "solution.pptx"));
+                List.of("md-body"),
+                artifacts.find(PROJECT, "stored", "solution.md").stream()
+                        .map(StoredArtifact::contentBase64)
+                        .toList());
         assertEquals(
-                List.of("other-body"), artifacts.findContents(PROJECT, "other", "solution.pptx"));
+                List.of("private-body"),
+                artifacts.find("other", RELEASE, "solution.pptx").stream()
+                        .map(StoredArtifact::contentBase64)
+                        .toList());
+        assertEquals(
+                List.of("other-body"),
+                artifacts.find(PROJECT, "other", "solution.pptx").stream()
+                        .map(StoredArtifact::contentBase64)
+                        .toList());
     }
 
     @Test
@@ -119,7 +137,9 @@ class PresalesArtifactRepositoryTest {
                     assertEquals(1, artifacts.reassignRelease(PROJECT, RELEASE, "stored"));
                     assertEquals(
                             List.of(RAW),
-                            artifacts.findContents(PROJECT, "stored", "solution.pptx"));
+                            artifacts.find(PROJECT, "stored", "solution.pptx").stream()
+                                    .map(StoredArtifact::contentBase64)
+                                    .toList());
                     status.setRollbackOnly();
                 });
         assertEquals(

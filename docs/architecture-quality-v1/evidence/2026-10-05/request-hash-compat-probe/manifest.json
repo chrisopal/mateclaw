@@ -1,0 +1,12 @@
+[
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-05/request-hash-compat-probe/HashCompatProbe.java.gz",
+    "sha256": "03710597109c1a6b34c9058652e3e820ed450c01fc142cee3488122f53d0b0cc",
+    "decoded_sha256": "69b4d8c9ae63032ce4dd6b44ff7573dfde8b8b15b8a9c4a94d346e2cc07599c6"
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-05/request-hash-compat-probe/result.log.gz",
+    "sha256": "e7246dced205b58b095a8aec015dd76ddf13fed5f71a98622f263caa30ab39e1",
+    "decoded_sha256": "4df79777a307d59dbae2b3bab7158ce4abc3223313a3d87fe1f41347d8ab7112"
+  }
+]

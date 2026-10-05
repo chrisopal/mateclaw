@@ -58,6 +58,7 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
     PresalesRuntimeTransactionIntegrationTest.Boundaries.class,
     PresalesAccess.class,
     PresalesService.class,
+    PresalesProjectQueryService.class,
     vip.mate.presales.repository.PresalesProjectRepository.class,
     vip.mate.presales.repository.PresalesArtifactRepository.class,
     PresalesSourceAuthorization.class,
@@ -162,6 +163,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     }
 
     @Autowired PresalesService service;
+    @Autowired PresalesProjectQueryService queryService;
     @Autowired PresalesEmployeeRuntime runtime;
     @Autowired PresalesContextProvider contexts;
     @MockBean AgentService agents;
@@ -404,7 +406,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     }
 
     private void assertListingVersion(ObjectNode current) {
-        var page = service.list(workspace, null, null, null, null, 1, 100);
+        var page = queryService.list(workspace, null, null, null, null, 1, 100);
         var listed =
                 page.items().stream()
                         .filter(p -> p.path("id").asText().equals(current.path("id").asText()))

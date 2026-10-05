@@ -20,6 +20,8 @@ import vip.mate.semantic.support.SemanticHttpFixture;
     vip.mate.semantic.source.SourceGovernanceReadService.class,
     vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
     vip.mate.workspace.core.service.ProjectSourceAccess.class,
@@ -171,6 +173,129 @@ class PresalesArtifactPersistenceContractTest extends SemanticHttpFixture {
     }
 
     @Test
+    void publishedReadRejectsContentAndStoredDigestChangedTogether() throws Exception {
+        var p = fixture();
+        String id = p.path("id").asText();
+        byte[] replacement = new byte[] {7, 0, -1, 9};
+        store(id, RELEASE, "solution.pptx", replacement);
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/" + id + "/releases/" + RELEASE + "/files/solution.pptx",
+                        "viewer",
+                        workspace,
+                        null);
+        assertEquals(
+                409,
+                result.getStatus(),
+                "A self-consistent replacement must not replace frozen bytes");
+        assertTrue(result.getContentAsString().contains("ARTIFACT_DIGEST_MISMATCH"));
+        assertArrayEquals(
+                replacement,
+                java.util.Base64.getDecoder()
+                        .decode(
+                                jdbc.queryForObject(
+                                        "SELECT content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=? AND filename=?",
+                                        String.class,
+                                        id,
+                                        RELEASE,
+                                        "solution.pptx")),
+                "Failed reads must not repair stored bytes");
+    }
+
+    @Test
+    void publishedReadRejectsAStoredFileOutsideItsFrozenManifest() throws Exception {
+        var p = fixture();
+        String id = p.path("id").asText();
+        store(id, RELEASE, "undeclared.md", BYTES);
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/" + id + "/releases/" + RELEASE + "/files/undeclared.md",
+                        "viewer",
+                        workspace,
+                        null);
+        assertEquals(404, result.getStatus());
+        assertTrue(result.getContentAsString().contains("NOT_FOUND"));
+    }
+
+    @Test
+    void publishedReadCannotTreatAnEmptyFrozenDigestAsPermissionToSkipIntegrity() throws Exception {
+        var p = fixture();
+        String id = p.path("id").asText();
+        ((com.fasterxml.jackson.databind.node.ObjectNode)
+                        p.path("releases").get(0).path("files").get(0))
+                .put("sha256", "");
+        persist(p);
+        store(id, RELEASE, "solution.pptx", BYTES);
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/" + id + "/releases/" + RELEASE + "/files/solution.pptx",
+                        "viewer",
+                        workspace,
+                        null);
+        assertEquals(409, result.getStatus());
+        assertTrue(result.getContentAsString().contains("ARTIFACT_DIGEST_MISMATCH"));
+    }
+
+    @Test
+    void previewCannotReadAStoredFileOutsideItsFrozenManifest() throws Exception {
+        var p = fixture();
+        String id = p.path("id").asText();
+        store(id, RELEASE, "solution.pptx", BYTES);
+        store(id, RELEASE, "undeclared.md", BYTES);
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/" + id + "/releases/" + RELEASE + "/preview/undeclared.md",
+                        "owner",
+                        workspace,
+                        null);
+        assertEquals(404, result.getStatus());
+        assertTrue(result.getContentAsString().contains("NOT_FOUND"));
+    }
+
+    @Test
+    void declaredPublishedFileWithoutStoredBytesKeepsNotFound() throws Exception {
+        var p = fixture();
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/"
+                                + p.path("id").asText()
+                                + "/releases/"
+                                + RELEASE
+                                + "/files/solution.pptx",
+                        "viewer",
+                        workspace,
+                        null);
+        assertEquals(404, result.getStatus());
+        assertTrue(result.getContentAsString().contains("NOT_FOUND"));
+    }
+
+    @Test
+    void duplicatePublishedManifestEntriesCannotChooseAnArbitraryDigest() throws Exception {
+        var p = fixture();
+        String id = p.path("id").asText();
+        var files =
+                (com.fasterxml.jackson.databind.node.ArrayNode)
+                        p.path("releases").get(0).path("files");
+        files.add(files.get(0).deepCopy());
+        persist(p);
+        store(id, RELEASE, "solution.pptx", BYTES);
+        var result =
+                artifactRequest(
+                        "GET",
+                        "/projects/" + id + "/releases/" + RELEASE + "/files/solution.pptx",
+                        "viewer",
+                        workspace,
+                        null);
+        assertEquals(409, result.getStatus());
+        assertTrue(result.getContentAsString().contains("ARTIFACT_MISSING"));
+    }
+
+    @Test
     void candidateWritesRollBackWithProjectRevisionFailure() throws Exception {
         var p = fixture();
         String id = p.path("id").asText();
@@ -228,6 +353,269 @@ class PresalesArtifactPersistenceContractTest extends SemanticHttpFixture {
         } finally {
             jdbc.execute(
                     "ALTER TABLE mate_presales_revision DROP CONSTRAINT artifact_contract_rollback");
+        }
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    vip.mate.semantic.config.SemanticProperties semantic;
+
+    private com.fasterxml.jackson.databind.node.ObjectNode frozenFixture() throws Exception {
+        var p = fixture();
+        var release = (com.fasterxml.jackson.databind.node.ObjectNode) p.path("releases").get(0);
+        release.put("baselineId", "baseline");
+        var frozen = release.putObject("handoffSnapshot");
+        frozen.put("schemaVersion", 1)
+                .put("workspaceId", workspace)
+                .put("engagementId", p.path("id").asText())
+                .put("caseRef", p.path("id").asText());
+        frozen.set("baseline", p.path("baselines").get(0).deepCopy());
+        frozen.set("solution", p.path("solutions").get(0).deepCopy());
+        var frozenRelease = release.deepCopy();
+        frozenRelease.remove("handoffSnapshot");
+        frozen.set("release", frozenRelease);
+        frozen.putArray("materials");
+        frozen.putArray("sourceRefs");
+        frozen.putArray("fitGaps");
+        store(p.path("id").asText(), RELEASE, "solution.pptx", BYTES);
+        persist(p);
+        return p;
+    }
+
+    private String readFacts(com.fasterxml.jackson.databind.node.ObjectNode p) throws Exception {
+        return json.writeValueAsString(
+                java.util.List.of(
+                        jdbc.queryForMap(
+                                "SELECT body_json,version FROM mate_presales_project WHERE id=?",
+                                p.path("id").asText()),
+                        jdbc.queryForList(
+                                "SELECT release_id,filename,digest,content_base64 FROM mate_presales_artifact WHERE project_id=? ORDER BY release_id,filename",
+                                p.path("id").asText())));
+    }
+
+    private void assertFrozenReads(
+            com.fasterxml.jackson.databind.node.ObjectNode p, int expected, String error)
+            throws Exception {
+        for (String route : java.util.List.of("files", "preview")) {
+            var r =
+                    artifactRequest(
+                            "GET",
+                            "/projects/"
+                                    + p.path("id").asText()
+                                    + "/releases/"
+                                    + RELEASE
+                                    + "/"
+                                    + route
+                                    + "/solution.pptx",
+                            route.equals("files") ? "viewer" : "owner",
+                            workspace,
+                            null);
+            assertEquals(expected, r.getStatus(), route + ": " + r.getContentAsString());
+            if (expected == 200) assertArrayEquals(BYTES, r.getContentAsByteArray());
+            else assertTrue(r.getContentAsString().contains(error), r.getContentAsString());
+        }
+    }
+
+    @Test
+    void publishedFrozenBytesRemainReadableAfterNewBaselineAndRequirements() throws Exception {
+        var p = frozenFixture();
+        p.withArray("baselines").addObject().put("id", "new-baseline").putArray("references");
+        p.withArray("requirements")
+                .addObject()
+                .put("id", "new-requirement")
+                .put("version", 1)
+                .put("scope", "IN");
+        persist(p);
+        String before = readFacts(p);
+        assertFrozenReads(p, 200, null);
+        assertEquals(before, readFacts(p));
+    }
+
+    @Test
+    void publishedFrozenBytesRemainReadableWhenNewPublicationIsDisabled() throws Exception {
+        var p = frozenFixture();
+        String before = readFacts(p);
+        boolean enabled = semantic.isEnabled();
+        try {
+            semantic.setEnabled(false);
+            assertFrozenReads(p, 200, null);
+            var r =
+                    artifactRequest(
+                            "POST",
+                            "/projects/" + p.path("id").asText() + "/commands",
+                            "owner",
+                            workspace,
+                            Map.of(
+                                    "action",
+                                    "CREATE_RELEASE",
+                                    "expectedVersion",
+                                    p.path("version").asInt(),
+                                    "operationId",
+                                    UUID.randomUUID().toString(),
+                                    "payload",
+                                    Map.of("solutionId", SOLUTION)));
+            assertEquals(409, r.getStatus());
+            assertTrue(r.getContentAsString().contains("SEMANTIC_DISABLED"));
+            assertEquals(before, readFacts(p));
+        } finally {
+            semantic.setEnabled(enabled);
+        }
+    }
+
+    @Test
+    void pendingAndApprovedPreviewRetainCurrentPublicationGate() throws Exception {
+        var p = frozenFixture();
+        boolean enabled = semantic.isEnabled();
+        try {
+            semantic.setEnabled(false);
+            for (String state : java.util.List.of("PENDING", "APPROVED")) {
+                ((com.fasterxml.jackson.databind.node.ObjectNode) p.path("releases").get(0))
+                        .put("status", state);
+                persist(p);
+                String before = readFacts(p);
+                var preview =
+                        artifactRequest(
+                                "GET",
+                                "/projects/"
+                                        + p.path("id").asText()
+                                        + "/releases/"
+                                        + RELEASE
+                                        + "/preview/solution.pptx",
+                                "owner",
+                                workspace,
+                                null);
+                assertEquals(409, preview.getStatus());
+                assertTrue(preview.getContentAsString().contains("SEMANTIC_DISABLED"));
+                var download =
+                        artifactRequest(
+                                "GET",
+                                "/projects/"
+                                        + p.path("id").asText()
+                                        + "/releases/"
+                                        + RELEASE
+                                        + "/files/solution.pptx",
+                                "viewer",
+                                workspace,
+                                null);
+                assertEquals(403, download.getStatus());
+                assertTrue(download.getContentAsString().contains("RELEASE_NOT_PUBLISHED"));
+                assertEquals(before, readFacts(p));
+            }
+        } finally {
+            semantic.setEnabled(enabled);
+        }
+    }
+
+    @Test
+    void legacyOrInvalidSnapshotClaimsCannotBypassCurrentPublicationGate() throws Exception {
+        var p = frozenFixture();
+        var release = (com.fasterxml.jackson.databind.node.ObjectNode) p.path("releases").get(0);
+        var valid = release.path("handoffSnapshot").deepCopy();
+        boolean enabled = semantic.isEnabled();
+        try {
+            semantic.setEnabled(false);
+            for (String defect :
+                    java.util.List.of(
+                            "absent",
+                            "non-object",
+                            "partial",
+                            "schema",
+                            "scope",
+                            "project",
+                            "release",
+                            "baseline",
+                            "sources",
+                            "nested-sources")) {
+                var frozen = (com.fasterxml.jackson.databind.node.ObjectNode) valid.deepCopy();
+                switch (defect) {
+                    case "absent" -> release.remove("handoffSnapshot");
+                    case "non-object" -> release.put("handoffSnapshot", "unknown");
+                    case "partial" -> {
+                        var partial = json.createObjectNode();
+                        partial.putArray("materials");
+                        release.set("handoffSnapshot", partial);
+                    }
+                    case "schema" -> {
+                        frozen.put("schemaVersion", 2);
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "scope" -> {
+                        frozen.put("workspaceId", otherWorkspace);
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "project" -> {
+                        frozen.put("engagementId", "other-project");
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "release" -> {
+                        ((com.fasterxml.jackson.databind.node.ObjectNode) frozen.path("release"))
+                                .put("id", "other-release");
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "baseline" -> {
+                        ((com.fasterxml.jackson.databind.node.ObjectNode) frozen.path("baseline"))
+                                .put("id", "other-baseline");
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "sources" -> {
+                        frozen.put("sourceRefs", "unknown");
+                        release.set("handoffSnapshot", frozen);
+                    }
+                    case "nested-sources" -> {
+                        ((com.fasterxml.jackson.databind.node.ObjectNode) frozen.path("baseline"))
+                                .withArray("references")
+                                .addObject()
+                                .put("graphId", "synthetic")
+                                .put("sources", "unknown");
+                        release.set("handoffSnapshot", frozen);
+                    }
+                }
+                persist(p);
+                String before = readFacts(p);
+                assertFrozenReads(p, 409, "SEMANTIC_DISABLED");
+                assertEquals(before, readFacts(p));
+            }
+        } finally {
+            semantic.setEnabled(enabled);
+        }
+    }
+
+    @Test
+    void frozenPublishedPreviewStillRequiresAdmin() throws Exception {
+        var p = frozenFixture();
+        String before = readFacts(p);
+        for (String role : java.util.List.of("viewer", "member")) {
+            var r =
+                    artifactRequest(
+                            "GET",
+                            "/projects/"
+                                    + p.path("id").asText()
+                                    + "/releases/"
+                                    + RELEASE
+                                    + "/preview/solution.pptx",
+                            role,
+                            workspace,
+                            null);
+            assertEquals(403, r.getStatus());
+        }
+        assertFrozenReads(p, 200, null);
+        assertEquals(before, readFacts(p));
+    }
+
+    @Test
+    void frozenPublishedDigestChecksRemainActiveWhenSemanticMutationsAreDisabled()
+            throws Exception {
+        var p = frozenFixture();
+        boolean enabled = semantic.isEnabled();
+        jdbc.update(
+                "UPDATE mate_presales_artifact SET digest='corrupt' WHERE project_id=?",
+                p.path("id").asText());
+        String before = readFacts(p);
+        try {
+            semantic.setEnabled(false);
+            assertFrozenReads(p, 409, "ARTIFACT_DIGEST_MISMATCH");
+            assertEquals(before, readFacts(p));
+        } finally {
+            semantic.setEnabled(enabled);
         }
     }
 }

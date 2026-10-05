@@ -1,20 +1,19 @@
 package vip.mate.agent.graph.plan.state;
 
+import static vip.mate.agent.graph.plan.state.PlanStateKeys.*;
+
 import com.alibaba.cloud.ai.graph.OverAllState;
+import java.util.*;
 import org.springframework.ai.chat.messages.Message;
 import vip.mate.agent.GraphEventPublisher;
 import vip.mate.agent.graph.NodeStreamingChatHelper;
 import vip.mate.agent.graph.state.MateClawStateKeys;
 
-import java.util.*;
-
-import static vip.mate.agent.graph.plan.state.PlanStateKeys.*;
-
 /**
  * Plan-Execute 类型安全的状态访问器
- * <p>
- * 参照 {@link vip.mate.agent.graph.state.MateClawStateAccessor} 的模式，
- * 为 Plan-Execute 特有的状态字段提供类型安全读取和 fluent 输出构建。
+ *
+ * <p>参照 {@link vip.mate.agent.graph.state.MateClawStateAccessor} 的模式， 为 Plan-Execute
+ * 特有的状态字段提供类型安全读取和 fluent 输出构建。
  *
  * @author MateClaw Team
  */
@@ -117,10 +116,10 @@ public final class PlanStateAccessor {
     }
 
     /**
-     * The {@link vip.mate.agent.context.ChatOrigin} forwarded into graph
-     * state by {@code MateClawStateAccessor.OutputBuilder.chatOrigin}.
-     * Returns {@link vip.mate.agent.context.ChatOrigin#EMPTY} when nothing
-     * was injected (legacy callers / non-channel entry points).
+     * The {@link vip.mate.agent.context.ChatOrigin} forwarded into graph state by {@code
+     * MateClawStateAccessor.OutputBuilder.chatOrigin}. Returns {@link
+     * vip.mate.agent.context.ChatOrigin#EMPTY} when nothing was injected (legacy callers /
+     * non-channel entry points).
      */
     public vip.mate.agent.context.ChatOrigin chatOrigin() {
         return state.<vip.mate.agent.context.ChatOrigin>value(MateClawStateKeys.CHAT_ORIGIN)
@@ -151,9 +150,7 @@ public final class PlanStateAccessor {
         return new OutputBuilder();
     }
 
-    /**
-     * Fluent 输出构建器
-     */
+    /** Fluent 输出构建器 */
     public static final class OutputBuilder {
         private final Map<String, Object> map = new HashMap<>();
 
@@ -213,9 +210,7 @@ public final class PlanStateAccessor {
             return put(CURRENT_STEP_RESULT, result);
         }
 
-        /**
-         * 追加到 COMPLETED_RESULTS（APPEND 策略，传入单条结果包装为 List）
-         */
+        /** 追加到 COMPLETED_RESULTS（APPEND 策略，传入单条结果包装为 List） */
         public OutputBuilder completedResults(String result) {
             return put(COMPLETED_RESULTS, List.of(result));
         }
@@ -268,40 +263,65 @@ public final class PlanStateAccessor {
         // ---- Token Usage（写入共享键）----
 
         /** 将本次 LLM 调用的 usage 累加到 state 已有值上 */
-        public OutputBuilder mergeUsage(OverAllState currentState,
-                                        NodeStreamingChatHelper.StreamResult result) {
+        public OutputBuilder runtimeIdentity(NodeStreamingChatHelper.RuntimeIdentity identity) {
+            if (identity != null) {
+                map.put(MateClawStateKeys.RUNTIME_MODEL_NAME, identity.modelName());
+                map.put(MateClawStateKeys.RUNTIME_PROVIDER_ID, identity.providerId());
+                map.put(MateClawStateKeys.MODEL_RESPONSE_OBSERVED, true);
+            }
+            return this;
+        }
+
+        public OutputBuilder mergeUsage(
+                OverAllState currentState, NodeStreamingChatHelper.StreamResult result) {
             int existingPrompt = currentState.value(MateClawStateKeys.PROMPT_TOKENS, 0);
             int existingCompletion = currentState.value(MateClawStateKeys.COMPLETION_TOKENS, 0);
             int existingLlmCalls = currentState.value(MateClawStateKeys.LLM_CALL_COUNT, 0);
             map.put(MateClawStateKeys.PROMPT_TOKENS, existingPrompt + result.promptTokens());
-            map.put(MateClawStateKeys.COMPLETION_TOKENS, existingCompletion + result.completionTokens());
-            map.put(MateClawStateKeys.CACHE_READ_TOKENS,
-                    currentState.value(MateClawStateKeys.CACHE_READ_TOKENS, 0) + result.cacheReadTokens());
-            map.put(MateClawStateKeys.CACHE_WRITE_TOKENS,
-                    currentState.value(MateClawStateKeys.CACHE_WRITE_TOKENS, 0) + result.cacheWriteTokens());
-            map.put(MateClawStateKeys.REASONING_TOKENS,
-                    currentState.value(MateClawStateKeys.REASONING_TOKENS, 0) + result.reasoningTokens());
+            map.put(
+                    MateClawStateKeys.COMPLETION_TOKENS,
+                    existingCompletion + result.completionTokens());
+            map.put(
+                    MateClawStateKeys.CACHE_READ_TOKENS,
+                    currentState.value(MateClawStateKeys.CACHE_READ_TOKENS, 0)
+                            + result.cacheReadTokens());
+            map.put(
+                    MateClawStateKeys.CACHE_WRITE_TOKENS,
+                    currentState.value(MateClawStateKeys.CACHE_WRITE_TOKENS, 0)
+                            + result.cacheWriteTokens());
+            map.put(
+                    MateClawStateKeys.REASONING_TOKENS,
+                    currentState.value(MateClawStateKeys.REASONING_TOKENS, 0)
+                            + result.reasoningTokens());
             map.put(MateClawStateKeys.LLM_CALL_COUNT, existingLlmCalls + 1);
-            return this;
+            return runtimeIdentity(result.runtimeIdentity());
         }
 
         /**
-         * 将一个 step 的累计 usage（含 cache / reasoning 分项）加到 state 已有值上。
-         * StepExecutionNode 在多个出口路径上写回同一组键，统一走这里避免漏项。
+         * 将一个 step 的累计 usage（含 cache / reasoning 分项）加到 state 已有值上。 StepExecutionNode
+         * 在多个出口路径上写回同一组键，统一走这里避免漏项。
          */
-        public OutputBuilder addStepUsage(OverAllState currentState,
-                                          int promptTokens, int completionTokens,
-                                          int cacheReadTokens, int cacheWriteTokens,
-                                          int reasoningTokens) {
-            map.put(MateClawStateKeys.PROMPT_TOKENS,
+        public OutputBuilder addStepUsage(
+                OverAllState currentState,
+                int promptTokens,
+                int completionTokens,
+                int cacheReadTokens,
+                int cacheWriteTokens,
+                int reasoningTokens) {
+            map.put(
+                    MateClawStateKeys.PROMPT_TOKENS,
                     currentState.value(MateClawStateKeys.PROMPT_TOKENS, 0) + promptTokens);
-            map.put(MateClawStateKeys.COMPLETION_TOKENS,
+            map.put(
+                    MateClawStateKeys.COMPLETION_TOKENS,
                     currentState.value(MateClawStateKeys.COMPLETION_TOKENS, 0) + completionTokens);
-            map.put(MateClawStateKeys.CACHE_READ_TOKENS,
+            map.put(
+                    MateClawStateKeys.CACHE_READ_TOKENS,
                     currentState.value(MateClawStateKeys.CACHE_READ_TOKENS, 0) + cacheReadTokens);
-            map.put(MateClawStateKeys.CACHE_WRITE_TOKENS,
+            map.put(
+                    MateClawStateKeys.CACHE_WRITE_TOKENS,
                     currentState.value(MateClawStateKeys.CACHE_WRITE_TOKENS, 0) + cacheWriteTokens);
-            map.put(MateClawStateKeys.REASONING_TOKENS,
+            map.put(
+                    MateClawStateKeys.REASONING_TOKENS,
                     currentState.value(MateClawStateKeys.REASONING_TOKENS, 0) + reasoningTokens);
             return this;
         }

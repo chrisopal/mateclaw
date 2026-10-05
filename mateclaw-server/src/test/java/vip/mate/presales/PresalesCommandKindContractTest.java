@@ -22,6 +22,8 @@ import vip.mate.semantic.support.SemanticHttpFixture;
     vip.mate.semantic.source.SourceGovernanceReadService.class,
     vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
     vip.mate.workspace.core.service.ProjectSourceAccess.class,
@@ -148,7 +150,7 @@ class PresalesCommandKindContractTest extends SemanticHttpFixture {
         var c = cmd(1, op, "UPDATE_PROJECT", payload);
         var wire = json.treeToValue(c, PresalesDtos.Command.class);
         String expected =
-                vip.mate.semantic.statement.StatementApplicationService.hash(
+                PresalesRequestHashV2.digest(
                         json.writeValueAsString(List.of(p.path("id").asText(), wire)));
         var accepted = command(p, c, "member", 200).path("data");
         assertEquals(

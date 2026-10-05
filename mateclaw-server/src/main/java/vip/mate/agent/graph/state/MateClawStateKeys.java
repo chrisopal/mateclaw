@@ -2,24 +2,23 @@ package vip.mate.agent.graph.state;
 
 /**
  * MateClaw 增强版状态键常量
- * <p>
- * 包含原 ReActStateKeys 的所有字段，并新增 summarizing、超限处理、
- * 观察压缩等字段，支撑完整的标准 ReAct 状态图。
- * <p>
- * 所有节点和路由统一引用此类，避免字符串散落。
+ *
+ * <p>包含原 ReActStateKeys 的所有字段，并新增 summarizing、超限处理、 观察压缩等字段，支撑完整的标准 ReAct 状态图。
+ *
+ * <p>所有节点和路由统一引用此类，避免字符串散落。
  *
  * @author MateClaw Team
  */
 public final class MateClawStateKeys {
 
-    private MateClawStateKeys() {
-    }
+    private MateClawStateKeys() {}
 
     // ===== 输入 =====
     public static final String USER_MESSAGE = "user_message";
     public static final String CONVERSATION_ID = "conversation_id";
     public static final String SYSTEM_PROMPT = "system_prompt";
     public static final String AGENT_ID = "agent_id";
+
     /** 工作区活动目录（为空不限制文件访问范围） */
     public static final String WORKSPACE_BASE_PATH = "workspace_base_path";
 
@@ -31,12 +30,11 @@ public final class MateClawStateKeys {
     public static final String MAX_ITERATIONS = "max_iterations";
 
     /**
-     * Iterations refunded this run because a reasoning round did no real work —
-     * its whole tool batch was progressive-disclosure setup ({@code load_skill}
-     * / {@code enable_tool}). ObservationNode skips the iteration increment for
-     * such rounds so a tight budget isn't eaten by the load-then-use two-step;
-     * this counter bounds the refunds so a model that only ever loads skills
-     * still terminates. Implicitly 0 at run start. REPLACE strategy.
+     * Iterations refunded this run because a reasoning round did no real work — its whole tool
+     * batch was progressive-disclosure setup ({@code load_skill} / {@code enable_tool}).
+     * ObservationNode skips the iteration increment for such rounds so a tight budget isn't eaten
+     * by the load-then-use two-step; this counter bounds the refunds so a model that only ever
+     * loads skills still terminates. Implicitly 0 at run start. REPLACE strategy.
      */
     public static final String ITERATION_REFUND_COUNT = "iteration_refund_count";
 
@@ -64,6 +62,7 @@ public final class MateClawStateKeys {
 
     /** 最终回答草稿（由 summarizing 或 limitExceeded 节点生成） */
     public static final String FINAL_ANSWER_DRAFT = "final_answer_draft";
+
     /** Accumulated visible body for an explicit long-form generation request. */
     public static final String LONG_FORM_DRAFT = "long_form_draft";
 
@@ -96,11 +95,10 @@ public final class MateClawStateKeys {
     public static final String PENDING_EVENTS = "pending_events";
 
     /**
-     * Multimodal routing decision for the current turn (REPLACE strategy).
-     * Stored as a Map ready for JSON serialization. Set by BaseAgent before
-     * the reasoning node runs; read back by FinalAnswerNode and (separately)
-     * emitted as a graph event for the SSE accumulator to write into the
-     * persisted message metadata under {@code metadata.routing}.
+     * Multimodal routing decision for the current turn (REPLACE strategy). Stored as a Map ready
+     * for JSON serialization. Set by BaseAgent before the reasoning node runs; read back by
+     * FinalAnswerNode and (separately) emitted as a graph event for the SSE accumulator to write
+     * into the persisted message metadata under {@code metadata.routing}.
      */
     public static final String ROUTING_DECISION = "routing_decision";
 
@@ -124,6 +122,7 @@ public final class MateClawStateKeys {
     // ===== 流式内容暂存（REPLACE 策略）=====
     /** ReasoningNode 流式推送后暂存的文本内容，供 AWAITING_APPROVAL 路径持久化使用 */
     public static final String STREAMED_CONTENT = "streamed_content";
+
     /** ReasoningNode 流式推送后暂存的 thinking 内容，供 AWAITING_APPROVAL 路径持久化使用 */
     public static final String STREAMED_THINKING = "streamed_thinking";
 
@@ -136,9 +135,9 @@ public final class MateClawStateKeys {
     public static final String FORCED_TOOL_CALL = "forced_tool_call";
 
     /**
-     * Plan-Execute replay 专用：审批通过的工具调用 payload（工具名+参数），
-     * 由 StateGraphPlanExecuteAgent.chatWithReplayStream 注入，
-     * StepExecutionNode 检测到匹配时跳过 ToolGuard 直接执行。
+     * Plan-Execute replay 专用：审批通过的工具调用 payload（工具名+参数）， 由
+     * StateGraphPlanExecuteAgent.chatWithReplayStream 注入， StepExecutionNode 检测到匹配时跳过 ToolGuard
+     * 直接执行。
      */
     public static final String PRE_APPROVED_TOOL_CALL = "pre_approved_tool_call";
 
@@ -157,29 +156,33 @@ public final class MateClawStateKeys {
     // ===== Token Usage 累计（REPLACE 策略，节点内累加后写回）=====
     public static final String PROMPT_TOKENS = "prompt_tokens";
     public static final String COMPLETION_TOKENS = "completion_tokens";
+
     /** Prompt cache 命中 tokens 累计（provider 未上报时保持 0） */
     public static final String CACHE_READ_TOKENS = "cache_read_tokens";
+
     /** Prompt cache 写入 tokens 累计（provider 未上报时保持 0） */
     public static final String CACHE_WRITE_TOKENS = "cache_write_tokens";
+
     /** 思考（reasoning）tokens 累计（provider 未上报时保持 0） */
     public static final String REASONING_TOKENS = "reasoning_tokens";
 
     // ===== 运行时模型快照（REPLACE 策略，buildInitialState 注入）=====
     public static final String RUNTIME_MODEL_NAME = "runtime_model_name";
+    public static final String MODEL_RESPONSE_OBSERVED = "model_response_observed";
     public static final String RUNTIME_PROVIDER_ID = "runtime_provider_id";
 
     // ===== RFC-052: Tool returnDirect 与数据隔离 =====
 
     /**
-     * RFC-052: when true the latest tool batch contained at least one tool
-     * declared as returnDirect, so the graph must short-circuit to
-     * {@link #FINAL_ANSWER_NODE} without re-entering the LLM.
+     * RFC-052: when true the latest tool batch contained at least one tool declared as
+     * returnDirect, so the graph must short-circuit to {@link #FINAL_ANSWER_NODE} without
+     * re-entering the LLM.
      */
     public static final String RETURN_DIRECT_TRIGGERED = "return_direct_triggered";
 
     /**
-     * RFC-052: list of {@code DirectToolOutput} accumulated from the most recent
-     * tool batch, used by FinalAnswerNode to assemble the final answer.
+     * RFC-052: list of {@code DirectToolOutput} accumulated from the most recent tool batch, used
+     * by FinalAnswerNode to assemble the final answer.
      */
     public static final String DIRECT_TOOL_OUTPUTS = "direct_tool_outputs";
 
@@ -201,76 +204,70 @@ public final class MateClawStateKeys {
     // ===== Persistent goal — cross-turn objective lock-in =====
 
     /**
-     * Active goal snapshot bound to the conversation; null when no goal.
-     * Injected by {@code buildInitialState} from {@code GoalService.findActiveByConversation}.
-     * Read by GoalEvaluationNode + its dispatcher.
+     * Active goal snapshot bound to the conversation; null when no goal. Injected by {@code
+     * buildInitialState} from {@code GoalService.findActiveByConversation}. Read by
+     * GoalEvaluationNode + its dispatcher.
      */
     public static final String ACTIVE_GOAL = "active_goal";
 
     /**
-     * Map snapshot of the latest evaluation pass (score/gap/decision/...).
-     * Written by GoalEvaluationNode; consumed by the SSE accumulator for
-     * the {@code goal_evaluated} event payload.
+     * Map snapshot of the latest evaluation pass (score/gap/decision/...). Written by
+     * GoalEvaluationNode; consumed by the SSE accumulator for the {@code goal_evaluated} event
+     * payload.
      */
     public static final String GOAL_EVALUATION_RESULT = "goal_evaluation_result";
 
     /**
-     * True when GoalEvaluationNode injected a follow-up prompt and the
-     * dispatcher should re-enter the reasoning loop (or PlanGeneration in
-     * the Plan-Execute graph) instead of terminating to END.
+     * True when GoalEvaluationNode injected a follow-up prompt and the dispatcher should re-enter
+     * the reasoning loop (or PlanGeneration in the Plan-Execute graph) instead of terminating to
+     * END.
      */
     public static final String GOAL_FOLLOWUP_INJECTED = "goal_followup_injected";
 
     /**
-     * Follow-up user-message text to append to MESSAGES on graph re-entry.
-     * ReasoningNode (or PlanGenerationNode) reads this on its way in,
-     * appends to MESSAGES, then clears the value so the second pass
-     * cannot double-inject.
+     * Follow-up user-message text to append to MESSAGES on graph re-entry. ReasoningNode (or
+     * PlanGenerationNode) reads this on its way in, appends to MESSAGES, then clears the value so
+     * the second pass cannot double-inject.
      */
     public static final String GOAL_FOLLOWUP_PROMPT = "goal_followup_prompt";
 
     /**
-     * Re-entry guard for TERMINAL evaluation passes: GoalEvaluationNode sets
-     * this true only when it ENDS the run (completed / exhausted / skip /
-     * continue-without-followup). The FinalAnswerNode→GoalEvaluation edge skips
-     * re-entering once it's true. The followup branch deliberately leaves it
-     * false so the self-continuation loop can re-evaluate the next answer; that
-     * loop is bounded instead by {@link #GOAL_FOLLOWUP_COUNT} (per-run cap) plus
-     * the goal's turn / LLM-call budgets.
+     * Re-entry guard for TERMINAL evaluation passes: GoalEvaluationNode sets this true only when it
+     * ENDS the run (completed / exhausted / skip / continue-without-followup). The
+     * FinalAnswerNode→GoalEvaluation edge skips re-entering once it's true. The followup branch
+     * deliberately leaves it false so the self-continuation loop can re-evaluate the next answer;
+     * that loop is bounded instead by {@link #GOAL_FOLLOWUP_COUNT} (per-run cap) plus the goal's
+     * turn / LLM-call budgets.
      */
     public static final String GOAL_EVALUATED_THIS_RUN = "goal_evaluated_this_run";
 
     /**
-     * Number of auto-followups already injected in THIS graph run (one user
-     * turn). Bounds the self-continuation loop per single message — independent
-     * of the goal's cross-turn turn_budget — so one message can't drive an
-     * unbounded number of autonomous steps or exhaust the graph recursion
-     * limit. Implicitly 0 at the start of each graph invocation.
+     * Number of auto-followups already injected in THIS graph run (one user turn). Bounds the
+     * self-continuation loop per single message — independent of the goal's cross-turn turn_budget
+     * — so one message can't drive an unbounded number of autonomous steps or exhaust the graph
+     * recursion limit. Implicitly 0 at the start of each graph invocation.
      */
     public static final String GOAL_FOLLOWUP_COUNT = "goal_followup_count";
 
     /**
-     * Cumulative agent LLM-call count already billed to the goal in THIS graph
-     * run. The run-to-completion loop evaluates multiple times per run while
-     * {@link #LLM_CALL_COUNT} keeps growing; recording only
-     * (current − accounted) on each pass avoids re-billing earlier calls and
-     * exhausting the goal's LLM budget prematurely. Implicitly 0 at run start.
+     * Cumulative agent LLM-call count already billed to the goal in THIS graph run. The
+     * run-to-completion loop evaluates multiple times per run while {@link #LLM_CALL_COUNT} keeps
+     * growing; recording only (current − accounted) on each pass avoids re-billing earlier calls
+     * and exhausting the goal's LLM budget prematurely. Implicitly 0 at run start.
      */
     public static final String GOAL_ACCOUNTED_LLM_CALL_COUNT = "goal_accounted_llm_call_count";
 
     /**
-     * Number of "hard continuations" already performed in THIS graph run — a
-     * hard continuation is a goal follow-up that re-enters the ReAct loop with
-     * a FRESH iteration budget (CURRENT_ITERATION reset to 0) after a turn that
-     * ended in {@link FinishReason#MAX_ITERATIONS_REACHED}. Unlike a normal
-     * follow-up (which shares the run's single iteration budget), a hard
-     * continuation grants the goal a brand-new ReAct segment so a task too big
-     * for one budget can keep going autonomously instead of stalling until the
-     * user sends another message. Because each such segment costs up to a full
-     * {@code maxIterations} worth of node visits, it is bounded by a dedicated,
-     * tighter cap ({@code mateclaw.goal.max-hard-continuations-per-run}, clamped
-     * to {@link vip.mate.goal.config.GoalProperties#MAX_HARD_CONTINUATIONS_CEILING})
-     * and sized into the graph recursion ceiling. Implicitly 0 at run start.
+     * Number of "hard continuations" already performed in THIS graph run — a hard continuation is a
+     * goal follow-up that re-enters the ReAct loop with a FRESH iteration budget (CURRENT_ITERATION
+     * reset to 0) after a turn that ended in {@link FinishReason#MAX_ITERATIONS_REACHED}. Unlike a
+     * normal follow-up (which shares the run's single iteration budget), a hard continuation grants
+     * the goal a brand-new ReAct segment so a task too big for one budget can keep going
+     * autonomously instead of stalling until the user sends another message. Because each such
+     * segment costs up to a full {@code maxIterations} worth of node visits, it is bounded by a
+     * dedicated, tighter cap ({@code mateclaw.goal.max-hard-continuations-per-run}, clamped to
+     * {@link vip.mate.goal.config.GoalProperties#MAX_HARD_CONTINUATIONS_CEILING}) and sized into
+     * the graph recursion ceiling. Implicitly 0 at run start.
      */
     public static final String GOAL_HARD_CONTINUATION_COUNT = "goal_hard_continuation_count";
 
@@ -280,67 +277,61 @@ public final class MateClawStateKeys {
     // ===== RFC-063r: ChatOrigin propagation through the StateGraph =====
 
     /**
-     * RFC-063r §2.5: top-level agent writes the {@code ChatOrigin} value object
-     * into graph state once at {@code buildInitialState}; nodes (especially
-     * {@code StepExecutionNode} in the Plan-Execute sub-graph) read it
-     * read-only when invoking {@link vip.mate.agent.graph.executor.ToolExecutionExecutor}
-     * so child graphs and delegated agents inherit the originating channel /
-     * workspace context.
+     * RFC-063r §2.5: top-level agent writes the {@code ChatOrigin} value object into graph state
+     * once at {@code buildInitialState}; nodes (especially {@code StepExecutionNode} in the
+     * Plan-Execute sub-graph) read it read-only when invoking {@link
+     * vip.mate.agent.graph.executor.ToolExecutionExecutor} so child graphs and delegated agents
+     * inherit the originating channel / workspace context.
      */
     public static final String CHAT_ORIGIN = "chat_origin";
+
     /** Trusted, immutable server options for an isolated project execution. */
     public static final String PROJECT_EXECUTION_OPTIONS = "project_execution_options";
 
     // ===== Skill progressive disclosure (REPLACE strategy) =====
 
     /**
-     * Names of skills explicitly loaded via the {@code load_skill} tool during
-     * this graph run. Stored as a {@code Set<String>} and used to pin recently
-     * loaded skills to the top of the runtime skill catalog so a multi-iteration
-     * loop stops re-loading the same skill it already pulled into message
-     * history. ActionNode reads the prior value and writes back the merged set
+     * Names of skills explicitly loaded via the {@code load_skill} tool during this graph run.
+     * Stored as a {@code Set<String>} and used to pin recently loaded skills to the top of the
+     * runtime skill catalog so a multi-iteration loop stops re-loading the same skill it already
+     * pulled into message history. ActionNode reads the prior value and writes back the merged set
      * (read-merge-write under the REPLACE strategy).
-     * <p>
-     * MUST be registered in both the ReAct and Plan-Execute KeyStrategyFactory
-     * blocks or the framework will drop it on multi-node merges, leaving the
-     * catalog ranker blind to in-run loads.
+     *
+     * <p>MUST be registered in both the ReAct and Plan-Execute KeyStrategyFactory blocks or the
+     * framework will drop it on multi-node merges, leaving the catalog ranker blind to in-run
+     * loads.
      */
     public static final String LOADED_SKILLS = "loaded_skills";
 
     /**
-     * Function names of extension-tier tools activated via {@code enable_tool}
-     * during this run. Stored as a {@code Set<String>}; ReasoningNode adds these
-     * back to the active tool callbacks on its next turn so an enabled extension
-     * tool becomes callable within the same ReAct loop. ActionNode reads the
-     * prior value and writes back the merged set (read-merge-write under REPLACE).
-     * <p>
-     * MUST be registered in both KeyStrategyFactory blocks (see
-     * {@link #LOADED_SKILLS}).
+     * Function names of extension-tier tools activated via {@code enable_tool} during this run.
+     * Stored as a {@code Set<String>}; ReasoningNode adds these back to the active tool callbacks
+     * on its next turn so an enabled extension tool becomes callable within the same ReAct loop.
+     * ActionNode reads the prior value and writes back the merged set (read-merge-write under
+     * REPLACE).
+     *
+     * <p>MUST be registered in both KeyStrategyFactory blocks (see {@link #LOADED_SKILLS}).
      */
     public static final String ENABLED_EXTENSION_TOOLS = "enabled_extension_tools";
 
     // ===== Tool-call loop guard (REPLACE strategy) =====
 
     /**
-     * Per-run counters for the tool-call loop guard: repeated identical-argument
-     * failures, per-tool failure totals, and consecutive no-progress results
-     * from idempotent read-only tools. Stored as a {@code Map<String, Object>}
-     * keyed by detector-prefixed signatures; ObservationNode reads the prior
-     * map and writes back the updated one each observation round
-     * (read-merge-write under REPLACE). Implicitly empty at run start, so the
-     * counters reset naturally between graph runs.
-     * <p>
-     * MUST be registered in both KeyStrategyFactory blocks (see
-     * {@link #LOADED_SKILLS}).
+     * Per-run counters for the tool-call loop guard: repeated identical-argument failures, per-tool
+     * failure totals, and consecutive no-progress results from idempotent read-only tools. Stored
+     * as a {@code Map<String, Object>} keyed by detector-prefixed signatures; ObservationNode reads
+     * the prior map and writes back the updated one each observation round (read-merge-write under
+     * REPLACE). Implicitly empty at run start, so the counters reset naturally between graph runs.
+     *
+     * <p>MUST be registered in both KeyStrategyFactory blocks (see {@link #LOADED_SKILLS}).
      */
     public static final String TOOL_LOOP_STATS = "tool_loop_stats";
 
     /**
-     * True once the one-shot post-mutation verification reminder has been
-     * injected into an observation this run. The reminder asks the model to
-     * verify a successful file mutation (run tests / re-read the file) before
-     * declaring the task complete; injecting it at most once per run keeps
-     * multi-file tasks from being spammed. REPLACE strategy.
+     * True once the one-shot post-mutation verification reminder has been injected into an
+     * observation this run. The reminder asks the model to verify a successful file mutation (run
+     * tests / re-read the file) before declaring the task complete; injecting it at most once per
+     * run keeps multi-file tasks from being spammed. REPLACE strategy.
      */
     public static final String MUTATION_REMINDER_INJECTED = "mutation_reminder_injected";
 }

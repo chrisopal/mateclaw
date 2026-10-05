@@ -1,0 +1,397 @@
+{
+  "classes": 51,
+  "totals": {
+    "tests": 555,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "suites": [
+    {
+      "class": "vip.mate.presales.PresalesProjectItemsTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesDisabledStartupReadContractTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesPresentationCompilerTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    {
+      "class": "vip.mate.presales.PresalesArtifactPersistenceContractTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.ProjectAuthorityFenceDatabaseTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesContextProviderTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesAccessPolicyTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesArtifactReadContractTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesProjectListingContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesSqlListingTest",
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesModelAdapterTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesArtifactRepositoryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesCommandKindsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesExecutionRevalidationProviderTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesHandoffReadContractTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesRequestHashMigrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesProjectPersistenceContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesQueryDtosTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesArtifactRendererTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesPresentationServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesCommandPayloadTest",
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesRuntimeTransactionIntegrationTest",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesRequestHashV2Test",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesProjectListingTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesEmployeeRuntimeTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesQueryDtoContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesReleaseSnapshotContractTest",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesGenerationControllerTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesGenerationCoordinatorTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesSolutionPolicyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesVersionInputContractTest",
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesTerminalReceptionTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesProjectRepositoryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesCommandPayloadContractTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesPresentationPinTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesErrorContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesSourceAuthorizationTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesSolutionPolicyContractTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesCommandKindContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesListingProjectionBackfillTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesAtomicResultAcceptanceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesEmployeeResultProjectionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesIntegrationTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesAccessActorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesSourceScopeTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.architecture.WorkbenchArchitectureTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.bidding.BiddingHandoffReceiptTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.bidding.BiddingMaterialsTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.bidding.BiddingHandoffTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.semantic.source.SourceGovernanceReadServiceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.semantic.SemanticCoreArchitectureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "sources": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationController.java": "3ef9e8fed170ebee9737aabd30754a930154dfb8edcb2bfa956a224d0441d9fa",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationService.java": "c606d9bc8f293b128c7c9dd6973782f83afdb31355aea2ffade3dc803f52a3a1",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesDtos.java": "a881078b9dba7b983764245faaa6172717f69dfb5cfb581c61fc43720016114e",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesGenerationControllerTest.java": "167a1c66aae8e02f883b0585129731283b333fe44182b5d0fefcb564df1fa075",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesVersionInputContractTest.java": "2c4030ab18b319a1d8fd4a126f097cb7700ee9526a4dc82ccd2a4f352def8b9f"
+  },
+  "task": "AQ05_GENERATION_USECASE",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "before": {
+    "classes": 2,
+    "tests": 61,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "new_cases": 11,
+  "format": "PASS",
+  "dev_slice_task": "fvyzbcmh",
+  "review": "Independent native agent COMMENT; not maintainer approval",
+  "not_run": [
+    "full commit gate",
+    "new MySQL/Kingbase execution for this slice",
+    "full production application/browser/model/Office acceptance",
+    "46 formal AC",
+    "remote required CI"
+  ],
+  "final_gate": "See generation-usecase-tests/final-report.gz and final-manifest.gz; no submission readiness claimed"
+}

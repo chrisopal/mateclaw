@@ -31,6 +31,105 @@ class PresalesTerminalReceptionTest {
     private String otherWorkspaceBody;
     private AtomicBoolean actorLost;
 
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void directWritersRejectBodyVersionMismatchWithoutRepairingIt(boolean recovery)
+            throws Exception {
+        for (String raw : new String[] {"4294967298", "2.5", "null", "3"}) {
+            var p = accepted.deepCopy();
+            p.set("version", json.readTree(raw));
+            storage.update(
+                    "UPDATE mate_presales_project SET version=2,body_json=? WHERE id='p' AND workspace_id='w'",
+                    json.writeValueAsString(p));
+            actorLost.set(false);
+            String before = body();
+            if (recovery) coordinator(storage).recoverStaleTasks();
+            else runActorLossFallback();
+            assertEquals(before, body());
+            assertEquals(
+                    2,
+                    storage.queryForObject(
+                            "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
+                            Integer.class));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MAX_VALUE, 0, -1})
+    void actorLossFallbackNeverWrapsOrRepairsInvalidVersion(int version) throws Exception {
+        store(current().put("version", version));
+        String before = body();
+        runActorLossFallback();
+        assertEquals(before, body());
+        assertEquals(
+                version,
+                storage.queryForObject(
+                        "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
+                        Integer.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MAX_VALUE, 0, -1})
+    void recoverySkipsExhaustedOrInvalidVersionAndContinuesOtherProjects(int version)
+            throws Exception {
+        store(current().put("version", version));
+        String before = body();
+        var healthy = accepted.deepCopy().put("id", "healthy");
+        storage.update(
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
+                "healthy",
+                "w",
+                2,
+                "healthy",
+                "ACTIVE",
+                json.writeValueAsString(healthy));
+        assertDoesNotThrow(() -> coordinator(storage).recoverStaleTasks());
+        assertEquals(before, body());
+        assertEquals(
+                version,
+                storage.queryForObject(
+                        "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
+                        Integer.class));
+        var restored =
+                json.readTree(
+                        storage.queryForObject(
+                                "SELECT body_json FROM mate_presales_project WHERE id='healthy' AND workspace_id='w'",
+                                String.class));
+        assertEquals(3, restored.path("version").intValue());
+        assertEquals("FAILED", restored.path("tasks").get(0).path("status").asText());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void lastRuntimeVersionCanStillPersistTerminalState(boolean recovery) throws Exception {
+        store(current().put("version", Integer.MAX_VALUE - 1));
+        if (recovery) coordinator(storage).recoverStaleTasks();
+        else runActorLossFallback();
+        assertEquals(Integer.MAX_VALUE, current().path("version").intValue());
+        assertEquals("FAILED", current().path("tasks").get(0).path("status").asText());
+        assertRuntimeListing();
+    }
+
+    private void runActorLossFallback() throws Exception {
+        loseActorAfterModelStarts();
+        doAnswer(
+                        call -> {
+                            actorLost.set(true);
+                            throw new SemanticApiException(422, "MODEL_FORMAT", "invalid result");
+                        })
+                .when(model)
+                .execute(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        any());
+        coordinator(storage).process(submission());
+        verify(service, never()).saveEmployeeTask(anyString(), anyString(), any());
+    }
+
     @BeforeEach
     void prepare() throws Exception {
         var source =
@@ -109,20 +208,8 @@ class PresalesTerminalReceptionTest {
         var access = mock(PresalesAccess.class);
         when(access.require("w", "viewer")).thenReturn("viewer");
         var listingService =
-                new PresalesService(
-                        null,
-                        new PresalesProjectRepository(storage),
-                        json,
-                        access,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
+                new PresalesProjectQueryService(
+                        new PresalesProjectRepository(storage), json, access);
         var page = listingService.list("w", null, null, null, null, 1, 20);
         var summary = page.items().getFirst();
         assertEquals(1, page.total());
@@ -476,6 +563,113 @@ class PresalesTerminalReceptionTest {
         coordinator(storage).process(submission());
         assertEquals("FAILED", current().path("tasks").get(0).path("status").asText());
         assertTrue(current().path("tasks").get(0).path("result").isMissingNode());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"EDIT", "CANCELLED", "SUCCEEDED", "REPLACED", "DELETED"})
+    void restartRecoveryRechecksCurrentStateAfterConcurrentEdit(String change) throws Exception {
+        var projects = spy(new PresalesProjectRepository(storage));
+        var firstWrite = new AtomicBoolean(true);
+        var concurrentBody = new AtomicReference<String>();
+        doAnswer(
+                        call -> {
+                            if (firstWrite.getAndSet(false)) {
+                                if ("DELETED".equals(change)) {
+                                    storage.update(
+                                            "DELETE FROM mate_presales_project WHERE id='p' AND workspace_id='w'");
+                                } else {
+                                    var latest =
+                                            current()
+                                                    .put("version", 3)
+                                                    .put("concurrentEdit", "retain");
+                                    var task = (ObjectNode) latest.path("tasks").get(0);
+                                    if ("REPLACED".equals(change)) {
+                                        task.put("runId", "new-run")
+                                                .put("operationId", "new-op")
+                                                .put(
+                                                        "queuedAt",
+                                                        java.time.Instant.now()
+                                                                .plusSeconds(10)
+                                                                .toString());
+                                    } else if (!"EDIT".equals(change)) {
+                                        task.put("status", change);
+                                    }
+                                    store(latest);
+                                    concurrentBody.set(body());
+                                }
+                            }
+                            return call.callRealMethod();
+                        })
+                .when(projects)
+                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+        var coordinator =
+                new PresalesGenerationCoordinator(
+                        service, contexts, model, json, projects, hooks());
+
+        coordinator.recoverStaleTasks();
+
+        if ("EDIT".equals(change)) {
+            var recovered = current();
+            assertEquals(4, recovered.path("version").intValue());
+            assertEquals("retain", recovered.path("concurrentEdit").asText());
+            assertEquals("FAILED", recovered.path("tasks").get(0).path("status").asText());
+            assertEquals(
+                    "INTERRUPTED_BY_RESTART",
+                    recovered.path("tasks").get(0).path("error").asText());
+            assertEquals(accepted.path("requirements"), recovered.path("requirements"));
+            assertRuntimeListing();
+        } else if ("DELETED".equals(change)) {
+            assertTrue(projects.findRuntimeRow("w", "p").isEmpty());
+        } else {
+            assertEquals(concurrentBody.get(), body());
+        }
+        verify(projects, times("EDIT".equals(change) ? 2 : 1))
+                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+        verifyNoInteractions(model, contexts, service);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void recoveryRetriesAreBoundedAndDoNotBlockOtherProjects(int conflicts) throws Exception {
+        var healthy = accepted.deepCopy().put("id", "healthy");
+        storage.update(
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
+                "healthy",
+                "w",
+                2,
+                "healthy",
+                "ACTIVE",
+                json.writeValueAsString(healthy));
+        var projects = spy(new PresalesProjectRepository(storage));
+        var attempts = new java.util.concurrent.atomic.AtomicInteger();
+        doAnswer(
+                        call -> {
+                            int attempt = attempts.incrementAndGet();
+                            if (attempt <= conflicts) {
+                                var latest = current();
+                                latest.put("version", latest.path("version").intValue() + 1)
+                                        .put("concurrentEdit", attempt);
+                                store(latest);
+                            }
+                            return call.callRealMethod();
+                        })
+                .when(projects)
+                .updateRuntimeBody(eq("w"), eq("p"), anyInt(), anyInt(), anyString(), any());
+        new PresalesGenerationCoordinator(service, contexts, model, json, projects, hooks())
+                .recoverStaleTasks();
+
+        assertEquals(3, attempts.get());
+        var latest = current();
+        assertEquals(conflicts, latest.path("concurrentEdit").intValue());
+        assertEquals(5, latest.path("version").intValue());
+        assertEquals(
+                conflicts == 2 ? "FAILED" : "RUNNING",
+                latest.path("tasks").get(0).path("status").asText());
+        var restored =
+                json.readTree(projects.findRuntimeRow("w", "healthy").orElseThrow().bodyJson());
+        assertEquals(3, restored.path("version").intValue());
+        assertEquals("FAILED", restored.path("tasks").get(0).path("status").asText());
+        verifyNoInteractions(model, contexts, service);
     }
 
     @Test

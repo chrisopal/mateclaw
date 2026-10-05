@@ -19,6 +19,8 @@ git rev-parse HEAD
 python3 -B scripts/quality/verify.py --mode dev --base origin/dev
 ```
 
+Java/控制面变更核对实际 `WorkbenchArchitectureTest` 的生产导入、聚合非空计数和正反例；不能以文档模板替代编译结果。AR-001 宿主六个 main 路径及 AR-002 工作台三个 main 路径已封口；新增路径同步审核映射，严禁清空封口或重写基线。纯语义层自有 port 与 Controller DAL 分类分开，保持现有更严格语义测试。
+
 保留初始存量问题与新问题的区别。没有 origin/dev 时记录阻断，由操作者按既有流程准备基线。
 
 写一个短实施计划：用例、依赖方向、数据权威、权限、兼容、事务边界、回归。复杂变更按

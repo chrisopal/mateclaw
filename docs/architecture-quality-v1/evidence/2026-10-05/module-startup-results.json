@@ -1,0 +1,228 @@
+{
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "sources": {
+    "mateclaw-server/src/test/java/vip/mate/acceptance/ModuleStartupProbe.java": "013b6e04a3a648b70872f9e83b96be5cee5004595e81f8d53a921002fc49264a",
+    "mateclaw-server/src/test/java/vip/mate/acceptance/ModuleStartupMatrixTest.java": "4eacaa0abbcc19439ff08be5ce9595534d157f913ca6daae9ade2c92f8edc28a"
+  },
+  "task": "AQ-01 / AC-05",
+  "scope": "Full production component scan, awaiting-setup boot, isolated owner fixture HTTP contracts",
+  "formal_acceptance": "NOT_RUN",
+  "tests": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "variants": [
+    {
+      "database": "jdbc:h2:mem:ac05_000",
+      "http_contracts": {
+        "bidding": "404_BIDDING_DISABLED"
+      },
+      "variant": "000",
+      "ready_event": true,
+      "port": 50998,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "bidding": false,
+        "presales": false,
+        "semantic": false
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_001",
+      "http_contracts": {
+        "bidding": "200_ENABLED",
+        "presales_dependency": "409_PRESALES_UNAVAILABLE"
+      },
+      "variant": "001",
+      "ready_event": true,
+      "port": 50942,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "presales": false,
+        "bidding": true,
+        "semantic": false
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_010",
+      "http_contracts": {
+        "bidding": "404_BIDDING_DISABLED",
+        "presales_project": "CREATE_READ_BACK_200",
+        "semantic_dependency": "409_SEMANTIC_DISABLED"
+      },
+      "variant": "010",
+      "ready_event": true,
+      "port": 50935,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "semantic": false,
+        "presales": true,
+        "bidding": false
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_011",
+      "http_contracts": {
+        "bidding": "200_ENABLED",
+        "presales_project": "CREATE_READ_BACK_200",
+        "semantic_dependency": "409_SEMANTIC_DISABLED",
+        "presales_dependency": "200_EMPTY_OPTIONS"
+      },
+      "variant": "011",
+      "ready_event": true,
+      "port": 50982,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "presales": true,
+        "bidding": true,
+        "semantic": false
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_100",
+      "http_contracts": {
+        "bidding": "404_BIDDING_DISABLED"
+      },
+      "variant": "100",
+      "ready_event": true,
+      "port": 50919,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "bidding": false,
+        "presales": false,
+        "semantic": true
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_101",
+      "http_contracts": {
+        "bidding": "200_ENABLED",
+        "presales_dependency": "409_PRESALES_UNAVAILABLE"
+      },
+      "variant": "101",
+      "ready_event": true,
+      "port": 50971,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "presales": false,
+        "semantic": true,
+        "bidding": true
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_110",
+      "http_contracts": {
+        "bidding": "404_BIDDING_DISABLED",
+        "presales_project": "CREATE_READ_BACK_200",
+        "semantic_dependency": "200_EMPTY_STATEMENTS"
+      },
+      "variant": "110",
+      "ready_event": true,
+      "port": 50951,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "presales": true,
+        "bidding": false,
+        "semantic": true
+      },
+      "context_closed": true
+    },
+    {
+      "database": "jdbc:h2:mem:ac05_111",
+      "http_contracts": {
+        "bidding": "200_ENABLED",
+        "presales_project": "CREATE_READ_BACK_200",
+        "semantic_dependency": "200_EMPTY_STATEMENTS",
+        "presales_dependency": "200_EMPTY_OPTIONS"
+      },
+      "variant": "111",
+      "ready_event": true,
+      "port": 50903,
+      "setup_initialized": false,
+      "current_migration": "219",
+      "enabled_external_work": {
+        "mate_cron_job": 0,
+        "mate_channel": 0,
+        "mate_mcp_server": 0,
+        "mate_model_provider": 0
+      },
+      "module_flags": {
+        "semantic": true,
+        "bidding": true,
+        "presales": true
+      },
+      "context_closed": true
+    }
+  ],
+  "commands": [
+    "JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -B -pl mateclaw-server -am -Dtest=ModuleStartupMatrixTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test",
+    "JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn -B -Dquality.base=origin/dev spotless:check",
+    "python3 -B scripts/quality/verify.py --mode dev --base origin/dev"
+  ],
+  "limitations": [
+    "No default seed initialization path",
+    "No ordinary chat/model execution",
+    "No MySQL/Kingbase/browser/customer acceptance",
+    "No network egress guarantee",
+    "No exact staged-tree commit gate or remote CI approval",
+    "Child System.exit follows context.close; not proof every scheduler thread stops naturally"
+  ]
+}

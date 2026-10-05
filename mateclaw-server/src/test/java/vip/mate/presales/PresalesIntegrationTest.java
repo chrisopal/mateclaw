@@ -22,6 +22,8 @@ import vip.mate.semantic.support.SemanticHttpFixture;
     vip.mate.semantic.source.SourceGovernanceReadService.class,
     vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
     vip.mate.workspace.core.service.ProjectSourceAccess.class,
@@ -556,8 +558,11 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                                 1),
                         "member",
                         200);
+        var beforeApproval = approvalFacts(p.path("id").asText());
         cmd(p, "APPROVE_BASELINE", Map.of("reason", "checked"), "member", 403);
+        assertEquals(beforeApproval, approvalFacts(p.path("id").asText()));
         cmd(p, "APPROVE_BASELINE", Map.of("reason", "checked"), "owner", 409);
+        assertEquals(beforeApproval, approvalFacts(p.path("id").asText()));
         var accepted =
                 call(
                         "POST",
@@ -602,7 +607,9 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 "UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",
                 "new source",
                 f.raw);
+        beforeApproval = approvalFacts(p.path("id").asText());
         cmd(p, "APPROVE_BASELINE", Map.of("reason", "stale source"), "owner", 409);
+        assertEquals(beforeApproval, approvalFacts(p.path("id").asText()));
         jdbc.update(
                 "UPDATE mate_wiki_raw_material SET original_content=? WHERE id=?",
                 "设备😀额定380V",
@@ -629,6 +636,61 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         .get(0)
                         .path("snapshotId")
                         .asText());
+        String fitText = "Independent fit evidence";
+        String fitRaw = raw(f.kb, fitText);
+        var fitImport =
+                call(
+                        "POST",
+                        "/graphs/" + f.graph + "/imports",
+                        "member",
+                        workspace,
+                        Map.of(
+                                "sourceKind",
+                                "WIKI_RAW",
+                                "sourceRef",
+                                fitRaw,
+                                "operationId",
+                                UUID.randomUUID().toString()),
+                        200);
+        var fitEvidence =
+                call(
+                        "POST",
+                        "/graphs/"
+                                + f.graph
+                                + "/snapshots/"
+                                + fitImport.path("snapshotId").asText()
+                                + "/evidence",
+                        "member",
+                        workspace,
+                        Map.of(
+                                "operationId",
+                                UUID.randomUUID().toString(),
+                                "startCodePoint",
+                                0,
+                                "endCodePoint",
+                                fitText.length(),
+                                "exactQuote",
+                                fitText),
+                        200);
+        p =
+                cmd(
+                        p,
+                        "SAVE_FIT_GAP",
+                        Map.of(
+                                "requirementId",
+                                req.path("id").asText(),
+                                "status",
+                                "FIT",
+                                "reason",
+                                "Independent fit evidence",
+                                "productVersion",
+                                "synthetic-v1",
+                                "graphId",
+                                f.graph,
+                                "evidenceIds",
+                                List.of(fitEvidence.path("id").asText())),
+                        "member",
+                        200);
         p =
                 cmd(
                         p,
@@ -724,6 +786,159 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         "member",
                         200);
         p = cmd(p, "PUBLISH_RELEASE", Map.of("releaseId", release), "owner", 200);
+        boolean semanticWasEnabled = semanticProperties.isEnabled();
+        try {
+            semanticProperties.setEnabled(false);
+            assertPublishedDownload(p, release, original);
+            var publishedPreview =
+                    mvc.perform(
+                                    org.springframework.test.web.servlet.request
+                                            .MockMvcRequestBuilders.get(
+                                                    "/api/v1/presales/projects/"
+                                                            + p.path("id").asText()
+                                                            + "/releases/"
+                                                            + release
+                                                            + "/preview/solution.md")
+                                            .header("Authorization", tokens.get("owner"))
+                                            .header("X-Workspace-Id", workspace))
+                            .andReturn()
+                            .getResponse();
+            assertEquals(200, publishedPreview.getStatus());
+            assertArrayEquals(
+                    Base64.getDecoder().decode(original), publishedPreview.getContentAsByteArray());
+            cmd(p, "CREATE_RELEASE", Map.of("solutionId", solution), "owner", 409);
+        } finally {
+            semanticProperties.setEnabled(semanticWasEnabled);
+        }
+
+        String publishedBodyBefore =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        p.path("id").asText());
+        var unboundPublished = ((com.fasterxml.jackson.databind.node.ObjectNode) p).deepCopy();
+        unboundPublished.withArray("materials").removeAll();
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                unboundPublished.toString(),
+                p.path("id").asText());
+        try {
+            for (String route : List.of("files", "preview")) {
+                var unboundRead =
+                        mvc.perform(
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.get(
+                                                        "/api/v1/presales/projects/"
+                                                                + p.path("id").asText()
+                                                                + "/releases/"
+                                                                + release
+                                                                + "/"
+                                                                + route
+                                                                + "/solution.md")
+                                                .header(
+                                                        "Authorization",
+                                                        tokens.get(
+                                                                route.equals("files")
+                                                                        ? "viewer"
+                                                                        : "owner"))
+                                                .header("X-Workspace-Id", workspace))
+                                .andReturn()
+                                .getResponse();
+                assertEquals(400, unboundRead.getStatus());
+            }
+        } finally {
+            jdbc.update(
+                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                    publishedBodyBefore,
+                    p.path("id").asText());
+        }
+        // A real published fit source is absent from baseline/sourceRefs, but must remain
+        // authorized.
+        for (String revocation : List.of("withdrawn", "deleted", "excluded")) {
+            if (revocation.equals("withdrawn"))
+                call(
+                        "POST",
+                        "/graphs/" + f.graph + "/sources/withdraw",
+                        "owner",
+                        workspace,
+                        Map.of(
+                                "sourceKind",
+                                "WIKI_RAW",
+                                "sourceRef",
+                                fitRaw,
+                                "reason",
+                                "Fit-only revoke",
+                                "operationId",
+                                UUID.randomUUID().toString()),
+                        200);
+            else if (revocation.equals("deleted"))
+                jdbc.update("UPDATE mate_wiki_raw_material SET deleted=1 WHERE id=?", fitRaw);
+            else
+                jdbc.update(
+                        "INSERT INTO mate_semantic_snapshot_exclusion(graph_id,snapshot_id,actor_id,reason,created_at) VALUES(?,?,?,?,?)",
+                        f.graph,
+                        fitImport.path("snapshotId").asText(),
+                        "synthetic",
+                        "Fit-only exclusion",
+                        java.time.LocalDateTime.now());
+            try {
+                for (String route : List.of("files", "preview")) {
+                    var denied =
+                            mvc.perform(
+                                            org.springframework.test.web.servlet.request
+                                                    .MockMvcRequestBuilders.get(
+                                                            "/api/v1/presales/projects/"
+                                                                    + p.path("id").asText()
+                                                                    + "/releases/"
+                                                                    + release
+                                                                    + "/"
+                                                                    + route
+                                                                    + "/solution.md")
+                                                    .header(
+                                                            "Authorization",
+                                                            tokens.get(
+                                                                    route.equals("files")
+                                                                            ? "viewer"
+                                                                            : "owner"))
+                                                    .header("X-Workspace-Id", workspace))
+                                    .andReturn()
+                                    .getResponse();
+                    assertEquals(404, denied.getStatus(), revocation + " " + route);
+                }
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
+                        "viewer",
+                        workspace,
+                        null,
+                        404);
+                assertEquals(
+                        publishedBodyBefore,
+                        jdbc.queryForObject(
+                                "SELECT body_json FROM mate_presales_project WHERE id=?",
+                                String.class,
+                                p.path("id").asText()));
+                assertEquals(
+                        original,
+                        jdbc.queryForObject(
+                                "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
+                                String.class,
+                                release));
+            } finally {
+                if (revocation.equals("withdrawn"))
+                    jdbc.update(
+                            "DELETE FROM mate_semantic_source_governance WHERE graph_id=? AND source_kind='WIKI_RAW' AND source_id=?",
+                            f.graph,
+                            fitRaw);
+                else if (revocation.equals("deleted"))
+                    jdbc.update("UPDATE mate_wiki_raw_material SET deleted=0 WHERE id=?", fitRaw);
+                else
+                    jdbc.update(
+                            "DELETE FROM mate_semantic_snapshot_exclusion WHERE graph_id=? AND snapshot_id=?",
+                            f.graph,
+                            fitImport.path("snapshotId").asText());
+            }
+        }
         var frozenHandoff =
                 api(
                         "GET",
@@ -760,6 +975,22 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                                 200)
                         .path("clarifications")
                         .size());
+        var latestFrozenHandoff =
+                api(
+                        "GET",
+                        "/projects/" + p.path("id").asText() + "/handoff",
+                        "viewer",
+                        workspace,
+                        null,
+                        200);
+        assertEquals(
+                1,
+                latestFrozenHandoff.path("clarifications").size(),
+                "Post-publication clarifications must not enter an existing published handoff");
+        assertEquals(
+                frozenHandoff,
+                latestFrozenHandoff,
+                "Latest and explicit release routes must expose the same frozen handoff");
         assertEquals(
                 original,
                 jdbc.queryForObject(
@@ -1524,6 +1755,19 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 now,
                 now);
         return id;
+    }
+
+    private List<?> approvalFacts(String projectId) {
+        return List.of(
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?",
+                        projectId),
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_revision WHERE project_id=? ORDER BY version",
+                        projectId),
+                jdbc.queryForList(
+                        "SELECT operation_id,request_hash,response_json FROM mate_presales_operation WHERE workspace_id=? ORDER BY operation_id",
+                        workspace));
     }
 
     private record Fixture(

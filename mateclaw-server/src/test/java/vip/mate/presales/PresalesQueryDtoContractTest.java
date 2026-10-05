@@ -24,6 +24,8 @@ import vip.mate.semantic.web.SemanticApiException;
     vip.mate.semantic.source.SourceGovernanceReadService.class,
     vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
     PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
     PresalesExceptionHandler.class,
     PresalesArtifactRenderer.class,
     vip.mate.workspace.core.service.ProjectSourceAccess.class,
@@ -33,9 +35,15 @@ import vip.mate.semantic.web.SemanticApiException;
 class PresalesQueryDtoContractTest extends SemanticHttpFixture {
     @MockitoBean vip.mate.semantic.graph.GraphApplicationService graphs;
     @MockitoBean vip.mate.semantic.statement.StatementApplicationService statements;
+    @MockitoBean vip.mate.semantic.query.SemanticQueryService queries;
 
     @org.springframework.beans.factory.annotation.Autowired
     vip.mate.semantic.config.SemanticProperties semantic;
+
+    @org.junit.jupiter.api.BeforeEach
+    void useRealOptionalBindingLookup() {
+        doCallRealMethod().when(graphs).findBinding(anyString(), anyString());
+    }
 
     private JsonNode api(String path, String role, String scope, int status) throws Exception {
         var r =
@@ -232,5 +240,76 @@ class PresalesQueryDtoContractTest extends SemanticHttpFixture {
         assertEquals(
                 "MATERIAL_UNAVAILABLE", api(path, "viewer", workspace, 403).path("code").asText());
         verifyNoInteractions(statements);
+    }
+
+    @Test
+    void evidencePreservesProjectionAndUpstreamErrorsAfterProjectAuthorization() throws Exception {
+        var p = project("g");
+        String path =
+                "/projects/"
+                        + p.path("id").asText()
+                        + "/evidence?graphId=g&evidenceId=9007199254740993008";
+        var evidence =
+                new vip.mate.semantic.query.SemanticQueryDtos.EvidenceResult(
+                        "9007199254740993008",
+                        "snapshot",
+                        "WIKI_RAW",
+                        "9007199254740993009",
+                        null,
+                        "原始证据",
+                        2,
+                        6,
+                        "digest");
+        when(queries.evidence(workspace, "g", "9007199254740993008")).thenReturn(evidence);
+        assertEquals(json.valueToTree(evidence), api(path, "viewer", workspace, 200));
+        for (int status : List.of(401, 403, 404, 409)) {
+            doThrow(new SemanticApiException(status, "UPSTREAM_FAILURE", "unavailable"))
+                    .when(queries)
+                    .evidence(workspace, "g", "9007199254740993008");
+            assertEquals(
+                    "UPSTREAM_FAILURE",
+                    api(path, "viewer", workspace, status).path("code").asText());
+        }
+    }
+
+    @Test
+    void evidenceAuthorizesRoleAndSourcesBeforeBindingAndSemanticAvailability() throws Exception {
+        var p = project("g");
+        String prefix = "/projects/" + p.path("id").asText() + "/evidence?evidenceId=e&graphId=";
+        semantic.setEnabled(false);
+        try {
+            api(prefix + "unbound", "member", otherWorkspace, 403);
+            assertEquals(
+                    "INVALID_REQUEST",
+                    api(prefix + "unbound", "viewer", workspace, 400).path("code").asText());
+            assertEquals(
+                    "INVALID_REQUEST", api(prefix, "viewer", workspace, 400).path("code").asText());
+            assertEquals(
+                    "SEMANTIC_DISABLED",
+                    api(prefix + "g", "viewer", workspace, 409).path("code").asText());
+            when(wikiKnowledgeBases.getById(1001L)).thenReturn(null);
+            assertEquals(
+                    "MATERIAL_UNAVAILABLE",
+                    api(prefix + "unbound", "viewer", workspace, 403).path("code").asText());
+            assertEquals(
+                    "MATERIAL_UNAVAILABLE",
+                    api(
+                                    "/projects/" + p.path("id").asText() + "/statements",
+                                    "viewer",
+                                    workspace,
+                                    403)
+                            .path("code")
+                            .asText());
+            verifyNoInteractions(queries, statements);
+        } finally {
+            semantic.setEnabled(true);
+        }
+    }
+
+    @Test
+    void sourcesAuthorizeBeforeCatalogOrGraphAccess() throws Exception {
+        clearInvocations(wikiKnowledgeBases, graphs);
+        api("/sources", "member", otherWorkspace, 403);
+        verifyNoInteractions(wikiKnowledgeBases, graphs);
     }
 }

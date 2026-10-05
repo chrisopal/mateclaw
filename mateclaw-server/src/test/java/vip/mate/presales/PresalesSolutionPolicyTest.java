@@ -26,10 +26,7 @@ class PresalesSolutionPolicyTest {
         assertEquals(original.path("presentation"), v.path("presentation"));
         assertFalse(v.has("id"));
         assertFalse(p.has("solutions"));
-        var e =
-                assertThrows(
-                        PresalesProjectItems.Rejected.class,
-                        () -> policy.prepare(p, original, false));
+        var e = assertThrows(PresalesRejected.class, () -> policy.prepare(p, original, false));
         assertEquals(422, e.status());
         assertEquals("PRESENTATION_METADATA_UNTRUSTED", e.code());
     }
@@ -82,15 +79,11 @@ class PresalesSolutionPolicyTest {
         for (int i = 0; i < 100; i++) v.withArray("sourceRefs").add("allowed");
         assertDoesNotThrow(() -> policy.prepare(p, v, false));
         v.withArray("sourceRefs").add("allowed");
-        var size =
-                assertThrows(
-                        PresalesProjectItems.Rejected.class, () -> policy.prepare(p, v, false));
+        var size = assertThrows(PresalesRejected.class, () -> policy.prepare(p, v, false));
         assertEquals("MODEL_FORMAT", size.code());
         assertEquals(422, size.status());
         v.putArray("sourceRefs").add(1);
-        var value =
-                assertThrows(
-                        PresalesProjectItems.Rejected.class, () -> policy.prepare(p, v, false));
+        var value = assertThrows(PresalesRejected.class, () -> policy.prepare(p, v, false));
         assertEquals("INVALID_SOURCE_REFERENCE", value.code());
     }
 
@@ -101,12 +94,10 @@ class PresalesSolutionPolicyTest {
         var v = draft().put("baselineId", "base").put("baselineVersion", 1);
         v.putArray("sourceRefs").add("unbound");
         v.putArray("requirementResponses").addObject().put("requirementId", "not-in-baseline");
-        var e =
-                assertThrows(
-                        PresalesProjectItems.Rejected.class, () -> policy.prepare(p, v, false));
+        var e = assertThrows(PresalesRejected.class, () -> policy.prepare(p, v, false));
         assertEquals("BASELINE_STALE", e.code());
         v.putNull("presentation");
-        e = assertThrows(PresalesProjectItems.Rejected.class, () -> policy.prepare(p, v, false));
+        e = assertThrows(PresalesRejected.class, () -> policy.prepare(p, v, false));
         assertEquals("PRESENTATION_METADATA_UNTRUSTED", e.code());
     }
 }

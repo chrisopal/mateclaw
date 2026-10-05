@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.*;
 
-/** Draft and coverage rules over an already-authorized project, without persistence. */
+/** Draft, coverage and release rules over an already-authorized project, without persistence. */
 final class PresalesSolutionPolicy {
     private final ObjectMapper json;
 
@@ -26,15 +26,17 @@ final class PresalesSolutionPolicy {
         }
         String base = value.path("baselineId").asText();
         if (!employeeResult && value.has("presentation"))
-            throw new PresalesProjectItems.Rejected(
+            throw new PresalesRejected(
                     422, "PRESENTATION_METADATA_UNTRUSTED", "PRESENTATION_METADATA_UNTRUSTED");
         ObjectNode baseline = null;
         if (!base.isBlank()) {
             baseline = find(p, "baselines", base);
-            if (value.has("baselineVersion")
-                    && value.path("baselineVersion").asInt() != baseline.path("version").asInt())
+            Integer baselineVersion = positiveRevision(baseline.path("version"));
+            if (baselineVersion == null
+                    || (value.has("baselineVersion")
+                            && !matchesRevision(value.path("baselineVersion"), baselineVersion)))
                 throw conflict("BASELINE_STALE", "Solution baseline version is stale");
-            value.put("baselineVersion", baseline.path("version").asInt());
+            value.put("baselineVersion", baselineVersion);
         }
         validateProjectSourceRefs(p, value);
         if (base.isBlank()) value.remove("baselineVersion");
@@ -63,10 +65,10 @@ final class PresalesSolutionPolicy {
     private void validateSourceRefs(JsonNode refs, Set<String> allowed) {
         if (refs.isMissingNode()) return;
         if (!refs.isArray() || refs.size() > 100)
-            throw new PresalesProjectItems.Rejected(422, "MODEL_FORMAT", "MODEL_FORMAT");
+            throw new PresalesRejected(422, "MODEL_FORMAT", "MODEL_FORMAT");
         for (var ref : refs)
             if (!ref.isTextual() || !allowed.contains(ref.asText()))
-                throw new PresalesProjectItems.Rejected(
+                throw new PresalesRejected(
                         422, "INVALID_SOURCE_REFERENCE", "INVALID_SOURCE_REFERENCE");
     }
 
@@ -130,11 +132,51 @@ final class PresalesSolutionPolicy {
         return result;
     }
 
-    private static PresalesProjectItems.Rejected bad(String message) {
-        return new PresalesProjectItems.Rejected(400, "INVALID_REQUEST", message);
+    ObjectNode releaseBaseline(ObjectNode p, ObjectNode solution) {
+        if (solution.path("provisional").asBoolean(true))
+            throw conflict("BASELINE_REQUIRED", "Provisional solutions cannot be released");
+        var baseline = find(p, "baselines", solution.path("baselineId").asText());
+        var coverage = coverage(p, solution);
+        if (coverage.path("handledIn").asInt() != coverage.path("totalIn").asInt())
+            throw conflict(
+                    "REQUIREMENTS_UNHANDLED",
+                    "Every in-scope requirement needs an explicit linked response before release");
+        if (!baseline.equals(p.withArray("baselines").get(p.withArray("baselines").size() - 1)))
+            throw conflict("BASELINE_STALE", "Solution uses an older baseline");
+        if (baseline.path("references").size() != p.withArray("requirements").size())
+            throw conflict("BASELINE_STALE", "Requirements added after baseline approval");
+        return baseline;
     }
 
-    private static PresalesProjectItems.Rejected conflict(String code, String message) {
-        return new PresalesProjectItems.Rejected(409, code, message);
+    String releaseReviewId(ObjectNode p, ObjectNode solution) {
+        boolean reviewed = false;
+        String reviewId = "";
+        for (var review : p.withArray("reviews"))
+            if ("HUMAN_REVIEW".equals(review.path("kind").asText())
+                    && !"UNTRUSTED_DRAFT".equals(review.path("authority").asText())
+                    && solution.path("id").asText().equals(review.path("solutionId").asText())
+                    && !solution.path("authorId")
+                            .asText()
+                            .equals(review.path("authorId").asText())) {
+                boolean blocked = false;
+                for (var issue : review.path("issues"))
+                    if (!"RESOLVED".equals(issue.path("status").asText())
+                            && "BLOCKER".equals(issue.path("severity").asText())) blocked = true;
+                reviewed = !blocked;
+                reviewId = review.path("id").asText();
+            }
+        if (!reviewed)
+            throw conflict(
+                    "INDEPENDENT_REVIEW_REQUIRED",
+                    "A separate reviewer must inspect the exact solution and resolve blockers");
+        return reviewId;
+    }
+
+    private static PresalesRejected bad(String message) {
+        return new PresalesRejected(400, "INVALID_REQUEST", message);
+    }
+
+    private static PresalesRejected conflict(String code, String message) {
+        return new PresalesRejected(409, code, message);
     }
 }

@@ -1,0 +1,9 @@
+# AQ-01/AQ-06：重启恢复CAS冲突重试
+
+当前HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，base origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，保留累计工作树。现有recoverStaleTasks忽略updateRuntimeBody返回0；启动扫描与用户编辑竞争后旧RUNNING可能永远未恢复。
+
+先在现有真实H2终态接收测试注入首个CAS之前的并发写入，确认旧实现失败。覆盖：无关编辑保留且旧任务恢复、变更为终态后不二次写入、换成当前进程的新运行后不误杀、并发删除不复建、连续冲突次数有界并继续处理其他项目。保持项目/Workspace隔离、列表投影、JSON/列版本一致性、容量保护及模型零调用。
+
+实现限定于GenerationCoordinator恢复方法：复用findRuntimeRow和updateRuntimeBody，每项目最多3次CAS。失败后读取最新row、重新计算恢复资格和新版本，不复用失败尝试的已修改JSON。不新增数据库方法/字段/依赖/调度器。耗尽或非法版本仍拒绝写入并记录，不以原地改写或重置版本回避CAS；连续3次冲突记录明确警告。原事件入口与单实例假设保留。
+
+RED归档后实现，先定向终态/协调器回归，再售前相关回归、生产ArchUnit、Spotless/dev和独立审阅。测试夹具依旧使用实际H2 CAS，只有竞争调度通过repository spy控制，不能mock成功写入。AC-17/21补充工程证据，完整进程重启、多方言/多实例及正式QA不冒充通过。回退会恢复已复现的丢失恢复问题。

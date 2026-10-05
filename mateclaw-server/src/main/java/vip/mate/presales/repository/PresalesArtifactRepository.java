@@ -46,13 +46,4 @@ public class PresalesArtifactRepository {
                 releaseId,
                 filename);
     }
-
-    public List<String> findContents(String projectId, String releaseId, String filename) {
-        return jdbc.query(
-                "SELECT content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=? AND filename=?",
-                (row, n) -> row.getString(1),
-                projectId,
-                releaseId,
-                filename);
-    }
 }

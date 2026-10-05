@@ -1,0 +1,455 @@
+{
+  "task": "AQ07 compiled ArchUnit and source scope sealing",
+  "status": "ENGINEERING_SLICE_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "head_tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "production_bytecode": {
+    "imported": 2871,
+    "runtime_matched": 876,
+    "controller_matched": 3,
+    "semantic_matched": 122,
+    "per_package_completeness_claimed": false
+  },
+  "initial_red": {
+    "tests": 15,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "cause": "Semantic predicate incorrectly reused Controller repository-name classification"
+  },
+  "targeted_green": {
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "combined": {
+    "tests": 356,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "combined_actual": 355,
+  "skips": [
+    {
+      "suite": "vip.mate.presales.PresalesPresentationCompilerTest",
+      "test": "compilesEditableSlidesWithInstalledSkillAndPersistsExactBytes",
+      "message": "Environment variable [PRESALES_PPT_SKILL_ROOT] does not exist"
+    }
+  ],
+  "format_check_exit": 0,
+  "slice_dev_report": "mateclaw-quality-lwa6pow8",
+  "independent_review": {
+    "agent": "authority_writer_audit",
+    "verdict": "COMMENT",
+    "original_medium": "CLOSED",
+    "mutations_independently_rerun": false,
+    "maintainer_approval": "NOT_VERIFIED",
+    "java_lsp": "NOT_RUN",
+    "documentation": "COMMENT; initial/resume trace labels clarified"
+  },
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/initial-red.log.gz",
+      "archive_sha256": "f6d0cf90e7210eae17b88bd253c69791bf9ab9ab98e9e5654741d810e59c9588",
+      "decoded_sha256": "5268d44e934aeb47ae646bece556b440069805c5791408bf13ac6a9f46e6a730"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/initial-red.xml.gz",
+      "archive_sha256": "957b578f248c7e485fe0b98afd72495ec90401490fa91b8ea6c9b6d109364606",
+      "decoded_sha256": "7401f28bfaf4e496e958f5c91fd21c1faccc34bd8f7f398ed16cf0279e99821b"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/green-maven.log.gz",
+      "archive_sha256": "ecc01dfb4f2a87b3d405931a5931cc7c346d8e2f6a3d7d685ff6c1ee4017e3a1",
+      "decoded_sha256": "80662f23331d5d9bac0566752a48b726822beb7945243e600c47ec16972096cb"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/green-WorkbenchArchitectureTest.xml.gz",
+      "archive_sha256": "4cf8d84712c741033eae2e8d0ebc24b70aeb38d616b150eea97780ba25e60b59",
+      "decoded_sha256": "cb798cde27e96ea5f6244c63b0b9bbdfd11eb6b54c2115fab5ca7640cebe228d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/green-SemanticCoreArchitectureTest.xml.gz",
+      "archive_sha256": "93d96f98b6dc4403aae4a98527bdd1dedb22f001e2105a9a0b0ee320239a2429",
+      "decoded_sha256": "44adb94f8043f38fd107545455c5b4ac77f52da079f0a826c6f4675f0d6d885a"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-regression.log.gz",
+      "decoded_sha256": "8d0d86d31524fa452f6193bf5a02493881dd5b683735e4b6a25eb180b2b15eec",
+      "archive_sha256": "b9dcabec2bb07becd6714dee310685109abe8d38dfe5deecdbe052e73a25c5f2",
+      "redaction_changed_bytes": true
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/project-format-check.log.gz",
+      "decoded_sha256": "fa8bee5eea050edc8ed661c8f3be31d05fa4068cfe91597f704fb1e978039e2e",
+      "archive_sha256": "90df513b1c751316c306e9efa1db517766fadbfd40eef8eedc4eb3f618943c09",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/scoped-format.log.gz",
+      "decoded_sha256": "7b9828110237003d81e0b7414d103bcf95bf5e5d85d15ccc779dbff4de0c8061",
+      "archive_sha256": "50029a380df059d1199df0625d359564933ca6b2920dae2d2fc52cd0f5a659a4",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/initial-dev.log.gz",
+      "decoded_sha256": "0001abac93a4ffc52695549ead8ef4fc43fbf6715a76c6084e20c8d9383cf718",
+      "archive_sha256": "dce52a5faa414fcc0635ae7877986428dd4608351c62c1ff93ca79564d38ee52",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/slice-dev.log.gz",
+      "decoded_sha256": "896f4941e92aed8186a12533dc72277e806df35c993eb045858c0da1ed0630e3",
+      "archive_sha256": "7bcb374acdcbbda7b97e5ae207bbea58b39081c0186f00f579f6025fc73dc17d",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesProjectItemsTest.xml.gz",
+      "decoded_sha256": "d6208f758ef57493eaa4c8a3d5312c246c077493f331bcb377f8ddc4339dacd9",
+      "archive_sha256": "479299241f6c86a84a370ece5516e81e847c8fd1d472baac62874966144f9aa6",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml.gz",
+      "decoded_sha256": "6f73df68eea03494b7fed1ca1311cf1d753403113821177f5155d555981b4b75",
+      "archive_sha256": "320298ac0c0fbd81a997dedf4a4afffdc26f4a87c75d5bc30fd83d6c608d4443",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml.gz",
+      "decoded_sha256": "7a181c122e2caab1f1062c589441565d50bfc6edb0fdffa608335540a2dbcfd3",
+      "archive_sha256": "c212a0f7b2fd03c84c520a5aa0e5b0dad6bb36eeca4d5304ecd6f6ee62e059db",
+      "redaction_changed_bytes": true
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+      "decoded_sha256": "4fdddbc766978a22e3e71b13a3219bcf5f66d3ff892a7a66a9758f9da880f5e7",
+      "archive_sha256": "836266cc7c4ed1b096d2b352fa9ab2eabfd87852e5f7bd0b79c49f239fb6d3ed",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesContextProviderTest.xml.gz",
+      "decoded_sha256": "2a34df3e0fb28eb6bdb7f95fc0204e2007007633c39c3bbbffbd9209ec5644fc",
+      "archive_sha256": "337b2afb1df1b907f6876f31860b78f478eebf595f9cad7fe936551a1c9be2ac",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesAccessPolicyTest.xml.gz",
+      "decoded_sha256": "546afb5eb12542072723e950fa5bc8e8e0a6a29840271f3bbe189ab7b637df36",
+      "archive_sha256": "f55a66a323775297ab6a3950db4e556c03beed68fe8fc360bf9c3bff9f59d7f3",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesProjectListingContractTest.xml.gz",
+      "decoded_sha256": "4285ef3a46d1736e3ccd0d6f58dbef768046d56fa6e318db68963078c462f728",
+      "archive_sha256": "4401161d72c16bf560de53ab82729b83dcac7a89ae1009969082c2047f933d97",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesSqlListingTest.xml.gz",
+      "decoded_sha256": "3c07aead28f010035f8bfd7216268d3362b3c0d9c563d8c5ee20958967bd71ce",
+      "archive_sha256": "a836f60dd21c9090e3e23eb52a7cdddd39d55aa200c26d74297c0619512fb82e",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesModelAdapterTest.xml.gz",
+      "decoded_sha256": "f940ce3096847a93507881d88f855fcf0c1ac2b0683c21870a732009820e4b49",
+      "archive_sha256": "f5587048a62e2461bbf34ba1da0b70ccd0d0e0619e5ed56dd84294d77e4c249f",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml.gz",
+      "decoded_sha256": "53fbcacd5171ebb2def971db990945fc46f5945f7871b2902f5c504b965f4ae6",
+      "archive_sha256": "c5f3cd46dcc947ffda7e6811b9ee3d00a5784eb2308bf395226aed85b3e05974",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesCommandKindsTest.xml.gz",
+      "decoded_sha256": "d902d95a4d9593372d871c50da00b472227942c6500275ead4325d1878b6dfa3",
+      "archive_sha256": "6c7ba72fdd0f75f0c584344f1b16ebee4d08e8ec018f0cae3322f90c7ac9c6a0",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml.gz",
+      "decoded_sha256": "15843829ca6ab956d45f66851ca0df3c82f2378c243d533b2513f18f50e5c2a8",
+      "archive_sha256": "f1e98d492a4dba3b2e8f69cf79602feeee925d3cdd5a214ad66948cddf8c22ce",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "decoded_sha256": "52117ceb3b3ac04dfce8d519064031f112db7cb5f8ce2f1aa47adde046bf9df5",
+      "archive_sha256": "7032c3be867b89701f91e2f56dba8a8b74378bd098e3949b3fc19cff84a97a30",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml.gz",
+      "decoded_sha256": "935e3869a12be65ad628ff2017e179946bb3e6f1e3bf2ff52561ea7bff00096e",
+      "archive_sha256": "f99066bc4cd37c3a3f895f78517448895e751c5c06240582bc100b85b1ac21e9",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesQueryDtosTest.xml.gz",
+      "decoded_sha256": "89c0914c9a52e0907a4590c73a8af65b5475053c82fbd3f2708bb443af94842e",
+      "archive_sha256": "13472e3ccf8171b6fb396540bf3ea53a19b62296b4441bab227047e34ca1ca3a",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesArtifactRendererTest.xml.gz",
+      "decoded_sha256": "4259cfc5a54a8125ba39aa8bd15616e23a6972def4699e2dc9f6ca46c46a590a",
+      "archive_sha256": "4f6d75da3bbfa53643b636e1fdf96b264a682e3310afa0f46384a7f9ce92d3ab",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesPresentationServiceTest.xml.gz",
+      "decoded_sha256": "14e6b1eb53806e3eb7762f61e7809baf2e1c8189114f9257042a664711b739f4",
+      "archive_sha256": "34f7a0418a6516ddc745feafbdb0b03028c1a0df95b6b25a81cf2659eb596d38",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesCommandPayloadTest.xml.gz",
+      "decoded_sha256": "c2fe9d5c0ad0d499e19563eeec7b7625f2b83c0382c6bff01a9ecd7c9886b4d1",
+      "archive_sha256": "056ac2c400f2b711d7a8cac2ceaa9d55a0362c8c6eb4b4da2f26038f71b96934",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+      "decoded_sha256": "ccaa316250a98aa6027fbfc8c861bb701d05d4906fcace5516df7fbe3d7ccbdf",
+      "archive_sha256": "85c5b0a852c097c41153d9aa708adfe896d2f39168d03524e663b1bc051fc0b1",
+      "redaction_changed_bytes": true
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "decoded_sha256": "b6b465eed9dfef56276f56ee56b0eb0e844038832a68d51e40c2f2dcbd69712a",
+      "archive_sha256": "c38105f5801a79f3c522dd5c41db9e570eec478d66004a51143a91958c574c2c",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesProjectListingTest.xml.gz",
+      "decoded_sha256": "a5a26c75f5dea5661902c4e9dc31d038bed4cdacd655cab2a3e0f7fd6d675104",
+      "archive_sha256": "aa646c9789e19782d6cafdb0c84722b256708ffcf06b9cc09cc93c594b9bfec8",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml.gz",
+      "decoded_sha256": "ea912b0d758f356380b1230b24b2267924a890816132772d854fd2fcef73b620",
+      "archive_sha256": "780190841851a1430a28eea76ac649569f715f08958295c6a7e8ff53e261781d",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml.gz",
+      "decoded_sha256": "a11221000acad2ef3bbc4a182f408904216319cb8342b48bb6976d420ba716f2",
+      "archive_sha256": "e2a14cc76cd96daeea5c70b81a8df14c2660183d40ee7da4ee8537b18950264b",
+      "redaction_changed_bytes": true
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesGenerationControllerTest.xml.gz",
+      "decoded_sha256": "8a1f1b69de5d034a0d72917a553afd61507ef0618f081798f2525f3bab442036",
+      "archive_sha256": "3b902556ececacb99df38db20ad60adfcde67f65ef8cde9746cb57ef081c49bf",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml.gz",
+      "decoded_sha256": "bea414f1e816dab1ecd3410bcc321811f05ad072f6ded6abbda5e7b234d140c1",
+      "archive_sha256": "7280ff8712055e894ed849fc8971fb8f3cbfeed4cd716f1bf648bc96f8c85cf8",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml.gz",
+      "decoded_sha256": "e2c2fa444dd461c96f6da7a399ba2207da0a3dc531e0fdabc66b704cb173da9d",
+      "archive_sha256": "a073f1312469269f324602ddf8056353d65c41919232b4b42f1179cb924266ab",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml.gz",
+      "decoded_sha256": "dae39e8da888784db99dea9b6a4cad01a7f575b66205454ad27395d31a0db5c1",
+      "archive_sha256": "6769ed85a3106546f53bcf814e8af8b7f22d458a69150a3fc104875fabd486f1",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml.gz",
+      "decoded_sha256": "0fab216b6210072744e6a6868c36aa23c82f4e848d2183d1f143f4bf54c48899",
+      "archive_sha256": "912819870f5de8b52722ce5ea1df9e1b266f1961613d2d5114036f40f657dc3b",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+      "decoded_sha256": "c9f6efcbe3befee08d03a70529420b838c1c7e0cc6b1e1a0ea16ad6699de0801",
+      "archive_sha256": "8ccc6370fbea1a8acf27355e6226b2533a864b6beea6ec30c102121731e323dc",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesPresentationPinTest.xml.gz",
+      "decoded_sha256": "8701ae7c33fd5e08a13e3f21b11e1e7ee9845f029d3ad01b4e4c7f07a85641ff",
+      "archive_sha256": "e58ea96354dd6ab43cfdfdc0de5f1e9ef5dfeb3a6334bc131307827af4750dd7",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml.gz",
+      "decoded_sha256": "c23ec0db07c96b4a3232c3ad43ce8098147f45b4a7111490fa3a5f2fa09869ee",
+      "archive_sha256": "ff8a8bbcec1c23bc625dec0bd14919cd930fb3e39fc11c3803bdc3f2cacca9ef",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml.gz",
+      "decoded_sha256": "93e461316fc64bae0890e087d06a5b7c8140dc4496de3c8a3ce9442572f28f1f",
+      "archive_sha256": "5ce1d95b89aba93a25d57aa34b3d5dd8ba263ea3391ee0f10d436b3855536fe2",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesCommandKindContractTest.xml.gz",
+      "decoded_sha256": "ed19993ab5a61ea36b9bb0fb61f348e13118751af16c0426a2cf72a9a2b227f6",
+      "archive_sha256": "265e7e5887c38a73521e50ab6315948f0cf4a3145191a6d6305fe19e5ec06e87",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml.gz",
+      "decoded_sha256": "2cac90c52071b4f1a2d017ef25c5f34d85f238448c4ab76eae7ae2dd0945a775",
+      "archive_sha256": "42a3e50f575fe92fc3273e5dafc013e71312daa71be7ad44a43d079345f5f35f",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+      "decoded_sha256": "8ec7ad655da7eb36f14fd0cba93d12c4a60b73ea0de8e918f0a57910151e6149",
+      "archive_sha256": "78de4ceddd9cd14d75048c98b7bec939b0078817b32328605e154c1de14193a8",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+      "decoded_sha256": "0c4d2eb04dd21ce38f394aa9dc21da1462dea74c08d3820e32828ef1861dbcdc",
+      "archive_sha256": "864435bbab0a132350f6b7d6e666c5bd61cc464caea6a651084b1a9cd7fedde5",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesIntegrationTest.xml.gz",
+      "decoded_sha256": "970b3490aafc7489a244e03fd5850feecab0b56074e53a92aa7d487fa3c671ba",
+      "archive_sha256": "02c30e4c9a03f634c96da0b9a741524e5fae16ee4aa3a799206c9913bd884339",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesAccessActorTest.xml.gz",
+      "decoded_sha256": "8f075726c6d5251258e4a106972b1e0cce3ce2566228feaf13cff8361d433de5",
+      "archive_sha256": "2174fbea9a38392f620538241f9a845022e8bbe990adbacb9d046f5d17d77ef3",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.presales.PresalesSourceScopeTest.xml.gz",
+      "decoded_sha256": "66458cf6213d876bd42eb2318bcc92d4d50d303a4d26e24f753d14f2639e9fdb",
+      "archive_sha256": "78301f14e8f555c99a76af86ea832123a9a99484b65c2668d5b9736683f9a6e5",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.architecture.WorkbenchArchitectureTest.xml.gz",
+      "decoded_sha256": "ecdab07b3e7c89eaad9c97fbcafc92a5963184e3b31cfd57bf516683d9c3ea68",
+      "archive_sha256": "1ac5e4320dd827d58a0b440fea17f0afd30c8deac7348d874dbcd0d8d11a2902",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/combined-TEST-vip.mate.semantic.SemanticCoreArchitectureTest.xml.gz",
+      "decoded_sha256": "0e0543a3bb673c0b519a461c8ef84dc42f398bbf174c40209e4f4d063c3b3e18",
+      "archive_sha256": "572afbc906a4ba074fe3c7bd698734ddc16b5d76ccfd4d78226929e5dd6ad7dc",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-.quality__policy.json.gz",
+      "decoded_sha256": "fd68ea349fb6d7dd1f3d20849353cffcf94716b5fc9945c9f7d6141c94ccf607",
+      "archive_sha256": "b51280ab8dea672565aef67501223a0c763c6d47899e2d530f4610c830a78387",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-.agents__skills__mateclaw-engineering-gate__SKILL.md.gz",
+      "decoded_sha256": "5a991d3174781c963fb41c84fda3ca752f2623f5805921f4626754e88db26348",
+      "archive_sha256": "fa556ccbb0cad91df2018dac56024b39d420caf3d054585e67b7f623d1cddb19",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-.github__pull_request_template.md.gz",
+      "decoded_sha256": "c9b8410ae3589aedb46c742183ed20a17c74527a8a35cf409c73ffc2d9f67661",
+      "archive_sha256": "117c2e627b97b8e639ee56c2f83456ee2159a674b4744f44e5cd086083c4000c",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-docs__architecture-quality-v1__RULES.md.gz",
+      "decoded_sha256": "46afc422a7fcf7faa163b581554a8b4aed2c57325d49e57b24f77d3132b73f81",
+      "archive_sha256": "14d2c5f9f02c573461d47ab9116d12eda06c384dcf1648d20028e103b50395b1",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-docs__architecture-quality-v1__README.md.gz",
+      "decoded_sha256": "93f2cf384b8210b712374dcb46a76dab71b6b657058dfe0c0b29970aeff3f080",
+      "archive_sha256": "f9f6205bbc89b266952664b8e3df903e946d878776abc41a20b4a8af7d26cc28",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-docs__architecture-quality-v1__REVIEW_CHECKLIST.md.gz",
+      "decoded_sha256": "7ec3b99e81cad2d99c4030d867a21cd57dff8109e27c1c49db372f65e77f98ea",
+      "archive_sha256": "a814532de04a674d8d051ce24979a8e13eb932e6b97d31bae23604a2be5c95ed",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-docs__architecture-quality-v1__integration__WorkbenchArchitectureTest.java.gz",
+      "decoded_sha256": "4953db7c6e58101c37dc2916377245008e0efe05fb949a5e51350f1a5c7f08f6",
+      "archive_sha256": "6f5211d9d16496f6b3706c6733fd2e31c65cc4da67869a3f58e5d4719acec881",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__architecture__WorkbenchArchitectureTest.java.gz",
+      "decoded_sha256": "4932b62ef4ad11c515331608acc85200e6d9df559278fca42283daaaa0cc7e46",
+      "archive_sha256": "3fecf3c5b1c6d69abecbdca8b67ca62c814cb8ef689011170420eb1fd06e4dfc",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__agent__architecturefixture__RuntimeCanaries.java.gz",
+      "decoded_sha256": "8efaebc439961e890616c7d59370273eb6e48bf2463cc921474b382db443ce3f",
+      "archive_sha256": "7f1d2e2155d9e9f53d0e62cac850ef9ebe2e42f88db72e1d9774870430029b9f",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__presales__architecturefixture__ControllerCanaries.java.gz",
+      "decoded_sha256": "45f7df88b60f760b415972801d7f5656e9587a0eb0f002e4065995a58cff367e",
+      "archive_sha256": "7ce00dc461399a528c1701c7eda1ed7531fef398473fa36193182f7961dbac49",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__semantic__core__architecturefixture__ForbiddenFrameworkDependency.java.gz",
+      "decoded_sha256": "03f211aef1c873632977d5d1742da236688621addbeb016e6afa175b4205e6a3",
+      "archive_sha256": "e7ceed6f3b30629fe1b9a2591545ea65c67ea94c63f7116d65f4fd53c773ae70",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__semantic__application__architecturefixture__AllowedExtractionPortDependency.java.gz",
+      "decoded_sha256": "235ebf7c8c2c1bf730ec51416d52e829b5a0e2768b04dfd77426e372c89b2285",
+      "archive_sha256": "6d7f2aadca80b2b2d444154f619c7c8e05813a2a7115dc103f8aeec984decf9b",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/archunit-install-tests/candidate-mateclaw-server__src__test__java__vip__mate__presales__repository__architecturefixture__QueryPort.java.gz",
+      "decoded_sha256": "ccfe35cfe06bcfbce0043a35f705433a3e646804272d5687741156cf90d5fcdf",
+      "archive_sha256": "fba93b07b54fe2e0ba10b6d125b15abcbb4f4c46b735b3c3c71e1af7dc55b647",
+      "redaction_changed_bytes": false
+    }
+  ],
+  "source_sha256": {
+    ".quality/policy.json": "fd68ea349fb6d7dd1f3d20849353cffcf94716b5fc9945c9f7d6141c94ccf607",
+    ".agents/skills/mateclaw-engineering-gate/SKILL.md": "5a991d3174781c963fb41c84fda3ca752f2623f5805921f4626754e88db26348",
+    ".github/pull_request_template.md": "c9b8410ae3589aedb46c742183ed20a17c74527a8a35cf409c73ffc2d9f67661",
+    "docs/architecture-quality-v1/RULES.md": "46afc422a7fcf7faa163b581554a8b4aed2c57325d49e57b24f77d3132b73f81",
+    "docs/architecture-quality-v1/README.md": "93f2cf384b8210b712374dcb46a76dab71b6b657058dfe0c0b29970aeff3f080",
+    "docs/architecture-quality-v1/REVIEW_CHECKLIST.md": "7ec3b99e81cad2d99c4030d867a21cd57dff8109e27c1c49db372f65e77f98ea",
+    "docs/architecture-quality-v1/integration/WorkbenchArchitectureTest.java": "4953db7c6e58101c37dc2916377245008e0efe05fb949a5e51350f1a5c7f08f6",
+    "mateclaw-server/src/test/java/vip/mate/architecture/WorkbenchArchitectureTest.java": "4932b62ef4ad11c515331608acc85200e6d9df559278fca42283daaaa0cc7e46",
+    "mateclaw-server/src/test/java/vip/mate/agent/architecturefixture/RuntimeCanaries.java": "8efaebc439961e890616c7d59370273eb6e48bf2463cc921474b382db443ce3f",
+    "mateclaw-server/src/test/java/vip/mate/presales/architecturefixture/ControllerCanaries.java": "45f7df88b60f760b415972801d7f5656e9587a0eb0f002e4065995a58cff367e",
+    "mateclaw-server/src/test/java/vip/mate/semantic/core/architecturefixture/ForbiddenFrameworkDependency.java": "03f211aef1c873632977d5d1742da236688621addbeb016e6afa175b4205e6a3",
+    "mateclaw-server/src/test/java/vip/mate/semantic/application/architecturefixture/AllowedExtractionPortDependency.java": "235ebf7c8c2c1bf730ec51416d52e829b5a0e2768b04dfd77426e372c89b2285",
+    "mateclaw-server/src/test/java/vip/mate/presales/repository/architecturefixture/QueryPort.java": "ccfe35cfe06bcfbce0043a35f705433a3e646804272d5687741156cf90d5fcdf"
+  },
+  "migration_manifest_gate_existing_semantic_test": "UNCHANGED_HEAD_BYTES",
+  "aq05_aq20_sources": "UNCHANGED_PREVIOUS_ACCEPTANCE_HASHES",
+  "formal_ac": "46 NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED",
+  "submission_ready": false,
+  "preceding_phase_dev_report": "mateclaw-quality-bz6m680n",
+  "resume_dev_report": "mateclaw-quality-3k21duk5"
+}

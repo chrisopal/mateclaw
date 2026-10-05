@@ -1,0 +1,476 @@
+[
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/before-PresalesService.java.gz",
+    "archive_sha256": "d6ce16fda079c68afa11c3f4908e29a41a6f0a40ffe815785a6e0017c733f2fa",
+    "decoded_sha256": "5de0c1dcbae496765dff9edb1580c87114591da37ebf57434638af1589102277",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline.log.gz",
+    "archive_sha256": "7c366b0d96e6c09136d15ae506d371530937342ee88d0027bc8ad0c968015caa",
+    "decoded_sha256": "fcac1a40e918a5c359fa9ff8fa3276e93383a0a1a8a255d8aa19d925853ad91f",
+    "redacted_fields": 2
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline-results.json.gz",
+    "archive_sha256": "276042cd160405942e2bcde83e642e797dadb782d8f56123a2814460f12f9960",
+    "decoded_sha256": "a4709be29c7230def5a9da90d1a3af1dfd6c8a5a2b32d17256bb4af04d9f4c0f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted.log.gz",
+    "archive_sha256": "ceb2e3fe0542ea87109e3dec8449f6e3249839961cafac031a36fbabd1a52fc7",
+    "decoded_sha256": "e986ba4e31a388a1b0feeaefb13b0cd6ed11dd930a5cfbadf1b16b437041e8e9",
+    "redacted_fields": 2
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-results.json.gz",
+    "archive_sha256": "a81548949fb0006e5a5012d460fa73349fb3ad4e6638e5b78d93527eb2e791d3",
+    "decoded_sha256": "984a36c9c8a2b0d2eb849413efd2b01b20e44905da1d743eb123dd4f6a059390",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/format.log.gz",
+    "archive_sha256": "67b56a70aeaf95a16c285da4b68699aa5c7e2dade28856af11339706809b1bf6",
+    "decoded_sha256": "1f34d957cc256703df9603e33763e8f6e3243836e02a29c0fcb93a62734a0c06",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/initial-dev.log.gz",
+    "archive_sha256": "4f7b1626d03ed5cd91d93c37b012306b792866807b1d6fe9b6e4c7d3604c126f",
+    "decoded_sha256": "168d5d6d4f1144d1e10aeed234e2ca5c252f5ca27f07b3facdf92d777587d6b2",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/after-dev.log.gz",
+    "archive_sha256": "05522c3e5a6cb4b62cb82a1579c74cbf9d8510c696766983c9f837aa7496f47d",
+    "decoded_sha256": "a852d6fb990bdfb98a7c794d34917db6c465707181ddced373348e7570d64326",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad.log.gz",
+    "archive_sha256": "5e68d1f51eeb4d9485125f479ac49830d171a157c92590c03bfc5fea889737f8",
+    "decoded_sha256": "0b5a3acc5a3e8cfaf50e0525956d7010dc24f7fd023592a13f445ea50993b8df",
+    "redacted_fields": 6
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-results.json.gz",
+    "archive_sha256": "98637ea4fa19198b63fa81f783b5fe7b6e2cafca8362d49dd19354b557fa818b",
+    "decoded_sha256": "83a5b411e87a83701e6adf36041910b86525f16bf710e2a6f0ed035222b783d5",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+    "archive_sha256": "cf56afcb468b62bc6265d35f15cda3d2fb36e124a8f719a9036fed0492ec4a42",
+    "decoded_sha256": "4f200f3c4be81c5779eea5d700f2255f51a91eb717289ea404ecc63135978074",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+    "archive_sha256": "0fdc45f2dd65e6d1cec7803455283c9268e81744a149380fb2e763501bdab84d",
+    "decoded_sha256": "04f68b19847999acea256275dd284989a8f4c77c100f42030ae59e808751edb5",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+    "archive_sha256": "0c3e85320d2c7e448b54311a84a16ecedbc941ae629b4ce045e1ae4ef7fd54fe",
+    "decoded_sha256": "40d04d72ab677321c657b17bff1bbe9552cf40d5d912daec961e15f41e43fd89",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/baseline-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+    "archive_sha256": "71acbfa7d29aaf1d4e612a3242d4ffc238b6a880bf3a6abc4841bf4e8cc7d0a2",
+    "decoded_sha256": "4504f4416d387abee532289e98e338cc65837ce6c70c4777603c4c8c77f792c5",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+    "archive_sha256": "97bbbde44a1bb0975dffb1e7efbd10e8e109da74e6ac295d555d30c2cef0ba30",
+    "decoded_sha256": "1180bbbc931040b92f9da87d12339eeea123e90563c3cd9b846a334dea4e0b31",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+    "archive_sha256": "c312d43d77de02b8badced4683e08866c2cd419f933f9a9499c282fa1e81e9c5",
+    "decoded_sha256": "e7696357975ea7a19acee5b9858410cb617a565e6e02b0052606435825a57129",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+    "archive_sha256": "27a910ef9742da9e2068264c80e7bc21e2a00da8cf95f3e69b6aa7eb05336bd3",
+    "decoded_sha256": "f9353011536a0e36e02eb2aabeea0680ab9157a8257724f94e1584857dbc805f",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-TEST-vip.mate.presales.PresalesTaskAcceptanceTest.xml.gz",
+    "archive_sha256": "e9da79aef4cb0b483dd7e2c8ac19f45b3eb80fa40b6d62a19c912dde1544d419",
+    "decoded_sha256": "dfbcd469e576e0fbf5f7fa9b37907755fc49beb031d51a9d4fab26b2a4c93d32",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/targeted-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+    "archive_sha256": "6f86fe453bc20f968224004c0e074ac67d78a4a4484713d7dc962f4c15d48295",
+    "decoded_sha256": "c4e13f3da3d523db58dde30b2077548527a57238d67237d0e2ab8fa7cf22c91e",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.agent.execution.ProjectExecutionRevalidatorDispatcherTest.xml.gz",
+    "archive_sha256": "3f7c38206c8973b21d5995d0f857f7262ffd7840c5fcfb47afcc2cb2817ab32f",
+    "decoded_sha256": "df5ba477b829fe1f1963b0c7b0cedea685f8d5f0ede83e38110b3fe48dd70ea2",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.agent.execution.ProjectExecutionWiringTest.xml.gz",
+    "archive_sha256": "05300982ce3ea2f1f7a7b95e5bf11bd6717b08972debc116378cc420ceef53d0",
+    "decoded_sha256": "63e0bffa9f67282cde50d7dcd03ba6b0f359a1b5d0391a3f37f99956bbbf0f44",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.architecture.WorkbenchArchitectureTest.xml.gz",
+    "archive_sha256": "d7036c50cc2f642097d61dbcff759676e5506a53049e1d3cfd3d3f47e0137bcc",
+    "decoded_sha256": "ba25437fd978ec3e653d75fc4dc6a720395fa2cd9098bdfe9c5f23cea2e6f3f8",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesAccessActorTest.xml.gz",
+    "archive_sha256": "54a99993312166c1df7b2f7b65a0da10978427fe3faa09a91860469c282434a1",
+    "decoded_sha256": "de8c9fce6c5932fe60e469074af278d539a3c575b7630c07dd32f2365d7596cd",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesAccessPolicyTest.xml.gz",
+    "archive_sha256": "ba66f30ebf35311ebf2552b1a58dc1a21c728ffaec1dcf6ef1c27633901f6e33",
+    "decoded_sha256": "175828136898979679ce90d289e67ab00ab3ccf2389b65b968194256648f7f7d",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml.gz",
+    "archive_sha256": "a3fb98f47ca7bbd650c092dc91cb00af3bd813670033beabac0d7850ef5086dc",
+    "decoded_sha256": "301993d8e050d136b8e6866d320f6be6f3a060690b9628455839ae40a7173efd",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml.gz",
+    "archive_sha256": "b21fe5998b4b5cafd159ed2d4f730dfe9943a0c3829b419530d4368cf24dbf77",
+    "decoded_sha256": "e8d468506330ceaa2a82aae311dfe5e1a54e2e01abbf81a7fe3319488fefcbd2",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesArtifactRendererTest.xml.gz",
+    "archive_sha256": "6d42885e542464f732ea659841a7a903c327b04d51e13116e9b8d7b674de1746",
+    "decoded_sha256": "3f95e1894b05984ea4a577a5d6607bf9f92e872cb973bcc8bac61116ce41219a",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml.gz",
+    "archive_sha256": "76f796ca4d6599c3ee61b12591946c999d0041de240ad90580ff0465b7bd67d0",
+    "decoded_sha256": "85cac37aff8032b0246edf792cc2052586f914cdf758312dba1b69effee0bf71",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+    "archive_sha256": "b415bc5f5c33bb1d3f9ea3ee666caefe31f0f56d887961aeb30280df09306204",
+    "decoded_sha256": "321ef003247c8d2b75247f0eb97d7d49f067ffeaa6eb497d7bf7ba73660314ba",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesCommandKindContractTest.xml.gz",
+    "archive_sha256": "cd73523bdbe80af483039786c4a16264873dd76461b16951fb7a556372331f7f",
+    "decoded_sha256": "e74de26458846acc99acc4c41d9e05965bafb581e147e28decf0e29c0b5e9df2",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesCommandKindsTest.xml.gz",
+    "archive_sha256": "7251375b02771a5049fb5188205fbd43a9084edb533b906e39f59aca32e8d11b",
+    "decoded_sha256": "d443acc43b910de50975e725eb0f330b6d9b652abf634af7ff1c357d60c90a7f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+    "archive_sha256": "427291c377af1373e7fdb30596e63fcac697477566a738f41242fa1b329726ea",
+    "decoded_sha256": "d8721de7b1f0f3412293c8ae39174c418dbc85337fbef036348e8cb938bee54c",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesCommandPayloadTest.xml.gz",
+    "archive_sha256": "11e9b8affb74cd1aed5e79943d3a46f57bc0be580b04cc237c2022437d2a1349",
+    "decoded_sha256": "6fcf6a2231ed8d5b89b6552329a024938c11fac471cb1d7563d058aca2f16842",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesContextProviderTest.xml.gz",
+    "archive_sha256": "b99b06066716e090a7a802219a544c18a3b6a5da6a5837afb0a74b5dbd3d1f79",
+    "decoded_sha256": "f0f9f28108f9db5e50b43f0d9794a8931658e27e3f0f715db19e077e6a0bcc68",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesDisabledStartupReadContractTest.xml.gz",
+    "archive_sha256": "998dd48d556702432770cc7bf69df43f7bf0cb8f990cf28415be19129f3de76c",
+    "decoded_sha256": "d7e6688096abb0315ca55e573550c7607f03e6b65f42b8a997561113748fd650",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesEmployeeQueryContractTest.xml.gz",
+    "archive_sha256": "468771f6f43bc554b65b66fde58a29fa73fe8b904cb44adee41219a1f818ced0",
+    "decoded_sha256": "2e56e2de3456631dd0d37d93c649e9f8cb7f22dc8bd5312e7249bff83d5ed82b",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+    "archive_sha256": "bcc9a31adb5cb17f4ae77c03ab53896c94c3f7dc38238db9d3fbc918189e05fa",
+    "decoded_sha256": "559b29b9356ed6652dd6dca8116ff2447f9844dd9650f3dcd971b3e77d2f7881",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml.gz",
+    "archive_sha256": "267f0554a84c5b84b57d350c10c05184b869abff6636932e81344f1eb1ab4c80",
+    "decoded_sha256": "b8a821a38ea48cde8d16ab52ee8d4fe561615e971c11693aa6d3a29c160456b6",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesErrorContractTest.xml.gz",
+    "archive_sha256": "ae0edd595950360007ba0cd705ad7d7e3cb3f4589a627b45023de05ae77669c9",
+    "decoded_sha256": "49e1ea11d0b07540b599ab37006df26323bbd50cf46a3fbb455c9f1d78badd31",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml.gz",
+    "archive_sha256": "9b9c8a360827d89f24bba854b632029291b99492a1a37ca65b2b3b08cf402c45",
+    "decoded_sha256": "b5672160e2c8f8e575da175f42e3a05ccbab88baab97316760b7ba56ce18b181",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesExecutionVersionContractTest.xml.gz",
+    "archive_sha256": "18e9af25e7d0c0ab299e2807c6e0bce1b377eb51b1f994831c2469c7ed1378be",
+    "decoded_sha256": "92a0d0cad39d58793fd5798eb80bb7142cbff9301d5df6773aa16bddfb754cf1",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesGenerationControllerTest.xml.gz",
+    "archive_sha256": "c366d15a2a12a930d31316ae6ac3169de2554feca67af3233a1894491ff6e25b",
+    "decoded_sha256": "fcfb6656fb10b3dd9fa90dbe7dcc91b6efd0030ee6cdcc21d91d0f1f3551ac6e",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml.gz",
+    "archive_sha256": "cbf53ea7f39e4a123fa7723067a10ba6e189fd756bb184bda1678f0442722ccd",
+    "decoded_sha256": "a0a8a5dbfbbb42a36e168d8809356de9df6c74d0146b57e9d45cb8f557c57a50",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesHandoffReadContractTest.xml.gz",
+    "archive_sha256": "996f0c4ff8fd047fbe221b668bf791136d5141a36066b0a3a6544e11c2bdb594",
+    "decoded_sha256": "2d1e6b5cd722af583f0e6ad4c37c8372f9f4f335679c14d28b4cea9c0647ae51",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesIntegrationTest.xml.gz",
+    "archive_sha256": "907d0b6b248523837a58de1d990d14d5e7f430f848b30d0428cdaace4c1d7d12",
+    "decoded_sha256": "bb3dc9f6be7d44a93fcca63916cb99c7e9fa89b3d1fcc51480c326dede83cfea",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml.gz",
+    "archive_sha256": "e39d3f26457afe2b943e623a8bed2c426f1d8448ac10e554efce9d8ed48d1280",
+    "decoded_sha256": "79dba269af2bb77ad3bda48f670dee7d2fc362b78d4183c3e31527c13fdb9f3a",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesModelAdapterTest.xml.gz",
+    "archive_sha256": "e628dfd8c7eba19bd7d231b9685121518517231aa5c4b945520119585ae33173",
+    "decoded_sha256": "9a0f66a2b77309d5a71cce6bf77410e0b8ed7b6dc097fa8007f9e260150b16e0",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml.gz",
+    "archive_sha256": "155a758442a6f5899501120eca48e5b25858ef6b1f5874c6fea58805d129e0ec",
+    "decoded_sha256": "2a4593031782acb73a7f8e435ec557cb7917dc9323a151ef1c51540343e7f64f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesPresentationPinTest.xml.gz",
+    "archive_sha256": "282f3348bb6fe4051a6057f71b0cc36bcb08ed3c3e49da43093abc7adbf83224",
+    "decoded_sha256": "67a787b3aa1e12e6d7717f9b82ccbfee5c4077bd204f9e3bae44624ff3d85a24",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesPresentationServiceTest.xml.gz",
+    "archive_sha256": "4697cdca65ddbadfeb7af1346e81ee54498f37b9b449c7ef83d7eaaeb8412ee5",
+    "decoded_sha256": "a02b8c14bf5e8d243cd25fc48adf5d8adaa74d7350292155cc9ca4375f1199e3",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesProjectItemsTest.xml.gz",
+    "archive_sha256": "322969512055e325109ec098c2ce4b65ed81225643c7b939f0c376af3396d742",
+    "decoded_sha256": "6ebec183fc354fed9fcc998951b5208ddb417cb4532bf9b9698eeee0338fb5c4",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesProjectListingContractTest.xml.gz",
+    "archive_sha256": "89412953b2755c007c428919f8ba75d7882ca01afb2545b527dc850e69e1262c",
+    "decoded_sha256": "f373295bbdefc6dfec43ebe0c91a3c36088ce5d6869f0a66316e0e926fc31fb7",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesProjectListingTest.xml.gz",
+    "archive_sha256": "b32515f89d1c9d91057d5334d3f5d0e4eb703fa7d075fc9027593c014588585d",
+    "decoded_sha256": "72267aa11b77c62642c74fe1f065cb9a5766d3923b12a9b593a85b11c77e1e39",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml.gz",
+    "archive_sha256": "a1469a2e0af7edc3a822f1ae386f2e1ddd0611d8607b88d689925920016f3827",
+    "decoded_sha256": "693e13cba04c807c0476a2be8d3e5c27e216608046442217866afb8f30cf02b5",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml.gz",
+    "archive_sha256": "c7d28bd447d05664e9ef9d1db9df175f5ea4ffe97b2dfcac61e10074dba05a6f",
+    "decoded_sha256": "b2e015c6b46ebc3d2724e3afda0d1bc60a8bd16a4544a72d1249220157c5c58e",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml.gz",
+    "archive_sha256": "4e44dc2169d385488d0628adffd83490cda90ae19d0db3d32619af95bc70f248",
+    "decoded_sha256": "176ecb8e36f36d9f3fa4afd3c71d10236083d26f8dfa26a1f6ffed7e821cada2",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesQueryDtosTest.xml.gz",
+    "archive_sha256": "48b417602823107e813d43de117f5b07f9f7632ca42f76fa4445797431d28c6b",
+    "decoded_sha256": "8812a7b2ae61aab28691f141f0c8e7b4667495a225a153aea76e577602930971",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesReleaseAuthorizationTest.xml.gz",
+    "archive_sha256": "e8f641853ef19fa9054a98f1a6a6be91c9c432d28422a856b7ee40bdf28bb36f",
+    "decoded_sha256": "98194b6202d7f71b7f20655332d82434cd087c81412f1121efac776a87849f6b",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesReleaseSnapshotContractTest.xml.gz",
+    "archive_sha256": "1f61e335892a8e94f452203906bf8c054e14700bbc29f174703dff0130a8c1ac",
+    "decoded_sha256": "5a168d8ab3c77ae9dcc5489810fa34456c67975fb0a215e8543bb0b8be2b4219",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesRepairPolicyTest.xml.gz",
+    "archive_sha256": "0fd65efee106d0ca1fa2c97a591674da5596e5ca12e80f8bf5e9d05a885639d7",
+    "decoded_sha256": "1c9c906f34bd92584540da0fc5d187e0440381c6d8c94047c63c849492a49df2",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+    "archive_sha256": "91ad317ef3e24d6b844f68a7d8cb876c923ef08d958d22b50825568a0e8e89ab",
+    "decoded_sha256": "47b25eabfa106fea44bbc7eb94aa459c4ab677e068bb04c30757b5632946486a",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesRequestHashReplayTest.xml.gz",
+    "archive_sha256": "934ecea9611176292623e876112ee30fe9c886ed340e391c2e789ef1de7c45d6",
+    "decoded_sha256": "0c6adf9195ae653b38ed46ba0a7f3892f0adb52b29e2c074cb338c40e9d91de5",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+    "archive_sha256": "130e8b08997193618e39c715e7c6c3998deb1444efccb39d3f88acd6d4a16aff",
+    "decoded_sha256": "4ae311282adbfaa1a8ccf6dbca016238b37c3fd076cf1282d87072175a9b18ed",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+    "archive_sha256": "1cd35d27e4773ebf0c286d3e2d770111195eb51af092ea1d65de27e112160e1d",
+    "decoded_sha256": "86772479e9bb750ad68cc253c0f3991a11bf9112d2e4846d7516ae5807a1d138",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml.gz",
+    "archive_sha256": "f2f98a0acc6b7c12cf55ca6e1de3fe987eaeb2e0a4cbf7293e13564146d51e98",
+    "decoded_sha256": "153d616b8f3df54eb3848272dae980193001723103af3a0f79daf094ff2b8cd0",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml.gz",
+    "archive_sha256": "1e1c1e077b4bc89e32781e293dca1e1605fbcd342db8f2edd5c43fecc2a29ecd",
+    "decoded_sha256": "30d96b75bce0239fd5a589b0927e7e63460f2eecca879c2bc63f50cf83871879",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml.gz",
+    "archive_sha256": "9d659d7107f02f071c5a3218fb62904dc42fa1c4d7e4aedb2ec3880585fe9dbb",
+    "decoded_sha256": "745935846e787495063cab12841bebc02aa056a7baedf69b8de298d9afc7a3da",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesSourceScopeTest.xml.gz",
+    "archive_sha256": "c577aad87137a16abbef2804ca48a6567f37cb471eee5893eedbd1310f5d4830",
+    "decoded_sha256": "f5446407b83cdd0c76913f64c6b7528192410f5e0816be0f923ccc575216ebf3",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesSqlListingTest.xml.gz",
+    "archive_sha256": "8a9ba003ec6fe4a6225a9e6d644114e2e7e0171e822bfd766a5b1c2be24fe7fd",
+    "decoded_sha256": "58efe8f78f4f9b6a21d439115076e2caee05de1c398bd04d0b7f95eeb775fc15",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesTaskAcceptanceTest.xml.gz",
+    "archive_sha256": "c8a727e8b69189dea47d16365655ff8ec7ca3804dd7e7c87dc1bad1ac7b1d339",
+    "decoded_sha256": "e79728314168eee8839ff0f7ee92e369115d42983bfc05cdcee631acb91553a0",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml.gz",
+    "archive_sha256": "2058b16080aacc7c6cb8a79997a0996d234f5b40787c916a28e980976cc2c781",
+    "decoded_sha256": "3f73c6657891adc382c6def811758871b81e4a80127134051174372dbbd9759f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.PresalesVersionInputContractTest.xml.gz",
+    "archive_sha256": "274ee4499c0e80e03335fdc93f42d096815d90fe906d74e22c40c988df56ff38",
+    "decoded_sha256": "ef1db19edc3f7195c88dfba18225cebeacbb92d1b3927ed92d8837cc917dc56b",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+    "archive_sha256": "9ec9a7ffd403d0a48f2d61233fcbf1ec02446301161a1d1b5cc1c56c16484475",
+    "decoded_sha256": "1e0a5a99bda0f8082f60d0ce05db247202f9c5a8d2fee3ac48c176bc3bbbb04f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.semantic.SemanticGraphBindingTest.xml.gz",
+    "archive_sha256": "6f4c9c899f2e809ebc14f2b9248cafe586e1e9d237244d16d895b8a578c2587e",
+    "decoded_sha256": "10d9ac44c1f3958cee2f3fcee7ece84b6213cecdfcc70e4bf8eb313eae528119",
+    "redacted_fields": 1
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/broad-TEST-vip.mate.semantic.graph.GraphOptionalBindingContractTest.xml.gz",
+    "archive_sha256": "216719e5986452fc78befd40a49671ead2c1693cc2028538c3bebef81b0094a1",
+    "decoded_sha256": "569deda31e2c31d4af64624b840ec275dc414ed13a840291b71cc09f6f704c37",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/PresalesService.java.gz",
+    "archive_sha256": "ca3d4eddfb1b57f4501463d5feae011ebb22dae1126dabde83badc34a6f55b23",
+    "decoded_sha256": "ecf3f9fa7dac325fed2931503952348c2bdfd344c39d1e86c1f68a8899e90088",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/PresalesTaskAcceptance.java.gz",
+    "archive_sha256": "ab585c92fa3eae8102c5c033d70fc1ea0f6126b4cecdd84e24ff53bbbb4f3f54",
+    "decoded_sha256": "7e03328c0d63f409e7177f618269e043a50ac694dbed5a230821ee299be9fb96",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/PresalesTaskAcceptanceTest.java.gz",
+    "archive_sha256": "77520b6c99856160b9813d116bc17c2be6a83614a906498f1e5d9be973dfde44",
+    "decoded_sha256": "32c9a07b76e74041bc69fdd302e0aeba7d6e3ea533d3ded8769b56aa89ea720f",
+    "redacted_fields": 0
+  },
+  {
+    "path": "docs/architecture-quality-v1/evidence/2026-10-06/task-acceptance-tests/spotless.log.gz",
+    "archive_sha256": "cd4244e87cc480aa14f08fbb729c2386c9aeebf21dd4c3ef9dfaea09541b9e40",
+    "decoded_sha256": "0d5c5cb26a8b7a9310738f01c4ba6ea7e198a0fa17acd42d7dbcc8cc16b5aeb6",
+    "redacted_fields": 0
+  }
+]

@@ -1,0 +1,11 @@
+# AQ-05 发布实时授权策略拆分计划
+
+HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，108项dirty。初始dev e4yet_s4 SCAN_PASS/submission_ready=false。仅architecture-quality工作树，保留累计WIP。
+
+Service的releaseGate承载模块可用性、精确需求/声明修订、本体变化、来源证据复核和人工评审查询，同时fit-gap写入使用同组证据逻辑。将这些当前事实检查集中包内PresalesReleaseAuthorization，复用PresalesSolutionPolicy和PresalesProjectItems及既有公开语义服务。新模块不写数据库、不渲染、不升级批准，不依赖Service或Controller；不引入bean/依赖/表。
+
+模块拥有requireEnabled、validateEvidence、reviewId三个具体操作。Service保留当前成员/admin前置检查、来源/replay/CAS顺序、事务、文件持久化、批准/发布状态迁移，并仅在旧边界将PresalesRejected/SourceAuthorization.Denied转换为既有SemanticApiException，保持调用者兼容。requireEnabled保持原只检查semantic/graph/statement的条件，不额外加入query provider检查改动错误优先级。逐项遍历顺序和实时调用不可缓存或去重。
+
+实施顺序：先运行旧ReleaseSnapshot/SolutionPolicy/ArtifactPersistence/Handoff/DisabledStartup合同；新增策略边界测试锁定enabled检查、stale requirement→graph→fact→evidence顺序、精确revision、fit-gap UNKNOWN跳过、来源拒绝和review优先级。旧公开行为有现成合同保护，不修改已有断言。提取后重跑定向和扩展presales/runtime/字节码回归、正式base Spotless与dev，独立审核后归档SHA/XML/log。若现有测试不足，在旧Service补刻画后才搬移。
+
+不修改纯SolutionPolicy、旧Flyway、摘要算法、前端、门禁或生产数据。新策略无Service回调；拒绝通用rule engine、重复事务或把整个Service移入另一大类。回退仅恢复before Service并删除新增策略及其独立测试。正式浏览器/业务/QA、真实历史耗尽版本恢复和完整V2迁移仍开放。

@@ -6,9 +6,50 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PresalesProjectItemsTest {
     private final ObjectMapper json = new ObjectMapper();
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2147483647", "4294967297", "1.5", "\"1.5\"", "0", "null", "{}", "[]"})
+    void invalidOrExhaustedRevisionLeavesBothItemAndRequestUntouched(String raw) throws Exception {
+        for (boolean immutable : new boolean[] {false, true}) {
+            var p = json.createObjectNode();
+            var old = p.putArray("items").addObject().put("id", "old");
+            old.set("version", json.readTree(raw));
+            var value = json.createObjectNode().put("id", "old").put("title", "new");
+            var before = p.deepCopy();
+            var input = value.deepCopy();
+            var error =
+                    assertThrows(
+                            PresalesRejected.class,
+                            () ->
+                                    PresalesProjectItems.saveItem(
+                                            p, "items", value, "actor", immutable));
+            assertEquals(409, error.status());
+            assertEquals(
+                    raw.equals("2147483647") ? "VERSION_EXHAUSTED" : "VERSION_CONFLICT",
+                    error.code());
+            assertEquals(before, p);
+            assertEquals(input, value);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void lastItemRevisionRemainsPositiveAndPreservesReplacementPolicy(boolean immutable) {
+        var p = json.createObjectNode();
+        p.putArray("items").addObject().put("id", "old").put("version", Integer.MAX_VALUE - 1);
+        var before = p.path("items").get(0).deepCopy();
+        var value = json.createObjectNode().put("id", "old");
+        PresalesProjectItems.saveItem(p, "items", value, "actor", immutable);
+        assertEquals(Integer.MAX_VALUE, value.path("version").intValue());
+        assertEquals(immutable ? 2 : 1, p.path("items").size());
+        if (immutable) assertEquals(before, p.path("items").get(0));
+        else assertEquals("old", value.path("id").asText());
+    }
 
     @Test
     void mutableReplacementMovesToEndAndRetainsStringIdentity() {
@@ -55,7 +96,7 @@ class PresalesProjectItemsTest {
         var p = json.createObjectNode();
         var missing =
                 assertThrows(
-                        PresalesProjectItems.Rejected.class,
+                        PresalesRejected.class,
                         () -> PresalesProjectItems.find(p, "tasks", "missing"));
         assertEquals(404, missing.status());
         assertEquals("NOT_FOUND", missing.code());
@@ -63,7 +104,7 @@ class PresalesProjectItemsTest {
         assertTrue(p.path("tasks").isArray());
         var v = json.createObjectNode().put("id", "missing");
         assertThrows(
-                PresalesProjectItems.Rejected.class,
+                PresalesRejected.class,
                 () -> PresalesProjectItems.saveItem(p, "tasks", v, "a", false));
         assertEquals(json.createObjectNode().put("id", "missing"), v);
         assertEquals(0, p.path("tasks").size());
@@ -82,14 +123,12 @@ class PresalesProjectItemsTest {
         v.put("status", "open");
         var e =
                 assertThrows(
-                        PresalesProjectItems.Rejected.class,
+                        PresalesRejected.class,
                         () -> PresalesProjectItems.enumValue(v, "status", Set.of("OPEN"), "OPEN"));
         assertEquals(400, e.status());
         assertEquals("INVALID_REQUEST", e.code());
         assertEquals("Invalid status", e.getMessage());
         assertDoesNotThrow(() -> PresalesProjectItems.text("😀", "title", 2));
-        assertThrows(
-                PresalesProjectItems.Rejected.class,
-                () -> PresalesProjectItems.text("😀", "title", 1));
+        assertThrows(PresalesRejected.class, () -> PresalesProjectItems.text("😀", "title", 1));
     }
 }

@@ -1,0 +1,487 @@
+{
+  "backup_root": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz",
+  "generated_moves": [
+    {
+      "from": ".omx/artifacts/claude-ordinary-chat-20261005.md",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.omx/artifacts/claude-ordinary-chat-20261005.md",
+      "sha256": "2ae0d0bad2dd481ffee4808fd1f1305909f2dbb9cba01c0bae9a52416c8d2cd4",
+      "bytes": 226796,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-05/ordinary-chat-tests/independent-review-artifact.md.gz"
+      ]
+    },
+    {
+      "from": ".omx/state/discovery-panels/ralph-progress.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.omx/state/discovery-panels/ralph-progress.json",
+      "sha256": "38d5ba2bb3d0ec1ac1ce7fdc782576bd277341344d04bca6e6c6bf38ed0b0418",
+      "bytes": 543,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-21-44-732Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-21-44-732Z.yml",
+      "sha256": "753361484bc93bc3b8d5ca172876066147d6c1cda6118c12a028effa6f495ad2",
+      "bytes": 7322,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-22-32-318Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-22-32-318Z.yml",
+      "sha256": "b285a4c8b1e666cb36be2ba7c77d47ff3b59738fa3de8538f256c10c1b042640",
+      "bytes": 7375,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-22-38-326Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-22-38-326Z.yml",
+      "sha256": "71eeab7fdc6aed5819169319f5ceff6453df1bb00b7e6ee99a513d6684451889",
+      "bytes": 7374,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-22-40-549Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-22-40-549Z.yml",
+      "sha256": "328672c55d2c00af09bceb652941593fed11a586f7a12bca12e773041c47a404",
+      "bytes": 7374,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-22-46-657Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-22-46-657Z.yml",
+      "sha256": "050eba6e9fd322815f9dd6c46c0e6069970217823b4eea63ec517377d1ecf08b",
+      "bytes": 7521,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-23-16-958Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-23-16-958Z.yml",
+      "sha256": "1d273464666bfe9f32e7f3c9fcd7ec046009959ec4f2e5e0a3568e23b3784ea1",
+      "bytes": 7531,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-23-24-549Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-23-24-549Z.yml",
+      "sha256": "310c56bb70e02d54370eedea39a70977098ac884b363e6540bed9d7000c234f1",
+      "bytes": 7531,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-23-30-662Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-23-30-662Z.yml",
+      "sha256": "ebd3351fc60920d590d989804e49d8ddf01206bd3ec3e0236dd7be23b0b910bb",
+      "bytes": 7535,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-23-33-069Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-23-33-069Z.yml",
+      "sha256": "e270aec35ae8ea883afcc89126098c6ef403b8d96de6a1a2f18e7e0cf768447a",
+      "bytes": 7535,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-23-39-050Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-23-39-050Z.yml",
+      "sha256": "1e61084ccc9ac97e625f33ce1b517ddb4c4b9f27fd5b905bf9760372f6bf7ab7",
+      "bytes": 7535,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-24-09-484Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-24-09-484Z.yml",
+      "sha256": "b5c95091c7b44cba4c1fdc884ae0ae05bb437b4b06a1c650fac4bff584867ede",
+      "bytes": 7535,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-24-13-875Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-24-13-875Z.yml",
+      "sha256": "548d3eceeda16145a6bea30d287fb3b8cd6adadb1c834e8e82abe86da637635c",
+      "bytes": 6737,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-24-16-083Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-24-16-083Z.yml",
+      "sha256": "573f8cb6c2ab0796515c2792a79f1854ca1eeb634536a23d4fefa51227621ed8",
+      "bytes": 6723,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-24-32-029Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-24-32-029Z.yml",
+      "sha256": "6cd665fc970f11e1f2976f55e35848a4b238bc42be56f2f066a9508e3ad7f560",
+      "bytes": 6740,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-24-34-194Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-24-34-194Z.yml",
+      "sha256": "2ac3c9f2d3eaa5f56fbe30ca00cf4b9ebe45c3d823515a170b3dfe5d59919c66",
+      "bytes": 6773,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-36-525Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-36-525Z.yml",
+      "sha256": "fec747cd7758a864f640036105e078eabff83b4ead662f850d5fc761bd168b5e",
+      "bytes": 7650,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-42-151Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-42-151Z.yml",
+      "sha256": "7559d00d26ac568053bf39c4264578847c7ee5fa2dd5057eeaf3cd26a4f32544",
+      "bytes": 7703,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-46-024Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-46-024Z.yml",
+      "sha256": "5da54272a09038dae8bccca43b75e7ecfe7d66465e4a30d4fffc2a8d26316c49",
+      "bytes": 7702,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-48-182Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-48-182Z.yml",
+      "sha256": "7e5a68ba26225512ea6995a0ede58d160dc0bb096b3239ef0bd0ddfd13a37a40",
+      "bytes": 7702,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-52-009Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-52-009Z.yml",
+      "sha256": "a0b6b89b29a55d67c31365b28ba5a1bc94e532da2b5d027105a435f9eb2abc2a",
+      "bytes": 7849,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-25-57-662Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-25-57-662Z.yml",
+      "sha256": "c0c6907c4b67bf863a58ef2631cade84f4268a375527a35491859d0368c8d062",
+      "bytes": 7859,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-01-536Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-01-536Z.yml",
+      "sha256": "6a9ac8f1d0d700fc217f5d56cf7f57dbc2304e1b9f42d47d0a258a4c91ee22c4",
+      "bytes": 7859,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-05-389Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-05-389Z.yml",
+      "sha256": "9261ff40914865cbc1bf3b58104f89030c3d3e517f43daf90cf762de9c701491",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-07-897Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-07-897Z.yml",
+      "sha256": "b8015ee6986f0fc5cd60e4e8bb37b6e4c36afe57b96c19cfe6506af669d736d1",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-11-701Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-11-701Z.yml",
+      "sha256": "5d0ce16345bf35b599b80ccace4f273b264e2c23342afc0d82c62b0e8c3eecea",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-23-625Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-23-625Z.yml",
+      "sha256": "ce754f5f5581c2c78572716a7e221c069e33ed6cbb5e3451907cf62563a3d5aa",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-26-27-485Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-26-27-485Z.yml",
+      "sha256": "790d317ea2452247f4a11340cd83f5311f647df3d453eae8c5a3abbc0baf0669",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-18-513Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-18-513Z.yml",
+      "sha256": "1bd6712822c8125c921731226c34eb4e51a40954bafb5ff1fe8b2973685eb9c7",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-22-936Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-22-936Z.yml",
+      "sha256": "110288b3015c0d10538edfbf89c0822782a2afb6a7be1f5e193578efab823d93",
+      "bytes": 7860,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-25-203Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-25-203Z.yml",
+      "sha256": "0d05045e8e6c2e41aa354a798c38258efdd7895ea4cffb6dffab1834b6d5855b",
+      "bytes": 7860,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-29-716Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-29-716Z.yml",
+      "sha256": "f2bcc13523ccea1d2472e95c94be5ef18fbc80095b97746d1148b6f9460c210e",
+      "bytes": 7860,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-38-144Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-38-144Z.yml",
+      "sha256": "e22cd2c7b29c52b021b2ffb2eef8c866492fe9eb2e7b50f382953e8d870dd8cf",
+      "bytes": 7860,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-42-539Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-42-539Z.yml",
+      "sha256": "44efc84f57d3ce77edb686dfa97da7eae083d00a506622c369e6c4e639015c9c",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-44-747Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-44-747Z.yml",
+      "sha256": "30e91d886020bdce677c91b39c74cfda0cac59fdcfe7957133bd468f655351b4",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": ".playwright-cli/page-2026-10-05T17-27-49-097Z.yml",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/.playwright-cli/page-2026-10-05T17-27-49-097Z.yml",
+      "sha256": "00866ae56b660e8b2aad2acf06530dab03ff291e14b99c237b50f9afdc84be2b",
+      "bytes": 7863,
+      "same_bytes_archives": []
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-classic-desktop.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-classic-desktop.json",
+      "sha256": "e5bc8a83576e8f3b2850e7404624a797e16c5b465d0101807a61e7e0d51f5fb7",
+      "bytes": 427,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-desktop.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-classic-desktop.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-classic-desktop.png",
+      "sha256": "77970366aaa5dbcee18e63d1e978913d5145237fd942c79e56562e25baeb7aa3",
+      "bytes": 182224,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-desktop.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-desktop.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-classic-narrow.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-classic-narrow.json",
+      "sha256": "28db861f7270fc298e5d3e53d7170f2063e29dfa533c66006ff745ac76f9208b",
+      "bytes": 423,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-narrow.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-classic-narrow.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-classic-narrow.png",
+      "sha256": "afb002bf728d7b7849507c55e05293aeb27ea182e18274ad953193a698ce22f4",
+      "bytes": 109849,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-narrow.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-narrow.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-enterprise-desktop.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-enterprise-desktop.json",
+      "sha256": "8b497728cc86668870fe63caec53c6a912765fb0b8a19f97217aa7f0d6195ca7",
+      "bytes": 430,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-desktop.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-enterprise-desktop.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-enterprise-desktop.png",
+      "sha256": "978bd48841eb85197dca76b25065b25ba6fd4c6c380acd58d5d00312a2c65c8b",
+      "bytes": 138517,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-desktop.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-desktop.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-enterprise-narrow.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-enterprise-narrow.json",
+      "sha256": "672b89e2b3aa70bb240b57ee5c6c80a3860c6ea8e1929dd0fa8ea6d7cf3a66bc",
+      "bytes": 426,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-narrow.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-enterprise-narrow.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-enterprise-narrow.png",
+      "sha256": "a71b074f68873020c60814fae46dea04d4127dfde112bff750ad1fe51e52a69e",
+      "bytes": 82874,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-narrow.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-narrow.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-event-filter.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-event-filter.json",
+      "sha256": "68c0a5a225df7b4a82f4bd1c39fd373b827ef5218812f4552389816416d9c283",
+      "bytes": 108,
+      "same_bytes_archives": []
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-filter-interaction.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-filter-interaction.json",
+      "sha256": "011da9239b41a0341ec21acad68f11ae1c2e692ad7de471c081331c3ae012c98",
+      "bytes": 88,
+      "same_bytes_archives": []
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-interactions.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-interactions.json",
+      "sha256": "e337df540e1ca4145a10e463954797463b707890f08f8a43569835b0037f5e9c",
+      "bytes": 703,
+      "same_bytes_archives": []
+    },
+    {
+      "from": "output/playwright/discovery-panels/after-permission-narrow.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/after-permission-narrow.json",
+      "sha256": "cd342959790726d6d382e648d12f396198d64b701e6dd5fcf570282d77784e88",
+      "bytes": 728,
+      "same_bytes_archives": []
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-classic-desktop.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-classic-desktop.json",
+      "sha256": "635671d4413150729cc542613312e201c478d685b6829c7b9dd86acd16cb67c6",
+      "bytes": 428,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-desktop.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-classic-desktop.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-classic-desktop.png",
+      "sha256": "77970366aaa5dbcee18e63d1e978913d5145237fd942c79e56562e25baeb7aa3",
+      "bytes": 182224,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-desktop.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-desktop.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-classic-narrow.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-classic-narrow.json",
+      "sha256": "1b46d2f997c8a46cc742fdd078544b12445b5c64048cd0cbfae134f8f27cf3ec",
+      "bytes": 424,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-narrow.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-classic-narrow.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-classic-narrow.png",
+      "sha256": "afb002bf728d7b7849507c55e05293aeb27ea182e18274ad953193a698ce22f4",
+      "bytes": 109849,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-classic-narrow.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-classic-narrow.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-enterprise-desktop.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-enterprise-desktop.json",
+      "sha256": "54c34ae71d732b17f55eeab9e961ad9614b1c47710585db54ff5161362c157f7",
+      "bytes": 431,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-desktop.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-enterprise-desktop.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-enterprise-desktop.png",
+      "sha256": "978bd48841eb85197dca76b25065b25ba6fd4c6c380acd58d5d00312a2c65c8b",
+      "bytes": 138517,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-desktop.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-desktop.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-enterprise-narrow.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-enterprise-narrow.json",
+      "sha256": "91e3a7a2dc8aa34f4a60c0747634c3449d4e6919dee87c4a66b3ff7205b71aac",
+      "bytes": 427,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-narrow.json.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/before-enterprise-narrow.png",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/before-enterprise-narrow.png",
+      "sha256": "a71b074f68873020c60814fae46dea04d4127dfde112bff750ad1fe51e52a69e",
+      "bytes": 82874,
+      "same_bytes_archives": [
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-before-enterprise-narrow.png.gz",
+        "docs/architecture-quality-v1/evidence/2026-10-06/workbench-sections-tests/browser-final-after-enterprise-narrow.png.gz"
+      ]
+    },
+    {
+      "from": "output/playwright/discovery-panels/visual-verdict.json",
+      "to": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/generated/output/playwright/discovery-panels/visual-verdict.json",
+      "sha256": "f870bd24c4a8afbf9a04669a10791d5d70ce9b6ea080ce3e01f08bf234035cf8",
+      "bytes": 1113,
+      "same_bytes_archives": []
+    }
+  ],
+  "evidence_redactions": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.log.gz",
+      "previous_archive_sha256": "bcbf6e963f4f29653656e542e44a93e1d2d84d3d3d773c4b8e877d7621f305e9",
+      "previous_decoded_sha256": "54e4c9602711b140866478b26c9fd0d308deb065204043242b0780bd3e32ebc4",
+      "additional_jwt_redactions": 5,
+      "archive_sha256": "5d85954fafe28dfc4f23aecc3411d81dd63f0b89002db80bbc434e87b8c2e9b7",
+      "decoded_sha256": "491f8edf9371224d9c0d0b96d46044b7addf3c436f77e31c9794c6d54c41f8d6"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.xml.gz",
+      "previous_archive_sha256": "6519cfa3a16082a5f3a3e81b12d66ea36cfc420e89d12f66bd61407d4a316433",
+      "previous_decoded_sha256": "f417fc2b462282b512a34833ac750a3f1094bd2728ec673161256dbb5289120d",
+      "additional_jwt_redactions": 5,
+      "archive_sha256": "d327fe8a15b9cfd2ce1ff89401b163cf87e595da92930762fad6268f3b2b154f",
+      "decoded_sha256": "86849472271951587fbe9ed79b3dc23b9556f1c42a0595b85d6187d71a3a5af2"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.log.gz",
+      "previous_archive_sha256": "634df73fd60c0583a179be98ebd3dd103b892d743549a34d5e2d62b1901c7106",
+      "previous_decoded_sha256": "302b0b7e8d4280d94f9a08bcf3d3ba792063571e00dccef6f9f45dd6d851c4fb",
+      "additional_jwt_redactions": 15,
+      "archive_sha256": "5ce2d6d85b3fb8f4e296567a5bfce37c4778f84f90b06c376df86d4ca62aef32",
+      "decoded_sha256": "b89feb4b326ba4cf274456c819ae9ac6911f2c8363eb74972483427ef8693596"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.xml.gz",
+      "previous_archive_sha256": "bec3293ad4a7ec940122f42d1d9a985bf1947d3daee718e0c59cd0ece69089db",
+      "previous_decoded_sha256": "3cf8626ac2a1e700c18b3363034b901c6feff2964f915ae521942fdeb863816f",
+      "additional_jwt_redactions": 15,
+      "archive_sha256": "bde4feb237fb3fbd6d07e6e3de1407d39c5f3d2e223c9c3fb25dd26ddb1c4124",
+      "decoded_sha256": "97aec11a41fcef6b6af8db00a2fd75544d9f22fe35ee5c18a25e0e64a0579485"
+    }
+  ]
+}

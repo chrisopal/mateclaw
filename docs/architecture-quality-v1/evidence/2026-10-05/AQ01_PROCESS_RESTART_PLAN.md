@@ -1,0 +1,7 @@
+# AQ-01/AC-21：真实进程退出与重启恢复验证
+
+复用ModuleStartupMatrixTest/ModuleStartupProbe的真main、生产classpath、清空环境、独立HOME/cwd/tmp和禁用后台外部任务策略；既有八组合不改变默认行为。增加三个阶段的独立JVM：restart-seed通过真实认证/工作区/HTTP项目创建与generate，等待合成loopback模型收到实际请求且DB任务RUNNING；同步落盘隔离H2文件库后halt退出，不执行协调器或Spring关闭回调。restart-recover用同库启动真main，通过真实HTTP登录/回读及DB原字节证明ApplicationReadyEvent将旧任务改FAILED/INTERRUPTED_BY_RESTART。restart-repeat验证第二次重启不递增版本、不二次写入回执/任务。记录三个进程PID、数据库身份、版本/运行ID及关闭方式。
+
+受控外部边界仅本地OpenAI协议模型保持请求未完成，真实应用/仓储/权限/公共执行入口/异步事务均不mock。发起任务后、halt之前禁用仅测试provider以避免下次启动自动探测已经消失的临时端口；不修改用户数据或生产配置。随机登录密码仅位于临时沙箱状态文件，不进入结果/日志摘要，成功后清理整个沙箱。失败保留沙箱路径供排查，不自动删除其他工作。
+
+先写测试并执行，发现真实问题修复生产代码必须先保留失败证据；不通过扫描排除、重写规则或放宽断言使测试变绿。阶段报告区分halt与context关闭；第一阶段不能声称优雅关闭。重新运行既有八组合验证共享harness兼容，生产代码若无变更则不额外重跑无关全回归。独立审阅/Spotless/dev和归档后补AC21证据，真实厂商、计费结论、MySQL/Kingbase、多实例以及正式QA仍单独未验收。

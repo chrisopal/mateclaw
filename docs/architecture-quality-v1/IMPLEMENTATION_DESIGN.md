@@ -389,3 +389,57 @@ DB-001/002 previously protected SQL only. Extend their existing hard invariants 
 Reject a target-only mutable digest list because it allows changing both algorithm and digest. Reject automatic regex dependency discovery as incomplete authority over a Java closure. No policy/baseline relaxation, automatic waiver, dependency addition or old migration change. New semantics require new source/migration versions; complete closure and JDK/compiler/Jackson compatibility remain independent-review obligations. This is source protection, not runtime Flyway validation or database acceptance.
 
 Evidence: evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md and java-migration-guard-results.json. Genuine red19/35 failures; green91; 18 published-source scenarios/36 actual CLI checks; independent technical COMMENT with ineffective LSP and missing ast-grep explicitly unrun. Full staged/hook/push evidence is recorded after execution. Maintainer approval, trusted-base installation, required CI, ArchUnit/zero-tolerance and all46 formal AC remain pending. Revert this installation only through reviewed control-plane change; never modify historical algorithms or digests to conceal a violation.
+
+## ADR-AQ-036：项目列表由独立查询应用服务负责（Proposed）
+
+大型PresalesService同时承载写事务和列表应用流程。将list完整移入本域PresalesProjectQueryService，Controller直接调用，写服务与查询服务无相互依赖。复用现有Access、ProjectRepository和ObjectMapper；授权、分页、故障映射属于用例，SQL属于仓储。原读取没有新增事务，保持单SQL一致性快照及writer原子投影更新。
+
+拒绝仅增加转发wrapper、Controller直接读取Repository或创建通用查询框架。列表投影有已验证的未知扩展/null/类型保留约束，且V218/ProjectionV1属于冻结迁移闭包，因此本片不强行改成固定字段DTO；完整读DTO需版本化兼容/历史迁移设计后继续实施。与已完成的Employee等固定查询DTO区别必须保留，不能用R<Page>声称域模型已强类型化。
+
+取舍：大型Service减少43行，新服务76行与一个bean，复制原小型解码异常包装以维持清晰依赖。旧104/104、新52类598项（597通过/1既有PPTskip）、原HTTP/H2与事务/SQL影子合同及独立技术审阅验证此切片。正式AC、MySQL/Kingbase本轮、全UI/真实环境、维护人批准与remote requiredCI仍开放。证据见evidence/2026-10-05/AQ05_LIST_QUERY_ACCEPTANCE.md；回退仅恢复源码接线，无数据操作。
+
+门禁实际捕获AR-004后，新查询服务不再导入语义私有异常；分页使用既有PresalesRejected，HTTP Advice新增同形状映射。原Access/旧Service的SemanticApiException兼容路径保留。直接Java非法分页类型变化已在合同中明确，HTTP状态/码/消息保持；7新HTTP合同从实际RED到GREEN。失败报告zs3tnns3保留，未改规则或基线。
+
+## ADR-AQ-037：工作台提交会话与成果下载拥有各自异步生命周期（Proposed）
+
+PresalesWorkbench同时处理路由/布局与写请求、确认对话框和下载。将command/save/approve/archive完整移入本域usePresalesMutationSession，将file/handoff移入usePresalesDownloads；页面不再保留原实现或请求转发wrapper。复用已有API、submission转换、错误归类，作用域代次/receipt/唯一saving锁/版本接纳仍来自页面；editor管理草稿身份，execution session管理员工执行。服务端仍是授权、事务、版本和发布权威。
+
+批准/归档的ElMessageBox继续直接由本域提交模块使用，避免仅为单个UI库加转发适配器；导航与重载以回调提供。下载模块合并DOM/URL释放代码，但JSON和二进制API保持各自契约。显式依赖比内联代码多，换取可单独验证的完整用例；拒绝整页god composable、全局store、第二份项目/权限缓存或跨feature文件服务。模块释放后拒绝保留回调再次发请求，晚到结果仍检查原scope/项目身份。
+
+页面1638→1461行；提交模块213行、下载模块86行，源码总行数增加122行（主要为显式依赖与生命周期保护），不能以页面行数下降宣称系统整体更短。模板/style原字节保持，无新依赖/后端/迁移/协议。两项独立审核发现已处理：测试DOM递归mock改为anchor点击观察；补create/update等待重载/导航期间已解锁合同。技术验证与限制见evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md。
+
+本决定实现已作工程验证，但正式业务/维护人签收仍未完成。回退只恢复本片before页面/测试并删除两个新增模块，保留原查询/编辑/执行拆分与摘要修复；无数据库操作。
+
+## ADR-AQ-038：发布前实时事实检查属于独立领域策略（Proposed）
+
+发布与fit-gap共享的模块/图谱/证据核验原在PresalesService，与事务和文件写入耦合。将其移入包内PresalesReleaseAuthorization，公开三个具体域操作并复用SolutionPolicy与SourceAuthorization。Service保留角色检查、幂等与CAS、事务、状态和旧异常适配；策略不依赖Service/Controller，不写库，不缓存授权结果。
+
+保持requireEnabled只检查semantic/graph/statement的既有契约及逐项短路顺序；query provider仍在实际证据访问时需要。拒绝额外可用性前置条件、回调式Service访问和通用规则引擎，以免改变旧错误优先级或增加隐式依赖。未新增bean/依赖/迁移；新模块94行，Service减少50行，总生产代码增加44行。工程证据见evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md；不把即时检查声称为跨实例原子锁或业务验收。
+
+原110合同前后通过、新8直接测试及最终721项（720通过/1既有环境skip）保护授权和异常兼容。正式维护人/QA签收仍待完成；回退仅恢复before Service并移除本片策略/测试，不改数据库。
+
+## ADR-AQ-039：售前发现阶段面板统一采用展示组件边界（Proposed）
+
+已有Overview/Solutions/Outputs采用组件，但材料、需求澄清与能力匹配仍内联于Workbench。将三个面板完整移入PresalesMaterials/PresalesRequirements/PresalesFitGap，以typed props/emits连接既有用例；页签及授权/当前项目/会话生命周期保留父级。明确材料、需求、澄清、能力事件的领域类型，不新建API、store或通用表格框架。
+
+clarificationFilter通过必需model受控，父级寿命不变，过滤派生归需求组件；拒绝子组件独立filter以免跨项目切换后意外重置。原样式/文案与shared workbenchSections.css保持。页面减少235行，新增组件318行，生产总代码增加83行；换取完整面板职责和与现有组件的一致性，而非声称整体更短。
+
+证据见evidence/2026-10-06/AQ09_DISCOVERY_PANELS_ACCEPTANCE.md。工程测试、隔离浏览器夹具、真实业务签收分别报告，正式维护人/QA仍待完成。回退恢复before页面并删除三个组件，保留既有会话重构，无数据迁移。
+
+
+## ADR-AQ-040：任务结果接收与事务持久化分离（Proposed）
+
+SAVE_AI_TASK内的完整身份、权限围栏及模型输出核验集中到包内PresalesTaskAcceptance.prepare。Service保留授权、幂等、项目锁、事务和全部持久化；prepare在现有事务中取得原围栏锁，不引入新事务、缓存或Service回调。继续复用ProjectItems、ProjectAuthorityFence和业务runtime/ModelAdapter。
+
+拒绝只把大型switch整体搬进新类或创建通用规则引擎。成功与失败分别保留原三个/五个可变输出字段，其余包括未知扩展继续精确匹配，且错误优先级不变。原94合同先通过，新17项与原合同111/111，最终56类738项（737通过/1既有PPT环境skip）。Service减少62行，新类93行，总生产增加31行，明确以职责隔离而非总行数减少为收益。
+
+工程证据见evidence/2026-10-06/AQ05_TASK_ACCEPTANCE_ACCEPTANCE.md；独立审阅新增测试与权限边界不替代维护人/QA签收。正式DTO/V2迁移和坏历史任务恢复继续开放。回退仅恢复before Service并移除本片新类/测试，无数据库操作。
+
+
+## ADR-AQ-041：新建生成任务在JSON持久化边界前使用固定DTO（Proposed）
+
+GenerationService不再按字符串键拼装18个任务字段，改用包内PresalesQueuedTask记录及初始状态枚举；在原SAVE_AI_TASK命令边界才转换为ObjectNode。保留明确的属性顺序、显式null和字符串ID，snapshot防御性深拷贝但不改其版本化JSON语义。原回执hash、授权、版本检查、pin、保存后排队不变。
+
+拒绝用新DTO重写历史任务、扩展另一个Task表，或把命名相近的字段当作完整V2迁移。它仅定义新任务写入边界，历史未知状态和旧序列化仍由原路径读取。增加65行生产声明换取类型与快照边界，不以减行数评价此决定。
+
+原Service先通过含4个独立wire刻画的62项合同；替换后64/64，扩展744项（743通过/1既有PPT环境skip）。默认/真实宿主/省略null/属性排序四种mapper下保持原wire；证据见evidence/2026-10-06/AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md。正式QA/维护人仍待签收，回退只恢复before生成服务并移除本片DTO/测试，无数据库动作。

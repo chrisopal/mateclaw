@@ -24,6 +24,7 @@ class PresalesSqlListingTest {
     private final ObjectMapper json = new ObjectMapper();
     private LedgerJdbc jdbc;
     private PresalesService service;
+    private PresalesProjectQueryService queryService;
     private PresalesAccess access;
     private boolean external;
     private boolean ownsTables;
@@ -134,6 +135,8 @@ class PresalesSqlListingTest {
                         null,
                         null,
                         mock(PresalesSourceAuthorization.class));
+        queryService =
+                new PresalesProjectQueryService(new PresalesProjectRepository(jdbc), json, access);
         for (int i = 0; i < 120; i++) {
             String id = String.format(java.util.Locale.ROOT, "%04d", i);
             var body =
@@ -162,7 +165,7 @@ class PresalesSqlListingTest {
                 .locations("classpath:db/migration/" + (external ? "mysql" : "h2"))
                 .baselineOnMigrate(true)
                 .baselineVersion("216")
-                .target("218")
+                .target("219")
                 .load()
                 .migrate();
         jdbc.reads.clear();
@@ -184,8 +187,42 @@ class PresalesSqlListingTest {
     }
 
     @Test
+    void deniedViewerPrecedesPaginationAndDoesNotReadSql() {
+        var denied = new vip.mate.semantic.web.SemanticApiException(403, "FORBIDDEN", "denied");
+        when(access.require("scope", "viewer")).thenThrow(denied);
+        for (int[] paging : List.of(new int[] {1, 20}, new int[] {0, 0})) {
+            assertSame(
+                    denied,
+                    assertThrows(
+                            vip.mate.semantic.web.SemanticApiException.class,
+                            () ->
+                                    queryService.list(
+                                            "scope", null, null, null, null, paging[0],
+                                            paging[1])));
+            assertTrue(jdbc.reads.isEmpty(), jdbc.reads.toString());
+        }
+    }
+
+    @Test
+    void invalidPaginationDoesNotReadSqlAfterViewerCheck() {
+        for (int[] paging : List.of(new int[] {0, 20}, new int[] {1, 0}, new int[] {1, 101})) {
+            var error =
+                    assertThrows(
+                            PresalesRejected.class,
+                            () ->
+                                    queryService.list(
+                                            "scope", null, null, null, null, paging[0], paging[1]));
+            assertEquals(400, error.status());
+            assertEquals("INVALID_REQUEST", error.code());
+            assertEquals("Invalid pagination", error.getMessage());
+            assertTrue(jdbc.reads.isEmpty(), jdbc.reads.toString());
+        }
+        verify(access, times(3)).require("scope", "viewer");
+    }
+
+    @Test
     void listReadsOnlyTheRequestedSummaryRowsWithoutBodyHistory() {
-        var result = service.list("scope", null, null, null, null, 3, 7);
+        var result = queryService.list("scope", null, null, null, null, 3, 7);
         assertEquals(120, result.total());
         assertEquals(7, result.items().size());
         assertEquals("0014", result.items().getFirst().path("id").asText());
@@ -204,7 +241,7 @@ class PresalesSqlListingTest {
 
     @Test
     void emptyLargePageReturnsTotalWithoutMaterializingAllProjects() {
-        var result = service.list("scope", null, null, null, null, Integer.MAX_VALUE, 100);
+        var result = queryService.list("scope", null, null, null, null, Integer.MAX_VALUE, 100);
         assertEquals(120, result.total());
         assertTrue(result.items().isEmpty());
         assertTrue(jdbc.rows <= 1, "JDBC rows actually materialized: " + jdbc.rows);
@@ -277,7 +314,7 @@ class PresalesSqlListingTest {
         String body = escaped.writeValueAsString(project("edge", name));
         insert("edge", "scope", "Order", body);
         var expected = shadow("scope", query, null, "special", null, 1, 20);
-        var actual = service.list("scope", query, null, "special", null, 1, 20);
+        var actual = queryService.list("scope", query, null, "special", null, 1, 20);
         assertEquals(matches ? 1 : 0, expected.total());
         assertWireEquals(expected, actual);
         assertEquals(
@@ -311,9 +348,10 @@ class PresalesSqlListingTest {
                         new String[] {null, " \t", "Owner ", " \t"})) {
             assertWireEquals(
                     shadow("scope", filters[0], filters[1], filters[2], filters[3], 1, 1),
-                    service.list("scope", filters[0], filters[1], filters[2], filters[3], 1, 1));
+                    queryService.list(
+                            "scope", filters[0], filters[1], filters[2], filters[3], 1, 1));
         }
-        var result = service.list("scope", null, "ACTIVE", "Owner ", "SOLUTION", 1, 20);
+        var result = queryService.list("scope", null, "ACTIVE", "Owner ", "SOLUTION", 1, 20);
         assertEquals(
                 List.of("edge-a", "edge-b"),
                 result.items().stream().map(x -> x.path("id").asText()).toList());
@@ -330,7 +368,7 @@ class PresalesSqlListingTest {
                 assertThrows(
                         IllegalStateException.class,
                         () ->
-                                service.list(
+                                queryService.list(
                                         "scope",
                                         "no matches",
                                         null,
@@ -340,7 +378,7 @@ class PresalesSqlListingTest {
                                         100));
         assertTrue(failure.getMessage().startsWith("Invalid project body"));
         when(access.require("other", "viewer")).thenReturn("viewer");
-        assertEquals(0, service.list("other", "no matches", null, null, null, 1, 20).total());
+        assertEquals(0, queryService.list("other", "no matches", null, null, null, 1, 20).total());
     }
 
     @Test
@@ -352,7 +390,7 @@ class PresalesSqlListingTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                service.list(
+                                queryService.list(
                                         "scope",
                                         null,
                                         null,
@@ -364,7 +402,7 @@ class PresalesSqlListingTest {
         jdbc.update("UPDATE mate_presales_project SET name='0-first' WHERE id='bad-decode'");
         assertThrows(
                 IllegalStateException.class,
-                () -> service.list("scope", null, null, null, "DISCOVERY", 1, 20));
+                () -> queryService.list("scope", null, null, null, "DISCOVERY", 1, 20));
     }
 
     @Test
@@ -374,13 +412,14 @@ class PresalesSqlListingTest {
                         .put("status", "ARCHIVED")
                         .put("clarifications", "wrong");
         insert("bad-summary", "scope", "A-first", json.writeValueAsString(bad));
-        assertEquals(0, service.list("scope", null, null, "special", "DISCOVERY", 1, 20).total());
-        assertEquals(0, service.list("scope", "absent", null, "special", null, 1, 20).total());
+        assertEquals(
+                0, queryService.list("scope", null, null, "special", "DISCOVERY", 1, 20).total());
+        assertEquals(0, queryService.list("scope", "absent", null, "special", null, 1, 20).total());
         var failure =
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                service.list(
+                                queryService.list(
                                         "scope",
                                         null,
                                         null,
@@ -398,17 +437,18 @@ class PresalesSqlListingTest {
                 "scope",
                 "A",
                 json.writeValueAsString(project("bad-stage", "fault").put("releases", "wrong")));
-        assertEquals(0, service.list("scope", "absent", null, null, "DISCOVERY", 1, 20).total());
-        assertEquals(0, service.list("scope", null, "OTHER", null, null, 1, 20).total());
+        assertEquals(
+                0, queryService.list("scope", "absent", null, null, "DISCOVERY", 1, 20).total());
+        assertEquals(0, queryService.list("scope", null, "OTHER", null, null, 1, 20).total());
         assertThrows(
                 IllegalArgumentException.class,
-                () -> service.list("scope", null, null, null, null, 1, 20));
+                () -> queryService.list("scope", null, null, null, null, 1, 20));
     }
 
     @Test
     void missingAndStaleFactsFailWithoutBodyFallbackAndOtherScopeCannotPoison() throws Exception {
         insert("foreign", "other", "first", "{");
-        assertEquals(120, service.list("scope", null, null, null, null, 1, 20).total());
+        assertEquals(120, queryService.list("scope", null, null, null, null, 1, 20).total());
         for (String expression :
                 List.of(
                         "listing_contract=NULL",
@@ -418,7 +458,7 @@ class PresalesSqlListingTest {
             jdbc.reads.clear();
             assertThrows(
                     IllegalStateException.class,
-                    () -> service.list("scope", "absent", null, null, null, 1, 20));
+                    () -> queryService.list("scope", "absent", null, null, null, 1, 20));
             assertFalse(jdbc.reads.stream().anyMatch(x -> x.contains("body_json")));
             jdbc.update("UPDATE mate_presales_project SET listing_contract=NULL WHERE id='0000'");
             try (var connection = jdbc.getDataSource().getConnection()) {
@@ -445,7 +485,7 @@ class PresalesSqlListingTest {
         p.putObject("extension").put("opaque", opaque);
         String body = json.writeValueAsString(p);
         insert("large", "scope", "Large", body);
-        var result = service.list("scope", "Ω", null, owner, null, 1, 20);
+        var result = queryService.list("scope", "Ω", null, owner, null, 1, 20);
         assertEquals(1, result.total());
         assertEquals(opaque, result.items().getFirst().path("extension").path("opaque").asText());
         assertEquals(owner, result.items().getFirst().path("ownerId").asText());
@@ -472,7 +512,7 @@ class PresalesSqlListingTest {
         for (String q : List.of("?", "\ud800", "x"))
             assertWireEquals(
                     shadow("scope", q, null, "writer", null, 1, 20),
-                    service.list("scope", q, null, "writer", null, 1, 20));
+                    queryService.list("scope", q, null, "writer", null, 1, 20));
         var command =
                 new PresalesDtos.Command(
                         1,
@@ -485,7 +525,7 @@ class PresalesSqlListingTest {
         assertEquals(2, updated.path("version").asInt());
         assertWireEquals(
                 shadow("scope", "renamed", null, "writer", null, 1, 20),
-                service.list("scope", "renamed", null, "writer", null, 1, 20));
+                queryService.list("scope", "renamed", null, "writer", null, 1, 20));
         String body =
                 jdbc.queryForObject(
                         "SELECT body_json FROM mate_presales_project WHERE id=?",
@@ -539,7 +579,7 @@ class PresalesSqlListingTest {
                         created.path("id").asText()));
         assertWireEquals(
                 shadow("scope", "renamed", null, "writer", null, 1, 20),
-                service.list("scope", "renamed", null, "writer", null, 1, 20));
+                queryService.list("scope", "renamed", null, "writer", null, 1, 20));
     }
 
     @Test
@@ -559,11 +599,13 @@ class PresalesSqlListingTest {
                 vip.mate.semantic.statement.StatementApplicationService.hash(
                         json.writeValueAsString(different)));
         var created = service.create("scope", first);
-        var replay = service.create("scope", different);
-        assertEquals(
-                created,
-                replay,
-                "Existing unversioned hash collision; not proof of distinct-request rejection");
+        var conflict =
+                assertThrows(
+                        vip.mate.semantic.web.SemanticApiException.class,
+                        () -> service.create("scope", different));
+        assertEquals(409, conflict.status());
+        assertEquals("OPERATION_CONFLICT", conflict.code());
+        assertEquals(created, service.create("scope", first));
         assertEquals(
                 1,
                 jdbc.queryForObject(

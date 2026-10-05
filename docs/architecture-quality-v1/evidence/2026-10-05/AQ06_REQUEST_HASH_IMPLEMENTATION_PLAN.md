@@ -1,0 +1,13 @@
+# AQ-06 请求摘要V2接入实施计划
+
+基于已独立审核的AQ06_REQUEST_HASH_COMPATIBILITY_DESIGN及REVIEW，实施Service create/command新回执V2写入和stored-format双读。HEAD6ce0cd21592b661b6f79dd1726cf68a9b334e1e2/base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，初始100条WIP保留，初始dev输出见/tmp/request-hash-initial-dev.log。本批不得改既有Flyway、冻结清单、共享旧hash算法或Generation task.byte-writer哈希。
+
+后端范围为PresalesService、现有PresalesRequestHashV2（若需纯歧义判断）、新的RequestHashReplay合同及相关既有测试/测试schema。先归档本片源码与当前Surefire报告，运行原hash/migration/HTTP/SQL合同，再在原实现写真实Service/HTTP RED。覆盖新create/POST command/PATCH孤立代理与问号/属性名/扩展的双向碰撞，必须验证拒绝后项目/修订/回执持久化不变。随后接入V2，不改变先授权/来源/回放/版本的顺序。序列化envelope一次复用，stored为legacy64或v2:64hex分派，畸形版本明确409不回退或500。
+
+legacy匹配但含ASCII问号/孤立代理时拒绝OPERATION_REPLAY_UNVERIFIABLE；不同legacy摘要仍OPERATION_CONFLICT。合法emoji对、字面转义、U+FFFD、全角问号正常兼容。使用可信synthetic legacy fixture而非按当前请求自动升级旧行，保留原回执存储字节与commandResponse权限裁剪。更新旧测试新写入hash断言时保留独立legacy fixture回放，不删除兼容覆盖。
+
+测试建表若仅加载V211的64字符列，按生产新增V219迁移扩至67并核对；历史迁移测试继续保留原64列升级证据，不直接改旧SQL或降低断言。测试调整须独立审核。Generation旧task含问号仍同请求回放、零enqueue，与Service拒绝旧歧义形成正例；内部SAVE_AI_TASK、cancel/result写入保持。
+
+前端单独负责shared/state.ts和state.test.ts/presalesWorkbench.test.ts的新增错误码conflict识别，先RED证明409带code旧实现不识别，再修复；防盲提/草稿保留，不能自动生成新operationId重发。双方不改同一文件。
+
+每个职责切片后dev（协调源码稳定后执行）。最终JDK21适用Java回归、Spotless非修复check、UI类型/lint/格式/售前/全UI/Node/两mode及独立MySQL隔离schema真实67字符/legacy回放验证。每轮报告/源码/失败日志先归档，不能覆盖唯一证据。独立审核后最终dev核对精确工作树。Kingbase、真实旧样本、多实例上线/回退、浏览器与正式QA没有证据则NOT_RUN。新V2写入前生产所有reader须支持双读；未实施生产发布，不以工程测试宣称无损降级。无提交/推送，不覆盖其他WIP。

@@ -159,7 +159,6 @@ final class PresalesCommandPayload {
     }
 
     private static void invalid(String path) {
-        throw new PresalesProjectItems.Rejected(
-                400, "INVALID_REQUEST", "Invalid payload field: " + path);
+        throw new PresalesRejected(400, "INVALID_REQUEST", "Invalid payload field: " + path);
     }
 }

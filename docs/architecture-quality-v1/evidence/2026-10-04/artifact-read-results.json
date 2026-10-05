@@ -1,0 +1,501 @@
+{
+  "task": "AQ05 artifact read responsibility and frozen manifest enforcement",
+  "status": "ENGINEERING_FIX_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "head_tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "initial_dev_report": "mateclaw-quality-yp_letsh",
+  "slice_dev_report": "mateclaw-quality-fo5j16zc",
+  "published_red": {
+    "tests": 6,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 1
+  },
+  "characterization_before": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 0
+  },
+  "preview_red": {
+    "tests": 22,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 1
+  },
+  "green": {
+    "tests": 370,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "green_actual": 369,
+  "skips": [
+    {
+      "suite": "vip.mate.presales.PresalesPresentationCompilerTest",
+      "test": "compilesEditableSlidesWithInstalledSkillAndPersistsExactBytes",
+      "message": "Environment variable [PRESALES_PPT_SKILL_ROOT] does not exist"
+    }
+  ],
+  "spotless_check": {
+    "files": 119,
+    "needs_changes": 0,
+    "exit": 0
+  },
+  "service_lines": {
+    "before_slice": 1228,
+    "after_slice": 1194
+  },
+  "unchanged_service_method_bytes": [
+    "get",
+    "releaseGate",
+    "replay",
+    "receipt",
+    "hash"
+  ],
+  "independent_review": {
+    "agent": "artifact_read_review",
+    "verdict": "COMMENT",
+    "actionable_findings": 0,
+    "java_lsp": "NOT_RUN",
+    "ast": "NOT_RUN",
+    "maintainer_approval": "NOT_VERIFIED"
+  },
+  "sources": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "1348a29e91420b3a53f12d136bfe6474e01afd9f520fb75ee0bfe0ea6bb23d14",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesArtifactReader.java": "1b3e52b50cba926abf8f60bb2a6eb3bef70c876b36e11cec01141c9e17c06a38",
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesArtifactRepository.java": "8c0ede776d19b270be07a48debc19200ed8cd9142847c4272b802c239c1ce002",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesArtifactReadContractTest.java": "23e5d1b7b674fe9b15c0fbf48f140afaca170747f8d9bc3cd8d53785b99742e9",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesArtifactPersistenceContractTest.java": "e27a3e6658206c526afadaf2d34cdc3d41918c6669c5ddb6ea5d8e8e09d8525b",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesArtifactRepositoryTest.java": "95e8a33579e451403790c98650c635177e26d9ad39af1dd82683fdbe7448b0c8"
+  },
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/before-PresalesArtifactRepository.java.gz",
+      "decoded_sha256": "0a973bba250d6a56f57aa5fa45fac5195afe9c52e6676c0195a26708221f66b9",
+      "archive_sha256": "5845d61f45b36b8a804a2aa536ad74d01f68e7ebdf4691c2e8eb6df73f2a826f",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/before-PresalesArtifactRepositoryTest.java.gz",
+      "decoded_sha256": "c9b3ea2d8886673294eb39f18b901b05b014eaebade5c9db6e8318b2a178a089",
+      "archive_sha256": "c9b1520e5d981ebf779c7a6d52b76f91809df24ca7371c917210f111a44fdfff",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/before-PresalesService.java.gz",
+      "decoded_sha256": "bd2925098d96d6f564a0eab01062c76d09b0062ffebd3d8d7003009569069672",
+      "archive_sha256": "ac38619703e664ceb9f46694c5e442b48bc1481db6ea1b8b54db3d842116ef20",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/before-characterization.log.gz",
+      "decoded_sha256": "9b76ee8706bdaa95206370d9248ee765ea86bfb1a046190768125027d14ba2d8",
+      "archive_sha256": "80cd54846e775d77c0dfc9700cb2c943713f16675456547b74fc3fd531506a61",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/before-characterization.xml.gz",
+      "decoded_sha256": "f85784b6fd78ffe7163492684e7cad4ba6edcca5629cffe58a50f9b4954c7138",
+      "archive_sha256": "c10e9f89a6fa0e0a31df6c5f6deebab5b8ef1eca5f6fd5cbdca79e4c5a4ef220",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.log.gz",
+      "decoded_sha256": "491f8edf9371224d9c0d0b96d46044b7addf3c436f77e31c9794c6d54c41f8d6",
+      "archive_sha256": "5d85954fafe28dfc4f23aecc3411d81dd63f0b89002db80bbc434e87b8c2e9b7",
+      "credential_shape_redactions": 8
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.xml.gz",
+      "decoded_sha256": "86849472271951587fbe9ed79b3dc23b9556f1c42a0595b85d6187d71a3a5af2",
+      "archive_sha256": "d327fe8a15b9cfd2ce1ff89401b163cf87e595da92930762fad6268f3b2b154f",
+      "credential_shape_redactions": 8
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.log.gz",
+      "decoded_sha256": "b89feb4b326ba4cf274456c819ae9ac6911f2c8363eb74972483427ef8693596",
+      "archive_sha256": "5ce2d6d85b3fb8f4e296567a5bfce37c4778f84f90b06c376df86d4ca62aef32",
+      "credential_shape_redactions": 22
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.xml.gz",
+      "decoded_sha256": "97aec11a41fcef6b6af8db00a2fd75544d9f22fe35ee5c18a25e0e64a0579485",
+      "archive_sha256": "bde4feb237fb3fbd6d07e6e3de1407d39c5f3d2e223c9c3fb25dd26ddb1c4124",
+      "credential_shape_redactions": 22
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-maven.log.gz",
+      "decoded_sha256": "f6bce522013925df94fc9f7dab4c879d9b9ec3467887d734c046d93c891865f4",
+      "archive_sha256": "8e2bba2f5c0f063aec2d28dfde63e960596bf7605d9a5df0e3eb95c20f296ed2",
+      "credential_shape_redactions": 3
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/initial-dev.log.gz",
+      "decoded_sha256": "a1714865183cb7d3ac27c4b0d6ad062c4ede04f8cce87879bf71c225801f1e7d",
+      "archive_sha256": "ce299c00a8b67818cacd4a4bdf7c18b93ccdf2ee884fe5398bb4ba6ac4b7e1c4",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/slice-dev.log.gz",
+      "decoded_sha256": "008899cd48c40c6634903542ff609d8a779a8d94e806aee71c9204c3c3c9010e",
+      "archive_sha256": "c2a3d15fcb6f4be427149c4cdfb5b64960dbb2da7d9fb5f46ea8351f1095a0ac",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/format-check.log.gz",
+      "decoded_sha256": "4301f51c2bba0536590ee160429b6e3030b1fcea990997238e30364cf1809dd4",
+      "archive_sha256": "02cf6aabefd36bee6db8ddf6993ca0376b9efee5a6b8be374ac15fa5a9f5a706",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/first-scoped-format.log.gz",
+      "decoded_sha256": "a24eaadf1144beb78e2c028d15b29dc39de57c83ed62cfc9b35150fe39c9306a",
+      "archive_sha256": "bfd0cd5a92351852193e2e1381a9cd55f3889939203de984a90c6eea5ab801ed",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/final-scoped-format.log.gz",
+      "decoded_sha256": "eb2927219656361d5c8ef878987510a2068074f7de370157f2ccefb03b93f3c5",
+      "archive_sha256": "919909a18df448780e7539051903dd336f196512f1af189957b6b607bb66e314",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesProjectItemsTest.xml.gz",
+      "decoded_sha256": "2a875f270f2533cc05137f17b08572f8cd767b7e694555cf003cb72647ae1985",
+      "archive_sha256": "99fc506f0af0ed07a2ff8a26fd0fc905567b249cb349b741142c85034aa26ff7",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml.gz",
+      "decoded_sha256": "85dadbd378f986d1afc3e2c34cde4cac8ca31dca1ea8a02a1a873c694153fe73",
+      "archive_sha256": "8e61520edf869b5b67ffe6259e81069f672051ae7b444d72a51b83f26357a6f2",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml.gz",
+      "decoded_sha256": "a7f2303999ab0886fe736123527592ddea3c048158fd7f53ed9ae9210e32bd27",
+      "archive_sha256": "5d473da5e023c46a1b482f96810e6092b53aa3045a98be0b2c1cda4579d9fb1f",
+      "credential_shape_redactions": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+      "decoded_sha256": "789e5576173fe928ed75ed4a61b6d421a56a5a9bbacb19374419309e792ae573",
+      "archive_sha256": "b3d92d135b20c908259c8135348594480c584c4a5d74912b60f08147692be4c7",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesContextProviderTest.xml.gz",
+      "decoded_sha256": "0654e925b168bd9211af4f94a917512df12a056a8eae7d99a59343d346310809",
+      "archive_sha256": "d488107b8304a9c9e3a9e2d15774775634d204bc624a5d2408b4bfe267357cd9",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesAccessPolicyTest.xml.gz",
+      "decoded_sha256": "f3e9d4d2d650531e1e77881b49753860397273264f19c5d87150009be190aa8f",
+      "archive_sha256": "c08a7fa6d3188dcf49ae9e9e3a0968d42a06035c14d1120ced030aa5d1170e52",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml.gz",
+      "decoded_sha256": "cc58e7b91981ded590f5468d8b7e3d3839dc66aeedbf728e8cfa4f88954a6bfd",
+      "archive_sha256": "3a0e45b5dfc93bcf43cc56db5d1575ae1732ba3f6448b25b0172a1c6453c2b13",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesProjectListingContractTest.xml.gz",
+      "decoded_sha256": "17830b3942720b459a22f203aa0548989e6fb7693f13f60520ced8902f827bb1",
+      "archive_sha256": "acbc993a449832cc20bafc7c3dbb81bd67b019d16bd691fb080cbac4fa9497cb",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesSqlListingTest.xml.gz",
+      "decoded_sha256": "ebd50e8c3345f135d932bd4846d16a264b0f6c86efb3e2c2302d4945dfdb9f8b",
+      "archive_sha256": "60843dd710463962e82ad326f5d40a8bc6c46fdab3146a5e4e137a49a6b851f7",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesModelAdapterTest.xml.gz",
+      "decoded_sha256": "7c7cc26f6be1dfae195c3a265ac88ea5d2d5e5c2b64432e426ea0153cb45b8bb",
+      "archive_sha256": "a0ef84da464321e0c1a1ad6d321c997e91df7d1d21bf0e03ca3c9e5ffaad92f4",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml.gz",
+      "decoded_sha256": "e8ef19c8e16085228585af1c33d2023b0d24ad508e397f7d92cb9c234490dd23",
+      "archive_sha256": "990699844d0babbb5f202854869cb7bc33faac9e72f180f701428fd2ad288a68",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesCommandKindsTest.xml.gz",
+      "decoded_sha256": "4e83b8c6eff75b831b162ebaba541589c3681d8e5dd42c6fa3c7ed4e69c83b6a",
+      "archive_sha256": "64fed239fe9e8613b8e9d5195ac68d9cfac0bf307f3780610771c03153ae1535",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml.gz",
+      "decoded_sha256": "7cd72910b11029935de38b17c487ba8a1e5c24c7ea2fe017952b36c0cea1292b",
+      "archive_sha256": "1e1a46aa2b9b71933e0000787425cca7cd2c3a9f538c1c8368e825166e6709ce",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "decoded_sha256": "7d5273b8d5e7dd4df283ead2394b917481ec2ea2e861c388c556672dba584a14",
+      "archive_sha256": "1f89c518f693a17f9aa78ea062b8ecc5a5aa7c70935cd545ab86d8e8bb3c92b6",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml.gz",
+      "decoded_sha256": "0d0ac3b4f15a2c6395b67ee4794565633e1b2730260b5c6f6d7656697a249c8f",
+      "archive_sha256": "6933549f6dcabba571b912724d3f68e056abac36a1b6c0b2da234e4597fc2fce",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesQueryDtosTest.xml.gz",
+      "decoded_sha256": "f1ad3187b232b213cd1f1dd543a30f8167b008108fb7322182231f5314efb83b",
+      "archive_sha256": "ec3d1aae9aa1b7a3186b63e3c3148675fafa23e9cb876146c4ce84328bb0193c",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesArtifactRendererTest.xml.gz",
+      "decoded_sha256": "4a6686203aed38478c1f50cda6e975c0da005c8e3eae38e537e444f0591ae38c",
+      "archive_sha256": "824c8205ecddd0debfbe27de2189e71b644f892c227e696a12dfabed82f0df83",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesPresentationServiceTest.xml.gz",
+      "decoded_sha256": "68f1ac3f801aa2a66f86292094516f5d534afd5c9fb99baac84a1b6d049f6047",
+      "archive_sha256": "611b218f5e54bca2026749beaa679eab4511e373e2177f3967668984ade9c01e",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesCommandPayloadTest.xml.gz",
+      "decoded_sha256": "96189bd747179b9163348788d463531650996eddd2b9be84964d48390adb58ee",
+      "archive_sha256": "86eb19892299a357b1d5776f007d19a9e37fc28bc1989c56e45268b6326ffeab",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+      "decoded_sha256": "169f44ede0814c3c3ec17566bc87632014acaa6ee7cdccfb925669e0370b9fb5",
+      "archive_sha256": "02a3c6165e4277706e08870aecb56eb764b3e370f9814b0ba84ea61dac02bb4e",
+      "credential_shape_redactions": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "decoded_sha256": "394fef572daf74e32853229764999a689470d87354c322ba28900d40444a6332",
+      "archive_sha256": "e8907996792991e4f412a2c109145a49ac357078f3d2e2c18a8e3d85a055a574",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesProjectListingTest.xml.gz",
+      "decoded_sha256": "b27f782666f33a5ff3dce424530c9b6f59c6a4e308d9355fbe2f7ce1224663c3",
+      "archive_sha256": "8bb2f21ebd1599bbeae7490ae31aef1897a03c8e9315ec202df0062779c102f7",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml.gz",
+      "decoded_sha256": "1ee68517581745a29e62c580a6186b592d863e368f3945fca84b892475011894",
+      "archive_sha256": "e510f9c88dc333f98dc33dfb598770c9eb19face3414ad46046ad23f9316d51e",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml.gz",
+      "decoded_sha256": "8c6f9b2cdc3d6f029b9591fae050734b090eb8c385328cfbbcffa34e7847b4d0",
+      "archive_sha256": "0166dda8b5ca70ad700d1e0fbb7a09e52f14b35cf1f8cba8c8061b3e28ea3f8c",
+      "credential_shape_redactions": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesGenerationControllerTest.xml.gz",
+      "decoded_sha256": "f25585f9e8722e35f133ed56e74a906a948671fd41bf28e552d90ceaf1b24c26",
+      "archive_sha256": "d97e59f58f2f12bd4a725ecb1a0e775cfefd31f196c7d7d99d783390d871adeb",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml.gz",
+      "decoded_sha256": "7c87a3c3d60025dca7407d39075c20a395c189a268f120f11e2910d302704a9f",
+      "archive_sha256": "823fb426e4ce42f2acdb5d5f49f160f84953b97d199e650534bcd9f363954daa",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml.gz",
+      "decoded_sha256": "63efd6d2dde9d77535910ae005a855c281d78fe3783ba36c426e34e7970668f2",
+      "archive_sha256": "a60d6afb899306fbe18eae3a829ce8f015e66a2a2d4477b812eef3b075bad73a",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml.gz",
+      "decoded_sha256": "af2c41bad3cf369a89eddca25baaa73b752e37dc4c5bc292acde6eb3519049eb",
+      "archive_sha256": "8a5ae5f495b92bd73fe238c54c497ad38a6c76c1439ff2ab5be8a0114158472f",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml.gz",
+      "decoded_sha256": "3a1a71e405699969405c1ee742e5702ea64b28a17e3b4ba6122f54f34fc7f89e",
+      "archive_sha256": "b5f8bd2c00af38457228d8d6d0630c016b6f976491afae2bfdb32493ac12196a",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+      "decoded_sha256": "a38953ce3a3eb830f9621e4a87e617bcb48de3cc26b1ad6646ae9105099cee6e",
+      "archive_sha256": "0646e38a2625b9cde2481c44fca15278d9d2c683c97f00f397ce1f15ddc89831",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesPresentationPinTest.xml.gz",
+      "decoded_sha256": "5036bb945955e38ba228c8063098db7a50af5fef5e62c521ff0c5f0c271e9514",
+      "archive_sha256": "a3663f665f2a191258bcbfe7d806b97237366d9925056811d1951817bf9f69e1",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml.gz",
+      "decoded_sha256": "de31a07945119203b299cd97c48019e38295e2fde322af2ad695e28df9fbb355",
+      "archive_sha256": "f96c7fe7b491c83173ae089484ebd6cfc4c4859a86f1254cc9cc780f3ec63667",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml.gz",
+      "decoded_sha256": "4ce0808fda58d25691e17146c11d5a604985f756f572230c2bea34dcacf669ef",
+      "archive_sha256": "98ce06651d8c98ac376d6567386127ba2ce01f2f9b35322378323c1a443b880c",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesCommandKindContractTest.xml.gz",
+      "decoded_sha256": "f8217b1af771f97d17b3236dcf46172615ad5e85696b3acb43f56363bfd649a8",
+      "archive_sha256": "f3e2c6986f831fd603c596806552e566a4d493774b501ddea5147b536310fe21",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml.gz",
+      "decoded_sha256": "bb42f5a5fc44e1ef1bee7c7fc5a912cbbf1a90d4d2aa576e5b1dfca5be35e49e",
+      "archive_sha256": "c9cc8210202797abd4e41099d51e91ca1f8d053644f9e1145cfaefd8aa8a6698",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+      "decoded_sha256": "e3a3130c8004ce77315c17fa5dc8480370196116934738c3e1a8ec2e77b06ac3",
+      "archive_sha256": "fa35b4155fd935a080fdef37b323c5ded5e99f151e6f2d9a14dc20fafd1f108a",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+      "decoded_sha256": "f5254d64ed3678fb249af1339ef647c2f9ca4a55c16aaa4bfa5cdb199786550e",
+      "archive_sha256": "1eb743195ef52e07a4cb657d504a447fca2eb85ea2dd1f718554661e20ce5d16",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesIntegrationTest.xml.gz",
+      "decoded_sha256": "f7f976231fe03a38f48258482896daa8793858b7643c767c9f25e32f2d031560",
+      "archive_sha256": "e33d1b37fd97781d2f2b7c397bb09e4d8662ab71fb3c3ae0153f1ee8ae1e1ddc",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesAccessActorTest.xml.gz",
+      "decoded_sha256": "04ca8d91b8dee93ede88ab72a8c9b601907d3d8b37a4cd65009c7aac8ccbc16b",
+      "archive_sha256": "4d3b548bf8d439be8e53d04a73e3b4e8e60fd8a1d70a05a384355a62c0d704d0",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.presales.PresalesSourceScopeTest.xml.gz",
+      "decoded_sha256": "f890b22b190467ecd14faa449483264235d711ac73166a852dea68732c87240b",
+      "archive_sha256": "9b43855bdc0419d87692f7e025b8856aa35cb5fff3ec11e7b18e0039d7877c6f",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.architecture.WorkbenchArchitectureTest.xml.gz",
+      "decoded_sha256": "dc5c8f9d28e40a739d073ac7440336862722d726635e29c59bebd935c24e26a9",
+      "archive_sha256": "d79596baa20a3c3edb48c3a00e8bb3866dae1b7111700d8c69bafb5fe6a9233c",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/green-TEST-vip.mate.semantic.SemanticCoreArchitectureTest.xml.gz",
+      "decoded_sha256": "b668b5fb026f340dcf0e64abab46014b5159e27eaccda03b2f86a8369916f241",
+      "archive_sha256": "75bf68bc065869c5ea3e93568a76ce4cf2358d71b44583680b4a1600b4787a7f",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__main__java__vip__mate__presales__PresalesService.java.gz",
+      "decoded_sha256": "1348a29e91420b3a53f12d136bfe6474e01afd9f520fb75ee0bfe0ea6bb23d14",
+      "archive_sha256": "c6c87576c0a3177aae87057e89637751b036ad125158004dbe7a74e634bdfe2b",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__main__java__vip__mate__presales__PresalesArtifactReader.java.gz",
+      "decoded_sha256": "1b3e52b50cba926abf8f60bb2a6eb3bef70c876b36e11cec01141c9e17c06a38",
+      "archive_sha256": "0b6d62eb9b15bc9df653a508a0d7d9f5575728834d68a2e9f632e05b324f0b13",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__main__java__vip__mate__presales__repository__PresalesArtifactRepository.java.gz",
+      "decoded_sha256": "8c0ede776d19b270be07a48debc19200ed8cd9142847c4272b802c239c1ce002",
+      "archive_sha256": "5028d0b59c535ac6da8a8b5d38927ffcaf3d0fed941facb468cdc53fa7d8d673",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactReadContractTest.java.gz",
+      "decoded_sha256": "23e5d1b7b674fe9b15c0fbf48f140afaca170747f8d9bc3cd8d53785b99742e9",
+      "archive_sha256": "3646be28c93ed69b9e3a71851ddba01d0d2e93e9c0f70196711399db47193ec9",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactPersistenceContractTest.java.gz",
+      "decoded_sha256": "e27a3e6658206c526afadaf2d34cdc3d41918c6669c5ddb6ea5d8e8e09d8525b",
+      "archive_sha256": "86350781fd520d0c0a56a7a52d59800fabd028ca20c2d7e6ab099738bbe88c4d",
+      "credential_shape_redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/candidate-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactRepositoryTest.java.gz",
+      "decoded_sha256": "95e8a33579e451403790c98650c635177e26d9ad39af1dd82683fdbe7448b0c8",
+      "archive_sha256": "8cef93e91fde39c283973a4db7ccb9367e9ed0c78764c76d12fd758542ed2e18",
+      "credential_shape_redactions": 0
+    }
+  ],
+  "full_commit_gate": "NOT_RUN",
+  "submission_ready": false,
+  "formal_ac": "46 NOT_RUN",
+  "mysql_current_artifact_fix": "NOT_RUN",
+  "kingbase": "NOT_RUN",
+  "historical_corpus_office": "NOT_RUN",
+  "remote_required_ci": "NOT_VERIFIED",
+  "compatibility_risk": "Undeclared, ambiguous or unverifiable frozen release files now fail closed; no backfill or recreation",
+  "redaction_amendment_2026_10_06": {
+    "reason": "Additional JWT-shaped test credentials removed before first submission; test outcomes unchanged; prior gate identities remain historical evidence.",
+    "changes": [
+      {
+        "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.log.gz",
+        "previous_archive_sha256": "bcbf6e963f4f29653656e542e44a93e1d2d84d3d3d773c4b8e877d7621f305e9",
+        "previous_decoded_sha256": "54e4c9602711b140866478b26c9fd0d308deb065204043242b0780bd3e32ebc4",
+        "additional_jwt_redactions": 5,
+        "archive_sha256": "5d85954fafe28dfc4f23aecc3411d81dd63f0b89002db80bbc434e87b8c2e9b7",
+        "decoded_sha256": "491f8edf9371224d9c0d0b96d46044b7addf3c436f77e31c9794c6d54c41f8d6"
+      },
+      {
+        "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/preview-red.xml.gz",
+        "previous_archive_sha256": "6519cfa3a16082a5f3a3e81b12d66ea36cfc420e89d12f66bd61407d4a316433",
+        "previous_decoded_sha256": "f417fc2b462282b512a34833ac750a3f1094bd2728ec673161256dbb5289120d",
+        "additional_jwt_redactions": 5,
+        "archive_sha256": "d327fe8a15b9cfd2ce1ff89401b163cf87e595da92930762fad6268f3b2b154f",
+        "decoded_sha256": "86849472271951587fbe9ed79b3dc23b9556f1c42a0595b85d6187d71a3a5af2"
+      },
+      {
+        "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.log.gz",
+        "previous_archive_sha256": "634df73fd60c0583a179be98ebd3dd103b892d743549a34d5e2d62b1901c7106",
+        "previous_decoded_sha256": "302b0b7e8d4280d94f9a08bcf3d3ba792063571e00dccef6f9f45dd6d851c4fb",
+        "additional_jwt_redactions": 15,
+        "archive_sha256": "5ce2d6d85b3fb8f4e296567a5bfce37c4778f84f90b06c376df86d4ca62aef32",
+        "decoded_sha256": "b89feb4b326ba4cf274456c819ae9ac6911f2c8363eb74972483427ef8693596"
+      },
+      {
+        "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-read-tests/red-http.xml.gz",
+        "previous_archive_sha256": "bec3293ad4a7ec940122f42d1d9a985bf1947d3daee718e0c59cd0ece69089db",
+        "previous_decoded_sha256": "3cf8626ac2a1e700c18b3363034b901c6feff2964f915ae521942fdeb863816f",
+        "additional_jwt_redactions": 15,
+        "archive_sha256": "bde4feb237fb3fbd6d07e6e3de1407d39c5f3d2e223c9c3fb25dd26ddb1c4124",
+        "decoded_sha256": "97aec11a41fcef6b6af8db00a2fd75544d9f22fe35ee5c18a25e0e64a0579485"
+      }
+    ]
+  }
+}

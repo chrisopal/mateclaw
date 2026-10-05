@@ -1,0 +1,650 @@
+{
+  "task": "AQ05/AQ02 artifact MySQL HTTP and source authorization verification",
+  "status": "ENGINEERING_HTTP_FIXTURE_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "runs": {
+    "initial_fail": {
+      "state": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-artifact-mysql-http-8a_h5j87",
+      "counts": {
+        "found": 17,
+        "started": 17,
+        "succeeded": 16,
+        "failed": 1,
+        "aborted": 0,
+        "skipped": 0,
+        "container_failures": 0,
+        "cases": [
+          {
+            "name": "mysqlCrossWorkspaceHistoricalSourceStopsArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlRevokedEmployeeKbStopsHistoricalArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "duplicatePublishedManifestEntriesCannotChooseAnArbitraryDigest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "storedPresentationReadsRetainExactBytesAndIntegrityErrors()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadCannotTreatAnEmptyFrozenDigestAsPermissionToSkipIntegrity()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlMissingCredentialsCannotDownloadFrozenBytes()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "candidateWritesRollBackWithProjectRevisionFailure()",
+            "status": "FAILED"
+          },
+          {
+            "name": "previewCannotReadAStoredFileOutsideItsFrozenManifest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlDisabledAccountCannotReuseItsExistingJwt()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "actualMysqlMigrationIdentityIsExplicit()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlDisabledEmployeeStopsHistoricalArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlWithdrawnHistoricalSourceStopsArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "declaredPublishedFileWithoutStoredBytesKeepsNotFound()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadRejectsAStoredFileOutsideItsFrozenManifest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadRejectsContentAndStoredDigestChangedTogether()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedAndPreviewReadsPreserveBytesAndAuthorization()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlRealRoleMatrixRetainsReadAndPreviewAuthority()",
+            "status": "SUCCESSFUL"
+          }
+        ],
+        "status": "FAIL"
+      },
+      "cleanup_exit": 0
+    },
+    "diagnostic_fail": {
+      "state": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-artifact-mysql-http-1j5wzv9z",
+      "counts": {
+        "found": 17,
+        "started": 17,
+        "succeeded": 16,
+        "failed": 1,
+        "aborted": 0,
+        "skipped": 0,
+        "container_failures": 0,
+        "cases": [
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlCrossWorkspaceHistoricalSourceStopsArtifactDownload()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlRevokedEmployeeKbStopsHistoricalArtifactDownload()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "duplicatePublishedManifestEntriesCannotChooseAnArbitraryDigest()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "storedPresentationReadsRetainExactBytesAndIntegrityErrors()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "publishedReadCannotTreatAnEmptyFrozenDigestAsPermissionToSkipIntegrity()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlMissingCredentialsCannotDownloadFrozenBytes()"
+          },
+          {
+            "status": "FAILED",
+            "name": "candidateWritesRollBackWithProjectRevisionFailure()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "previewCannotReadAStoredFileOutsideItsFrozenManifest()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlDisabledAccountCannotReuseItsExistingJwt()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "actualMysqlMigrationIdentityIsExplicit()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlDisabledEmployeeStopsHistoricalArtifactDownload()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlWithdrawnHistoricalSourceStopsArtifactDownload()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "declaredPublishedFileWithoutStoredBytesKeepsNotFound()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "publishedReadRejectsAStoredFileOutsideItsFrozenManifest()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "publishedReadRejectsContentAndStoredDigestChangedTogether()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "publishedAndPreviewReadsPreserveBytesAndAuthorization()"
+          },
+          {
+            "status": "SUCCESSFUL",
+            "name": "mysqlRealRoleMatrixRetainsReadAndPreviewAuthority()"
+          }
+        ],
+        "status": "FAIL"
+      },
+      "diagnostic": "UncategorizedSQLException/HY000/3819",
+      "cleanup_exit": 0
+    },
+    "green": {
+      "state": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-artifact-mysql-http-1zzea6of",
+      "container_id": "129f6517ef803f31ef3f667980d46ed7f1ccf79b2204b1e2e7fec78588548fd6",
+      "container": "mateclaw-aq-artifact-http-8314560754",
+      "schema": "mateclaw_aq_acceptance_a7eccc57d5",
+      "image": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+      "server_version": "8.0.46",
+      "counts": {
+        "found": 17,
+        "started": 17,
+        "succeeded": 17,
+        "failed": 0,
+        "aborted": 0,
+        "skipped": 0,
+        "container_failures": 0,
+        "cases": [
+          {
+            "name": "mysqlCrossWorkspaceHistoricalSourceStopsArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlRevokedEmployeeKbStopsHistoricalArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "duplicatePublishedManifestEntriesCannotChooseAnArbitraryDigest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "storedPresentationReadsRetainExactBytesAndIntegrityErrors()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadCannotTreatAnEmptyFrozenDigestAsPermissionToSkipIntegrity()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlMissingCredentialsCannotDownloadFrozenBytes()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "candidateWritesRollBackWithProjectRevisionFailure()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "previewCannotReadAStoredFileOutsideItsFrozenManifest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlDisabledAccountCannotReuseItsExistingJwt()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "actualMysqlMigrationIdentityIsExplicit()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlDisabledEmployeeStopsHistoricalArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlWithdrawnHistoricalSourceStopsArtifactDownload()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "declaredPublishedFileWithoutStoredBytesKeepsNotFound()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadRejectsAStoredFileOutsideItsFrozenManifest()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedReadRejectsContentAndStoredDigestChangedTogether()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "publishedAndPreviewReadsPreserveBytesAndAuthorization()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "mysqlRealRoleMatrixRetainsReadAndPreviewAuthority()",
+            "status": "SUCCESSFUL"
+          }
+        ],
+        "status": "PASS"
+      },
+      "cleanup_exit": 0
+    }
+  },
+  "h2_original_counts": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "existing_test_adaptation": {
+    "original_sha256": "e27a3e6658206c526afadaf2d34cdc3d41918c6669c5ddb6ea5d8e8e09d8525b",
+    "adapted_existing_body_sha256": "457a88695fe67bbc8557d72146cb84b09ae68a2fae54dd26ccc29777b203f950",
+    "changes": [
+      "class rename",
+      "MySQL DROP CHECK cleanup",
+      "actual MySQL UncategorizedSQLException HY000/3819 constraint assertion",
+      "additive physical version/revision rollback assertions",
+      "additive dynamic properties and 8 tests"
+    ],
+    "original_behavior_assertions_preserved": true,
+    "driver_specific_exception_expectation_adapted": true
+  },
+  "migration": {
+    "fresh_own_schema": true,
+    "rows": 212,
+    "start": "1\tSQL\t1",
+    "last": [
+      "217\tSQL\t1",
+      "218\tJDBC\t1",
+      "219\tSQL\t1"
+    ],
+    "all_success": true,
+    "validate": "PASS",
+    "pending": 0,
+    "hash_width": 67,
+    "full_production_boot_and_upgrade_restore": "NOT_RUN"
+  },
+  "fingerprints": {
+    "source_count": 243,
+    "runtime_class_count": 8217,
+    "external_class_count": 3,
+    "current_matches_recorded": true,
+    "all_six_product_repair_sources_unchanged": true
+  },
+  "independent_review": {
+    "agent": "artifact_read_review",
+    "verdict": "COMMENT",
+    "remaining_substantive_findings": 0,
+    "hashes_and_actual_fail_green_evidence_read": "PASS",
+    "database_maven_gate_rerun": false,
+    "java_lsp": "NOT_RUN",
+    "maintainer_approval": "NOT_VERIFIED"
+  },
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "e29f6c412a3127ff6f966db800f0496fc4c0c032fc27e463024253c44d5f61fe",
+      "decoded_sha256": "30670e173b4c372021397c81631b3ee7f962ee5d9b4f49e7a14c944e197a4d1d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-PresalesArtifactMysqlHttpTest.java.gz",
+      "archive_sha256": "a6b8951ed2be62e9409f252d27d04d52dc666253ee0b0180204024866b5346d7",
+      "decoded_sha256": "ff590b970f51092fb4eecc4eef81b24c35a8c6ec22de361e49738026f386f14e"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-cleanup.log.gz",
+      "archive_sha256": "ae20ea90a946263aac5c6bdd210e83e1d22c1f41bf5288de312afcb226d573bb",
+      "decoded_sha256": "98661e33b7a8e73df9d746f0205eab3b3243140e6b440ac1abff9cf4d3d1e725"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-compile.log.gz",
+      "archive_sha256": "7d6a3b7f8231a3eff73e62920bfe79dc3ad321e7cfae52754d3211388eafc4ad",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-container-start.log.gz",
+      "archive_sha256": "ae20ea90a946263aac5c6bdd210e83e1d22c1f41bf5288de312afcb226d573bb",
+      "decoded_sha256": "98661e33b7a8e73df9d746f0205eab3b3243140e6b440ac1abff9cf4d3d1e725"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-empty-schema.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-h2-original.xml.gz",
+      "archive_sha256": "9414bc26e224bfc07bd379e717d557794ed7a1b780d9cc444153dd3e22d78ec9",
+      "decoded_sha256": "6888372b34260d89ab5715a3b7501d6b2fa8286a97f493ebeb051aa84f9d9306"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-image.log.gz",
+      "archive_sha256": "15679a82dd29b3f206b6fc1dd6e0f6b3565a668c8e139f63a6278425ca3add3c",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-java-results.json.gz",
+      "archive_sha256": "5a62713e3fc98c6f2407ffb816d75b28fb313f3cb46e8e1d3a5e6ad5b9cfb85f",
+      "decoded_sha256": "2903c810eed481566f43097ced05a5181e05105b097949db630a2a2543e246a1"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-jdk21.log.gz",
+      "archive_sha256": "cdeeed1d3af9312900e755bb1316e9ca8c812c3d63b96544a576e3d4277439f8",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-mysql-http-tests.log.gz",
+      "archive_sha256": "91d80745b8d07de431049efe137e392588ae8071583d76b009cc2d3a46bc9950",
+      "decoded_sha256": "fd4af2a311d99a17dc9201110b0d4c8b7f4b35cc705bf318fd456c54ee6abd77"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-mysql-version.log.gz",
+      "archive_sha256": "98f55566f81c245f67a0259f43fe9ccf338ac7c6911ba82106abe1682c10ee52",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-results.json.gz",
+      "archive_sha256": "09304ab1515fcc7c8d943a8cc65d4bb176db81d99b98f3d31c1a67c7ba164b8e",
+      "decoded_sha256": "9efa16b2641a0a5af950d527e08d0d05b93db3d47984493da9d1ddbd6c164c91"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-vip__mate__presales__ArtifactMysqlHttpLauncher$1.class.gz",
+      "archive_sha256": "0bd09f4dae6e30a742f63e4755f15f337a713323128a46c5870ce9202c73ccf4",
+      "decoded_sha256": "3bf96827d59e2131098209542e32165f0ce57de30880c19800db71e737f65568"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-vip__mate__presales__ArtifactMysqlHttpLauncher.class.gz",
+      "archive_sha256": "b78651fdde9301b68c39c270674b1693529bf7611716cde659113aff428ca43c",
+      "decoded_sha256": "30a7a651f432c5c929dd8390923fc7646b0a0a5aa9aa907388e91db264e0a790"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/first-fail-vip__mate__presales__PresalesArtifactMysqlHttpTest.class.gz",
+      "archive_sha256": "de7a87b8d7d30f402f4b5c78529126cb2255928158d80a0123e5b0dd9ec3fd32",
+      "decoded_sha256": "20c41d94f34250c023660d4d91b4468db1d0ba8681236dbb549a4207f0bc500f"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "e29f6c412a3127ff6f966db800f0496fc4c0c032fc27e463024253c44d5f61fe",
+      "decoded_sha256": "30670e173b4c372021397c81631b3ee7f962ee5d9b4f49e7a14c944e197a4d1d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-PresalesArtifactMysqlHttpTest.java.gz",
+      "archive_sha256": "9750d6a03e29a4e55d4357ba19379257063aa1784e393ab2ac6c05bcea2e2400",
+      "decoded_sha256": "c9fb9b3df4ca0f435dea849dea67b912120989ed73fe839e0413844e20fa233a"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-cleanup.log.gz",
+      "archive_sha256": "82e680a8824b66a8c1372531e06a8c5ee11fca88ac384ce2c41748a0faf4cf02",
+      "decoded_sha256": "7ef543b330f4c69b3d51421358d4801c7609c2b3d8abfbb306d4e4ceed1a260d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-compile.log.gz",
+      "archive_sha256": "7d6a3b7f8231a3eff73e62920bfe79dc3ad321e7cfae52754d3211388eafc4ad",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-container-start.log.gz",
+      "archive_sha256": "82e680a8824b66a8c1372531e06a8c5ee11fca88ac384ce2c41748a0faf4cf02",
+      "decoded_sha256": "7ef543b330f4c69b3d51421358d4801c7609c2b3d8abfbb306d4e4ceed1a260d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-empty-schema.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-h2-original.xml.gz",
+      "archive_sha256": "9414bc26e224bfc07bd379e717d557794ed7a1b780d9cc444153dd3e22d78ec9",
+      "decoded_sha256": "6888372b34260d89ab5715a3b7501d6b2fa8286a97f493ebeb051aa84f9d9306"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-image.log.gz",
+      "archive_sha256": "15679a82dd29b3f206b6fc1dd6e0f6b3565a668c8e139f63a6278425ca3add3c",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-java-results.json.gz",
+      "archive_sha256": "476860ea723ca58e4a1eaadbbbc53bd36c1af66ffc694e658cd2e2da7d52ef33",
+      "decoded_sha256": "6c902bc53858314786ef8eb31409c0896a26b171b2ee9bbe0b7eac438efc1318"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-jdk21.log.gz",
+      "archive_sha256": "cdeeed1d3af9312900e755bb1316e9ca8c812c3d63b96544a576e3d4277439f8",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-mysql-http-tests.log.gz",
+      "archive_sha256": "0c9ee0ce6f1fbd8b24f370788c08b68e8b10ac36b397bfd0aa92bcd70053444b",
+      "decoded_sha256": "22331a341e3e2d717c8d85ccdbc30a74a1fe7a1be6b48e4fdef5ec8cca190336"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-mysql-version.log.gz",
+      "archive_sha256": "98f55566f81c245f67a0259f43fe9ccf338ac7c6911ba82106abe1682c10ee52",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-results.json.gz",
+      "archive_sha256": "d8e236f37034ab98125018328589776a9bbe757405cd321a8fe53d904409d518",
+      "decoded_sha256": "0b11ca090bfc2761543f9182c6bf53d0e45f22a87119be2de6a84bcf3e1e4061"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-vip__mate__presales__ArtifactMysqlHttpLauncher$1.class.gz",
+      "archive_sha256": "0bd09f4dae6e30a742f63e4755f15f337a713323128a46c5870ce9202c73ccf4",
+      "decoded_sha256": "3bf96827d59e2131098209542e32165f0ce57de30880c19800db71e737f65568"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-vip__mate__presales__ArtifactMysqlHttpLauncher.class.gz",
+      "archive_sha256": "b78651fdde9301b68c39c270674b1693529bf7611716cde659113aff428ca43c",
+      "decoded_sha256": "30a7a651f432c5c929dd8390923fc7646b0a0a5aa9aa907388e91db264e0a790"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/diagnostic-fail-vip__mate__presales__PresalesArtifactMysqlHttpTest.class.gz",
+      "archive_sha256": "36bd2f03f20a3fae3880d5942ee2158ae36c2ab33f5b3ef6b5500455f3023610",
+      "decoded_sha256": "a06094daff3c7a5ff6cb2a4175e15f28b28b4e5e951933c2afecd57431c4c12e"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "e29f6c412a3127ff6f966db800f0496fc4c0c032fc27e463024253c44d5f61fe",
+      "decoded_sha256": "30670e173b4c372021397c81631b3ee7f962ee5d9b4f49e7a14c944e197a4d1d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-PresalesArtifactMysqlHttpTest.java.gz",
+      "archive_sha256": "bb2c341cce6fc11aabf511b1f1746dbe7944db6c99bf72f1943fa297ae8ab505",
+      "decoded_sha256": "675d08c20cca3a4ae811ebdff23e53e31b1b3253d9458909b7cd57b3c1aa7c63"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-cleanup.log.gz",
+      "archive_sha256": "165aaf23a30084e33eafda812e36a7170f10e1e042726c326f413c921d833c46",
+      "decoded_sha256": "af01c9bad5ba197a766f232bed95ca8408b379d87d340054acf71bf8404dba04"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-compile.log.gz",
+      "archive_sha256": "7d6a3b7f8231a3eff73e62920bfe79dc3ad321e7cfae52754d3211388eafc4ad",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-container-start.log.gz",
+      "archive_sha256": "165aaf23a30084e33eafda812e36a7170f10e1e042726c326f413c921d833c46",
+      "decoded_sha256": "af01c9bad5ba197a766f232bed95ca8408b379d87d340054acf71bf8404dba04"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-empty-schema.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-flyway-history.log.gz",
+      "archive_sha256": "14578c0f07875175855d3d282b9795df3db64f90f6d02403dad337365ce066f8",
+      "decoded_sha256": "acf6ffb6d71a8b65fe2c0001d0eff62c0192ef44f1ebb807177c8db36a326d35"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-h2-original.xml.gz",
+      "archive_sha256": "9414bc26e224bfc07bd379e717d557794ed7a1b780d9cc444153dd3e22d78ec9",
+      "decoded_sha256": "6888372b34260d89ab5715a3b7501d6b2fa8286a97f493ebeb051aa84f9d9306"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-image.log.gz",
+      "archive_sha256": "15679a82dd29b3f206b6fc1dd6e0f6b3565a668c8e139f63a6278425ca3add3c",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-java-results.json.gz",
+      "archive_sha256": "1407986d4f93868110c7c9aa25c0b66fe51d8554ec70988f92f5e59a370cc96d",
+      "decoded_sha256": "a04288957055d7f4d39146d60e20a0beb2e41a86772a398d8dd372423921ee63"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-jdk21.log.gz",
+      "archive_sha256": "cdeeed1d3af9312900e755bb1316e9ca8c812c3d63b96544a576e3d4277439f8",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-mysql-http-tests.log.gz",
+      "archive_sha256": "3a076e350499199b75ea36174fff35c071380fe3f49dd133dde0f986430781f9",
+      "decoded_sha256": "2bcf8d4dca1ef424de33bc25c9977f76af18c13e50f87dc7b2de343a0d4905bc"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-mysql-version.log.gz",
+      "archive_sha256": "98f55566f81c245f67a0259f43fe9ccf338ac7c6911ba82106abe1682c10ee52",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-results.json.gz",
+      "archive_sha256": "f75b2340a42972876a42738853eeae0b781c4bfd2133f42853173a5633bc03f4",
+      "decoded_sha256": "2e83e83c1894b79736912d1361ee2f599d751b362c04637ba07180db30abbe14"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-vip__mate__presales__ArtifactMysqlHttpLauncher$1.class.gz",
+      "archive_sha256": "0bd09f4dae6e30a742f63e4755f15f337a713323128a46c5870ce9202c73ccf4",
+      "decoded_sha256": "3bf96827d59e2131098209542e32165f0ce57de30880c19800db71e737f65568"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-vip__mate__presales__ArtifactMysqlHttpLauncher.class.gz",
+      "archive_sha256": "b78651fdde9301b68c39c270674b1693529bf7611716cde659113aff428ca43c",
+      "decoded_sha256": "30a7a651f432c5c929dd8390923fc7646b0a0a5aa9aa907388e91db264e0a790"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/green-vip__mate__presales__PresalesArtifactMysqlHttpTest.class.gz",
+      "archive_sha256": "50468e8ca88087b03afe33270ba2e9dc0cd6a039a51975adc08a0a431a2be276",
+      "decoded_sha256": "67e6a431417f09ca329d79aa783a1ceeb9c76f1d6b3858f9d628373dfabf186f"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-runner.py.gz",
+      "archive_sha256": "be5859b680144d2ea35785583743130441e2bd68416fa16616d247bf9cffe3b3",
+      "decoded_sha256": "b7edeef814877aef55974c71082d3940bccc93d012f4b3a3d0bd784a0fb6448f"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-extra.java.txt.gz",
+      "archive_sha256": "d21d4ea7e2a3024abda9599911a68de765b07bec4d71768190c039d98c30b4dc",
+      "decoded_sha256": "0105c2e5a0ea6b56fc9ccd5f24d43031ca055c28af848619ce308e4292368d45"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "e29f6c412a3127ff6f966db800f0496fc4c0c032fc27e463024253c44d5f61fe",
+      "decoded_sha256": "30670e173b4c372021397c81631b3ee7f962ee5d9b4f49e7a14c944e197a4d1d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-initial-dev.log.gz",
+      "archive_sha256": "6d7c41af0cdee41920cc56e067dafb5d4b4a7796c50a1aa321f6107bfcc3d079",
+      "decoded_sha256": "4e70a29b63f33df71b359f7b79f31263a15913ebb2e459b3688b15d789303d6d"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-h2-green.log.gz",
+      "archive_sha256": "544c945e58676eeb50529ac4380162796bb0086360ce8d1c172c54f6a5eee189",
+      "decoded_sha256": "58a5f5b294815a7e6d0d18018b25a0602c9db6a838f6fd17ece3f159f9abcd85"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-run.log.gz",
+      "archive_sha256": "aeafd148b4e99e4a1e5547fa2e321c83681dd89f77476bd121b6510b2c8e99ec",
+      "decoded_sha256": "4d3b96c2f1c0b946fc9c7362ece0fde0a46dec182760c00955afc5d4bae8ceba"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-diagnostic-run.log.gz",
+      "archive_sha256": "967a3024b27adcf1bd3bd5ed06a83086d2a12854e76243e21319ee9a9f3c9394",
+      "decoded_sha256": "4f82cf1d578b9540042179d15943c7a164c28fed736eebe96331af3ae359ef8e"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/mateclaw-artifact-mysql-http-green-run.log.gz",
+      "archive_sha256": "584d14c00dddef9b70b737b0e8fdac65814ab82ef6ba07f28e806483486cd0db",
+      "decoded_sha256": "d7747261271d5e4b4de1503978b48a656f431a6d1070cfc778ec11389d2e66ec"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__main__java__vip__mate__presales__PresalesService.java.gz",
+      "archive_sha256": "c6c87576c0a3177aae87057e89637751b036ad125158004dbe7a74e634bdfe2b",
+      "decoded_sha256": "1348a29e91420b3a53f12d136bfe6474e01afd9f520fb75ee0bfe0ea6bb23d14"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__main__java__vip__mate__presales__PresalesArtifactReader.java.gz",
+      "archive_sha256": "0b6d62eb9b15bc9df653a508a0d7d9f5575728834d68a2e9f632e05b324f0b13",
+      "decoded_sha256": "1b3e52b50cba926abf8f60bb2a6eb3bef70c876b36e11cec01141c9e17c06a38"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__main__java__vip__mate__presales__repository__PresalesArtifactRepository.java.gz",
+      "archive_sha256": "5028d0b59c535ac6da8a8b5d38927ffcaf3d0fed941facb468cdc53fa7d8d673",
+      "decoded_sha256": "8c0ede776d19b270be07a48debc19200ed8cd9142847c4272b802c239c1ce002"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactReadContractTest.java.gz",
+      "archive_sha256": "3646be28c93ed69b9e3a71851ddba01d0d2e93e9c0f70196711399db47193ec9",
+      "decoded_sha256": "23e5d1b7b674fe9b15c0fbf48f140afaca170747f8d9bc3cd8d53785b99742e9"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactPersistenceContractTest.java.gz",
+      "archive_sha256": "86350781fd520d0c0a56a7a52d59800fabd028ca20c2d7e6ab099738bbe88c4d",
+      "decoded_sha256": "e27a3e6658206c526afadaf2d34cdc3d41918c6669c5ddb6ea5d8e8e09d8525b"
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/artifact-mysql-http-tests/current-mateclaw-server__src__test__java__vip__mate__presales__PresalesArtifactRepositoryTest.java.gz",
+      "archive_sha256": "8cef93e91fde39c283973a4db7ccb9367e9ed0c78764c76d12fd758542ed2e18",
+      "decoded_sha256": "95e8a33579e451403790c98650c635177e26d9ad39af1dd82683fdbe7448b0c8"
+    }
+  ],
+  "limits": {
+    "transport": "MockMvc, not socket server or browser",
+    "existing_mocks": [
+      "WikiKnowledgeBaseService",
+      "PersonalAccessTokenService",
+      "I18nService"
+    ],
+    "all_task_tool_cache_source_flows": "NOT_RUN",
+    "real_historical_office": "NOT_RUN",
+    "kingbase": "NOT_RUN",
+    "production_upgrade_restore": "NOT_RUN",
+    "remote_required_ci": "NOT_VERIFIED",
+    "formal_ac": "46 NOT_RUN",
+    "hash_writer_legacy_policy": "PENDING",
+    "commit_gate": "NOT_RUN"
+  },
+  "submission_ready": false
+}

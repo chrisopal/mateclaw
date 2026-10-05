@@ -108,7 +108,137 @@ public class PresalesSourceAuthorization {
                 }
             }
             authorizeMaterials(scope, historical);
+            authorizeFrozenFitEvidence(scope, project, snapshot);
         }
+    }
+
+    private void authorizeFrozenFitEvidence(String scope, ObjectNode project, JsonNode snapshot) {
+        // Missing legacy fit collections are not reconstructed. Artifact reads retain live gates.
+        if (snapshot.path("fitGaps").isMissingNode()) return;
+        if (!snapshot.path("fitGaps").isArray())
+            throw new Denied(403, "SOURCE_UNAVAILABLE", "Frozen fit provenance is unavailable");
+        for (var fit : snapshot.path("fitGaps")) {
+            if ("UNKNOWN".equals(fit.path("status").asText())) continue;
+            if (!supportedFitEvidence(fit))
+                throw new Denied(403, "SOURCE_UNAVAILABLE", "Frozen fit provenance is unavailable");
+            String graph = fit.path("graphId").asText();
+            String kb = "";
+            for (var material : snapshot.path("materials")) {
+                if (!graph.equals(material.path("graphId").asText())) continue;
+                String candidate = material.path("kbId").asText();
+                if (!kb.isBlank() && !kb.equals(candidate))
+                    throw new Denied(
+                            403, "SOURCE_UNAVAILABLE", "Frozen fit graph binding is ambiguous");
+                kb = candidate;
+            }
+            if (kb.isBlank())
+                throw new Denied(403, "SOURCE_UNAVAILABLE", "Frozen fit graph is not bound");
+            for (var evidenceId : fit.path("evidenceIds")) {
+                String source =
+                        governance
+                                .availableEvidenceSource(scope, graph, kb, evidenceId.asText())
+                                .orElseThrow(
+                                        () ->
+                                                new Denied(
+                                                        404,
+                                                        "NOT_FOUND",
+                                                        "Frozen evidence is unavailable"));
+                authorizeHistoricalSource(scope, project, source);
+            }
+        }
+    }
+
+    private static boolean supportedFitEvidence(JsonNode fit) {
+        if (!fit.isObject()
+                || !nonblankText(fit.path("status"))
+                || !Set.of("FIT", "CONFIG", "EXTEND", "PARTNER", "GAP", "UNKNOWN")
+                        .contains(fit.path("status").asText())) return false;
+        if ("UNKNOWN".equals(fit.path("status").asText())) return true;
+        if (!nonblankText(fit.path("graphId"))
+                || !fit.path("evidenceIds").isArray()
+                || fit.path("evidenceIds").isEmpty()) return false;
+        for (var id : fit.path("evidenceIds")) if (!nonblankText(id)) return false;
+        return true;
+    }
+
+    /** Structural recognition only; the caller must still reauthorize and verify stored bytes. */
+    static boolean hasFrozenSourceSnapshot(String scope, ObjectNode project, ObjectNode release) {
+        String projectId = project.path("id").asText();
+        JsonNode snapshot = release.path("handoffSnapshot");
+        JsonNode frozenRelease = snapshot.path("release");
+        JsonNode baseline = snapshot.path("baseline");
+        if (!"PUBLISHED".equals(release.path("status").asText())
+                || !snapshot.isObject()
+                || !snapshot.path("schemaVersion").isIntegralNumber()
+                || !snapshot.path("schemaVersion").canConvertToInt()
+                || snapshot.path("schemaVersion").asInt() != 1
+                || !sameText(snapshot.path("workspaceId"), scope)
+                || !sameText(snapshot.path("engagementId"), projectId)
+                || !sameText(snapshot.path("caseRef"), projectId)
+                || !sameText(frozenRelease.path("id"), release.path("id").asText())
+                || !sameText(
+                        snapshot.path("solution").path("id"), release.path("solutionId").asText())
+                || !sameText(baseline.path("id"), release.path("baselineId").asText())
+                || !sameText(
+                        snapshot.path("solution").path("baselineId"), baseline.path("id").asText())
+                || !release.path("files").isArray()
+                || !release.path("files").equals(frozenRelease.path("files"))
+                || !snapshot.path("materials").isArray()
+                || !snapshot.path("sourceRefs").isArray()
+                || !baseline.path("references").isArray()) return false;
+        for (var material : snapshot.path("materials"))
+            if (!material.isObject()
+                    || !nonblankText(material.path("kbId"))
+                    || !material.path("graphId").isTextual()) return false;
+        for (var ref : baseline.path("references"))
+            if (!currentlyBoundGraph(project, ref.path("graphId").asText())
+                    || !ref.isObject()
+                    || !nonblankText(ref.path("graphId"))
+                    || !sourceObjects(ref.path("sources"))) return false;
+        for (var ref : snapshot.path("sourceRefs")) {
+            if (ref.isTextual()) {
+                if (!nonblankText(ref)) return false;
+            } else if (ref.isObject() && ref.has("sources")) {
+                if (!nonblankText(ref.path("graphId")) || !sourceObjects(ref.path("sources")))
+                    return false;
+            } else if (!ref.isObject() || !nonblankText(ref.path("sourceRef"))) return false;
+        }
+        if (!snapshot.path("fitGaps").isArray()
+                || !snapshot.path("solution").path("fitGapRefs").isArray()) return false;
+        Set<String> fitIds = new HashSet<>();
+        for (var id : snapshot.path("solution").path("fitGapRefs"))
+            if (!nonblankText(id) || !fitIds.add(id.asText())) return false;
+        for (var fit : snapshot.path("fitGaps"))
+            if (!nonblankText(fit.path("id"))
+                    || !fitIds.remove(fit.path("id").asText())
+                    || !supportedFitEvidence(fit)
+                    || (!"UNKNOWN".equals(fit.path("status").asText())
+                            && !currentlyBoundGraph(project, fit.path("graphId").asText())))
+                return false;
+        if (!fitIds.isEmpty()) return false;
+        return true;
+    }
+
+    private static boolean currentlyBoundGraph(ObjectNode project, String graph) {
+        if (graph.isBlank()) return false;
+        for (var material : project.path("materials"))
+            if (graph.equals(material.path("graphId").asText())) return true;
+        return false;
+    }
+
+    private static boolean sourceObjects(JsonNode sources) {
+        if (!sources.isArray()) return false;
+        for (var source : sources)
+            if (!source.isObject() || !nonblankText(source.path("sourceRef"))) return false;
+        return true;
+    }
+
+    private static boolean nonblankText(JsonNode value) {
+        return value.isTextual() && !value.asText().isBlank();
+    }
+
+    private static boolean sameText(JsonNode value, String expected) {
+        return !expected.isBlank() && value.isTextual() && expected.equals(value.asText());
     }
 
     private void authorizeHistoricalSource(String scope, ObjectNode project, String sourceId) {

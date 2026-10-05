@@ -15,6 +15,12 @@ public class SourceGovernanceReadService {
         this.repository = repository;
     }
 
+    /** Caller must authorize Workspace, frozen materials and the returned current source. */
+    public java.util.Optional<String> availableEvidenceSource(
+            String scope, String graphId, String kbId, String evidenceId) {
+        return repository.availableEvidenceSource(scope, graphId, kbId, evidenceId);
+    }
+
     public boolean isWithdrawn(String graphId, String sourceId) {
         return repository.isWithdrawn(graphId, sourceId);
     }

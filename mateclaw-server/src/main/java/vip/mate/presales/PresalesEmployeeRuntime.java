@@ -50,21 +50,11 @@ public class PresalesEmployeeRuntime {
                 && "native".equalsIgnoreCase(a.getRuntimeType());
     }
 
-    public List<Map<String, Object>> employees(String scope) {
+    public List<PresalesDtos.Employee> employees(String scope) {
         if (agents.getIfAvailable() == null) return List.of();
         return agents.getObject().listAgentsByWorkspace(Long.valueOf(scope), true).stream()
                 .filter(a -> eligible(a, scope))
-                .map(
-                        a ->
-                                Map.<String, Object>of(
-                                        "id",
-                                        a.getId().toString(),
-                                        "name",
-                                        a.getName(),
-                                        "enabled",
-                                        true,
-                                        "available",
-                                        true))
+                .map(a -> new PresalesDtos.Employee(a.getId().toString(), a.getName(), true, true))
                 .toList();
     }
 
@@ -138,6 +128,8 @@ public class PresalesEmployeeRuntime {
                         "presales:" + scope + ":" + projectId + ":" + runId)
                 || !task.path("skill").asText().equals(snapshot.path("skill").asText()))
             throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+        Integer version = PresalesProjectItems.positiveRevision(snapshot.path("projectVersion"));
+        if (version == null) throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
         var toolScope =
                 new PresalesToolScope(
                         scope,
@@ -148,7 +140,7 @@ public class PresalesEmployeeRuntime {
                         task.path("operationId").asText(),
                         PresalesToolScope.inputRefs(snapshot),
                         task.path("agentId").asText(),
-                        snapshot.path("projectVersion").asInt());
+                        version);
         return new ProjectExecutionOptions(
                 runId,
                 pin.modelConfigId(),

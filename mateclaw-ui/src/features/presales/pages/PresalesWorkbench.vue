@@ -309,277 +309,46 @@
             :label="t('presales.materials_evidence')"
             name="materials"
           >
-            <section class="section-heading">
-              <h2>{{ t('presales.authorized_sources') }}</h2>
-              <el-button
-                :disabled="!canWrite"
-                @click="openEditor('material')"
-                >{{ t('presales.bind_material') }}</el-button
-              >
-            </section>
-            <el-table :data="project.materials"
-              ><el-table-column :label="t('presales.role')"
-                ><template #default="{ row }">{{ stateLabel(row.role) }}</template></el-table-column
-              ><el-table-column
-                prop="kbId"
-                :label="t('presales.knowledge_base')"
-                min-width="180"
-              /><el-table-column
-                prop="graphId"
-                :label="t('presales.graph')"
-                min-width="180"
-              /><el-table-column :label="t('presales.status')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.status)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.actions')"
-                min-width="224"
-                ><template #default="{ row }"
-                  ><div class="table-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="showEvidence(row)"
-                      >{{ t('presales.view_source') }}</el-button
-                    ><el-button
-                      plain
-                      size="small"
-                      type="danger"
-                      :disabled="!canWrite || row.status === 'WITHDRAWN'"
-                      @click="command({ action: 'UNBIND_MATERIAL', payload: { id: row.id } })"
-                      >{{ t('presales.withdraw') }}</el-button
-                    >
-                  </div></template
-                ></el-table-column
-              ></el-table
-            >
+            <PresalesMaterials
+              :project="project"
+              :can-write="canWrite"
+              :state-label="stateLabel"
+              @bind="openEditor('material')"
+              @unbind="(id) => command({ action: 'UNBIND_MATERIAL', payload: { id } })"
+              @evidence="showEvidence"
+            />
           </el-tab-pane>
           <el-tab-pane
             :label="t('presales.requirements_questions')"
             name="requirements"
           >
-            <section class="section-heading">
-              <h2>{{ t('presales.requirements') }}</h2>
-              <div>
-                <el-button
-                  :disabled="!canGenerate"
-                  @click="openGeneration('S2')"
-                  >{{ t('presales.ask_employee_to_assess_requirements') }}</el-button
-                ><el-button
-                  type="primary"
-                  :disabled="!canApprove"
-                  @click="openEditor('baseline')"
-                  >{{ t('presales.confirm_requirements') }}</el-button
-                >
-              </div>
-            </section>
-            <details class="inline-help">
-              <summary>
-                {{ t('presales.about_confirmation_steps') }}
-              </summary>
-              <p>
-                {{ t('presales.context_message_6') }}
-              </p>
-            </details>
-            <el-table :data="project.requirements"
-              ><el-table-column
-                prop="title"
-                :label="t('presales.requirement')"
-                min-width="240"
-              /><el-table-column
-                :label="t('presales.origin')"
-                min-width="130"
-                ><template #default="{ row }">{{
-                  stateLabel(row.originKind)
-                }}</template></el-table-column
-              ><el-table-column :label="t('presales.priority')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.priority)
-                }}</template></el-table-column
-              ><el-table-column :label="t('presales.scope')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.scope)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.customer_confirmation')"
-                min-width="160"
-                ><template #default="{ row }">{{
-                  stateLabel(row.customerConfirmationStatus)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.actions')"
-                min-width="224"
-                ><template #default="{ row }"
-                  ><div class="table-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="showEvidence(row)"
-                      >{{ t('presales.evidence') }}</el-button
-                    ><el-button
-                      type="primary"
-                      size="small"
-                      :disabled="!canWrite"
-                      @click="openEditor('requirement', row)"
-                      >{{ t('presales.revise') }}</el-button
-                    >
-                  </div></template
-                ></el-table-column
-              ></el-table
-            >
-            <section class="section-heading">
-              <h2>
-                {{ t('presales.information_requested_by_employee') }}
-              </h2>
-              <el-button
-                :disabled="!canGenerate || !project.agentId"
-                @click="continueEmployee"
-                >{{ t('presales.continue_employee_work') }}</el-button
-              >
-            </section>
-            <div class="toolbar">
-              <el-radio-group
-                v-model="clarificationFilter"
-                :aria-label="t('presales.filter_clarification_status')"
-                ><el-radio-button value="ALL"
-                  >{{ t('presales.all') }} {{ project.clarifications.length }}</el-radio-button
-                ><el-radio-button value="OPEN"
-                  >{{ t('presales.open') }}
-                  {{
-                    project.clarifications.filter((c) => c.status !== 'ANSWERED').length
-                  }}</el-radio-button
-                ><el-radio-button value="ANSWERED"
-                  >{{ t('presales.answered') }}
-                  {{
-                    project.clarifications.filter((c) => c.status === 'ANSWERED').length
-                  }}</el-radio-button
-                ></el-radio-group
-              >
-            </div>
-            <el-table :data="filteredClarifications"
-              ><el-table-column
-                prop="question"
-                :label="t('presales.question')"
-                min-width="240"
-              /><el-table-column
-                :label="t('presales.requirement_impact')"
-                min-width="180"
-                ><template #default="{ row }"
-                  ><span>{{
-                    project.requirements.find((r) => r.id === row.requirementId)?.title ||
-                    t('presales.project_wide')
-                  }}</span>
-                  <div class="muted">{{ row.impact || '—' }}</div></template
-                ></el-table-column
-              ><el-table-column :label="t('presales.owner')"
-                ><template #default="{ row }">{{
-                  ownerName(row.ownerId)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.answer_and_source')"
-                min-width="230"
-                ><template #default="{ row }"
-                  ><p class="safe-content">{{ row.answer || '—' }}</p>
-                  <div class="muted">
-                    {{ row.answerSourceId || t('presales.no_source_recorded') }}
-                  </div></template
-                ></el-table-column
-              ><el-table-column :label="t('presales.status')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.status)
-                }}</template></el-table-column
-              ><el-table-column
-                :label="t('presales.actions')"
-                min-width="224"
-                ><template #default="{ row }"
-                  ><div class="table-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="showEvidence(row)"
-                      >{{ t('presales.view_record') }}</el-button
-                    ><el-button
-                      type="primary"
-                      size="small"
-                      :disabled="!canWrite"
-                      @click="openEditor('clarification', row)"
-                      >{{
-                        row.status === 'ANSWERED'
-                          ? t('presales.revise_answer')
-                          : t('presales.provide_information')
-                      }}</el-button
-                    >
-                  </div></template
-                ></el-table-column
-              ></el-table
-            >
-            <h3>{{ t('presales.requirement_confirmation_history') }}</h3>
-            <el-table :data="project.baselines"
-              ><el-table-column
-                prop="id"
-                label="ID" /><el-table-column
-                prop="reason"
-                :label="t('presales.decision_reason')" /><el-table-column
-                prop="createdAt"
-                :label="t('presales.created')"
-            /></el-table>
+            <PresalesRequirements
+              :project="project"
+              :can-write="canWrite"
+              :can-generate="canGenerate"
+              :can-approve="canApprove"
+              :state-label="stateLabel"
+              :owner-name="ownerName"
+              v-model:clarification-filter="clarificationFilter"
+              @generate="openGeneration('S2')"
+              @confirm="openEditor('baseline')"
+              @continue="continueEmployee"
+              @revise-requirement="(item) => openEditor('requirement', item)"
+              @revise-clarification="(item) => openEditor('clarification', item)"
+              @evidence="showEvidence"
+            />
           </el-tab-pane>
           <el-tab-pane
             :label="t('presales.capabilities_cases')"
             name="fitgap"
           >
-            <section class="section-heading">
-              <h2>
-                {{ t('presales.requirement_capability_matching') }}
-              </h2>
-              <div>
-                <el-button
-                  :disabled="!canGenerate"
-                  @click="openGeneration('S3')"
-                  >{{ t('presales.match_capabilities') }}</el-button
-                >
-              </div>
-            </section>
-            <details class="inline-help">
-              <summary>
-                {{ t('presales.about_capability_assessment') }}
-              </summary>
-              <p>
-                {{ t('presales.context_message_7') }}
-              </p>
-            </details>
-            <el-table :data="project.fitGaps"
-              ><el-table-column
-                prop="requirementId"
-                :label="t('presales.requirement_2')"
-                min-width="190"
-              /><el-table-column :label="t('presales.fulfillment_approach')"
-                ><template #default="{ row }">{{
-                  stateLabel(row.status)
-                }}</template></el-table-column
-              ><el-table-column
-                prop="productVersion"
-                :label="t('presales.product_version')"
-              /><el-table-column
-                prop="reason"
-                :label="t('presales.basis_gap')"
-                min-width="250"
-              /><el-table-column
-                :label="t('presales.actions')"
-                min-width="224"
-                ><template #default="{ row }"
-                  ><div class="table-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="showEvidence(row)"
-                      >{{ t('presales.evidence') }}</el-button
-                    >
-                  </div></template
-                ></el-table-column
-              ></el-table
-            >
+            <PresalesFitGap
+              :project="project"
+              :can-generate="canGenerate"
+              :state-label="stateLabel"
+              @generate="openGeneration('S3')"
+              @evidence="showEvidence"
+            />
           </el-tab-pane>
           <el-tab-pane
             :label="t('presales.solution_design')"
@@ -790,6 +559,9 @@
 <script setup lang="ts">
 import { presalesMessages } from '../shared/messages'
 import { useI18n } from 'vue-i18n'
+import PresalesMaterials from '../components/PresalesMaterials.vue'
+import PresalesRequirements from '../components/PresalesRequirements.vue'
+import PresalesFitGap from '../components/PresalesFitGap.vue'
 import PresalesDashboard from '../components/PresalesDashboard.vue'
 import PresalesAssignmentFields from '../components/PresalesAssignmentFields.vue'
 import PresalesDiscoveryFields from '../components/PresalesDiscoveryFields.vue'
@@ -797,30 +569,21 @@ import PresalesOutputFields from '../components/PresalesOutputFields.vue'
 import PresalesSolutions from '../components/PresalesSolutions.vue'
 import PresalesOutputs from '../components/PresalesOutputs.vue'
 import PresalesOverview from '../components/PresalesOverview.vue'
-import { loadPortfolio } from '../shared/dashboard'
+import { usePresalesWorkbenchQuery } from '../composables/usePresalesWorkbenchQuery'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
-import {
-  presalesApi,
-  type PresalesCapabilities,
-  type PresalesCommandIntent,
-  type PresalesSkill,
-  type PresalesMember,
-  type PresalesEmployee,
-  type PresalesTask,
-  type PresalesProject,
-  type PresalesProjectSummary,
-  type PresalesRecord,
-} from '../api/presalesApi'
+import { type PresalesMember, type PresalesProject, type PresalesRecord } from '../api/presalesApi'
 import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
-import { isCurrentRequest, presalesError, operationReceipt } from '../shared/state'
+import { isCurrentRequest, operationReceipt } from '../shared/state'
 import { classifyStatus, statusLabel } from '../shared/status'
+import { usePresalesExecutionSession } from '../composables/usePresalesExecutionSession'
 import { usePresalesEditorSession } from '../composables/usePresalesEditorSession'
-import { prepareEditorSubmission } from '../shared/editorSubmission'
+import { usePresalesMutationSession } from '../composables/usePresalesMutationSession'
+import { usePresalesDownloads } from '../composables/usePresalesDownloads'
 const { t } = useI18n({ messages: presalesMessages })
 const narrowQuery = window.matchMedia('(max-width: 768px)')
 const isNarrow = ref(narrowQuery.matches)
@@ -853,61 +616,54 @@ function isActiveScope(scope: ReturnType<typeof captureScope>) {
     )
   )
 }
-const members = ref<PresalesMember[]>([]),
-  membersLoading = ref(false),
-  membersError = ref('')
+const {
+  members,
+  membersLoading,
+  membersError,
+  capabilities,
+  project,
+  projects,
+  portfolio,
+  portfolioLoading,
+  portfolioError,
+  loading,
+  error,
+  conflict,
+  page,
+  total,
+  query,
+  ownerFilter,
+  statusFilter,
+  load,
+  readProject,
+  refreshPortfolio,
+  search,
+  dispose: disposeQuery,
+} = usePresalesWorkbenchQuery({
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  isDirty: () => dirty.value,
+  t,
+  invalidateScope: () => {
+    scopeGeneration++
+  },
+  resetPolling: () => taskPolling.reset(),
+  resetView: () => {
+    sourcePreview.reset()
+    saving.value = false
+    optionsLoading.value = false
+    employeesLoading.value = false
+    editError.value = ''
+    compareId.value = ''
+  },
+  acceptProject,
+})
 function memberName(member: PresalesMember): string {
   return member.nickname || member.username || t('presales.unnamed_member')
 }
 function ownerName(id?: string): string {
   const member = members.value.find((item) => item.userId === id)
   return member ? memberName(member) : id ? t('presales.member_unavailable') : '—'
-}
-async function loadMembers(ws: string, signal: AbortSignal) {
-  members.value = []
-  membersError.value = ''
-  membersLoading.value = true
-  try {
-    const rows = await presalesApi.members(ws, signal)
-    if (!signal.aborted && ws === workspace.currentWorkspaceId) members.value = rows
-  } catch {
-    if (!signal.aborted && ws === workspace.currentWorkspaceId)
-      membersError.value = t('presales.context_message_27')
-  } finally {
-    if (!signal.aborted && ws === workspace.currentWorkspaceId) membersLoading.value = false
-  }
-}
-
-const capabilities = ref<PresalesCapabilities>(),
-  project = ref<PresalesProject>(),
-  projects = ref<PresalesProjectSummary[]>([])
-const portfolio = ref<PresalesProjectSummary[]>([]),
-  portfolioLoading = ref(false),
-  portfolioError = ref(false)
-let portfolioController: AbortController | undefined
-async function refreshPortfolio() {
-  portfolioController?.abort()
-  portfolioController = new AbortController()
-  const ws = workspace.currentWorkspaceId,
-    signal = portfolioController.signal
-  portfolio.value = []
-  portfolioError.value = false
-  if (!ws || projectId.value || !capabilities.value?.enabled) {
-    portfolioLoading.value = false
-    return
-  }
-  portfolioLoading.value = true
-  try {
-    const rows = await loadPortfolio(
-      (page) => presalesApi.list(ws, { page, pageSize: 100 }, signal),
-      signal,
-    )
-    if (!signal.aborted && ws === workspace.currentWorkspaceId) portfolio.value = rows
-  } catch {
-    if (!signal.aborted) portfolioError.value = true
-  } finally {
-    if (!signal.aborted) portfolioLoading.value = false
-  }
 }
 function filterStage(stage: string) {
   statusFilter.value = stage
@@ -956,26 +712,11 @@ const projectMetrics = computed(() => {
     },
   ]
 })
-const loading = ref(false),
-  saving = ref(false),
-  error = ref(''),
-  conflict = ref(false),
-  page = ref(1),
-  total = ref(0)
+const saving = ref(false)
 const compareId = ref(''),
   compareTargetId = ref('')
 const clarificationFilter = ref('ALL')
-const filteredClarifications = computed(() =>
-  (project.value?.clarifications || []).filter(
-    (c) =>
-      clarificationFilter.value === 'ALL' ||
-      (clarificationFilter.value === 'OPEN' ? c.status !== 'ANSWERED' : c.status === 'ANSWERED'),
-  ),
-)
-const query = ref(''),
-  ownerFilter = ref(''),
-  statusFilter = ref(''),
-  tab = ref('overview')
+const tab = ref('overview')
 const stages = ['DISCOVERY', 'REQUIREMENTS', 'BASELINED', 'SOLUTION', 'RELEASE', 'ARCHIVED']
 const canWrite = computed(
   () =>
@@ -1054,7 +795,6 @@ function stateLabel(state: string | undefined): string {
 function printable(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—'
 }
-let controller: AbortController | undefined
 const taskPolling = usePresalesTaskPolling({
   workspaceId: () => workspace.currentWorkspaceId,
   projectId: () => projectId.value,
@@ -1078,165 +818,6 @@ function acceptMutation(detail: PresalesProject, scope: ReturnType<typeof captur
   acceptProject(detail)
   return true
 }
-async function readProject(ws: string, id: string, signal: AbortSignal): Promise<PresalesProject> {
-  try {
-    return await presalesApi.get(ws, id, signal)
-  } catch (e) {
-    if (
-      !presalesError(e).accessDenied ||
-      signal.aborted ||
-      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      throw e
-    project.value = undefined
-    if (!capabilities.value?.canWrite) throw e
-    try {
-      const repair = await presalesApi.repairContext(ws, id, signal)
-      const sourceCollections = [
-        'materials',
-        'requirements',
-        'clarifications',
-        'baselines',
-        'fitGaps',
-        'cases',
-        'solutions',
-        'reviews',
-        'reviewDrafts',
-        'releases',
-        'tasks',
-        'contextCards',
-      ] as const
-      const metadata = [
-        'id',
-        'workspaceId',
-        'version',
-        'name',
-        'customer',
-        'ownerId',
-        'industry',
-        'goal',
-        'status',
-        'stage',
-        'agentId',
-        'agentName',
-        'createdBy',
-        'createdAt',
-        'updatedBy',
-        'updatedAt',
-        'sourceAccessRestricted',
-        'repairBindings',
-      ]
-      const allowedKeys = new Set<string>([...metadata, ...sourceCollections])
-      if (
-        repair.sourceAccessRestricted !== true ||
-        repair.id !== id ||
-        repair.workspaceId !== ws ||
-        !Number.isInteger(repair.version) ||
-        Object.keys(repair).some((key) => !allowedKeys.has(key)) ||
-        sourceCollections.some((key) => !Array.isArray(repair[key]) || repair[key].length !== 0) ||
-        !Array.isArray(repair.repairBindings) ||
-        repair.repairBindings.some(
-          (binding) =>
-            typeof binding.id !== 'string' ||
-            !binding.id ||
-            !['PROJECT', 'PRODUCT', 'CASE', 'UNKNOWN'].includes(binding.role) ||
-            Object.keys(binding).some((key) => !['id', 'role'].includes(key)),
-        )
-      )
-        throw e
-      return { ...repair }
-    } catch {
-      throw e
-    }
-  }
-}
-async function load() {
-  if (dirty.value) return
-  scopeGeneration++
-  controller?.abort()
-  controller = new AbortController()
-  taskPolling.reset()
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value,
-    signal = controller.signal
-  members.value = []
-  membersError.value = ''
-  membersLoading.value = false
-  portfolioController?.abort()
-  portfolio.value = []
-  portfolioError.value = false
-  portfolioLoading.value = false
-  project.value = undefined
-  projects.value = []
-  capabilities.value = undefined
-  sourcePreview.reset()
-  saving.value = false
-  optionsLoading.value = false
-  employeesLoading.value = false
-  editError.value = ''
-  compareId.value = ''
-  if (!ws) {
-    error.value = t('presales.select_a_workspace')
-    return
-  }
-  loading.value = true
-  error.value = ''
-  conflict.value = false
-  try {
-    const caps = await presalesApi.capabilities(ws, signal)
-    if (!isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) || signal.aborted)
-      return
-    capabilities.value = caps
-    if (!caps.enabled) return
-    void loadMembers(ws, signal)
-    if (!id) void refreshPortfolio()
-    if (id) {
-      const detail = await readProject(ws, id, signal)
-      if (
-        isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) &&
-        !signal.aborted
-      ) {
-        acceptProject(detail)
-      }
-    } else {
-      const result = await presalesApi.list(
-        ws,
-        {
-          q: query.value,
-          ownerId: ownerFilter.value,
-          stage: statusFilter.value,
-          page: page.value,
-          pageSize: 20,
-        },
-        signal,
-      )
-      if (
-        isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value) &&
-        !signal.aborted
-      ) {
-        projects.value = result.items
-        total.value = Number(result.total)
-      }
-    }
-  } catch (e) {
-    if (!signal.aborted) {
-      if ((e as { response?: { status?: number } }).response?.status === 404 && !capabilities.value)
-        capabilities.value = {
-          enabled: false,
-          semanticEnabled: false,
-          canWrite: false,
-          canApprove: false,
-        }
-      else error.value = presalesError(e).message
-    }
-  } finally {
-    if (!signal.aborted) loading.value = false
-  }
-}
-function search() {
-  page.value = 1
-  void load()
-}
 const editor = usePresalesEditorSession({
   project,
   canWrite: () => canWrite.value,
@@ -1245,7 +826,7 @@ const editor = usePresalesEditorSession({
   projectId: () => projectId.value,
   captureScope,
   isActiveScope,
-  loadEmployees,
+  loadEmployees: (): Promise<void> => loadEmployees(),
   confirmDiscard: () =>
     ElMessageBox.confirm(t('presales.discard_unsaved_changes'), t('presales.unsaved_changes_2'), {
       type: 'warning',
@@ -1286,188 +867,6 @@ const editorTitle = computed(
 onBeforeRouteLeave(discard)
 onBeforeRouteUpdate(discard)
 const unregister = workspace.registerBeforeSwitch(discard)
-async function command(intent: PresalesCommandIntent): Promise<boolean> {
-  const { action, payload } = intent
-  const scope = captureScope()
-  const ws = workspace.currentWorkspaceId,
-    current = project.value
-  if (!ws || !current || !canWrite.value || saving.value) return false
-  if (
-    current.sourceAccessRestricted &&
-    !(
-      action === 'BIND_MATERIAL' ||
-      action === 'UNBIND_MATERIAL' ||
-      (action === 'UPDATE_PROJECT' &&
-        Object.keys(payload).length === 1 &&
-        'agentId' in payload &&
-        typeof payload.agentId === 'string')
-    )
-  )
-    return false
-  saving.value = true
-  editError.value = ''
-  error.value = ''
-  try {
-    const result = await presalesApi.command(ws, current.id, {
-      ...intent,
-      expectedVersion: current.version,
-      operationId: receipt({
-        ws,
-        id: current.id,
-        version: current.version,
-        action,
-        payload,
-      }),
-    })
-    return acceptMutation(result, scope)
-  } catch (e) {
-    if (!isActiveScope(scope)) return false
-    const issue = presalesError(e)
-    conflict.value = issue.conflict
-    error.value = editError.value = issue.message
-    return false
-  } finally {
-    if (isActiveScope(scope)) saving.value = false
-  }
-}
-async function save() {
-  if (!canWrite.value || saving.value || conflict.value) return
-  const scope = captureScope(),
-    active = editor.captureSession(),
-    kind = editorKind.value
-  const submission = prepareEditorSubmission(
-    kind,
-    form.value,
-    !!project.value?.sourceAccessRestricted,
-  )
-  if (submission.kind === 'invalid') {
-    editError.value = t(
-      submission.issue === 'REQUIRED_FIELDS'
-        ? 'presales.complete_the_required_fields'
-        : 'presales.context_message_28',
-    )
-    return
-  }
-  if (submission.kind === 'project') {
-    const data = submission.data
-    const ws = workspace.currentWorkspaceId
-    if (!ws) return
-    saving.value = true
-    try {
-      const body = {
-        ...submission.metadata,
-        expectedVersion: project.value?.version || 0,
-        operationId: receipt({
-          ws,
-          id: projectId.value,
-          version: project.value?.version || 0,
-          data,
-        }),
-      }
-      const result = project.value
-        ? await presalesApi.update(ws, project.value.id, body)
-        : await presalesApi.create(ws, { ...body, expectedVersion: 0 })
-      if (!active() || !acceptMutation(result, scope)) return
-      editorOpen.value = false
-      saving.value = false
-      if (projectId.value) await load()
-      else await router.push(`/presales/${result.id}`)
-    } catch (e) {
-      if (!active()) return
-      const issue = presalesError(e)
-      editError.value = error.value = issue.message
-      conflict.value = issue.conflict
-    } finally {
-      if (isActiveScope(scope)) saving.value = false
-    }
-    return
-  }
-  // Keep UI-only metadata out of the HTTP body and preserve the action/payload relationship.
-  const { kind: submissionKind, continueEmployee: resumeEmployee, ...intent } = submission
-  if (submissionKind === 'command' && (await command(intent)) && active()) {
-    editorOpen.value = false
-    if (resumeEmployee && project.value?.agentId) await continueEmployee()
-  }
-}
-
-async function downloadHandoff() {
-  const scope = captureScope()
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value
-  const current = project.value
-  if (!ws || current?.sourceAccessRestricted) return
-  try {
-    const result = await presalesApi.handoff(ws, id)
-    if (
-      !isActiveScope(scope) ||
-      project.value !== current ||
-      project.value?.sourceAccessRestricted ||
-      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      return
-    const blob = new Blob([JSON.stringify(result, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `internal-handoff-${id}-v${project.value?.version}.json`
-    link.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  } catch (e) {
-    if (isActiveScope(scope) && project.value === current) error.value = presalesError(e).message
-  }
-}
-async function download(versionId: string, filename: string, kind: 'files' | 'preview' | 'draft') {
-  const scope = captureScope()
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value
-  const current = project.value
-  if (!ws || current?.sourceAccessRestricted) return
-  try {
-    const blob = await presalesApi.file(ws, id, versionId, filename, kind)
-    if (
-      !isActiveScope(scope) ||
-      project.value !== current ||
-      project.value?.sourceAccessRestricted ||
-      !isCurrentRequest(ws, workspace.currentWorkspaceId, id, projectId.value)
-    )
-      return
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = (kind === 'files' ? '' : 'UNAPPROVED-') + filename
-    link.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  } catch (e) {
-    if (isActiveScope(scope) && project.value === current) error.value = presalesError(e).message
-  }
-}
-async function approveRelease(release: PresalesRecord) {
-  const scope = captureScope(),
-    current = project.value
-  if (!current || !canApprove.value || saving.value) return
-  try {
-    const result = await ElMessageBox.prompt(
-      t('presales.context_message_29'),
-      t('presales.approve_release'),
-      { inputValidator: (value) => !!value?.trim() },
-    )
-    if (
-      !isActiveScope(scope) ||
-      current.id !== project.value?.id ||
-      current.version !== project.value.version ||
-      !canApprove.value
-    )
-      return
-    await command({
-      action: 'APPROVE_RELEASE',
-      payload: { releaseId: release.id, reason: result.value },
-    })
-  } catch {
-    /* Cancel. */
-  }
-}
 function adopt(skill: string | undefined, item: PresalesRecord) {
   if (skill === 'S1') openEditor('context', { ...item })
   else if (skill === 'S5' || skill === 'S6')
@@ -1494,35 +893,68 @@ function adopt(skill: string | undefined, item: PresalesRecord) {
       sourceRefs: item.sourceRefs || [],
     })
 }
-async function archive() {
-  const scope = captureScope(),
-    current = project.value
-  if (!current || !canWrite.value || current.sourceAccessRestricted || saving.value) return
-  try {
-    await ElMessageBox.confirm(
-      t('presales.archive_this_project_and_make_it_read_only'),
-      t('presales.archive_project'),
-      { type: 'warning' },
-    )
-    if (
-      !isActiveScope(scope) ||
-      current.id !== project.value?.id ||
-      current.version !== project.value.version ||
-      !canWrite.value ||
-      project.value.sourceAccessRestricted
-    )
-      return
-    await command({ action: 'ARCHIVE', payload: {} })
-  } catch {
-    /* Cancel leaves data unchanged. */
-  }
-}
-const generationOpen = ref(false),
-  employees = ref<PresalesEmployee[]>([]),
-  employeeError = ref(''),
-  employeesLoading = ref(false)
-let employeeRequest = 0
-const generation = ref<{ skill: PresalesSkill; taskGoal: string }>({ skill: 'S1', taskGoal: '' })
+const {
+  employees,
+  employeeError,
+  employeesLoading,
+  generation,
+  generationOpen,
+  loadEmployees,
+  openGeneration,
+  continueEmployee,
+  generate,
+  cancelTask,
+} = usePresalesExecutionSession({
+  project,
+  saving,
+  error,
+  conflict,
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  canWrite: () => canWrite.value,
+  canGenerate: () => canGenerate.value,
+  isDirty: (): boolean => dirty.value,
+  captureScope,
+  isActiveScope,
+  receipt,
+  acceptMutation,
+  startPolling: () => taskPolling.start(),
+  employeeIssue,
+  t,
+})
+const { command, save, approveRelease, archive } = usePresalesMutationSession({
+  project,
+  saving,
+  error,
+  conflict,
+  editError,
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  canWrite: () => canWrite.value,
+  canApprove: () => canApprove.value,
+  captureScope,
+  isActiveScope,
+  receipt,
+  acceptMutation,
+  editor: {
+    editorKind,
+    form,
+    editorOpen,
+    captureSession: editor.captureSession,
+  },
+  continueEmployee,
+  load,
+  navigateToProject: (id) => router.push(`/presales/${id}`),
+  t,
+})
+const { download, downloadHandoff } = usePresalesDownloads({
+  project,
+  error,
+  workspaceId: () => workspace.currentWorkspaceId,
+  projectId: () => projectId.value,
+  captureScope,
+  isActiveScope,
+})
 const skillNames = computed(() => ({
   S1: t('presales.analyze_project_context'),
   S2: t('presales.assess_requirements_and_missing_information'),
@@ -1533,85 +965,6 @@ const skillNames = computed(() => ({
   S7: t('presales.review_solution_and_risks'),
   S8: t('presales.prepare_handoff'),
 }))
-async function loadEmployees() {
-  const scope = captureScope(),
-    request = ++employeeRequest
-  const ws = workspace.currentWorkspaceId
-  if (!ws) return
-  const active = () => isActiveScope(scope) && request === employeeRequest
-  employees.value = []
-  employeeError.value = ''
-  employeesLoading.value = true
-  try {
-    const result = await presalesApi.employees(ws)
-    if (active()) employees.value = result
-  } catch (e) {
-    if (active()) employeeError.value = employeeIssue(presalesError(e).message)
-  } finally {
-    if (active()) employeesLoading.value = false
-  }
-}
-async function openGeneration(skill: PresalesSkill, taskGoal = t('presales.context_message_30')) {
-  if (dirty.value || saving.value || !canGenerate.value) return
-  generation.value.skill = skill
-  generation.value.taskGoal = taskGoal
-  generationOpen.value = true
-  await loadEmployees()
-}
-async function continueEmployee() {
-  await openGeneration('S2', t('presales.context_message_31'))
-}
-async function generate() {
-  const scope = captureScope()
-  const ws = workspace.currentWorkspaceId,
-    current = project.value
-  if (!ws || !current || dirty.value || saving.value || !canGenerate.value) return
-  saving.value = true
-  const operationId = receipt({
-    ws,
-    id: current.id,
-    version: current.version,
-    generation: generation.value,
-  })
-  try {
-    const result = await presalesApi.generate(ws, current.id, {
-      ...generation.value,
-      expectedVersion: current.version,
-      operationId,
-    })
-    if (acceptMutation(result, scope)) {
-      taskPolling.start()
-      generationOpen.value = false
-    }
-  } catch (e) {
-    if (!isActiveScope(scope)) return
-    const issue = presalesError(e)
-    error.value = employeeError.value = employeeIssue(issue.message)
-    conflict.value = issue.conflict
-  } finally {
-    if (isActiveScope(scope)) saving.value = false
-  }
-}
-async function cancelTask(task: PresalesTask) {
-  const scope = captureScope()
-  const ws = workspace.currentWorkspaceId,
-    id = projectId.value
-  if (!ws || !id || !canWrite.value || saving.value || task.status !== 'RUNNING') return
-  saving.value = true
-  try {
-    const result = await presalesApi.cancelTask(ws, id, task.id, {
-      operationId: receipt({ ws, id, taskId: task.id, action: 'cancel' }),
-    })
-    acceptMutation(result, scope)
-  } catch (e) {
-    if (!isActiveScope(scope)) return
-    const issue = presalesError(e)
-    error.value = employeeError.value = employeeIssue(issue.message)
-    conflict.value = issue.conflict
-  } finally {
-    if (isActiveScope(scope)) saving.value = false
-  }
-}
 watch(
   () => project.value,
   (current, previous) => {
@@ -1637,8 +990,7 @@ watch(
 )
 onBeforeUnmount(() => {
   scopeGeneration++
-  portfolioController?.abort()
-  controller?.abort()
+  disposeQuery()
   taskPolling.reset()
   clearPresentationPreview()
   unregister()

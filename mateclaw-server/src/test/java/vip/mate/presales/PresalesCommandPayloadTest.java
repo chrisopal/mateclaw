@@ -98,7 +98,7 @@ class PresalesCommandPayloadTest {
             throws Exception {
         var error =
                 assertThrows(
-                        PresalesProjectItems.Rejected.class,
+                        PresalesRejected.class,
                         () ->
                                 PresalesCommandPayload.validate(
                                         CommandKind.valueOf(action),

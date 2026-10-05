@@ -1,6 +1,8 @@
 package vip.mate.presales;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 
@@ -14,14 +16,35 @@ public final class PresalesDtos {
             String agentId,
             String industry,
             String goal,
-            Integer expectedVersion,
+            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
             String operationId) {}
 
     public record Command(
-            Integer expectedVersion, String operationId, String action, ObjectNode payload) {
+            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
+            String operationId,
+            String action,
+            ObjectNode payload) {
         @JsonIgnore
         CommandAction parsedAction() {
             return CommandAction.from(action);
+        }
+    }
+
+    public record Generate(
+            @JsonDeserialize(using = PresalesExpectedVersion.class) Integer expectedVersion,
+            String operationId,
+            String skill,
+            String taskGoal) {}
+
+    public record Cancel(String operationId) {}
+
+    public record Update(Integer expectedVersion, String operationId, ObjectNode payload) {
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        public static Update fromJson(ObjectNode payload) {
+            return new Update(
+                    PresalesExpectedVersion.read(payload.get("expectedVersion")),
+                    payload.path("operationId").asText(),
+                    payload);
         }
     }
 
@@ -55,6 +78,20 @@ public final class PresalesDtos {
                 kind = CommandKind.UNKNOWN;
             }
             return new CommandAction(kind, raw);
+        }
+    }
+
+    public record ErrorData(String code) {
+        public ErrorData {
+            java.util.Objects.requireNonNull(code);
+        }
+    }
+
+    public record Employee(String id, String name, boolean enabled, boolean available) {
+        public Employee {
+            // Keep the original Map.of projection's rejection of malformed eligible identities.
+            java.util.Objects.requireNonNull(id);
+            java.util.Objects.requireNonNull(name);
         }
     }
 
