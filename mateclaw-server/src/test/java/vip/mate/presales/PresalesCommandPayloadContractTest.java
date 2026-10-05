@@ -201,7 +201,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.CsvSource({
         "UPDATE_PROJECT,name",
-        "SAVE_CLARIFICATION,question"
+        "SAVE_CLARIFICATION,question",
+        "SAVE_REVIEW,summary"
     })
     void authorizationReplayCasAndArchiveStillPrecedeShapeValidation(String action, String field)
             throws Exception {
@@ -252,7 +253,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.CsvSource({
         "UPDATE_PROJECT,name",
-        "SAVE_CLARIFICATION,question"
+        "SAVE_CLARIFICATION,question",
+        "SAVE_REVIEW,summary"
     })
     void revokedSourceStillPrecedesMalformedPayloadAndRepairIsNotWidened(
             String action, String field) throws Exception {
@@ -333,6 +335,167 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                                 .path("data");
         assertEquals("DRAFT", p.path("tasks").get(0).path("status").asText());
         assertEquals(task.path("result"), p.path("tasks").get(0).path("result"));
+        assertEquals(p.toString(), stored(p));
+    }
+
+    @Test
+    void reviewErrorsKeepDomainOrderAndLeaveAllRowsUntouched() throws Exception {
+        var p = project();
+        // Historical solution fixture isolates review rules from solution creation prerequisites.
+        p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+        var cases =
+                List.of(
+                        new String[] {
+                            "{\"solutionId\":\"foreign\",\"summary\":\"\"}",
+                            "404",
+                            "NOT_FOUND",
+                            "solutions item not found"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "summary required, max 10000 characters"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Review issues required"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[{\"severity\":\"BAD\",\"status\":\"BAD\"}]}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid severity"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[{\"status\":\"BAD\"},{\"severity\":\"BAD\"}]}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid status"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[]}",
+                            "404",
+                            "NOT_FOUND",
+                            "reviews item not found"
+                        });
+        String before = stored(p);
+        for (var sample : cases) {
+            String operation = UUID.randomUUID().toString();
+            error(
+                    command(
+                            p,
+                            cmd(1, operation, "SAVE_REVIEW", (ObjectNode) json.readTree(sample[0])),
+                            "member",
+                            Integer.parseInt(sample[1])),
+                    sample[2],
+                    sample[3]);
+            assertEquals(before, stored(p));
+            assertEquals(
+                    1,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                            Integer.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    0,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=? AND operation_id=?",
+                            Integer.class,
+                            workspace,
+                            operation));
+        }
+    }
+
+    @Test
+    void reviewDefaultsExtensionsAuthorityAndImmutableRevisionsSurviveReadback() throws Exception {
+        var p = project();
+        p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
+        jdbc.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
+                p.toString(),
+                p.path("id").asText());
+        var payload =
+                json.createObjectNode().put("solutionId", "solution").put("summary", "review");
+        var issues = payload.putArray("issues");
+        issues.addObject().putNull("severity").putNull("status").putNull("extension");
+        issues.addObject()
+                .put("severity", "BLOCKER")
+                .put("status", "RESOLVED")
+                .put("description", "closed");
+        issues.addObject().put("severity", "INFO").put("status", "ACCEPTED");
+        issues.addObject();
+        payload.put("authority", "forged").put("kind", "forged").put("authorId", "forged");
+        payload.putObject("extension").putNull("raw").put("opaque", "90071992547409999");
+        var input = payload.deepCopy();
+        var c = cmd(1, UUID.randomUUID().toString(), "SAVE_REVIEW", payload);
+        p = (ObjectNode) command(p, c, "member", 200).path("data");
+        var first = p.path("reviews").get(0).deepCopy();
+        assertEquals("HUMAN_REVIEW", first.path("kind").asText());
+        assertEquals("HUMAN_REVIEW", first.path("authority").asText());
+        assertEquals(p.path("createdBy"), first.path("authorId"));
+        assertEquals("WARNING", first.path("issues").get(0).path("severity").asText());
+        assertEquals("OPEN", first.path("issues").get(0).path("status").asText());
+        assertTrue(first.path("issues").get(0).path("extension").isNull());
+        assertEquals(input.path("issues").get(1), first.path("issues").get(1));
+        assertEquals(input.path("issues").get(2), first.path("issues").get(2));
+        assertEquals("WARNING", first.path("issues").get(3).path("severity").asText());
+        assertEquals("OPEN", first.path("issues").get(3).path("status").asText());
+        assertEquals(input.path("extension"), first.path("extension"));
+        assertFalse(first.has("previousId"));
+        var fields = new ArrayList<String>();
+        first.fieldNames().forEachRemaining(fields::add);
+        assertEquals(
+                List.of(
+                        "solutionId",
+                        "summary",
+                        "issues",
+                        "kind",
+                        "authorId",
+                        "extension",
+                        "authority",
+                        "id",
+                        "version",
+                        "createdAt"),
+                fields);
+        assertEquals(input, payload);
+        assertEquals(p, command(p, c, "member", 200).path("data"));
+        String firstId = first.path("id").asText();
+        var replacement =
+                json.createObjectNode()
+                        .put("id", firstId)
+                        .put("solutionId", "solution")
+                        .put("summary", "new review");
+        replacement.putArray("issues");
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                2,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_REVIEW",
+                                                replacement),
+                                        "member",
+                                        200)
+                                .path("data");
+        assertEquals(2, p.path("reviews").size());
+        assertEquals(first, p.path("reviews").get(0));
+        var saved = p.path("reviews").get(1);
+        assertNotEquals(firstId, saved.path("id").asText());
+        assertEquals(firstId, saved.path("previousId").asText());
+        assertEquals(2, saved.path("version").asInt());
+        assertFalse(saved.has("extension"));
+        assertTrue(saved.path("issues").isEmpty());
+        assertEquals(
+                p,
+                api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
         assertEquals(p.toString(), stored(p));
     }
 

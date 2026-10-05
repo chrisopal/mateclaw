@@ -276,16 +276,15 @@ public class PresalesService {
                 saveItem(p, "contextCards", value, actor, false);
             }
             case SAVE_REVIEW -> {
-                find(p, "solutions", value.path("solutionId").asText());
-                text(value.path("summary").asText(), "summary", 10000);
-                if (!value.path("issues").isArray()) throw bad("Review issues required");
-                for (var issue : value.path("issues")) {
-                    if (!(issue instanceof ObjectNode o)) throw bad("Review issue object required");
-                    enumValue(o, "severity", Set.of("BLOCKER", "WARNING", "INFO"), "WARNING");
-                    enumValue(o, "status", Set.of("OPEN", "RESOLVED", "ACCEPTED"), "OPEN");
+                try {
+                    var issues =
+                            PresalesReviewSave.decide(
+                                    PresalesReviewCodec.decode(value),
+                                    id -> PresalesProjectItems.find(p, "solutions", id));
+                    PresalesReviewCodec.apply(value, issues);
+                } catch (PresalesRejected rejection) {
+                    throw legacyRejection(rejection);
                 }
-                value.remove("authority");
-                value.put("kind", "HUMAN_REVIEW").put("authority", "HUMAN_REVIEW");
                 saveItem(p, "reviews", value, actor, true);
             }
             case CREATE_RELEASE -> createRelease(scope, p, value, actor);

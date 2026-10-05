@@ -95,3 +95,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 新建生成任务DTO见 [AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md](evidence/2026-10-06/AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md)：18字段改由固定记录声明，字符串ID、初始状态、显式null、顺序与快照保持，原事务/回执/保存后排队不变。原实现62/62，替换后64/64，最终744项（743通过/1既有PPT环境skip）。这是新任务类型边界，完整历史任务DTO/V2迁移与正式验收仍开放。
 
 澄清保存类型化见 [AQ05_CLARIFICATION_DTO_ACCEPTANCE.md](evidence/2026-10-06/AQ05_CLARIFICATION_DTO_ACCEPTANCE.md)：Draft/Status/Decision集中状态、回答及协作者顺序，旧JSON兼容由codec负责；Service保持事务、来源、幂等及CAS。旧合同先通过，扩展753项中752通过/1既有环境skip，追加字段顺序37/37；独立COMMENT无剩余发现。完整项目DTO/V2迁移及正式验收继续开放。
+
+人工评审保存类型边界见 [AQ05_REVIEW_DTO_ACCEPTANCE.md](evidence/2026-10-06/AQ05_REVIEW_DTO_ACCEPTANCE.md)：类型化等级/状态及有序校验与旧 JSON codec 分离；原授权、事务、回放和不可变修订不变。旧实现41合同通过，迁移后67/67；未重写历史格式或升级发布许可。完整 DTO、V2 单写迁移、坏版本任务恢复及正式验收仍开放。

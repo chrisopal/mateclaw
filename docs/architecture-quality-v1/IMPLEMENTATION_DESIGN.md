@@ -451,3 +451,9 @@ SAVE_CLARIFICATION以Draft/Status/Decision明确输入和决定，领域顺序�
 不在解码时提前校验状态、回答或加载旧item；保留question/status/requirement/owner/answer/source/item version顺序。OPEN不清除原answer/source，ANSWERED覆盖客户端伪造回答人/时间。未知扩展、null/缺失及字段顺序保留，不用record序列化重建整份旧JSON。取舍是增加两个小类换取真正的类型业务边界；尚未消除ProjectItems内JSON聚合存储，不能等同完整领域DTO或V2数据迁移。
 
 证据见evidence/2026-10-06/AQ05_CLARIFICATION_DTO_ACCEPTANCE.md。旧行为刻画先通过，扩展753项中752通过/1既有环境skip，追加字段顺序后37合同通过。正式维护人/QA签收仍开放；回退仅恢复分支及删除两个新类，无数据库操作。
+
+## ADR-AQ-043：人工评审规则以类型值决定，JSON适配保留历史格式（Proposed）
+
+SAVE_REVIEW 的 solution/summary/issues 检查顺序与等级、处理状态收敛到 PresalesReviewSave；合法结果是不可变类型列表。PresalesReviewCodec 仅负责旧字段默认值和必要写回，保留未知扩展、null/缺失、字段顺序与原输入。Service 继续控制授权、来源、原请求回放、CAS、事务，最后复用 ProjectItems 的不可变修订保存。人工评审标记仍不等于发布批准。
+
+拒绝直接将整份 JSON 反序列化为固定 record 再重写，也不创建通用状态引擎或第二套版本/权限规则。新增 95 行包内代码而 Service 仅少 1 行，是类型和兼容边界的取舍，不能宣称总复杂度或全部领域 DTO 已完成。旧 Service 的 41 项合同先通过，迁移后 67/67；证据见 evidence/2026-10-06/AQ05_REVIEW_DTO_ACCEPTANCE.md。完整聚合 DTO、V2 迁移及正式验收继续开放。回退恢复原分支并移除两个包内类，无数据库变更。
