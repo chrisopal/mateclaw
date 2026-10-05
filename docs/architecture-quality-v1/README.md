@@ -105,3 +105,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 对象状态和错误消费者修复见 [AQ05_DOMAIN_STATE_ACCEPTANCE.md](evidence/2026-10-06/AQ05_DOMAIN_STATE_ACCEPTANCE.md)：七组对象状态不再从全局翻译词表认定合法；未知不归OPEN，未答复汇总保持冻结投影口径，错误unknown经字符串校验。真实RED后售前528/528、类型和四组组件浏览器通过，独立P2修复后COMMENT/0发现。原wire和存储未变；聚合对象迁移属于AQ-06，不能用无限新增DTO wrapper替代，正式AC与本批外状态仍开放。
 
 项目修订容量扩展实施见 [计划](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md) 与 [工程记录](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_ACCEPTANCE.md)：仅项目 long/BIGINT、安全整数上限和 V220 三列；保留原数值 wire、低位任务信封、历史回执及条目 int 规则。合法旧上限 RUNNING 可恢复，坏/不一致版本仍拒写；部署须停止旧 writer，出现新范围写入后不能回滚旧二进制。具体测试、方言和提交状态按工程记录/PR分别核对，不代表完整对象迁移或正式业务验收。
+
+委派事件测试夹具修复见 [工程记录](evidence/2026-10-06/AQ01_DELEGATION_EVENT_FIXTURE_ACCEPTANCE.md)：推送门禁暴露Mockito未注入超时配置造成0秒取消，补真实成功断言及显式测试预算，RED后55/55。保留严格校验和顺序断言；生产事件回调顺序风险独立登记，不能据此宣称并发治理全部完成。
