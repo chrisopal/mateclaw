@@ -178,6 +178,159 @@ class DelegateParallelSseCancellationTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
+    void durableStopFailureStillCancelsSiblingsAndCleansTheBatch(boolean failFast)
+            throws Exception {
+        ReflectionTestUtils.setField(tool, "parallelTimeoutSeconds", failFast ? 10 : 1);
+        when(agentMapper.selectOne(any(LambdaQueryWrapper.class)))
+                .thenReturn(agent(101L, "A"), agent(102L, "B"), agent(103L, "C"));
+        var context = mock(org.springframework.context.ApplicationContext.class);
+        ReflectionTestUtils.setField(streamTracker, "applicationContext", context);
+        var siblingsStarted = new CountDownLatch(2);
+        var releaseModels = new CountDownLatch(1);
+        var childrenFinished = new CountDownLatch(3);
+        var disposed = new CountDownLatch(2);
+        var siblingIds = new ConcurrentHashMap<Long, String>();
+        List<String> stopAttempts = new CopyOnWriteArrayList<>();
+        List<Runnable> relayStops = new CopyOnWriteArrayList<>();
+        List<com.fasterxml.jackson.databind.JsonNode> endings = new CopyOnWriteArrayList<>();
+        Runnable hookB = mock(Runnable.class), hookC = mock(Runnable.class);
+        Disposable disposableB = mock(Disposable.class), disposableC = mock(Disposable.class);
+        for (var disposable : List.of(disposableB, disposableC)) {
+            doAnswer(
+                            call -> {
+                                disposed.countDown();
+                                return null;
+                            })
+                    .when(disposable)
+                    .dispose();
+        }
+        doAnswer(
+                        call -> {
+                            Object event = call.getArgument(0);
+                            if (event
+                                    instanceof
+                                    vip.mate.goal.service.GoalExecutionSignal.Stop stop) {
+                                stopAttempts.add(stop.conversationId());
+                                if (stop.conversationId().equals(siblingIds.get(102L)))
+                                    throw new IllegalStateException(
+                                            "synthetic durable stop failure");
+                            }
+                            return null;
+                        })
+                .when(context)
+                .publishEvent(any(Object.class));
+        doAnswer(
+                        call -> {
+                            Runnable actual = (Runnable) call.callRealMethod();
+                            Runnable tracked = mock(Runnable.class);
+                            doAnswer(
+                                            ignored -> {
+                                                actual.run();
+                                                return null;
+                                            })
+                                    .when(tracked)
+                                    .run();
+                            relayStops.add(tracked);
+                            return tracked;
+                        })
+                .when(streamTracker)
+                .addBatchedEventRelay(anyString(), anyString(), anyInt(), anyLong(), any());
+        doAnswer(
+                        call -> {
+                            if ("delegation_end".equals(call.getArgument(1)))
+                                endings.add(new ObjectMapper().valueToTree(call.getArgument(2)));
+                            return call.callRealMethod();
+                        })
+                .when(streamTracker)
+                .broadcastObject(eq(ROOT), anyString(), any());
+        doAnswer(
+                        call -> {
+                            Object result = call.callRealMethod();
+                            childrenFinished.countDown();
+                            return result;
+                        })
+                .when(streamTracker)
+                .complete(argThat((String id) -> !ROOT.equals(id)));
+        when(agentService.chatWithUsage(anyLong(), anyString(), anyString(), any()))
+                .thenAnswer(
+                        call -> {
+                            long id = call.getArgument(0);
+                            if (id == 101L) {
+                                await(siblingsStarted);
+                                if (failFast)
+                                    throw new IllegalStateException("required child failed");
+                                return ChatResult.contentOnly("Result A");
+                            }
+                            String conversation = call.getArgument(2);
+                            siblingIds.put(id, conversation);
+                            streamTracker.registerCancellationHook(
+                                    conversation, id == 102L ? hookB : hookC);
+                            streamTracker.setDisposable(
+                                    conversation, id == 102L ? disposableB : disposableC);
+                            siblingsStarted.countDown();
+                            await(releaseModels);
+                            return ChatResult.contentOnly("late result");
+                        });
+        CompletableFuture<String> batch =
+                CompletableFuture.supplyAsync(
+                        () -> {
+                            ToolExecutionContext.set(ROOT, "admin");
+                            try {
+                                return tool.delegateParallel(
+                                        "[{\"agentName\":\"A\",\"task\":\"a\"},"
+                                                + "{\"agentName\":\"B\",\"task\":\"b\"},"
+                                                + "{\"agentName\":\"C\",\"task\":\"c\"}]",
+                                        null);
+                            } finally {
+                                ToolExecutionContext.clear();
+                            }
+                        });
+        try {
+            await(siblingsStarted);
+            assertTrue(
+                    disposed.await(3, TimeUnit.SECONDS),
+                    "one failed durable stop must not prevent the next sibling's local cancellation");
+            String result = batch.get(5, TimeUnit.SECONDS);
+            assertTrue(
+                    result.contains(
+                            failFast ? "cancelled=1 error=2" : "timeout=1 cancelled=0 error=1"),
+                    result);
+            for (String id : siblingIds.values()) {
+                assertTrue(stopAttempts.contains(id));
+                assertTrue(streamTracker.isStopRequested(id));
+            }
+            verify(hookB).run();
+            verify(hookC).run();
+            verify(disposableB).dispose();
+            verify(disposableC).dispose();
+            assertEquals(3, relayStops.size());
+            for (Runnable stop : relayStops) verify(stop).run();
+            assertTrue(subagentRegistry.snapshot(ROOT).isEmpty());
+            assertEquals(1, endings.size());
+            var children = endings.getFirst().path("childResults");
+            assertEquals(3, children.size());
+            var failedStop =
+                    java.util.stream.StreamSupport.stream(children.spliterator(), false)
+                            .filter(child -> child.path("taskIndex").asInt() == 1)
+                            .findFirst()
+                            .orElseThrow();
+            assertEquals("error", failedStop.path("outcome").asText());
+            assertFalse(failedStop.path("success").asBoolean());
+            assertTrue(failedStop.path("error").asText().contains("stop"));
+            releaseModels.countDown();
+            await(childrenFinished);
+            assertEquals(1, endings.size(), "late completions must not reopen the closed batch");
+            assertTrue(subagentRegistry.snapshot(ROOT).isEmpty());
+        } finally {
+            releaseModels.countDown();
+            batch.handle((value, failure) -> null).get(5, TimeUnit.SECONDS);
+            await(childrenFinished);
+            streamTracker.complete(ROOT);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
     void completedChildCannotDeliverInlineOnTheRegistrationOwner(boolean optional)
             throws Exception {
         var child =

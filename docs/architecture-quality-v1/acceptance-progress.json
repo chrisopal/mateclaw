@@ -418,8 +418,8 @@
       "task": "AQ-01/AQ-06",
       "formal_status": "NOT_RUN",
       "engineering_classification": "IMPLEMENTATION_GAP",
-      "scope_basis": "重启与合法旧上限已修复；坏历史记录及取消异常边界未闭合，不能重复立项旧问题。",
-      "remaining_action": "重启与合法旧上限已修复；坏历史记录及取消异常边界未闭合，不能重复立项旧问题。",
+      "scope_basis": "重启与合法旧上限已修复；单个持久化Stop异常已隔离并通过151项回归。坏历史记录恢复及阻塞取消边界仍待核查；完整AC21未关闭。",
+      "remaining_action": "重启与合法旧上限已修复；单个持久化Stop异常已隔离并通过151项回归。坏历史记录恢复及阻塞取消边界仍待核查；完整AC21未关闭。",
       "evidence_keys": [
         "restart",
         "capacity",

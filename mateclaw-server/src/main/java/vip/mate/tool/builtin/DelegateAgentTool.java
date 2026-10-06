@@ -811,16 +811,28 @@ public class DelegateAgentTool {
                 // cancelled; without requestStop the underlying ReAct/Plan-Execute
                 // loop keeps invoking LLMs and tools (observed: 8-minute orphan
                 // child still writing files long after the parent gave up).
-                if (p != null && p.childConvId != null) {
-                    streamTracker.requestStopWithoutNotification(p.childConvId);
+                String stopError = null;
+                try {
+                    if (p != null && p.childConvId != null) {
+                        streamTracker.requestStopWithoutNotification(p.childConvId);
+                    }
+                } catch (RuntimeException stopFailure) {
+                    // The tracker attempts local cancellation even if durable Stop fails.
+                    // Keep stopping the other children, but do not report this one as stopped.
+                    log.warn("Parallel child stop request failed: taskIndex={}", idx, stopFailure);
+                    stopError = "Failed to stop child; local cancellation attempted";
+                } finally {
+                    f.cancel(true);
                 }
-                f.cancel(true);
                 // Distinguish fail-fast cancellation from a genuine timeout so the
                 // parent doesn't misread a cancelled sibling as a slow agent.
                 results.add(
-                        failFast
-                                ? ChildResult.ofCancelled(idx, agentName)
-                                : ChildResult.ofTimeout(idx, agentName, effectiveTimeoutSeconds));
+                        stopError != null
+                                ? ChildResult.ofError(idx, agentName, stopError)
+                                : failFast
+                                        ? ChildResult.ofCancelled(idx, agentName)
+                                        : ChildResult.ofTimeout(
+                                                idx, agentName, effectiveTimeoutSeconds));
             }
         }
 
