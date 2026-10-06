@@ -151,7 +151,7 @@ class DelegateParallelCompletionOrderTest {
                             return null;
                         })
                 .when(streamTracker)
-                .requestStop(anyString());
+                .requestStopWithoutNotification(anyString());
         recordEvents(events, notificationStarted, releaseNotification);
         CompletableFuture<String> batch = runBatch(3);
         try {
@@ -229,6 +229,7 @@ class DelegateParallelCompletionOrderTest {
                     batch.isDone(),
                     "optional completion must notify before the running sibling finishes");
             verify(streamTracker, never()).requestStop(anyString());
+            verify(streamTracker, never()).requestStopWithoutNotification(anyString());
             releaseB.countDown();
             String result = batch.get(5, TimeUnit.SECONDS);
             assertTrue(
@@ -283,6 +284,7 @@ class DelegateParallelCompletionOrderTest {
                 result.contains("success=2 blank_success=0 timeout=0 cancelled=0 error=0"), result);
         assertEquals(List.of("delegation_start", "child-0", "child-1", "delegation_end"), events);
         verify(streamTracker, never()).requestStop(anyString());
+        verify(streamTracker, never()).requestStopWithoutNotification(anyString());
         assertCleanup(2);
     }
 

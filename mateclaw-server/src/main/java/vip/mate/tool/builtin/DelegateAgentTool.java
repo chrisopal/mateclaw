@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -764,25 +765,11 @@ public class DelegateAgentTool {
                                             true),
                             DELEGATION_EXECUTOR);
 
-            // Cancellation callbacks run synchronously inside cancel(). Skip BEFORE
-            // acquiring the notification monitor so a slow send cannot delay stopping siblings.
-            if (hasRoot) {
-                future.whenComplete(
-                        (result, ex) -> {
-                            if (ex instanceof CancellationException) return;
-                            completionEvents.emit(p, result, ex);
-                        });
-            }
-
-            // Required children arm the fail-fast signal on unsuccessful completion.
-            if (!p.optional()) {
-                future.thenAccept(
-                        r -> {
-                            if (r != null && !r.success) {
-                                requiredFailure.complete(null);
-                            }
-                        });
-            }
+            registerParallelCompletion(
+                    future,
+                    p.optional(),
+                    requiredFailure,
+                    hasRoot ? (result, ex) -> completionEvents.emit(p, result, ex) : null);
 
             futures.put(p.index, future);
         }
@@ -825,7 +812,7 @@ public class DelegateAgentTool {
                 // loop keeps invoking LLMs and tools (observed: 8-minute orphan
                 // child still writing files long after the parent gave up).
                 if (p != null && p.childConvId != null) {
-                    streamTracker.requestStop(p.childConvId);
+                    streamTracker.requestStopWithoutNotification(p.childConvId);
                 }
                 f.cancel(true);
                 // Distinguish fail-fast cancellation from a genuine timeout so the
@@ -1478,6 +1465,29 @@ public class DelegateAgentTool {
             interrupted = true;
         } finally {
             if (interrupted) Thread.currentThread().interrupt();
+        }
+    }
+
+    /** Owns failure signaling and notification registration for one parallel child. */
+    static void registerParallelCompletion(
+            CompletableFuture<ChildResult> future,
+            boolean optional,
+            CompletableFuture<Void> requiredFailure,
+            @Nullable BiConsumer<ChildResult, Throwable> notification) {
+        // Signal failure before scheduling delivery, even when the child is already complete.
+        if (!optional) {
+            future.thenAccept(
+                    result -> {
+                        if (result != null && !result.success) requiredFailure.complete(null);
+                    });
+        }
+        if (notification != null) {
+            future.whenCompleteAsync(
+                    (result, ex) -> {
+                        if (ex instanceof CancellationException) return;
+                        notification.accept(result, ex);
+                    },
+                    DELEGATION_EXECUTOR);
         }
     }
 
