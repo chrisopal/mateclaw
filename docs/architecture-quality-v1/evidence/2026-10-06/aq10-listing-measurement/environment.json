@@ -1,0 +1,10 @@
+{
+  "java" : "21.0.7",
+  "os" : "Mac OS X",
+  "arch" : "aarch64",
+  "cpus" : 12,
+  "maxHeapBytes" : 1610612736,
+  "time" : "2026-10-06T11:37:03.807338Z",
+  "h2QueryCacheSize" : 0,
+  "measurementBoundary" : "warm single-client repository-only H2, synthetic data; shared host running normal delivery gate; sampled heap is not peak heap; no API authorization/model calls/concurrent SLA claim"
+}

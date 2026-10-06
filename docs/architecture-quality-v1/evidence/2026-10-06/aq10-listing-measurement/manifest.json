@@ -1,0 +1,90 @@
+{
+  "scope": "finite repository H2 evidence, not AQ10 completion",
+  "files": [
+    {
+      "path": "ListingMeasurement.java",
+      "bytes": 10058,
+      "sha256": "cb2ab4fda0946b41af14d2ec62da0cbe9c230bd155f65c9fa57c44f6134cffa4"
+    },
+    {
+      "path": "PLAN.md",
+      "bytes": 1498,
+      "sha256": "84edd9293b6f3aeee60821e38e15b161ac9c01b54f79f4cbfdca963ede2efb8e"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 4029,
+      "sha256": "8f5e8dae6685ddf0a4e1189fd881c5779e5e50c7a9427320cff3a5ad1f6067c0"
+    },
+    {
+      "path": "cached-environment.json",
+      "bytes": 365,
+      "sha256": "956f0e1080524621a305e14240eaf1d3321462734a418eb6fd90ed92769a7202"
+    },
+    {
+      "path": "cached-measurement.log",
+      "bytes": 1121,
+      "sha256": "81c97124ebbfecac376d15c551b97fdd15d84ae047d44515d5c1152b7558513d"
+    },
+    {
+      "path": "cached-results.json",
+      "bytes": 83192,
+      "sha256": "c545ba67be44e5c3fbaadb177d1bd7b2b4234804f8a2c8f95d79abceb702a839"
+    },
+    {
+      "path": "comparison-diagnosis.json",
+      "bytes": 412,
+      "sha256": "e43cc187063aad8dbd4d21e2435d4af11fc8ac423a5465b24370ad3840990da5"
+    },
+    {
+      "path": "environment.json",
+      "bytes": 391,
+      "sha256": "41a02890a0400e7c5f5fb8f4e9f20924e53947faefc83c8d31175c4dd2636ed4"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 522,
+      "sha256": "b78601a67554bfccea5f615d9cd8a7c9a5c97fb5c632a6be98b12c1bd92c15a0"
+    },
+    {
+      "path": "measurement-diagnosis.log",
+      "bytes": 375,
+      "sha256": "77f94ec5f3543bd7e21333395826e4ad88c69e053d93656ded45707c75c3969a"
+    },
+    {
+      "path": "measurement-first-failure.log",
+      "bytes": 375,
+      "sha256": "7e4242430be30ddd2a019b58c49d3655f9c876506c24a829f435f2bee79f9325"
+    },
+    {
+      "path": "measurement.log",
+      "bytes": 1111,
+      "sha256": "2d61c9b42a88d1a72cb8d9f8c621875bc4e6dc4e9da68b85f2af740619968da4"
+    },
+    {
+      "path": "mismatch-expected.json",
+      "bytes": 5252,
+      "sha256": "7051ba3eab40c4b3b6473366fbba997b349d6f197c0419dd1499a1eb1b9f990e"
+    },
+    {
+      "path": "mismatch-observed.json",
+      "bytes": 5252,
+      "sha256": "7051ba3eab40c4b3b6473366fbba997b349d6f197c0419dd1499a1eb1b9f990e"
+    },
+    {
+      "path": "results.json",
+      "bytes": 83177,
+      "sha256": "36e6874795707a634ea3badd098a72d48639202b39cc59f6705528933452341a"
+    },
+    {
+      "path": "runtime-identity.json",
+      "bytes": 327,
+      "sha256": "a3a301b3cf96d6da32e615b13dcd14860d6120602752d6d7b3ea5560ad56dc9c"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 468,
+      "sha256": "802d8e805f28b1c2fd0383177b4253aa2eb16e4ec3147ff49cc9e3f0bc9ff9ba"
+    }
+  ]
+}

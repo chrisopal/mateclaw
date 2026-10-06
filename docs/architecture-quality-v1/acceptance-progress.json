@@ -1,11 +1,11 @@
 {
   "source_head": "ad4cb39d998c472970a07565e8f122357ed6e55d",
   "source_tree": "e19b80008ae2d61acf88e7f04d7e7d5abd136854",
-  "scope": "工程证据与后续动作分类，包含基线上AC22候选实现；最终候选树与提交门禁见交付记录。不修改正式AC签收。",
+  "scope": "工程证据与后续动作分类，包含基线上AC22候选实现；最终候选树与提交门禁见交付记录。不修改正式AC签收。 本轮叠加5f61abce实现上的AC30原条款独立复核；工程分类34/12，正式签收不变。",
   "counts": {
-    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 33,
+    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 34,
     "IMPLEMENTATION_GAP": 8,
-    "ENVIRONMENT_GAP": 4,
+    "ENVIRONMENT_GAP": 3,
     "INSUFFICIENT_PROOF": 1
   },
   "items": [
@@ -585,15 +585,20 @@
       "assertion": "enterprise/classic、只读、空态、错误态、窄屏正常；真浏览器证据",
       "task": "AQ-09",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "ENVIRONMENT_GAP",
-      "scope_basis": "已有两主题/窄屏的组件及部分Workbench真实浏览器证据；尚未逐格核对完整工作台只读、空态、错误态的覆盖。",
-      "remaining_action": "复用现有浏览器夹具，按两主题/窄屏及只读、空态、错误态逐格补齐缺失证据；不追加真实模型或生产数据条件。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "原AC30类别要求已逐项与真实浏览器证据对应；当前JAR双profile窄屏、六页签空态/只读及错误恢复补验通过。旧证据仅按源码未变的具体行为复用，308个扩展槽位不冒充原始独立要求。",
+      "remaining_action": "独立正式签收；完整扩展控件组合保留NOT_RUN，作为后续增强而非新增原条款。",
       "evidence_keys": [
         "ledger",
         "ui",
-        "query"
+        "query",
+        "ac30_reconciliation"
       ],
-      "finite_evidence": []
+      "finite_evidence": [
+        "AC30_BROWSER_RECONCILIATION.md",
+        "current-runtime-smoke-results.json: both profiles PASS; zero writes",
+        "38-member browser evidence manifest verified"
+      ]
     },
     {
       "id": "AC-31",
@@ -1276,7 +1281,14 @@
       "source_identity": "base8d2c8b2a plus AC07 candidate; final submission identity in PR/delivery evidence",
       "sha256": "dbedd7e5b2bd0c4f77df16ede4ccd0a8b86018064a28fbe77deb66af531d51cc",
       "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AC09_ROLE_POLICY_MATRIX.md"
+    },
+    "ac30_reconciliation": {
+      "lines": null,
+      "scope": "独立原条款对账与当前JAR双profile浏览器复核；只更新工程分类，不替代正式签收。",
+      "source_identity": "5f61abceae13ee2721704fdecd391f69fb9b443d / runtime JAR 0c1d90e324591260d1c667ac09d06752f0dd56233e83946f363abe6e46ad2b5b",
+      "sha256": "33354a79236420f051b8ab5b096365b0dd676dd5886a02dc7c8caa8ec32afd7d",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AC30_BROWSER_RECONCILIATION.md"
     }
   },
-  "source_identity_scope": "上述身份为AC07修复前基线；本记录叠加AC07模型外发修复及AC09证据矩阵。最终候选提交/检查树以PR #5及交付记录为准，不将基线CI声称覆盖新修复。"
+  "source_identity_scope": "上述身份为AC07修复前基线；本记录叠加AC07模型外发修复及AC09证据矩阵。最终候选提交/检查树以PR #5及交付记录为准，不将基线CI声称覆盖新修复。 AC30新增证据以其单独source_identity为准；历史证据身份保持，未重新标记为当前包实测。"
 }

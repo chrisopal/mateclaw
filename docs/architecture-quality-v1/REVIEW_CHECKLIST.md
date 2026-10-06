@@ -55,8 +55,8 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 | AQ-06 | 局部CAS/幂等/恢复/SQL投影已实现；完整V2迁移未完成 | 正式V2/Delivery规格、独立对象依赖、单写切换及回退 |
 | AQ-07 | Java迁移保护、编译ArchUnit与零容忍路径已安装执行 | 独立维护人审批、远端强制及未来路径映射 |
 | AQ-08 | 真实CI已通过，分支保护未启用 | required检查、审批失效/Code Owner及绕过策略实际强制与签收 |
-| AQ-09 | 本轮Workbench/组件/会话/状态/i18n结构已收口 | AC30完整浏览器状态覆盖与正式QA |
-| AQ-10 | DESIGNED / NOT_IMPLEMENTED | 真实数据规模、负载/索引/可观测性测量与整改；不报告未测提速 |
+| AQ-09 | 本轮Workbench/组件/会话/状态/i18n结构及AC30原类别工程复核已收口 | 正式QA签收；扩展控件组合保留未测，不追加为原条款 |
+| AQ-10 | PARTIALLY_MEASURED / NOT_ACCEPTED | [H2列表18组有限测量](evidence/2026-10-06/AQ10_LISTING_MEASUREMENT.md)已有证据；并发HTTP、实际方言、V2依赖影响图和端到端可观测性仍待验，不承诺生产提速 |
 | AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账；调整仍需证据和审核 |
 
 ## AC 全量追踪

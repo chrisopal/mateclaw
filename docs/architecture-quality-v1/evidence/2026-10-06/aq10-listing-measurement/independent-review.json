@@ -1,0 +1,17 @@
+{
+  "reviewer": "/root/aq10_measurement_review",
+  "verdict": "COMMENT",
+  "blockers": 0,
+  "formalAcceptance": false,
+  "finding": {
+    "severity": "LOW",
+    "file": "ListingMeasurement.java",
+    "line": 83,
+    "issue": "DB_CLOSE_DELAY=-1 retains prior scale databases until JVM exit; heap/GC observations are process-wide and history-dependent",
+    "resolution": "Documented explicitly in REPORT.md; no rerun required by reviewer"
+  },
+  "diagnostics": {
+    "javaLsp": "UNAVAILABLE",
+    "ast": "UNAVAILABLE"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "source": {
+    "baseHead": "e70924e3bd0a4c8e4527a9f805313b19cc34f60c",
+    "candidateTree": "4862bf6660e57a4b2515830c58134a17ab290a1c",
+    "backendPid": 19617,
+    "serverJarSha256": "0c1d90e324591260d1c667ac09d06752f0dd56233e83946f363abe6e46ad2b5b"
+  },
+  "profiles": {
+    "enterprise": {
+      "url": "http://127.0.0.1:50043",
+      "narrowEmptyTabs": 6,
+      "narrowViewport": "390x844",
+      "documentWidths": [390, 390, 390, 390, 390, 390],
+      "editorCancelReachable": true,
+      "injectedList500Responses": 2,
+      "actualListRecovery": 200,
+      "viewerTabs": 6,
+      "viewerUniqueDisabledMutationControls": 15,
+      "writes": 0
+    },
+    "classic": {
+      "url": "http://127.0.0.1:61807",
+      "narrowEmptyTabs": 6,
+      "narrowViewport": "390x844",
+      "documentWidths": [390, 390, 390, 390, 390, 390],
+      "editorCancelReachable": true,
+      "injectedList500Responses": 2,
+      "actualListRecovery": 200,
+      "viewerTabs": 6,
+      "viewerUniqueDisabledMutationControls": 15,
+      "writes": 0
+    }
+  },
+  "expectedViewerGlobalDenials": [
+    {"method": "GET", "path": "/api/v1/settings", "status": 403},
+    {"method": "GET", "path": "/api/v1/approval/grants/active", "status": 403}
+  ],
+  "boundaries": {
+    "ordinaryLoginForms": true,
+    "authStorageInjection": false,
+    "forceClick": false,
+    "fixtureMutation": false,
+    "save": false,
+    "publish": false,
+    "modelCalls": false
+  },
+  "evidence": [
+    "evidence/current-enterprise-admin-smoke.log",
+    "evidence/current-classic-admin-smoke.log",
+    "evidence/current-enterprise-viewer-readonly.log",
+    "evidence/current-classic-viewer-readonly.log",
+    "evidence/current-enterprise-narrow-empty.png",
+    "evidence/current-classic-narrow-empty.png",
+    "evidence/current-enterprise-viewer-readonly.png",
+    "evidence/current-classic-viewer-readonly.png"
+  ]
+}
