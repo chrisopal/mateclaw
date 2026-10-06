@@ -1,5 +1,11 @@
 package vip.mate.workspace.conversation.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,13 +16,6 @@ import vip.mate.channel.web.ChatStreamTracker;
 import vip.mate.common.result.R;
 import vip.mate.team.service.TeamWorkerConversationGovernanceService;
 import vip.mate.workspace.conversation.ConversationService;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ConversationControllerTeamWorkerTranscriptTest {
@@ -30,7 +29,9 @@ class ConversationControllerTeamWorkerTranscriptTest {
 
     @BeforeEach
     void setUp() {
-        controller = new ConversationController(conversationService, streamTracker, teamWorkerGovernanceService);
+        controller =
+                new ConversationController(
+                        conversationService, streamTracker, teamWorkerGovernanceService);
         when(authentication.getName()).thenReturn("workspace-admin");
     }
 
@@ -38,12 +39,14 @@ class ConversationControllerTeamWorkerTranscriptTest {
     void listMessagesAllowsVerifiedTeamWorkerTranscriptForNonOwner() {
         when(conversationService.isConversationOwner("worker-conversation", "workspace-admin"))
                 .thenReturn(false);
-        when(teamWorkerGovernanceService.canReadTranscript("worker-conversation", 77L, 501L,
-                "workspace-admin")).thenReturn(true);
+        when(teamWorkerGovernanceService.canReadTranscript(
+                        "worker-conversation", 77L, 501L, "workspace-admin"))
+                .thenReturn(true);
         when(conversationService.listMessageViews("worker-conversation")).thenReturn(List.of());
 
-        R<?> result = controller.listMessages("worker-conversation", null, null, 77L, 501L,
-                authentication);
+        R<?> result =
+                controller.listMessages(
+                        "worker-conversation", null, null, 77L, 501L, authentication);
 
         assertEquals(200, result.getCode());
         assertEquals(List.of(), result.getData());
@@ -53,11 +56,13 @@ class ConversationControllerTeamWorkerTranscriptTest {
     void listMessagesRejectsNonOwnerWhenWorkerTranscriptIsNotVerified() {
         when(conversationService.isConversationOwner("ordinary-conversation", "workspace-admin"))
                 .thenReturn(false);
-        when(teamWorkerGovernanceService.canReadTranscript("ordinary-conversation", 77L, 501L,
-                "workspace-admin")).thenReturn(false);
+        when(teamWorkerGovernanceService.canReadTranscript(
+                        "ordinary-conversation", 77L, 501L, "workspace-admin"))
+                .thenReturn(false);
 
-        R<?> result = controller.listMessages("ordinary-conversation", null, null, 77L, 501L,
-                authentication);
+        R<?> result =
+                controller.listMessages(
+                        "ordinary-conversation", null, null, 77L, 501L, authentication);
 
         assertEquals(403, result.getCode());
         verify(conversationService, never()).listMessageViews("ordinary-conversation");

@@ -2,21 +2,19 @@ package vip.mate.workspace.conversation.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import vip.mate.common.result.R;
 import vip.mate.channel.web.ChatStreamTracker;
+import vip.mate.common.result.R;
 import vip.mate.team.service.TeamWorkerConversationGovernanceService;
 import vip.mate.workspace.conversation.ConversationService;
 import vip.mate.workspace.conversation.vo.ConversationVO;
-import vip.mate.workspace.conversation.vo.MessageVO;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 会话管理接口
@@ -35,10 +33,7 @@ public class ConversationController {
     private final ChatStreamTracker streamTracker;
     private final TeamWorkerConversationGovernanceService teamWorkerGovernanceService;
 
-    /**
-     * 获取当前用户的会话列表
-     * 返回 ConversationVO，包含 agentName / agentIcon / status 等前端展示字段
-     */
+    /** 获取当前用户的会话列表 返回 ConversationVO，包含 agentName / agentIcon / status 等前端展示字段 */
     @Operation(summary = "获取会话列表")
     @GetMapping
     public R<List<ConversationVO>> list(
@@ -52,6 +47,7 @@ public class ConversationController {
 
     /**
      * 分页查询会话列表（用于会话管理页）。
+     *
      * <p>会话管理页可能跨多个 IM 渠道，单页全量返回会拖慢首屏。
      */
     @Operation(summary = "分页查询会话列表")
@@ -63,20 +59,20 @@ public class ConversationController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword) {
         String username = auth != null ? auth.getName() : "anonymous";
-        return R.ok(conversationService.pageConversations(username, workspaceId, page, size, keyword));
+        return R.ok(
+                conversationService.pageConversations(username, workspaceId, page, size, keyword));
     }
 
     /**
      * 导出会话轨迹 —— 调试/验收用的线性纯文本转录。
-     * <p>
-     * 与聊天界面读同一份 {@code metadata.segments} 时间线，但按发射顺序原样打印：
-     * 每轮推理、工具调用、工具返回、答案各自成块，包括界面会折叠掉的
+     *
+     * <p>与聊天界面读同一份 {@code metadata.segments} 时间线，但按发射顺序原样打印： 每轮推理、工具调用、工具返回、答案各自成块，包括界面会折叠掉的
      * superseded 预写内容。可直接 diff 两次运行，或贴进 issue。
      */
     @Operation(summary = "导出会话轨迹（纯文本）")
     @GetMapping(value = "/{conversationId}/trajectory", produces = "text/plain;charset=UTF-8")
-    public ResponseEntity<String> exportTrajectory(@PathVariable String conversationId,
-                                                   Authentication auth) {
+    public ResponseEntity<String> exportTrajectory(
+            @PathVariable String conversationId, Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("无权访问该会话\n");
@@ -86,22 +82,23 @@ public class ConversationController {
 
     /**
      * 获取指定会话的消息历史（支持分页）。
-     * <p>
-     * 不传 limit 时返回全部消息（向后兼容）。
-     * 传 limit 时返回最新 limit 条 + hasMore 标志。
-     * 传 beforeId + limit 时返回该 ID 之前的 limit 条（上拉加载更早消息）。
+     *
+     * <p>不传 limit 时返回全部消息（向后兼容）。 传 limit 时返回最新 limit 条 + hasMore 标志。 传 beforeId + limit 时返回该 ID 之前的
+     * limit 条（上拉加载更早消息）。
      */
     @Operation(summary = "获取会话消息历史（支持分页）")
     @GetMapping("/{conversationId}/messages")
-    public R<?> listMessages(@PathVariable String conversationId,
-                             @RequestParam(required = false) Long beforeId,
-                             @RequestParam(required = false) Integer limit,
-                             @RequestParam(required = false) Long runId,
-                             @RequestParam(required = false) Long taskId,
-                             Authentication auth) {
+    public R<?> listMessages(
+            @PathVariable String conversationId,
+            @RequestParam(required = false) Long beforeId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long runId,
+            @RequestParam(required = false) Long taskId,
+            Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)
-                && !teamWorkerGovernanceService.canReadTranscript(conversationId, runId, taskId, username)) {
+                && !teamWorkerGovernanceService.canReadTranscript(
+                        conversationId, runId, taskId, username)) {
             return R.fail(403, "无权访问该会话");
         }
 
@@ -128,20 +125,23 @@ public class ConversationController {
             hasMore = total > limit;
         }
 
-        java.util.List<vip.mate.workspace.conversation.vo.MessageVO> views = messages.stream()
-                .map(m -> vip.mate.workspace.conversation.vo.MessageVO.from(
-                        m, conversationService.parseMessageParts(m), conversationService.renderMessageContent(m)))
-                .toList();
+        java.util.List<vip.mate.workspace.conversation.vo.MessageVO> views =
+                messages.stream()
+                        .map(
+                                m ->
+                                        vip.mate.workspace.conversation.vo.MessageVO.from(
+                                                m,
+                                                conversationService.parseMessageParts(m),
+                                                conversationService.renderMessageContent(m)))
+                        .toList();
 
-        return R.ok(java.util.Map.of(
-                "messages", views,
-                "hasMore", hasMore
-        ));
+        return R.ok(
+                java.util.Map.of(
+                        "messages", views,
+                        "hasMore", hasMore));
     }
 
-    /**
-     * 删除会话（同时删除消息）
-     */
+    /** 删除会话（同时删除消息） */
     @Operation(summary = "删除会话")
     @DeleteMapping("/{conversationId}")
     public R<Void> delete(@PathVariable String conversationId, Authentication auth) {
@@ -153,12 +153,13 @@ public class ConversationController {
         return R.ok();
     }
 
-    /**
-     * 重命名会话
-     */
+    /** 重命名会话 */
     @Operation(summary = "重命名会话")
     @PutMapping("/{conversationId}/title")
-    public R<Void> rename(@PathVariable String conversationId, @RequestBody Map<String, String> body, Authentication auth) {
+    public R<Void> rename(
+            @PathVariable String conversationId,
+            @RequestBody Map<String, String> body,
+            Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)) {
             return R.fail(403, "无权操作该会话");
@@ -171,14 +172,13 @@ public class ConversationController {
         return R.ok();
     }
 
-    /**
-     * 置顶 / 取消置顶会话
-     */
+    /** 置顶 / 取消置顶会话 */
     @Operation(summary = "置顶或取消置顶会话")
     @PutMapping("/{conversationId}/pin")
-    public R<Void> setPinned(@PathVariable String conversationId,
-                             @RequestBody Map<String, Boolean> body,
-                             Authentication auth) {
+    public R<Void> setPinned(
+            @PathVariable String conversationId,
+            @RequestBody Map<String, Boolean> body,
+            Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)) {
             return R.fail(403, "无权操作该会话");
@@ -188,23 +188,22 @@ public class ConversationController {
     }
 
     /**
-     * Pin a conversation to a specific (provider, model) pair so subsequent
-     * messages — including those from IM channels (Feishu / DingTalk / WeCom
-     * / Telegram / Discord / QQ / Slack / WeChat) — use that model instead
-     * of falling back to the agent or global default. Closes issue #183
-     * where IM conversations could never be steered away from the agent's
-     * configured default via the admin UI.
+     * Pin a conversation to a specific (provider, model) pair so subsequent messages — including
+     * those from IM channels (Feishu / DingTalk / WeCom / Telegram / Discord / QQ / Slack / WeChat)
+     * — use that model instead of falling back to the agent or global default. Closes issue #183
+     * where IM conversations could never be steered away from the agent's configured default via
+     * the admin UI.
      *
-     * <p>Both fields must be non-blank to take effect — a half-populated
-     * payload is silently ignored at the service layer (see
-     * {@link ConversationService#updateConversationModel}). Passing
-     * existing matching values is a no-op (no DB write).
+     * <p>Both fields must be non-blank to take effect — a half-populated payload is silently
+     * ignored at the service layer (see {@link ConversationService#updateConversationModel}).
+     * Passing existing matching values is a no-op (no DB write).
      */
     @Operation(summary = "切换会话使用的模型 (provider + model name)")
     @PutMapping("/{conversationId}/model")
-    public R<Void> setModel(@PathVariable String conversationId,
-                            @RequestBody Map<String, String> body,
-                            Authentication auth) {
+    public R<Void> setModel(
+            @PathVariable String conversationId,
+            @RequestBody Map<String, String> body,
+            Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)) {
             return R.fail(403, "无权操作该会话");
@@ -214,16 +213,16 @@ public class ConversationController {
         if (provider == null || provider.isBlank() || modelName == null || modelName.isBlank()) {
             return R.fail("modelProvider 和 modelName 都必须提供");
         }
-        conversationService.updateConversationModel(conversationId, provider.trim(), modelName.trim());
+        conversationService.updateConversationModel(
+                conversationId, provider.trim(), modelName.trim());
         return R.ok();
     }
 
-    /**
-     * 批量删除会话（仅删除当前用户有权操作的会话）
-     */
+    /** 批量删除会话（仅删除当前用户有权操作的会话） */
     @Operation(summary = "批量删除会话")
     @PostMapping("/batch-delete")
-    public R<Integer> batchDelete(@RequestBody Map<String, List<String>> body, Authentication auth) {
+    public R<Integer> batchDelete(
+            @RequestBody Map<String, List<String>> body, Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         List<String> ids = body.get("conversationIds");
         if (ids == null || ids.isEmpty()) {
@@ -252,15 +251,13 @@ public class ConversationController {
         return R.ok(deleted);
     }
 
-    /**
-     * 回退到指定消息：删除该消息及其之后的所有消息，会话回到该消息之前的状态。
-     * 生成中的会话拒绝回退（409），避免与在途流写入竞争。
-     */
+    /** 回退到指定消息：删除该消息及其之后的所有消息，会话回到该消息之前的状态。 生成中的会话拒绝回退（409），避免与在途流写入竞争。 */
     @Operation(summary = "回退会话到指定消息之前")
     @PostMapping("/{conversationId}/messages/{messageId}/rewind")
-    public R<ConversationService.RewindResult> rewindToMessage(@PathVariable String conversationId,
-                                                               @PathVariable Long messageId,
-                                                               Authentication auth) {
+    public R<ConversationService.RewindResult> rewindToMessage(
+            @PathVariable String conversationId,
+            @PathVariable Long messageId,
+            Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         if (!conversationService.isConversationOwner(conversationId, username)) {
             return R.fail(403, "无权操作该会话");
@@ -276,9 +273,7 @@ public class ConversationController {
         return R.ok(result);
     }
 
-    /**
-     * 清空会话消息（保留会话记录）
-     */
+    /** 清空会话消息（保留会话记录） */
     @Operation(summary = "清空会话消息")
     @DeleteMapping("/{conversationId}/messages")
     public R<Void> clearMessages(@PathVariable String conversationId, Authentication auth) {
@@ -290,13 +285,11 @@ public class ConversationController {
         return R.ok();
     }
 
-    /**
-     * 获取会话的流状态
-     * 优先使用内存中的 StreamTracker，若无数据则回退到数据库持久化的 stream_status
-     */
+    /** 获取会话的流状态 优先使用内存中的 StreamTracker，若无数据则回退到数据库持久化的 stream_status */
     @Operation(summary = "获取会话流状态")
     @GetMapping("/{conversationId}/status")
-    public R<Map<String, String>> getStreamStatus(@PathVariable String conversationId, Authentication auth) {
+    public R<Map<String, String>> getStreamStatus(
+            @PathVariable String conversationId, Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         // A freshly opened chat uses a client-generated id that is not persisted
         // until the first message lands. The console polls this endpoint on an

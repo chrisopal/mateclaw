@@ -4,6 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -12,9 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import vip.mate.agent.model.AgentEntity;
+import vip.mate.agent.repository.AgentMapper;
 import vip.mate.approval.ApprovalPlaceholderUtil;
 import vip.mate.approval.MetadataDecision;
-import vip.mate.agent.repository.AgentMapper;
 import vip.mate.approval.model.ToolApprovalEntity;
 import vip.mate.approval.repository.ToolApprovalMapper;
 import vip.mate.auth.model.UserEntity;
@@ -34,26 +44,13 @@ import vip.mate.workspace.conversation.vo.MessageVO;
 import vip.mate.workspace.core.service.ChatUploadLocationResolver;
 import vip.mate.workspace.core.service.WorkspaceService;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * Conversation management service (会话管理服务).
  *
- * <p>Owns the full lifecycle of {@link ConversationEntity} and
- * {@link MessageEntity} rows — list / get-or-create / save / rename /
- * pin / delete / compress / approval-state reconciliation — and the
- * cascade of side-tables that hang off a conversation (approvals,
- * async tasks, channel sessions, attachment files, tool-result spill).
+ * <p>Owns the full lifecycle of {@link ConversationEntity} and {@link MessageEntity} rows — list /
+ * get-or-create / save / rename / pin / delete / compress / approval-state reconciliation — and the
+ * cascade of side-tables that hang off a conversation (approvals, async tasks, channel sessions,
+ * attachment files, tool-result spill).
  *
  * @author MateClaw Team
  */
@@ -65,12 +62,11 @@ public class ConversationService {
     public static final String SYSTEM_USER = "system";
 
     /**
-     * Owner prefix for webchat conversations, written as {@code webchat:<visitorId>}
-     * (see {@code WebChatController#webchatUsername}). These rows are owned by an
-     * external visitor principal rather than a MateClaw account, so the admin
-     * console treats them like {@link #SYSTEM_USER} rows — visible to / manageable
-     * by any authenticated user in the workspace. The visitor-facing self-service
-     * endpoints keep isolating by the exact owner plus a signed visitor token, so
+     * Owner prefix for webchat conversations, written as {@code webchat:<visitorId>} (see {@code
+     * WebChatController#webchatUsername}). These rows are owned by an external visitor principal
+     * rather than a MateClaw account, so the admin console treats them like {@link #SYSTEM_USER}
+     * rows — visible to / manageable by any authenticated user in the workspace. The visitor-facing
+     * self-service endpoints keep isolating by the exact owner plus a signed visitor token, so
      * surfacing these rows to the console does not widen a visitor's own access.
      */
     static final String WEBCHAT_OWNER_PREFIX = "webchat:";
@@ -87,29 +83,29 @@ public class ConversationService {
     private final WorkspaceService workspaceService;
 
     /**
-     * Resolves the workspace/agent-aware chat-upload directory. The resolver
-     * injects {@code AgentService} lazily, which breaks the would-be cycle
-     * (agentService → agentGraphBuilder → this → resolver → agentService), so a
-     * plain constructor injection here is sufficient.
+     * Resolves the workspace/agent-aware chat-upload directory. The resolver injects {@code
+     * AgentService} lazily, which breaks the would-be cycle (agentService → agentGraphBuilder →
+     * this → resolver → agentService), so a plain constructor injection here is sufficient.
      */
     private final ChatUploadLocationResolver chatUploadLocationResolver;
 
     /**
-     * Optional spill store. Injected via a setter so the existing @RequiredArgsConstructor
-     * stays stable and tests that build the service directly don't need to wire
-     * tool-result storage. When present, deleteConversation also purges any spill
-     * files this conversation produced so they don't outlive the row that owned them.
+     * Optional spill store. Injected via a setter so the existing @RequiredArgsConstructor stays
+     * stable and tests that build the service directly don't need to wire tool-result storage. When
+     * present, deleteConversation also purges any spill files this conversation produced so they
+     * don't outlive the row that owned them.
      */
     private vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage;
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
-    public void setToolResultStorage(vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage) {
+    public void setToolResultStorage(
+            vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage) {
         this.toolResultStorage = toolResultStorage;
     }
 
     /**
-     * List conversations for a user, returned as VOs that include
-     * {@code agentName} / {@code agentIcon} / {@code status}.
+     * List conversations for a user, returned as VOs that include {@code agentName} / {@code
+     * agentIcon} / {@code status}.
      *
      * <p>获取用户的会话列表（返回 VO，包含 agentName / agentIcon / status）。
      */
@@ -120,9 +116,9 @@ public class ConversationService {
     /**
      * Workspace-scoped variant of {@link #listConversations(String)}.
      *
-     * <p>Strict ownership: only the user's own rows. Used by
-     * callers that must not see other principals' conversations — notably the
-     * webchat visitor self-service path, which scopes to one visitor.
+     * <p>Strict ownership: only the user's own rows. Used by callers that must not see other
+     * principals' conversations — notably the webchat visitor self-service path, which scopes to
+     * one visitor.
      *
      * <p>获取用户的会话列表（按工作区过滤）。
      */
@@ -131,16 +127,15 @@ public class ConversationService {
     }
 
     /**
-     * Admin-console variant. Ordinary users only see their own rows. When
-     * {@code includeChannelPrincipals} is true, global admins additionally see
-     * shared system/channel-principal conversations for inspection. The
-     * visitor-facing webchat endpoints keep using the strict overload, so this
-     * does not widen a visitor's own access.
+     * Admin-console variant. Ordinary users only see their own rows. When {@code
+     * includeChannelPrincipals} is true, global admins additionally see shared
+     * system/channel-principal conversations for inspection. The visitor-facing webchat endpoints
+     * keep using the strict overload, so this does not widen a visitor's own access.
      *
      * <p>控制台变体：includeChannelPrincipals 为 true 时额外纳入 webchat 访客会话。
      */
-    public List<ConversationVO> listConversations(String username, Long workspaceId,
-                                                  boolean includeChannelPrincipals) {
+    public List<ConversationVO> listConversations(
+            String username, Long workspaceId, boolean includeChannelPrincipals) {
         // Return the current user's conversations. Shared system/channel
         // principals are only surfaced to global admins; otherwise members in
         // the same workspace can see each other's IM/cron conversations (#616).
@@ -148,13 +143,14 @@ public class ConversationService {
         // 返回当前用户自己的会话。system/webchat 等共享主体仅对全局管理员展示，
         // 避免同工作区成员互相看到 IM/定时任务会话（#616）。
         boolean includeSharedPrincipals = includeChannelPrincipals && isGlobalAdmin(username);
-        LambdaQueryWrapper<ConversationEntity> wrapper = new LambdaQueryWrapper<ConversationEntity>()
-                .and(w -> applyOwnerScope(w, username, includeSharedPrincipals))
-                .and(this::applyMalformedIdGuard)
-                .and(this::applyOrdinaryConversationGuard)
-                .isNull(ConversationEntity::getParentConversationId)
-                .orderByDesc(ConversationEntity::getPinned)
-                .orderByDesc(ConversationEntity::getLastActiveTime);
+        LambdaQueryWrapper<ConversationEntity> wrapper =
+                new LambdaQueryWrapper<ConversationEntity>()
+                        .and(w -> applyOwnerScope(w, username, includeSharedPrincipals))
+                        .and(this::applyMalformedIdGuard)
+                        .and(this::applyOrdinaryConversationGuard)
+                        .isNull(ConversationEntity::getParentConversationId)
+                        .orderByDesc(ConversationEntity::getPinned)
+                        .orderByDesc(ConversationEntity::getLastActiveTime);
         if (workspaceId != null) {
             wrapper.eq(ConversationEntity::getWorkspaceId, workspaceId);
         }
@@ -166,61 +162,65 @@ public class ConversationService {
 
         // Batch-load associated Agent rows to avoid N+1 queries.
         // 批量查询关联的 Agent 信息，避免 N+1 查询。
-        List<Long> agentIds = entities.stream()
-                .filter(e -> e.getAgentId() != null)
-                .map(ConversationEntity::getAgentId)
-                .distinct()
-                .collect(Collectors.toList());
+        List<Long> agentIds =
+                entities.stream()
+                        .filter(e -> e.getAgentId() != null)
+                        .map(ConversationEntity::getAgentId)
+                        .distinct()
+                        .collect(Collectors.toList());
 
-        Map<Long, AgentEntity> agentMap = agentIds.isEmpty()
-                ? Map.of()
-                : agentMapper.selectBatchIds(agentIds).stream()
-                        .collect(Collectors.toMap(AgentEntity::getId, a -> a));
+        Map<Long, AgentEntity> agentMap =
+                agentIds.isEmpty()
+                        ? Map.of()
+                        : agentMapper.selectBatchIds(agentIds).stream()
+                                .collect(Collectors.toMap(AgentEntity::getId, a -> a));
 
         // Map entities to VOs and enrich with agentName / agentIcon / status.
         // 转换为 VO，补充 agentName / agentIcon / status。
         return entities.stream()
-                .map(entity -> {
-                    AgentEntity agent = entity.getAgentId() != null
-                            ? agentMap.get(entity.getAgentId())
-                            : null;
-                    String agentName = agent != null ? agent.getName() : null;
-                    String agentIcon = agent != null ? agent.getIcon() : null;
-                    return ConversationVO.from(entity, agentName, agentIcon);
-                })
+                .map(
+                        entity -> {
+                            AgentEntity agent =
+                                    entity.getAgentId() != null
+                                            ? agentMap.get(entity.getAgentId())
+                                            : null;
+                            String agentName = agent != null ? agent.getName() : null;
+                            String agentIcon = agent != null ? agent.getIcon() : null;
+                            return ConversationVO.from(entity, agentName, agentIcon);
+                        })
                 .collect(Collectors.toList());
     }
 
     /**
-     * Apply the owner-scope predicate onto a (nested) wrapper: always the user's
-     * own rows; when {@code includeSharedPrincipals} is true, also shared
-     * {@link #SYSTEM_USER} and external channel-principal rows ({@code webchat:%}).
-     * Kept as one helper so the list and page queries stay in lockstep.
+     * Apply the owner-scope predicate onto a (nested) wrapper: always the user's own rows; when
+     * {@code includeSharedPrincipals} is true, also shared {@link #SYSTEM_USER} and external
+     * channel-principal rows ({@code webchat:%}). Kept as one helper so the list and page queries
+     * stay in lockstep.
      */
-    private void applyOwnerScope(LambdaQueryWrapper<ConversationEntity> w,
-                                 String username, boolean includeSharedPrincipals) {
+    private void applyOwnerScope(
+            LambdaQueryWrapper<ConversationEntity> w,
+            String username,
+            boolean includeSharedPrincipals) {
         w.eq(ConversationEntity::getUsername, username);
         if (includeSharedPrincipals) {
             w.or().eq(ConversationEntity::getUsername, SYSTEM_USER)
-                    .or().likeRight(ConversationEntity::getUsername, WEBCHAT_OWNER_PREFIX);
+                    .or()
+                    .likeRight(ConversationEntity::getUsername, WEBCHAT_OWNER_PREFIX);
         }
     }
 
     /**
-     * Exclude rows whose conversationId ends in ":" — malformed (e.g.
-     * {@code webchat:<key8>:} with empty visitorId, from older versions).
-     * Showing them in the console surfaces threads that 500/403 on open
-     * because the trailing ":" makes some reverse proxies strip the path
-     * tail (issue #369).
+     * Exclude rows whose conversationId ends in ":" — malformed (e.g. {@code webchat:<key8>:} with
+     * empty visitorId, from older versions). Showing them in the console surfaces threads that
+     * 500/403 on open because the trailing ":" makes some reverse proxies strip the path tail
+     * (issue #369).
      *
-     * <p>Uses {@code notLikeLeft} rather than {@code notLike(...,"%:")}: the
-     * latter auto-wraps the value with extra {@code %} on both sides AND
-     * escapes the user-supplied {@code %}, producing a {@code %%:%} pattern
-     * that matches <em>any id containing a colon</em> — silently filtering
-     * out every {@code webchat:…}, {@code feishu:…}, {@code cron:…}
-     * conversation from the list. {@code notLikeLeft} only prepends the
-     * wildcard, giving the intended {@code NOT LIKE '%:'} ("does not end
-     * with a colon").
+     * <p>Uses {@code notLikeLeft} rather than {@code notLike(...,"%:")}: the latter auto-wraps the
+     * value with extra {@code %} on both sides AND escapes the user-supplied {@code %}, producing a
+     * {@code %%:%} pattern that matches <em>any id containing a colon</em> — silently filtering out
+     * every {@code webchat:…}, {@code feishu:…}, {@code cron:…} conversation from the list. {@code
+     * notLikeLeft} only prepends the wildcard, giving the intended {@code NOT LIKE '%:'} ("does not
+     * end with a colon").
      */
     private void applyMalformedIdGuard(LambdaQueryWrapper<ConversationEntity> w) {
         w.notLikeLeft(ConversationEntity::getConversationId, ":");
@@ -228,19 +228,19 @@ public class ConversationService {
 
     /** Keep worker evidence sessions out of ordinary list/page SQL, including legacy rows. */
     private void applyOrdinaryConversationGuard(LambdaQueryWrapper<ConversationEntity> w) {
-        w.and(kind -> kind
-                        .isNull(ConversationEntity::getConversationKind)
-                        .or()
-                        .ne(ConversationEntity::getConversationKind, "team_worker"))
+        w.and(
+                        kind ->
+                                kind.isNull(ConversationEntity::getConversationKind)
+                                        .or()
+                                        .ne(ConversationEntity::getConversationKind, "team_worker"))
                 .notLikeRight(ConversationEntity::getConversationId, "team-task-");
     }
 
     /**
-     * Whether the user is a global admin (role=admin), resolved from the DB —
-     * never from client-controlled data. Gates webchat row visibility in the
-     * admin-console list/page: {@link #isConversationOwner} only lets a global
-     * admin open a webchat-owned conversation, so only admins should see those
-     * rows — otherwise the console lists threads it would then 403 on.
+     * Whether the user is a global admin (role=admin), resolved from the DB — never from
+     * client-controlled data. Gates webchat row visibility in the admin-console list/page: {@link
+     * #isConversationOwner} only lets a global admin open a webchat-owned conversation, so only
+     * admins should see those rows — otherwise the console lists threads it would then 403 on.
      */
     private boolean isGlobalAdmin(String username) {
         UserEntity u = authService.findByUsername(username);
@@ -250,13 +250,12 @@ public class ConversationService {
     /**
      * Paginated variant used by the Sessions admin page.
      *
-     * <p>Mirrors {@link #listConversations(String, Long)}'s filtering (current
-     * user rows, top-level only, optional workspace) and adds a
-     * {@code keyword} match against title / conversationId. The keyword is
-     * case-insensitive and treated as a substring.
+     * <p>Mirrors {@link #listConversations(String, Long)}'s filtering (current user rows, top-level
+     * only, optional workspace) and adds a {@code keyword} match against title / conversationId.
+     * The keyword is case-insensitive and treated as a substring.
      *
-     * <p>会话管理页使用的分页查询。在 {@link #listConversations(String, Long)}
-     * 的基础上增加 title / conversationId 模糊匹配。
+     * <p>会话管理页使用的分页查询。在 {@link #listConversations(String, Long)} 的基础上增加 title / conversationId
+     * 模糊匹配。
      */
     public com.baomidou.mybatisplus.core.metadata.IPage<ConversationVO> pageConversations(
             String username, Long workspaceId, int page, int size, String keyword) {
@@ -269,22 +268,24 @@ public class ConversationService {
         // Admin Sessions page surfaces shared system/channel conversations too,
         // but only to global admins. Non-admins are isolated to their own rows
         // so workspace peers cannot see each other's shared-channel threads (#616).
-        LambdaQueryWrapper<ConversationEntity> wrapper = new LambdaQueryWrapper<ConversationEntity>()
-                .and(w -> applyOwnerScope(w, username, isGlobalAdmin(username)))
-                .and(this::applyMalformedIdGuard)
-                .and(this::applyOrdinaryConversationGuard)
-                .isNull(ConversationEntity::getParentConversationId)
-                .orderByDesc(ConversationEntity::getPinned)
-                .orderByDesc(ConversationEntity::getLastActiveTime);
+        LambdaQueryWrapper<ConversationEntity> wrapper =
+                new LambdaQueryWrapper<ConversationEntity>()
+                        .and(w -> applyOwnerScope(w, username, isGlobalAdmin(username)))
+                        .and(this::applyMalformedIdGuard)
+                        .and(this::applyOrdinaryConversationGuard)
+                        .isNull(ConversationEntity::getParentConversationId)
+                        .orderByDesc(ConversationEntity::getPinned)
+                        .orderByDesc(ConversationEntity::getLastActiveTime);
         if (workspaceId != null) {
             wrapper.eq(ConversationEntity::getWorkspaceId, workspaceId);
         }
         if (keyword != null && !keyword.isBlank()) {
             String kw = keyword.trim();
-            wrapper.and(w -> w
-                    .like(ConversationEntity::getTitle, kw)
-                    .or()
-                    .like(ConversationEntity::getConversationId, kw));
+            wrapper.and(
+                    w ->
+                            w.like(ConversationEntity::getTitle, kw)
+                                    .or()
+                                    .like(ConversationEntity::getConversationId, kw));
         }
 
         com.baomidou.mybatisplus.core.metadata.IPage<ConversationEntity> entityPage =
@@ -295,30 +296,35 @@ public class ConversationService {
         if (entities.isEmpty()) {
             agentMap = Map.of();
         } else {
-            List<Long> agentIds = entities.stream()
-                    .filter(e -> e.getAgentId() != null)
-                    .map(ConversationEntity::getAgentId)
-                    .distinct()
-                    .collect(Collectors.toList());
-            agentMap = agentIds.isEmpty()
-                    ? Map.of()
-                    : agentMapper.selectBatchIds(agentIds).stream()
-                            .collect(Collectors.toMap(AgentEntity::getId, a -> a));
+            List<Long> agentIds =
+                    entities.stream()
+                            .filter(e -> e.getAgentId() != null)
+                            .map(ConversationEntity::getAgentId)
+                            .distinct()
+                            .collect(Collectors.toList());
+            agentMap =
+                    agentIds.isEmpty()
+                            ? Map.of()
+                            : agentMapper.selectBatchIds(agentIds).stream()
+                                    .collect(Collectors.toMap(AgentEntity::getId, a -> a));
         }
 
         com.baomidou.mybatisplus.core.metadata.IPage<ConversationVO> voPage =
                 new com.baomidou.mybatisplus.extension.plugins.pagination.Page<ConversationVO>(
                         entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
-        voPage.setRecords(entities.stream()
-                .map(entity -> {
-                    AgentEntity agent = entity.getAgentId() != null
-                            ? agentMap.get(entity.getAgentId())
-                            : null;
-                    String agentName = agent != null ? agent.getName() : null;
-                    String agentIcon = agent != null ? agent.getIcon() : null;
-                    return ConversationVO.from(entity, agentName, agentIcon);
-                })
-                .collect(Collectors.toList()));
+        voPage.setRecords(
+                entities.stream()
+                        .map(
+                                entity -> {
+                                    AgentEntity agent =
+                                            entity.getAgentId() != null
+                                                    ? agentMap.get(entity.getAgentId())
+                                                    : null;
+                                    String agentName = agent != null ? agent.getName() : null;
+                                    String agentIcon = agent != null ? agent.getIcon() : null;
+                                    return ConversationVO.from(entity, agentName, agentIcon);
+                                })
+                        .collect(Collectors.toList()));
         return voPage;
     }
 
@@ -328,7 +334,8 @@ public class ConversationService {
      * <p>获取或创建会话（向后兼容，默认 workspace 1）。
      */
     @Transactional
-    public ConversationEntity getOrCreateConversation(String conversationId, Long agentId, String username) {
+    public ConversationEntity getOrCreateConversation(
+            String conversationId, Long agentId, String username) {
         return getOrCreateConversation(conversationId, agentId, username, 1L);
     }
 
@@ -338,10 +345,12 @@ public class ConversationService {
      * <p>获取或创建会话（workspace 感知）。
      */
     @Transactional
-    public ConversationEntity getOrCreateConversation(String conversationId, Long agentId,
-                                                       String username, Long workspaceId) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+    public ConversationEntity getOrCreateConversation(
+            String conversationId, Long agentId, String username, Long workspaceId) {
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv == null) {
             conv = new ConversationEntity();
             conv.setConversationId(conversationId);
@@ -359,10 +368,14 @@ public class ConversationService {
             // happen for channel traffic; refuse rather than silently write the
             // caller's message into another workspace's conversation. Also closes the
             // web-console bare-"default" cross-workspace edge case.
-            if (workspaceId != null && conv.getWorkspaceId() != null
+            if (workspaceId != null
+                    && conv.getWorkspaceId() != null
                     && !conv.getWorkspaceId().equals(workspaceId)) {
-                log.warn("[Conversation] Cross-workspace conversationId collision: id={} owner={} requested={}",
-                        conversationId, conv.getWorkspaceId(), workspaceId);
+                log.warn(
+                        "[Conversation] Cross-workspace conversationId collision: id={} owner={} requested={}",
+                        conversationId,
+                        conv.getWorkspaceId(),
+                        workspaceId);
                 throw new IllegalArgumentException("会话不属于当前工作区");
             }
             if (!conv.getUsername().equals(username)) {
@@ -373,36 +386,47 @@ public class ConversationService {
     }
 
     /**
-     * WebChat get-or-create that also records the thread's {@code sessionId} on
-     * insert, so the visitor's /sessions listing can recover it even when the
-     * conversationId hashes (long visitorId + sessionId). The session id is
-     * written only when the row is first created; an existing row is left as-is.
+     * WebChat get-or-create that also records the thread's {@code sessionId} on insert, so the
+     * visitor's /sessions listing can recover it even when the conversationId hashes (long
+     * visitorId + sessionId). The session id is written only when the row is first created; an
+     * existing row is left as-is.
      */
     @Transactional
-    public ConversationEntity getOrCreateWebchatConversation(String conversationId, Long agentId,
-                                                             String username, Long workspaceId,
-                                                             String sessionId) {
-        return getOrCreateWebchatConversation(conversationId, agentId, username, workspaceId, sessionId, null);
+    public ConversationEntity getOrCreateWebchatConversation(
+            String conversationId,
+            Long agentId,
+            String username,
+            Long workspaceId,
+            String sessionId) {
+        return getOrCreateWebchatConversation(
+                conversationId, agentId, username, workspaceId, sessionId, null);
     }
 
     /**
      * WebChat get-or-create with an optional caller-supplied title.
-     * <p>
-     * When the row is freshly inserted and {@code title} is non-blank, it
-     * overrides the default {@code "新对话"}; otherwise the default is kept and
-     * {@link #saveMessage} will still derive a title from the first user
-     * message. An existing row is never rewritten — neither {@code sessionId}
-     * nor {@code title} are clobbered, so a session created via
-     * {@code POST /sessions} with a caller-supplied title keeps that title
-     * when the first {@code /stream} message later lands.
+     *
+     * <p>When the row is freshly inserted and {@code title} is non-blank, it overrides the default
+     * {@code "新对话"}; otherwise the default is kept and {@link #saveMessage} will still derive a
+     * title from the first user message. An existing row is never rewritten — neither {@code
+     * sessionId} nor {@code title} are clobbered, so a session created via {@code POST /sessions}
+     * with a caller-supplied title keeps that title when the first {@code /stream} message later
+     * lands.
      */
     @Transactional
-    public ConversationEntity getOrCreateWebchatConversation(String conversationId, Long agentId,
-                                                             String username, Long workspaceId,
-                                                             String sessionId, String title) {
-        boolean existed = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId)) != null;
-        ConversationEntity conv = getOrCreateConversation(conversationId, agentId, username, workspaceId);
+    public ConversationEntity getOrCreateWebchatConversation(
+            String conversationId,
+            Long agentId,
+            String username,
+            Long workspaceId,
+            String sessionId,
+            String title) {
+        boolean existed =
+                conversationMapper.selectOne(
+                                new LambdaQueryWrapper<ConversationEntity>()
+                                        .eq(ConversationEntity::getConversationId, conversationId))
+                        != null;
+        ConversationEntity conv =
+                getOrCreateConversation(conversationId, agentId, username, workspaceId);
         if (!existed) {
             boolean dirty = false;
             if (sessionId != null && !sessionId.isBlank() && conv.getWebchatSessionId() == null) {
@@ -421,46 +445,61 @@ public class ConversationService {
     }
 
     /**
-     * List a webchat visitor's own conversations (top-level threads), ordered
-     * pinned-desc then last-active-desc.
-     * <p>
-     * Scoped to {@code username = owner} only — unlike {@link #listConversations}
-     * it does <b>not</b> pull in {@code system} rows, so a visitor's /sessions
-     * call doesn't load every IM/cron conversation in the database just to list
-     * its own handful of threads. The caller still applies the channel-prefix
-     * filter (literal {@code startsWith}, wildcard-safe) to isolate the channel.
+     * List a webchat visitor's own conversations (top-level threads), ordered pinned-desc then
+     * last-active-desc.
+     *
+     * <p>Scoped to {@code username = owner} only — unlike {@link #listConversations} it does
+     * <b>not</b> pull in {@code system} rows, so a visitor's /sessions call doesn't load every
+     * IM/cron conversation in the database just to list its own handful of threads. The caller
+     * still applies the channel-prefix filter (literal {@code startsWith}, wildcard-safe) to
+     * isolate the channel.
      */
     public List<ConversationEntity> listWebchatConversations(String username) {
-        return conversationMapper.selectList(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getUsername, username)
-                .isNull(ConversationEntity::getParentConversationId)
-                .orderByDesc(ConversationEntity::getPinned)
-                .orderByDesc(ConversationEntity::getLastActiveTime));
+        return conversationMapper.selectList(
+                new LambdaQueryWrapper<ConversationEntity>()
+                        .eq(ConversationEntity::getUsername, username)
+                        .isNull(ConversationEntity::getParentConversationId)
+                        .orderByDesc(ConversationEntity::getPinned)
+                        .orderByDesc(ConversationEntity::getLastActiveTime));
     }
 
     /**
-     * Create a child conversation (delegation scenario), linking it back to
-     * its parent via {@code parentConversationId}.
+     * Create a child conversation (delegation scenario), linking it back to its parent via {@code
+     * parentConversationId}.
      *
      * <p>创建子会话（委派场景），关联父会话 ID。
      */
     @Transactional
-    public ConversationEntity createChildConversation(String childConversationId, Long agentId,
-                                                        String username, Long workspaceId,
-                                                        String parentConversationId) {
-        return createChildConversation(childConversationId, agentId, username, workspaceId,
-                parentConversationId, "primary");
+    public ConversationEntity createChildConversation(
+            String childConversationId,
+            Long agentId,
+            String username,
+            Long workspaceId,
+            String parentConversationId) {
+        return createChildConversation(
+                childConversationId,
+                agentId,
+                username,
+                workspaceId,
+                parentConversationId,
+                "primary");
     }
 
     @Transactional
-    public ConversationEntity createChildConversation(String childConversationId, Long agentId,
-                                                        String username, Long workspaceId,
-                                                        String parentConversationId,
-                                                        String conversationKind) {
-        ConversationEntity conv = getOrCreateConversation(childConversationId, agentId, username, workspaceId);
+    public ConversationEntity createChildConversation(
+            String childConversationId,
+            Long agentId,
+            String username,
+            Long workspaceId,
+            String parentConversationId,
+            String conversationKind) {
+        ConversationEntity conv =
+                getOrCreateConversation(childConversationId, agentId, username, workspaceId);
         conv.setParentConversationId(parentConversationId);
-        conv.setConversationKind(conversationKind == null || conversationKind.isBlank()
-                ? "primary" : conversationKind);
+        conv.setConversationKind(
+                conversationKind == null || conversationKind.isBlank()
+                        ? "primary"
+                        : conversationKind);
         conv.setTitle("子任务");
         conversationMapper.updateById(conv);
         return conv;
@@ -469,17 +508,14 @@ public class ConversationService {
     /**
      * Get-or-create a shared channel conversation.
      *
-     * <p>IM-channel (Feishu / DingTalk / WeCom / …) conversations use the
-     * shared {@code system} owner and are only surfaced to global admins in the
-     * admin console. For legacy rows whose owner was
-     * historically written as a sender nickname / {@code open_id}, this
-     * method silently rewrites it to {@code system} on read — otherwise the
-     * admin console list and message endpoints would 403 those rows.
+     * <p>IM-channel (Feishu / DingTalk / WeCom / …) conversations use the shared {@code system}
+     * owner and are only surfaced to global admins in the admin console. For legacy rows whose
+     * owner was historically written as a sender nickname / {@code open_id}, this method silently
+     * rewrites it to {@code system} on read — otherwise the admin console list and message
+     * endpoints would 403 those rows.
      *
-     * <p>获取或创建共享渠道会话。IM 渠道（飞书 / 钉钉 / 企微等）的会话统一使用
-     * {@code system} 作为 owner，并仅在全局管理员控制台中展示。对于历史上已写成
-     * 发送者昵称 / open_id 的会话，这里会自动修正为 {@code system}，避免管理员
-     * 控制台列表和消息接口因权限校验而不可见。
+     * <p>获取或创建共享渠道会话。IM 渠道（飞书 / 钉钉 / 企微等）的会话统一使用 {@code system} 作为 owner，并仅在全局管理员控制台中展示。对于历史上已写成
+     * 发送者昵称 / open_id 的会话，这里会自动修正为 {@code system}，避免管理员 控制台列表和消息接口因权限校验而不可见。
      */
     @Transactional
     public ConversationEntity getOrCreateSharedConversation(String conversationId, Long agentId) {
@@ -489,44 +525,49 @@ public class ConversationService {
     /**
      * Workspace-aware get-or-create for shared channel conversations.
      *
-     * <p>Delegates to the 5-arg overload with {@code null} model defaults —
-     * preserves the legacy behavior for any caller that doesn't have an
-     * agent-level model to inherit from.
+     * <p>Delegates to the 5-arg overload with {@code null} model defaults — preserves the legacy
+     * behavior for any caller that doesn't have an agent-level model to inherit from.
      *
-     * <p>获取或创建共享渠道会话（workspace 感知）。委托到 5 参重载，model 默认值传
-     * {@code null}，保留对不需要继承 agent 模型的调用方的旧行为。
+     * <p>获取或创建共享渠道会话（workspace 感知）。委托到 5 参重载，model 默认值传 {@code null}，保留对不需要继承 agent 模型的调用方的旧行为。
      */
     @Transactional
-    public ConversationEntity getOrCreateSharedConversation(String conversationId, Long agentId, Long workspaceId) {
+    public ConversationEntity getOrCreateSharedConversation(
+            String conversationId, Long agentId, Long workspaceId) {
         return getOrCreateSharedConversation(conversationId, agentId, workspaceId, null, null);
     }
 
     /**
-     * Get-or-create variant that seeds the conversation's pinned model from
-     * an agent-level default. Used by the IM channel path
-     * ({@code ChannelMessageRouter}) so that new IM conversations inherit
-     * the agent's currently-configured model as a baseline.
+     * Get-or-create variant that seeds the conversation's pinned model from an agent-level default.
+     * Used by the IM channel path ({@code ChannelMessageRouter}) so that new IM conversations
+     * inherit the agent's currently-configured model as a baseline.
      *
-     * <p><b>Idempotent on the model fields</b>: the {@code defaultModelProvider}
-     * / {@code defaultModelName} are written <i>only</i> when the conversation
-     * is freshly inserted. For an existing conversation — including one the
-     * user already pinned to a different model via the admin UI — the model
-     * fields are left untouched. This is the core fix for issue #183: the
-     * IM channel call site supplies the agent default, but a user-pinned
-     * model wins on every subsequent message.
+     * <p><b>Idempotent on the model fields</b>: the {@code defaultModelProvider} / {@code
+     * defaultModelName} are written <i>only</i> when the conversation is freshly inserted. For an
+     * existing conversation — including one the user already pinned to a different model via the
+     * admin UI — the model fields are left untouched. This is the core fix for issue #183: the IM
+     * channel call site supplies the agent default, but a user-pinned model wins on every
+     * subsequent message.
      *
-     * <p>Both defaults must be non-blank to take effect. A half-populated
-     * pair (provider without name, or vice versa) is treated as no seed —
-     * matches {@link #updateConversationModel} so a malformed agent row
-     * doesn't pin an unusable model.
+     * <p>Both defaults must be non-blank to take effect. A half-populated pair (provider without
+     * name, or vice versa) is treated as no seed — matches {@link #updateConversationModel} so a
+     * malformed agent row doesn't pin an unusable model.
      */
     @Transactional
-    public ConversationEntity getOrCreateSharedConversation(String conversationId, Long agentId, Long workspaceId,
-                                                            String defaultModelProvider, String defaultModelName) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
-        boolean seedModel = defaultModelProvider != null && !defaultModelProvider.isBlank()
-                && defaultModelName != null && !defaultModelName.isBlank();
+    public ConversationEntity getOrCreateSharedConversation(
+            String conversationId,
+            Long agentId,
+            Long workspaceId,
+            String defaultModelProvider,
+            String defaultModelName) {
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
+        boolean seedModel =
+                defaultModelProvider != null
+                        && !defaultModelProvider.isBlank()
+                        && defaultModelName != null
+                        && !defaultModelName.isBlank();
         if (conv == null) {
             conv = new ConversationEntity();
             conv.setConversationId(conversationId);
@@ -549,10 +590,13 @@ public class ConversationService {
                 // Concurrent insert: another thread won the race — re-query
                 // and fall through to the owner-correction block below.
                 // 并发插入：另一个线程已创建，回退到查询；继续走下面的 owner 修正逻辑。
-                conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                        .eq(ConversationEntity::getConversationId, conversationId));
+                conv =
+                        conversationMapper.selectOne(
+                                new LambdaQueryWrapper<ConversationEntity>()
+                                        .eq(ConversationEntity::getConversationId, conversationId));
                 if (conv == null) {
-                    throw new IllegalStateException("Conversation vanished after duplicate key: " + conversationId, e);
+                    throw new IllegalStateException(
+                            "Conversation vanished after duplicate key: " + conversationId, e);
                 }
             }
         }
@@ -603,8 +647,8 @@ public class ConversationService {
     }
 
     /**
-     * Persist a message and update the conversation's aggregate counters
-     * ({@code messageCount}, {@code lastActiveTime}, {@code lastMessage}).
+     * Persist a message and update the conversation's aggregate counters ({@code messageCount},
+     * {@code lastActiveTime}, {@code lastMessage}).
      *
      * <p>保存消息并更新会话统计。
      */
@@ -614,40 +658,88 @@ public class ConversationService {
     }
 
     @Transactional
-    public MessageEntity saveMessage(String conversationId, String role, String content, List<MessageContentPart> parts) {
+    public MessageEntity saveMessage(
+            String conversationId, String role, String content, List<MessageContentPart> parts) {
         return saveMessage(conversationId, role, content, parts, "completed");
     }
 
     @Transactional
-    public MessageEntity saveMessage(String conversationId, String role, String content,
-            List<MessageContentPart> parts, String status) {
+    public MessageEntity saveMessage(
+            String conversationId,
+            String role,
+            String content,
+            List<MessageContentPart> parts,
+            String status) {
         return saveMessage(conversationId, role, content, parts, status, 0, 0, null, null);
     }
 
     @Transactional
-    public MessageEntity saveMessage(String conversationId, String role, String content,
-            List<MessageContentPart> parts, String status,
-            int promptTokens, int completionTokens,
-            String runtimeModel, String runtimeProvider) {
-        return saveMessage(conversationId, role, content, parts, status,
-                promptTokens, completionTokens, runtimeModel, runtimeProvider, null);
+    public MessageEntity saveMessage(
+            String conversationId,
+            String role,
+            String content,
+            List<MessageContentPart> parts,
+            String status,
+            int promptTokens,
+            int completionTokens,
+            String runtimeModel,
+            String runtimeProvider) {
+        return saveMessage(
+                conversationId,
+                role,
+                content,
+                parts,
+                status,
+                promptTokens,
+                completionTokens,
+                runtimeModel,
+                runtimeProvider,
+                null);
     }
 
     @Transactional
-    public MessageEntity saveMessage(String conversationId, String role, String content,
-            List<MessageContentPart> parts, String status,
-            int promptTokens, int completionTokens,
-            String runtimeModel, String runtimeProvider, String metadata) {
-        return saveMessage(conversationId, role, content, parts, status,
-                promptTokens, completionTokens, 0, 0, 0, runtimeModel, runtimeProvider, metadata);
+    public MessageEntity saveMessage(
+            String conversationId,
+            String role,
+            String content,
+            List<MessageContentPart> parts,
+            String status,
+            int promptTokens,
+            int completionTokens,
+            String runtimeModel,
+            String runtimeProvider,
+            String metadata) {
+        return saveMessage(
+                conversationId,
+                role,
+                content,
+                parts,
+                status,
+                promptTokens,
+                completionTokens,
+                0,
+                0,
+                0,
+                runtimeModel,
+                runtimeProvider,
+                metadata);
     }
 
     @Transactional
-    public MessageEntity saveMessage(String conversationId, String role, String content,
-            List<MessageContentPart> parts, String status,
-            int promptTokens, int completionTokens,
-            int cacheReadTokens, int cacheWriteTokens, int reasoningTokens,
-            String runtimeModel, String runtimeProvider, String metadata) {
+    public MessageEntity saveMessage(
+            String conversationId,
+            String role,
+            String content,
+            List<MessageContentPart> parts,
+            String status,
+            int promptTokens,
+            int completionTokens,
+            int cacheReadTokens,
+            int cacheWriteTokens,
+            int reasoningTokens,
+            String runtimeModel,
+            String runtimeProvider,
+            String metadata) {
         MessageEntity message = new MessageEntity();
         message.setConversationId(conversationId);
         message.setRole(role);
@@ -662,13 +754,16 @@ public class ConversationService {
         message.setReasoningTokens(reasoningTokens);
         message.setRuntimeModel(runtimeModel);
         message.setRuntimeProvider(runtimeProvider);
-        message.setMetadata(metadata != null ? metadata : "{}");  // Initialize as empty JSON object / 初始化为空对象
+        message.setMetadata(
+                metadata != null ? metadata : "{}"); // Initialize as empty JSON object / 初始化为空对象
         messageMapper.insert(message);
 
         // Update aggregate counters on the parent conversation row.
         // 更新会话信息（消息计数、最后活跃时间、最后一条摘要）。
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setMessageCount(conv.getMessageCount() + 1);
             conv.setLastActiveTime(LocalDateTime.now());
@@ -679,7 +774,8 @@ public class ConversationService {
             // metadata type team_announce) are user-role for context-pipeline
             // reasons but must never become the visible conversation title.
             // 用第一条用户消息作为会话标题。
-            if ("user".equals(role) && "新对话".equals(conv.getTitle())
+            if ("user".equals(role)
+                    && "新对话".equals(conv.getTitle())
                     && (metadata == null || !metadata.contains("\"team_announce\""))) {
                 conv.setTitle(summary.length() > 20 ? summary.substring(0, 20) + "..." : summary);
             }
@@ -687,7 +783,8 @@ public class ConversationService {
             // sidebar / list view (last_message column).
             // 保存最后一条 AI 回复摘要。
             if ("assistant".equals(role)) {
-                conv.setLastMessage(summary.length() > 50 ? summary.substring(0, 50) + "..." : summary);
+                conv.setLastMessage(
+                        summary.length() > 50 ? summary.substring(0, 50) + "..." : summary);
             }
             conversationMapper.updateById(conv);
         }
@@ -714,8 +811,10 @@ public class ConversationService {
      */
     @Transactional
     public void renameConversation(String conversationId, String title) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setTitle(title);
             conversationMapper.updateById(conv);
@@ -723,12 +822,14 @@ public class ConversationService {
     }
 
     /**
-     * Pin or unpin a conversation. Pinned conversations sort ahead of unpinned
-     * ones in the sidebar list regardless of last-active time.
+     * Pin or unpin a conversation. Pinned conversations sort ahead of unpinned ones in the sidebar
+     * list regardless of last-active time.
      */
     public void setPinned(String conversationId, boolean pinned) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setPinned(pinned ? 1 : 0);
             conversationMapper.updateById(conv);
@@ -736,14 +837,15 @@ public class ConversationService {
     }
 
     /**
-     * Archive or unarchive a conversation (webchat soft-close). Mirrors
-     * {@link #setPinned}: archived threads stay on disk (history preserved,
-     * addressable, downloadable) but are excluded from default listings; the
-     * caller opts back in via {@code includeArchived=true}.
+     * Archive or unarchive a conversation (webchat soft-close). Mirrors {@link #setPinned}:
+     * archived threads stay on disk (history preserved, addressable, downloadable) but are excluded
+     * from default listings; the caller opts back in via {@code includeArchived=true}.
      */
     public void setArchived(String conversationId, boolean archived) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setArchived(archived ? 1 : 0);
             conversationMapper.updateById(conv);
@@ -757,8 +859,10 @@ public class ConversationService {
      */
     @Transactional
     public void updateStreamStatus(String conversationId, String streamStatus) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setStreamStatus(streamStatus);
             conversationMapper.updateById(conv);
@@ -766,24 +870,29 @@ public class ConversationService {
     }
 
     /**
-     * Pin the model a conversation uses. A blank provider or model id is a
-     * no-op (no override supplied — the conversation keeps inheriting the
-     * agent / global default). The write is skipped when the stored value
-     * already matches, so persisting the same model on every turn costs only
-     * a SELECT.
+     * Pin the model a conversation uses. A blank provider or model id is a no-op (no override
+     * supplied — the conversation keeps inheriting the agent / global default). The write is
+     * skipped when the stored value already matches, so persisting the same model on every turn
+     * costs only a SELECT.
      */
     @Transactional
-    public void updateConversationModel(String conversationId, String modelProvider, String modelName) {
-        if (modelProvider == null || modelProvider.isBlank()
-                || modelName == null || modelName.isBlank()) {
+    public void updateConversationModel(
+            String conversationId, String modelProvider, String modelName) {
+        if (modelProvider == null
+                || modelProvider.isBlank()
+                || modelName == null
+                || modelName.isBlank()) {
             return;
         }
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv == null) {
             return;
         }
-        if (modelProvider.equals(conv.getModelProvider()) && modelName.equals(conv.getModelName())) {
+        if (modelProvider.equals(conv.getModelProvider())
+                && modelName.equals(conv.getModelName())) {
             return;
         }
         conv.setModelProvider(modelProvider);
@@ -792,77 +901,79 @@ public class ConversationService {
     }
 
     /**
-     * Clear a conversation's pinned model so it falls back to the agent /
-     * global default. Counterpart of {@link #updateConversationModel}, which
-     * deliberately treats blank input as "no override supplied" — resetting
-     * therefore needs its own explicit entry point. The null-write goes
-     * through an update wrapper because {@code updateById} skips null fields.
+     * Clear a conversation's pinned model so it falls back to the agent / global default.
+     * Counterpart of {@link #updateConversationModel}, which deliberately treats blank input as "no
+     * override supplied" — resetting therefore needs its own explicit entry point. The null-write
+     * goes through an update wrapper because {@code updateById} skips null fields.
      */
     @Transactional
     public void clearConversationModel(String conversationId) {
         if (conversationId == null || conversationId.isBlank()) {
             return;
         }
-        conversationMapper.update(null, new LambdaUpdateWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId)
-                .set(ConversationEntity::getModelProvider, null)
-                .set(ConversationEntity::getModelName, null));
+        conversationMapper.update(
+                null,
+                new LambdaUpdateWrapper<ConversationEntity>()
+                        .eq(ConversationEntity::getConversationId, conversationId)
+                        .set(ConversationEntity::getModelProvider, null)
+                        .set(ConversationEntity::getModelName, null));
     }
 
     /**
-     * Persist an assistant placeholder marker only when the last message is a
-     * user turn (i.e., the assistant never got to reply). Used by the admin
-     * force-recycle path so a torn-down turn leaves a visible "已被用户中止"
-     * marker instead of an empty conversation. Idempotent: if the previous
-     * emergency-save path already wrote an assistant row, this is a no-op.
+     * Persist an assistant placeholder marker only when the last message is a user turn (i.e., the
+     * assistant never got to reply). Used by the admin force-recycle path so a torn-down turn
+     * leaves a visible "已被用户中止" marker instead of an empty conversation. Idempotent: if the
+     * previous emergency-save path already wrote an assistant row, this is a no-op.
      *
      * @return the saved message, or {@code null} if the marker was not needed
      */
     @Transactional
-    public MessageEntity saveStopMarkerIfDangling(String conversationId, String markerText, String status) {
-        List<MessageEntity> recent = messageMapper.selectList(
-                new LambdaQueryWrapper<MessageEntity>()
-                        .eq(MessageEntity::getConversationId, conversationId)
-                        .orderByDesc(MessageEntity::getCreateTime)
-                        .orderByDesc(MessageEntity::getId)
-                        .last("LIMIT 1"));
+    public MessageEntity saveStopMarkerIfDangling(
+            String conversationId, String markerText, String status) {
+        List<MessageEntity> recent =
+                messageMapper.selectList(
+                        new LambdaQueryWrapper<MessageEntity>()
+                                .eq(MessageEntity::getConversationId, conversationId)
+                                .orderByDesc(MessageEntity::getCreateTime)
+                                .orderByDesc(MessageEntity::getId)
+                                .last("LIMIT 1"));
         if (recent.isEmpty()) return null;
         MessageEntity last = recent.get(0);
         if (!"user".equals(last.getRole())) return null;
-        return saveMessage(conversationId, "assistant", markerText, null,
-                status != null ? status : "stopped");
+        return saveMessage(
+                conversationId, "assistant", markerText, null, status != null ? status : "stopped");
     }
 
     /**
-     * Get the latest message preview text for a conversation — used by
-     * rate-limit guards and similar duplicate-detection paths.
+     * Get the latest message preview text for a conversation — used by rate-limit guards and
+     * similar duplicate-detection paths.
      *
      * <p>获取会话最后一条消息内容（用于 rate limit 防护等场景）。
      */
     public String getLastMessage(String conversationId) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         return conv != null ? conv.getLastMessage() : null;
     }
 
     /**
-     * Post-rewind snapshot handed back to the controller so the UI can sync
-     * the sidebar (message count + preview) without a follow-up query.
+     * Post-rewind snapshot handed back to the controller so the UI can sync the sidebar (message
+     * count + preview) without a follow-up query.
      */
-    public record RewindResult(int deletedCount, int messageCount, String lastMessage) {
-    }
+    public record RewindResult(int deletedCount, int messageCount, String lastMessage) {}
 
     /**
-     * Delete the given message and every message after it (compression
-     * boundary rows included), returning the conversation to the state just
-     * before that message. Aggregate counters ({@code messageCount},
-     * {@code lastMessage}, {@code lastActiveTime}) are recomputed from the
-     * surviving rows.
+     * Delete the given message and every message after it (compression boundary rows included),
+     * returning the conversation to the state just before that message. Aggregate counters ({@code
+     * messageCount}, {@code lastMessage}, {@code lastActiveTime}) are recomputed from the surviving
+     * rows.
      *
      * <p>回退到指定消息：删除该消息及其之后的所有消息，并重算会话统计。
      *
-     * @return snapshot of the post-rewind state, or {@code null} when the
-     *         message does not belong to the conversation
+     * @return snapshot of the post-rewind state, or {@code null} when the message does not belong
+     *     to the conversation
      */
     @Transactional
     public RewindResult rewindToMessage(String conversationId, Long messageId) {
@@ -877,55 +988,60 @@ public class ConversationService {
         if (index < 0) {
             return null;
         }
-        List<Long> doomedIds = all.subList(index, all.size()).stream()
-                .map(MessageEntity::getId)
-                .toList();
-        messageMapper.delete(new LambdaQueryWrapper<MessageEntity>()
-                .eq(MessageEntity::getConversationId, conversationId)
-                .in(MessageEntity::getId, doomedIds));
+        List<Long> doomedIds =
+                all.subList(index, all.size()).stream().map(MessageEntity::getId).toList();
+        messageMapper.delete(
+                new LambdaQueryWrapper<MessageEntity>()
+                        .eq(MessageEntity::getConversationId, conversationId)
+                        .in(MessageEntity::getId, doomedIds));
 
         List<MessageEntity> remaining = all.subList(0, index);
-        String lastMessage = remaining.stream()
-                .filter(m -> "assistant".equals(m.getRole()))
-                .reduce((first, second) -> second)
-                .map(this::assistantPreview)
-                .orElse(null);
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        String lastMessage =
+                remaining.stream()
+                        .filter(m -> "assistant".equals(m.getRole()))
+                        .reduce((first, second) -> second)
+                        .map(this::assistantPreview)
+                        .orElse(null);
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setMessageCount(remaining.size());
             conv.setLastMessage(lastMessage);
             conv.setLastActiveTime(LocalDateTime.now());
             conversationMapper.updateById(conv);
         }
-        log.info("[Conversation] Rewound conv={} to before message {}, deleted {} rows",
-                conversationId, messageId, doomedIds.size());
+        log.info(
+                "[Conversation] Rewound conv={} to before message {}, deleted {} rows",
+                conversationId,
+                messageId,
+                doomedIds.size());
         return new RewindResult(doomedIds.size(), remaining.size(), lastMessage);
     }
 
     /**
-     * Seed for a regenerate turn: the persisted user message whose reply is
-     * being regenerated. {@code parts} are already deserialized so the caller
-     * can rebuild the prompt exactly as the original turn saw it.
+     * Seed for a regenerate turn: the persisted user message whose reply is being regenerated.
+     * {@code parts} are already deserialized so the caller can rebuild the prompt exactly as the
+     * original turn saw it.
      */
-    public record RegenerateSeed(Long seedMessageId, String content, List<MessageContentPart> parts) {
-    }
+    public record RegenerateSeed(
+            Long seedMessageId, String content, List<MessageContentPart> parts) {}
 
     /**
-     * Prepare a regenerate turn: locate the most recent user message, delete
-     * every row after it (the assistant reply block, including any trailing
-     * system/boundary rows), and return that user message as the new turn's
-     * input. The caller re-runs the agent WITHOUT persisting a new user row,
-     * so {@code mate_message} stays free of duplicates.
+     * Prepare a regenerate turn: locate the most recent user message, delete every row after it
+     * (the assistant reply block, including any trailing system/boundary rows), and return that
+     * user message as the new turn's input. The caller re-runs the agent WITHOUT persisting a new
+     * user row, so {@code mate_message} stays free of duplicates.
      *
-     * <p>When the user message is already the conversation tail (the reply
-     * never got persisted — stream died mid-turn), nothing is deleted and the
-     * seed is still returned, which doubles as the recovery path.
+     * <p>When the user message is already the conversation tail (the reply never got persisted —
+     * stream died mid-turn), nothing is deleted and the seed is still returned, which doubles as
+     * the recovery path.
      *
      * <p>准备重新生成：删除最近一条 user 消息之后的所有行并返回该消息作为种子。
      *
-     * @return the seed, or {@code null} when the conversation has no user
-     *         message to regenerate from
+     * @return the seed, or {@code null} when the conversation has no user message to regenerate
+     *     from
      */
     @Transactional
     public RegenerateSeed prepareRegenerate(String conversationId) {
@@ -945,9 +1061,8 @@ public class ConversationService {
     }
 
     /**
-     * Sidebar preview of an assistant reply — same summarization and 50-char
-     * truncation that {@link #saveMessage} applies to the
-     * {@code last_message} column.
+     * Sidebar preview of an assistant reply — same summarization and 50-char truncation that {@link
+     * #saveMessage} applies to the {@code last_message} column.
      */
     private String assistantPreview(MessageEntity message) {
         String summary = summarizeMessage(message.getContent(), parseMessageParts(message));
@@ -960,8 +1075,10 @@ public class ConversationService {
      * <p>获取会话的消息数量。
      */
     public int getMessageCount(String conversationId) {
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         return conv != null && conv.getMessageCount() != null ? conv.getMessageCount() : 0;
     }
 
@@ -971,71 +1088,69 @@ public class ConversationService {
      * <p>获取会话的消息历史。
      */
     public List<MessageEntity> listMessages(String conversationId) {
-        return messageMapper.selectList(new LambdaQueryWrapper<MessageEntity>()
-                .eq(MessageEntity::getConversationId, conversationId)
-                .orderByAsc(MessageEntity::getCreateTime)
-                .orderByAsc(MessageEntity::getId));
-    }
-
-    /**
-     * Returns the most recent compression boundary row for the conversation,
-     * or {@code null} if no boundary exists yet. Used by the agent loader to
-     * recover the structured summary when the boundary itself sits outside the
-     * recent-message window — without this, a long conversation that already
-     * compacted would feed the model the last N raw messages while silently
-     * dropping the goal / progress digest the boundary holds.
-     *
-     * <p>Implemented as a single indexed query rather than a full
-     * {@code listMessages} + filter so it stays cheap on conversations with
-     * thousands of messages. Selection: {@code role=system} +
-     * {@code metadata like '%compression_summary%'} (the metadata column always
-     * carries that literal — see {@link #saveCompressionSummary}).
-     */
-    public MessageEntity findLatestCompressionBoundary(String conversationId) {
-        return messageMapper.selectOne(new LambdaQueryWrapper<MessageEntity>()
-                .eq(MessageEntity::getConversationId, conversationId)
-                .eq(MessageEntity::getRole, "system")
-                .like(MessageEntity::getMetadata, "compression_summary")
-                .orderByDesc(MessageEntity::getCreateTime)
-                .orderByDesc(MessageEntity::getId)
-                .last("LIMIT 1"));
-    }
-
-    /**
-     * Load the most recent N messages — pulled DESC then reversed to ASC.
-     * Uses the composite index {@code (conversation_id, create_time)} for
-     * efficient tail pagination.
-     *
-     * <p>加载最近 N 条消息（倒序取出后翻转为正序）；利用复合索引
-     * {@code (conversation_id, create_time)} 高效分页。
-     */
-    public List<MessageEntity> listRecentMessages(String conversationId, int lastN) {
-        List<MessageEntity> recent = messageMapper.selectList(
+        return messageMapper.selectList(
                 new LambdaQueryWrapper<MessageEntity>()
                         .eq(MessageEntity::getConversationId, conversationId)
+                        .orderByAsc(MessageEntity::getCreateTime)
+                        .orderByAsc(MessageEntity::getId));
+    }
+
+    /**
+     * Returns the most recent compression boundary row for the conversation, or {@code null} if no
+     * boundary exists yet. Used by the agent loader to recover the structured summary when the
+     * boundary itself sits outside the recent-message window — without this, a long conversation
+     * that already compacted would feed the model the last N raw messages while silently dropping
+     * the goal / progress digest the boundary holds.
+     *
+     * <p>Implemented as a single indexed query rather than a full {@code listMessages} + filter so
+     * it stays cheap on conversations with thousands of messages. Selection: {@code role=system} +
+     * {@code metadata like '%compression_summary%'} (the metadata column always carries that
+     * literal — see {@link #saveCompressionSummary}).
+     */
+    public MessageEntity findLatestCompressionBoundary(String conversationId) {
+        return messageMapper.selectOne(
+                new LambdaQueryWrapper<MessageEntity>()
+                        .eq(MessageEntity::getConversationId, conversationId)
+                        .eq(MessageEntity::getRole, "system")
+                        .like(MessageEntity::getMetadata, "compression_summary")
                         .orderByDesc(MessageEntity::getCreateTime)
                         .orderByDesc(MessageEntity::getId)
-                        .last("LIMIT " + lastN));
+                        .last("LIMIT 1"));
+    }
+
+    /**
+     * Load the most recent N messages — pulled DESC then reversed to ASC. Uses the composite index
+     * {@code (conversation_id, create_time)} for efficient tail pagination.
+     *
+     * <p>加载最近 N 条消息（倒序取出后翻转为正序）；利用复合索引 {@code (conversation_id, create_time)} 高效分页。
+     */
+    public List<MessageEntity> listRecentMessages(String conversationId, int lastN) {
+        List<MessageEntity> recent =
+                messageMapper.selectList(
+                        new LambdaQueryWrapper<MessageEntity>()
+                                .eq(MessageEntity::getConversationId, conversationId)
+                                .orderByDesc(MessageEntity::getCreateTime)
+                                .orderByDesc(MessageEntity::getId)
+                                .last("LIMIT " + lastN));
         Collections.reverse(recent);
         return recent;
     }
 
     /**
-     * Load a page of messages older than a given id — used by the frontend
-     * pull-up infinite-scroll. Results are returned DESC; the caller is
-     * responsible for reversing if it needs ASC.
+     * Load a page of messages older than a given id — used by the frontend pull-up infinite-scroll.
+     * Results are returned DESC; the caller is responsible for reversing if it needs ASC.
      *
-     * <p>分页加载指定 ID 之前的消息（用于前端上拉加载更早消息）；
-     * 返回倒序结果，调用方需自行 reverse。
+     * <p>分页加载指定 ID 之前的消息（用于前端上拉加载更早消息）； 返回倒序结果，调用方需自行 reverse。
      */
     public List<MessageEntity> listMessagesBefore(String conversationId, Long beforeId, int limit) {
-        List<MessageEntity> results = messageMapper.selectList(
-                new LambdaQueryWrapper<MessageEntity>()
-                        .eq(MessageEntity::getConversationId, conversationId)
-                        .lt(MessageEntity::getId, beforeId)
-                        .orderByDesc(MessageEntity::getCreateTime)
-                        .orderByDesc(MessageEntity::getId)
-                        .last("LIMIT " + limit));
+        List<MessageEntity> results =
+                messageMapper.selectList(
+                        new LambdaQueryWrapper<MessageEntity>()
+                                .eq(MessageEntity::getConversationId, conversationId)
+                                .lt(MessageEntity::getId, beforeId)
+                                .orderByDesc(MessageEntity::getCreateTime)
+                                .orderByDesc(MessageEntity::getId)
+                                .last("LIMIT " + limit));
         Collections.reverse(results);
         return results;
     }
@@ -1052,64 +1167,72 @@ public class ConversationService {
     }
 
     /**
-     * Persist a compaction boundary as a role=system message. The body is
-     * the summary text; the metadata describes <em>what happened</em> at
-     * this boundary (trigger, pre/post tokens, how many messages were
-     * summarised, how many spill files were produced, how many tail
-     * messages survived). On the next load this row is the cut-off — older
-     * messages are skipped, the model picks up from the summary forward.
+     * Persist a compaction boundary as a role=system message. The body is the summary text; the
+     * metadata describes <em>what happened</em> at this boundary (trigger, pre/post tokens, how
+     * many messages were summarised, how many spill files were produced, how many tail messages
+     * survived). On the next load this row is the cut-off — older messages are skipped, the model
+     * picks up from the summary forward.
      *
-     * <p>Backward-compat overload: legacy callers that only know the row
-     * count still work and produce a minimal metadata block.
+     * <p>Backward-compat overload: legacy callers that only know the row count still work and
+     * produce a minimal metadata block.
      */
     public void saveCompressionSummary(String conversationId, String summary, int compressedCount) {
         saveCompressionSummary(conversationId, summary, compressedCount, Map.of());
     }
 
     /**
-     * Same as {@link #saveCompressionSummary(String, String, int, Map)} but
-     * returns the inserted row's id so callers (notably
-     * {@code ConversationWindowManager}) can include the {@code summaryId}
-     * in the {@code compact_status} SSE payload. The id is also written back
-     * into the row's metadata JSON by the underlying overload, so the row is
-     * still self-describing if a client misses the SSE event and loads
-     * history later.
+     * Same as {@link #saveCompressionSummary(String, String, int, Map)} but returns the inserted
+     * row's id so callers (notably {@code ConversationWindowManager}) can include the {@code
+     * summaryId} in the {@code compact_status} SSE payload. The id is also written back into the
+     * row's metadata JSON by the underlying overload, so the row is still self-describing if a
+     * client misses the SSE event and loads history later.
      *
-     * <p>Returns {@code null} when the insert path failed (logged at INFO);
-     * callers should treat that as "no boundary was persisted" and still
-     * broadcast a {@code done} event without {@code summaryId}.
+     * <p>Returns {@code null} when the insert path failed (logged at INFO); callers should treat
+     * that as "no boundary was persisted" and still broadcast a {@code done} event without {@code
+     * summaryId}.
      */
-    public Long saveCompressionSummaryReturningId(String conversationId, String summary,
-                                                  int compressedCount, Map<String, Object> extraMetadata) {
-        return saveCompressionSummaryInternal(conversationId, summary, compressedCount, extraMetadata);
+    public Long saveCompressionSummaryReturningId(
+            String conversationId,
+            String summary,
+            int compressedCount,
+            Map<String, Object> extraMetadata) {
+        return saveCompressionSummaryInternal(
+                conversationId, summary, compressedCount, extraMetadata);
     }
 
     /**
-     * Same as the 3-arg overload but accepts extra structured fields that
-     * are merged into the boundary's metadata JSON. Fields the frontend
-     * and observability pipeline care about:
+     * Same as the 3-arg overload but accepts extra structured fields that are merged into the
+     * boundary's metadata JSON. Fields the frontend and observability pipeline care about:
+     *
      * <ul>
-     *   <li>{@code trigger} — what fired this boundary
-     *       ({@code token_threshold}, {@code user_compact}, etc.)</li>
-     *   <li>{@code preTokens} / {@code postTokens} — context size before
-     *       and after, for the in-prompt status row</li>
-     *   <li>{@code messagesSummarized} / {@code tailKept} — partition
-     *       counts the user sees in the boundary card</li>
-     *   <li>{@code toolResultsSpilled} — how many bodies the spill store
-     *       absorbed during this boundary</li>
-     *   <li>{@code summaryId} — stable id (the inserted message id) for
-     *       deep-linking from the SSE event</li>
+     *   <li>{@code trigger} — what fired this boundary ({@code token_threshold}, {@code
+     *       user_compact}, etc.)
+     *   <li>{@code preTokens} / {@code postTokens} — context size before and after, for the
+     *       in-prompt status row
+     *   <li>{@code messagesSummarized} / {@code tailKept} — partition counts the user sees in the
+     *       boundary card
+     *   <li>{@code toolResultsSpilled} — how many bodies the spill store absorbed during this
+     *       boundary
+     *   <li>{@code summaryId} — stable id (the inserted message id) for deep-linking from the SSE
+     *       event
      * </ul>
-     * <p>{@code type=compression_summary} is always present — the loader
-     * keys off it. {@code compressedCount} is kept for backward compat.
+     *
+     * <p>{@code type=compression_summary} is always present — the loader keys off it. {@code
+     * compressedCount} is kept for backward compat.
      */
-    public void saveCompressionSummary(String conversationId, String summary, int compressedCount,
-                                       Map<String, Object> extraMetadata) {
+    public void saveCompressionSummary(
+            String conversationId,
+            String summary,
+            int compressedCount,
+            Map<String, Object> extraMetadata) {
         saveCompressionSummaryInternal(conversationId, summary, compressedCount, extraMetadata);
     }
 
-    private Long saveCompressionSummaryInternal(String conversationId, String summary, int compressedCount,
-                                                Map<String, Object> extraMetadata) {
+    private Long saveCompressionSummaryInternal(
+            String conversationId,
+            String summary,
+            int compressedCount,
+            Map<String, Object> extraMetadata) {
         MessageEntity entity = new MessageEntity();
         entity.setConversationId(conversationId);
         entity.setRole("system");
@@ -1120,9 +1243,10 @@ public class ConversationService {
         metadata.put("type", "compression_summary");
         metadata.put("compressedCount", compressedCount);
         if (extraMetadata != null) {
-            extraMetadata.forEach((k, v) -> {
-                if (v != null) metadata.put(k, v);
-            });
+            extraMetadata.forEach(
+                    (k, v) -> {
+                        if (v != null) metadata.put(k, v);
+                    });
         }
         // First write a placeholder so the row lands with the structured
         // fields; we backfill summaryId in a second step once MyBatis Plus
@@ -1132,9 +1256,13 @@ public class ConversationService {
         try {
             entity.setMetadata(objectMapper.writeValueAsString(metadata));
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            log.warn("[Conversation] Failed to serialise compaction metadata, falling back to minimal: {}",
+            log.warn(
+                    "[Conversation] Failed to serialise compaction metadata, falling back to minimal: {}",
                     e.getMessage());
-            entity.setMetadata("{\"type\":\"compression_summary\",\"compressedCount\":" + compressedCount + "}");
+            entity.setMetadata(
+                    "{\"type\":\"compression_summary\",\"compressedCount\":"
+                            + compressedCount
+                            + "}");
         }
         messageMapper.insert(entity);
 
@@ -1147,136 +1275,161 @@ public class ConversationService {
                 entity.setMetadata(objectMapper.writeValueAsString(metadata));
                 messageMapper.updateById(entity);
             } catch (Exception e) {
-                log.warn("[Conversation] Failed to backfill summaryId on compression boundary: {}",
+                log.warn(
+                        "[Conversation] Failed to backfill summaryId on compression boundary: {}",
                         e.getMessage());
             }
         }
-        log.info("[Conversation] Saved compression boundary conv={}, compressedCount={}, metadata={}",
-                conversationId, compressedCount, entity.getMetadata());
+        log.info(
+                "[Conversation] Saved compression boundary conv={}, compressedCount={}, metadata={}",
+                conversationId,
+                compressedCount,
+                entity.getMetadata());
         return entity.getId();
     }
 
     public List<MessageVO> listMessageViews(String conversationId) {
         return listMessages(conversationId).stream()
-                .map(message -> MessageVO.from(message, parseMessageParts(message), renderMessageContent(message)))
+                .map(
+                        message ->
+                                MessageVO.from(
+                                        message,
+                                        parseMessageParts(message),
+                                        renderMessageContent(message)))
                 .toList();
     }
 
     /**
-     * Render the whole conversation as one linear transcript for debugging and
-     * acceptance: every reasoning span, tool call, tool result and answer in
-     * emission order. Server paths (never the file system) are exposed, same as
-     * {@link #renderMessageContent(MessageEntity, boolean)} with
+     * Render the whole conversation as one linear transcript for debugging and acceptance: every
+     * reasoning span, tool call, tool result and answer in emission order. Server paths (never the
+     * file system) are exposed, same as {@link #renderMessageContent(MessageEntity, boolean)} with
      * {@code includePath=false}.
      */
     public String renderTrajectory(String conversationId) {
         List<MessageEntity> messages = listMessages(conversationId);
-        List<String> rendered = messages.stream()
-                .map(message -> renderMessageContent(message, false))
-                .toList();
+        List<String> rendered =
+                messages.stream().map(message -> renderMessageContent(message, false)).toList();
         return new TrajectoryRenderer(objectMapper).render(conversationId, messages, rendered);
     }
 
     /**
-     * External-facing message views for untrusted callers (webchat visitors).
-     * Strips the server-side absolute file path from both the structured parts
-     * ({@code path} nulled) and the rendered text, so the server filesystem
-     * layout is never disclosed. Visitors still get {@code fileUrl} / {@code
-     * fileName} / {@code contentType} to render and download attachments.
+     * External-facing message views for untrusted callers (webchat visitors). Strips the
+     * server-side absolute file path from both the structured parts ({@code path} nulled) and the
+     * rendered text, so the server filesystem layout is never disclosed. Visitors still get {@code
+     * fileUrl} / {@code fileName} / {@code contentType} to render and download attachments.
      */
     public List<MessageVO> listMessageViewsExternal(String conversationId) {
         return toExternalMessageViews(listMessages(conversationId));
     }
 
     /**
-     * Map already-loaded message entities to external (path-stripped) views.
-     * Shared by the full-list and paginated webchat paths so sanitization stays
-     * in one place.
+     * Map already-loaded message entities to external (path-stripped) views. Shared by the
+     * full-list and paginated webchat paths so sanitization stays in one place.
      */
     public List<MessageVO> toExternalMessageViews(List<MessageEntity> messages) {
         return messages.stream()
-                .map(message -> {
-                    List<MessageContentPart> parts = parseMessageParts(message);
-                    parts.forEach(p -> {
-                        if (p != null) {
-                            p.setPath(null);
-                        }
-                    });
-                    return MessageVO.from(message, parts, renderMessageContent(message, false));
-                })
+                .map(
+                        message -> {
+                            List<MessageContentPart> parts = parseMessageParts(message);
+                            parts.forEach(
+                                    p -> {
+                                        if (p != null) {
+                                            p.setPath(null);
+                                        }
+                                    });
+                            return MessageVO.from(
+                                    message, parts, renderMessageContent(message, false));
+                        })
                 .toList();
     }
 
     /**
      * Delete a conversation and cascade-clean every row that referenced it.
-     * <p>
-     * Tables cleaned in the same transaction:
+     *
+     * <p>Tables cleaned in the same transaction:
+     *
      * <ul>
-     *   <li>{@code mate_message} — chat history</li>
-     *   <li>{@code mate_tool_approval} — pending approvals would otherwise
-     *       point to a non-existent conversation and surface as ghost items
-     *       in the approvals list</li>
-     *   <li>{@code mate_async_task} — long-running task records keyed on
-     *       this conversation</li>
-     *   <li>{@code mate_channel_session} — channel-side session row (the
-     *       column is UNIQUE; leaving it would block reuse of the same id)</li>
-     *   <li>{@code mate_conversation} — the conversation itself</li>
+     *   <li>{@code mate_message} — chat history
+     *   <li>{@code mate_tool_approval} — pending approvals would otherwise point to a non-existent
+     *       conversation and surface as ghost items in the approvals list
+     *   <li>{@code mate_async_task} — long-running task records keyed on this conversation
+     *   <li>{@code mate_channel_session} — channel-side session row (the column is UNIQUE; leaving
+     *       it would block reuse of the same id)
+     *   <li>{@code mate_conversation} — the conversation itself
      * </ul>
-     * Child conversations (delegated turns) have their
-     * {@code parent_conversation_id} set to NULL rather than cascade-deleted,
-     * so the user keeps independent access to delegated work.
-     * <p>
-     * Audit / history tables ({@code mate_tool_guard_audit_log},
-     * {@code mate_cron_job_run}, {@code mate_skill.source_conversation_id},
-     * {@code mate_skill_usage_stat}) are intentionally left alone — those
-     * are append-only records that should outlive their source conversation.
-     * <p>
-     * Attachment file cleanup is registered as an after-commit hook so it
-     * runs only when the DB cascade actually persists, and an IO failure
-     * cannot roll back the database deletes.
+     *
+     * Child conversations (delegated turns) have their {@code parent_conversation_id} set to NULL
+     * rather than cascade-deleted, so the user keeps independent access to delegated work.
+     *
+     * <p>Audit / history tables ({@code mate_tool_guard_audit_log}, {@code mate_cron_job_run},
+     * {@code mate_skill.source_conversation_id}, {@code mate_skill_usage_stat}) are intentionally
+     * left alone — those are append-only records that should outlive their source conversation.
+     *
+     * <p>Attachment file cleanup is registered as an after-commit hook so it runs only when the DB
+     * cascade actually persists, and an IO failure cannot roll back the database deletes.
      */
     @Transactional
     public void deleteConversation(String conversationId) {
-        int messages = messageMapper.delete(new LambdaQueryWrapper<MessageEntity>()
-                .eq(MessageEntity::getConversationId, conversationId));
-        int approvals = toolApprovalMapper.delete(new LambdaQueryWrapper<ToolApprovalEntity>()
-                .eq(ToolApprovalEntity::getConversationId, conversationId));
-        int asyncTasks = asyncTaskMapper.delete(new LambdaQueryWrapper<AsyncTaskEntity>()
-                .eq(AsyncTaskEntity::getConversationId, conversationId));
-        int channelSessions = channelSessionMapper.delete(new LambdaQueryWrapper<ChannelSessionEntity>()
-                .eq(ChannelSessionEntity::getConversationId, conversationId));
-        int childrenUnlinked = conversationMapper.update(null, new LambdaUpdateWrapper<ConversationEntity>()
-                .set(ConversationEntity::getParentConversationId, null)
-                .eq(ConversationEntity::getParentConversationId, conversationId));
-        int conversations = conversationMapper.delete(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        int messages =
+                messageMapper.delete(
+                        new LambdaQueryWrapper<MessageEntity>()
+                                .eq(MessageEntity::getConversationId, conversationId));
+        int approvals =
+                toolApprovalMapper.delete(
+                        new LambdaQueryWrapper<ToolApprovalEntity>()
+                                .eq(ToolApprovalEntity::getConversationId, conversationId));
+        int asyncTasks =
+                asyncTaskMapper.delete(
+                        new LambdaQueryWrapper<AsyncTaskEntity>()
+                                .eq(AsyncTaskEntity::getConversationId, conversationId));
+        int channelSessions =
+                channelSessionMapper.delete(
+                        new LambdaQueryWrapper<ChannelSessionEntity>()
+                                .eq(ChannelSessionEntity::getConversationId, conversationId));
+        int childrenUnlinked =
+                conversationMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<ConversationEntity>()
+                                .set(ConversationEntity::getParentConversationId, null)
+                                .eq(ConversationEntity::getParentConversationId, conversationId));
+        int conversations =
+                conversationMapper.delete(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
 
-        log.info("[Conversation] Deleted {}: messages={}, approvals={}, asyncTasks={},"
+        log.info(
+                "[Conversation] Deleted {}: messages={}, approvals={}, asyncTasks={},"
                         + " channelSessions={}, childrenUnlinked={}, conversationRow={}",
-                conversationId, messages, approvals, asyncTasks,
-                channelSessions, childrenUnlinked, conversations);
+                conversationId,
+                messages,
+                approvals,
+                asyncTasks,
+                channelSessions,
+                childrenUnlinked,
+                conversations);
 
         registerPostCommitCleanup(conversationId);
     }
 
     /**
-     * After-commit cleanup: file IO and the {@link ConversationDeletedEvent}
-     * fan-out both run only if the cascade actually persists, and an IO
-     * failure cannot roll back the DB cascade. The event lets approval and
-     * async-task modules drop their in-memory state (pendingMap, active
-     * pollers, canceled-conv set) so workers cannot resurrect orphan rows
-     * after the conversation row is gone.
+     * After-commit cleanup: file IO and the {@link ConversationDeletedEvent} fan-out both run only
+     * if the cascade actually persists, and an IO failure cannot roll back the DB cascade. The
+     * event lets approval and async-task modules drop their in-memory state (pendingMap, active
+     * pollers, canceled-conv set) so workers cannot resurrect orphan rows after the conversation
+     * row is gone.
      */
     private void registerPostCommitCleanup(String conversationId) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    cleanAttachmentFiles(conversationId);
-                    purgeToolResultSpill(conversationId);
-                    eventPublisher.publishEvent(new ConversationDeletedEvent(conversationId));
-                }
-            });
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            cleanAttachmentFiles(conversationId);
+                            purgeToolResultSpill(conversationId);
+                            eventPublisher.publishEvent(
+                                    new ConversationDeletedEvent(conversationId));
+                        }
+                    });
         } else {
             cleanAttachmentFiles(conversationId);
             purgeToolResultSpill(conversationId);
@@ -1285,10 +1438,9 @@ public class ConversationService {
     }
 
     /**
-     * Best-effort: ask the spill store to delete every tool-result file this
-     * conversation produced. No-op when no spill store is wired in (legacy
-     * deployments or tests that don't need spill). Failures are logged but
-     * never propagated — leaving an extra file on disk is a small price
+     * Best-effort: ask the spill store to delete every tool-result file this conversation produced.
+     * No-op when no spill store is wired in (legacy deployments or tests that don't need spill).
+     * Failures are logged but never propagated — leaving an extra file on disk is a small price
      * compared to surfacing IO errors as a 500 on the delete endpoint.
      */
     private void purgeToolResultSpill(String conversationId) {
@@ -1296,23 +1448,28 @@ public class ConversationService {
         try {
             toolResultStorage.purgeConversation(conversationId);
         } catch (Exception e) {
-            log.warn("[Conversation] tool-result spill purge failed for {}: {}",
-                    conversationId, e.getMessage());
+            log.warn(
+                    "[Conversation] tool-result spill purge failed for {}: {}",
+                    conversationId,
+                    e.getMessage());
         }
     }
 
     /**
-     * Wipe all messages in a conversation and reset its aggregate counters,
-     * also cleaning any attachment files those messages produced.
+     * Wipe all messages in a conversation and reset its aggregate counters, also cleaning any
+     * attachment files those messages produced.
      *
      * <p>清空会话消息（同时清理附件文件）。
      */
     @Transactional
     public void clearMessages(String conversationId) {
-        messageMapper.delete(new LambdaQueryWrapper<MessageEntity>()
-                .eq(MessageEntity::getConversationId, conversationId));
-        ConversationEntity conv = conversationMapper.selectOne(new LambdaQueryWrapper<ConversationEntity>()
-                .eq(ConversationEntity::getConversationId, conversationId));
+        messageMapper.delete(
+                new LambdaQueryWrapper<MessageEntity>()
+                        .eq(MessageEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv != null) {
             conv.setMessageCount(0);
             conv.setLastMessage(null);
@@ -1322,16 +1479,23 @@ public class ConversationService {
     }
 
     public List<MessageContentPart> parseMessageParts(MessageEntity message) {
-        if (message == null || message.getContentParts() == null || message.getContentParts().isBlank()) {
+        if (message == null
+                || message.getContentParts() == null
+                || message.getContentParts().isBlank()) {
             return List.of();
         }
         try {
-            return objectMapper.readValue(message.getContentParts(), new TypeReference<List<MessageContentPart>>() {});
+            return objectMapper.readValue(
+                    message.getContentParts(), new TypeReference<List<MessageContentPart>>() {});
         } catch (Exception e) {
-            log.warn("Failed to parse content_parts for message {}: {}", message.getId(), e.getMessage());
-            return List.of(MessageContentPart.parseError(
-                    message.getId() != null ? message.getId().toString() : "unknown",
-                    e.getMessage() != null ? e.getMessage() : "unknown error"));
+            log.warn(
+                    "Failed to parse content_parts for message {}: {}",
+                    message.getId(),
+                    e.getMessage());
+            return List.of(
+                    MessageContentPart.parseError(
+                            message.getId() != null ? message.getId().toString() : "unknown",
+                            e.getMessage() != null ? e.getMessage() : "unknown error"));
         }
     }
 
@@ -1340,10 +1504,10 @@ public class ConversationService {
     }
 
     /**
-     * Render variant whose {@code includePath} controls whether the server-side
-     * file path is embedded in the text. Internal/LLM rendering keeps it (tools
-     * resolve files by path); external rendering (webchat visitors) drops it so
-     * the server filesystem layout is not disclosed to untrusted callers.
+     * Render variant whose {@code includePath} controls whether the server-side file path is
+     * embedded in the text. Internal/LLM rendering keeps it (tools resolve files by path); external
+     * rendering (webchat visitors) drops it so the server filesystem layout is not disclosed to
+     * untrusted callers.
      */
     public String renderMessageContent(MessageEntity message, boolean includePath) {
         List<MessageContentPart> parts = parseMessageParts(message);
@@ -1358,9 +1522,12 @@ public class ConversationService {
             }
             switch (part.getType()) {
                 case "text" -> appendSegment(text, part.getText());
-                case "thinking", "tool_call", "parse_error" -> { /* skip — frontend reads these from contentParts directly */ }
+                case "thinking", "tool_call", "parse_error" -> {
+                    /* skip — frontend reads these from contentParts directly */
+                }
                 case "file" -> appendSegment(text, renderFilePart(part, includePath));
-                case "image", "video", "audio", "model3d" -> appendSegment(text, renderMediaPart(part, includePath));
+                case "image", "video", "audio", "model3d" ->
+                        appendSegment(text, renderMediaPart(part, includePath));
                 default -> appendSegment(text, part.getText());
             }
         }
@@ -1381,20 +1548,22 @@ public class ConversationService {
     private String summarizeMessage(String content, List<MessageContentPart> parts) {
         String rendered = content;
         if ((rendered == null || rendered.isBlank()) && parts != null && !parts.isEmpty()) {
-            rendered = parts.stream()
-                    .map(part -> {
-                        if (part == null || part.getType() == null) {
-                            return "";
-                        }
-                        return switch (part.getType()) {
-                            case "text", "thinking" -> safe(part.getText());
-                            case "tool_call" -> "";
-                            case "file" -> "[附件] " + safe(part.getFileName());
-                            default -> safe(part.getText());
-                        };
-                    })
-                    .filter(text -> !text.isBlank())
-                    .collect(Collectors.joining(" "));
+            rendered =
+                    parts.stream()
+                            .map(
+                                    part -> {
+                                        if (part == null || part.getType() == null) {
+                                            return "";
+                                        }
+                                        return switch (part.getType()) {
+                                            case "text", "thinking" -> safe(part.getText());
+                                            case "tool_call" -> "";
+                                            case "file" -> "[附件] " + safe(part.getFileName());
+                                            default -> safe(part.getText());
+                                        };
+                                    })
+                            .filter(text -> !text.isBlank())
+                            .collect(Collectors.joining(" "));
         }
         if (rendered == null || rendered.isBlank()) {
             return "新消息";
@@ -1403,12 +1572,12 @@ public class ConversationService {
     }
 
     /**
-     * Render a "file" content part for the LLM prompt. The original filename can be
-     * non-ASCII (Chinese, emoji, …); the upload pipeline sanitizes those characters
-     * to underscores when storing on disk, so the LLM-visible name and the on-disk
-     * name diverge. Surface the actual server-side path here so any tool the LLM
-     * picks (read_file / extract_document_text / detect_file_type / …) can be called
-     * with a path that resolves directly, instead of relying on per-tool fallbacks.
+     * Render a "file" content part for the LLM prompt. The original filename can be non-ASCII
+     * (Chinese, emoji, …); the upload pipeline sanitizes those characters to underscores when
+     * storing on disk, so the LLM-visible name and the on-disk name diverge. Surface the actual
+     * server-side path here so any tool the LLM picks (read_file / extract_document_text /
+     * detect_file_type / …) can be called with a path that resolves directly, instead of relying on
+     * per-tool fallbacks.
      */
     private String renderFilePart(MessageContentPart part, boolean includePath) {
         String name = safe(part.getFileName());
@@ -1421,23 +1590,23 @@ public class ConversationService {
 
     /**
      * Render an image/video/audio/3D-model content part for the LLM prompt.
-     * <p>
-     * Without this marker, media parts are invisible in the rendered text — the LLM
-     * sees only the user's accompanying text and has no idea an attachment was sent.
-     * That fails closed when the multimodal Media injection in {@code BaseAgent} is
-     * upstream-stripped (model heuristic claims vision but the actual provider drops
-     * the image), leaving the agent to ask "which image?" for an attachment the user
-     * already uploaded. The path lets file-reading tools ({@code read_file},
-     * {@code extract_document_text}, {@code detect_file_type}) work as a fallback.
+     *
+     * <p>Without this marker, media parts are invisible in the rendered text — the LLM sees only
+     * the user's accompanying text and has no idea an attachment was sent. That fails closed when
+     * the multimodal Media injection in {@code BaseAgent} is upstream-stripped (model heuristic
+     * claims vision but the actual provider drops the image), leaving the agent to ask "which
+     * image?" for an attachment the user already uploaded. The path lets file-reading tools ({@code
+     * read_file}, {@code extract_document_text}, {@code detect_file_type}) work as a fallback.
      */
     private String renderMediaPart(MessageContentPart part, boolean includePath) {
-        String label = switch (part.getType()) {
-            case "image" -> "[图片]";
-            case "video" -> "[视频]";
-            case "audio" -> "[音频]";
-            case "model3d" -> "[3D 模型]";
-            default -> "[附件]";
-        };
+        String label =
+                switch (part.getType()) {
+                    case "image" -> "[图片]";
+                    case "video" -> "[视频]";
+                    case "audio" -> "[音频]";
+                    case "model3d" -> "[3D 模型]";
+                    default -> "[附件]";
+                };
         String name = safe(part.getFileName());
         if (name.isBlank()) {
             name = "未命名";
@@ -1458,11 +1627,10 @@ public class ConversationService {
     }
 
     /**
-     * Overwrite a message's {@code content_parts} with an updated list — used by
-     * the vision sidecar to persist generated captions back onto image parts so
-     * later turns retain the image description (history replay is text-only).
-     * Best-effort: a serialization or DB failure is logged, not propagated, so
-     * the in-flight chat turn is never broken by a caption write.
+     * Overwrite a message's {@code content_parts} with an updated list — used by the vision sidecar
+     * to persist generated captions back onto image parts so later turns retain the image
+     * description (history replay is text-only). Best-effort: a serialization or DB failure is
+     * logged, not propagated, so the in-flight chat turn is never broken by a caption write.
      */
     public void updateMessageParts(MessageEntity message, List<MessageContentPart> parts) {
         if (message == null || message.getId() == null || parts == null || parts.isEmpty()) {
@@ -1472,8 +1640,10 @@ public class ConversationService {
             message.setContentParts(serializeParts(parts));
             messageMapper.updateById(message);
         } catch (Exception e) {
-            log.warn("Failed to persist updated content_parts for message {}: {}",
-                    message.getId(), e.getMessage());
+            log.warn(
+                    "Failed to persist updated content_parts for message {}: {}",
+                    message.getId(),
+                    e.getMessage());
         }
     }
 
@@ -1495,35 +1665,36 @@ public class ConversationService {
     /**
      * Remove all approval-placeholder assistant messages from a conversation.
      *
-     * <p>Called before replay so the LLM context contains no approval-related
-     * stub text that could confuse the next turn.
+     * <p>Called before replay so the LLM context contains no approval-related stub text that could
+     * confuse the next turn.
      *
-     * <p>删除指定会话中所有审批占位 assistant 消息。在 replay 前调用，
-     * 确保 LLM 上下文中不包含任何审批相关文本。
+     * <p>删除指定会话中所有审批占位 assistant 消息。在 replay 前调用， 确保 LLM 上下文中不包含任何审批相关文本。
      */
     /**
-     * Reconcile persisted assistant-message state when one or more pending approvals
-     * leave the {@code pending} status (approve / deny / timeout / superseded / consumed).
-     * <p>
-     * For each assistant message in the conversation whose
-     * {@code metadata.pendingApproval.pendingId} appears in {@code resolvedPendingIds}
-     * and whose {@code metadata.pendingApproval.status == "pending_approval"}, this
-     * method updates three fields atomically (within a single transaction):
+     * Reconcile persisted assistant-message state when one or more pending approvals leave the
+     * {@code pending} status (approve / deny / timeout / superseded / consumed).
+     *
+     * <p>For each assistant message in the conversation whose {@code
+     * metadata.pendingApproval.pendingId} appears in {@code resolvedPendingIds} and whose {@code
+     * metadata.pendingApproval.status == "pending_approval"}, this method updates three fields
+     * atomically (within a single transaction):
+     *
      * <ol>
-     *   <li>{@code metadata.pendingApproval.status} → {@code decision.pendingApprovalStatus}</li>
-     *   <li>{@code metadata.currentPhase} flips {@code awaiting_approval} → {@code resolved}</li>
-     *   <li>{@code MessageEntity.status} flips {@code awaiting_approval}
-     *       → {@code decision.messageStatus} (one of the existing terminal states the
-     *       frontend Message.status union supports)</li>
+     *   <li>{@code metadata.pendingApproval.status} → {@code decision.pendingApprovalStatus}
+     *   <li>{@code metadata.currentPhase} flips {@code awaiting_approval} → {@code resolved}
+     *   <li>{@code MessageEntity.status} flips {@code awaiting_approval} → {@code
+     *       decision.messageStatus} (one of the existing terminal states the frontend
+     *       Message.status union supports)
      * </ol>
-     * Without this synchronization, a page refresh re-hydrates the stale
-     * {@code pending_approval} status from message metadata and the UI pops a ghost
-     * approval banner for an approval the user already settled. See RFC-067 §4.1.5.
-     * <p>
-     * Idempotent: messages whose metadata does not match, or whose status already moved
-     * off {@code pending_approval}, are left untouched. Timeout / superseded callers
-     * pass {@link MetadataDecision#DENIED}; the more specific terminal status lives
-     * on {@code mate_tool_approval.status} for audit (see RFC-067 §4.4.1).
+     *
+     * Without this synchronization, a page refresh re-hydrates the stale {@code pending_approval}
+     * status from message metadata and the UI pops a ghost approval banner for an approval the user
+     * already settled. See RFC-067 §4.1.5.
+     *
+     * <p>Idempotent: messages whose metadata does not match, or whose status already moved off
+     * {@code pending_approval}, are left untouched. Timeout / superseded callers pass {@link
+     * MetadataDecision#DENIED}; the more specific terminal status lives on {@code
+     * mate_tool_approval.status} for audit (see RFC-067 §4.4.1).
      *
      * @param conversationId target conversation
      * @param resolvedPendingIds pendingIds whose owning message metadata should be reconciled
@@ -1531,9 +1702,10 @@ public class ConversationService {
      * @return number of messages whose state was rewritten
      */
     @Transactional
-    public int markPendingApprovalsResolved(String conversationId,
-                                            java.util.Set<String> resolvedPendingIds,
-                                            MetadataDecision decision) {
+    public int markPendingApprovalsResolved(
+            String conversationId,
+            java.util.Set<String> resolvedPendingIds,
+            MetadataDecision decision) {
         if (conversationId == null || resolvedPendingIds == null || resolvedPendingIds.isEmpty()) {
             return 0;
         }
@@ -1559,8 +1731,9 @@ public class ConversationService {
                 if (json.startsWith("\"") && json.endsWith("\"")) {
                     json = objectMapper.readValue(json, String.class);
                 }
-                java.util.Map<String, Object> meta = objectMapper.readValue(json,
-                        new TypeReference<java.util.Map<String, Object>>() {});
+                java.util.Map<String, Object> meta =
+                        objectMapper.readValue(
+                                json, new TypeReference<java.util.Map<String, Object>>() {});
                 Object pa = meta.get("pendingApproval");
                 if (!(pa instanceof java.util.Map)) continue;
                 @SuppressWarnings("unchecked")
@@ -1603,45 +1776,53 @@ public class ConversationService {
                 rewritten++;
             } catch (Exception e) {
                 String preview = raw.length() > 200 ? raw.substring(0, 200) + "..." : raw;
-                log.warn("[ConversationService] Failed to rewrite pendingApproval status for message {} " +
-                                "(rawLen={}, preview={}): {}",
-                        msg.getId(), raw.length(), preview, e.getMessage());
+                log.warn(
+                        "[ConversationService] Failed to rewrite pendingApproval status for message {} "
+                                + "(rawLen={}, preview={}): {}",
+                        msg.getId(),
+                        raw.length(),
+                        preview,
+                        e.getMessage());
             }
         }
         if (rewritten > 0) {
-            log.info("[ConversationService] Reconciled {} message(s) in conversation {} " +
-                            "to decision={} (cleared {} ghost pendings)",
-                    rewritten, conversationId, decision, resolvedPendingIds.size());
+            log.info(
+                    "[ConversationService] Reconciled {} message(s) in conversation {} "
+                            + "to decision={} (cleared {} ghost pendings)",
+                    rewritten,
+                    conversationId,
+                    decision,
+                    resolvedPendingIds.size());
         }
         return rewritten;
     }
 
     /**
-     * Flip the gate message's tool-call entry to a terminal state matching the
-     * approval decision (RFC-067 §4.10).
-     * <p>
-     * Driven by {@link MetadataDecision}:
+     * Flip the gate message's tool-call entry to a terminal state matching the approval decision
+     * (RFC-067 §4.10).
+     *
+     * <p>Driven by {@link MetadataDecision}:
+     *
      * <ul>
-     *   <li>{@link MetadataDecision#APPROVED} → {@code status='completed'} +
-     *       {@code success=true} + {@code result='[已批准]'}. The actual tool
-     *       execution result appears in the replayed assistant message that
-     *       follows — not on this gate row.</li>
-     *   <li>{@link MetadataDecision#DENIED} → {@code status='completed'} +
-     *       {@code success=false} + {@code result='[已拒绝]'}. MessageBubble
-     *       renders this as a red ✗.</li>
+     *   <li>{@link MetadataDecision#APPROVED} → {@code status='completed'} + {@code success=true} +
+     *       {@code result='[已批准]'}. The actual tool execution result appears in the replayed
+     *       assistant message that follows — not on this gate row.
+     *   <li>{@link MetadataDecision#DENIED} → {@code status='completed'} + {@code success=false} +
+     *       {@code result='[已拒绝]'}. MessageBubble renders this as a red ✗.
      * </ul>
-     * Both paths flip status off {@code awaiting_approval} / {@code running} so
-     * MessageBubble's icon precedence (running > awaiting_approval > success
-     * branches) can reach the right terminal icon. Without the flip the card
-     * stays as an orange spinner forever — replay creates a new message
-     * instead of overwriting the gate row, so nothing else updates it.
-     * Best-effort: if metadata.toolCalls is missing or no entry matches, this
-     * is a silent no-op.
+     *
+     * Both paths flip status off {@code awaiting_approval} / {@code running} so MessageBubble's
+     * icon precedence (running > awaiting_approval > success branches) can reach the right terminal
+     * icon. Without the flip the card stays as an orange spinner forever — replay creates a new
+     * message instead of overwriting the gate row, so nothing else updates it. Best-effort: if
+     * metadata.toolCalls is missing or no entry matches, this is a silent no-op.
      */
     @SuppressWarnings("unchecked")
-    private void flipResolvedToolCalls(java.util.Map<String, Object> meta,
-                                       String toolName, String toolArgs,
-                                       MetadataDecision decision) {
+    private void flipResolvedToolCalls(
+            java.util.Map<String, Object> meta,
+            String toolName,
+            String toolArgs,
+            MetadataDecision decision) {
         Object tc = meta.get("toolCalls");
         if (!(tc instanceof java.util.List)) return;
         boolean approved = decision == MetadataDecision.APPROVED;
@@ -1649,7 +1830,8 @@ public class ConversationService {
         for (Object entry : (java.util.List<Object>) tc) {
             if (!(entry instanceof java.util.Map)) continue;
             java.util.Map<String, Object> call = (java.util.Map<String, Object>) entry;
-            if (!matchesNameAndArgs(call.get("name"), call.get("arguments"), toolName, toolArgs)) continue;
+            if (!matchesNameAndArgs(call.get("name"), call.get("arguments"), toolName, toolArgs))
+                continue;
             Object status = call.get("status");
             if ("awaiting_approval".equals(String.valueOf(status))
                     || "running".equals(String.valueOf(status))) {
@@ -1661,16 +1843,17 @@ public class ConversationService {
     }
 
     /**
-     * Same terminal-state flip as {@link #flipResolvedToolCalls} but on the
-     * streaming-segments timeline. Segments use {@code toolName} / {@code toolArgs}
-     * + {@code toolSuccess} / {@code toolResult} field names (not
-     * {@code name} / {@code arguments} / {@code success} / {@code result}); the
-     * shape is otherwise symmetric.
+     * Same terminal-state flip as {@link #flipResolvedToolCalls} but on the streaming-segments
+     * timeline. Segments use {@code toolName} / {@code toolArgs} + {@code toolSuccess} / {@code
+     * toolResult} field names (not {@code name} / {@code arguments} / {@code success} / {@code
+     * result}); the shape is otherwise symmetric.
      */
     @SuppressWarnings("unchecked")
-    private void flipResolvedSegments(java.util.Map<String, Object> meta,
-                                      String toolName, String toolArgs,
-                                      MetadataDecision decision) {
+    private void flipResolvedSegments(
+            java.util.Map<String, Object> meta,
+            String toolName,
+            String toolArgs,
+            MetadataDecision decision) {
         Object segs = meta.get("segments");
         if (!(segs instanceof java.util.List)) return;
         boolean approved = decision == MetadataDecision.APPROVED;
@@ -1679,7 +1862,8 @@ public class ConversationService {
             if (!(entry instanceof java.util.Map)) continue;
             java.util.Map<String, Object> seg = (java.util.Map<String, Object>) entry;
             if (!"tool_call".equals(String.valueOf(seg.get("type")))) continue;
-            if (!matchesNameAndArgs(seg.get("toolName"), seg.get("toolArgs"), toolName, toolArgs)) continue;
+            if (!matchesNameAndArgs(seg.get("toolName"), seg.get("toolArgs"), toolName, toolArgs))
+                continue;
             Object status = seg.get("status");
             if ("awaiting_approval".equals(String.valueOf(status))
                     || "running".equals(String.valueOf(status))) {
@@ -1690,8 +1874,8 @@ public class ConversationService {
         }
     }
 
-    private static boolean matchesNameAndArgs(Object actualName, Object actualArgs,
-                                              String expectedName, String expectedArgs) {
+    private static boolean matchesNameAndArgs(
+            Object actualName, Object actualArgs, String expectedName, String expectedArgs) {
         if (expectedName == null || actualName == null) return false;
         if (!expectedName.equals(String.valueOf(actualName))) return false;
         // Arguments equality: pendingApproval stores them as the JSON-stringified form
@@ -1713,8 +1897,10 @@ public class ConversationService {
             }
         }
         if (removed > 0) {
-            log.info("[ConversationService] Removed {} approval placeholder(s) from conversation {}",
-                    removed, conversationId);
+            log.info(
+                    "[ConversationService] Removed {} approval placeholder(s) from conversation {}",
+                    removed,
+                    conversationId);
         }
     }
 
@@ -1729,49 +1915,48 @@ public class ConversationService {
      */
     public boolean conversationExists(String conversationId) {
         return conversationMapper.selectCount(
-                new LambdaQueryWrapper<ConversationEntity>()
-                        .eq(ConversationEntity::getConversationId, conversationId)) > 0;
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId))
+                > 0;
     }
 
     /**
-     * Check whether a user owns the conversation. Direct owners always pass.
-     * Shared rows (system / IM / {@code webchat:<visitorId>} principals) are
-     * restricted to global admins, with legacy system-owner fallbacks preserved
-     * for rows/endpoints that cannot resolve an authenticated user.
+     * Check whether a user owns the conversation. Direct owners always pass. Shared rows (system /
+     * IM / {@code webchat:<visitorId>} principals) are restricted to global admins, with legacy
+     * system-owner fallbacks preserved for rows/endpoints that cannot resolve an authenticated
+     * user.
      *
-     * <p><b>Cross-workspace guard (issue #344).</b> The legacy contract let any
-     * logged-in user reach a system / IM / webchat-owned conversation by id —
-     * the list endpoints filtered by {@code workspaceId} but the direct-access
-     * endpoints did not. Under a multi-tenant model where workspaces are
-     * untrusted isolation boundaries, that asymmetry is a cross-workspace
-     * authorization gap. This method now also requires, for shared (non-direct)
-     * conversations, that the requester actually be a member of the
-     * conversation's workspace. Issue #616 tightened this further: workspace
-     * membership alone is not enough to read a shared system conversation,
-     * because that lets peers in the same workspace see each other's channel
-     * or scheduled-job conversations.
+     * <p><b>Cross-workspace guard (issue #344).</b> The legacy contract let any logged-in user
+     * reach a system / IM / webchat-owned conversation by id — the list endpoints filtered by
+     * {@code workspaceId} but the direct-access endpoints did not. Under a multi-tenant model where
+     * workspaces are untrusted isolation boundaries, that asymmetry is a cross-workspace
+     * authorization gap. This method now also requires, for shared (non-direct) conversations, that
+     * the requester actually be a member of the conversation's workspace. Issue #616 tightened this
+     * further: workspace membership alone is not enough to read a shared system conversation,
+     * because that lets peers in the same workspace see each other's channel or scheduled-job
+     * conversations.
      *
-     * <p>校验用户是否拥有该会话。直属会话直接放行;共享会话(system / IM / webchat)
-     * 仅允许全局管理员查看，避免同 workspace 成员互相看到对话。
+     * <p>校验用户是否拥有该会话。直属会话直接放行;共享会话(system / IM / webchat) 仅允许全局管理员查看，避免同 workspace 成员互相看到对话。
      *
      * <p>分支:
+     *
      * <ul>
-     *   <li>会话不存在 → false</li>
-     *   <li>请求者是该会话的直属 owner → true(自己的会话,workspace 隐式一致)</li>
-     *   <li>请求者是全局 admin(user.role=admin)→ true(横切覆盖,与具体 workspace 无关)</li>
-     *   <li>会话无 workspace_id(老数据)→ 仅看是否 system owner(维持旧行为,避免回归)</li>
-     *   <li>请求者用户记录不存在(permitAll 端点的匿名重连)→ 仅看是否 system owner(维持旧行为)</li>
-     *   <li>否则 → false</li>
+     *   <li>会话不存在 → false
+     *   <li>请求者是该会话的直属 owner → true(自己的会话,workspace 隐式一致)
+     *   <li>请求者是全局 admin(user.role=admin)→ true(横切覆盖,与具体 workspace 无关)
+     *   <li>会话无 workspace_id(老数据)→ 仅看是否 system owner(维持旧行为,避免回归)
+     *   <li>请求者用户记录不存在(permitAll 端点的匿名重连)→ 仅看是否 system owner(维持旧行为)
+     *   <li>否则 → false
      * </ul>
      *
-     * <p>调用方签名不变;调用方若需在不查 DB 的情况下做 admin 例外,可在外层先短路,
-     * 但通常让本方法统一处理以避免散落的 admin 例外逻辑。注意:本方法不读
-     * {@code X-Workspace-Id} header —— 该 header 客户端可伪造,以 DB 中的成员关系为准。
+     * <p>调用方签名不变;调用方若需在不查 DB 的情况下做 admin 例外,可在外层先短路, 但通常让本方法统一处理以避免散落的 admin 例外逻辑。注意:本方法不读 {@code
+     * X-Workspace-Id} header —— 该 header 客户端可伪造,以 DB 中的成员关系为准。
      */
     public boolean isConversationOwner(String conversationId, String username) {
-        ConversationEntity conv = conversationMapper.selectOne(
-                new LambdaQueryWrapper<ConversationEntity>()
-                        .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         if (conv == null) {
             return false;
         }
@@ -1796,14 +1981,12 @@ public class ConversationService {
     }
 
     /**
-     * Look up a conversation by its string (UUID-style) id, returning the
-     * full entity or {@code null} when not found. Read-only — does not
-     * create or mutate.
+     * Look up a conversation by its string (UUID-style) id, returning the full entity or {@code
+     * null} when not found. Read-only — does not create or mutate.
      *
-     * <p>Callers that need to derive {@code agentId} / {@code workspaceId}
-     * from a conversation (so the request cannot lie about either) should
-     * use this rather than re-running the {@code LambdaQueryWrapper}
-     * boilerplate inline.
+     * <p>Callers that need to derive {@code agentId} / {@code workspaceId} from a conversation (so
+     * the request cannot lie about either) should use this rather than re-running the {@code
+     * LambdaQueryWrapper} boilerplate inline.
      */
     public ConversationEntity findByConversationId(String conversationId) {
         if (conversationId == null || conversationId.isBlank()) {
@@ -1827,7 +2010,7 @@ public class ConversationService {
         }
         return "team_worker".equals(conversation.getConversationKind())
                 || conversation.getConversationId() != null
-                && conversation.getConversationId().startsWith("team-task-");
+                        && conversation.getConversationId().startsWith("team-task-");
     }
 
     /**
@@ -1836,19 +2019,19 @@ public class ConversationService {
      * <p>获取会话的持久化流状态。
      */
     public String getStreamStatus(String conversationId) {
-        ConversationEntity conv = conversationMapper.selectOne(
-                new LambdaQueryWrapper<ConversationEntity>()
-                        .eq(ConversationEntity::getConversationId, conversationId));
+        ConversationEntity conv =
+                conversationMapper.selectOne(
+                        new LambdaQueryWrapper<ConversationEntity>()
+                                .eq(ConversationEntity::getConversationId, conversationId));
         return conv != null ? conv.getStreamStatus() : null;
     }
 
     /**
      * Clean up the attachment files associated with a conversation.
-     * <p>
-     * Walks every candidate upload root (the workspace/agent-aware root plus the
-     * default root) and deletes that conversation's attachment directory under
-     * each, so attachments are removed whether they landed in the new workspace
-     * directory or the pre-migration default directory.
+     *
+     * <p>Walks every candidate upload root (the workspace/agent-aware root plus the default root)
+     * and deletes that conversation's attachment directory under each, so attachments are removed
+     * whether they landed in the new workspace directory or the pre-migration default directory.
      */
     public void cleanAttachmentFiles(String conversationId) {
         if (conversationId == null || conversationId.isBlank()) {
@@ -1860,22 +2043,27 @@ public class ConversationService {
         // resolveCandidateConversationDirs sanitizes the id for the path segment
         // (so ids like "wecom:XXXX" clean correctly on Windows) and also probes
         // the raw-id dir for pre-fix Linux uploads.
-        for (Path dir : chatUploadLocationResolver.resolveCandidateConversationDirs(conversationId)) {
+        for (Path dir :
+                chatUploadLocationResolver.resolveCandidateConversationDirs(conversationId)) {
             if (!Files.exists(dir)) {
                 continue;
             }
             try (Stream<Path> walk = Files.walk(dir)) {
                 walk.sorted(Comparator.reverseOrder())
-                        .forEach(p -> {
-                            try {
-                                Files.deleteIfExists(p);
-                            } catch (IOException e) {
-                                log.warn("Failed to delete attachment file: {}", p, e);
-                            }
-                        });
+                        .forEach(
+                                p -> {
+                                    try {
+                                        Files.deleteIfExists(p);
+                                    } catch (IOException e) {
+                                        log.warn("Failed to delete attachment file: {}", p, e);
+                                    }
+                                });
                 cleanedAny = true;
             } catch (IOException e) {
-                log.warn("Failed to walk attachment directory for conversation: {}", conversationId, e);
+                log.warn(
+                        "Failed to walk attachment directory for conversation: {}",
+                        conversationId,
+                        e);
             }
         }
         if (cleanedAny) {

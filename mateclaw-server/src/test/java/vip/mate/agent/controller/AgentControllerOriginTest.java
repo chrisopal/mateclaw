@@ -1,5 +1,14 @@
 package vip.mate.agent.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,15 +27,6 @@ import vip.mate.workspace.conversation.ConversationService;
 import vip.mate.workspace.conversation.model.MessageEntity;
 import vip.mate.workspace.core.service.WorkspaceService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 class AgentControllerOriginTest {
 
     private static final Long AGENT_ID = 10L;
@@ -43,11 +43,18 @@ class AgentControllerOriginTest {
     void setUp() {
         agentService = mock(AgentService.class);
         conversations = mock(ConversationService.class);
-        controller = new AgentController(agentService, conversations,
-                mock(AuditEventService.class), mock(AuthService.class), mock(WorkspaceService.class),
-                mock(ModelConfigService.class), mock(ModelCapabilityService.class),
-                mock(SystemSettingService.class), mock(AgentGenerationService.class),
-                new ObjectMapper());
+        controller =
+                new AgentController(
+                        agentService,
+                        conversations,
+                        mock(AuditEventService.class),
+                        mock(AuthService.class),
+                        mock(WorkspaceService.class),
+                        mock(ModelConfigService.class),
+                        mock(ModelCapabilityService.class),
+                        mock(SystemSettingService.class),
+                        mock(AgentGenerationService.class),
+                        new ObjectMapper());
         AgentEntity agent = new AgentEntity();
         agent.setId(AGENT_ID);
         agent.setWorkspaceId(WORKSPACE_ID);
@@ -97,7 +104,8 @@ class AgentControllerOriginTest {
         controller.execute(AGENT_ID, request, WORKSPACE_ID);
 
         ArgumentCaptor<ChatOrigin> origin = ArgumentCaptor.forClass(ChatOrigin.class);
-        verify(agentService).execute(eq(AGENT_ID), eq(MESSAGE), eq(CONVERSATION_ID), origin.capture());
+        verify(agentService)
+                .execute(eq(AGENT_ID), eq(MESSAGE), eq(CONVERSATION_ID), origin.capture());
         assertEquals(MESSAGE_ID, origin.getValue().originMessageId());
         verifySingleUserSave();
         verify(agentService, never()).execute(AGENT_ID, MESSAGE, CONVERSATION_ID);
