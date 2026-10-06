@@ -48,6 +48,31 @@ final class PresalesReleaseAuthorization {
             queries.getObject().evidence(scope, graph, id.asText());
     }
 
+    java.util.List<PresalesReleaseAuthority.Reference> currentSources(
+            String scope, ObjectNode project, ObjectNode solution) {
+        var refs = new java.util.ArrayList<PresalesReleaseAuthority.Reference>();
+        var baseline = solutions.releaseBaseline(project, solution);
+        for (var ref : baseline.path("references"))
+            collectEvidence(scope, ref.path("graphId").asText(), ref.path("evidenceIds"), refs);
+        for (var id : solution.path("fitGapRefs")) {
+            var fit = find(project, "fitGaps", id.asText());
+            if (!"UNKNOWN".equals(fit.path("status").asText()))
+                collectEvidence(scope, fit.path("graphId").asText(), fit.path("evidenceIds"), refs);
+        }
+        return refs;
+    }
+
+    private void collectEvidence(
+            String scope,
+            String graph,
+            com.fasterxml.jackson.databind.JsonNode ids,
+            java.util.List<PresalesReleaseAuthority.Reference> refs) {
+        for (var id : ids) {
+            var source = queries.getObject().evidence(scope, graph, id.asText());
+            refs.add(new PresalesReleaseAuthority.Reference(source.sourceRef(), graph));
+        }
+    }
+
     String reviewId(String scope, ObjectNode p, ObjectNode solution) {
         requireEnabled();
         var baseline = solutions.releaseBaseline(p, solution);

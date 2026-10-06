@@ -487,3 +487,15 @@ Service同时知道应用命令与renderer/文件清单/存储/digest规则，�
 保持原渲染→存储→saveItem→重绑定→snapshot时序、字段顺序、presentation的textual/blank分支和全部旧读取算法。Service793→711行，Reader89→Artifacts179行，合计增加8行，是职责封装的取舍。同步render仍在command事务中，后续必须设计输入快照、授权/版本重验、制品清理协议，不能称长事务已解决。
 
 原实现101项、追加14次刻画后115项通过；提取后发现私有反射测试入口失效，保留全部断言并迁至公共draftArtifact路径，最终88类982项（981通过/1既有PPT环境skip）及dev通过。独立设计/实现/测试审核回读无新增阻断；技术证据不替代维护人、真实Office/方言及正式AC。见evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md。源码回退无数据动作，累计新写入迁移不得盲目回滚。
+
+### ADR-AQ-048：同步发布用持久化输入与两段短事务接纳（Proposed）
+
+CREATE_RELEASE 保持原同步成功响应，内部改为 READ_COMMITTED / REQUIRES_NEW 准备事务、NOT_SUPPORTED 转换区间及独立接纳事务。准备只提交 V221 render_task，不增加项目版本；固定项目/方案/请求/来源实际摘要/模板及实际 PPT 字节。转换、哈希与 Base64 编码在事务外；接纳锁定项目、主体和全部当前/历史来源依赖，重新检查角色、员工、语义事实、评审、项目版本和 PPT 后，一次提交制品、聚合、修订、回执及任务终态。普通命令继续 REQUIRED 加入调用方事务。
+
+所有命令在项目锁后使用相同 actor/workspace 围栏协调 operationId；创建新项目先取得围栏。现有 operation receipt 是唯一最终响应权威，新任务表不复制响应。普通调用方可能使用 REPEATABLE_READ，故锁后主体、成员、工作区和回执使用显式 FOR UPDATE 当前读取，不能只清 MyBatis 缓存。权限工具保持宿主公共接口，Controller 不增加数据访问。历史 fit 按其真实 evidenceId 解析来源，历史标量来源继承冻结材料 graph，材料、graph、KB/raw、员工和用户围栏覆盖实际重读路径。
+
+失败可用同键重试；仍在十分钟租约内的任务返回 RENDER_IN_PROGRESS。失败或到期任务通过旧 attemptId CAS 取得新 attempt，保留原输入；输入变化返回 RENDER_INPUT_CHANGED，不能静默替换。晚到 attempt 不能提交、清理或覆盖新 attempt；响应丢失按原最终回执和已保存字节回放。进程退出不自动发布，客户端以原 operationId 重试恢复；HTTP 断开也不等于取消。长于租约的转换会被拒收，当前没有后台排队、续租或自动重启调度。
+
+拒绝仅抽取 helper 后继续持有事务、使用进程 map 作为幂等权威、复用必须绑定 model/employee 且会增项目版本的 AI task、复制另一套最终回执，以及为了新流程修改历史 Flyway。代价是新的持久化任务、短事务期间共享主体/工作区锁和冻结输入的存储量；本片不宣称完整 Service 拆分或 V2 对象迁移完成。
+
+迁移仅新增 h2/mysql/kingbase V221。上线必须停止旧 writer；已存在活动任务时不能切回忽略任务占用的旧二进制。回退需先停止新任务、处理活动 attempt，并维持 operationId 占用协议；不自动删任务或缩表。工程证据见 evidence/2026-10-06/AQ05_RENDER_TRANSACTION_ACCEPTANCE.md；技术审阅、真实数据库验证和正式维护人/业务签收分别记录。

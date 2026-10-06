@@ -14,7 +14,6 @@ import vip.mate.presales.repository.PresalesProjectRepository;
 import vip.mate.semantic.config.SemanticProperties;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
-import vip.mate.workspace.core.service.ProjectAuthorityFence;
 
 class PresalesEmployeeResultProjectionTest {
     private final ObjectMapper json = new ObjectMapper();
@@ -212,8 +211,10 @@ class PresalesEmployeeResultProjectionTest {
                         mock(ObjectProvider.class),
                         mock(PresalesArtifactRenderer.class),
                         mock(ObjectProvider.class),
-                        mock(ProjectAuthorityFence.class),
-                        mock(PresalesSourceAuthorization.class));
+                        PresalesCommandTestSupport.fence(),
+                        mock(PresalesSourceAuthorization.class),
+                        mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                        mock(org.springframework.transaction.PlatformTransactionManager.class));
         var method =
                 PresalesService.class.getDeclaredMethod(
                         "projectEmployeeResult", ObjectNode.class, ObjectNode.class, String.class);

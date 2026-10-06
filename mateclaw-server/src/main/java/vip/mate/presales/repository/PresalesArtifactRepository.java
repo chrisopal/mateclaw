@@ -38,6 +38,16 @@ public class PresalesArtifactRepository {
                 releaseId);
     }
 
+    public List<StoredArtifact> findForUpdate(String projectId, String releaseId, String filename) {
+        return jdbc.query(
+                "SELECT digest,content_base64 FROM mate_presales_artifact"
+                        + " WHERE project_id=? AND release_id=? AND filename=? FOR UPDATE",
+                (row, n) -> new StoredArtifact(row.getString(1), row.getString(2)),
+                projectId,
+                releaseId,
+                filename);
+    }
+
     public List<StoredArtifact> find(String projectId, String releaseId, String filename) {
         return jdbc.query(
                 "SELECT digest,content_base64 FROM mate_presales_artifact WHERE project_id=? AND release_id=? AND filename=?",

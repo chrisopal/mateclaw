@@ -113,8 +113,24 @@ public class PresalesSourceAuthorization {
     }
 
     private void authorizeFrozenFitEvidence(String scope, ObjectNode project, JsonNode snapshot) {
+        for (var reference : frozenFitSources(scope, snapshot))
+            authorizeHistoricalSource(scope, project, reference.sourceId());
+    }
+
+    java.util.List<PresalesReleaseAuthority.Reference> historicalFitSources(
+            String scope, ObjectNode project) {
+        var references = new java.util.ArrayList<PresalesReleaseAuthority.Reference>();
+        for (var release : project.path("releases"))
+            if (release.path("handoffSnapshot").isObject())
+                references.addAll(frozenFitSources(scope, release.path("handoffSnapshot")));
+        return references;
+    }
+
+    private java.util.List<PresalesReleaseAuthority.Reference> frozenFitSources(
+            String scope, JsonNode snapshot) {
+        var references = new java.util.ArrayList<PresalesReleaseAuthority.Reference>();
         // Missing legacy fit collections are not reconstructed. Artifact reads retain live gates.
-        if (snapshot.path("fitGaps").isMissingNode()) return;
+        if (snapshot.path("fitGaps").isMissingNode()) return references;
         if (!snapshot.path("fitGaps").isArray())
             throw new Denied(403, "SOURCE_UNAVAILABLE", "Frozen fit provenance is unavailable");
         for (var fit : snapshot.path("fitGaps")) {
@@ -143,9 +159,10 @@ public class PresalesSourceAuthorization {
                                                         404,
                                                         "NOT_FOUND",
                                                         "Frozen evidence is unavailable"));
-                authorizeHistoricalSource(scope, project, source);
+                references.add(new PresalesReleaseAuthority.Reference(source, graph));
             }
         }
+        return references;
     }
 
     private static boolean supportedFitEvidence(JsonNode fit) {
@@ -256,6 +273,20 @@ public class PresalesSourceAuthorization {
         if (!employeeId.isBlank() && !sourceAccess.canEmployeeReadKb(scope, employeeId, kbId))
             throw new Denied(
                     403, "SOURCE_UNAVAILABLE", "Project employee source access was revoked");
+    }
+
+    WikiSourceReadService.CurrentSource candidateSource(
+            String scope, ObjectNode project, String sourceId, String graph) {
+        authorizeHistoricalSource(scope, project, sourceId);
+        if (!graph.isBlank() && governance.isWithdrawn(graph, sourceId))
+            throw new Denied(403, "SOURCE_UNAVAILABLE", "Candidate source withdrawn");
+        return sources.readInWorkspace(scope, sourceId)
+                .orElseThrow(
+                        () ->
+                                new Denied(
+                                        403,
+                                        "SOURCE_UNAVAILABLE",
+                                        "Referenced source access revoked"));
     }
 
     void currentSource(String scope, String sourceId, String digest, boolean checkDigest) {

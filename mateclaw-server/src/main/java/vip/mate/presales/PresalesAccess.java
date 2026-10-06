@@ -36,6 +36,30 @@ public class PresalesAccess {
         requireRole(workspace, userId, user, role);
     }
 
+    /**
+     * Current reads after the authority fence, including under an outer repeatable-read
+     * transaction.
+     */
+    public void requireLockedActor(String scope, String actorId, String role) {
+        long workspace = Long.parseLong(scope);
+        long actor = Long.parseLong(actorId);
+        UserEntity user;
+        try {
+            user = actors.requireActiveIdForUpdate(actor);
+        } catch (ActorResolver.Denied denied) {
+            throw denied(denied);
+        }
+        if (workspaces.findActiveWorkspaceForUpdate(workspace) == null)
+            throw new SemanticApiException(404, "NOT_FOUND", "Workspace not found");
+        if (!"admin".equalsIgnoreCase(user.getRole())) {
+            var member = workspaces.findActiveMembershipForUpdate(workspace, actor);
+            if (member == null
+                    || WorkspaceAccessService.roleLevel(member.getRole())
+                            < WorkspaceAccessService.roleLevel(role))
+                throw new SemanticApiException(403, "FORBIDDEN", "Workspace role requires " + role);
+        }
+    }
+
     public String require(String scope, String role) {
         UserEntity user;
         try {

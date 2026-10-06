@@ -29,6 +29,10 @@ public class ActorResolver {
         return active(auth.findById(actorId));
     }
 
+    public UserEntity requireActiveIdForUpdate(long actorId) {
+        return active(auth.findByIdForUpdate(actorId));
+    }
+
     private static UserEntity active(UserEntity user) {
         if (user == null
                 || !Boolean.TRUE.equals(user.getEnabled())

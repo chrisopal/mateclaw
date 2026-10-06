@@ -274,7 +274,7 @@ public class PresalesProjectRepository {
     public Optional<OperationReceipt> findReceipt(String scope, String actor, String operation) {
         return jdbc
                 .query(
-                        "SELECT request_hash,response_json FROM mate_presales_operation WHERE workspace_id=? AND actor_id=? AND operation_id=?",
+                        "SELECT request_hash,response_json FROM mate_presales_operation WHERE workspace_id=? AND actor_id=? AND operation_id=? FOR UPDATE",
                         (row, n) -> new OperationReceipt(row.getString(1), row.getString(2)),
                         scope,
                         actor,

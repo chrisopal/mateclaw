@@ -31,6 +31,24 @@ public class WorkspaceAccessService {
                         .eq(WorkspaceMemberEntity::getDeleted, 0));
     }
 
+    public WorkspaceEntity findActiveWorkspaceForUpdate(long workspaceId) {
+        var row =
+                workspaces.selectOne(
+                        new LambdaQueryWrapper<WorkspaceEntity>()
+                                .eq(WorkspaceEntity::getId, workspaceId)
+                                .last("FOR UPDATE"));
+        return row == null || (row.getDeleted() != null && row.getDeleted() != 0) ? null : row;
+    }
+
+    public WorkspaceMemberEntity findActiveMembershipForUpdate(long workspaceId, long userId) {
+        return members.selectOne(
+                new LambdaQueryWrapper<WorkspaceMemberEntity>()
+                        .eq(WorkspaceMemberEntity::getWorkspaceId, workspaceId)
+                        .eq(WorkspaceMemberEntity::getUserId, userId)
+                        .eq(WorkspaceMemberEntity::getDeleted, 0)
+                        .last("FOR UPDATE"));
+    }
+
     public boolean hasMinimumRole(long workspaceId, long userId, String role) {
         var membership = findActiveMembership(workspaceId, userId);
         return membership != null && roleLevel(membership.getRole()) >= roleLevel(role);

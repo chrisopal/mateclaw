@@ -33,9 +33,45 @@ public class ProjectAuthorityFence {
             String employeeId,
             String modelConfigId,
             Collection<Source> sources) {
+        requireTransaction();
+        long workspace = id(workspaceId);
+        if (!lockActors(workspace, actorIds)) return false;
+        if (!lockEmployee(workspace, employeeId)) return false;
+        if (!lock("SELECT id FROM mate_model_config WHERE id=? FOR UPDATE", id(modelConfigId)))
+            return false;
+        return lockSources(workspace, java.util.List.of(), java.util.List.of(), sources);
+    }
+
+    /**
+     * Holds authority for a human command through its acceptance transaction. An unbound employee
+     * is legitimate; model authority is not part of a human command. The caller must revalidate
+     * current roles, bindings and source access after this returns, before writing any result. Use
+     * READ_COMMITTED so revalidation observes authority committed before these locks; this helper
+     * does not change the caller's transaction isolation or authorize missing memberships.
+     */
+    public boolean lockForCommand(
+            String workspaceId,
+            Collection<String> actorIds,
+            String employeeId,
+            Collection<String> knowledgeBaseIds,
+            Collection<String> graphIds,
+            Collection<Source> sources) {
+        requireTransaction();
+        if (actorIds.isEmpty())
+            throw new IllegalArgumentException("Command authority requires an actor");
+        long workspace = id(workspaceId);
+        if (!lockActors(workspace, actorIds)) return false;
+        if (employeeId != null && !employeeId.isBlank() && !lockEmployee(workspace, employeeId))
+            return false;
+        return lockSources(workspace, knowledgeBaseIds, graphIds, sources);
+    }
+
+    private static void requireTransaction() {
         if (!TransactionSynchronizationManager.isActualTransactionActive())
             throw new IllegalStateException("Result authority requires a transaction");
-        long workspace = id(workspaceId);
+    }
+
+    private boolean lockActors(long workspace, Collection<String> actorIds) {
         var actors = new TreeSet<Long>();
         for (String actor : actorIds) actors.add(id(actor));
         for (long actor : actors)
@@ -47,16 +83,30 @@ public class ProjectAuthorityFence {
                             + " AND deleted=0 FOR UPDATE",
                     workspace,
                     actor);
-        if (!lock(
+        return true;
+    }
+
+    private boolean lockEmployee(long workspace, String employeeId) {
+        return lock(
                 "SELECT id FROM mate_agent WHERE id=? AND workspace_id=? FOR UPDATE",
                 id(employeeId),
-                workspace)) return false;
-        if (!lock("SELECT id FROM mate_model_config WHERE id=? FOR UPDATE", id(modelConfigId)))
-            return false;
+                workspace);
+    }
 
+    private boolean lockSources(
+            long workspace,
+            Collection<String> knowledgeBaseIds,
+            Collection<String> graphIds,
+            Collection<Source> sources) {
         var knowledgeBases = new TreeSet<Long>();
+        for (String kb : knowledgeBaseIds) knowledgeBases.add(id(kb));
         var rawMaterials = new TreeMap<Long, Long>();
         Set<String> graphs = new TreeSet<>();
+        for (String graph : graphIds) {
+            if (graph == null || graph.isBlank())
+                throw new IllegalArgumentException("Invalid command graph identifier");
+            graphs.add(graph);
+        }
         for (Source source : sources) {
             long kb = id(source.kbId());
             knowledgeBases.add(kb);

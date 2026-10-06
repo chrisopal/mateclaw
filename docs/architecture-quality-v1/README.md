@@ -109,3 +109,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 委派事件测试夹具修复见 [工程记录](evidence/2026-10-06/AQ01_DELEGATION_EVENT_FIXTURE_ACCEPTANCE.md)：推送门禁暴露Mockito未注入超时配置造成0秒取消，补真实成功断言及显式测试预算，RED后55/55。保留严格校验和顺序断言；生产事件回调顺序风险独立登记，不能据此宣称并发治理全部完成。
 
 制品物化与冻结交付边界见 [AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md](evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md)：既有Reader扩展为包内Artifacts，Service793→711行，授权/事务/回放/状态保留；公共接口及旧读算法AST相同。原实现追加刻画115/115，最终售前/投标/架构88类982项（981通过/1既有PPT环境skip）。反射测试入口失败后迁至公共draftArtifact，全部旧断言保留。长事务、真实Office/方言、其余结构与正式AC继续开放，完整commit/push及远端CI按实际精确树记录。
+
+发布渲染短事务见 [AQ05_RENDER_TRANSACTION_ACCEPTANCE.md](evidence/2026-10-06/AQ05_RENDER_TRANSACTION_ACCEPTANCE.md)：持久化固定输入后在事务外转换，独立短事务重验并原子接纳；同键跨命令占用、租约/旧批次围栏、PPT/当前及历史来源固定、MySQL RR 当前读取均有针对性证据。隔离 MySQL 8 完整迁移至 V221、runtime43及发布生命周期14项通过；完整提交/推送以确切 tree hook 报告为准。Kingbase、生产切换、性能与正式 AC 未因此完成。

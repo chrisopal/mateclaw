@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.List;
 import vip.mate.presales.repository.PresalesArtifactRepository;
 import vip.mate.presales.repository.PresalesArtifactRepository.StoredArtifact;
 
@@ -20,39 +21,67 @@ final class PresalesArtifacts {
         this.renderer = renderer;
     }
 
-    void materializeCandidate(
-            String projectId, String releaseId, ObjectNode solution, ObjectNode candidate) {
+    /** Serializable input captures actual PPT bytes, including legacy rows without a pin. */
+    ObjectNode capture(String projectId, ObjectNode solution) {
+        ObjectNode input = solution.objectNode();
+        input.put("templateVersion", PresalesArtifactRenderer.TEMPLATE_VERSION);
+        input.set("solution", solution.deepCopy());
+        String presentationId = solution.path("presentation").path("artifactId").asText();
+        if (!presentationId.isBlank()) {
+            var rows = repository.findForUpdate(projectId, presentationId, "solution.pptx");
+            if (rows.size() != 1)
+                throw new PresalesRejected(404, "NOT_FOUND", "Presentation artifact not found");
+            byte[] bytes =
+                    verifiedBytes(
+                            rows.getFirst(),
+                            solution.path("presentation").path("sha256").asText(),
+                            true,
+                            "Presentation artifact integrity failure");
+            input.put("presentationBytes", Base64.getEncoder().encodeToString(bytes));
+            input.put("presentationDigest", PresalesArtifactRenderer.digest(bytes));
+        }
+        return input;
+    }
+
+    record RenderedFile(String filename, String digest, int size, String contentBase64) {}
+
+    /** No repository calls: conversion, hashing and encoding all happen outside transactions. */
+    List<RenderedFile> render(ObjectNode input) {
+        if (!PresalesArtifactRenderer.TEMPLATE_VERSION.equals(
+                input.path("templateVersion").asText()))
+            throw new PresalesRejected(409, "RENDER_TEMPLATE_CHANGED", "Render template changed");
+        ObjectNode solution = (ObjectNode) input.path("solution");
         var document = document(solution, solution.path("id").asText(), false);
-        // Textual presence controls template selection; blank IDs do not select stored bytes.
-        // These are distinct historical branches, including an explicitly empty textual ID.
         var files =
                 new LinkedHashMap<>(
                         solution.path("presentation").path("artifactId").isTextual()
                                 ? renderer.renderWithoutSlides(document)
                                 : renderer.render(document));
-        String presentationArtifact = solution.path("presentation").path("artifactId").asText();
-        if (!presentationArtifact.isBlank()) {
+        if (input.has("presentationBytes"))
             files.put(
                     "solution.pptx",
-                    presentation(
-                            projectId,
-                            presentationArtifact,
-                            "solution.pptx",
-                            solution.path("presentation").path("sha256").asText()));
-        }
+                    Base64.getDecoder().decode(input.path("presentationBytes").asText()));
+        var result = new ArrayList<RenderedFile>();
+        for (var entry : files.entrySet())
+            result.add(
+                    new RenderedFile(
+                            entry.getKey(),
+                            PresalesArtifactRenderer.digest(entry.getValue()),
+                            entry.getValue().length,
+                            Base64.getEncoder().encodeToString(entry.getValue())));
+        return List.copyOf(result);
+    }
+
+    void storeCandidate(
+            String projectId, String releaseId, List<RenderedFile> files, ObjectNode candidate) {
         var manifest = candidate.putArray("files");
-        for (var entry : files.entrySet()) {
-            String digest = PresalesArtifactRenderer.digest(entry.getValue());
+        for (var file : files) {
             repository.insert(
-                    projectId,
-                    releaseId,
-                    entry.getKey(),
-                    digest,
-                    Base64.getEncoder().encodeToString(entry.getValue()));
+                    projectId, releaseId, file.filename(), file.digest(), file.contentBase64());
             manifest.addObject()
-                    .put("filename", entry.getKey())
-                    .put("sha256", digest)
-                    .put("size", entry.getValue().length);
+                    .put("filename", file.filename())
+                    .put("sha256", file.digest())
+                    .put("size", file.size());
         }
     }
 

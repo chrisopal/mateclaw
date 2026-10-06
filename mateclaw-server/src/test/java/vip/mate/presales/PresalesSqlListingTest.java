@@ -133,8 +133,11 @@ class PresalesSqlListingTest {
                         null,
                         null,
                         null,
-                        null,
-                        mock(PresalesSourceAuthorization.class));
+                        PresalesCommandTestSupport.fence(),
+                        mock(PresalesSourceAuthorization.class),
+                        mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                                jdbc.getDataSource()));
         queryService =
                 new PresalesProjectQueryService(new PresalesProjectRepository(jdbc), json, access);
         for (int i = 0; i < 120; i++) {

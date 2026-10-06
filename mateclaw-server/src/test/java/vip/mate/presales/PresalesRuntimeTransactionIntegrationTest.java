@@ -58,6 +58,7 @@ import vip.mate.workspace.core.service.ProjectSourceAccess;
     PresalesRuntimeTransactionIntegrationTest.Boundaries.class,
     PresalesAccess.class,
     PresalesService.class,
+    vip.mate.presales.repository.PresalesRenderTaskRepository.class,
     PresalesProjectQueryService.class,
     vip.mate.presales.repository.PresalesProjectRepository.class,
     vip.mate.presales.repository.PresalesArtifactRepository.class,
@@ -135,6 +136,18 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         }
 
         @Override
+        public boolean lockForCommand(
+                String workspaceId,
+                Collection<String> actorIds,
+                String employeeId,
+                Collection<String> kbs,
+                Collection<String> graphs,
+                Collection<Source> sources) {
+            if (entered != null) entered.countDown();
+            return super.lockForCommand(workspaceId, actorIds, employeeId, kbs, graphs, sources);
+        }
+
+        @Override
         public boolean lockForResult(
                 String workspaceId,
                 Collection<String> actorIds,
@@ -178,6 +191,151 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     private String actor, actorName, agentId;
     private Long modelId;
     private ObjectNode project, task, snapshot;
+
+    @ParameterizedTest
+    @EnumSource(Revocation.class)
+    void ordinaryCommandRejectsRevocationAfterOuterRepeatableReadSnapshot(Revocation revocation)
+            throws Exception {
+        boolean h2 = isH2();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(
+                org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        service.get(workspace, project.path("id").asText());
+                        try {
+                            executor.submit(
+                                            () -> {
+                                                if (revocation == Revocation.WORKSPACE)
+                                                    jdbc.update(
+                                                            "UPDATE mate_workspace SET deleted=1 WHERE id=?",
+                                                            workspace);
+                                                else
+                                                    jdbc.update(
+                                                            "UPDATE mate_workspace_member SET role='viewer' WHERE workspace_id=? AND user_id=?",
+                                                            workspace,
+                                                            actor);
+                                            })
+                                    .get(10, TimeUnit.SECONDS);
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        org.junit.jupiter.api.function.Executable write =
+                                () ->
+                                        service.command(
+                                                workspace,
+                                                project.path("id").asText(),
+                                                new PresalesDtos.Command(
+                                                        project.path("version").longValue(),
+                                                        "rr-revoked",
+                                                        "UPDATE_PROJECT",
+                                                        json.createObjectNode()
+                                                                .put("name", "must-not-write")));
+                        if (h2) assertSerializationRejected(write);
+                        else {
+                            var error = assertThrows(SemanticApiException.class, write);
+                            assertEquals(
+                                    revocation == Revocation.WORKSPACE ? 404 : 403, error.status());
+                        }
+                        status.setRollbackOnly();
+                    });
+        }
+        assertEquals(
+                0,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE operation_id='rr-revoked'",
+                        Integer.class));
+        assertEquals(
+                project.path("name").asText(),
+                jdbc.queryForObject(
+                        "SELECT name FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+    }
+
+    @Test
+    void ordinaryReplayReadsReceiptCommittedAfterOuterRepeatableReadSnapshot() throws Exception {
+        boolean h2 = isH2();
+        var saved = new AtomicReference<ObjectNode>();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(
+                org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        var command =
+                new PresalesDtos.Command(
+                        project.path("version").longValue(),
+                        "rr-replay",
+                        "UPDATE_PROJECT",
+                        json.createObjectNode().put("name", "one-committed-write"));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        service.get(workspace, project.path("id").asText());
+                        ObjectNode committed;
+                        try {
+                            committed =
+                                    executor.submit(
+                                                    () -> {
+                                                        authenticate();
+                                                        try {
+                                                            return service.command(
+                                                                    workspace,
+                                                                    project.path("id").asText(),
+                                                                    command);
+                                                        } finally {
+                                                            SecurityContextHolder.clearContext();
+                                                        }
+                                                    })
+                                            .get(10, TimeUnit.SECONDS);
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        saved.set(committed);
+                        if (h2)
+                            assertSerializationRejected(
+                                    () ->
+                                            service.command(
+                                                    workspace,
+                                                    project.path("id").asText(),
+                                                    command));
+                        else
+                            assertEquals(
+                                    committed,
+                                    service.command(
+                                            workspace, project.path("id").asText(), command));
+                        status.setRollbackOnly();
+                    });
+        }
+        // H2 rejects the stale transaction itself; retry after rollback must still replay exactly.
+        assertEquals(saved.get(), service.command(workspace, project.path("id").asText(), command));
+        assertEquals(
+                1,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE operation_id='rr-replay'",
+                        Integer.class));
+        assertEquals(
+                project.path("version").longValue() + 1,
+                jdbc.queryForObject(
+                        "SELECT version FROM mate_presales_project WHERE id=?",
+                        Long.class,
+                        project.path("id").asText()));
+    }
+
+    private boolean isH2() throws java.sql.SQLException {
+        try (var connection = dataSource.getConnection()) {
+            return "H2".equals(connection.getMetaData().getDatabaseProductName());
+        }
+    }
+
+    private static void assertSerializationRejected(
+            org.junit.jupiter.api.function.Executable operation) {
+        var error =
+                assertThrows(org.springframework.dao.CannotAcquireLockException.class, operation);
+        Throwable cause = error.getCause();
+        while (cause != null && !(cause instanceof java.sql.SQLException)) cause = cause.getCause();
+        var sql = assertInstanceOf(java.sql.SQLException.class, cause);
+        assertEquals("40001", sql.getSQLState());
+    }
 
     @BeforeEach
     void prepareRuntime() {

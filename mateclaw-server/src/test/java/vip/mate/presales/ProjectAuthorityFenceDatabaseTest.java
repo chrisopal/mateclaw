@@ -170,6 +170,7 @@ class ProjectAuthorityFenceDatabaseTest {
         var auth = mock(AuthService.class);
         when(auth.findByUsername("fence-actor")).thenReturn(user);
         when(auth.findById(9L)).thenReturn(user);
+        when(auth.findByIdForUpdate(9L)).thenReturn(user);
         var principals = org.mockito.Mockito.spy(new ActorResolver(auth));
         org.mockito.Mockito.doReturn(user).when(principals).requireCurrent();
         access =
@@ -252,6 +253,19 @@ class ProjectAuthorityFenceDatabaseTest {
                         org.mockito.ArgumentMatchers.any(),
                         org.mockito.ArgumentMatchers.any(),
                         org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.doAnswer(
+                        call -> {
+                            initialAccessCompleted.countDown();
+                            return call.callRealMethod();
+                        })
+                .when(observedFence)
+                .lockForCommand(
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any());
         var wiki = mock(vip.mate.wiki.service.WikiKnowledgeBaseService.class);
         return new PresalesService(
                 new vip.mate.presales.repository.PresalesArtifactRepository(jdbc),
@@ -274,7 +288,10 @@ class ProjectAuthorityFenceDatabaseTest {
                                 new vip.mate.wiki.repository.WikiSourceReadRepository(jdbc)),
                         new vip.mate.semantic.source.SourceGovernanceReadService(
                                 new vip.mate.semantic.source.repository
-                                        .SourceGovernanceReadRepository(jdbc))));
+                                        .SourceGovernanceReadRepository(jdbc))),
+                mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                        jdbc.getDataSource()));
     }
 
     @ParameterizedTest

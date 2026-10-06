@@ -29,7 +29,6 @@ import vip.mate.semantic.statement.StatementApplicationService;
 import vip.mate.semantic.web.SemanticApiException;
 import vip.mate.semantic.web.StatementDtos.StatementView;
 import vip.mate.wiki.service.WikiKnowledgeBaseService;
-import vip.mate.workspace.core.service.ProjectAuthorityFence;
 
 /** Characterizes candidate assembly through the service; HTTP authority is covered separately. */
 class PresalesReleaseSnapshotContractTest {
@@ -621,15 +620,16 @@ class PresalesReleaseSnapshotContractTest {
                 .put("artifactId", "stored-presentation")
                 .put("sha256", digest);
         when(renderer.renderWithoutSlides(any())).thenReturn(Map.of("solution.md", new byte[] {8}));
-        when(artifacts.find(p.path("id").asText(), "stored-presentation", "solution.pptx"))
+        when(artifacts.findForUpdate(p.path("id").asText(), "stored-presentation", "solution.pptx"))
                 .thenReturn(
                         List.of(
                                 new PresalesArtifactRepository.StoredArtifact(
                                         digest, Base64.getEncoder().encodeToString(ppt))));
         var release = create(p);
         var order = inOrder(renderer, artifacts);
+        order.verify(artifacts)
+                .findForUpdate(p.path("id").asText(), "stored-presentation", "solution.pptx");
         order.verify(renderer).renderWithoutSlides(any());
-        order.verify(artifacts).find(p.path("id").asText(), "stored-presentation", "solution.pptx");
         order.verify(artifacts)
                 .insert(
                         eq(p.path("id").asText()),
@@ -665,7 +665,7 @@ class PresalesReleaseSnapshotContractTest {
                 .put("sha256", "original-digest");
         var before = p.deepCopy();
         when(renderer.renderWithoutSlides(any())).thenReturn(Map.of("solution.md", new byte[] {8}));
-        when(artifacts.find(p.path("id").asText(), "stored-presentation", "solution.pptx"))
+        when(artifacts.findForUpdate(p.path("id").asText(), "stored-presentation", "solution.pptx"))
                 .thenReturn(
                         List.of(new PresalesArtifactRepository.StoredArtifact("wrong", "AA==")));
         var error = assertThrows(SemanticApiException.class, () -> create(p));
@@ -832,10 +832,26 @@ class PresalesReleaseSnapshotContractTest {
                         String.class,
                         ObjectNode.class,
                         ObjectNode.class,
-                        String.class);
+                        String.class,
+                        List.class);
         method.setAccessible(true);
         try {
-            method.invoke(service, "9007199254740993002", p, release, "writer");
+            var gate =
+                    PresalesService.class.getDeclaredMethod(
+                            "releaseGate", String.class, ObjectNode.class, ObjectNode.class);
+            gate.setAccessible(true);
+            var solution = (ObjectNode) p.path("solutions").get(0);
+            release.put(
+                    "reviewId", (String) gate.invoke(service, "9007199254740993002", p, solution));
+            var boundary = new PresalesArtifacts(artifacts, renderer);
+            List<PresalesArtifacts.RenderedFile> files;
+            try {
+                files = boundary.render(boundary.capture(p.path("id").asText(), solution));
+            } catch (PresalesRejected rejection) {
+                throw new SemanticApiException(
+                        rejection.status(), rejection.code(), rejection.getMessage());
+            }
+            method.invoke(service, "9007199254740993002", p, release, "writer", files);
             return release;
         } catch (InvocationTargetException error) {
             if (error.getCause() instanceof RuntimeException cause) throw cause;
@@ -876,7 +892,9 @@ class PresalesReleaseSnapshotContractTest {
                 queries,
                 renderer,
                 mock(ObjectProvider.class),
-                mock(ProjectAuthorityFence.class),
-                sourceAuthorization);
+                PresalesCommandTestSupport.fence(),
+                sourceAuthorization,
+                mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                mock(org.springframework.transaction.PlatformTransactionManager.class));
     }
 }

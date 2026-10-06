@@ -114,7 +114,10 @@ class PresalesAtomicResultAcceptanceTest {
                                                 jdbc)),
                                 new vip.mate.semantic.source.SourceGovernanceReadService(
                                         new vip.mate.semantic.source.repository
-                                                .SourceGovernanceReadRepository(jdbc))));
+                                                .SourceGovernanceReadRepository(jdbc))),
+                        mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                                jdbc.getDataSource()));
         var candidate =
                 (ObjectNode)
                         json.readTree(
@@ -246,7 +249,10 @@ class PresalesAtomicResultAcceptanceTest {
                                                 jdbc)),
                                 new vip.mate.semantic.source.SourceGovernanceReadService(
                                         new vip.mate.semantic.source.repository
-                                                .SourceGovernanceReadRepository(jdbc))));
+                                                .SourceGovernanceReadRepository(jdbc))),
+                        mock(vip.mate.presales.repository.PresalesRenderTaskRepository.class),
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                                jdbc.getDataSource()));
         var candidate =
                 (ObjectNode)
                         json.readTree(

@@ -10,11 +10,14 @@ import java.util.*;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import vip.mate.presales.repository.PresalesArtifactRepository;
 import vip.mate.presales.repository.PresalesProjectRepository;
+import vip.mate.presales.repository.PresalesRenderTaskRepository;
 import vip.mate.semantic.config.SemanticProperties;
 import vip.mate.semantic.graph.GraphApplicationService;
 import vip.mate.semantic.statement.StatementApplicationService;
@@ -26,6 +29,11 @@ import vip.mate.workspace.core.service.ProjectAuthorityFence;
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesService {
     private final PresalesArtifacts artifacts;
+    private final PresalesRenderTaskRepository renderTasks;
+    private final ProjectAuthorityFence authorityFence;
+    private final PresalesReleaseAuthority releaseAuthority;
+    private final PresalesRenderExecution renderExecution;
+    private final TransactionTemplate commandTransaction;
     private final PresalesProjectRepository projects;
     private final ObjectMapper json;
     private final PresalesSolutionPolicy solutionPolicy;
@@ -54,8 +62,13 @@ public class PresalesService {
             PresalesArtifactRenderer renderer,
             ObjectProvider<PresalesEmployeeRuntime> employees,
             ProjectAuthorityFence authorityFence,
-            PresalesSourceAuthorization sourceAuthorization) {
+            PresalesSourceAuthorization sourceAuthorization,
+            PresalesRenderTaskRepository renderTasks,
+            PlatformTransactionManager transactions) {
         this.sourceAuthorization = sourceAuthorization;
+        this.renderTasks = renderTasks;
+        this.authorityFence = authorityFence;
+        this.commandTransaction = new TransactionTemplate(transactions);
         this.employees = employees;
         this.taskAcceptance = new PresalesTaskAcceptance(employees, authorityFence);
         this.artifacts = new PresalesArtifacts(artifacts, renderer);
@@ -65,6 +78,15 @@ public class PresalesService {
         this.releaseAuthorization =
                 new PresalesReleaseAuthorization(
                         semantic, graphs, statements, queries, sourceAuthorization, solutionPolicy);
+        this.releaseAuthority =
+                new PresalesReleaseAuthority(
+                        authorityFence,
+                        sourceAuthorization,
+                        releaseAuthorization,
+                        access,
+                        employees);
+        this.renderExecution =
+                new PresalesRenderExecution(renderTasks, this.artifacts, json, transactions);
         this.baselineApproval =
                 new PresalesBaselineApproval(
                         json, graphs, statements, queries, sourceAuthorization);
@@ -106,8 +128,10 @@ public class PresalesService {
             throw bad("expectedVersion must be 0");
         operation(r.operationId());
         String encodedRequest = encode(r);
+        lockOperationActor(scope, actor, "member");
         var replay = replay(scope, actor, r.operationId(), encodedRequest);
         if (replay != null) return replay;
+        rejectRenderOperation(scope, actor, r.operationId());
         text(r.name(), "name", 300);
         text(r.customer(), "customer", 300);
         ObjectNode p = json.createObjectNode();
@@ -151,9 +175,22 @@ public class PresalesService {
         return p;
     }
 
-    @Transactional
     public ObjectNode command(String scope, String projectId, Command r) {
-        return applyCommand(scope, projectId, r, false);
+        if (r != null && r.parsedAction().kind() == CommandKind.CREATE_RELEASE) {
+            try {
+                return renderExecution.execute(
+                        scope,
+                        projectId,
+                        r,
+                        () -> prepareRelease(scope, projectId, r),
+                        (prepared, files) -> acceptRelease(scope, projectId, r, prepared, files));
+            } catch (PresalesRejected rejection) {
+                throw legacyRejection(rejection);
+            } catch (PresalesSourceAuthorization.Denied denied) {
+                throw new SemanticApiException(denied.status(), denied.code(), denied.getMessage());
+            }
+        }
+        return commandTransaction.execute(status -> applyCommand(scope, projectId, r, false));
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
@@ -163,31 +200,52 @@ public class PresalesService {
         return applyCommand(scope, projectId, r, true);
     }
 
-    private ObjectNode applyCommand(
+    private record PreparedCommand(
+            String actor,
+            String encodedRequest,
+            ObjectNode project,
+            ObjectNode value,
+            long nextVersion,
+            ObjectNode replay) {}
+
+    private PreparedCommand prepareCommand(
             String scope, String projectId, Command r, boolean employeeResult) {
         if (r == null) throw bad("Command required");
         var parsedAction = r.parsedAction();
-        String action = parsedAction.raw();
-        String actor =
-                access.require(
-                        scope,
-                        Set.of(
-                                                CommandKind.APPROVE_BASELINE,
-                                                CommandKind.APPROVE_RELEASE,
-                                                CommandKind.PUBLISH_RELEASE)
-                                        .contains(parsedAction.kind())
-                                ? "admin"
-                                : "member");
+        String role =
+                Set.of(
+                                        CommandKind.APPROVE_BASELINE,
+                                        CommandKind.APPROVE_RELEASE,
+                                        CommandKind.PUBLISH_RELEASE)
+                                .contains(parsedAction.kind())
+                        ? "admin"
+                        : "member";
+        String actor = access.require(scope, role);
         operation(r.operationId());
         if (r.expectedVersion() == null) throw bad("expectedVersion required");
         String encodedRequest = encode(List.of(projectId, r));
         ObjectNode p = load(scope, projectId, true);
         boolean repair = repairPolicy.allows(r);
         if (!repair) authorizeMaterials(scope, p);
+        lockOperationActor(scope, actor, role);
         var replay = replay(scope, actor, r.operationId(), encodedRequest);
         if (replay != null) {
-            return commandResponse(scope, p, replay);
+            return new PreparedCommand(
+                    actor, encodedRequest, p, null, 0, commandResponse(scope, p, replay));
         }
+        if (parsedAction.kind() != CommandKind.CREATE_RELEASE)
+            rejectRenderOperation(scope, actor, r.operationId());
+        else
+            renderTasks
+                    .findOperation(scope, actor, r.operationId(), true)
+                    .ifPresent(
+                            task -> {
+                                if (!task.requestHash()
+                                        .equals(PresalesRequestHashV2.digest(encodedRequest)))
+                                    throw conflict(
+                                            "OPERATION_CONFLICT",
+                                            "Operation id reused with different input");
+                            });
         if (!PresalesProjectRevision.matchesRevision(p.path("version"), r.expectedVersion()))
             throw conflict("VERSION_CONFLICT", "Project has changed; reload before saving");
         if ("ARCHIVED".equals(p.path("status").asText()))
@@ -200,6 +258,17 @@ public class PresalesService {
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
+        return new PreparedCommand(actor, encodedRequest, p, value, nextVersion, null);
+    }
+
+    private ObjectNode applyCommand(
+            String scope, String projectId, Command r, boolean employeeResult) {
+        var prepared = prepareCommand(scope, projectId, r, employeeResult);
+        if (prepared.replay() != null) return prepared.replay();
+        String actor = prepared.actor();
+        ObjectNode p = prepared.project();
+        ObjectNode value = prepared.value();
+        var parsedAction = r.parsedAction();
         switch (parsedAction.kind()) {
             case UPDATE_PROJECT -> {
                 if (value.has("agentId")) bindEmployee(scope, p, value.path("agentId").asText());
@@ -282,7 +351,8 @@ public class PresalesService {
                 }
                 saveItem(p, "reviews", value, actor, true);
             }
-            case CREATE_RELEASE -> createRelease(scope, p, value, actor);
+            case CREATE_RELEASE ->
+                    throw new IllegalStateException("Release requires durable render execution");
             case APPROVE_RELEASE -> {
                 var release = find(p, "releases", value.path("releaseId").asText());
                 if (!"PENDING".equals(release.path("status").asText()))
@@ -336,25 +406,37 @@ public class PresalesService {
                 saveItem(p, "fitGaps", value, actor, true);
             }
             case SAVE_SOLUTION -> saveSolutionDraft(p, value, actor, false);
-            default -> throw bad("Unsupported command: " + action);
+            default -> throw bad("Unsupported command: " + parsedAction.raw());
         }
+        return persistCommand(scope, projectId, r, prepared);
+    }
+
+    private ObjectNode persistCommand(
+            String scope, String projectId, Command r, PreparedCommand prepared) {
+        ObjectNode p = prepared.project();
+        String actor = prepared.actor();
         p.put("stage", PresalesProjectListing.stage(p));
-        p.set("version", PresalesProjectRevision.number(nextVersion));
+        p.set("version", PresalesProjectRevision.number(prepared.nextVersion()));
         p.put("updatedBy", actor).put("updatedAt", LocalDateTime.now(ZoneOffset.UTC).toString());
         String body = PresalesListingProjectionV1.storageJson(encode(p));
         if (projects.update(
                         new PresalesProjectRepository.ProjectRow(
                                 projectId,
                                 scope,
-                                nextVersion,
+                                prepared.nextVersion(),
                                 p.path("name").asText(),
                                 p.path("status").asText(),
                                 body,
                                 PresalesListingProjectionV1.fromBody(body, json)),
                         r.expectedVersion())
                 != 1) throw conflict("VERSION_CONFLICT", "Concurrent update");
-        record(p, actor, action);
-        receipt(scope, actor, r.operationId(), PresalesRequestHashV2.digest(encodedRequest), p);
+        record(p, actor, r.parsedAction().raw());
+        receipt(
+                scope,
+                actor,
+                r.operationId(),
+                PresalesRequestHashV2.digest(prepared.encodedRequest()),
+                p);
         return commandResponse(scope, p, p);
     }
 
@@ -480,16 +562,58 @@ public class PresalesService {
         }
     }
 
-    private void createRelease(String scope, ObjectNode p, ObjectNode v, String actor) {
+    private PresalesRenderExecution.Prepared prepareRelease(
+            String scope, String projectId, Command r) {
+        var prepared = prepareCommand(scope, projectId, r, false);
+        String hash = PresalesRequestHashV2.digest(prepared.encodedRequest());
+        if (prepared.replay() != null)
+            return new PresalesRenderExecution.Prepared(
+                    prepared.actor(), hash, null, prepared.replay());
+        ObjectNode p = prepared.project();
+        ObjectNode value = prepared.value();
+        var solution = find(p, "solutions", value.path("solutionId").asText());
+        releaseAuthorization.requireEnabled();
+        var sources = releaseAuthority.lockAndCapture(scope, prepared.actor(), p, solution);
+        value.put("reviewId", releaseGate(scope, p, solution));
+        ObjectNode input = json.createObjectNode();
+        input.set("project", p);
+        input.set("candidate", value);
+        input.set("sources", sources);
+        input.set("artifacts", artifacts.capture(projectId, solution));
+        return new PresalesRenderExecution.Prepared(prepared.actor(), hash, input, null);
+    }
+
+    private ObjectNode acceptRelease(
+            String scope,
+            String projectId,
+            Command r,
+            PresalesRenderExecution.Prepared prepared,
+            List<PresalesArtifacts.RenderedFile> files) {
+        ObjectNode p = ((ObjectNode) prepared.input().path("project")).deepCopy();
+        ObjectNode value = ((ObjectNode) prepared.input().path("candidate")).deepCopy();
+        createRelease(scope, p, value, prepared.actor(), files);
+        return persistCommand(
+                scope,
+                projectId,
+                r,
+                new PreparedCommand(
+                        prepared.actor(),
+                        encode(List.of(projectId, r)),
+                        p,
+                        value,
+                        PresalesProjectRevision.nextRevision(r.expectedVersion()),
+                        null));
+    }
+
+    private void createRelease(
+            String scope,
+            ObjectNode p,
+            ObjectNode v,
+            String actor,
+            List<PresalesArtifacts.RenderedFile> files) {
         var solution = find(p, "solutions", v.path("solutionId").asText());
-        String reviewId = releaseGate(scope, p, solution);
         String releaseId = id();
-        v.put("reviewId", reviewId);
-        try {
-            artifacts.materializeCandidate(p.path("id").asText(), releaseId, solution, v);
-        } catch (PresalesRejected rejection) {
-            throw legacyRejection(rejection);
-        }
+        artifacts.storeCandidate(p.path("id").asText(), releaseId, files, v);
         v.put("status", "PENDING")
                 .put("baselineId", solution.path("baselineId").asText())
                 .put("templateVersion", PresalesArtifactRenderer.TEMPLATE_VERSION);
@@ -500,6 +624,20 @@ public class PresalesService {
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
+    }
+
+    /** Serializes the shared operation namespace across projects and command kinds. */
+    private void lockOperationActor(String scope, String actor, String role) {
+        if (!authorityFence.lockForCommand(
+                scope, List.of(actor), null, List.of(), List.of(), List.of()))
+            throw conflict("EXECUTION_AUTHORITY_CHANGED", "Operation authority changed");
+        access.requireLockedActor(scope, actor, role);
+    }
+
+    private void rejectRenderOperation(String scope, String actor, String operation) {
+        if (renderTasks.findOperation(scope, actor, operation, true).isPresent())
+            throw conflict(
+                    "OPERATION_CONFLICT", "Operation id already belongs to a render request");
     }
 
     private ArrayNode publicationClarificationRefs(ObjectNode project) {
