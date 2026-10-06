@@ -1,0 +1,116 @@
+{
+  "scope": "shareable external MySQL measurement evidence only",
+  "excluded": [
+    "classes/",
+    ".private/ (deleted)",
+    "../aq10-listing-measurement/runtime/",
+    "all dependency JARs"
+  ],
+  "files": [
+    {
+      "path": "ListingMeasurement.java",
+      "bytes": 11550,
+      "sha256": "857b4f320654df1846a599cb8d196f24ee4f680a549892e7c75c17edf1f4cf99"
+    },
+    {
+      "path": "PLAN.md",
+      "bytes": 2404,
+      "sha256": "f204e31438e43d79a0fe3b17f3938923d43fe3fb04524ef77f84d42afcdb3f47"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 7281,
+      "sha256": "fca7282593398f005eddce22fe2d91568893c6138ced74bfeb181c306a0289db"
+    },
+    {
+      "path": "artifact-verification.json",
+      "bytes": 574,
+      "sha256": "629c98e07618bf2935a55bc31ff7a48022f77bc5034d30554078c53ebe83e1bf"
+    },
+    {
+      "path": "commands.json",
+      "bytes": 1241,
+      "sha256": "1b2496b2440611e24ddbe9cce393735a6e600bd8ef12ce750eb3b18956b49592"
+    },
+    {
+      "path": "container-identity.json",
+      "bytes": 535,
+      "sha256": "d2e5e65aa5fb0234f01e542766b465d17f5bfa7f123674e92c23b45f6a15df7e"
+    },
+    {
+      "path": "container-lifecycle.json",
+      "bytes": 1066,
+      "sha256": "bd1ec68166e8f6d1ad5efe133f3cd6a22adb0d081fd31d51c21992c3ea37c9c1"
+    },
+    {
+      "path": "database-100.json",
+      "bytes": 1437,
+      "sha256": "23a943d06555320adb7388abaac3beeb8e63f9420bf4bfce4b5e3322292e676e"
+    },
+    {
+      "path": "database-1000.json",
+      "bytes": 1438,
+      "sha256": "871c773a12c34cf8f7073ea373ffc2ba305efd55e567cce129d8f1c2413110db"
+    },
+    {
+      "path": "database-5000.json",
+      "bytes": 1438,
+      "sha256": "fcdb828ca6edc6514bd12517fa663afd63d919301ed0c4cc5d247c8260fb6347"
+    },
+    {
+      "path": "dependency-hashes.json",
+      "bytes": 297,
+      "sha256": "f564cf260da390e06f2f8ddd25b0cd1d3e330e422a6340e079b8c64abfdbb24b"
+    },
+    {
+      "path": "diagnostics.json",
+      "bytes": 1211,
+      "sha256": "11d7956e350685aea01b9725ac4276c8dc59a6d494465a5022fdb880d08be169"
+    },
+    {
+      "path": "environment.json",
+      "bytes": 486,
+      "sha256": "60e5d93a180d910d597be63fb63ee0efaf1092db0958d6bce464c3d64251f03e"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 660,
+      "sha256": "a7e4741dd7ff81c643d3c4f94b9c4f2ca5264a6176ea448cd7573886c228f718"
+    },
+    {
+      "path": "javac.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "measurement.log",
+      "bytes": 1134,
+      "sha256": "e79f95bd83444a13990900fb0ef1557b8f80c7651bd1dd1fd3dcd017713e6750"
+    },
+    {
+      "path": "results.json",
+      "bytes": 53669,
+      "sha256": "8738465b078d075256d21184b5e9249d71c27a0222598d893d0a578eee550df3"
+    },
+    {
+      "path": "run_measurement.py",
+      "bytes": 6146,
+      "sha256": "bd54ee161384dcc6445808aac9925169df4e1d79d8c1e28dac84b5a643241ccb"
+    },
+    {
+      "path": "runtime-identity.json",
+      "bytes": 1314,
+      "sha256": "ec0f0fc4bec4c49e6e2bfb0c19d10edd4cb93dd8072bcc8247e130f65b380e67"
+    },
+    {
+      "path": "source-identity.json",
+      "bytes": 692,
+      "sha256": "42a33f06ca96dfae9a8d28b0bc614013b938b712e5bef9c1d50f74f1cbf22e94"
+    },
+    {
+      "path": "verify_and_report.py",
+      "bytes": 10042,
+      "sha256": "4cc364ab226f0e884c395bd7645f530a7411cad2ed6def99b862a3f1483855a0"
+    }
+  ]
+}

@@ -120,4 +120,4 @@ AC21 取消/重启/晚到结果原条款的工程证据见 [完整提示与恢�
 
 历史任务固定Skill包的候选实现与专项证据见 [AC22_TASK_PACKAGE_ACCEPTANCE.md](evidence/2026-10-06/AC22_TASK_PACKAGE_ACCEPTANCE.md)：内置Skill与S6引擎保存原始执行闭包，实际工具读取验证A/B隔离；三方言新增V222，H2/MySQL已执行，Kingbase另验。
 
-AC30 原条款工程复核已收口，见 [浏览器证据对账](evidence/2026-10-06/AC30_BROWSER_RECONCILIATION.md)。34项工程证据齐备、12项仍有缺口；正式签收不变。AQ10 新增 [列表有限规模测量](evidence/2026-10-06/AQ10_LISTING_MEASUREMENT.md)：18组JSON字节一致，保留SQL计划、时延、分配及测量局限；不代表完整性能验收。
+AC30 原条款工程复核已收口，见 [浏览器证据对账](evidence/2026-10-06/AC30_BROWSER_RECONCILIATION.md)。34项工程证据齐备、12项仍有缺口；正式签收不变。AQ10 已有 [H2列表有限规模测量](evidence/2026-10-06/AQ10_LISTING_MEASUREMENT.md)及 [隔离MySQL 8.0.46测量](evidence/2026-10-06/AQ10_MYSQL_LISTING_MEASUREMENT.md)：各18组路径测量，新旧JSON字节一致，保留SQL计划、时延、分配及环境限制；不代表完整性能验收。
