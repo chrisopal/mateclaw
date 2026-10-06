@@ -100,6 +100,67 @@ class PresalesTerminalReceptionTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"{broken", "[]", "null"})
+    void recoveryIsolatesMalformedBodiesWithoutRepeatingHealthyRecovery(String malformed)
+            throws Exception {
+        storage.update(
+                "UPDATE mate_presales_project SET body_json=? WHERE id='p' AND workspace_id='w'",
+                malformed);
+        var healthy = accepted.deepCopy().put("id", "z-healthy");
+        ((ObjectNode) healthy.path("tasks").get(0))
+                .set("result", json.createObjectNode().put("obsolete", true));
+        storage.update(
+                "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json) VALUES(?,?,?,?,?,?)",
+                "z-healthy",
+                "w",
+                2,
+                "healthy",
+                "ACTIVE",
+                json.writeValueAsString(healthy));
+        var repository = new PresalesProjectRepository(storage);
+        var rowIds =
+                repository.listRuntimeRows().stream()
+                        .filter(row -> "w".equals(row.workspaceId()))
+                        .map(PresalesProjectRepository.ProjectRow::id)
+                        .toList();
+        assertTrue(
+                rowIds.contains("p")
+                        && rowIds.contains("z-healthy")
+                        && rowIds.indexOf("p") < rowIds.indexOf("z-healthy"),
+                "The malformed fixture must be visited before the healthy project");
+        var coordinator =
+                new PresalesGenerationCoordinator(
+                        service, contexts, model, json, repository, hooks());
+        assertDoesNotThrow(coordinator::recoverStaleTasks);
+        String recoveredBody =
+                storage.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id='z-healthy' AND workspace_id='w'",
+                        String.class);
+        var recovered = json.readTree(recoveredBody);
+        assertEquals(3, recovered.path("version").asInt());
+        var task = recovered.path("tasks").get(0);
+        assertEquals("FAILED", task.path("status").asText());
+        assertEquals("INTERRUPTED_BY_RESTART", task.path("error").asText());
+        assertFalse(task.has("result"));
+        assertEquals(healthy.path("requirements"), recovered.path("requirements"));
+        assertEquals(healthy.path("unknown"), recovered.path("unknown"));
+        assertEquals(healthy.path("tasks").get(0).path("extension"), task.path("extension"));
+        assertDoesNotThrow(coordinator::recoverStaleTasks);
+        assertEquals(
+                recoveredBody,
+                storage.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id='z-healthy' AND workspace_id='w'",
+                        String.class));
+        assertEquals(malformed, body());
+        assertEquals(
+                2,
+                storage.queryForObject(
+                        "SELECT version FROM mate_presales_project WHERE id='p' AND workspace_id='w'",
+                        Integer.class));
+        verifyNoInteractions(model, contexts, service);
+    }
+
+    @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void lastRuntimeVersionCanStillPersistTerminalState(boolean recovery) throws Exception {
         store(current().put("version", PresalesProjectRevision.MAX_VALUE - 1));

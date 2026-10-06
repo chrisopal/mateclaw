@@ -2,7 +2,7 @@
 
 本目录以用户提供的 1.0.0 规范为需求来源。原始 ARCHITECTURE_SPEC、RULES、CHECKS、ACCEPTANCE、CODEX_TASKS 等保留原文；其中“执行下一阶段”的示例提示词不扩大本轮授权。
 
-当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中30项已有相称工程证据，正式签收仍分开。剩余实现、有限补证、环境/样本及远端强制配置均逐项列明，不以代码行数继续追加拆分。
+当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中32项已有相称工程证据，正式签收仍分开。剩余实现、有限补证、环境/样本及远端强制配置均逐项列明，不以代码行数继续追加拆分。
 
 下面按切片保留的工程记录描述各自执行时点；其中“尚未提交”“结构未完成”等历史文字不覆盖当前收口表。原始要求和正式验收台账保持，历史失败证据不删除。
 
@@ -113,3 +113,7 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 制品物化与冻结交付边界见 [AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md](evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md)：既有Reader扩展为包内Artifacts，Service793→711行，授权/事务/回放/状态保留；公共接口及旧读算法AST相同。原实现追加刻画115/115，最终售前/投标/架构88类982项（981通过/1既有PPT环境skip）。反射测试入口失败后迁至公共draftArtifact，全部旧断言保留。长事务、真实Office/方言、其余结构与正式AC继续开放，完整commit/push及远端CI按实际精确树记录。
 
 发布渲染短事务见 [AQ05_RENDER_TRANSACTION_ACCEPTANCE.md](evidence/2026-10-06/AQ05_RENDER_TRANSACTION_ACCEPTANCE.md)：持久化固定输入后在事务外转换，独立短事务重验并原子接纳；同键跨命令占用、租约/旧批次围栏、PPT/当前及历史来源固定、MySQL RR 当前读取均有针对性证据。隔离 MySQL 8 完整迁移至 V221、runtime43及发布生命周期14项通过；完整提交/推送以确切 tree hook 报告为准。Kingbase、生产切换、性能与正式 AC 未因此完成。
+
+AC46 原始公共 CI 来源核验见 [工程记录](evidence/2026-10-06/AC46_ORIGINAL_CI_ACCEPTANCE.md)：确切 run37418776854 的18个原始产物、15日志摘要及合成测试来源经过独立检查；工程证据齐备，正式签收保持 NOT_RUN。
+
+AC21 取消/重启/晚到结果原条款的工程证据见 [完整提示与恢复隔离](evidence/2026-10-06/AC21_RESTART_NOTICE_ACCEPTANCE.md)：取消无error及重启/晚到/终态失败均诚实显示未知计费，122项UI与44项H2回归通过；独立复核结合既有3JVM恢复及拒收/批准边界，转为工程证据齐备待正式签收。

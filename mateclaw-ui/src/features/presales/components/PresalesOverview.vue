@@ -90,6 +90,12 @@
       {{ t('presales.accepted_and_waiting_for_the_employee') }}
     </p>
     <p v-if="task.error">{{ employeeIssue(task.error) }}</p>
+    <el-alert
+      v-if="isDomainStatus('task', task.status, 'CANCELLED')"
+      type="warning"
+      :closable="false"
+      :title="t('presales.cancelled_task_notice')"
+    />
     <div
       v-for="(item, index) in task.result?.items || []"
       :key="index"

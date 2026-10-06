@@ -2721,7 +2721,7 @@ describe('remaining display contract', () => {
     },
   )
 
-  // Captured verbatim before moving the employee messages into the existing catalogue.
+  // Preserve existing messages and verify new runtime notices through the same host catalogue.
   it.each([
     [
       'EMPLOYEE_UNAVAILABLE',
@@ -2734,6 +2734,11 @@ describe('remaining display contract', () => {
       'Employee execution failed. Check the execution and model configuration before retrying.',
     ],
     ['EMPLOYEE_RUNTIME_UNAVAILABLE', '员工运行服务暂不可用。', 'Employee runtime is unavailable.'],
+    [
+      'INTERRUPTED_BY_RESTART',
+      '服务重启中断了本次执行，结果未采纳。模型服务是否已计费无法确认；如需继续，请人工重新执行。',
+      'A service restart interrupted this run; results were not applied. Model billing is unknown. Run again manually if needed.',
+    ],
     [
       'PRESENTATION_UNAVAILABLE',
       '成果编译服务暂不可用，本次执行未完成。',
@@ -2756,8 +2761,13 @@ describe('remaining display contract', () => {
     ],
     [
       'PROJECT_CHANGED_DURING_GENERATION',
-      '执行期间项目已变化，本次结果未采纳。请重新执行。',
-      'Project changed during execution. Results were not applied; run again.',
+      '执行期间项目已变化，本次结果未采纳。模型服务是否已计费无法确认；如需继续，请人工重新执行。',
+      'Project changed during execution. Results were not applied. Model billing is unknown. Run again manually if needed.',
+    ],
+    [
+      'TERMINAL_PERSISTENCE_FAILED',
+      '未能保存任务完成状态。模型服务是否已计费无法确认；请核对执行记录后人工重新执行。',
+      'The task completion state could not be saved. Model billing is unknown. Check the execution record before running again manually.',
     ],
     ['LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE'],
     ['constructor', 'constructor', 'constructor'],
@@ -2777,7 +2787,42 @@ describe('remaining display contract', () => {
     await settle()
     expect(document.querySelector('#pane-overview')?.textContent).toContain(en)
     expect(presalesApi.command).not.toHaveBeenCalled()
+    expect(presalesApi.generate).not.toHaveBeenCalled()
   })
+
+  it('shows unknown billing for a cancelled task without an error through host language changes', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      tasks: [{ id: 'cancelled-task', skill: 'S1', status: 'CANCELLED' }],
+    })
+    await mount(`/presales/${project.id}`)
+    const en =
+      'Result reception has stopped. Model billing is unknown. Run again manually if needed.'
+    const zh = '任务已停止接收结果，模型服务是否已计费无法确认；如需继续，请人工重新执行。'
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(en)
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(zh)
+    changeLocale('en-US')
+    await settle()
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(en)
+    expect(presalesApi.command).not.toHaveBeenCalled()
+    expect(presalesApi.generate).not.toHaveBeenCalled()
+  })
+
+  it.each(['SUCCEEDED', 'DRAFT'])(
+    'does not show the cancellation notice for task status %s',
+    async (status) => {
+      vi.mocked(presalesApi.get).mockResolvedValue({
+        ...project,
+        tasks: [{ id: 'other-task', skill: 'S1', status }],
+      })
+      await mount(`/presales/${project.id}`)
+      expect(document.querySelector('#pane-overview')?.textContent).not.toContain(
+        'Result reception has stopped.',
+      )
+    },
+  )
 
   it.each(['stage', 'status'] as const)(
     'rejects a foreign project %s in header and ledger',

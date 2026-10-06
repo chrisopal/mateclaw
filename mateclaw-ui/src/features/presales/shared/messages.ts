@@ -5,12 +5,19 @@ export const presalesMessages = {
         EMPLOYEE_UNAVAILABLE: '负责员工不可用，请检查绑定、工作区与启用状态。',
         EMPLOYEE_RUNTIME_FAILED: '员工执行失败，请查看执行过程并检查员工的模型配置后重试。',
         EMPLOYEE_RUNTIME_UNAVAILABLE: '员工运行服务暂不可用。',
+        INTERRUPTED_BY_RESTART:
+          '服务重启中断了本次执行，结果未采纳。模型服务是否已计费无法确认；如需继续，请人工重新执行。',
         PRESENTATION_UNAVAILABLE: '成果编译服务暂不可用，本次执行未完成。',
         PRESENTATION_FAILED: '成果草稿编译失败，请检查页面内容后重试。',
         PPT_GENERATION_FAILED: '成果草稿生成失败，请检查 PPT 技能配置后重试。',
         PPT_GENERATION_TIMEOUT: '成果草稿生成超时，请稍后重试。',
-        PROJECT_CHANGED_DURING_GENERATION: '执行期间项目已变化，本次结果未采纳。请重新执行。',
+        PROJECT_CHANGED_DURING_GENERATION:
+          '执行期间项目已变化，本次结果未采纳。模型服务是否已计费无法确认；如需继续，请人工重新执行。',
+        TERMINAL_PERSISTENCE_FAILED:
+          '未能保存任务完成状态。模型服务是否已计费无法确认；请核对执行记录后人工重新执行。',
       },
+      cancelled_task_notice:
+        '任务已停止接收结果，模型服务是否已计费无法确认；如需继续，请人工重新执行。',
       unknown_status: '未知状态：{raw}',
       states: {
         DISCOVERY: '项目理解',
@@ -366,6 +373,8 @@ export const presalesMessages = {
         EMPLOYEE_RUNTIME_FAILED:
           'Employee execution failed. Check the execution and model configuration before retrying.',
         EMPLOYEE_RUNTIME_UNAVAILABLE: 'Employee runtime is unavailable.',
+        INTERRUPTED_BY_RESTART:
+          'A service restart interrupted this run; results were not applied. Model billing is unknown. Run again manually if needed.',
         PRESENTATION_UNAVAILABLE:
           'Presentation compiler is unavailable; this run did not complete.',
         PRESENTATION_FAILED: 'Presentation draft compilation failed; review the content and retry.',
@@ -373,8 +382,12 @@ export const presalesMessages = {
           'Output draft generation failed; check the PPT skill configuration and retry.',
         PPT_GENERATION_TIMEOUT: 'Output draft generation timed out; retry later.',
         PROJECT_CHANGED_DURING_GENERATION:
-          'Project changed during execution. Results were not applied; run again.',
+          'Project changed during execution. Results were not applied. Model billing is unknown. Run again manually if needed.',
+        TERMINAL_PERSISTENCE_FAILED:
+          'The task completion state could not be saved. Model billing is unknown. Check the execution record before running again manually.',
       },
+      cancelled_task_notice:
+        'Result reception has stopped. Model billing is unknown. Run again manually if needed.',
       unknown_status: 'Unknown status: {raw}',
       states: {
         DISCOVERY: 'Discovery',

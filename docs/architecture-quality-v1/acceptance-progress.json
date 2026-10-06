@@ -1,12 +1,12 @@
 {
-  "source_head": "8d2c8b2a68c3d63280f79e8ea21623fbe2223b7b",
-  "source_tree": "fe4471581cf6b71d3270a3abee2874c51c6d0d9a",
+  "source_head": "7e2f610396c283b1dded8e418ffda1a645714e05",
+  "source_tree": "37cfdd057de7c5a3b5d9a5bdc2066044a788dd5e",
   "scope": "工程证据与后续动作分类，不修改正式AC签收。历史证据按原条款和当前门禁复核，不追加隐含验收要求。",
   "counts": {
-    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 30,
-    "IMPLEMENTATION_GAP": 10,
+    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 32,
+    "IMPLEMENTATION_GAP": 9,
     "ENVIRONMENT_GAP": 4,
-    "INSUFFICIENT_PROOF": 2
+    "INSUFFICIENT_PROOF": 1
   },
   "items": [
     {
@@ -417,16 +417,19 @@
       "assertion": "无二次写入与模型自批准；未知计费状态如实显示",
       "task": "AQ-01/AQ-06",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "IMPLEMENTATION_GAP",
-      "scope_basis": "重启与合法旧上限已修复；单个持久化Stop异常已隔离并通过151项回归。坏历史记录恢复及阻塞取消边界仍待核查；完整AC21未关闭。",
-      "remaining_action": "重启与合法旧上限已修复；单个持久化Stop异常已隔离并通过151项回归。坏历史记录恢复及阻塞取消边界仍待核查；完整AC21未关闭。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "Stop异常隔离、真实3JVM重启单写/回执保持、H2 CAS/晚到拒写/坏记录隔离及模型自批准拒绝均有证据；取消/重启/丢弃结果/终态失败的未知计费双语提示122项回归通过，独立按原条款复核闭合。",
+      "remaining_action": "独立正式签核；坏数据无权修复时拒写、任意阻塞回调与真实供应商账单仍如实列为边界，不扩写原AC21。",
       "evidence_keys": [
         "restart",
         "capacity",
         "render",
         "sse"
       ],
-      "finite_evidence": []
+      "finite_evidence": [
+        "AC21_CANCEL_FAILURE_ACCEPTANCE.md",
+        "AC21_RESTART_NOTICE_ACCEPTANCE.md"
+      ]
     },
     {
       "id": "AC-22",
@@ -880,9 +883,9 @@
       "assertion": "不使用生产数据/密钥；公共CI产物无客户敏感原文",
       "task": "AQ-08/AQ-11",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "INSUFFICIENT_PROOF",
-      "scope_basis": "隔离DB、合成数据和环境过滤均有证据；但本地脱敏后的副本不能单独证明当前原始公共CI上传内容无客户敏感原文。",
-      "remaining_action": "对当前一次原始CI上传日志/文件做来源核对+有限敏感内容检查，只输出脱敏发现/摘要；确认样本确为合成且没有生产配置来源，满足后转待签核。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "原始托管CI37418776854/source608d525a的18产物、15日志摘要和测试来源已独立核验；32条生成密码为测试启动值，135种中文片段与自由文本均溯源到合成夹具/诊断常量，无生产配置或客户敏感原文发现。",
+      "remaining_action": "独立正式签核；此有限原始CI核验不保证未来任意日志。",
       "evidence_keys": [
         "startup",
         "render",
@@ -893,7 +896,8 @@
       "finite_evidence": [
         "scripts/quality/verify.py:67-75",
         "AQ01_FULL_CONTEXT_ACCEPTANCE.md:24-33",
-        "AQ08_REMOTE_CI_ACCEPTANCE.md:19"
+        "AQ08_REMOTE_CI_ACCEPTANCE.md:19",
+        "AC46_ORIGINAL_CI_ACCEPTANCE.md / run37418776854 / ac46_ci_provenance_audit"
       ]
     }
   ],
