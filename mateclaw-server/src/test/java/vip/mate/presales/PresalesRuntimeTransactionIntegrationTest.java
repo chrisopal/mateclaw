@@ -193,6 +193,94 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     private Long modelId;
     private ObjectNode project, task, snapshot;
 
+    @Test
+    void metadataUpdatesKeepEmployeeEligibilityAndRejectSilentUnassignment() {
+        String id = project.path("id").asText();
+        var before =
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?", id);
+        int receipts =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace);
+        int revisions =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        id);
+        for (String requested : List.of("", " ", "not-an-id", "9223372036854775807")) {
+            var error =
+                    assertThrows(
+                            SemanticApiException.class,
+                            () ->
+                                    service.command(
+                                            workspace,
+                                            id,
+                                            new PresalesDtos.Command(
+                                                    project.path("version").asLong(),
+                                                    UUID.randomUUID().toString(),
+                                                    "UPDATE_PROJECT",
+                                                    json.createObjectNode()
+                                                            .put("agentId", requested)
+                                                            .put("goal", "Must not save"))));
+            assertEquals(409, error.status());
+            assertEquals("EMPLOYEE_UNAVAILABLE", error.code());
+        }
+        var replacement = new AgentEntity();
+        replacement.setName("Employee eligibility contrast");
+        replacement.setWorkspaceId(Long.valueOf(otherWorkspace));
+        replacement.setEnabled(true);
+        replacement.setDeleted(0);
+        replacement.setRuntimeType("native");
+        agentMapper.insert(replacement);
+        var command =
+                new PresalesDtos.Command(
+                        project.path("version").asLong(),
+                        UUID.randomUUID().toString(),
+                        "UPDATE_PROJECT",
+                        json.createObjectNode()
+                                .put("agentId", replacement.getId().toString())
+                                .put("goal", "Authorized update"));
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.command(workspace, id, command))
+                        .status());
+        replacement.setWorkspaceId(Long.valueOf(workspace));
+        replacement.setEnabled(false);
+        agentMapper.updateById(replacement);
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.command(workspace, id, command))
+                        .status());
+        assertEquals(
+                before,
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?", id));
+        assertEquals(
+                receipts,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace));
+        assertEquals(
+                revisions,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        id));
+        replacement.setEnabled(true);
+        agentMapper.updateById(replacement);
+        var updated = service.command(workspace, id, command);
+        assertEquals(replacement.getId().toString(), updated.path("agentId").asText());
+        assertEquals("Authorized update", updated.path("goal").asText());
+        assertEquals(project.path("version").asLong() + 1, updated.path("version").asLong());
+    }
+
     @ParameterizedTest
     @EnumSource(Revocation.class)
     void ordinaryCommandRejectsRevocationAfterOuterRepeatableReadSnapshot(Revocation revocation)

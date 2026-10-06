@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import vip.mate.semantic.support.SemanticHttpFixture;
@@ -69,6 +71,77 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         "operationId",
                         UUID.randomUUID().toString()),
                 200);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"PATCH", "POST"})
+    void unassignedProjectMetadataSavesWithoutBindingAnEmployee(String method) throws Exception {
+        var p = project();
+        String id = p.path("id").asText();
+        String path = "/projects/" + id + (method.equals("POST") ? "/commands" : "");
+        var payload = json.createObjectNode().put("agentId", "").put("goal", "Updated goal");
+        var request =
+                json.createObjectNode()
+                        .put("expectedVersion", 1)
+                        .put("operationId", "empty-employee-save");
+        if (method.equals("POST")) request.put("action", "UPDATE_PROJECT").set("payload", payload);
+        else request.setAll(payload);
+        api(method, path, "viewer", workspace, request, 403);
+        api(method, path, "member", otherWorkspace, request, 403);
+        var changed = api(method, path, "member", workspace, request, 200);
+        assertEquals(2, changed.path("version").asInt());
+        assertEquals("Updated goal", changed.path("goal").asText());
+        assertEquals(p.path("ownerId"), changed.path("ownerId"));
+        assertFalse(changed.has("agentId"));
+        assertFalse(changed.has("agentName"));
+        assertEquals(changed, api("GET", "/projects/" + id, "viewer", workspace, null, 200));
+        var facts = approvalFacts(id);
+        assertEquals(changed, api(method, path, "member", workspace, request, 200));
+        assertEquals(facts, approvalFacts(id));
+        var changedInput = request.deepCopy();
+        if (method.equals("POST"))
+            ((com.fasterxml.jackson.databind.node.ObjectNode) changedInput.path("payload"))
+                    .remove("agentId");
+        else changedInput.remove("agentId");
+        api(method, path, "member", workspace, changedInput, 409);
+        request.put("operationId", "empty-employee-stale");
+        api(method, path, "member", workspace, request, 409);
+        assertEquals(facts, approvalFacts(id));
+        assertEquals(
+                2,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        id));
+        var archived = cmd(changed, "ARCHIVE", Map.of(), "member", 200);
+        request.put("expectedVersion", archived.path("version").asLong())
+                .put("operationId", "empty-employee-archived");
+        facts = approvalFacts(id);
+        api(method, path, "member", workspace, request, 409);
+        assertEquals(facts, approvalFacts(id));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"null", "\"\"", "{}", "[]", "0", "\" \""})
+    void emptyEmployeeUpdateDoesNotNormalizeMalformedStoredIds(String storedId) throws Exception {
+        var p = (com.fasterxml.jackson.databind.node.ObjectNode) project();
+        String id = p.path("id").asText();
+        p.set("agentId", json.readTree(storedId));
+        jdbc.update("UPDATE mate_presales_project SET body_json=? WHERE id=?", p.toString(), id);
+        var before = approvalFacts(id);
+        boolean unassigned = storedId.equals("null") || storedId.equals("\"\"");
+        var result =
+                cmd(
+                        p,
+                        "UPDATE_PROJECT",
+                        Map.of("agentId", "", "goal", "Updated"),
+                        "member",
+                        unassigned ? 200 : 409);
+        if (unassigned) {
+            assertEquals(json.readTree(storedId), result.path("agentId"));
+            assertEquals("Updated", result.path("goal").asText());
+            assertFalse(result.has("agentName"));
+        } else assertEquals(before, approvalFacts(id));
     }
 
     @Test
@@ -199,6 +272,11 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 workspace,
                 unknownUpdate,
                 403);
+        var restrictedFacts = approvalFacts(p.path("id").asText());
+        for (var value : List.of(Map.of("agentId", ""), Map.of("agentId", "", "goal", "Denied"))) {
+            cmd(p, "UPDATE_PROJECT", value, "member", 403);
+            assertEquals(restrictedFacts, approvalFacts(p.path("id").asText()));
+        }
         api(
                 "POST",
                 "/projects/" + p.path("id").asText() + "/commands",

@@ -1,0 +1,10 @@
+{
+  "base_head": "e70924e3bd0a4c8e4527a9f805313b19cc34f60c",
+  "candidate_tree": "4862bf6660e57a4b2515830c58134a17ab290a1c",
+  "changed_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "8c4afdc55d9fab28f5ecdff0ed8cd4a5a06bffa9c6857c0202f21e91d3119cdf",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "bf8114689defc2ba7b509ced33033133813e9c22b8e0cd1c91c04431781b1597",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java": "d1d73549cf7f6ccfedc8f07fceb9181d554e17f6c327e72fc0d08ebd00114198",
+    "docs/architecture-quality-v1/evidence/2026-10-06/AC30_UNASSIGNED_PROJECT_SAVE_PLAN.md": "0a16544fae7553e607fc62eab339603678f47a18e53f9cfa89af5b0f1c5abb48"
+  }
+}

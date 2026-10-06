@@ -1,0 +1,60 @@
+{
+  "reviewer": "aq08_proposal_review",
+  "reviewed_at": "2026-10-06T11:09:58.446044+00:00",
+  "verdict": "COMMENT",
+  "maintainer_approval": false,
+  "head": "e70924e3bd0a4c8e4527a9f805313b19cc34f60c",
+  "diff_sha256": "0e9ae70764cb728d78c2e7905f189285a619a19bd3b806190fa7fdc383a49fe6",
+  "files": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "8c4afdc55d9fab28f5ecdff0ed8cd4a5a06bffa9c6857c0202f21e91d3119cdf",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "bf8114689defc2ba7b509ced33033133813e9c22b8e0cd1c91c04431781b1597",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java": "d1d73549cf7f6ccfedc8f07fceb9181d554e17f6c327e72fc0d08ebd00114198",
+    "docs/architecture-quality-v1/evidence/2026-10-06/AC30_UNASSIGNED_PROJECT_SAVE_PLAN.md": "0a16544fae7553e607fc62eab339603678f47a18e53f9cfa89af5b0f1c5abb48"
+  },
+  "stage_1": "Scope and requested behavior satisfied by the reviewed diff: only empty textual employee request on missing/null/empty-text stored employee skips binding. Public string validation, source repair policy, request hashing, member authority, CAS and transaction/receipt path unchanged.",
+  "stage_2": "No actionable defect found in reviewed production and test changes. Real runtime employee eligibility tests use mapper reads, positive enabled same-workspace contrast, and rejection persistence checks. Source-revoked empty-only and mixed payloads remain denied.",
+  "findings": [],
+  "validation": {
+    "red": {
+      "tests": 63,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "build": "FAILURE"
+    },
+    "green": {
+      "tests": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "build": "SUCCESS"
+    },
+    "regression_package": {
+      "tests": 861,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "skipped_class": "PresalesPresentationCompilerTest",
+      "build": "SUCCESS"
+    },
+    "dev": {
+      "status": "SCAN_PASS",
+      "submission_ready": false
+    },
+    "diff_check": "exit 0"
+  },
+  "logs_sha256": {
+    "/tmp/ac30-unassigned-red.log": "bf7a337514d6335593d121d0cc4c0a3ac691ccab08d52ada6738a089f8a72467",
+    "/tmp/ac30-unassigned-green.log": "3972fa03eaadbc7440cd2ad6a6cb2a354ff3ae2b54d82fe91a50e2c95bf68dd9",
+    "/tmp/ac30-unassigned-regression-package.log": "ed34f821ecada900c450f946cf707d09d3f031d7064daefe10219756933ce5a3",
+    "/tmp/ac30-unassigned-dev-after.log": "8a5305f3a84d104d65d70700416c113b648f21747e644607093bd1ef401298b5"
+  },
+  "limitations": [
+    "Reviewed existing execution logs; reviewer did not run concurrent Maven.",
+    "LSP called for all three Java files but returned tsc skipped: no tsconfig found; Java LSP diagnostics NOT_RUN.",
+    "AST grep unavailable from earlier tool check; static review performed manually.",
+    "Employee eligibility contrast is service/transaction/H2 coverage, while empty employee save has PATCH and commands MockMvc/H2 coverage.",
+    "Real browser recovery after updated runtime, exact staged-tree gate, remote CI and maintainer/business acceptance are outside this review result."
+  ],
+  "repository_mutations": false
+}

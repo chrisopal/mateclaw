@@ -324,7 +324,17 @@ public class PresalesService {
         var parsedAction = r.parsedAction();
         switch (parsedAction.kind()) {
             case UPDATE_PROJECT -> {
-                if (value.has("agentId")) bindEmployee(scope, p, value.path("agentId").asText());
+                if (value.has("agentId")) {
+                    var currentEmployee = p.path("agentId");
+                    boolean unassigned =
+                            currentEmployee.isMissingNode()
+                                    || currentEmployee.isNull()
+                                    || (currentEmployee.isTextual()
+                                            && currentEmployee.textValue().isEmpty());
+                    // The project form includes an empty employee even for metadata-only edits.
+                    if (!unassigned || !value.path("agentId").asText().isEmpty())
+                        bindEmployee(scope, p, value.path("agentId").asText());
+                }
                 if (value.has("ownerId"))
                     p.put(
                             "ownerId",
