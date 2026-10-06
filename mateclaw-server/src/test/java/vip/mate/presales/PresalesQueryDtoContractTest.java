@@ -162,10 +162,8 @@ class PresalesQueryDtoContractTest extends SemanticHttpFixture {
                     .put("id", UUID.randomUUID().toString())
                     .put("kbId", "1001")
                     .put("graphId", g);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         return p;
     }
 

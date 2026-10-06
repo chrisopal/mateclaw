@@ -1,5 +1,7 @@
 # 全项目开发与审核检查台账
 
+**当前范围调整（2026-10-06）**：按用户要求采用新数据完成售前 V2、真实生成和 Delivery；不验收旧数据/旧消费者兼容；Kingbase=TODO。实施与覆盖差异见[新数据设计](../plans/2026-10-06-presales-v2-newdata-design.md)，该调整不等于相关功能已通过。
+
 适用全部后续开发，检查项可按真实情况演进；调整规则本身需要证据和审核。此台账是评审入口，不是 PASS 清单。设计见 [IMPLEMENTATION_DESIGN](IMPLEMENTATION_DESIGN.md)，实测见 [SETUP_EVIDENCE](SETUP_EVIDENCE.md)。
 
 最新实施状态见[整改收口表](ACCEPTANCE_PROGRESS.md)和[46项工程分类](acceptance-progress.json)。分类依据实际证据，不替代[正式签收台账](acceptance-register.json)。后续历史切片段落保留当时状态，不能据此重复立项已修复问题。

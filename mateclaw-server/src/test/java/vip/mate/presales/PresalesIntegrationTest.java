@@ -14,6 +14,11 @@ import org.springframework.test.context.TestPropertySource;
 import vip.mate.semantic.support.SemanticHttpFixture;
 
 @Import({
+    PresalesHandoffAdapter.class,
+    vip.mate.delivery.DeliveryHandoffService.class,
+    vip.mate.delivery.DeliveryHandoffController.class,
+    vip.mate.delivery.DeliveryExceptionHandler.class,
+    vip.mate.delivery.repository.DeliveryHandoffRepository.class,
     PresalesAccess.class,
     PresalesService.class,
     vip.mate.presales.repository.PresalesRenderTaskRepository.class,
@@ -53,6 +58,14 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         return response.getContentAsString().isBlank()
                 ? json.nullNode()
                 : json.readTree(response.getContentAsString()).path("data");
+    }
+
+    private void writeProjectFixture(String body, String projectId) {
+        PresalesStorageTestSupport.write(jdbc, json, workspace, projectId, body);
+    }
+
+    private String storedProjectBody(String projectId) {
+        return PresalesStorageTestSupport.body(jdbc, workspace, projectId);
     }
 
     private JsonNode project() throws Exception {
@@ -127,7 +140,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         var p = (com.fasterxml.jackson.databind.node.ObjectNode) project();
         String id = p.path("id").asText();
         p.set("agentId", json.readTree(storedId));
-        jdbc.update("UPDATE mate_presales_project SET body_json=? WHERE id=?", p.toString(), id);
+        writeProjectFixture(p.toString(), id);
         var before = approvalFacts(id);
         boolean unassigned = storedId.equals("null") || storedId.equals("\"\"");
         var result =
@@ -155,10 +168,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 .put("label", "private source label");
         p.putObject("sourceSnapshot").put("sourceRef", "raw-secret");
         p.put("privateProjectExtension", "do-not-leak");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        writeProjectFixture(p.toString(), p.path("id").asText());
         var revoked = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
         revoked.setId(1001L);
         revoked.setWorkspaceId(Long.valueOf(workspace));
@@ -321,16 +331,12 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
 
         var archived =
                 (com.fasterxml.jackson.databind.node.ObjectNode)
-                        json.readTree(
-                                jdbc.queryForObject(
-                                        "SELECT body_json FROM mate_presales_project WHERE id=?",
-                                        String.class,
-                                        p.path("id").asText()));
+                        json.readTree(storedProjectBody(p.path("id").asText()));
         archived.put("status", "ARCHIVED");
+        writeProjectFixture(archived.toString(), p.path("id").asText());
         jdbc.update(
-                "UPDATE mate_presales_project SET status=?, body_json=? WHERE id=?",
+                "UPDATE mate_presales_project SET status=? WHERE id=?",
                 "ARCHIVED",
-                archived.toString(),
                 p.path("id").asText());
         assertEquals(
                 "ARCHIVED",
@@ -359,10 +365,10 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         unbindPayload),
                 409);
         archived.put("status", "ACTIVE");
+        writeProjectFixture(archived.toString(), p.path("id").asText());
         jdbc.update(
-                "UPDATE mate_presales_project SET status=?, body_json=? WHERE id=?",
+                "UPDATE mate_presales_project SET status=? WHERE id=?",
                 "ACTIVE",
-                archived.toString(),
                 p.path("id").asText());
 
         var unbind =
@@ -865,6 +871,8 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         "member",
                         200);
         p = cmd(p, "PUBLISH_RELEASE", Map.of("releaseId", release), "owner", 200);
+        String deliveryId = verifyNewDelivery(p.path("id").asText(), release);
+
         boolean semanticWasEnabled = semanticProperties.isEnabled();
         try {
             semanticProperties.setEnabled(false);
@@ -890,17 +898,10 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
             semanticProperties.setEnabled(semanticWasEnabled);
         }
 
-        String publishedBodyBefore =
-                jdbc.queryForObject(
-                        "SELECT body_json FROM mate_presales_project WHERE id=?",
-                        String.class,
-                        p.path("id").asText());
+        String publishedBodyBefore = storedProjectBody(p.path("id").asText());
         var unboundPublished = ((com.fasterxml.jackson.databind.node.ObjectNode) p).deepCopy();
         unboundPublished.withArray("materials").removeAll();
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                unboundPublished.toString(),
-                p.path("id").asText());
+        writeProjectFixture(unboundPublished.toString(), p.path("id").asText());
         try {
             for (String route : List.of("files", "preview")) {
                 var unboundRead =
@@ -926,10 +927,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 assertEquals(400, unboundRead.getStatus());
             }
         } finally {
-            jdbc.update(
-                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                    publishedBodyBefore,
-                    p.path("id").asText());
+            writeProjectFixture(publishedBodyBefore, p.path("id").asText());
         }
         // A real published fit source is absent from baseline/sourceRefs, but must remain
         // authorized.
@@ -991,12 +989,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         workspace,
                         null,
                         404);
-                assertEquals(
-                        publishedBodyBefore,
-                        jdbc.queryForObject(
-                                "SELECT body_json FROM mate_presales_project WHERE id=?",
-                                String.class,
-                                p.path("id").asText()));
+                assertEquals(publishedBodyBefore, storedProjectBody(p.path("id").asText()));
                 assertEquals(
                         original,
                         jdbc.queryForObject(
@@ -1054,6 +1047,10 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                                 200)
                         .path("clarifications")
                         .size());
+        assertEquals(
+                frozenHandoff,
+                delivery("GET", "/handoffs/" + deliveryId, "viewer", workspace, null, 200)
+                        .path("snapshot"));
         var latestFrozenHandoff =
                 api(
                         "GET",
@@ -1100,21 +1097,14 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         employeeMapper.insert(employee);
         String employeeId = employee.getId().toString();
         ((com.fasterxml.jackson.databind.node.ObjectNode) p).put("agentId", employeeId);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        writeProjectFixture(p.toString(), p.path("id").asText());
         jdbc.update(
                 "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
                 com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
                 employee.getId(),
                 Long.valueOf(f.kb));
         api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 200);
-        String persistedProject =
-                jdbc.queryForObject(
-                        "SELECT body_json FROM mate_presales_project WHERE id=?",
-                        String.class,
-                        p.path("id").asText());
+        String persistedProject = storedProjectBody(p.path("id").asText());
         int receipts =
                 jdbc.queryForObject(
                         "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
@@ -1146,12 +1136,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         null,
                         403);
             }
-            assertEquals(
-                    persistedProject,
-                    jdbc.queryForObject(
-                            "SELECT body_json FROM mate_presales_project WHERE id=?",
-                            String.class,
-                            p.path("id").asText()));
+            assertEquals(persistedProject, storedProjectBody(p.path("id").asText()));
             assertEquals(
                     receipts,
                     jdbc.queryForObject(
@@ -1199,10 +1184,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         for (var oldBaseline : archived.path("baselines")) {
             ((com.fasterxml.jackson.databind.node.ObjectNode) oldBaseline).putArray("references");
         }
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                archived.toString(),
-                p.path("id").asText());
+        writeProjectFixture(archived.toString(), p.path("id").asText());
         assertEquals(
                 frozenHandoff,
                 api(
@@ -1233,16 +1215,10 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 var candidate = archived.deepCopy();
                 ((com.fasterxml.jackson.databind.node.ObjectNode) candidate.path("releases").get(0))
                         .put("status", candidateStatus);
-                jdbc.update(
-                        "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                        candidate.toString(),
-                        p.path("id").asText());
+                writeProjectFixture(candidate.toString(), p.path("id").asText());
                 api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 403);
             }
-            jdbc.update(
-                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                    archived.toString(),
-                    p.path("id").asText());
+            writeProjectFixture(archived.toString(), p.path("id").asText());
             for (String suffix :
                     List.of(
                             "",
@@ -1257,12 +1233,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         null,
                         403);
             }
-            assertEquals(
-                    archived.toString(),
-                    jdbc.queryForObject(
-                            "SELECT body_json FROM mate_presales_project WHERE id=?",
-                            String.class,
-                            p.path("id").asText()));
+            assertEquals(archived, json.readTree(storedProjectBody(p.path("id").asText())));
             assertEquals(
                     archivedReceipts,
                     jdbc.queryForObject(
@@ -1296,10 +1267,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                             null,
                             200));
         }
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        writeProjectFixture(p.toString(), p.path("id").asText());
 
         var scalarOnly = archived.deepCopy();
         var scalarSnapshot =
@@ -1308,10 +1276,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         ((com.fasterxml.jackson.databind.node.ObjectNode) scalarSnapshot.path("baseline"))
                 .putArray("references");
         scalarSnapshot.putArray("sourceRefs").add(f.raw);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                scalarOnly.toString(),
-                p.path("id").asText());
+        writeProjectFixture(scalarOnly.toString(), p.path("id").asText());
         api(
                 "GET",
                 "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
@@ -1328,10 +1293,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 null,
                 403);
         jdbc.update("UPDATE mate_wiki_raw_material SET deleted=0 WHERE id=?", f.raw);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        writeProjectFixture(p.toString(), p.path("id").asText());
 
         String materialId = p.path("materials").get(0).path("id").asText();
         int unbindVersion = p.path("version").asInt();
@@ -1429,10 +1391,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 403);
         // The live project no longer carries source references; withdrawal is enforced by the
         // release.
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                archived.toString(),
-                p.path("id").asText());
+        writeProjectFixture(archived.toString(), p.path("id").asText());
         for (String suffix :
                 List.of(
                         "",
@@ -1452,10 +1411,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         "SELECT content_base64 FROM mate_presales_artifact WHERE release_id=? AND filename='solution.md'",
                         String.class,
                         release));
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                scalarOnly.toString(),
-                p.path("id").asText());
+        writeProjectFixture(scalarOnly.toString(), p.path("id").asText());
         api(
                 "GET",
                 "/projects/" + p.path("id").asText() + "/releases/" + release + "/handoff",
@@ -1463,6 +1419,60 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                 workspace,
                 null,
                 403);
+    }
+
+    private JsonNode delivery(
+            String method, String path, String role, String scope, Object body, int status)
+            throws Exception {
+        var request =
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
+                                org.springframework.http.HttpMethod.valueOf(method),
+                                "/api/v1/delivery" + path)
+                        .contentType("application/json")
+                        .header("Authorization", tokens.get(role))
+                        .header("X-Workspace-Id", scope);
+        if (body != null) request.content(json.writeValueAsString(body));
+        var response = mvc.perform(request).andReturn().getResponse();
+        assertEquals(status, response.getStatus(), response.getContentAsString());
+        return json.readTree(response.getContentAsString()).path("data");
+    }
+
+    private String verifyNewDelivery(String project, String release) throws Exception {
+        var preview =
+                delivery(
+                        "GET",
+                        "/handoff-preview?projectId=" + project + "&releaseId=" + release,
+                        "viewer",
+                        workspace,
+                        null,
+                        200);
+        var request =
+                Map.of(
+                        "operationId",
+                        UUID.randomUUID().toString(),
+                        "projectId",
+                        project,
+                        "releaseId",
+                        release,
+                        "digest",
+                        preview.path("digest").asText());
+        delivery("POST", "/handoffs", "viewer", workspace, request, 403);
+        var accepted = delivery("POST", "/handoffs", "member", workspace, request, 200);
+        assertEquals(accepted, delivery("POST", "/handoffs", "member", workspace, request, 200));
+        String id = accepted.path("id").asText();
+        assertEquals(accepted, delivery("GET", "/handoffs/" + id, "viewer", workspace, null, 200));
+        delivery("GET", "/handoffs/" + id, "global", otherWorkspace, null, 404);
+        assertEquals(
+                json.readTree(preview.path("snapshotJson").asText()), accepted.path("snapshot"));
+        assertEquals(
+                1,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_delivery_handoff WHERE workspace_id=? AND project_id=? AND release_id=?",
+                        Integer.class,
+                        workspace,
+                        project,
+                        release));
+        return id;
     }
 
     private void assertPublishedDownload(JsonNode project, String release, String original)
@@ -1498,16 +1508,14 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         p.put("agentId", first);
         p.withArray("tasks")
                 .addObject()
+                .put("id", "history-task")
                 .putObject("contextSnapshot")
                 .putArray("sources")
                 .addObject()
                 .put("sourceRef", source)
                 .put("kbId", allowedKb)
                 .put("text", "historical private source");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        writeProjectFixture(p.toString(), p.path("id").asText());
         String operation = UUID.randomUUID().toString(), projectId = p.path("id").asText();
         var request =
                 Map.of(
@@ -1535,10 +1543,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
         var current = (com.fasterxml.jackson.databind.node.ObjectNode) originalResponse.deepCopy();
         current.put("agentId", second);
         current.putArray("tasks");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                current.toString(),
-                projectId);
+        writeProjectFixture(current.toString(), projectId);
         var restricted =
                 api(
                         "POST",
@@ -1556,17 +1561,9 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                         "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
                         String.class,
                         operation));
-        assertEquals(
-                current.toString(),
-                jdbc.queryForObject(
-                        "SELECT body_json FROM mate_presales_project WHERE id=?",
-                        String.class,
-                        projectId));
+        assertEquals(current, json.readTree(storedProjectBody(projectId)));
         current.put("agentId", first);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                current.toString(),
-                projectId);
+        writeProjectFixture(current.toString(), projectId);
         assertEquals(
                 originalResponse,
                 api(
@@ -1623,7 +1620,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
             p.putArray("tasks");
             p.putArray("baselines");
             p.put("agentId", employee.getId().toString());
-            var item = p.withArray(collection).addObject();
+            var item = p.withArray(collection).addObject().put("id", "history-" + collection);
             var source =
                     collection.equals("tasks")
                             ? item.putObject("contextSnapshot").putArray("sources").addObject()
@@ -1634,10 +1631,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
             source.put("sourceRef", deniedRaw)
                     .put("kbId", allowedKb)
                     .put("text", "private historical source");
-            jdbc.update(
-                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                    p.toString(),
-                    p.path("id").asText());
+            writeProjectFixture(p.toString(), p.path("id").asText());
             api("GET", "/projects/" + p.path("id").asText(), "viewer", workspace, null, 403);
             // A restored grant permits the original snapshot without rewriting historical data.
             jdbc.update(
@@ -1658,10 +1652,7 @@ class PresalesIntegrationTest extends SemanticHttpFixture {
                     allowedKb,
                     employee.getId());
             p.remove("agentId");
-            jdbc.update(
-                    "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                    p.toString(),
-                    p.path("id").asText());
+            writeProjectFixture(p.toString(), p.path("id").asText());
             assertEquals(
                     p,
                     api(

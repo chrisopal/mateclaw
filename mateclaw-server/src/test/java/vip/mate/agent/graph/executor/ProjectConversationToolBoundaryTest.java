@@ -65,7 +65,8 @@ class ProjectConversationToolBoundaryTest {
                 new PresalesToolPolicy(
                         jdbc,
                         new ObjectMapper(),
-                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc)));
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc),
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc)));
 
         var result =
                 executor.execute(

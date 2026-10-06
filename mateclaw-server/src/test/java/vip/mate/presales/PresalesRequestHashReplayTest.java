@@ -144,15 +144,16 @@ class PresalesRequestHashReplayTest extends SemanticHttpFixture {
                         "SELECT actor_id FROM mate_presales_operation WHERE workspace_id=? LIMIT 1",
                         String.class,
                         workspace);
-        jdbc.update(
-                "INSERT INTO mate_presales_operation(workspace_id,actor_id,operation_id,request_hash,response_json) VALUES(?,?,?,?,?)",
+        PresalesStorageTestSupport.receipt(
+                jdbc,
+                json,
                 workspace,
                 actor,
                 original.path("operationId").asText(),
                 hash == null
                         ? StatementApplicationService.hash(envelope(original, projectId, method))
                         : hash,
-                json.writeValueAsString(response));
+                response);
     }
 
     @Test
@@ -318,8 +319,7 @@ class PresalesRequestHashReplayTest extends SemanticHttpFixture {
                 .put("id", "revoked-binding")
                 .put("kbId", "1001")
                 .put("role", "PROJECT");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?", project.toString(), id);
+        PresalesStorageTestSupport.write(jdbc, json, workspace, id, project.toString());
         org.mockito.Mockito.when(wikiKnowledgeBases.getById(1001L)).thenReturn(null);
         var blocked = command("POST", "safe", false);
         seed(blocked, id, "POST", json.createObjectNode().put("id", id), "unknown-format");

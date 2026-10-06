@@ -1,8 +1,10 @@
 # 架构检查与实施设计入口
 
+**当前范围调整（2026-10-06）**：按用户要求采用新数据完成售前 V2、真实生成和 Delivery；不验收旧数据/旧消费者兼容；Kingbase=TODO。实施与覆盖差异见[新数据设计](../plans/2026-10-06-presales-v2-newdata-design.md)，该调整不等于相关功能已通过。
+
 本目录以用户提供的 1.0.0 规范为需求来源。原始 ARCHITECTURE_SPEC、RULES、CHECKS、ACCEPTANCE、CODEX_TASKS 等保留原文；其中“执行下一阶段”的示例提示词不扩大本轮授权。
 
-当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中34项已有相称工程证据（含AC30原条款独立浏览器复核），正式签收仍分开。剩余实现、有限补证、环境/样本及远端强制配置均逐项列明，不以代码行数继续追加拆分。
+当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中39项已有相称工程证据（含本轮新数据 V2 四项及 Delivery），正式签收仍分开。本轮剩余真实模型阻塞，Kingbase延期、旧兼容排除；另有4项远端治理配置缺口，不以代码行数继续追加拆分。
 
 下面按切片保留的工程记录描述各自执行时点；其中“尚未提交”“结构未完成”等历史文字不覆盖当前收口表。原始要求和正式验收台账保持，历史失败证据不删除。
 

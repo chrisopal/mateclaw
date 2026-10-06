@@ -21,11 +21,12 @@ class ToolExecutionExecutorPresalesScopeTest {
     @Test
     void projectPolicyAllowsBoundReadOnlyWikiAndRejectsCrossProjectKb() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForObject(
-                        startsWith("SELECT body_json"), eq(String.class), eq("p"), eq("1")))
+        var projects = mock(vip.mate.presales.repository.PresalesProjectRepository.class);
+        when(projects.findBody("1", "p", false))
                 .thenReturn(
-                        "{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"42\"}],"
-                                + "\"tasks\":[{\"runId\":\"run\",\"status\":\"RUNNING\",\"contextSnapshot\":{\"sources\":[{\"sourceRef\":\"101\"}]}}]}");
+                        java.util.Optional.of(
+                                "{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"42\"}],"
+                                        + "\"tasks\":[{\"runId\":\"run\",\"status\":\"RUNNING\",\"contextSnapshot\":{\"sources\":[{\"sourceRef\":\"101\"}]}}]}"));
         when(jdbc.queryForObject(
                         startsWith("SELECT COUNT(*)"), eq(Integer.class), eq("42"), eq("1")))
                 .thenReturn(1);
@@ -34,7 +35,7 @@ class ToolExecutionExecutorPresalesScopeTest {
                 .thenReturn(false);
         var sourceAccess = mock(ProjectSourceAccess.class);
         when(sourceAccess.canEmployeeReadKb("1", "7", "42")).thenReturn(true);
-        var policy = new PresalesToolPolicy(jdbc, new ObjectMapper(), sourceAccess);
+        var policy = new PresalesToolPolicy(jdbc, new ObjectMapper(), sourceAccess, projects);
         var origin = ChatOrigin.web("presales:1:p:run", "1", 1L, null).withAgent(7L);
         assertTrue(
                 policy.evaluate(
@@ -75,11 +76,14 @@ class ToolExecutionExecutorPresalesScopeTest {
     @Test
     void projectPolicyFailsClosedWhenRunOrSnapshotIsMissing() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForObject(
-                        startsWith("SELECT body_json"), eq(String.class), eq("p"), eq("1")))
-                .thenReturn("{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"42\"}],\"tasks\":[]}");
+        var projects = mock(vip.mate.presales.repository.PresalesProjectRepository.class);
+        when(projects.findBody("1", "p", false))
+                .thenReturn(
+                        java.util.Optional.of(
+                                "{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"42\"}],\"tasks\":[]}"));
         var policy =
-                new PresalesToolPolicy(jdbc, new ObjectMapper(), mock(ProjectSourceAccess.class));
+                new PresalesToolPolicy(
+                        jdbc, new ObjectMapper(), mock(ProjectSourceAccess.class), projects);
         var origin = ChatOrigin.web("presales:1:p:run", "1", 1L, null).withAgent(7L);
         assertFalse(
                 policy.evaluate(

@@ -81,10 +81,7 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
     }
 
     private String stored(ObjectNode p) {
-        return jdbc.queryForObject(
-                "SELECT body_json FROM mate_presales_project WHERE id=?",
-                String.class,
-                p.path("id").asText());
+        return PresalesStorageTestSupport.body(jdbc, workspace, p.path("id").asText());
     }
 
     private void error(JsonNode r, String code, String message) {
@@ -223,13 +220,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                                 List.of(
                                         p.path("id").asText(),
                                         json.treeToValue(c, PresalesDtos.Command.class))));
-        jdbc.update(
-                "INSERT INTO mate_presales_operation(workspace_id,actor_id,operation_id,request_hash,response_json) VALUES(?,?,?,?,?)",
-                workspace,
-                p.path("createdBy").asText(),
-                operation,
-                hash,
-                p.toString());
+        PresalesStorageTestSupport.receipt(
+                jdbc, json, workspace, p.path("createdBy").asText(), operation, hash, p);
         assertEquals(p, command(p, c, "member", 200).path("data"));
         payload.put(field, 456);
         error(command(p, c, "member", 409), "OPERATION_CONFLICT", null);
@@ -265,10 +257,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                 .put("id", "opaque-binding")
                 .put("kbId", "1001")
                 .put("role", "PROJECT");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         when(wikiKnowledgeBases.getById(1001L)).thenReturn(null);
         error(
                 command(
@@ -336,7 +326,7 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
                                 .path("data");
         assertEquals("DRAFT", p.path("tasks").get(0).path("status").asText());
         assertEquals(task.path("result"), p.path("tasks").get(0).path("result"));
-        assertEquals(p.toString(), stored(p));
+        assertEquals(p, json.readTree(stored(p)));
     }
 
     @Test
@@ -344,10 +334,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
         var p = project();
         // Historical solution fixture isolates review rules from solution creation prerequisites.
         p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         var cases =
                 List.of(
                         new String[] {
@@ -418,10 +406,8 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
     void reviewDefaultsExtensionsAuthorityAndImmutableRevisionsSurviveReadback() throws Exception {
         var p = project();
         p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         var payload =
                 json.createObjectNode().put("solutionId", "solution").put("summary", "review");
         var issues = payload.putArray("issues");
@@ -497,7 +483,7 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
         assertEquals(
                 p,
                 api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
-        assertEquals(p.toString(), stored(p));
+        assertEquals(p, json.readTree(stored(p)));
     }
 
     @Test
@@ -638,6 +624,6 @@ class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
         assertEquals(
                 p,
                 api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
-        assertEquals(p.toString(), stored(p));
+        assertEquals(p, json.readTree(stored(p)));
     }
 }

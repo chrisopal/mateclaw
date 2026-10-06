@@ -98,7 +98,11 @@ class PresalesSourceScopeTest {
                 "{\"agentId\":\"7\",\"materials\":[{\"kbId\":\"1\"}],\"tasks\":[{\"runId\":\"run\","
                         + "\"status\":\"RUNNING\",\"contextSnapshot\":{\"sources\":[]}}]}");
         var policy =
-                new PresalesToolPolicy(jdbc, new ObjectMapper(), new ProjectSourceAccess(jdbc));
+                new PresalesToolPolicy(
+                        jdbc,
+                        new ObjectMapper(),
+                        new ProjectSourceAccess(jdbc),
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc));
         var origin = ChatOrigin.web("presales:10:p:run", "9", 10L, null).withAgent(7L);
         String args = "{\"agentId\":\"7\",\"kbName\":\"A\",\"query\":\"scope\"}";
 

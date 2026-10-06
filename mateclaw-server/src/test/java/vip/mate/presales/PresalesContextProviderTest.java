@@ -4,18 +4,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import vip.mate.semantic.web.SemanticApiException;
 
 class PresalesContextProviderTest {
-    @Test
-    void projectSourceScopeAndUpdatesAreEnforced() throws Exception {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2})
+    void projectSourceScopeAndUpdatesAreEnforced(int storageVersion) throws Exception {
         var jdbc =
                 new JdbcTemplate(
                         new DriverManagerDataSource(
-                                "jdbc:h2:mem:presalesctx;DB_CLOSE_DELAY=-1", "sa", ""));
+                                "jdbc:h2:mem:presalesctx" + storageVersion + ";DB_CLOSE_DELAY=-1",
+                                "sa",
+                                ""));
         jdbc.execute(
                 "CREATE TABLE mate_semantic_source_governance(graph_id VARCHAR,source_id VARCHAR,state VARCHAR)");
         jdbc.execute(
@@ -37,6 +41,10 @@ class PresalesContextProviderTest {
                 (com.fasterxml.jackson.databind.node.ObjectNode)
                         json.readTree(
                                 "{\"id\":\"p1\",\"version\":1,\"agentId\":\"7\",\"materials\":[{\"kbId\":\"1\",\"graphId\":\"g1\",\"role\":\"PROJECT\"}],\"reviews\":[{\"summary\":\"self-approved\"}]}");
+        p.put("storageVersion", storageVersion);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) p.path("materials").get(0))
+                .put("id", "m")
+                .put("version", 1);
         var provider =
                 new PresalesContextProvider(
                         jdbc,

@@ -171,6 +171,12 @@ class PresalesSqlListingTest {
                 .target("219")
                 .load()
                 .migrate();
+        new ResourceDatabasePopulator(
+                        new ClassPathResource(
+                                "db/migration/"
+                                        + (external ? "mysql" : "h2")
+                                        + "/V223__presales_object_storage.sql"))
+                .execute(source);
         jdbc.reads.clear();
         jdbc.rows = 0;
     }
@@ -181,6 +187,8 @@ class PresalesSqlListingTest {
         if (external)
             for (String table :
                     List.of(
+                            "mate_presales_object_revision",
+                            "mate_presales_object",
                             "mate_presales_artifact",
                             "mate_presales_revision",
                             "mate_presales_operation",
@@ -294,17 +302,20 @@ class PresalesSqlListingTest {
     private PresalesDtos.Page shadow(
             String scope, String q, String status, String owner, String stage, int page, int size) {
         var bodies =
-                jdbc.query(
-                        "SELECT body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",
-                        (rs, n) -> {
-                            try {
-                                return (com.fasterxml.jackson.databind.node.ObjectNode)
-                                        json.readTree(rs.getString(1));
-                            } catch (Exception e) {
-                                throw new IllegalStateException("legacy decode", e);
-                            }
-                        },
-                        scope);
+                new PresalesProjectRepository(jdbc)
+                        .listBodies(scope).stream()
+                                .map(
+                                        body -> {
+                                            try {
+                                                return (com.fasterxml.jackson.databind.node
+                                                                .ObjectNode)
+                                                        json.readTree(body);
+                                            } catch (Exception e) {
+                                                throw new IllegalStateException(
+                                                        "project decode", e);
+                                            }
+                                        })
+                                .toList();
         return PresalesProjectListing.page(
                 bodies.stream(),
                 new PresalesProjectListing.Criteria(q, status, owner, stage, page, size),
@@ -607,14 +618,18 @@ class PresalesSqlListingTest {
                         json.writeValueAsString(first)),
                 vip.mate.semantic.statement.StatementApplicationService.hash(
                         json.writeValueAsString(different)));
-        var created = service.create("scope", first);
+        var tx =
+                new org.springframework.transaction.support.TransactionTemplate(
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                                jdbc.getDataSource()));
+        var created = tx.execute(status -> service.create("scope", first));
         var conflict =
                 assertThrows(
                         vip.mate.semantic.web.SemanticApiException.class,
-                        () -> service.create("scope", different));
+                        () -> tx.execute(status -> service.create("scope", different)));
         assertEquals(409, conflict.status());
         assertEquals("OPERATION_CONFLICT", conflict.code());
-        assertEquals(created, service.create("scope", first));
+        assertEquals(created, tx.execute(status -> service.create("scope", first)));
         assertEquals(
                 1,
                 jdbc.queryForObject(

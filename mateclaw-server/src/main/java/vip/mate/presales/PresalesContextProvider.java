@@ -113,6 +113,8 @@ public class PresalesContextProvider {
             }
         }
         out.put("truncated", truncated).put("needsHumanReview", true);
+        if (PresalesTaskDependencies.newProject(project))
+            PresalesTaskDependencies.capture(project, out);
         return out;
     }
 
@@ -120,8 +122,12 @@ public class PresalesContextProvider {
         access.requireActor(scope, snapshot.path("actorId").asText(), "member");
         Long version = PresalesProjectRevision.positiveRevision(project.path("version"));
         if (version == null
-                || !PresalesProjectRevision.matchesRevision(
-                        snapshot.path("projectVersion"), version))
+                || PresalesProjectRevision.positiveRevision(snapshot.path("projectVersion"))
+                        == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
+        if (PresalesTaskDependencies.newProject(project)
+                || PresalesTaskDependencies.hasManifest(snapshot))
+            PresalesTaskDependencies.requireCurrent(project, snapshot);
+        else if (!PresalesProjectRevision.matchesRevision(snapshot.path("projectVersion"), version))
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
         for (var source : snapshot.path("sources")) {
             if (!sourceAccess.canEmployeeReadKb(

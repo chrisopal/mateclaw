@@ -75,7 +75,29 @@ class PresalesProjectPersistenceContractTest extends SemanticHttpFixture {
 
     private void assertStored(JsonNode response, String operation) throws Exception {
         String projectId = response.path("id").asText(), stored = body(projectId);
-        assertEquals(response, json.readTree(stored));
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        assertEquals(
+                response,
+                json.readTree(repository.findBody(workspace, projectId, false).orElseThrow()));
+        assertEquals(
+                response,
+                json.readTree(
+                        repository
+                                .findRevision(
+                                        workspace, projectId, response.path("version").asLong())
+                                .orElseThrow()));
+        assertEquals(
+                response,
+                json.readTree(
+                        repository
+                                .findReceipt(
+                                        workspace, response.path("createdBy").asText(), operation)
+                                .orElseThrow()
+                                .responseJson()));
+        assertEquals(2, json.readTree(stored).path("storageVersion").asInt());
+        assertFalse(json.readTree(stored).has("materials"));
+        assertTrue(json.readTree(stored).path("_objectRefs").isObject());
+        // The three stored manifests are identical, while reads resolve their pinned objects.
         assertEquals(
                 stored,
                 jdbc.queryForObject(
@@ -100,10 +122,24 @@ class PresalesProjectPersistenceContractTest extends SemanticHttpFixture {
         String id = created.path("id").asText();
         var historical = (com.fasterxml.jackson.databind.node.ObjectNode) created.deepCopy();
         historical.putObject("legacyExtension").put("unchanged", "  Ω\n客户原文  ");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                json.writeValueAsString(historical),
-                id);
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        var tx =
+                new org.springframework.transaction.support.TransactionTemplate(
+                        new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                                jdbc.getDataSource()));
+        String historicalBody = json.writeValueAsString(historical);
+        tx.executeWithoutResult(
+                status ->
+                        assertEquals(
+                                1,
+                                repository.updateRuntimeBody(
+                                        workspace,
+                                        id,
+                                        1,
+                                        1,
+                                        historicalBody,
+                                        PresalesListingProjectionV1.fromBody(
+                                                historicalBody, json))));
         String operation = UUID.randomUUID().toString();
         JsonNode changed =
                 api(

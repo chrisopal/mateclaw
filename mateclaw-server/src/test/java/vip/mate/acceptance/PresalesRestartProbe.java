@@ -88,6 +88,20 @@ final class PresalesRestartProbe {
             require(
                     revisions(jdbc, projectId) == state.path("revisions").intValue(),
                     "No duplicate command revision");
+            require(
+                    objectCount(jdbc, projectId, false) == state.path("objectCount").intValue(),
+                    "Recovery must preserve current object cardinality");
+            require(
+                    objectCount(jdbc, projectId, true)
+                            == state.path("objectRevisionCount").intValue() + 1,
+                    "Recovery must append exactly one task object revision");
+            String manifest = rawBody(jdbc, workspace, projectId);
+            Path rawSaved = root.resolve("recovered-manifest.json");
+            if (phase.equals("restart-recover")) Files.writeString(rawSaved, manifest);
+            else
+                require(
+                        Files.readString(rawSaved).equals(manifest),
+                        "Second restart must preserve exact stored reference bytes");
             Path saved = root.resolve("recovered-body.json");
             if (phase.equals("restart-recover")) Files.writeString(saved, body);
             else
@@ -278,6 +292,12 @@ final class PresalesRestartProbe {
         require(calls.get() == 1, "Exactly one model request must be pending");
         String body = body(jdbc, scope, projectId);
         var persisted = json.readTree(body);
+        var manifest = json.readTree(rawBody(jdbc, scope, projectId));
+        require(
+                manifest.path("storageVersion").asInt() == 2
+                        && manifest.path("_objectRefs").isObject()
+                        && !manifest.has("tasks"),
+                "New project must store V2 references, not an aggregate mirror");
         require(
                 persisted.equals(submitted.path("data")),
                 "Generate response must equal committed task body");
@@ -298,7 +318,9 @@ final class PresalesRestartProbe {
                 .put("beforeBody", body)
                 .put("acceptedVersion", persisted.path("version").intValue())
                 .put("receipts", receipts(jdbc, scope))
-                .put("revisions", revisions(jdbc, projectId));
+                .put("revisions", revisions(jdbc, projectId))
+                .put("objectCount", objectCount(jdbc, projectId, false))
+                .put("objectRevisionCount", objectCount(jdbc, projectId, true));
         json.writeValue(root.resolve("restart-private-state.json").toFile(), state);
         return Map.of(
                 "phase",
@@ -341,10 +363,25 @@ final class PresalesRestartProbe {
     }
 
     private static String body(JdbcTemplate jdbc, String workspace, String project) {
+        return new vip.mate.presales.repository.PresalesProjectRepository(jdbc)
+                .findBody(workspace, project, false)
+                .orElseThrow();
+    }
+
+    private static String rawBody(JdbcTemplate jdbc, String workspace, String project) {
         return jdbc.queryForObject(
                 "SELECT body_json FROM mate_presales_project WHERE workspace_id=? AND id=?",
                 String.class,
                 workspace,
+                project);
+    }
+
+    private static int objectCount(JdbcTemplate jdbc, String project, boolean revisions) {
+        return jdbc.queryForObject(
+                "SELECT COUNT(*) FROM "
+                        + (revisions ? "mate_presales_object_revision" : "mate_presales_object")
+                        + " WHERE project_id=?",
+                Integer.class,
                 project);
     }
 

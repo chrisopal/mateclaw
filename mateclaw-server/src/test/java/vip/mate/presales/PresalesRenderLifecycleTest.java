@@ -107,7 +107,8 @@ class PresalesRenderLifecycleTest {
                                 migration + "V219__presales_versioned_request_hash.sql"),
                         new ClassPathResource(
                                 migration + "V220__presales_project_revision_capacity.sql"),
-                        new ClassPathResource(migration + "V221__presales_render_tasks.sql"))
+                        new ClassPathResource(migration + "V221__presales_render_tasks.sql"),
+                        new ClassPathResource(migration + "V223__presales_object_storage.sql"))
                 .execute(source);
         jdbc = new FailingJdbcTemplate(source);
         jdbc.execute("CREATE TABLE mate_user(id BIGINT PRIMARY KEY)");
@@ -134,6 +135,8 @@ class PresalesRenderLifecycleTest {
             else
                 for (String table :
                         List.of(
+                                "mate_presales_object_revision",
+                                "mate_presales_object",
                                 "mate_presales_render_task",
                                 "mate_presales_artifact",
                                 "mate_presales_revision",

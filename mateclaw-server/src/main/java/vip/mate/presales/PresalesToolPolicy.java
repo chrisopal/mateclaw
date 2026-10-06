@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.execution.ProjectConversationToolBoundary;
+import vip.mate.presales.repository.PresalesProjectRepository;
 import vip.mate.workspace.core.service.ProjectSourceAccess;
 
 /**
@@ -45,12 +46,17 @@ public class PresalesToolPolicy implements ProjectConversationToolBoundary {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final ProjectSourceAccess sourceAccess;
+    private final PresalesProjectRepository projects;
 
     public PresalesToolPolicy(
-            JdbcTemplate jdbc, ObjectMapper json, ProjectSourceAccess sourceAccess) {
+            JdbcTemplate jdbc,
+            ObjectMapper json,
+            ProjectSourceAccess sourceAccess,
+            PresalesProjectRepository projects) {
         this.jdbc = jdbc;
         this.json = json;
         this.sourceAccess = sourceAccess;
+        this.projects = projects;
     }
 
     @Override
@@ -187,12 +193,7 @@ public class PresalesToolPolicy implements ProjectConversationToolBoundary {
         String projectId = match.group(2);
         String runId = match.group(3);
         try {
-            String body =
-                    jdbc.queryForObject(
-                            "SELECT body_json FROM mate_presales_project WHERE id=? AND workspace_id=?",
-                            String.class,
-                            projectId,
-                            workspaceId);
+            String body = projects.findBody(workspaceId, projectId, false).orElseThrow();
             JsonNode value = json.readTree(body);
             String agentId = value.path("agentId").asText("");
             if (agentId.isBlank()) return null;

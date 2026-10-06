@@ -15,13 +15,39 @@ public record PresalesToolScope(
         String operationId,
         List<String> inputRefs,
         String employeeId,
-        long projectVersion)
+        long projectVersion,
+        String dependencyDigest)
         implements ProjectToolPolicy {
     private static final Set<String> ALLOWED = PresalesToolPolicy.PROJECT_VISIBLE_TOOLS;
 
+    public PresalesToolScope(
+            String workspaceId,
+            String actorId,
+            String projectId,
+            String taskId,
+            String runId,
+            String operationId,
+            List<String> inputRefs,
+            String employeeId,
+            long projectVersion) {
+        this(
+                workspaceId,
+                actorId,
+                projectId,
+                taskId,
+                runId,
+                operationId,
+                inputRefs,
+                employeeId,
+                projectVersion,
+                "");
+    }
+
     public PresalesToolScope {
         inputRefs = inputRefs == null ? List.of() : List.copyOf(inputRefs);
-        if (workspaceId == null
+        if (dependencyDigest == null
+                || (!dependencyDigest.isEmpty() && !dependencyDigest.matches("v2:[0-9a-f]{64}"))
+                || workspaceId == null
                 || workspaceId.isBlank()
                 || actorId == null
                 || actorId.isBlank()

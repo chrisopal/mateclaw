@@ -221,7 +221,8 @@ public class PresalesEmployeeRuntime {
                         task.path("operationId").asText(),
                         PresalesToolScope.inputRefs(snapshot),
                         task.path("agentId").asText(),
-                        version);
+                        version,
+                        PresalesTaskDependencies.snapshotDigest(snapshot));
         return new ProjectExecutionOptions(
                 runId,
                 pin.modelConfigId(),

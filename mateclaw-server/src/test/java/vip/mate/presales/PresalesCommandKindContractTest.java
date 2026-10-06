@@ -81,10 +81,7 @@ class PresalesCommandKindContractTest extends SemanticHttpFixture {
     }
 
     private String stored(ObjectNode p) {
-        return jdbc.queryForObject(
-                "SELECT body_json FROM mate_presales_project WHERE id=?",
-                String.class,
-                p.path("id").asText());
+        return PresalesStorageTestSupport.body(jdbc, workspace, p.path("id").asText());
     }
 
     private void error(JsonNode r, String code, String message) {
@@ -167,7 +164,7 @@ class PresalesCommandKindContractTest extends SemanticHttpFixture {
         payload.put("legacyExtension", "retained in hash");
         c.put("action", "unknown");
         error(command(p, c, "member", 409), "OPERATION_CONFLICT", null);
-        assertEquals(accepted.toString(), stored(p));
+        assertEquals(accepted, json.readTree(stored(p)));
     }
 
     @Test
@@ -179,10 +176,8 @@ class PresalesCommandKindContractTest extends SemanticHttpFixture {
                 .put("id", "opaque-binding")
                 .put("kbId", "1001")
                 .put("role", "PROJECT");
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         when(wikiKnowledgeBases.getById(1001L)).thenReturn(null);
         var payload = json.createObjectNode().put("id", "opaque-binding");
         error(

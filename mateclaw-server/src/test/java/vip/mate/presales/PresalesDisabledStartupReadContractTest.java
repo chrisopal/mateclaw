@@ -151,7 +151,11 @@ class PresalesDisabledStartupReadContractTest extends SemanticHttpFixture {
                 UUID.randomUUID().toString(),
                 p.path("ownerId").asText(),
                 now);
-        p.withArray("materials").addObject().put("kbId", kb).put("graphId", graph);
+        p.withArray("materials")
+                .addObject()
+                .put("id", "material")
+                .put("kbId", kb)
+                .put("graphId", graph);
         var baseline = p.withArray("baselines").addObject().put("id", "baseline");
         baseline.putArray("references");
         var solution =
@@ -207,10 +211,8 @@ class PresalesDisabledStartupReadContractTest extends SemanticHttpFixture {
     }
 
     private void persist(ObjectNode p) throws Exception {
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                json.writeValueAsString(p),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), json.writeValueAsString(p));
     }
 
     private String path(Frozen f, String suffix) {

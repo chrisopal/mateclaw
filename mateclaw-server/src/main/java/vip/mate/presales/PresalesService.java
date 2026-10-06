@@ -135,6 +135,7 @@ public class PresalesService {
         text(r.name(), "name", 300);
         text(r.customer(), "customer", 300);
         ObjectNode p = json.createObjectNode();
+        p.put("storageVersion", 2);
         p.put("id", id())
                 .put("workspaceId", scope)
                 .put("version", 1)
@@ -215,6 +216,9 @@ public class PresalesService {
                     ObjectNode task = json.valueToTree(queued);
                     task.put("packageDigest", original.digest());
                     var request = new Command(expectedVersion, operationId, "SAVE_AI_TASK", task);
+                    ObjectNode current = load(scope, projectId, true);
+                    if (PresalesTaskDependencies.newProject(current))
+                        PresalesTaskDependencies.requireCurrent(current, queued.contextSnapshot());
                     ObjectNode result = applyCommand(scope, projectId, request, false, true);
                     ObjectNode stored = null;
                     for (var item : result.path("tasks"))
@@ -605,6 +609,16 @@ public class PresalesService {
         if (!"PUBLISHED".equals(release.path("status").asText()))
             throw new SemanticApiException(409, "PUBLISHED_RELEASE_REQUIRED", "请选择已发布版本");
         return frozenHandoff(projectId, releaseId, release);
+    }
+
+    /** Translates the application's HTTP errors at the public handoff port boundary. */
+    ObjectNode handoffForDelivery(String scope, String projectId, String releaseId) {
+        try {
+            return handoff(scope, projectId, releaseId);
+        } catch (SemanticApiException unavailable) {
+            throw new vip.mate.presales.api.PresalesHandoffReader.Unavailable(
+                    unavailable.status(), unavailable.code());
+        }
     }
 
     private ObjectNode frozenHandoff(String projectId, String releaseId, ObjectNode release) {

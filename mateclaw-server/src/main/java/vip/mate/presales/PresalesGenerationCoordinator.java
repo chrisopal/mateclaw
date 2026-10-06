@@ -204,7 +204,9 @@ public class PresalesGenerationCoordinator {
                     return;
                 Long version = PresalesProjectRevision.positiveRevision(current.path("version"));
                 if (version == null) throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
-                if (version != submission.acceptedVersion()) {
+                if (!PresalesTaskDependencies.newProject(current)
+                        && !PresalesTaskDependencies.hasManifest(submission.snapshot())
+                        && version != submission.acceptedVersion()) {
                     task.put("status", "FAILED").put("error", "PROJECT_CHANGED_DURING_GENERATION");
                     task.remove("result");
                 }
@@ -220,7 +222,12 @@ public class PresalesGenerationCoordinator {
             } catch (SemanticApiException e) {
                 if ("VERSION_CONFLICT".equals(e.code()) && attempt < 4) continue;
                 task.put("status", "FAILED")
-                        .put("error", "TERMINAL_PERSISTENCE_FAILED")
+                        .put(
+                                "error",
+                                PresalesTaskDependencies.hasManifest(submission.snapshot())
+                                                && !"VERSION_CONFLICT".equals(e.code())
+                                        ? e.code()
+                                        : "TERMINAL_PERSISTENCE_FAILED")
                         .remove("result");
                 persistFailureWithoutActor(submission, task);
                 return;
@@ -259,12 +266,14 @@ public class PresalesGenerationCoordinator {
                     throw new PresalesRejected(
                             409, "VERSION_CONFLICT", "Stored project versions do not match");
                 long nextVersion = PresalesProjectRevision.nextRevision(version);
-                // A concurrent project edit invalidates the model snapshot; keep the task terminal
-                // and
-                // discard its output rather than overwriting the user's newer project body.
+                // Merge only the terminal failure into the latest body; metadata edits in V2
+                // do not imply changed task inputs. This fallback never accepts model output.
                 String error =
-                        version == submission.acceptedVersion()
-                                ? "TERMINAL_PERSISTENCE_FAILED"
+                        PresalesTaskDependencies.newProject(project)
+                                        || PresalesTaskDependencies.hasManifest(
+                                                submission.snapshot())
+                                        || version == submission.acceptedVersion()
+                                ? task.path("error").asText("TERMINAL_PERSISTENCE_FAILED")
                                 : "PROJECT_CHANGED_DURING_GENERATION";
                 task.put("status", "FAILED").put("error", error).remove("result");
                 live.remove("result");

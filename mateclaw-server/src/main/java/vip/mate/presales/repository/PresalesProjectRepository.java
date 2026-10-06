@@ -10,16 +10,19 @@ import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import vip.mate.presales.PresalesListingProjectionV1.Projection;
 
-/** SQL facts only. Callers own authorization, JSON encoding, errors and transaction boundaries. */
+/** SQL persistence and storage encoding. Callers own authorization and transaction boundaries. */
 @Repository
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesProjectRepository {
     private final JdbcTemplate jdbc;
+    private final PresalesObjectStorage objects;
 
     public PresalesProjectRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
+        this.objects = new PresalesObjectStorage(jdbc);
     }
 
     public record ProjectRow(
@@ -95,18 +98,28 @@ public class PresalesProjectRepository {
                 .findFirst();
     }
 
+    private record StoredBody(String id, String body) {}
+
     public List<String> listBodies(String scope) {
-        return jdbc.query(
-                "SELECT body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",
-                (row, n) -> row.getString(1),
-                scope);
+        return jdbc
+                .query(
+                        "SELECT id,body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",
+                        (row, n) -> new StoredBody(row.getString(1), row.getString(2)),
+                        scope)
+                .stream()
+                .map(row -> objects.expand(scope, row.id(), row.body()))
+                .toList();
     }
 
     /** Server restart inspection; callers own recovery eligibility and transitions. */
     public List<ProjectRow> listRuntimeRows() {
-        return jdbc.query(
-                "SELECT id,workspace_id,version,name,status,body_json FROM mate_presales_project",
-                PresalesProjectRepository::projectRow);
+        return jdbc
+                .query(
+                        "SELECT id,workspace_id,version,name,status,body_json FROM mate_presales_project",
+                        PresalesProjectRepository::projectRow)
+                .stream()
+                .map(this::expandedRow)
+                .toList();
     }
 
     public Optional<ProjectRow> findRuntimeRow(String scope, String id) {
@@ -117,7 +130,8 @@ public class PresalesProjectRepository {
                         id,
                         scope)
                 .stream()
-                .findFirst();
+                .findFirst()
+                .map(this::expandedRow);
     }
 
     private static final String LISTING_SET =
@@ -125,7 +139,11 @@ public class PresalesProjectRepository {
                     + "listing_status_key=?,listing_owner_key=?,listing_stage_key=?,listing_summary_json=?,"
                     + "listing_decode_failure=?,listing_stage_failure=?,listing_summary_failure=?";
 
-    /** Runtime envelope CAS preserves separately maintained name/status columns. */
+    /**
+     * Runtime CAS preserves name/status and atomically persists object revisions. REQUIRED joins a
+     * caller transaction, or supplies a short transaction for background recovery/failure cleanup.
+     */
+    @Transactional
     public int updateRuntimeBody(
             String scope,
             String id,
@@ -133,12 +151,14 @@ public class PresalesProjectRepository {
             long nextVersion,
             String bodyJson,
             Projection listing) {
+        String storedBody = prepareUpdate(scope, id, expectedVersion, bodyJson);
+        if (storedBody == null) return 0;
         return jdbc.update(
                 "UPDATE mate_presales_project SET body_json=?,version=?,"
                         + LISTING_SET
                         + " WHERE id=? AND workspace_id=? AND version=?",
                 parameters(
-                        new Object[] {bodyJson, nextVersion},
+                        new Object[] {storedBody, nextVersion},
                         listingArguments(listing, nextVersion),
                         new Object[] {id, scope, expectedVersion}));
     }
@@ -176,6 +196,33 @@ public class PresalesProjectRepository {
                 row.getString("body_json"));
     }
 
+    private ProjectRow expandedRow(ProjectRow row) {
+        return new ProjectRow(
+                row.id(),
+                row.workspaceId(),
+                row.version(),
+                row.name(),
+                row.status(),
+                objects.expand(row.workspaceId(), row.id(), row.bodyJson()),
+                row.listing());
+    }
+
+    private String prepareUpdate(String scope, String id, long expected, String body) {
+        if (PresalesObjectCodec.isV2(body)) {
+            if (!objects.lockVersion(scope, id, expected)) return null;
+            return objects.persist(scope, id, body);
+        }
+        var existing =
+                jdbc.queryForList(
+                        "SELECT body_json FROM mate_presales_project WHERE workspace_id=? AND id=? FOR UPDATE",
+                        String.class,
+                        scope,
+                        id);
+        if (!existing.isEmpty() && PresalesObjectCodec.isV2(existing.getFirst()))
+            throw new IllegalStateException("V2 project cannot fall back to aggregate storage");
+        return body;
+    }
+
     public Optional<String> findBody(String scope, String id, boolean lock) {
         return jdbc
                 .query(
@@ -185,10 +232,15 @@ public class PresalesProjectRepository {
                         id,
                         scope)
                 .stream()
-                .findFirst();
+                .findFirst()
+                .map(body -> objects.expand(scope, id, body, lock));
     }
 
     public void insert(ProjectRow project) {
+        String storedBody =
+                PresalesObjectCodec.isV2(project.bodyJson())
+                        ? objects.persist(project.workspaceId(), project.id(), project.bodyJson())
+                        : project.bodyJson();
         jdbc.update(
                 "INSERT INTO mate_presales_project(id,workspace_id,version,name,status,body_json,"
                         + "listing_contract,listing_project_version,listing_name_key,listing_customer_key,"
@@ -202,19 +254,23 @@ public class PresalesProjectRepository {
                             project.version(),
                             project.name(),
                             project.status(),
-                            project.bodyJson()
+                            storedBody
                         },
                         listingArguments(project.listing(), project.version())));
     }
 
     public int update(ProjectRow project, long expectedVersion) {
+        String storedBody =
+                prepareUpdate(
+                        project.workspaceId(), project.id(), expectedVersion, project.bodyJson());
+        if (storedBody == null) return 0;
         return jdbc.update(
                 "UPDATE mate_presales_project SET version=?,name=?,status=?,body_json=?,"
                         + LISTING_SET
                         + " WHERE id=? AND workspace_id=? AND version=?",
                 parameters(
                         new Object[] {
-                            project.version(), project.name(), project.status(), project.bodyJson()
+                            project.version(), project.name(), project.status(), storedBody
                         },
                         listingArguments(project.listing(), project.version()),
                         new Object[] {project.id(), project.workspaceId(), expectedVersion}));
@@ -332,18 +388,30 @@ public class PresalesProjectRepository {
                         actor,
                         operation)
                 .stream()
-                .findFirst();
+                .findFirst()
+                .map(
+                        receipt ->
+                                new OperationReceipt(
+                                        receipt.requestHash(),
+                                        objects.expandSnapshot(scope, receipt.responseJson())));
     }
 
     public void insertReceipt(
             String scope, String actor, String operation, String hash, String responseJson) {
+        String storedResponse =
+                PresalesObjectCodec.isV2(responseJson)
+                        ? objects.snapshot(
+                                scope,
+                                PresalesObjectCodec.id(PresalesObjectCodec.object(responseJson)),
+                                responseJson)
+                        : responseJson;
         jdbc.update(
                 "INSERT INTO mate_presales_operation(workspace_id,actor_id,operation_id,request_hash,response_json) VALUES(?,?,?,?,?)",
                 scope,
                 actor,
                 operation,
                 hash,
-                responseJson);
+                storedResponse);
     }
 
     public void insertRevision(
@@ -353,13 +421,36 @@ public class PresalesProjectRepository {
             String action,
             String bodyJson,
             LocalDateTime createdAt) {
+        String storedBody =
+                PresalesObjectCodec.isV2(bodyJson)
+                        ? objects.snapshot(
+                                PresalesObjectCodec.object(bodyJson).path("workspaceId").asText(),
+                                projectId,
+                                bodyJson)
+                        : bodyJson;
         jdbc.update(
                 "INSERT INTO mate_presales_revision(project_id,version,actor_id,action,body_json,created_at) VALUES(?,?,?,?,?,?)",
                 projectId,
                 version,
                 actor,
                 action,
-                bodyJson,
+                storedBody,
                 createdAt);
+    }
+
+    /**
+     * Workspace-scoped historical read resolves the original immutable object revision references.
+     */
+    public Optional<String> findRevision(String scope, String projectId, long version) {
+        return jdbc
+                .query(
+                        "SELECT r.body_json FROM mate_presales_revision r JOIN mate_presales_project p ON p.id=r.project_id WHERE p.workspace_id=? AND r.project_id=? AND r.version=? FOR UPDATE",
+                        (row, n) -> row.getString(1),
+                        scope,
+                        projectId,
+                        version)
+                .stream()
+                .findFirst()
+                .map(body -> objects.expand(scope, projectId, body, true));
     }
 }

@@ -389,11 +389,29 @@ class PresalesTaskCreationAuthorityTest extends SemanticHttpFixture {
                 .thenReturn(PresalesTaskPackageFixtures.capture("S1", "17", "fixture-config"));
         when(contexts.snapshot(eq(workspace), any(), eq("S1"), anyString()))
                 .thenAnswer(
-                        call ->
-                                json.createObjectNode()
-                                        .put("workspaceId", workspace)
-                                        .put("caseRef", project.path("id").asText())
-                                        .put("actorId", project.path("createdBy").asText()));
+                        call -> {
+                            ObjectNode current = call.getArgument(1);
+                            ObjectNode snapshot =
+                                    json.createObjectNode()
+                                            .put("workspaceId", workspace)
+                                            .put("caseRef", current.path("id").asText())
+                                            .put("actorId", current.path("createdBy").asText());
+                            ObjectNode operational = snapshot.putObject("operational_record");
+                            for (String field : List.of("name", "customer", "industry", "goal"))
+                                operational.set(field, current.path(field));
+                            for (String collection :
+                                    List.of(
+                                            "requirements",
+                                            "clarifications",
+                                            "baselines",
+                                            "fitGaps",
+                                            "cases",
+                                            "solutions"))
+                                snapshot.set(collection, current.path(collection).deepCopy());
+                            snapshot.putArray("sources");
+                            PresalesTaskDependencies.capture(current, snapshot);
+                            return snapshot;
+                        });
     }
 
     private ObjectNode manualDraft() {
@@ -409,14 +427,24 @@ class PresalesTaskCreationAuthorityTest extends SemanticHttpFixture {
     }
 
     private void persistHistoricalFixture(ObjectNode project) {
-        // Fixture-only import: do not bootstrap protected history through the vulnerable API.
-        assertEquals(
-                1,
-                jdbc.update(
-                        "UPDATE mate_presales_project SET body_json=? WHERE id=? AND workspace_id=?",
-                        project.toString(),
-                        project.path("id").asText(),
-                        workspace));
+        // Trusted fixture construction goes through the new store, never a second aggregate writer.
+        new org.springframework.transaction.support.TransactionTemplate(transactions)
+                .executeWithoutResult(
+                        status ->
+                                assertEquals(
+                                        1,
+                                        packages.update(
+                                                new vip.mate.presales.repository
+                                                        .PresalesProjectRepository.ProjectRow(
+                                                        project.path("id").asText(),
+                                                        workspace,
+                                                        project.path("version").asLong(),
+                                                        project.path("name").asText(),
+                                                        project.path("status").asText(),
+                                                        project.toString(),
+                                                        PresalesListingProjectionV1.fromBody(
+                                                                project.toString(), json)),
+                                                project.path("version").asLong())));
     }
 
     private void assertRejectedWithoutWrites(ObjectNode project, ObjectNode payload)
@@ -513,7 +541,19 @@ class PresalesTaskCreationAuthorityTest extends SemanticHttpFixture {
     private void assertStored(ObjectNode project, String operation) throws Exception {
         String id = project.path("id").asText();
         DurableState state = durableState(id);
-        assertEquals(project, json.readTree(state.body()));
+        assertEquals(project, json.readTree(packages.findBody(workspace, id, false).orElseThrow()));
+        assertEquals(
+                project,
+                json.readTree(
+                        packages.findRevision(workspace, id, project.path("version").asLong())
+                                .orElseThrow()));
+        assertEquals(
+                project,
+                json.readTree(
+                        packages.findReceipt(
+                                        workspace, project.path("createdBy").asText(), operation)
+                                .orElseThrow()
+                                .responseJson()));
         assertEquals(project.path("version").longValue(), state.version().longValue());
         JsonNode revision =
                 json.readTree(
@@ -529,8 +569,10 @@ class PresalesTaskCreationAuthorityTest extends SemanticHttpFixture {
                                 String.class,
                                 workspace,
                                 operation));
-        assertEquals(project, revision);
-        assertEquals(project, receipt);
+        assertEquals(json.readTree(state.body()), revision);
+        assertEquals(json.readTree(state.body()), receipt);
+        assertTrue(revision.path("_objectRefs").isObject());
+        assertFalse(revision.has("tasks"));
     }
 
     private String operation() {

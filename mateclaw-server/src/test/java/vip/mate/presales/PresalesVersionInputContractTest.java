@@ -75,7 +75,34 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
         when(model.capture(workspace, "7", "S1"))
                 .thenReturn(PresalesTaskPackageFixtures.capture("S1", "17", "config"));
         when(contexts.snapshot(eq(workspace), any(), eq("S1"), eq(goal)))
-                .thenReturn(json.createObjectNode());
+                .thenAnswer(
+                        call -> {
+                            ObjectNode current = call.getArgument(1);
+                            ObjectNode snapshot =
+                                    json.createObjectNode()
+                                            .put("schemaVersion", 1)
+                                            .put("skill", "S1")
+                                            .put("taskGoal", goal);
+                            ObjectNode record = snapshot.putObject("operational_record");
+                            for (String key :
+                                    java.util.List.of("name", "customer", "industry", "goal"))
+                                record.set(key, current.path(key).deepCopy());
+                            for (String key :
+                                    java.util.List.of(
+                                            "requirements",
+                                            "clarifications",
+                                            "baselines",
+                                            "fitGaps",
+                                            "cases",
+                                            "solutions",
+                                            "reviews",
+                                            "reviewDrafts",
+                                            "releases"))
+                                snapshot.set(key, current.path(key).deepCopy());
+                            snapshot.putArray("sources");
+                            PresalesTaskDependencies.capture(current, snapshot);
+                            return snapshot;
+                        });
         doAnswer(
                         call -> {
                             assertFalse(
@@ -97,7 +124,11 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
                                     assertTrue(rows.next());
                                     assertEquals(version + 1, rows.getLong(1));
                                     var task =
-                                            json.readTree(rows.getString(2)).path("tasks").get(0);
+                                            json.readTree(
+                                                            PresalesStorageTestSupport.body(
+                                                                    jdbc, workspace, projectId))
+                                                    .path("tasks")
+                                                    .get(0);
                                     assertEquals(submission.task(), task);
                                     assertEquals(
                                             submission.snapshot(), task.path("contextSnapshot"));
@@ -152,10 +183,8 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
                 .put("requestHash", archivedHash)
                 .put("taskGoal", original.taskGoal())
                 .put("status", "RUNNING");
-        jdbc.update(
-                "UPDATE mate_presales_project SET version=2,body_json=? WHERE id=?",
-                json.writeValueAsString(p),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), json.writeValueAsString(p), 2);
         var body = (ObjectNode) json.valueToTree(original);
         var before = facts();
         assertEquals(p, api("POST", path(p) + "/generate", "member", body, 200).path("data"));
@@ -214,10 +243,8 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
     void invalidStoredProjectVersionCannotAliasTheExpectedVersion(String raw) throws Exception {
         var p = (ObjectNode) project();
         p.set("version", json.readTree(raw));
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
         var before = facts();
         error(api("POST", path(p) + "/commands", "member", commandBody(), 409), "VERSION_CONFLICT");
         assertEquals(before, facts());
@@ -268,11 +295,8 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
 
     private void seedVersion(ObjectNode p, long version) {
         p.put("version", version);
-        jdbc.update(
-                "UPDATE mate_presales_project SET version=?,body_json=? WHERE id=?",
-                version,
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString(), version);
     }
 
     @ParameterizedTest

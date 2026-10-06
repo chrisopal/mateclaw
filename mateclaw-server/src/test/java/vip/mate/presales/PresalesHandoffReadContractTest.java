@@ -138,10 +138,8 @@ class PresalesHandoffReadContractTest extends SemanticHttpFixture {
     }
 
     private void persist(com.fasterxml.jackson.databind.node.ObjectNode p) throws Exception {
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                json.writeValueAsString(p),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), json.writeValueAsString(p));
     }
 
     private com.fasterxml.jackson.databind.JsonNode body(

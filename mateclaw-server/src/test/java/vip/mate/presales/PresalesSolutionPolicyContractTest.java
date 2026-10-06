@@ -147,17 +147,12 @@ class PresalesSolutionPolicyContractTest extends SemanticHttpFixture {
     }
 
     private void seed(ObjectNode p) {
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                p.toString(),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
     }
 
     private String stored(ObjectNode p) {
-        return jdbc.queryForObject(
-                "SELECT body_json FROM mate_presales_project WHERE id=?",
-                String.class,
-                p.path("id").asText());
+        return PresalesStorageTestSupport.body(jdbc, workspace, p.path("id").asText());
     }
 
     private ObjectNode draft() {
@@ -276,6 +271,7 @@ class PresalesSolutionPolicyContractTest extends SemanticHttpFixture {
                 .put("sourceRef", String.valueOf(kb + 1));
         p.withArray("tasks")
                 .addObject()
+                .put("id", "source-task")
                 .putObject("contextSnapshot")
                 .putArray("sources")
                 .addObject()

@@ -102,10 +102,8 @@ class PresalesArtifactPersistenceContractTest extends SemanticHttpFixture {
     }
 
     private void persist(com.fasterxml.jackson.databind.node.ObjectNode p) throws Exception {
-        jdbc.update(
-                "UPDATE mate_presales_project SET body_json=? WHERE id=?",
-                json.writeValueAsString(p),
-                p.path("id").asText());
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), json.writeValueAsString(p));
     }
 
     private void store(String project, String release, String filename, byte[] bytes) {
@@ -300,9 +298,7 @@ class PresalesArtifactPersistenceContractTest extends SemanticHttpFixture {
     void candidateWritesRollBackWithProjectRevisionFailure() throws Exception {
         var p = fixture();
         String id = p.path("id").asText();
-        String before =
-                jdbc.queryForObject(
-                        "SELECT body_json FROM mate_presales_project WHERE id=?", String.class, id);
+        String before = PresalesStorageTestSupport.body(jdbc, workspace, id);
         String operation = UUID.randomUUID().toString();
         jdbc.execute(
                 "ALTER TABLE mate_presales_revision ADD CONSTRAINT artifact_contract_rollback CHECK (action <> 'CREATE_RELEASE')");
@@ -333,12 +329,7 @@ class PresalesArtifactPersistenceContractTest extends SemanticHttpFixture {
                             .getMessage()
                             .toLowerCase(java.util.Locale.ROOT)
                             .contains("artifact_contract_rollback"));
-            assertEquals(
-                    before,
-                    jdbc.queryForObject(
-                            "SELECT body_json FROM mate_presales_project WHERE id=?",
-                            String.class,
-                            id));
+            assertEquals(before, PresalesStorageTestSupport.body(jdbc, workspace, id));
             assertEquals(
                     0,
                     jdbc.queryForObject(

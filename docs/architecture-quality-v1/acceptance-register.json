@@ -353,7 +353,10 @@
         "evidence/2026-10-02/AQ03_PROJECT_STORAGE_ACCEPTANCE.md",
         "evidence/2026-10-02/project-storage-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；项目持久化七类SQL与string/rawJSON边界提取，旧53/最终59项真实H2/HTTP/Spring、CAS/回执/事务回滚/双连接锁通过，原授权与caller事务保持；独立对象/多方言/正式QA仍NOT_RUN",
+      "current_scope": "新任务不因无关元数据变化失效",
+      "current_scope_status": "ENGINEERING_VERIFIED",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-19",
@@ -367,7 +370,10 @@
         "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md",
         "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_TASK_ACCEPTANCE_ACCEPTANCE.md"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-06发布实时授权拆分补充模块/精确修订/独立评审局部工程证据，非该AC全场景签收；2026-10-06任务结果接收职责隔离及原事务/撤权合同与新增17项通过，正式签收仍NOT_RUN"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；2026-10-06发布实时授权拆分补充模块/精确修订/独立评审局部工程证据，非该AC全场景签收；2026-10-06任务结果接收职责隔离及原事务/撤权合同与新增17项通过，正式签收仍NOT_RUN",
+      "current_scope": "新任务实际依赖修订变化明确stale且拒收",
+      "current_scope_status": "ENGINEERING_VERIFIED",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-20",
@@ -460,7 +466,9 @@
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
         "evidence/2026-10-03/listing-projection-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项；成果SQL共享仓储，旧33/最终66项H2/HTTP/事务合同与真实compiler1项通过，caller权限/事务/摘要/发布冻结保持；黄金迁移/多方言/真实模型/正式QA仍NOT_RUN SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.",
+      "current_scope": "旧成果迁移兼容OUT_OF_SCOPE；新发布原字节回读仍必验",
+      "current_scope_status": "OUT_OF_SCOPE_USER_REQUEST"
     },
     {
       "id": "AC-24",
@@ -474,7 +482,10 @@
         "evidence/2026-10-02/AQ05_QUERY_DTO_ACCEPTANCE.md",
         "evidence/2026-10-02/query-dto-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项",
+      "current_scope": "新Delivery消费者精确发布引用、摘要与回读",
+      "current_scope_status": "ENGINEERING_VERIFIED",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-25",
@@ -505,7 +516,9 @@
         "evidence/2026-10-05/AQ06_REQUEST_HASH_REVIEW.md",
         "evidence/2026-10-05/request-hash-integration-tests/results.json.gz"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.；2026-10-06：本片隔离MySQL8.0.46真实迁移至既有V219、validate/pending/67列宽及HTTP共17/17；本片未修改迁移。Kingbase真实执行与正式多方言签收仍未完成。"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.；2026-10-06：本片隔离MySQL8.0.46真实迁移至既有V219、validate/pending/67列宽及HTTP共17/17；本片未修改迁移。Kingbase真实执行与正式多方言签收仍未完成。",
+      "current_scope": "Kingbase TODO；本轮不执行不记PASS",
+      "current_scope_status": "TODO_KINGBASE_USER_DEFERRED"
     },
     {
       "id": "AC-27",
@@ -516,7 +529,10 @@
       "method": "迁移/恢复/真实数据库/字节对账",
       "status": "NOT_RUN",
       "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项",
+      "current_scope": "新项目独立对象和修订单一写入权威，不做旧数据回填",
+      "current_scope_status": "ENGINEERING_VERIFIED",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-28",
@@ -530,7 +546,10 @@
         "evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md",
         "evidence/2026-10-03/listing-projection-test-results.json"
       ],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open.",
+      "current_scope": "新写入事务完整性；明确阻断退回旧JSON，无旧反向迁移",
+      "current_scope_status": "ENGINEERING_VERIFIED",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-29",
@@ -785,7 +804,10 @@
       "method": "授权真实样本/真实模型/人工质量审核",
       "status": "NOT_RUN",
       "evidence": [],
-      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项"
+      "note": "门禁自测或基线工具链不自动满足该应用/流程验收项",
+      "current_scope": "全新隔离数据、真实模型、长文输出与内容评审",
+      "current_scope_status": "BLOCKED_PROVIDER_AUTH_OR_MISSING_LOCAL_MODEL",
+      "current_scope_evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md"
     },
     {
       "id": "AC-46",
@@ -815,5 +837,26 @@
       ],
       "note": "门禁自测或基线工具链不自动满足该应用/流程验收项 Public declared-field schema:64 new/103 targeted contracts and exact full Java gates; source/replay/CAS/archive ordering, fixed paths and no rejected-write persistence covered. Real concurrent HTTP, complete server/model schema, browsers, maintainer/QA and remote required CI remain NOT_RUN/NOT_VERIFIED. Failed checked-push f1t0yr2g retained; final-event unit barrier repaired without weakening assertions. Independent technical review and exact source full gates are engineering evidence, not maintainer/QA acceptance. V1 late employee failure rejection and coordinator SQL fact extraction:43 new/119 targeted plus exact full gates; real H2 fallback/CAS/recovery and no rejected body/revision/receipt writes. Full V2/dependencies/migration/distributed concurrency/browser/live model/maintainer/QA/required CI remain NOT_RUN/NOT_VERIFIED. SQL listing subtask: exact H2 engineering gates, real MySQL29 regressions and 205-row mysqldump/restore preserve synthetic legacy bytes; unmeasured latency, actual Office artifacts, Kingbase, production/reverse rollout, full V2 and independent formal QA remain unverified. Existing UTF-8 request-hash collision has explicit characterization; versioned replay policy remains open."
     }
-  ]
+  ],
+  "scope_override_2026_10_06": {
+    "authority": "用户明确要求",
+    "design": "docs/plans/2026-10-06-presales-v2-newdata-design.md",
+    "data": "new isolated data",
+    "legacy_compatibility": "OUT_OF_SCOPE",
+    "kingbase": "TODO",
+    "implementation_status": "CORE_AND_DELIVERY_ENGINEERING_VERIFIED",
+    "real_generation": "BLOCKED_PROVIDER_AUTH_OR_MISSING_LOCAL_MODEL",
+    "evidence": "docs/architecture-quality-v1/evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md",
+    "core_items": [
+      "AC-18",
+      "AC-19",
+      "AC-27",
+      "AC-28"
+    ],
+    "delivery_item": "AC-24",
+    "legacy_items_out_of_scope": [
+      "AC-23"
+    ],
+    "commit_ci": "See exact final candidate delivery reports; not inferred from targeted tests"
+  }
 }

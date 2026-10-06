@@ -1,5 +1,9 @@
 # 架构整改当前收口状态
 
+**本轮新数据结果**：售前 V2 四项（AC-18/19/27/28）和新 Delivery（AC-24）工程验证完成；真实生成 AC-45 因 DeepSeek401/本地模型文件缺失阻塞；Kingbase AC-26=TODO，旧兼容 AC-23 按用户要求排除。详见[新数据验收](evidence/2026-10-06/AQ03_V2_NEW_DATA_ACCEPTANCE.md)。全表工程分类更新为39项有证据、4项远端治理配置缺口、1项真实模型阻塞、1项排除、1项延期；下方原始条款和历史描述保留用于追溯，以此新范围及 JSON 的 current_scope_status 为准。
+
+**当前范围调整（2026-10-06）**：按用户要求采用新数据完成售前 V2、真实生成和 Delivery；不验收旧数据/旧消费者兼容；Kingbase=TODO。实施与覆盖差异见[新数据设计](../plans/2026-10-06-presales-v2-newdata-design.md)，该调整不等于相关功能已通过。
+
 当前实现已提交推送至 `5f61abceae13ee2721704fdecd391f69fb9b443d`、tree `2f0efd237fbaef25dce4e16ba446d82b6816d0bf`；本轮补入AC30独立浏览器对账和AQ10有限测量（2026-10-06）。各历史证据保留自己的受检版本。最新提交、推送与合并树CI结果，以[PR #5](https://github.com/chrisopal/mateclaw/pull/5)当前身份为准。
 
 ## 已收口的开发范围

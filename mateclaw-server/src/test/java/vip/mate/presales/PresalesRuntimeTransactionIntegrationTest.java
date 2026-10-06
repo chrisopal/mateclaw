@@ -410,6 +410,328 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         project.path("id").asText()));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"manifest", "receipt", "write"})
+    void v2CurrentReadsResolveObjectsCommittedAfterOuterRepeatableReadSnapshot(String entry)
+            throws Exception {
+        boolean h2 = isH2();
+        String projectId = project.path("id").asText();
+        long originalVersion = project.path("version").longValue();
+        long committedVersion = originalVersion + 2;
+        String operation = "rr-v2-" + UUID.randomUUID();
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        var committed = new AtomicReference<ObjectNode>();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        // Establish an old consistent read view before another connection appends
+                        // object
+                        // revisions. Changing metadata alone cannot expose this storage isolation
+                        // defect.
+                        String oldBody =
+                                repository.findBody(workspace, projectId, false).orElseThrow();
+                        assertEquals(project, assertDoesNotThrow(() -> json.readTree(oldBody)));
+                        try {
+                            committed.set(
+                                    executor.submit(
+                                                    () ->
+                                                            new TransactionTemplate(
+                                                                            transactionManager)
+                                                                    .execute(
+                                                                            writer -> {
+                                                                                // Append then
+                                                                                // remove an object
+                                                                                // after the outer
+                                                                                // snapshot. Its
+                                                                                // immutable
+                                                                                // history must
+                                                                                // remain visible
+                                                                                // when the outer
+                                                                                // writer re-adds
+                                                                                // the identity.
+                                                                                var temporary =
+                                                                                        project
+                                                                                                .deepCopy();
+                                                                                temporary.set(
+                                                                                        "version",
+                                                                                        PresalesProjectRevision
+                                                                                                .number(
+                                                                                                        originalVersion
+                                                                                                                + 1));
+                                                                                temporary
+                                                                                        .withArray(
+                                                                                                "requirements")
+                                                                                        .addObject()
+                                                                                        .put(
+                                                                                                "id",
+                                                                                                "rr-removed")
+                                                                                        .put(
+                                                                                                "version",
+                                                                                                1)
+                                                                                        .put(
+                                                                                                "title",
+                                                                                                "removed independently");
+                                                                                String
+                                                                                        temporaryBody =
+                                                                                                temporary
+                                                                                                        .toString();
+                                                                                assertEquals(
+                                                                                        1,
+                                                                                        repository
+                                                                                                .update(
+                                                                                                        new vip
+                                                                                                                .mate
+                                                                                                                .presales
+                                                                                                                .repository
+                                                                                                                .PresalesProjectRepository
+                                                                                                                .ProjectRow(
+                                                                                                                projectId,
+                                                                                                                workspace,
+                                                                                                                originalVersion
+                                                                                                                        + 1,
+                                                                                                                temporary
+                                                                                                                        .path(
+                                                                                                                                "name")
+                                                                                                                        .asText(),
+                                                                                                                temporary
+                                                                                                                        .path(
+                                                                                                                                "status")
+                                                                                                                        .asText(),
+                                                                                                                temporaryBody,
+                                                                                                                PresalesListingProjectionV1
+                                                                                                                        .fromBody(
+                                                                                                                                temporaryBody,
+                                                                                                                                json)),
+                                                                                                        originalVersion));
+                                                                                var changed =
+                                                                                        project
+                                                                                                .deepCopy();
+                                                                                changed.set(
+                                                                                        "version",
+                                                                                        PresalesProjectRevision
+                                                                                                .number(
+                                                                                                        committedVersion));
+                                                                                changed.withArray(
+                                                                                                "requirements")
+                                                                                        .addObject()
+                                                                                        .put(
+                                                                                                "id",
+                                                                                                "rr-requirement")
+                                                                                        .put(
+                                                                                                "version",
+                                                                                                1)
+                                                                                        .put(
+                                                                                                "title",
+                                                                                                "independently committed");
+                                                                                ((ObjectNode)
+                                                                                                changed.path(
+                                                                                                                "tasks")
+                                                                                                        .get(
+                                                                                                                0))
+                                                                                        .put(
+                                                                                                "rrObjectProbe",
+                                                                                                "committed");
+                                                                                String body =
+                                                                                        changed
+                                                                                                .toString();
+                                                                                assertEquals(
+                                                                                        1,
+                                                                                        repository
+                                                                                                .update(
+                                                                                                        new vip
+                                                                                                                .mate
+                                                                                                                .presales
+                                                                                                                .repository
+                                                                                                                .PresalesProjectRepository
+                                                                                                                .ProjectRow(
+                                                                                                                projectId,
+                                                                                                                workspace,
+                                                                                                                committedVersion,
+                                                                                                                changed.path(
+                                                                                                                                "name")
+                                                                                                                        .asText(),
+                                                                                                                changed.path(
+                                                                                                                                "status")
+                                                                                                                        .asText(),
+                                                                                                                body,
+                                                                                                                PresalesListingProjectionV1
+                                                                                                                        .fromBody(
+                                                                                                                                body,
+                                                                                                                                json)),
+                                                                                                        originalVersion
+                                                                                                                + 1));
+                                                                                repository
+                                                                                        .insertRevision(
+                                                                                                projectId,
+                                                                                                committedVersion,
+                                                                                                actor,
+                                                                                                "RR_OBJECT_WRITE",
+                                                                                                body,
+                                                                                                java
+                                                                                                        .time
+                                                                                                        .LocalDateTime
+                                                                                                        .now());
+                                                                                repository
+                                                                                        .insertReceipt(
+                                                                                                workspace,
+                                                                                                actor,
+                                                                                                operation,
+                                                                                                "rr-object-hash",
+                                                                                                body);
+                                                                                return changed;
+                                                                            }))
+                                            .get(10, TimeUnit.SECONDS));
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        if (h2) {
+                            // H2 aborts the stale RR transaction when locking the changed project
+                            // row,
+                            // rather than offering InnoDB's current-read view. Assert SQLSTATE
+                            // explicitly.
+                            assertSerializationRejected(
+                                    () -> repository.findBody(workspace, projectId, true));
+                        } else {
+                            assertDoesNotThrow(
+                                    () -> {
+                                        ObjectNode latest;
+                                        if ("receipt".equals(entry)) {
+                                            latest =
+                                                    (ObjectNode)
+                                                            json.readTree(
+                                                                    repository
+                                                                            .findReceipt(
+                                                                                    workspace,
+                                                                                    actor,
+                                                                                    operation)
+                                                                            .orElseThrow()
+                                                                            .responseJson());
+                                        } else if ("manifest".equals(entry)) {
+                                            latest =
+                                                    (ObjectNode)
+                                                            json.readTree(
+                                                                    repository
+                                                                            .findBody(
+                                                                                    workspace,
+                                                                                    projectId, true)
+                                                                            .orElseThrow());
+                                        } else {
+                                            // An already-known fresh response must still compare
+                                            // against current
+                                            // object pointers, not the caller transaction's old
+                                            // consistent view.
+                                            latest = committed.get().deepCopy();
+                                        }
+                                        assertEquals(committed.get(), latest);
+                                        latest.set(
+                                                "version",
+                                                PresalesProjectRevision.number(
+                                                        committedVersion + 1));
+                                        latest.put("goal", "outer uncommitted edit");
+                                        ((ObjectNode) latest.path("requirements").get(0))
+                                                .put("title", "outer object edit");
+                                        latest.withArray("requirements")
+                                                .addObject()
+                                                .put("id", "rr-removed")
+                                                .put("version", 1)
+                                                .put("title", "re-added in old RR transaction");
+                                        String body = latest.toString();
+                                        assertEquals(
+                                                1,
+                                                repository.update(
+                                                        new vip.mate.presales.repository
+                                                                .PresalesProjectRepository
+                                                                .ProjectRow(
+                                                                projectId,
+                                                                workspace,
+                                                                committedVersion + 1,
+                                                                latest.path("name").asText(),
+                                                                latest.path("status").asText(),
+                                                                body,
+                                                                PresalesListingProjectionV1
+                                                                        .fromBody(body, json)),
+                                                        committedVersion));
+                                        assertEquals(
+                                                2L,
+                                                jdbc.queryForObject(
+                                                        "SELECT storage_revision FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed' FOR UPDATE",
+                                                        Long.class,
+                                                        workspace,
+                                                        projectId));
+                                        repository.insertRevision(
+                                                projectId,
+                                                committedVersion + 1,
+                                                actor,
+                                                "RR_OUTER_WRITE",
+                                                body,
+                                                java.time.LocalDateTime.now());
+                                        repository.insertReceipt(
+                                                workspace,
+                                                actor,
+                                                operation + "-outer",
+                                                "rr-outer-hash",
+                                                body);
+                                        assertEquals(
+                                                latest,
+                                                json.readTree(
+                                                        repository
+                                                                .findReceipt(
+                                                                        workspace,
+                                                                        actor,
+                                                                        operation + "-outer")
+                                                                .orElseThrow()
+                                                                .responseJson()));
+                                        assertEquals(
+                                                latest,
+                                                json.readTree(
+                                                        repository
+                                                                .findRevision(
+                                                                        workspace,
+                                                                        projectId,
+                                                                        committedVersion + 1)
+                                                                .orElseThrow()));
+                                    });
+                        }
+                        status.setRollbackOnly();
+                    });
+        }
+        assertEquals(
+                committed.get(),
+                json.readTree(repository.findBody(workspace, projectId, false).orElseThrow()));
+        assertEquals(
+                committed.get(),
+                json.readTree(
+                        repository
+                                .findReceipt(workspace, actor, operation)
+                                .orElseThrow()
+                                .responseJson()));
+        assertTrue(repository.findReceipt(workspace, actor, operation + "-outer").isEmpty());
+        assertTrue(repository.findRevision(workspace, projectId, committedVersion + 1).isEmpty());
+        assertEquals(
+                0,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed'",
+                        Integer.class,
+                        workspace,
+                        projectId));
+        assertEquals(
+                1L,
+                jdbc.queryForObject(
+                        "SELECT MAX(storage_revision) FROM mate_presales_object_revision WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed'",
+                        Long.class,
+                        workspace,
+                        projectId));
+        assertEquals(
+                1L,
+                jdbc.queryForObject(
+                        "SELECT storage_revision FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-requirement'",
+                        Long.class,
+                        workspace,
+                        projectId));
+    }
+
     private boolean isH2() throws java.sql.SQLException {
         try (var connection = dataSource.getConnection()) {
             return "H2".equals(connection.getMetaData().getDatabaseProductName());
@@ -676,7 +998,11 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                             null,
                             null);
             executor.setProjectToolPolicy(
-                    new PresalesToolPolicy(jdbc, json, new ProjectSourceAccess(jdbc)));
+                    new PresalesToolPolicy(
+                            jdbc,
+                            json,
+                            new ProjectSourceAccess(jdbc),
+                            new vip.mate.presales.repository.PresalesProjectRepository(jdbc)));
             executor.setProjectExecutionRevalidator(dispatcher);
             String args = json.createObjectNode().put("skillName", original.skillName()).toString();
             var readCall =
@@ -1084,14 +1410,21 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         project = project.deepCopy();
         project.withArray("tasks").set(0, live);
         project.put("version", project.path("version").asInt() + 1);
-        assertEquals(
-                1,
-                jdbc.update(
-                        "UPDATE mate_presales_project SET body_json=?,version=? WHERE id=? AND workspace_id=?",
-                        json.writeValueAsString(project),
-                        project.path("version").asInt(),
-                        project.path("id").asText(),
-                        workspace));
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        var transaction =
+                new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+        String body = json.writeValueAsString(project);
+        transaction.executeWithoutResult(
+                status ->
+                        assertEquals(
+                                1,
+                                repository.updateRuntimeBody(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        project.path("version").asLong() - 1,
+                                        project.path("version").asLong(),
+                                        body,
+                                        PresalesListingProjectionV1.fromBody(body, json))));
     }
 
     private void assertFailureRejectedWithoutWrite(String candidateStatus) {
@@ -1141,10 +1474,9 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     private void unchanged(int receipts, int revisions) throws Exception {
         var stored =
                 json.readTree(
-                        jdbc.queryForObject(
-                                "SELECT body_json FROM mate_presales_project WHERE id=?",
-                                String.class,
-                                project.path("id").asText()));
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc)
+                                .findBody(workspace, project.path("id").asText(), false)
+                                .orElseThrow());
         assertEquals(project, stored);
         assertEquals(receipts, receiptCount());
         assertEquals(revisions, revisionCount());
@@ -1222,8 +1554,8 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                     case EMPLOYEE_DISABLED -> "EMPLOYEE_UNAVAILABLE";
                     case MODEL_CHANGED -> "EXECUTION_PIN_CHANGED";
                     case VIEWER -> "FORBIDDEN";
-                    case CANCELLED, PROJECT_CHANGED ->
-                            resultPhase ? "VERSION_CONFLICT" : "PROJECT_CHANGED_DURING_GENERATION";
+                    case CANCELLED -> resultPhase ? "VERSION_CONFLICT" : "TASK_SCOPE_CHANGED";
+                    case PROJECT_CHANGED -> resultPhase ? "VERSION_CONFLICT" : "TASK_INPUT_CHANGED";
                 },
                 error.code());
     }
@@ -1257,16 +1589,21 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
         task.set("contextSnapshot", snapshot.deepCopy());
         project.withArray("tasks").set(0, task.deepCopy());
         String body = project.toString();
-        assertEquals(
-                1,
-                new vip.mate.presales.repository.PresalesProjectRepository(jdbc)
-                        .updateRuntimeBody(
-                                workspace,
-                                project.path("id").asText(),
-                                originalVersion,
-                                version,
-                                body,
-                                PresalesListingProjectionV1.fromBody(body, json)));
+        new TransactionTemplate(transactionManager)
+                .executeWithoutResult(
+                        status ->
+                                assertEquals(
+                                        1,
+                                        new vip.mate.presales.repository.PresalesProjectRepository(
+                                                        jdbc)
+                                                .updateRuntimeBody(
+                                                        workspace,
+                                                        project.path("id").asText(),
+                                                        originalVersion,
+                                                        version,
+                                                        body,
+                                                        PresalesListingProjectionV1.fromBody(
+                                                                body, json))));
         assertTrue(AopUtils.isAopProxy(service));
         var command = resultCommand();
         var outerResource = new AtomicReference<Object>();
