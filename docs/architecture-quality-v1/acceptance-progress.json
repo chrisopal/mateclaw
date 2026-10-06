@@ -1,12 +1,12 @@
 {
-  "source_head": "4c6b8fcdd4b3d46daa3b376954f27f3368ac5d79",
-  "source_tree": "7e5243c40d7cb49113e6f137b40b6530ea7f5642",
+  "source_head": "8d2c8b2a68c3d63280f79e8ea21623fbe2223b7b",
+  "source_tree": "fe4471581cf6b71d3270a3abee2874c51c6d0d9a",
   "scope": "工程证据与后续动作分类，不修改正式AC签收。历史证据按原条款和当前门禁复核，不追加隐含验收要求。",
   "counts": {
-    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 28,
-    "INSUFFICIENT_PROOF": 4,
+    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 30,
     "IMPLEMENTATION_GAP": 10,
-    "ENVIRONMENT_GAP": 4
+    "ENVIRONMENT_GAP": 4,
+    "INSUFFICIENT_PROOF": 2
   },
   "items": [
     {
@@ -133,20 +133,23 @@
       "assertion": "prompt、工具、缓存、历史和导出一致拒绝未授权内容",
       "task": "AQ-02",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "INSUFFICIENT_PROOF",
-      "scope_basis": "prompt、工具、历史、导出已有切实拒绝证据；但原文明确列出缓存，当前证据未把实际会复用来源内容的缓存/会话上下文入口对上撤权后重验。",
-      "remaining_action": "仅补一项有限事实：确定项目执行实际复用的缓存/会话上下文入口；若不存在可复用来源缓存，记录代码依据并由审阅人认可该子项不适用；若存在，证明KB-A/KB-B或wiki_disabled改变后不能复用未授权内容。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "原prompt、工具、历史、导出证据保留；实际同attempt消息/观察复用的模型外发缺口已修复。统一stream外发和初始同步历史摘要均复用公共Revalidator；新增18项正反例及35类相关回归、独立技术复核证明缓存边界。",
+      "remaining_action": "独立正式签核；当前候选完整提交门禁及远端CI按交付记录核验，不由本表自签。",
       "evidence_keys": [
         "source",
         "history",
         "frozen",
-        "artifact_mysql"
+        "artifact_mysql",
+        "model_egress"
       ],
       "finite_evidence": [
         "PresalesSourceScopeTest2",
         "PresalesSourceAuthorizationTest8",
         "PresalesIntegrationTest8",
-        "AQ02_HISTORY_SOURCE_ACCEPTANCE.md"
+        "AQ02_HISTORY_SOURCE_ACCEPTANCE.md",
+        "ProjectModelOutboundAuthorizationTest18",
+        "AC07_MODEL_OUTBOUND_ACCEPTANCE.md"
       ]
     },
     {
@@ -176,19 +179,21 @@
       "assertion": "UI capability、API、后台任务的有效政策一致",
       "task": "AQ-02",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "INSUFFICIENT_PROOF",
-      "scope_basis": "五个点名角色在基础授权层已有断言，UI也服从服务端capability；仍缺一份能逐格对应这五角色在capability、API和后台任务有效政策一致的证据。",
-      "remaining_action": "只形成5角色×3入口映射并核实缺格：viewer/member/admin/owner/system-admin的同一写/批准动作；能用现有断言填满则签核，不因矩阵格式新增功能。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "五角色HTTP capability、UI正反例、统一roleLevel及API/后台/接纳入口形成同一生成候选动作矩阵；既有执行/接纳撤权断言与独立证据复核相称。未声称15条新增E2E。",
+      "remaining_action": "独立正式签核；不因矩阵格式新增功能或统一不同领域的批准政策。",
       "evidence_keys": [
         "principal",
         "frozen",
-        "ui"
+        "ui",
+        "role_matrix"
       ],
       "finite_evidence": [
         "PresalesAccessPolicyTest5",
         "BiddingAccessPolicyTest7",
         "PresalesRuntimeTransactionIntegrationTest43",
-        "presalesWorkbench read-only capability tests"
+        "presalesWorkbench read-only capability tests",
+        "AC09_ROLE_POLICY_MATRIX.md"
       ]
     },
     {
@@ -1246,6 +1251,21 @@
       "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
       "sha256": "6e7c771ed49aeb1290956cf205cd11b866adf2cd0b197d1c3344401c4de3733c",
       "repository_path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesBaselineApproval.java"
+    },
+    "model_egress": {
+      "lines": null,
+      "scope": "18项新增回归通过；213项相关回归中212执行、1既有Windows条件skip；两个模型出口授权守卫；独立技术COMMENT，无正式签收。",
+      "source_identity": "base8d2c8b2a plus AC07 candidate; final submission identity in PR/delivery evidence",
+      "sha256": "d5452696760ffb5e569387a553c472362efc503d7057bfb610871524015bc7a8",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AC07_MODEL_OUTBOUND_ACCEPTANCE.md"
+    },
+    "role_matrix": {
+      "lines": null,
+      "scope": "五角色×入口组合证据；源码和既有门禁日志摘要独立复核，无新增权限政策。",
+      "source_identity": "base8d2c8b2a plus AC07 candidate; final submission identity in PR/delivery evidence",
+      "sha256": "dbedd7e5b2bd0c4f77df16ede4ccd0a8b86018064a28fbe77deb66af531d51cc",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AC09_ROLE_POLICY_MATRIX.md"
     }
-  }
+  },
+  "source_identity_scope": "上述身份为AC07修复前基线；本记录叠加AC07模型外发修复及AC09证据矩阵。最终候选提交/检查树以PR #5及交付记录为准，不将基线CI声称覆盖新修复。"
 }

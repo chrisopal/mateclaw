@@ -30,6 +30,8 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import vip.mate.agent.execution.ProjectExecutionOptions;
+import vip.mate.agent.execution.ProjectToolPolicy;
 import vip.mate.channel.web.ChatStreamTracker;
 import vip.mate.llm.chatmodel.AssistantThinkingRelay;
 import vip.mate.llm.chatmodel.ReasoningContentCache;
@@ -112,6 +114,9 @@ public class NodeStreamingChatHelper {
             vip.mate.llm.chatmodel.HttpTimeouts.DEFAULT_STREAM_IDLE_TIMEOUT.toSeconds();
 
     private boolean retryDisabled;
+
+    private final ProjectExecutionOptions projectOptions;
+    private final ProjectToolPolicy.Revalidator projectExecutionRevalidator;
 
     public NodeStreamingChatHelper(ChatStreamTracker streamTracker) {
         this(streamTracker, List.of(), null, null, null, null);
@@ -206,6 +211,31 @@ public class NodeStreamingChatHelper {
             String primaryProviderId,
             vip.mate.llm.failover.AvailableProviderPool providerPool,
             String primaryModelName) {
+        this(
+                streamTracker,
+                fallbackChain,
+                cacheMetrics,
+                healthTracker,
+                primaryProviderId,
+                providerPool,
+                primaryModelName,
+                null,
+                null);
+    }
+
+    /** Project constraints belong to this isolated graph, never to mutable conversation state. */
+    public NodeStreamingChatHelper(
+            ChatStreamTracker streamTracker,
+            List<vip.mate.llm.failover.FallbackEntry> fallbackChain,
+            vip.mate.llm.cache.LlmCacheMetricsAggregator cacheMetrics,
+            vip.mate.llm.failover.ProviderHealthTracker healthTracker,
+            String primaryProviderId,
+            vip.mate.llm.failover.AvailableProviderPool providerPool,
+            String primaryModelName,
+            ProjectExecutionOptions projectOptions,
+            ProjectToolPolicy.Revalidator projectExecutionRevalidator) {
+        this.projectOptions = projectOptions;
+        this.projectExecutionRevalidator = projectExecutionRevalidator;
         this.primaryModelName = primaryModelName;
         this.streamTracker = streamTracker;
         this.fallbackChain = fallbackChain == null ? List.of() : List.copyOf(fallbackChain);
@@ -1494,6 +1524,14 @@ public class NodeStreamingChatHelper {
         // The fallback Flux carries a descriptive message so classifyError's
         // "timeout" pattern matches it (vanilla TimeoutException.getMessage()
         // is null) and the health tracker / failover chain engage.
+        // Retained source context must still be authorized at every actual send, including
+        // after retry backoff and before fallback. Keep this outside provider error handling:
+        // an authorization failure must escape, never become a retryable model failure.
+        if (projectOptions != null) {
+            if (projectExecutionRevalidator == null)
+                throw new IllegalStateException("Project execution revalidator is required");
+            projectExecutionRevalidator.requireActive(projectOptions);
+        }
         Flux<ChatResponse> streamWithIdleGuard =
                 streamIdleTimeoutSec > 0
                         ? chatModel.stream(prompt)

@@ -47,6 +47,13 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     private final org.springframework.ai.chat.model.ChatModel chatModel;
     private final ConversationWindowManager conversationWindowManager;
 
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
+    public void setProjectExecutionRevalidator(
+            vip.mate.agent.execution.ProjectToolPolicy.Revalidator revalidator) {
+        this.projectExecutionRevalidator = revalidator;
+    }
+
     /**
      * Held only so {@link #buildInitialState} can include the tools schema in the context-window
      * budget — those bytes ride along on every LLM call and were previously ignored, making
@@ -682,7 +689,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
                     agentName,
                     conversationId);
 
-            Map<String, Object> inputs = buildInitialState(userMessage, conversationId);
+            Map<String, Object> inputs = buildInitialState(userMessage, conversationId, options);
             inputs.put(REQUESTER_ID, requesterId != null ? requesterId : "");
             if (options != null) inputs.put(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS, options);
             String threadId = UUID.randomUUID().toString();
@@ -1113,6 +1120,13 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     private Map<String, Object> buildInitialState(String userMessage, String conversationId) {
+        return buildInitialState(userMessage, conversationId, null);
+    }
+
+    private Map<String, Object> buildInitialState(
+            String userMessage,
+            String conversationId,
+            vip.mate.agent.execution.ProjectExecutionOptions options) {
         // 加载会话历史
         List<Message> historyMessages = buildConversationHistory(conversationId, userMessage);
 
@@ -1123,13 +1137,27 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
                 parsedAgentId = Long.valueOf(agentId);
             } catch (Exception ignored) {
             }
+            // The initial history summary calls ChatModel synchronously, outside the graph's
+            // streaming helper. Guard only this summary delegate so provider-specific model
+            // types used by the graph nodes remain unchanged.
+            org.springframework.ai.chat.model.ChatModel summaryModel = chatModel;
+            if (options != null) {
+                summaryModel =
+                        prompt -> {
+                            if (projectExecutionRevalidator == null)
+                                throw new IllegalStateException(
+                                        "Project execution revalidator is required");
+                            projectExecutionRevalidator.requireActive(options);
+                            return chatModel.call(prompt);
+                        };
+            }
             historyMessages =
                     conversationWindowManager.fitToWindow(
                             historyMessages,
                             systemPrompt != null ? systemPrompt : "",
                             userMessage,
                             maxInputTokens,
-                            chatModel,
+                            summaryModel,
                             conversationId,
                             parsedAgentId,
                             toolSet != null ? toolSet.callbacks() : null,

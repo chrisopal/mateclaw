@@ -838,6 +838,7 @@ public class AgentGraphBuilder {
                         chatModel,
                         conversationWindowManager,
                         toolSet);
+        agent.setProjectExecutionRevalidator(projectExecutionRevalidator);
         if (reasoningRetentionProperties != null) {
             agent.setPersistEveryIterationReasoning(
                     reasoningRetentionProperties.persistsEveryIteration());
@@ -1481,7 +1482,9 @@ public class AgentGraphBuilder {
                             providerHealthTracker,
                             primaryModelConfig != null ? primaryModelConfig.getProvider() : null,
                             providerPool,
-                            primaryModelConfig != null ? primaryModelConfig.getModelName() : null);
+                            primaryModelConfig != null ? primaryModelConfig.getModelName() : null,
+                            projectOptions,
+                            projectExecutionRevalidator);
             if (projectOptions != null) streamingHelper.setRetryDisabled(true);
             if (primaryModelConfig != null) {
                 // Feed "prompt too long" rejections back into the window resolver

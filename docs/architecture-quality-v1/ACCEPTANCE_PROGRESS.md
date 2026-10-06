@@ -1,6 +1,6 @@
 # 架构整改当前收口状态
 
-本记录对应源代码 `4c6b8fcdd4b3d46daa3b376954f27f3368ac5d79`、tree `7e5243c40d7cb49113e6f137b40b6530ea7f5642`（2026-10-06）。文档之后的提交、推送与最新合并树CI结果，以[PR #5](https://github.com/chrisopal/mateclaw/pull/5)当前身份为准。
+本记录以 `8d2c8b2a68c3d63280f79e8ea21623fbe2223b7b`、tree `fe4471581cf6b71d3270a3abee2874c51c6d0d9a` 为变更基线，叠加AC07模型外发授权修复与AC09角色矩阵（2026-10-06）。最终提交、推送与最新合并树CI结果，以[PR #5](https://github.com/chrisopal/mateclaw/pull/5)当前身份为准。
 
 ## 已收口的开发范围
 
@@ -13,10 +13,10 @@
 - **实现**：AQ06对象/依赖粒度与单写迁移回退；固定Skill历史执行包；坏历史记录与取消异常边界。正式Presales V2/Delivery V1规格仍需定位，不能另造不兼容schema。
 - **性能**：AQ10 的负载、索引与可观测性仍需实测；本轮结构收口不代表性能目标验收，不宣称未测提速。
 - **配置**：dev及本PR实际base `codex/aq03-task-query` 的GitHub protection接口均404、rules空数组。CI存在不等于禁止失败合入；未授权改管理员配置。
-- **补证**：仅AC07缓存来源复验、AC09五角色跨层一致性、AC24 Delivery精确引用消费者、AC46原始公共CI内容来源。
+- **补证**：仅AC24 Delivery精确引用消费者、AC46原始公共CI内容来源。AC07缓存外发漏洞已修复并有正反例；AC09五角色跨层政策已有相称组合证据，两项待正式签收。
 - **环境/样本**：Kingbase、真实历史Office/handoff、完整浏览器状态覆盖、真实模型及人工质量。已有本机soffice；不能把工具已安装当成文件验收。MySQL完整Flyway已至V221，不再沿用“只做SQL探针”的旧限制。
 
-46项分类为28项工程证据齐备待签收、4项有限补证、10项实现/配置缺口、4项环境/真实样本缺口。[正式台账](acceptance-register.json)全部保持NOT_RUN；[工程分类JSON](acceptance-progress.json)只表示工作类型，不是自动签收或合入许可。
+46项分类为30项工程证据齐备待签收、2项有限补证、10项实现/配置缺口、4项环境/真实样本缺口。[正式台账](acceptance-register.json)全部保持NOT_RUN；[工程分类JSON](acceptance-progress.json)只表示工作类型，不是自动签收或合入许可。
 
 ## 逐项对应
 
@@ -28,9 +28,9 @@
 | AC-04 | 同时注册多个 Revalidator | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
 | AC-05 | 模块开关组合 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
 | AC-06 | actor/employee执行前被停用 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
-| AC-07 | wiki_disabled/仅KB-A/项目KB-B | 有限补证 | 仅补一项有限事实：确定项目执行实际复用的缓存/会话上下文入口；若不存在可复用来源缓存，记录代码依据并由审阅人认可该子项不适用；若存在，证明KB-A/KB-B或wiki_disabled改变后不能复用未授权内容。 |
+| AC-07 | wiki_disabled/仅KB-A/项目KB-B | 工程证据齐备，待签收 | 实际缓存模型外发缺口已修复；新增18项及相关212项执行通过，1项既有Windows条件skip。见AC07模型外发工程记录，正式签收另行。 |
 | AC-08 | 执行中撤权/来源撤回 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
-| AC-09 | viewer/member/admin/owner/system admin | 有限补证 | 只形成5角色×3入口映射并核实缺格：viewer/member/admin/owner/system-admin的同一写/批准动作；能用现有断言填满则签核，不因矩阵格式新增功能。 |
+| AC-09 | viewer/member/admin/owner/system admin | 工程证据齐备，待签收 | 五角色同一生成候选动作的UI/API/后台矩阵已按既有代码与执行证据补齐；独立技术复核无缺格，不新增权限逻辑。 |
 | AC-10 | 投标项目owner批准 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
 | AC-11 | Controller迁移 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
 | AC-12 | 审核任务解绑后回读 | 工程证据齐备，待签收 | 按原条款核对已有证据并正式签收；无新增实现缺口。 |
@@ -76,3 +76,5 @@ AC35/37/38使用当前未修改的runner/installer和可丢弃Git仓库验证。
 本机归档目录：`~/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/`。`finite-gate-acceptance-probes.tar.gz` SHA-256 `bb0013d68ec4026fcf38d9bce8f24a0fd649db4a8c1d6ce03d71d67021af2c5f`；详表为`acceptance-closure-scope-review.md/json`。本机原始包没有自动随仓库分发；远端证据链接见PR。其余工程记录按各任务在README中的链接回读，不将历史未完成文字当作当前未完成状态。
 
 本轮只整理证据和状态入口，不降低门禁、不调整正式验收要求、不合并部署、不改生产数据或仓库保护。后续只因新的失败、源代码变更或明确缺失断言追加验证。
+
+本次收口证据：[AC07模型外发](evidence/2026-10-06/AC07_MODEL_OUTBOUND_ACCEPTANCE.md)、[AC09角色矩阵](evidence/2026-10-06/AC09_ROLE_POLICY_MATRIX.md)。授权拒绝不会进入供应商重试/降级；初始CWM保留原本地fallback行为但不向摘要模型外发，后续模型仍受围栏。既有来源/历史/导出证据保持，技术复核不替代正式签收。
