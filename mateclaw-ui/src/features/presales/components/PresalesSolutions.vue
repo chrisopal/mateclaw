@@ -41,7 +41,9 @@
         prop="title"
         :label="t('presales.requirement')"
         min-width="200" /><el-table-column :label="t('presales.scope')"
-        ><template #default="{ row }">{{ stateLabel(row.scope) }}</template></el-table-column
+        ><template #default="{ row }">{{
+          stateLabel(row.scope, 'requirementScope')
+        }}</template></el-table-column
       ><el-table-column :label="t('presales.fulfillment_approach')"
         ><template #default="{ row }">{{
           stateLabel(row.fit, 'fitGap')
@@ -113,7 +115,7 @@
           {{ solution.title }} ·
           {{ versionLabel('solutions', solution.id) }}
         </h3>
-        <el-tag>{{ stateLabel(solution.status || 'DRAFT') }}</el-tag>
+        <el-tag>{{ stateLabel(solution.status || 'DRAFT', 'solution') }}</el-tag>
       </div>
       <el-button
         type="primary"

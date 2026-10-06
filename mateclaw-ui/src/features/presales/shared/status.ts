@@ -43,6 +43,16 @@ export function statusLabel(
 
 /** Current object contracts, independent of the shared translation vocabulary. */
 const domainStates = {
+  projectStage: ['DISCOVERY', 'REQUIREMENTS', 'BASELINED', 'SOLUTION', 'RELEASE', 'ARCHIVED'],
+  projectStatus: ['ACTIVE', 'ARCHIVED'],
+  materialRole: ['PROJECT', 'PRODUCT', 'CASE'],
+  // The existing UI recognizes withdrawal; ordinary bindings have no lifecycle status.
+  materialStatus: ['WITHDRAWN'],
+  requirementPriority: ['HIGH', 'MEDIUM', 'LOW'],
+  requirementScope: ['IN', 'OUT', 'UNKNOWN'],
+  origin: ['CUSTOMER_SOURCE', 'PRODUCT_SOURCE', 'INTERNAL_JUDGMENT', 'ASSUMPTION', 'AI_SUGGESTION'],
+  customerConfirmation: ['UNCONFIRMED'],
+  solution: ['DRAFT'],
   clarification: ['OPEN', 'ANSWERED'],
   task: ['DRAFT', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCELLED'],
   release: ['PENDING', 'APPROVED', 'PUBLISHED'],
@@ -55,7 +65,7 @@ const domainStates = {
 export type StatusDomain = keyof typeof domainStates
 export type DomainStatusValue<Domain extends StatusDomain> = (typeof domainStates)[Domain][number]
 export type DomainStatus<Domain extends StatusDomain> = PresalesStatus<DomainStatusValue<Domain>>
-export type StateLabel = (raw: string | undefined, domain?: StatusDomain) => string
+export type StateLabel = (raw: string | undefined, domain: StatusDomain) => string
 
 export function classifyDomainStatus<Domain extends StatusDomain>(
   raw: string | undefined,

@@ -31,7 +31,7 @@
     </header>
     <el-alert
       v-if="error"
-      :title="error"
+      :title="employeeIssue(error)"
       type="error"
       show-icon
       :closable="false"
@@ -79,7 +79,7 @@
         <PresalesProjectLedger
           :projects="projects"
           :total="total"
-          :error="error"
+          :error="employeeIssue(error)"
           :members="members"
           :members-loading="membersLoading"
           :member-name="memberName"
@@ -96,7 +96,12 @@
       </template>
       <template v-else-if="project">
         <div class="project-meta">
-          <el-tag>{{ stateLabel(project.stage || project.status) }}</el-tag
+          <el-tag>{{
+            stateLabel(
+              project.stage || project.status,
+              project.stage ? 'projectStage' : 'projectStatus',
+            )
+          }}</el-tag
           ><span>{{ project.customer }}</span
           ><span>{{ t('presales.owner') }}: {{ ownerName(project.ownerId) }}</span
           ><span>{{ t('presales.record_version') }} {{ project.version }}</span
@@ -158,7 +163,7 @@
               v-for="binding in project.repairBindings"
               :key="binding.id"
             >
-              <span>{{ binding.id }} · {{ stateLabel(binding.role) }}</span>
+              <span>{{ binding.id }} · {{ stateLabel(binding.role, 'materialRole') }}</span>
               <el-button
                 :disabled="!canWrite || saving"
                 @click="command({ action: 'UNBIND_MATERIAL', payload: { id: binding.id } })"
@@ -355,7 +360,7 @@
           :members-error="membersError"
           :employees="employees"
           :employees-loading="employeesLoading"
-          :employee-error="employeeError"
+          :employee-error="employeeIssue(employeeError)"
           :owner-name="ownerName"
           :member-name="memberName"
           @agents="router.push('/agents')"
@@ -416,7 +421,7 @@
       :close-on-click-modal="false"
       ><el-alert
         v-if="employeeError"
-        :title="employeeError"
+        :title="employeeIssue(employeeError)"
         type="error"
         :closable="false"
       /><el-alert
@@ -483,12 +488,10 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vu
 import { ElMessageBox } from 'element-plus'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { type PresalesMember, type PresalesProject, type PresalesRecord } from '../api/presalesApi'
-import { label as l } from '../shared/locale'
 import { usePresalesTaskPolling } from '../composables/usePresalesTaskPolling'
 import { usePresalesSourcePreview } from '../composables/usePresalesSourcePreview'
 import { isCurrentRequest, operationReceipt } from '../shared/state'
 import {
-  classifyStatus,
   classifyDomainStatus,
   isDomainStatus,
   statusLabel,
@@ -656,42 +659,12 @@ function baselineLabel(id: string): string {
     : `${t('presales.requirements_confirmation')} V${index + 1}`
 }
 function employeeIssue(code: string): string {
-  const messages: Record<string, [string, string]> = {
-    EMPLOYEE_UNAVAILABLE: [
-      '负责员工不可用，请检查绑定、工作区与启用状态。',
-      'Assigned employee unavailable. Check assignment, workspace and enabled state.',
-    ],
-    EMPLOYEE_RUNTIME_FAILED: [
-      '员工执行失败，请查看执行过程并检查员工的模型配置后重试。',
-      'Employee execution failed. Check the execution and model configuration before retrying.',
-    ],
-    EMPLOYEE_RUNTIME_UNAVAILABLE: ['员工运行服务暂不可用。', 'Employee runtime is unavailable.'],
-    PRESENTATION_UNAVAILABLE: [
-      '成果编译服务暂不可用，本次执行未完成。',
-      'Presentation compiler is unavailable; this run did not complete.',
-    ],
-    PRESENTATION_FAILED: [
-      '成果草稿编译失败，请检查页面内容后重试。',
-      'Presentation draft compilation failed; review the content and retry.',
-    ],
-    PPT_GENERATION_FAILED: [
-      '成果草稿生成失败，请检查 PPT 技能配置后重试。',
-      'Output draft generation failed; check the PPT skill configuration and retry.',
-    ],
-    PPT_GENERATION_TIMEOUT: [
-      '成果草稿生成超时，请稍后重试。',
-      'Output draft generation timed out; retry later.',
-    ],
-    PROJECT_CHANGED_DURING_GENERATION: [
-      '执行期间项目已变化，本次结果未采纳。请重新执行。',
-      'Project changed during execution. Results were not applied; run again.',
-    ],
-  }
-  const message = messages[code]
-  return message ? l(...message) : code
+  return Object.hasOwn(presalesMessages['en-US'].presales.employee_issues, code)
+    ? t(`presales.employee_issues.${code}`)
+    : code
 }
-function stateLabel(state: string | undefined, domain?: StatusDomain): string {
-  return statusLabel(domain ? classifyDomainStatus(state, domain) : classifyStatus(state), t)
+function stateLabel(state: string | undefined, domain: StatusDomain): string {
+  return statusLabel(classifyDomainStatus(state, domain), t)
 }
 function printable(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2) || '—'
@@ -822,7 +795,6 @@ const {
   receipt,
   acceptMutation,
   startPolling: () => taskPolling.start(),
-  employeeIssue,
   t,
 })
 const { command, save, approveRelease, archive } = usePresalesMutationSession({

@@ -91,7 +91,6 @@ function setup() {
       receipt: operationReceipt(),
       acceptMutation,
       startPolling,
-      employeeIssue: (message) => `employee:${message}`,
       t: (key) => `translated:${key}`,
     }),
   )!
@@ -220,7 +219,7 @@ describe('presales execution session contracts', () => {
     vi.mocked(presalesApi.employees).mockRejectedValueOnce(new Error('EMPLOYEE_UNAVAILABLE'))
     const session = setup()
     await session.loadEmployees()
-    expect(session.employeeError.value).toBe('employee:EMPLOYEE_UNAVAILABLE')
+    expect(session.employeeError.value).toBe('EMPLOYEE_UNAVAILABLE')
     expect(session.employeesLoading.value).toBe(false)
     await session.loadEmployees()
     expect(session.employeeError.value).toBe('')
@@ -239,7 +238,7 @@ describe('presales execution session contracts', () => {
       const run = () => (action === 'generate' ? session.generate() : session.cancelTask(task))
       await run()
       await run()
-      expect(session.error.value).toBe('employee:OPERATION_CONFLICT')
+      expect(session.error.value).toBe('OPERATION_CONFLICT')
       expect(session.employeeError.value).toBe(session.error.value)
       expect(session.conflict.value).toBe(true)
       expect(session.saving.value).toBe(false)

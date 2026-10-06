@@ -121,10 +121,10 @@ it('keeps the domain UNKNOWN label known and provides a discriminated type inste
 
 it('has matching finite display vocabulary for both languages', () => {
   expect(Object.keys(presalesMessages['en-US'].presales.states).sort()).toEqual(
-    previousLabels.map(([key]) => key).sort(),
+    [...previousLabels.map(([key]) => key), 'WITHDRAWN'].sort(),
   )
   expect(Object.keys(presalesMessages['zh-CN'].presales.states).sort()).toEqual(
-    previousLabels.map(([key]) => key).sort(),
+    [...previousLabels.map(([key]) => key), 'WITHDRAWN'].sort(),
   )
 })
 
@@ -145,6 +145,18 @@ it('classifies equal wire text by object contract, not by translated vocabulary'
 })
 
 it.each([
+  ['projectStage', ['DISCOVERY', 'REQUIREMENTS', 'BASELINED', 'SOLUTION', 'RELEASE', 'ARCHIVED']],
+  ['projectStatus', ['ACTIVE', 'ARCHIVED']],
+  ['materialRole', ['PROJECT', 'PRODUCT', 'CASE']],
+  ['materialStatus', ['WITHDRAWN']],
+  ['requirementPriority', ['HIGH', 'MEDIUM', 'LOW']],
+  ['requirementScope', ['IN', 'OUT', 'UNKNOWN']],
+  [
+    'origin',
+    ['CUSTOMER_SOURCE', 'PRODUCT_SOURCE', 'INTERNAL_JUDGMENT', 'ASSUMPTION', 'AI_SUGGESTION'],
+  ],
+  ['customerConfirmation', ['UNCONFIRMED']],
+  ['solution', ['DRAFT']],
   ['clarification', ['OPEN', 'ANSWERED']],
   ['task', ['DRAFT', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCELLED']],
   ['release', ['PENDING', 'APPROVED', 'PUBLISHED']],
@@ -173,3 +185,21 @@ it.each([
       expect(classifyDomainStatus(raw, domain)).toEqual({ kind: 'missing' })
   },
 )
+
+it('labels only the material withdrawal contract without inventing an active binding state', async () => {
+  const { classifyDomainStatus } = await import('../shared/status')
+  const i18n = createI18n({ legacy: false, locale: 'en-US', messages: presalesMessages })
+  const withdrawn = classifyDomainStatus('WITHDRAWN', 'materialStatus')
+  expect(withdrawn).toEqual({ kind: 'known', value: 'WITHDRAWN' })
+  expect(statusLabel(withdrawn, i18n.global.t)).toBe('Withdrawn')
+  i18n.global.locale.value = 'zh-CN'
+  expect(statusLabel(withdrawn, i18n.global.t)).toBe('已撤回')
+  expect(classifyDomainStatus('ACTIVE', 'materialStatus')).toEqual({
+    kind: 'unknown',
+    raw: 'ACTIVE',
+  })
+  expect(classifyDomainStatus('WITHDRAWN', 'projectStatus')).toEqual({
+    kind: 'unknown',
+    raw: 'WITHDRAWN',
+  })
+})

@@ -1,12 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
+import { currentLocale } from '@/i18n'
 import enMessages from '@/i18n/locales/en-US'
 import zhMessages from '@/i18n/locales/zh-CN'
 import { createApp, nextTick } from 'vue'
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
 import ElementPlus, { ElMessageBox } from 'element-plus'
 import Workbench from '../pages/PresalesWorkbench.vue'
-import { presalesApi, type PresalesHandoff, type PresalesRepairContext } from '../api/presalesApi'
+import {
+  presalesApi,
+  type PresalesHandoff,
+  type PresalesProject,
+  type PresalesRepairContext,
+} from '../api/presalesApi'
 vi.mock('../api/presalesApi', () => ({
   presalesApi: Object.fromEntries(
     [
@@ -29,7 +35,7 @@ vi.mock('../api/presalesApi', () => ({
     ].map((key) => [key, vi.fn()]),
   ),
 }))
-vi.mock('../shared/locale', () => ({ label: (_zh: string, en: string) => en }))
+const initialHostLocale = currentLocale.value
 const workspaceFixture = vi.hoisted(() => ({
   beforeSwitch: undefined as (() => Promise<boolean>) | undefined,
   current: {
@@ -102,6 +108,7 @@ async function mount(path = '/presales') {
     messages: { 'en-US': enMessages, 'zh-CN': zhMessages },
   })
   changeLocale = (locale) => {
+    currentLocale.value = locale
     translations.global.locale.value = locale
   }
   app.use(translations)
@@ -122,6 +129,7 @@ function confirmed(value = ''): Awaited<ReturnType<typeof ElMessageBox.confirm>>
 }
 beforeEach(() => {
   vi.resetAllMocks()
+  currentLocale.value = 'en-US'
   workspaceFixture.beforeSwitch = undefined
   workspaceFixture.current.currentWorkspaceId = project.workspaceId
   vi.mocked(presalesApi.members).mockResolvedValue([
@@ -150,6 +158,7 @@ beforeEach(() => {
 afterEach(() => {
   app?.unmount()
   document.body.innerHTML = ''
+  currentLocale.value = initialHostLocale
 })
 describe('presales workspace behavior', () => {
   it('keeps ledger filter models, pagination and dashboard stage selection in the query session', async () => {
@@ -2662,5 +2671,214 @@ describe('discovery panel boundaries', () => {
     }
     expect(presalesApi.command).not.toHaveBeenCalled()
     expect(presalesApi.generate).not.toHaveBeenCalled()
+  })
+})
+
+describe('remaining display contract', () => {
+  it.each(['employees', 'generate', 'cancel'] as const)(
+    'updates an existing %s API failure when the host language changes',
+    async (action) => {
+      vi.mocked(presalesApi.get).mockResolvedValue({
+        ...project,
+        agentId: '90071992547409996',
+        tasks: [{ id: 'failed-request-task', status: 'RUNNING', skill: 'S1' }],
+      })
+      const api =
+        action === 'employees'
+          ? presalesApi.employees
+          : action === 'generate'
+            ? presalesApi.generate
+            : presalesApi.cancelTask
+      vi.mocked(api).mockRejectedValue({
+        response: {
+          status: 503,
+          data: { msg: 'EMPLOYEE_RUNTIME_UNAVAILABLE' },
+        },
+      })
+      await mount(`/presales/${project.id}`)
+      if (action === 'cancel') button('Discard this run result').click()
+      else {
+        button('Delegate to employee').click()
+        await settle()
+        if (action === 'generate') button('Start work').click()
+      }
+      await settle()
+      expect(api).toHaveBeenCalledTimes(1)
+      const alerts = () =>
+        [...document.querySelectorAll('.el-alert--error .el-alert__title')].map(
+          (item) => item.textContent,
+        )
+      expect(alerts()).toContain('Employee runtime is unavailable.')
+      changeLocale('zh-CN')
+      await settle()
+      expect(alerts()).toContain('员工运行服务暂不可用。')
+      expect(alerts()).not.toContain('Employee runtime is unavailable.')
+      changeLocale('en-US')
+      await settle()
+      expect(alerts()).toContain('Employee runtime is unavailable.')
+      expect(alerts()).not.toContain('员工运行服务暂不可用。')
+      expect(api).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  // Captured verbatim before moving the employee messages into the existing catalogue.
+  it.each([
+    [
+      'EMPLOYEE_UNAVAILABLE',
+      '负责员工不可用，请检查绑定、工作区与启用状态。',
+      'Assigned employee unavailable. Check assignment, workspace and enabled state.',
+    ],
+    [
+      'EMPLOYEE_RUNTIME_FAILED',
+      '员工执行失败，请查看执行过程并检查员工的模型配置后重试。',
+      'Employee execution failed. Check the execution and model configuration before retrying.',
+    ],
+    ['EMPLOYEE_RUNTIME_UNAVAILABLE', '员工运行服务暂不可用。', 'Employee runtime is unavailable.'],
+    [
+      'PRESENTATION_UNAVAILABLE',
+      '成果编译服务暂不可用，本次执行未完成。',
+      'Presentation compiler is unavailable; this run did not complete.',
+    ],
+    [
+      'PRESENTATION_FAILED',
+      '成果草稿编译失败，请检查页面内容后重试。',
+      'Presentation draft compilation failed; review the content and retry.',
+    ],
+    [
+      'PPT_GENERATION_FAILED',
+      '成果草稿生成失败，请检查 PPT 技能配置后重试。',
+      'Output draft generation failed; check the PPT skill configuration and retry.',
+    ],
+    [
+      'PPT_GENERATION_TIMEOUT',
+      '成果草稿生成超时，请稍后重试。',
+      'Output draft generation timed out; retry later.',
+    ],
+    [
+      'PROJECT_CHANGED_DURING_GENERATION',
+      '执行期间项目已变化，本次结果未采纳。请重新执行。',
+      'Project changed during execution. Results were not applied; run again.',
+    ],
+    ['LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE'],
+    ['constructor', 'constructor', 'constructor'],
+    ['__proto__', '__proto__', '__proto__'],
+    ['toString', 'toString', 'toString'],
+  ])('preserves employee error %s through actual host language changes', async (code, zh, en) => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      tasks: [{ id: 'error-task', skill: 'S1', status: 'FAILED', error: code }],
+    })
+    await mount(`/presales/${project.id}`)
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(en)
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(zh)
+    changeLocale('en-US')
+    await settle()
+    expect(document.querySelector('#pane-overview')?.textContent).toContain(en)
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it.each(['stage', 'status'] as const)(
+    'rejects a foreign project %s in header and ledger',
+    async (field) => {
+      const detail: PresalesProject = { ...project, [field]: 'RUNNING' }
+      vi.mocked(presalesApi.get).mockResolvedValue(detail)
+      const router = await mount(`/presales/${project.id}`)
+      expect(document.body.textContent).toContain('Unknown status: RUNNING')
+      vi.mocked(presalesApi.list).mockResolvedValue({
+        items: [detail],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      })
+      await router.push('/presales')
+      await settle()
+      expect(document.querySelector('.project-ledger')?.textContent).toContain(
+        'Unknown status: RUNNING',
+      )
+      expect(detail[field]).toBe('RUNNING')
+    },
+  )
+
+  it.each([
+    ['priority', 'RUNNING'],
+    ['scope', 'ACTIVE'],
+    ['originKind', 'ANSWERED'],
+    ['customerConfirmationStatus', 'APPROVED'],
+  ])('does not treat foreign requirement %s as known', async (field, raw) => {
+    const item = {
+      id: 'requirement-state',
+      title: 'Preserved requirement',
+      [field]: raw,
+    }
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      requirements: [item],
+    })
+    await mount(`/presales/${project.id}`)
+    document.querySelector<HTMLElement>('#tab-requirements')!.click()
+    await settle()
+    expect(document.querySelector('#pane-requirements')?.textContent).toContain(
+      `Unknown status: ${raw}`,
+    )
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('#pane-requirements')?.textContent).toContain(`未知状态：${raw}`)
+    expect(item[field]).toBe(raw)
+  })
+
+  it.each([
+    ['role', 'RUNNING'],
+    ['status', 'ACTIVE'],
+  ])('does not borrow another object material %s', async (field, raw) => {
+    const item = { id: 'material-state', kbId: 'kb', [field]: raw }
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      materials: [item],
+    })
+    await mount(`/presales/${project.id}`)
+    document.querySelector<HTMLElement>('#tab-materials')!.click()
+    await settle()
+    expect(document.querySelector('#pane-materials')?.textContent).toContain(
+      `Unknown status: ${raw}`,
+    )
+    expect(button('Withdraw').disabled).toBe(false)
+    expect(item[field]).toBe(raw)
+  })
+
+  it('labels the already recognized withdrawn material without enabling withdrawal', async () => {
+    vi.mocked(presalesApi.get).mockResolvedValue({
+      ...project,
+      materials: [{ id: 'withdrawn', status: 'WITHDRAWN' }],
+    })
+    await mount(`/presales/${project.id}`)
+    document.querySelector<HTMLElement>('#tab-materials')!.click()
+    await settle()
+    expect(document.querySelector('#pane-materials')?.textContent).toContain('Withdrawn')
+    expect(document.querySelector('#pane-materials')?.textContent).not.toContain(
+      'Unknown status: WITHDRAWN',
+    )
+    expect(button('Withdraw').disabled).toBe(true)
+    changeLocale('zh-CN')
+    await settle()
+    expect(document.querySelector('#pane-materials')?.textContent).toContain('已撤回')
+    expect(presalesApi.command).not.toHaveBeenCalled()
+  })
+
+  it('keeps solution draft fallback but rejects a foreign explicit state', async () => {
+    const solutions = [
+      { id: 'implicit', title: 'Implicit draft' },
+      { id: 'foreign', title: 'Foreign state', status: 'ANSWERED' },
+    ]
+    vi.mocked(presalesApi.get).mockResolvedValue({ ...project, solutions })
+    await mount(`/presales/${project.id}`)
+    document.querySelector<HTMLElement>('#tab-solution')!.click()
+    await settle()
+    const pane = document.querySelector('#pane-solution')!
+    expect(pane.textContent).toContain('Unknown status: ANSWERED')
+    expect(pane.textContent).toContain('Draft')
+    expect(solutions[0]).not.toHaveProperty('status')
+    expect(presalesApi.command).not.toHaveBeenCalled()
   })
 })

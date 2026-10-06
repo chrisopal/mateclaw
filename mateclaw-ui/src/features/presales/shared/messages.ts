@@ -1,6 +1,16 @@
 export const presalesMessages = {
   'zh-CN': {
     presales: {
+      employee_issues: {
+        EMPLOYEE_UNAVAILABLE: '负责员工不可用，请检查绑定、工作区与启用状态。',
+        EMPLOYEE_RUNTIME_FAILED: '员工执行失败，请查看执行过程并检查员工的模型配置后重试。',
+        EMPLOYEE_RUNTIME_UNAVAILABLE: '员工运行服务暂不可用。',
+        PRESENTATION_UNAVAILABLE: '成果编译服务暂不可用，本次执行未完成。',
+        PRESENTATION_FAILED: '成果草稿编译失败，请检查页面内容后重试。',
+        PPT_GENERATION_FAILED: '成果草稿生成失败，请检查 PPT 技能配置后重试。',
+        PPT_GENERATION_TIMEOUT: '成果草稿生成超时，请稍后重试。',
+        PROJECT_CHANGED_DURING_GENERATION: '执行期间项目已变化，本次结果未采纳。请重新执行。',
+      },
       unknown_status: '未知状态：{raw}',
       states: {
         DISCOVERY: '项目理解',
@@ -10,6 +20,7 @@ export const presalesMessages = {
         RELEASE: '成果发布',
         ARCHIVED: '已归档',
         ACTIVE: '进行中',
+        WITHDRAWN: '已撤回',
         FULL: '完整响应',
         PARTIAL: '部分响应',
         CONDITIONAL: '条件响应',
@@ -349,6 +360,21 @@ export const presalesMessages = {
   },
   'en-US': {
     presales: {
+      employee_issues: {
+        EMPLOYEE_UNAVAILABLE:
+          'Assigned employee unavailable. Check assignment, workspace and enabled state.',
+        EMPLOYEE_RUNTIME_FAILED:
+          'Employee execution failed. Check the execution and model configuration before retrying.',
+        EMPLOYEE_RUNTIME_UNAVAILABLE: 'Employee runtime is unavailable.',
+        PRESENTATION_UNAVAILABLE:
+          'Presentation compiler is unavailable; this run did not complete.',
+        PRESENTATION_FAILED: 'Presentation draft compilation failed; review the content and retry.',
+        PPT_GENERATION_FAILED:
+          'Output draft generation failed; check the PPT skill configuration and retry.',
+        PPT_GENERATION_TIMEOUT: 'Output draft generation timed out; retry later.',
+        PROJECT_CHANGED_DURING_GENERATION:
+          'Project changed during execution. Results were not applied; run again.',
+      },
       unknown_status: 'Unknown status: {raw}',
       states: {
         DISCOVERY: 'Discovery',
@@ -358,6 +384,7 @@ export const presalesMessages = {
         RELEASE: 'Release',
         ARCHIVED: 'Archived',
         ACTIVE: 'Active',
+        WITHDRAWN: 'Withdrawn',
         FULL: 'Full',
         PARTIAL: 'Partial',
         CONDITIONAL: 'Conditional',

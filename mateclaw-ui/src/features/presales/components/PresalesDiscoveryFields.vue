@@ -42,7 +42,7 @@
           v-for="role in ['PROJECT', 'PRODUCT', 'CASE']"
           :key="role"
           :value="role"
-          :label="stateLabel(role)" /></el-select
+          :label="stateLabel(role, 'materialRole')" /></el-select
     ></el-form-item>
   </template>
   <template v-else-if="kind === 'requirement'">
@@ -67,7 +67,7 @@
           ]"
           :key="v"
           :value="v"
-          :label="stateLabel(v)" /></el-select
+          :label="stateLabel(v, 'origin')" /></el-select
     ></el-form-item>
     <div class="form-grid">
       <el-form-item :label="t('presales.priority')"
@@ -76,14 +76,14 @@
             v-for="v in ['HIGH', 'MEDIUM', 'LOW']"
             :key="v"
             :value="v"
-            :label="stateLabel(v)" /></el-select></el-form-item
+            :label="stateLabel(v, 'requirementPriority')" /></el-select></el-form-item
       ><el-form-item :label="t('presales.scope')"
         ><el-select v-model="form.scope"
           ><el-option
             v-for="v in ['IN', 'OUT', 'UNKNOWN']"
             :key="v"
             :value="v"
-            :label="stateLabel(v)" /></el-select
+            :label="stateLabel(v, 'requirementScope')" /></el-select
       ></el-form-item>
     </div>
     <el-form-item :label="t('presales.context_message_17')"
@@ -214,7 +214,7 @@
         type="textarea"
         :rows="8"
     /></el-form-item>
-    <p>{{ stateLabel(form.originKind) }}</p>
+    <p>{{ stateLabel(form.originKind, 'origin') }}</p>
   </template>
 </template>
 <script setup lang="ts">

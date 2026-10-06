@@ -24,7 +24,6 @@ interface ExecutionSessionOptions<Scope> {
   receipt: (input: unknown) => string
   acceptMutation: (detail: PresalesProject, scope: Scope) => boolean
   startPolling: () => void
-  employeeIssue: (message: string) => string
   t: (key: string) => string
 }
 
@@ -54,7 +53,7 @@ export function usePresalesExecutionSession<Scope>(options: ExecutionSessionOpti
       const result = await presalesApi.employees(ws)
       if (active()) employees.value = result
     } catch (e) {
-      if (active()) employeeError.value = options.employeeIssue(presalesError(e).message)
+      if (active()) employeeError.value = presalesError(e).message
     } finally {
       if (active()) employeesLoading.value = false
     }
@@ -105,7 +104,7 @@ export function usePresalesExecutionSession<Scope>(options: ExecutionSessionOpti
     } catch (e) {
       if (!isActiveScope(scope)) return
       const issue = presalesError(e)
-      options.error.value = employeeError.value = options.employeeIssue(issue.message)
+      options.error.value = employeeError.value = issue.message
       options.conflict.value = issue.conflict
     } finally {
       if (isActiveScope(scope)) options.saving.value = false
@@ -133,7 +132,7 @@ export function usePresalesExecutionSession<Scope>(options: ExecutionSessionOpti
     } catch (e) {
       if (!isActiveScope(scope)) return
       const issue = presalesError(e)
-      options.error.value = employeeError.value = options.employeeIssue(issue.message)
+      options.error.value = employeeError.value = issue.message
       options.conflict.value = issue.conflict
     } finally {
       if (isActiveScope(scope)) options.saving.value = false

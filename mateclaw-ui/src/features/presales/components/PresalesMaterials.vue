@@ -9,7 +9,9 @@
   </section>
   <el-table :data="project.materials"
     ><el-table-column :label="t('presales.role')"
-      ><template #default="{ row }">{{ stateLabel(row.role) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.role, 'materialRole')
+      }}</template></el-table-column
     ><el-table-column
       prop="kbId"
       :label="t('presales.knowledge_base')"
@@ -19,7 +21,9 @@
       :label="t('presales.graph')"
       min-width="180"
     /><el-table-column :label="t('presales.status')"
-      ><template #default="{ row }">{{ stateLabel(row.status) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.status, 'materialStatus')
+      }}</template></el-table-column
     ><el-table-column
       :label="t('presales.actions')"
       min-width="224"

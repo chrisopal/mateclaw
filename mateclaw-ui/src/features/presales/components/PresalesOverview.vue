@@ -94,7 +94,7 @@
       v-for="(item, index) in task.result?.items || []"
       :key="index"
     >
-      <h4>{{ item.title }} · {{ stateLabel(item.originKind) }}</h4>
+      <h4>{{ item.title }} · {{ stateLabel(item.originKind, 'origin') }}</h4>
       <pre class="safe-content">{{ item.text }}</pre>
       <el-button
         v-if="['S1', 'S5', 'S6'].includes(task.skill!)"

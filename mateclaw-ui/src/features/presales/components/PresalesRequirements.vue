@@ -31,16 +31,22 @@
     /><el-table-column
       :label="t('presales.origin')"
       min-width="130"
-      ><template #default="{ row }">{{ stateLabel(row.originKind) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.originKind, 'origin')
+      }}</template></el-table-column
     ><el-table-column :label="t('presales.priority')"
-      ><template #default="{ row }">{{ stateLabel(row.priority) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.priority, 'requirementPriority')
+      }}</template></el-table-column
     ><el-table-column :label="t('presales.scope')"
-      ><template #default="{ row }">{{ stateLabel(row.scope) }}</template></el-table-column
+      ><template #default="{ row }">{{
+        stateLabel(row.scope, 'requirementScope')
+      }}</template></el-table-column
     ><el-table-column
       :label="t('presales.customer_confirmation')"
       min-width="160"
       ><template #default="{ row }">{{
-        stateLabel(row.customerConfirmationStatus)
+        stateLabel(row.customerConfirmationStatus, 'customerConfirmation')
       }}</template></el-table-column
     ><el-table-column
       :label="t('presales.actions')"

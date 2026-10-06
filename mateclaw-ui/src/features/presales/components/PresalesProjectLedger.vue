@@ -34,7 +34,7 @@
         v-for="status in stages"
         :key="status"
         :value="status"
-        :label="stateLabel(status)" /></el-select
+        :label="stateLabel(status, 'projectStage')" /></el-select
     ><el-button native-type="submit">{{ t('presales.search') }}</el-button>
   </form>
   <el-table
@@ -72,7 +72,9 @@
         ><span
           class="stage-label"
           :data-stage="row.stage"
-          >{{ stateLabel(row.stage || row.status) }}</span
+          >{{
+            stateLabel(row.stage || row.status, row.stage ? 'projectStage' : 'projectStatus')
+          }}</span
         ></template
       ></el-table-column
     ><el-table-column
