@@ -22,4 +22,15 @@ public interface PresalesPresentationHook {
             String agentId) {
         throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
     }
+
+    default ObjectNode prepare(
+            ObjectNode result,
+            String scope,
+            String projectId,
+            String runId,
+            String expectedDigest,
+            String agentId,
+            PresalesPresentationPackage pkg) {
+        throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
+    }
 }

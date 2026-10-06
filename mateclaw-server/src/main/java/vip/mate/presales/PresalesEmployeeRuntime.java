@@ -23,6 +23,7 @@ public class PresalesEmployeeRuntime {
     private final ObjectMapper json;
     private final ModelConfigService models;
     private final ProjectToolPolicy.Revalidator revalidator;
+    private final ObjectProvider<vip.mate.presales.repository.PresalesProjectRepository> projects;
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private PresalesPresentationService presentations;
@@ -32,13 +33,14 @@ public class PresalesEmployeeRuntime {
             ObjectProvider<ConversationService> conversations,
             ObjectMapper json,
             ModelConfigService models,
-            @org.springframework.context.annotation.Lazy
-                    ProjectToolPolicy.Revalidator revalidator) {
+            @org.springframework.context.annotation.Lazy ProjectToolPolicy.Revalidator revalidator,
+            ObjectProvider<vip.mate.presales.repository.PresalesProjectRepository> projects) {
         this.agents = agents;
         this.conversations = conversations;
         this.json = json;
         this.models = models;
         this.revalidator = revalidator;
+        this.projects = projects;
     }
 
     private boolean eligible(AgentEntity a, String scope) {
@@ -82,29 +84,101 @@ public class PresalesEmployeeRuntime {
         }
     }
 
-    /** Resolve the same server-owned model and classpath skill at submit and execution time. */
+    record CapturedExecution(Pin pin, PresalesTaskPackage skillPackage) {}
+
+    /** Capture once before submission, deriving the prompt from the same immutable files. */
+    CapturedExecution capture(String scope, String agentId, String skill) {
+        var config = modelPin(scope, agentId);
+        PresalesPresentationPackage presentation = null;
+        if ("S6".equals(skill)) {
+            if (presentations == null)
+                throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
+            presentation = presentations.capturePackage(scope, agentId);
+        }
+        var original =
+                PresalesTaskPackage.create(
+                        skill, PresalesModelAdapter.readSkillFiles(skill), presentation);
+        return new CapturedExecution(
+                new Pin(
+                        config.modelConfigId(),
+                        config.configDigest(),
+                        original.skillName(),
+                        original.skillDigest(),
+                        original.presentationDigest()),
+                original);
+    }
+
     public Pin pin(String scope, String agentId, String skill) {
+        return capture(scope, agentId, skill).pin();
+    }
+
+    private Pin modelPin(String scope, String agentId) {
         var employee = require(scope, agentId);
         var model = models.resolveModel(employee.getModelName());
         if (model == null || model.getId() == null || !Boolean.TRUE.equals(model.getEnabled()))
             throw PresalesModelAdapter.error(409, "MODEL_CONFIG_MISSING");
         try {
-            String instructions = PresalesModelAdapter.instructions(skill);
             return new Pin(
                     model.getId().toString(),
                     PresalesArtifactRenderer.digest(json.writeValueAsBytes(model)),
-                    PresalesModelAdapter.skillName(skill),
-                    PresalesArtifactRenderer.digest(instructions.getBytes(StandardCharsets.UTF_8)),
-                    "S6".equals(skill) ? presentationPin(scope, agentId).digest() : "");
+                    "",
+                    "");
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new IllegalStateException("Unable to pin presales model configuration", e);
+            throw new IllegalStateException(e);
         }
     }
 
-    private PresalesPresentationService.ExecutionPin presentationPin(String scope, String agentId) {
-        if (presentations == null)
-            throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
-        return presentations.executionPin(scope, agentId);
+    PresalesTaskPackage originalPackage(
+            String scope, String actor, ObjectNode task, ObjectNode snapshot) {
+        var repository = projects.getIfAvailable();
+        if (repository == null)
+            throw PresalesModelAdapter.error(409, "TASK_SKILL_PACKAGE_UNAVAILABLE");
+        var stored =
+                repository
+                        .findTaskPackage(
+                                scope,
+                                snapshot.path("caseRef").asText(),
+                                task.path("id").asText(),
+                                task.path("runId").asText())
+                        .orElseThrow(
+                                () ->
+                                        PresalesModelAdapter.error(
+                                                409, "TASK_SKILL_PACKAGE_UNAVAILABLE"));
+        if (!actor.equals(stored.actorId())
+                || !actor.equals(snapshot.path("actorId").asText())
+                || !scope.equals(snapshot.path("workspaceId").asText())
+                || !task.path("agentId").asText().equals(stored.employeeId())
+                || !task.path("packageDigest").asText().equals(stored.packageDigest()))
+            throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+        PresalesTaskPackage original;
+        try {
+            original = json.readValue(stored.bodyJson(), PresalesTaskPackage.class);
+        } catch (Exception invalid) {
+            throw PresalesModelAdapter.error(409, "TASK_SKILL_PACKAGE_UNAVAILABLE");
+        }
+        if (!original.digest().equals(stored.packageDigest())
+                || !original.skill().equals(task.path("skill").asText())
+                || !original.skillName().equals(task.path("skillName").asText())
+                || !original.skillDigest().equals(task.path("skillDigest").asText())
+                || !original.presentationDigest().equals(task.path("presentationDigest").asText()))
+            throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
+        return original;
+    }
+
+    String instructionsForTask(String scope, String actor, ObjectNode task, ObjectNode snapshot) {
+        return originalPackage(scope, actor, task, snapshot).instructions();
+    }
+
+    void requirePinnedOptions(
+            ProjectExecutionOptions options, ObjectNode task, ObjectNode snapshot) {
+        var scope = (PresalesToolScope) options.toolPolicy();
+        var expected = executionOptions(scope.workspaceId(), scope.actorId(), task, snapshot);
+        if (!expected.modelConfigId().equals(options.modelConfigId())
+                || !expected.configDigest().equals(options.configDigest())
+                || !expected.skillName().equals(options.skillName())
+                || !expected.skillDigest().equals(options.skillDigest())
+                || !expected.skillFiles().equals(options.skillFiles()))
+            throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
     }
 
     /** Recheck the durable execution boundary immediately before a model result is accepted. */
@@ -114,13 +188,19 @@ public class PresalesEmployeeRuntime {
 
     private ProjectExecutionOptions executionOptions(
             String scope, String actor, ObjectNode task, ObjectNode snapshot) {
-        var pin = pin(scope, task.path("agentId").asText(), task.path("skill").asText());
+        if (PresalesProjectRevision.positiveRevision(snapshot.path("projectVersion")) == null)
+            throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
+        var original = originalPackage(scope, actor, task, snapshot);
+        var pin = modelPin(scope, task.path("agentId").asText());
         if (!pin.modelConfigId().equals(task.path("modelConfigId").asText())
-                || !pin.configDigest().equals(task.path("configDigest").asText())
-                || !pin.skillName().equals(task.path("skillName").asText())
-                || !pin.skillDigest().equals(task.path("skillDigest").asText())
-                || !pin.presentationDigest().equals(task.path("presentationDigest").asText()))
+                || !pin.configDigest().equals(task.path("configDigest").asText()))
             throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
+        if (original.presentation() != null) {
+            if (presentations == null)
+                throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
+            presentations.requireActivePackage(
+                    scope, task.path("agentId").asText(), original.presentation());
+        }
         String runId = task.path("runId").asText();
         String projectId = snapshot.path("caseRef").asText();
         if (!Objects.equals(
@@ -145,9 +225,9 @@ public class PresalesEmployeeRuntime {
                 runId,
                 pin.modelConfigId(),
                 pin.configDigest(),
-                pin.skillName(),
-                pin.skillDigest(),
-                Map.of("SKILL.md", PresalesModelAdapter.readSkill(task.path("skill").asText())),
+                original.skillName(),
+                original.skillDigest(),
+                original.skillFiles(),
                 PresalesToolPolicy.PROJECT_VISIBLE_TOOLS,
                 toolScope,
                 0,
@@ -177,10 +257,8 @@ public class PresalesEmployeeRuntime {
             throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
         revalidator.requireActive(options);
         if ("S6".equals(snapshot.path("skill").asText())) {
-            var presentation = presentationPin(scope, agentId);
-            if (!presentation.digest().equals(task.path("presentationDigest").asText()))
-                throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
-            instructions += presentation.instructions();
+            instructions +=
+                    originalPackage(scope, actor, task, snapshot).presentation().instructions();
         }
         if (conversations.getIfAvailable() == null)
             throw PresalesModelAdapter.error(409, "EMPLOYEE_RUNTIME_UNAVAILABLE");

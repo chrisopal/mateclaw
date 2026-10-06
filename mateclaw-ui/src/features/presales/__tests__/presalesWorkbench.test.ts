@@ -2769,6 +2769,16 @@ describe('remaining display contract', () => {
       '未能保存任务完成状态。模型服务是否已计费无法确认；请核对执行记录后人工重新执行。',
       'The task completion state could not be saved. Model billing is unknown. Check the execution record before running again manually.',
     ],
+    [
+      'TASK_SKILL_PACKAGE_UNAVAILABLE',
+      '本次任务的原始技能包缺失或损坏，无法继续执行。请新建任务；系统不会用当前技能替代历史版本。',
+      'The original skill package is missing or invalid. Create a new task; the current skill will not replace the historical version.',
+    ],
+    [
+      'PPT_RUNTIME_CHANGED',
+      '成果编译环境与任务创建时不一致，已停止编译。请核对运行环境后新建任务。',
+      'The presentation runtime differs from the task snapshot. Compilation stopped; check the runtime before creating a new task.',
+    ],
     ['LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE', 'LEGACY_EMPLOYEE_FAILURE'],
     ['constructor', 'constructor', 'constructor'],
     ['__proto__', '__proto__', '__proto__'],

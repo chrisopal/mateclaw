@@ -104,7 +104,8 @@ public class PresalesPresentationService implements PresalesPresentationHook {
         this.transaction = new TransactionTemplate(tx);
     }
 
-    public String instructions(String scope, String agentId) {
+    private vip.mate.skill.runtime.model.ResolvedSkill requireBinding(
+            String scope, String agentId) {
         var skill = skills.findActiveSkill("ppt-master-plus", Long.valueOf(scope));
         var bound = bindings.getBoundSkillIds(Long.valueOf(agentId));
         if (skill == null
@@ -113,23 +114,71 @@ public class PresalesPresentationService implements PresalesPresentationHook {
                 || bound == null
                 || !bound.contains(skill.getId()))
             throw PresalesModelAdapter.error(409, "PPT_SKILL_NOT_BOUND");
-        Path root = root();
         try {
-            if (skill.getSkillDir() == null || !skill.getSkillDir().toRealPath().equals(root))
+            if (skill.getSkillDir() == null || !skill.getSkillDir().toRealPath().equals(root()))
                 throw PresalesModelAdapter.error(409, "PPT_SKILL_PATH_MISMATCH");
-            return "\nPRESENTATION ENGINE: ppt-master-plus. Author self-contained 1280x720 SVG slides "
-                    + "in solution.presentation.slides [{title,svg}]. Use editable text and vector shapes only. "
-                    + "No scripts, images, stylesheets, URLs, links, embedded files, metadata, defs or use. Allowed elements: "
-                    + TAGS
-                    + ". White background, enterprise blue #0966D9, dark text, generous margins (64px), "
-                    + "title 32px and body 22px or larger; split long content over pages. Include 未批准草稿 in each page. "
-                    + "Use only supplied project facts, preserve unknowns. This platform adapter compiles the authored SVG roster "
-                    + "with the bound skill's quality checker and native converter, then requires human review before publication. "
-                    + "It does not run arbitrary skill scripts.\nBOUND SKILL INSTRUCTIONS (platform structured-output contract applies):\n"
-                    + skill.getContent();
         } catch (java.io.IOException e) {
             throw PresalesModelAdapter.error(409, "PPT_SKILL_UNAVAILABLE");
         }
+        return skill;
+    }
+
+    public String instructions(String scope, String agentId) {
+        return instructionsFor(requireBinding(scope, agentId).getContent());
+    }
+
+    private static String instructionsFor(String skillContent) {
+        return "\nPRESENTATION ENGINE: ppt-master-plus. Author self-contained 1280x720 SVG slides "
+                + "in solution.presentation.slides [{title,svg}]. Use editable text and vector shapes only. "
+                + "No scripts, images, stylesheets, URLs, links, embedded files, metadata, defs or use. Allowed elements: "
+                + TAGS
+                + ". White background, enterprise blue #0966D9, dark text, generous margins (64px), "
+                + "title 32px and body 22px or larger; split long content over pages. Include 未批准草稿 in each page. "
+                + "Use only supplied project facts, preserve unknowns. This platform adapter compiles the authored SVG roster "
+                + "with the bound skill's quality checker and native converter, then requires human review before publication. "
+                + "It does not run arbitrary skill scripts.\nBOUND SKILL INSTRUCTIONS (platform structured-output contract applies):\n"
+                + skillContent;
+    }
+
+    PresalesPresentationPackage capturePackage(String scope, String agentId) {
+        var skill = requireBinding(scope, agentId);
+        Path work = null;
+        try {
+            var files = PresalesPresentationPackage.captureFiles(root());
+            String prompt =
+                    instructionsFor(
+                            new String(
+                                    Base64.getDecoder().decode(files.get("SKILL.md")),
+                                    StandardCharsets.UTF_8));
+            work = Files.createTempDirectory("presales-ppt-capture-").toRealPath();
+            Path engine = work.resolve("engine");
+            // Materialize before probing imports, so even capture never executes current loose
+            // files.
+            var candidate =
+                    PresalesPresentationPackage.create(
+                            String.valueOf(skill.getId()), prompt, files, "capture");
+            candidate.materialize(engine);
+            String runtime = runtimeIdentity(engine, work);
+            candidate.verifyMaterialized(engine);
+            var captured =
+                    PresalesPresentationPackage.create(
+                            candidate.bindingId(), prompt, files, runtime);
+            requireActivePackage(scope, agentId, captured);
+            return captured;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw PresalesModelAdapter.error(409, "PPT_SKILL_PACKAGE_UNAVAILABLE");
+        } finally {
+            deleteWork(work);
+        }
+    }
+
+    void requireActivePackage(String scope, String agentId, PresalesPresentationPackage pkg) {
+        if (pkg == null) throw PresalesModelAdapter.error(409, "PPT_SKILL_PACKAGE_UNAVAILABLE");
+        var active = requireBinding(scope, agentId);
+        if (!String.valueOf(active.getId()).equals(pkg.bindingId()))
+            throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
     }
 
     public record ExecutionPin(String instructions, String digest) {}
@@ -158,13 +207,26 @@ public class PresalesPresentationService implements PresalesPresentationHook {
         if (trustedRoot.isBlank())
             throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
         try {
-            return Path.of(trustedRoot).toRealPath();
+            Path configured = Path.of(trustedRoot).toAbsolutePath().normalize();
+            if (Files.isSymbolicLink(configured))
+                throw new java.io.IOException("Symlink engine root");
+            return configured.toRealPath();
         } catch (Exception e) {
             throw PresalesModelAdapter.error(409, "PPT_ENGINE_NOT_CONFIGURED");
         }
     }
 
     public ObjectNode prepare(ObjectNode result, String scope, String projectId, String runId) {
+        return compile(result, scope, projectId, runId, null, null);
+    }
+
+    private ObjectNode compile(
+            ObjectNode result,
+            String scope,
+            String projectId,
+            String runId,
+            String agentId,
+            PresalesPresentationPackage pkg) {
         JsonNode presentation = result.path("solution").path("presentation");
         if (!presentation.path("slides").isArray()
                 || presentation.path("slides").isEmpty()
@@ -179,9 +241,14 @@ public class PresalesPresentationService implements PresalesPresentationHook {
                     String.format(Locale.ROOT, "page-%02d.svg", ++i),
                     svg.getBytes(StandardCharsets.UTF_8));
         }
-        Path root = root(), work = null;
+        Path root = pkg == null ? root() : null, work = null;
         try {
-            work = Files.createTempDirectory("presales-ppt-");
+            work = Files.createTempDirectory("presales-ppt-").toRealPath();
+            if (pkg != null) {
+                root = work.resolve("engine");
+                pkg.materialize(root);
+                requireRuntime(pkg, root, work);
+            }
             Path output = Files.createDirectories(work.resolve("svg_output"));
             for (var page : pages.entrySet())
                 Files.write(output.resolve(page.getKey()), page.getValue());
@@ -237,6 +304,14 @@ public class PresalesPresentationService implements PresalesPresentationHook {
                             .put(
                                     "skillVersion",
                                     version(Files.readString(root.resolve("SKILL.md"))));
+            if (pkg != null) {
+                pkg.verifyMaterialized(root);
+                requireRuntime(pkg, root, work);
+                requireActivePackage(scope, agentId, pkg);
+                manifest.put("packageSha256", pkg.digest())
+                        .put("runtimeIdentity", pkg.runtimeIdentity())
+                        .put("engineTreeSha256", pkg.digest());
+            }
             var list = manifest.putArray("slides");
             i = 0;
             for (var page : pages.entrySet())
@@ -268,19 +343,38 @@ public class PresalesPresentationService implements PresalesPresentationHook {
         } catch (Exception e) {
             throw PresalesModelAdapter.error(422, "PPT_GENERATION_FAILED");
         } finally {
-            if (work != null)
-                try (var paths = Files.walk(work)) {
-                    paths.sorted(Comparator.reverseOrder())
-                            .forEach(
-                                    p -> {
-                                        try {
-                                            Files.deleteIfExists(p);
-                                        } catch (Exception ignored) {
-                                        }
-                                    });
-                } catch (Exception ignored) {
-                }
+            deleteWork(work);
         }
+    }
+
+    private static void deleteWork(Path work) {
+        if (work != null)
+            try (var paths = Files.walk(work)) {
+                paths.sorted(Comparator.reverseOrder())
+                        .forEach(
+                                p -> {
+                                    try {
+                                        Files.deleteIfExists(p);
+                                    } catch (Exception ignored) {
+                                    }
+                                });
+            } catch (Exception ignored) {
+            }
+    }
+
+    @Override
+    public ObjectNode prepare(
+            ObjectNode result,
+            String scope,
+            String projectId,
+            String runId,
+            String expectedDigest,
+            String agentId,
+            PresalesPresentationPackage pkg) {
+        requireActivePackage(scope, agentId, pkg);
+        if (expectedDigest == null || !expectedDigest.equals(pkg.digest()))
+            throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
+        return compile(result, scope, projectId, runId, agentId, pkg);
     }
 
     @Override
@@ -335,6 +429,10 @@ public class PresalesPresentationService implements PresalesPresentationHook {
         if (path != null) builder.environment().put("PATH", path);
         builder.environment().put("HOME", work.toString());
         builder.environment().put("PYTHONIOENCODING", "utf-8");
+        builder.environment().put("TMPDIR", work.toString());
+        builder.environment().put("PYTHONNOUSERSITE", "1");
+        builder.environment().put("PYTHONDONTWRITEBYTECODE", "1");
+        builder.environment().put("PPT_MASTER_DISABLE_WORKFLOW_TRANSCRIPT", "1");
         Process p = builder.start();
         try {
             if (!p.waitFor(seconds, TimeUnit.SECONDS))
@@ -346,6 +444,73 @@ public class PresalesPresentationService implements PresalesPresentationHook {
             p.destroyForcibly();
         }
     }
+
+    private void requireRuntime(PresalesPresentationPackage pkg, Path engine, Path work)
+            throws Exception {
+        if (!pkg.runtimeIdentity().equals(runtimeIdentity(engine, work)))
+            throw PresalesModelAdapter.error(409, "PPT_RUNTIME_CHANGED");
+    }
+
+    private String runtimeIdentity(Path engine, Path work) throws Exception {
+        Path probe = work.resolve("runtime-probe.py");
+        Files.writeString(probe, RUNTIME_PROBE);
+        run(probe, List.of(engine.toString()), work, 60);
+        String identity = Files.readString(work.resolve("compiler.log")).strip();
+        if (!identity.matches("[0-9a-f]{64}"))
+            throw PresalesModelAdapter.error(409, "PPT_RUNTIME_UNAVAILABLE");
+        return identity;
+    }
+
+    private static final String RUNTIME_PROBE =
+            """
+            import ast, hashlib, importlib.metadata, json, platform, sys
+            from pathlib import Path
+            root = Path(sys.argv[1]).resolve()
+            sys.path.insert(0, str(root / 'scripts'))
+            import svg_quality.checker as checker
+            import svg_to_pptx.pptx_package.cli
+            import pptx, lxml, PIL
+            fallbacks = set()
+            for node in ast.walk(ast.parse((root / 'scripts/svg_quality/checker.py').read_text())):
+                if isinstance(node, ast.ExceptHandler) and node.type is not None and 'ImportError' in ast.unparse(node.type):
+                    for stmt in node.body:
+                        if isinstance(stmt, ast.Assign) and isinstance(stmt.value, ast.Constant) and stmt.value.value is None:
+                            fallbacks.update(t.id for t in stmt.targets if isinstance(t, ast.Name))
+            missing = sorted(n for n in fallbacks if not n.endswith('_import_error') and getattr(checker, n, None) is None)
+            if missing:
+                raise RuntimeError('Incomplete presentation checker imports: ' + ','.join(missing))
+            # Identity includes all files of external distributions actually imported by the supported path,
+            # not just their declared version; this includes python-pptx's installed default template.
+            external = set()
+            modules = {}
+            for name, module in list(sys.modules.items()):
+                filename = getattr(module, '__file__', None)
+                if not filename or name == '__main__':
+                    continue
+                path = Path(filename).resolve()
+                if path == Path(__file__).resolve() or path.is_relative_to(root) or not path.is_file():
+                    continue
+                modules[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+                external.add(name.split('.')[0])
+            packages = {}
+            for top, distributions in importlib.metadata.packages_distributions().items():
+                if top not in external:
+                    continue
+                for name in distributions:
+                    dist = importlib.metadata.distribution(name)
+                    files = {}
+                    for file in dist.files or []:
+                        path = Path(dist.locate_file(file)).resolve()
+                        if path.is_file() and '__pycache__' not in path.parts and path.suffix != '.pyc':
+                            files[str(file)] = hashlib.sha256(path.read_bytes()).hexdigest()
+                    packages[name] = {'version': dist.version, 'files': files}
+            template = Path(pptx.__file__).parent / 'templates/default.pptx'
+            identity = {'python': sys.version, 'platform': platform.platform(),
+                        'executable': hashlib.sha256(Path(sys.executable).resolve().read_bytes()).hexdigest(),
+                        'template': hashlib.sha256(template.read_bytes()).hexdigest(),
+                        'modules': modules, 'packages': packages}
+            print(hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':')).encode()).hexdigest())
+            """;
 
     static void validateSvg(String svg) {
         if (svg.isBlank() || svg.length() > 150_000)

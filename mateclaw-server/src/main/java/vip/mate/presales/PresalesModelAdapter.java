@@ -26,6 +26,10 @@ public final class PresalesModelAdapter {
 
     /** Returns the skill-specific output contract appended to the employee prompt. */
     public static String instructions(String skill) {
+        return instructions(skill, readSkill(skill == null ? "" : skill.toUpperCase(Locale.ROOT)));
+    }
+
+    static String instructions(String skill, String body) {
         String key = skill == null ? "" : skill.toUpperCase(Locale.ROOT);
         String contract =
                 switch (key) {
@@ -60,7 +64,7 @@ public final class PresalesModelAdapter {
                                     + ":[exact sourceRef]}],assumptions:[],unknowns:[],warnings:[]}. Every result is an untrusted proposal "
                                     + "requiring human review.";
                 };
-        return readSkill(key) + "\n\nPLATFORM OUTPUT CONTRACT:\n" + contract;
+        return body + "\n\nPLATFORM OUTPUT CONTRACT:\n" + contract;
     }
 
     static void bindPresentationSource(ObjectNode result, ObjectNode context) {
@@ -106,6 +110,56 @@ public final class PresalesModelAdapter {
         for (int i = 0; i < names.length; i++)
             if (names[i].equals(skill)) return "presales-" + paths[i];
         throw error(400, "INVALID_SKILL");
+    }
+
+    static java.util.Map<String, String> readSkillFiles(String skill) {
+        var captured = readSkillFilesOnce(skill);
+        if (!captured.equals(readSkillFilesOnce(skill)))
+            throw error(409, "TASK_SKILL_PACKAGE_UNAVAILABLE");
+        return captured;
+    }
+
+    private static java.util.Map<String, String> readSkillFilesOnce(String skill) {
+        String prefix = "skills/" + skillName(skill) + "/";
+        int total = 0;
+        var files = new java.util.TreeMap<String, String>();
+        try {
+            var resolver =
+                    new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
+            for (var resource : resolver.getResources("classpath*:" + prefix + "**/*")) {
+                if (!resource.isReadable()) continue;
+                String uri = resource.getURI().getSchemeSpecificPart();
+                if ("file".equals(resource.getURI().getScheme())) {
+                    java.nio.file.Path file = java.nio.file.Path.of(resource.getURI());
+                    for (var check = file; check != null; check = check.getParent()) {
+                        if (java.nio.file.Files.isSymbolicLink(check))
+                            throw new IllegalArgumentException("Symbolic skill resource");
+                        if (check.getFileName().toString().equals(skillName(skill))) break;
+                    }
+                }
+                int at = uri.lastIndexOf(prefix);
+                if (at < 0 || uri.endsWith("/")) continue;
+                String relative = uri.substring(at + prefix.length());
+                try (var input = resource.getInputStream()) {
+                    byte[] bytes = input.readNBytes(2_000_001);
+                    total += bytes.length;
+                    if (total > 2_000_000 || files.size() >= 256)
+                        throw new IllegalArgumentException("Skill package too large");
+                    String content =
+                            StandardCharsets.UTF_8
+                                    .newDecoder()
+                                    .decode(java.nio.ByteBuffer.wrap(bytes))
+                                    .toString();
+                    if (files.putIfAbsent(relative, content) != null)
+                        throw new IllegalArgumentException("Duplicate skill resource");
+                }
+            }
+            if (!files.containsKey("SKILL.md"))
+                throw new IllegalArgumentException("Missing skill root");
+            return java.util.Map.copyOf(files);
+        } catch (Exception invalid) {
+            throw error(409, "TASK_SKILL_PACKAGE_UNAVAILABLE");
+        }
     }
 
     static String readSkill(String skill) {

@@ -23,6 +23,8 @@ class PresalesGenerationCoordinatorTest {
         var service = mock(PresalesService.class);
         var contexts = mock(PresalesContextProvider.class);
         var model = mock(PresalesEmployeeRuntime.class);
+        when(model.instructionsForTask(anyString(), anyString(), any(), any()))
+                .thenReturn(PresalesModelAdapter.instructions("S1"));
         var state =
                 (ObjectNode)
                         json.readTree(
@@ -79,6 +81,8 @@ class PresalesGenerationCoordinatorTest {
         var json = new ObjectMapper();
         var service = mock(PresalesService.class);
         var model = mock(PresalesEmployeeRuntime.class);
+        when(model.instructionsForTask(anyString(), anyString(), any(), any()))
+                .thenReturn(PresalesModelAdapter.instructions("S1"));
         var state =
                 (ObjectNode)
                         json.readTree(
@@ -139,6 +143,8 @@ class PresalesGenerationCoordinatorTest {
         when(service.find(any(), eq("tasks"), eq("t")))
                 .thenAnswer(i -> (ObjectNode) ((ObjectNode) i.getArgument(0)).path("tasks").get(0));
         var model = mock(PresalesEmployeeRuntime.class);
+        when(model.instructionsForTask(anyString(), anyString(), any(), any()))
+                .thenReturn(PresalesModelAdapter.instructions("S1"));
         var coordinator =
                 new PresalesGenerationCoordinator(
                         service, mock(PresalesContextProvider.class), model, json, hooks());

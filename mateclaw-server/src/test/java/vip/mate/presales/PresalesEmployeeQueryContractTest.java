@@ -31,7 +31,8 @@ class PresalesEmployeeQueryContractTest {
                     provider(mock(ConversationService.class)),
                     json,
                     mock(ModelConfigService.class),
-                    mock(ProjectToolPolicy.Revalidator.class));
+                    mock(ProjectToolPolicy.Revalidator.class),
+                    provider(mock(vip.mate.presales.repository.PresalesProjectRepository.class)));
     private final PresalesGenerationController controller =
             new PresalesGenerationController(
                     new PresalesGenerationService(

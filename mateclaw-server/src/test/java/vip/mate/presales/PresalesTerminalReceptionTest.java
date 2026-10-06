@@ -257,6 +257,8 @@ class PresalesTerminalReceptionTest {
         actorLost = new AtomicBoolean();
         service = mock(PresalesService.class);
         model = mock(PresalesEmployeeRuntime.class);
+        when(model.instructionsForTask(anyString(), anyString(), any(), any()))
+                .thenReturn(PresalesModelAdapter.instructions("S1"));
         contexts = mock(PresalesContextProvider.class);
         when(service.get("w", "p")).thenAnswer(call -> current());
         when(service.find(any(), eq("tasks"), eq("t")))

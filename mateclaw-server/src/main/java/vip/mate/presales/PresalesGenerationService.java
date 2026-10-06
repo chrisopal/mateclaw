@@ -82,7 +82,8 @@ public class PresalesGenerationService {
         }
         var employee = model.require(scope, project.path("agentId").asText());
         ObjectNode snapshot = contexts.snapshot(scope, project, input.skill(), input.taskGoal());
-        var pin = model.pin(scope, employee.getId().toString(), input.skill());
+        var captured = model.capture(scope, employee.getId().toString(), input.skill());
+        var pin = captured.pin();
         // SAVE_AI_TASK advances the project version exactly once. Persist that accepted
         // version in the task snapshot so tool-time revalidation can compare it.
         snapshot.set("projectVersion", PresalesProjectRevision.number(acceptedVersion));
@@ -107,24 +108,22 @@ public class PresalesGenerationService {
                         pin.presentationDigest(),
                         "presales:" + scope + ":" + id + ":" + runId,
                         snapshot);
-        ObjectNode task = json.valueToTree(queuedTask);
         project =
-                service.command(
+                service.queueEmployeeTask(
                         scope,
                         id,
-                        new PresalesDtos.Command(
-                                input.expectedVersion(),
-                                input.operationId() + ":start",
-                                "SAVE_AI_TASK",
-                                task));
+                        input.expectedVersion(),
+                        input.operationId() + ":start",
+                        queuedTask,
+                        captured.skillPackage());
         ObjectNode stored =
                 (ObjectNode) project.path("tasks").get(project.path("tasks").size() - 1);
-        task = stored.deepCopy();
+        ObjectNode task = stored.deepCopy();
         if (!PresalesProjectRevision.matchesRevision(project.path("version"), acceptedVersion)
                 || !PresalesProjectRevision.matchesRevision(
                         snapshot.path("projectVersion"), acceptedVersion))
             throw PresalesModelAdapter.error(409, "VERSION_CONFLICT");
-        coordinator.enqueue(
+        var submission =
                 new PresalesGenerationCoordinator.Submission(
                         scope,
                         actor,
@@ -134,7 +133,22 @@ public class PresalesGenerationService {
                         input.taskGoal(),
                         task,
                         snapshot,
-                        acceptedVersion));
+                        acceptedVersion);
+        var enqueue =
+                new org.springframework.security.concurrent.DelegatingSecurityContextRunnable(
+                        () -> coordinator.enqueue(submission));
+        if (org.springframework.transaction.support.TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager
+                    .registerSynchronization(
+                            new org.springframework.transaction.support
+                                    .TransactionSynchronization() {
+                                @Override
+                                public void afterCommit() {
+                                    enqueue.run();
+                                }
+                            });
+        } else enqueue.run();
         return project;
     }
 

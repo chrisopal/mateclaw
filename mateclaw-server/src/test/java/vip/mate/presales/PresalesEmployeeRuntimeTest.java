@@ -30,7 +30,7 @@ import vip.mate.workspace.conversation.ConversationService;
 
 class PresalesEmployeeRuntimeTest {
     @Test
-    void projectRunUsesPinnedExecutionOptionsAndAuthenticatedWorkspace() {
+    void projectRunUsesPinnedExecutionOptionsAndAuthenticatedWorkspace() throws Exception {
         AgentService agents = mock(AgentService.class);
         ConversationService conversations = mock(ConversationService.class);
         ModelConfigService models = mock(ModelConfigService.class);
@@ -50,14 +50,17 @@ class PresalesEmployeeRuntimeTest {
         model.setModelName("model");
         when(models.resolveModel(employee.getModelName())).thenReturn(model);
 
+        var packages = mock(vip.mate.presales.repository.PresalesProjectRepository.class);
         var runtime =
                 new PresalesEmployeeRuntime(
                         agentProvider,
                         conversationProvider,
                         new ObjectMapper(),
                         models,
-                        revalidator);
-        var pin = runtime.pin("1", "7", "S1");
+                        revalidator,
+                        provider(packages));
+        var captured = runtime.capture("1", "7", "S1");
+        var pin = captured.pin();
         ObjectNode task =
                 new ObjectMapper()
                         .createObjectNode()
@@ -77,6 +80,22 @@ class PresalesEmployeeRuntimeTest {
                         .put("skill", "S1")
                         .put("caseRef", "p")
                         .put("projectVersion", 2);
+        task.put("packageDigest", captured.skillPackage().digest());
+        snapshot.put("workspaceId", "1").put("actorId", "9");
+        when(packages.findTaskPackage("1", "p", "t", "run"))
+                .thenReturn(
+                        java.util.Optional.of(
+                                new vip.mate.presales.repository.PresalesProjectRepository
+                                        .TaskPackageRow(
+                                        "1",
+                                        "p",
+                                        "t",
+                                        "run",
+                                        "9",
+                                        "7",
+                                        captured.skillPackage().digest(),
+                                        new ObjectMapper()
+                                                .writeValueAsString(captured.skillPackage()))));
         var origin = ArgumentCaptor.forClass(ChatOrigin.class);
         var options = ArgumentCaptor.forClass(ProjectExecutionOptions.class);
         when(agents.chatStructuredStream(

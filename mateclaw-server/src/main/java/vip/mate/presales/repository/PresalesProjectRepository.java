@@ -43,6 +43,58 @@ public class PresalesProjectRepository {
 
     public record OperationReceipt(String requestHash, String responseJson) {}
 
+    /**
+     * Immutable original task bytes. Authorization and transaction ownership remain in the service.
+     */
+    public record TaskPackageRow(
+            String workspaceId,
+            String projectId,
+            String taskId,
+            String runId,
+            String actorId,
+            String employeeId,
+            String packageDigest,
+            String bodyJson) {}
+
+    public void insertTaskPackage(TaskPackageRow row) {
+        jdbc.update(
+                "INSERT INTO mate_presales_task_package"
+                        + " (workspace_id,project_id,task_id,run_id,actor_id,employee_id,package_digest,body_json)"
+                        + " VALUES(?,?,?,?,?,?,?,?)",
+                row.workspaceId(),
+                row.projectId(),
+                row.taskId(),
+                row.runId(),
+                row.actorId(),
+                row.employeeId(),
+                row.packageDigest(),
+                row.bodyJson());
+    }
+
+    public Optional<TaskPackageRow> findTaskPackage(
+            String scope, String project, String task, String run) {
+        return jdbc
+                .query(
+                        "SELECT workspace_id,project_id,task_id,run_id,actor_id,employee_id,package_digest,body_json"
+                                + " FROM mate_presales_task_package WHERE workspace_id=? AND project_id=? AND task_id=? AND run_id=?",
+                        (rs, n) ->
+                                new TaskPackageRow(
+                                        rs.getString(1),
+                                        rs.getString(2),
+                                        rs.getString(3),
+                                        rs.getString(4),
+                                        rs.getString(5),
+                                        rs.getString(6),
+                                        rs.getString(7),
+                                        rs.getString(8)),
+                        scope,
+                        project,
+                        task,
+                        run)
+                .stream()
+                .findFirst();
+    }
+
     public List<String> listBodies(String scope) {
         return jdbc.query(
                 "SELECT body_json FROM mate_presales_project WHERE workspace_id=? ORDER BY name,id",

@@ -30,26 +30,27 @@ class PresalesGenerationControllerTest {
         employee.setId(7L);
         employee.setName("售前员工");
         when(model.require(anyString(), anyString())).thenReturn(employee);
-        when(model.pin("w", "7", "S1"))
-                .thenReturn(
-                        new PresalesEmployeeRuntime.Pin(
-                                "17", "config", "presales-customer-context-analysis", "skill"));
+        when(model.capture("w", "7", "S1"))
+                .thenReturn(PresalesTaskPackageFixtures.capture("S1", "17", "config"));
         when(access.require("w", "member")).thenReturn("1");
         when(contexts.snapshot(anyString(), any(), anyString(), anyString()))
                 .thenReturn(json.createObjectNode().put("projectVersion", 1));
         org.mockito.stubbing.Answer<ObjectNode> save =
                 i -> {
-                    PresalesDtos.Command c = i.getArgument(2);
-                    assertEquals(state.get().path("version").asInt(), c.expectedVersion());
+                    long expectedVersion = i.getArgument(2);
+                    PresalesQueuedTask queuedTask = i.getArgument(4);
+                    assertEquals(state.get().path("version").asInt(), expectedVersion);
                     var p = state.get().deepCopy();
-                    var task = c.payload().deepCopy();
+                    ObjectNode task = json.valueToTree(queuedTask);
                     task.put("id", "task");
                     p.putArray("tasks").add(task);
-                    p.put("version", c.expectedVersion() + 1);
+                    p.put("version", expectedVersion + 1);
                     state.set(p);
                     return p.deepCopy();
                 };
-        when(service.command(anyString(), anyString(), any())).thenAnswer(save);
+        when(service.queueEmployeeTask(
+                        anyString(), anyString(), anyLong(), anyString(), any(), any()))
+                .thenAnswer(save);
         var controller =
                 new PresalesGenerationController(
                         new PresalesGenerationService(

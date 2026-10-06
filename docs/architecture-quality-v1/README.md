@@ -2,7 +2,7 @@
 
 本目录以用户提供的 1.0.0 规范为需求来源。原始 ARCHITECTURE_SPEC、RULES、CHECKS、ACCEPTANCE、CODEX_TASKS 等保留原文；其中“执行下一阶段”的示例提示词不扩大本轮授权。
 
-当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中32项已有相称工程证据，正式签收仍分开。剩余实现、有限补证、环境/样本及远端强制配置均逐项列明，不以代码行数继续追加拆分。
+当前状态以[整改收口表](ACCEPTANCE_PROGRESS.md)及[工程分类JSON](acceptance-progress.json)为准：售前主要 Service/Workbench 结构整改已收口；46项中33项已有相称工程证据（含AC22候选专项，提交门禁另验），正式签收仍分开。剩余实现、有限补证、环境/样本及远端强制配置均逐项列明，不以代码行数继续追加拆分。
 
 下面按切片保留的工程记录描述各自执行时点；其中“尚未提交”“结构未完成”等历史文字不覆盖当前收口表。原始要求和正式验收台账保持，历史失败证据不删除。
 
@@ -117,3 +117,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 AC46 原始公共 CI 来源核验见 [工程记录](evidence/2026-10-06/AC46_ORIGINAL_CI_ACCEPTANCE.md)：确切 run37418776854 的18个原始产物、15日志摘要及合成测试来源经过独立检查；工程证据齐备，正式签收保持 NOT_RUN。
 
 AC21 取消/重启/晚到结果原条款的工程证据见 [完整提示与恢复隔离](evidence/2026-10-06/AC21_RESTART_NOTICE_ACCEPTANCE.md)：取消无error及重启/晚到/终态失败均诚实显示未知计费，122项UI与44项H2回归通过；独立复核结合既有3JVM恢复及拒收/批准边界，转为工程证据齐备待正式签收。
+
+历史任务固定Skill包的候选实现与专项证据见 [AC22_TASK_PACKAGE_ACCEPTANCE.md](evidence/2026-10-06/AC22_TASK_PACKAGE_ACCEPTANCE.md)：内置Skill与S6引擎保存原始执行闭包，实际工具读取验证A/B隔离；三方言新增V222，H2/MySQL已执行，Kingbase另验。

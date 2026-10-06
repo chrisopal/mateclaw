@@ -43,14 +43,19 @@ class PresalesQueuedTaskContractTest {
         when(access.require("workspace", "member")).thenReturn("actor");
         when(service.get("workspace", "project")).thenReturn(project);
         when(model.require(anyString(), anyString())).thenReturn(employee);
-        when(model.pin("workspace", Long.toString(Long.MAX_VALUE), "S1"))
-                .thenReturn(new PresalesEmployeeRuntime.Pin("17", null, "skill-name", null, null));
+        when(model.capture("workspace", Long.toString(Long.MAX_VALUE), "S1"))
+                .thenReturn(
+                        new PresalesEmployeeRuntime.CapturedExecution(
+                                new PresalesEmployeeRuntime.Pin(
+                                        "17", null, "skill-name", null, null),
+                                PresalesTaskPackageFixtures.original("S1")));
         when(contexts.snapshot("workspace", project, "S1", "理解需求")).thenReturn(snapshot);
-        when(service.command(eq("workspace"), eq("project"), any()))
+        when(service.queueEmployeeTask(
+                        eq("workspace"), eq("project"), anyLong(), anyString(), any(), any()))
                 .thenAnswer(
                         call -> {
-                            PresalesDtos.Command command = call.getArgument(2);
-                            var saved = command.payload().deepCopy();
+                            PresalesQueuedTask queuedTask = call.getArgument(4);
+                            ObjectNode saved = json.valueToTree(queuedTask);
                             saved.put("id", "stored-task").put("version", 1);
                             saved.put("authority", "UNTRUSTED_DRAFT");
                             var response = project.deepCopy().put("version", 2);
@@ -61,13 +66,16 @@ class PresalesQueuedTaskContractTest {
                 new PresalesGenerationService(service, access, contexts, model, json, coordinator);
         var input = new PresalesDtos.Generate(1L, "operation", "S1", "理解需求");
         var response = generation.generate("workspace", "project", input);
-        var write = ArgumentCaptor.forClass(PresalesDtos.Command.class);
-        verify(service).command(eq("workspace"), eq("project"), write.capture());
-        var command = write.getValue();
-        assertEquals(1, command.expectedVersion());
-        assertEquals("operation:start", command.operationId());
-        assertEquals("SAVE_AI_TASK", command.action());
-        var actual = command.payload();
+        var write = ArgumentCaptor.forClass(PresalesQueuedTask.class);
+        verify(service)
+                .queueEmployeeTask(
+                        eq("workspace"),
+                        eq("project"),
+                        eq(1L),
+                        eq("operation:start"),
+                        write.capture(),
+                        any());
+        ObjectNode actual = json.valueToTree(write.getValue());
         String runId = actual.path("runId").asText();
         UUID.fromString(runId);
         Instant.parse(actual.path("queuedAt").asText());
@@ -92,7 +100,14 @@ class PresalesQueuedTaskContractTest {
         var queued = ArgumentCaptor.forClass(PresalesGenerationCoordinator.Submission.class);
         var ordered = inOrder(service, coordinator);
         ordered.verify(service).get("workspace", "project");
-        ordered.verify(service).command(eq("workspace"), eq("project"), any());
+        ordered.verify(service)
+                .queueEmployeeTask(
+                        eq("workspace"),
+                        eq("project"),
+                        eq(1L),
+                        eq("operation:start"),
+                        any(),
+                        any());
         ordered.verify(coordinator).enqueue(queued.capture());
         assertEquals(response.path("tasks").get(0), queued.getValue().task());
         assertEquals(expected.path("contextSnapshot"), queued.getValue().snapshot());
@@ -101,7 +116,7 @@ class PresalesQueuedTaskContractTest {
         when(service.get("workspace", "project")).thenReturn(response);
         assertSame(response, generation.generate("workspace", "project", input));
         verify(coordinator, times(1)).enqueue(any());
-        verify(model, times(1)).pin(anyString(), anyString(), anyString());
+        verify(model, times(1)).capture(anyString(), anyString(), anyString());
     }
 
     private static ObjectMapper mapper(String mode) {

@@ -120,7 +120,11 @@ public class PresalesGenerationCoordinator {
                             submission.actor(),
                             task.path("agentId").asText(),
                             task.path("conversationId").asText(),
-                            PresalesModelAdapter.instructions(submission.skill()),
+                            model.instructionsForTask(
+                                    submission.scope(),
+                                    submission.actor(),
+                                    task,
+                                    submission.snapshot()),
                             task,
                             submission.snapshot().deepCopy());
             if ("S6".equals(submission.skill())) {
@@ -133,7 +137,13 @@ public class PresalesGenerationCoordinator {
                                 submission.projectId(),
                                 task.path("runId").asText(),
                                 task.path("presentationDigest").asText(),
-                                task.path("agentId").asText());
+                                task.path("agentId").asText(),
+                                model.originalPackage(
+                                                submission.scope(),
+                                                submission.actor(),
+                                                task,
+                                                submission.snapshot())
+                                        .presentation());
                 if (result == null) throw PresalesModelAdapter.error(422, "PRESENTATION_FAILED");
             }
             if (isCancelled(submission.scope(), submission.projectId(), taskId, key)) return;

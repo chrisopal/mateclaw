@@ -23,6 +23,24 @@ final class PresalesTaskAcceptance {
 
     void prepare(
             String scope, String actor, ObjectNode p, ObjectNode value, boolean employeeResult) {
+        prepare(scope, actor, p, value, employeeResult, false);
+    }
+
+    void prepare(
+            String scope,
+            String actor,
+            ObjectNode p,
+            ObjectNode value,
+            boolean employeeResult,
+            boolean queued) {
+        if (!employeeResult && !queued) {
+            if (executionClaim(value)) throw PresalesModelAdapter.error(400, "TASK_SERVER_OWNED");
+            for (var task : p.path("tasks"))
+                if (value.hasNonNull("id")
+                        && value.path("id").asText().equals(task.path("id").asText())
+                        && executionClaim((ObjectNode) task))
+                    throw PresalesModelAdapter.error(409, "TASK_SERVER_OWNED");
+        }
         value.put("status", value.path("status").asText("DRAFT"))
                 .put("authority", "UNTRUSTED_DRAFT");
         PresalesProjectItems.enumValue(
@@ -53,6 +71,27 @@ final class PresalesTaskAcceptance {
             employees.getObject().revalidate(scope, actor, value, snapshot);
             PresalesModelAdapter.validate(result, snapshot, value.path("skill").asText());
         }
+    }
+
+    private static boolean executionClaim(ObjectNode task) {
+        if ("RUNNING".equals(task.path("status").asText())) return true;
+        for (String key :
+                List.of(
+                        "runId",
+                        "conversationId",
+                        "modelConfigId",
+                        "configDigest",
+                        "skillName",
+                        "skillDigest",
+                        "presentationDigest",
+                        "packageDigest",
+                        "skillPackage",
+                        "serverCreated",
+                        "queueState",
+                        "queuedAt",
+                        "operationId",
+                        "requestHash")) if (task.has(key)) return true;
+        return false;
     }
 
     private void lockResultAuthority(

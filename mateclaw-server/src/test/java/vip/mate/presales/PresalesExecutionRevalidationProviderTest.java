@@ -53,6 +53,7 @@ class PresalesExecutionRevalidationProviderTest {
                         new PresalesEmployeeRuntime.Pin("17", "config", "presales-skill", "skill"));
 
         provider.requireActive(options);
+        verify(runtime).requirePinnedOptions(eq(options), any(), any());
 
         verify(contexts).revalidate(eq("1"), eq(project), any(ObjectNode.class));
     }
@@ -81,7 +82,7 @@ class PresalesExecutionRevalidationProviderTest {
 
         assertThrows(SemanticApiException.class, () -> provider.requireActive(options));
 
-        verify(runtime, never()).pin("1", "7", "S1");
+        verify(runtime, never()).requirePinnedOptions(any(), any(), any());
         verify(contexts, never()).revalidate(eq("1"), eq(project), any(ObjectNode.class));
     }
 
@@ -92,10 +93,9 @@ class PresalesExecutionRevalidationProviderTest {
         when(service.getForExecution("1", "p", "9")).thenReturn(project);
         when(service.find(project, "tasks", "t"))
                 .thenReturn((ObjectNode) project.path("tasks").get(0));
-        when(runtime.pin("1", "7", "S1"))
-                .thenReturn(
-                        new PresalesEmployeeRuntime.Pin(
-                                "17", "changed", "presales-skill", "skill"));
+        org.mockito.Mockito.doThrow(PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED"))
+                .when(runtime)
+                .requirePinnedOptions(eq(options), any(), any());
 
         assertThrows(SemanticApiException.class, () -> provider.requireActive(options));
 
@@ -112,13 +112,13 @@ class PresalesExecutionRevalidationProviderTest {
         when(service.find(project, "tasks", "t")).thenReturn(task);
 
         assertThrows(SemanticApiException.class, () -> provider.requireActive(options));
-        verify(runtime, never()).pin("1", "7", "S1");
+        verify(runtime, never()).requirePinnedOptions(any(), any(), any());
 
         task.put("operationId", "op");
         ((ObjectNode) task.path("contextSnapshot").path("sources").get(0))
                 .put("sourceRef", "different");
         assertThrows(SemanticApiException.class, () -> provider.requireActive(options));
-        verify(runtime, never()).pin("1", "7", "S1");
+        verify(runtime, never()).requirePinnedOptions(any(), any(), any());
     }
 
     private ObjectNode activeProject() throws Exception {

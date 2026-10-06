@@ -72,10 +72,8 @@ class PresalesVersionInputContractTest extends SemanticHttpFixture {
         employee.setId(7L);
         employee.setName("Employee");
         when(model.require(anyString(), anyString())).thenReturn(employee);
-        when(model.pin(workspace, "7", "S1"))
-                .thenReturn(
-                        new PresalesEmployeeRuntime.Pin(
-                                "17", "config", "presales-customer-context-analysis", "skill"));
+        when(model.capture(workspace, "7", "S1"))
+                .thenReturn(PresalesTaskPackageFixtures.capture("S1", "17", "config"));
         when(contexts.snapshot(eq(workspace), any(), eq("S1"), eq(goal)))
                 .thenReturn(json.createObjectNode());
         doAnswer(

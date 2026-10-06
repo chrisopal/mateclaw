@@ -193,6 +193,54 @@ public class PresalesService {
         return commandTransaction.execute(status -> applyCommand(scope, projectId, r, false));
     }
 
+    /** Server-only typed creation; public commands cannot manufacture execution authority. */
+    ObjectNode queueEmployeeTask(
+            String scope,
+            String projectId,
+            long expectedVersion,
+            String operationId,
+            PresalesQueuedTask queued,
+            PresalesTaskPackage original) {
+        if (queued == null
+                || original == null
+                || queued.status() != PresalesQueuedTask.Status.RUNNING
+                || !original.skill().equals(queued.skill())
+                || !original.skillName().equals(queued.skillName())
+                || !original.skillDigest().equals(queued.skillDigest())
+                || !original.presentationDigest().equals(queued.presentationDigest()))
+            throw conflict("TASK_SCOPE_CHANGED", "Invalid queued package");
+        return commandTransaction.execute(
+                status -> {
+                    String actor = access.require(scope, "member");
+                    ObjectNode task = json.valueToTree(queued);
+                    task.put("packageDigest", original.digest());
+                    var request = new Command(expectedVersion, operationId, "SAVE_AI_TASK", task);
+                    ObjectNode result = applyCommand(scope, projectId, request, false, true);
+                    ObjectNode stored = null;
+                    for (var item : result.path("tasks"))
+                        if (queued.runId().equals(item.path("runId").asText()))
+                            stored = (ObjectNode) item;
+                    if (stored == null) throw conflict("TASK_SCOPE_CHANGED", "Queued task missing");
+                    var existing =
+                            projects.findTaskPackage(
+                                    scope, projectId, stored.path("id").asText(), queued.runId());
+                    if (existing.isEmpty())
+                        projects.insertTaskPackage(
+                                new PresalesProjectRepository.TaskPackageRow(
+                                        scope,
+                                        projectId,
+                                        stored.path("id").asText(),
+                                        queued.runId(),
+                                        actor,
+                                        queued.agentId(),
+                                        original.digest(),
+                                        encode(original)));
+                    else if (!existing.get().packageDigest().equals(original.digest()))
+                        throw conflict("TASK_SCOPE_CHANGED", "Queued package changed");
+                    return result;
+                });
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     public ObjectNode saveEmployeeTask(String scope, String projectId, Command r) {
         if (r.parsedAction().kind() != CommandKind.SAVE_AI_TASK)
@@ -263,6 +311,11 @@ public class PresalesService {
 
     private ObjectNode applyCommand(
             String scope, String projectId, Command r, boolean employeeResult) {
+        return applyCommand(scope, projectId, r, employeeResult, false);
+    }
+
+    private ObjectNode applyCommand(
+            String scope, String projectId, Command r, boolean employeeResult, boolean queued) {
         var prepared = prepareCommand(scope, projectId, r, employeeResult);
         if (prepared.replay() != null) return prepared.replay();
         String actor = prepared.actor();
@@ -326,7 +379,7 @@ public class PresalesService {
             }
             case SAVE_AI_TASK -> {
                 try {
-                    taskAcceptance.prepare(scope, actor, p, value, employeeResult);
+                    taskAcceptance.prepare(scope, actor, p, value, employeeResult, queued);
                 } catch (PresalesRejected rejection) {
                     throw legacyRejection(rejection);
                 }

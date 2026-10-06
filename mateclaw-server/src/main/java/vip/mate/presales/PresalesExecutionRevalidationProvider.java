@@ -63,17 +63,7 @@ public class PresalesExecutionRevalidationProvider implements ProjectExecutionRe
                                         + ":"
                                         + scope.runId()))
             throw PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED");
-        var pin = runtime.pin(scope.workspaceId(), scope.employeeId(), task.path("skill").asText());
-        if (!pin.modelConfigId().equals(options.modelConfigId())
-                || !pin.configDigest().equals(options.configDigest())
-                || !pin.skillName().equals(options.skillName())
-                || !pin.skillDigest().equals(options.skillDigest())
-                || !pin.modelConfigId().equals(task.path("modelConfigId").asText())
-                || !pin.configDigest().equals(task.path("configDigest").asText())
-                || !pin.skillName().equals(task.path("skillName").asText())
-                || !pin.skillDigest().equals(task.path("skillDigest").asText())
-                || !pin.presentationDigest().equals(task.path("presentationDigest").asText()))
-            throw PresalesModelAdapter.error(409, "EXECUTION_PIN_CHANGED");
+        runtime.requirePinnedOptions(options, task, snapshot);
         contexts.revalidate(scope.workspaceId(), project, snapshot);
     }
 }

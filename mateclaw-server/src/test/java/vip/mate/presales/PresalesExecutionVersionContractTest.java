@@ -120,7 +120,8 @@ class PresalesExecutionVersionContractTest {
                                 mock(ObjectProvider.class),
                                 json,
                                 null,
-                                revalidator));
+                                revalidator,
+                                mock(ObjectProvider.class)));
         doReturn(pin).when(actual).pin("1", "7", "S1");
         ObjectNode snapshot = snapshot();
         snapshot.set("projectVersion", json.readTree(value));
@@ -153,13 +154,16 @@ class PresalesExecutionVersionContractTest {
         var employee = new AgentEntity();
         employee.setId(7L);
         when(runtime.require("1", "7")).thenReturn(employee);
-        when(runtime.pin("1", "7", "S1")).thenReturn(pin);
+        when(runtime.capture("1", "7", "S1"))
+                .thenReturn(PresalesTaskPackageFixtures.capture("S1", "17", "config"));
         when(contexts.snapshot(anyString(), any(), anyString(), anyString()))
                 .thenReturn(snapshot());
         ObjectNode saved = project();
         saved.set("version", json.readTree(value));
         saved.putArray("tasks").add(task());
-        when(service.command(anyString(), anyString(), any())).thenReturn(saved);
+        when(service.queueEmployeeTask(
+                        anyString(), anyString(), anyLong(), anyString(), any(), any()))
+                .thenReturn(saved);
         var app =
                 new PresalesGenerationService(
                         service, access, contexts, runtime, json, coordinator);

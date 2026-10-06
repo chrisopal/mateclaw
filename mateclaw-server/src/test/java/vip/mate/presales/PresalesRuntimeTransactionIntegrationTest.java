@@ -178,6 +178,7 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
     @Autowired PresalesService service;
     @Autowired PresalesProjectQueryService queryService;
     @Autowired PresalesEmployeeRuntime runtime;
+    @Autowired ProjectExecutionRevalidatorDispatcher dispatcher;
     @Autowired PresalesContextProvider contexts;
     @MockBean AgentService agents;
     @MockBean ConversationService conversations;
@@ -417,7 +418,10 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                         .put("skillDigest", pin.skillDigest());
         task.set("contextSnapshot", snapshot);
         project =
-                service.command(
+                PresalesTaskPackageFixtures.queue(
+                        service,
+                        runtime,
+                        json,
                         workspace,
                         project.path("id").asText(),
                         new PresalesDtos.Command(
@@ -426,6 +430,309 @@ class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
                                 "SAVE_AI_TASK",
                                 task));
         task = ((ObjectNode) project.path("tasks").get(0)).deepCopy();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void storedPackageAExecutesAfterCurrentSkillChangesAndNewCaptureUsesB(boolean referenceOnly)
+            throws Exception {
+        var original = runtime.originalPackage(workspace, actor, task, snapshot);
+        try (var adapter = mockStatic(PresalesModelAdapter.class, CALLS_REAL_METHODS)) {
+            if (referenceOnly) {
+                var initial =
+                        Map.of(
+                                "SKILL.md",
+                                original.skillFiles().get("SKILL.md"),
+                                "references/detail.md",
+                                "A reference");
+                adapter.when(() -> PresalesModelAdapter.readSkillFiles("S1")).thenReturn(initial);
+                snapshot = contexts.snapshot(workspace, project, "S1", "Reference package A");
+                snapshot.put("projectVersion", project.path("version").longValue() + 1);
+                var first =
+                        task.deepCopy()
+                                .put("runId", UUID.randomUUID().toString())
+                                .put("operationId", UUID.randomUUID().toString());
+                first.put(
+                        "conversationId",
+                        "presales:"
+                                + workspace
+                                + ":"
+                                + project.path("id").asText()
+                                + ":"
+                                + first.path("runId").asText());
+                first.set("contextSnapshot", snapshot);
+                project =
+                        PresalesTaskPackageFixtures.queue(
+                                service,
+                                runtime,
+                                json,
+                                workspace,
+                                project.path("id").asText(),
+                                new PresalesDtos.Command(
+                                        project.path("version").longValue(),
+                                        UUID.randomUUID().toString(),
+                                        "SAVE_AI_TASK",
+                                        first));
+                task = (ObjectNode) project.path("tasks").get(project.path("tasks").size() - 1);
+                original = runtime.originalPackage(workspace, actor, task, snapshot);
+            }
+            var changed =
+                    Map.of(
+                            "SKILL.md",
+                            referenceOnly
+                                    ? original.skillFiles().get("SKILL.md")
+                                    : "Changed installed skill B",
+                            "references/detail.md",
+                            "B reference");
+            adapter.when(() -> PresalesModelAdapter.readSkillFiles("S1")).thenReturn(changed);
+            var next = runtime.capture(workspace, agentId, "S1");
+            assertEquals(changed, next.skillPackage().skillFiles());
+            assertNotEquals(original.digest(), next.skillPackage().digest());
+            if (referenceOnly)
+                assertEquals(original.skillDigest(), next.skillPackage().skillDigest());
+            ObjectNode output =
+                    runtime.execute(
+                            workspace,
+                            actor,
+                            agentId,
+                            task.path("conversationId").asText(),
+                            runtime.instructionsForTask(workspace, actor, task, snapshot),
+                            task,
+                            snapshot);
+            assertTrue(output.path("needsHumanReview").asBoolean());
+            var prompt = org.mockito.ArgumentCaptor.forClass(String.class);
+            var options =
+                    org.mockito.ArgumentCaptor.forClass(
+                            vip.mate.agent.execution.ProjectExecutionOptions.class);
+            verify(agents)
+                    .chatStructuredStream(
+                            anyLong(),
+                            prompt.capture(),
+                            anyString(),
+                            anyString(),
+                            isNull(),
+                            any(),
+                            options.capture());
+            assertTrue(prompt.getValue().startsWith(original.instructions()));
+            assertFalse(prompt.getValue().contains("Changed installed skill B"));
+            assertEquals(original.skillFiles(), options.getValue().skillFiles());
+            runtime.requirePinnedOptions(options.getValue(), task, snapshot);
+            var catalog = mock(vip.mate.skill.runtime.SkillRuntimeService.class);
+            var resolver = mock(vip.mate.agent.context.AgentWorkspaceResolver.class);
+            var files =
+                    new vip.mate.tool.builtin.SkillFileTool(
+                            catalog,
+                            mock(vip.mate.skill.runtime.SkillFileAccessPolicy.class),
+                            mock(vip.mate.skill.usage.SkillUsageService.class),
+                            resolver);
+            var loader = new vip.mate.tool.builtin.SkillLoadTool(catalog, files, resolver);
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    files, "projectExecutionRevalidator", dispatcher);
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    loader, "projectExecutionRevalidator", dispatcher);
+            var toolContext =
+                    new org.springframework.ai.chat.model.ToolContext(
+                            Map.of(
+                                    vip.mate.agent.execution.ProjectExecutionOptions
+                                            .TOOL_CONTEXT_KEY,
+                                    options.getValue()));
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    loader.loadSkill(original.skillName(), null, toolContext));
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    files.readSkillFile(original.skillName(), "SKILL.md", null, null, toolContext));
+            if (referenceOnly) {
+                assertEquals(
+                        "A reference",
+                        loader.loadSkill(
+                                original.skillName(), "references/detail.md", toolContext));
+                assertEquals(
+                        "A reference",
+                        files.readSkillFile(
+                                original.skillName(),
+                                "references/detail.md",
+                                null,
+                                null,
+                                toolContext));
+            } else
+                assertTrue(
+                        loader.loadSkill(original.skillName(), "references/detail.md", toolContext)
+                                .startsWith("Error:"));
+            var callback = mock(org.springframework.ai.tool.ToolCallback.class);
+            when(callback.getToolDefinition())
+                    .thenReturn(
+                            org.springframework.ai.tool.definition.ToolDefinition.builder()
+                                    .name("load_skill")
+                                    .description("actual pinned skill reader")
+                                    .inputSchema("{}")
+                                    .build());
+            when(callback.getToolMetadata())
+                    .thenReturn(
+                            org.springframework.ai.tool.metadata.ToolMetadata.builder()
+                                    .returnDirect(false)
+                                    .build());
+            when(callback.call(anyString(), any()))
+                    .thenAnswer(
+                            call -> {
+                                var arguments = json.readTree(call.<String>getArgument(0));
+                                return loader.loadSkill(
+                                        arguments.path("skillName").asText(),
+                                        arguments.path("filePath").asText(null),
+                                        call.getArgument(1));
+                            });
+            var executor =
+                    new vip.mate.agent.graph.executor.ToolExecutionExecutor(
+                            vip.mate.agent.AgentToolSet.fromCallbacks(List.of(), List.of(callback)),
+                            (name, arguments) -> vip.mate.tool.guard.ToolGuardResult.allow(),
+                            null,
+                            null);
+            executor.setProjectToolPolicy(
+                    new PresalesToolPolicy(jdbc, json, new ProjectSourceAccess(jdbc)));
+            executor.setProjectExecutionRevalidator(dispatcher);
+            String args = json.createObjectNode().put("skillName", original.skillName()).toString();
+            var readCall =
+                    new org.springframework.ai.chat.messages.AssistantMessage.ToolCall(
+                            "load-original", "function", "load_skill", args);
+            var origin =
+                    vip.mate.agent.context.ChatOrigin.web(
+                                    task.path("conversationId").asText(),
+                                    actor,
+                                    Long.valueOf(workspace),
+                                    null)
+                            .withAgent(Long.valueOf(agentId));
+            var executed =
+                    executor.execute(
+                            List.of(readCall),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(),
+                            options.getValue());
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    executed.responses().getFirst().responseData());
+            var loaded =
+                    executed.events().stream()
+                            .filter(event -> event.type().equals("project_skill_loaded"))
+                            .toList();
+            assertEquals(1, loaded.size());
+            assertEquals(
+                    original.skillDigest(), ((Map<?, ?>) loaded.getFirst().data()).get("digest"));
+            var claimed =
+                    executor.execute(
+                            List.of(),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(original.skillName()),
+                            options.getValue());
+            assertTrue(
+                    claimed.events().stream()
+                            .noneMatch(event -> event.type().equals("project_skill_loaded")));
+            verifyNoInteractions(catalog, resolver);
+
+            var o = options.getValue();
+            var forged =
+                    new vip.mate.agent.execution.ProjectExecutionOptions(
+                            o.attemptId(),
+                            o.modelConfigId(),
+                            o.configDigest(),
+                            o.skillName(),
+                            o.skillDigest(),
+                            changed,
+                            o.allowedTools(),
+                            o.toolPolicy(),
+                            o.internalRetryLimit(),
+                            o.allowFallback(),
+                            o.injectMemory(),
+                            o.maxIterations());
+            assertEquals(
+                    "EXECUTION_PIN_CHANGED",
+                    assertThrows(
+                                    SemanticApiException.class,
+                                    () -> runtime.requirePinnedOptions(forged, task, snapshot))
+                            .code());
+            clearInvocations(callback);
+            var deniedLoad =
+                    executor.execute(
+                            List.of(readCall),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(),
+                            forged);
+            assertTrue(
+                    deniedLoad.events().stream()
+                            .noneMatch(event -> event.type().equals("project_skill_loaded")));
+            verify(callback, never()).call(anyString(), any());
+            var nextSnapshot = contexts.snapshot(workspace, project, "S1", "New task after update");
+            nextSnapshot.put("projectVersion", project.path("version").longValue() + 1);
+            var nextTask =
+                    task.deepCopy()
+                            .put("runId", UUID.randomUUID().toString())
+                            .put("operationId", UUID.randomUUID().toString());
+            nextTask.put(
+                    "conversationId",
+                    "presales:"
+                            + workspace
+                            + ":"
+                            + project.path("id").asText()
+                            + ":"
+                            + nextTask.path("runId").asText());
+            nextTask.set("contextSnapshot", nextSnapshot);
+            var saved =
+                    PresalesTaskPackageFixtures.queue(
+                            service,
+                            runtime,
+                            json,
+                            workspace,
+                            project.path("id").asText(),
+                            new PresalesDtos.Command(
+                                    project.path("version").longValue(),
+                                    UUID.randomUUID().toString(),
+                                    "SAVE_AI_TASK",
+                                    nextTask));
+            var storedB = (ObjectNode) saved.path("tasks").get(saved.path("tasks").size() - 1);
+            var originalB = runtime.originalPackage(workspace, actor, storedB, nextSnapshot);
+            assertEquals(changed, originalB.skillFiles());
+            assertEquals(
+                    original.digest(),
+                    runtime.originalPackage(workspace, actor, task, snapshot).digest());
+            assertTrue(
+                    runtime.execute(
+                                    workspace,
+                                    actor,
+                                    agentId,
+                                    storedB.path("conversationId").asText(),
+                                    originalB.instructions(),
+                                    storedB,
+                                    nextSnapshot)
+                            .path("needsHumanReview")
+                            .asBoolean());
+        }
+    }
+
+    @Test
+    void legacyExecutionWithoutOriginalPackageCannotUseCurrentInstructions() {
+        jdbc.update(
+                "DELETE FROM mate_presales_task_package WHERE task_id=?", task.path("id").asText());
+        assertEquals(
+                "TASK_SKILL_PACKAGE_UNAVAILABLE",
+                assertThrows(SemanticApiException.class, this::execute).code());
+        verify(agents, never())
+                .chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), any(), any(), any());
+        verifyNoInteractions(conversations);
     }
 
     @Test

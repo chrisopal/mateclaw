@@ -1,10 +1,10 @@
 {
-  "source_head": "7e2f610396c283b1dded8e418ffda1a645714e05",
-  "source_tree": "37cfdd057de7c5a3b5d9a5bdc2066044a788dd5e",
-  "scope": "工程证据与后续动作分类，不修改正式AC签收。历史证据按原条款和当前门禁复核，不追加隐含验收要求。",
+  "source_head": "ad4cb39d998c472970a07565e8f122357ed6e55d",
+  "source_tree": "e19b80008ae2d61acf88e7f04d7e7d5abd136854",
+  "scope": "工程证据与后续动作分类，包含基线上AC22候选实现；最终候选树与提交门禁见交付记录。不修改正式AC签收。",
   "counts": {
-    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 32,
-    "IMPLEMENTATION_GAP": 9,
+    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 33,
+    "IMPLEMENTATION_GAP": 8,
     "ENVIRONMENT_GAP": 4,
     "INSUFFICIENT_PROOF": 1
   },
@@ -437,14 +437,21 @@
       "assertion": "历史任务保持原包；新任务按新pin；不能伪造运行加载证据",
       "task": "AQ-01/AQ-06",
       "formal_status": "NOT_RUN",
-      "engineering_classification": "IMPLEMENTATION_GAP",
-      "scope_basis": "当前pin变更会拒绝；历史任务原Skill包的不可变保留和实际加载证明未闭合。",
-      "remaining_action": "当前pin变更会拒绝；历史任务原Skill包的不可变保留和实际加载证明未闭合。",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "权威不可变任务包和S6原引擎闭包已实现；实际A/B文件、原包数据库读取、真实工具加载事件、伪造拒绝及事务回滚有正反例，独立技术COMMENT无本批阻断。",
+      "remaining_action": "完成当前候选精确树提交门禁、推送和最新CI；正式独立签收另行。Kingbase归AC26，不以H2/MySQL替代。",
       "evidence_keys": [
         "skill",
         "xml"
       ],
-      "finite_evidence": []
+      "finite_evidence": [
+        "AC22_TASK_PACKAGE_ACCEPTANCE.md",
+        "PresalesRuntimeTransactionIntegrationTest46 H2 and MySQL",
+        "PresalesTaskCreationAuthorityTest21",
+        "PresalesPresentationCompilerTest1 persisted original package",
+        "PresalesTaskPackageTest3",
+        "PresalesPresentationPackageTest7"
+      ]
     },
     {
       "id": "AC-23",
