@@ -13,3 +13,7 @@ Mockito @InjectMocks 不处理 Spring @Value，测试未设置 parallelTimeoutSe
 回退仅恢复测试源码，会恢复错误夹具；无数据库或部署操作。正式业务验收、事件并发风险和项目容量的未测方言仍开放。
 
 [证据包](delegation-event-fixture/delegation-event-fixture.tar.gz) / [摘要清单](delegation-event-fixture/delegation-event-fixture-manifest.json)，SHA-256 `eff2f38706637817f14fa2272c789b158f6a08115bb9b244bc7a6c187e245c60`；源码、RED/GREEN日志、JUnit和审阅记录已归档回读。
+
+## 后续生产修复
+
+本文件登记的完成事件乱序风险已由下一片复现并实现修复，详见 [完成事件工程记录](AQ01_DELEGATION_COMPLETION_ORDER_ACCEPTANCE.md)。本文件原有夹具验证范围保持不变；新片的提交/远端结果须按其精确树单独核验。

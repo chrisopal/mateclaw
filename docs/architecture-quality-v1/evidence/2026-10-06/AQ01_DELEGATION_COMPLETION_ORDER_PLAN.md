@@ -1,0 +1,19 @@
+# AQ01 并行委派完成事件收束计划
+
+状态 Proposed；延续已授权修复，技术评审不替代正式业务验收。HEAD42b18b8959d64cced5e59218b2d8a4d330e2506f/tree98a7a9e138f097c223761c4ef4f61558b64140db，初始干净，dev5_fj89vq SCAN_PASS/submission_ready=false。上一轮已提交/推送项目容量与夹具修复，属实质进展；CI37391293724仍在运行。
+
+## 已验证结构与目标
+
+DelegateAgentTool 等待原始future，丢弃whenComplete返回阶段；原始任务完成不证明child_complete广播完成。结束事件可能越过仍在发送的完成通知。保持每个子任务的实时完成通知、原始模型结果、required/optional快速失败、timeout/requestStop/cancel及身份继承。不引入依赖、通用事件框架或权限变化。
+
+ChatStreamTracker的字符串广播会同步执行SSE发送。拒绝仅join回调阶段（可能等待仍运行模型）；拒绝由调用线程独占所有即时通知（慢SSE会使timeout owner无法及时取消模型）。采用批次局部完成通知边界：同一monitor保护emit去重与closed，广播RuntimeException独立隔离。保留原始future、失败信号和结果/取消循环；全部停止/取消之后finish只扫描已完成且未取消的future，用getNow补未发送通知并finally关闭，再清理relay/registry和发送end。取消回调必须在争锁之前跳过CancellationException，以免第一个cancel被慢广播阻塞后续兄弟停止。
+
+独立架构审阅delegation_terminal_boundary_review确认该顺序；首次architect角色调用因当前宿主不支持其固定模型失败，改用继承模型的只读角色完成审阅，未形成虚假审核证据。
+
+## 实施及验证
+
+1. 先新增latch反例：A通知阻塞、B结果已完成时end不得越过A；A通知阻塞且B/C模型悬挂时，两次requestStop须在释放A前发生，之后end最后且没有晚完成通知。
+2. 只调整DelegateAgentTool并行通知的所有权；保留原等待、模型调用、返回汇总和取消算法。不改全局广播器或单任务/async协议。按工程门禁格式化该源码，记录功能与格式差异。
+3. 增加failfast/optional、通知异常、实时完成和去重证据，保留既有55项委派回归。先运行确定性RED，再实现及定向回归；dev、独立复核、正常commit/push精确树和远端CI分别报告。
+
+边界：同步SSE永久挂住仍能拖延end，但不能因此阻止已到deadline的模型停止请求。本片不声称解决全局传输阻塞，也不改变结果收集时完成/cancel竞争的既有语义；发现新可复现问题另记，不删断言掩盖。
