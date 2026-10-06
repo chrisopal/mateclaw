@@ -84,3 +84,5 @@ AC21 本批局部修复：[持久化 Stop 异常](evidence/2026-10-06/AC21_CANCE
 本轮新增工程证据：[重启提示与坏记录隔离](evidence/2026-10-06/AC21_RESTART_NOTICE_ACCEPTANCE.md)、[AC46原始CI来源核验](evidence/2026-10-06/AC46_ORIGINAL_CI_ACCEPTANCE.md)。
 
 AC22 本批候选证据：[历史任务原包](evidence/2026-10-06/AC22_TASK_PACKAGE_ACCEPTANCE.md)。33项工程证据分类包含当前未提交候选，不是33项已正式签收。上一批ad4cb39d的CI37427585768已成功；合并树e19b8000与源tree一致，15日志摘要核验通过（Java6802/UI1267），不能覆盖本批新代码。
+
+AC30 执行记录修复：[工程验收与局限](evidence/2026-10-06/AC30_EXECUTION_TRANSCRIPT_ACCEPTANCE.md)。新执行的真实消息、受限读取、只读深链及取消晚到 interrupted 回读已验证；未补造旧记录。当前修复的提交门禁、推送和 CI 以 PR #5 最新交付栏为准。AC30 完整界面覆盖仍未完成，33/13 工程分类和正式签收状态不变。

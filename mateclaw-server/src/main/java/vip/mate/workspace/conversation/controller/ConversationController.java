@@ -74,7 +74,7 @@ public class ConversationController {
     public ResponseEntity<String> exportTrajectory(
             @PathVariable String conversationId, Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
-        if (!conversationService.isConversationOwner(conversationId, username)) {
+        if (!conversationService.canReadTranscript(conversationId, username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("无权访问该会话\n");
         }
         return ResponseEntity.ok(conversationService.renderTrajectory(conversationId));
@@ -96,9 +96,10 @@ public class ConversationController {
             @RequestParam(required = false) Long taskId,
             Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
-        if (!conversationService.isConversationOwner(conversationId, username)
-                && !teamWorkerGovernanceService.canReadTranscript(
-                        conversationId, runId, taskId, username)) {
+        if (!conversationService.canReadTranscript(conversationId, username)
+                && (conversationService.isProtectedTranscript(conversationId)
+                        || !teamWorkerGovernanceService.canReadTranscript(
+                                conversationId, runId, taskId, username))) {
             return R.fail(403, "无权访问该会话");
         }
 
@@ -297,14 +298,26 @@ public class ConversationController {
         if (!conversationService.conversationExists(conversationId)) {
             return R.ok(Map.of("streamStatus", "idle"));
         }
-        if (!conversationService.isConversationOwner(conversationId, username)) {
+        if (!conversationService.canReadTranscript(conversationId, username)) {
             return R.fail(403, "无权访问该会话");
         }
         if (streamTracker.isRunning(conversationId)) {
-            return R.ok(Map.of("streamStatus", "running"));
+            return R.ok(
+                    Map.of(
+                            "streamStatus",
+                            "running",
+                            "readOnly",
+                            Boolean.toString(
+                                    conversationService.isProtectedTranscript(conversationId))));
         }
         // 回退到数据库持久化的 stream_status（处理服务重启/节点切换场景）
         String dbStatus = conversationService.getStreamStatus(conversationId);
-        return R.ok(Map.of("streamStatus", dbStatus != null ? dbStatus : "idle"));
+        return R.ok(
+                Map.of(
+                        "streamStatus",
+                        dbStatus != null ? dbStatus : "idle",
+                        "readOnly",
+                        Boolean.toString(
+                                conversationService.isProtectedTranscript(conversationId))));
     }
 }

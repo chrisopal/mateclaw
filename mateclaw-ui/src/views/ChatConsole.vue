@@ -984,6 +984,11 @@ const workerRouteHint = computed(() =>
 const workerGuard = useWorkerConversationGuard({
   conversationId: currentConversationId,
   workerHint: workerRouteHint,
+  loadReadOnly: async (conversationId) => {
+    // Deep links may not appear in the ordinary list; only the server knows their kind.
+    const response = await conversationApi.getStatus(conversationId)
+    return response.data?.readOnly === 'true'
+  },
   load: async (conversationId) => {
     if (isEphemeralConversation(conversationId)) return null
     const query = teamRunRouteQuery.value

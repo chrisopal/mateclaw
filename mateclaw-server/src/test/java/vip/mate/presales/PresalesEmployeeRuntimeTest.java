@@ -123,13 +123,32 @@ class PresalesEmployeeRuntimeTest {
                         task,
                         snapshot);
 
+        var persistedContent = ArgumentCaptor.forClass(String.class);
+        var persistedMetadata = ArgumentCaptor.forClass(String.class);
+        verify(conversations)
+                .saveMessage(
+                        eq("presales:1:p:run"),
+                        eq("assistant"),
+                        persistedContent.capture(),
+                        any(),
+                        eq("completed"),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        anyString(),
+                        anyString(),
+                        persistedMetadata.capture());
+        assertTrue(persistedContent.getValue().contains("needsHumanReview"));
+        assertTrue(persistedMetadata.getValue().contains("先读取项目资料。"));
         assertTrue(result.path("needsHumanReview").asBoolean());
         assertEquals(1L, origin.getValue().workspaceId());
         assertEquals(9L, origin.getValue().requesterUserId());
         assertEquals("t", ((PresalesToolScope) options.getValue().toolPolicy()).taskId());
         assertEquals(pin.configDigest(), options.getValue().configDigest());
-        verify(revalidator).requireActive(options.getValue());
-        verify(conversations).getOrCreateConversation("presales:1:p:run", 7L, "9", 1L);
+        verify(revalidator, times(2)).requireActive(options.getValue());
+        verify(conversations).getOrCreateExecutionConversation("presales:1:p:run", 7L, "9", 1L);
         verify(agents)
                 .chatStructuredStream(
                         eq(7L),
@@ -163,6 +182,136 @@ class PresalesEmployeeRuntimeTest {
                         isNull(),
                         any(ChatOrigin.class),
                         any(ProjectExecutionOptions.class));
+
+        task.put("configDigest", pin.configDigest());
+        org.mockito.Mockito.doReturn(
+                        Flux.concat(
+                                Flux.just(AgentService.StreamDelta.segmentOnly("失败前的实际过程", null)),
+                                Flux.error(new IllegalStateException("provider failed"))))
+                .when(agents)
+                .chatStructuredStream(
+                        any(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        isNull(),
+                        any(ChatOrigin.class),
+                        any(ProjectExecutionOptions.class));
+        assertThrows(
+                vip.mate.semantic.web.SemanticApiException.class,
+                () ->
+                        runtime.execute(
+                                "1",
+                                "9",
+                                "7",
+                                "presales:1:p:run",
+                                PresalesModelAdapter.instructions("S1"),
+                                task,
+                                snapshot));
+        verify(conversations)
+                .saveMessage(
+                        eq("presales:1:p:run"),
+                        eq("assistant"),
+                        anyString(),
+                        any(),
+                        eq("error"),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        anyString(),
+                        anyString(),
+                        contains("失败前的实际过程"));
+
+        org.mockito.Mockito.doReturn(
+                        Flux.never()
+                                .doOnSubscribe(subscription -> Thread.currentThread().interrupt()))
+                .when(agents)
+                .chatStructuredStream(
+                        any(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        isNull(),
+                        any(ChatOrigin.class),
+                        any(ProjectExecutionOptions.class));
+        try {
+            assertThrows(
+                    vip.mate.semantic.web.SemanticApiException.class,
+                    () ->
+                            runtime.execute(
+                                    "1",
+                                    "9",
+                                    "7",
+                                    "presales:1:p:run",
+                                    PresalesModelAdapter.instructions("S1"),
+                                    task,
+                                    snapshot));
+            assertTrue(Thread.currentThread().isInterrupted());
+            verify(conversations)
+                    .saveMessage(
+                            eq("presales:1:p:run"),
+                            eq("assistant"),
+                            anyString(),
+                            any(),
+                            eq("interrupted"),
+                            org.mockito.ArgumentMatchers.anyInt(),
+                            org.mockito.ArgumentMatchers.anyInt(),
+                            org.mockito.ArgumentMatchers.anyInt(),
+                            org.mockito.ArgumentMatchers.anyInt(),
+                            org.mockito.ArgumentMatchers.anyInt(),
+                            anyString(),
+                            anyString(),
+                            anyString());
+        } finally {
+            Thread.interrupted();
+        }
+
+        org.mockito.Mockito.doReturn(
+                        Flux.just(
+                                AgentService.StreamDelta.finalAnswer(
+                                        "{\"schemaVersion\":1,\"needsHumanReview\":true,\"items\":[],\"unknowns\":[],\"assumptions\":[]}",
+                                        true)))
+                .when(agents)
+                .chatStructuredStream(
+                        any(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        isNull(),
+                        any(ChatOrigin.class),
+                        any(ProjectExecutionOptions.class));
+        org.mockito.Mockito.doNothing()
+                .doThrow(PresalesModelAdapter.error(409, "TASK_SCOPE_CHANGED"))
+                .when(revalidator)
+                .requireActive(any(ProjectExecutionOptions.class));
+        assertThrows(
+                vip.mate.semantic.web.SemanticApiException.class,
+                () ->
+                        runtime.execute(
+                                "1",
+                                "9",
+                                "7",
+                                "presales:1:p:run",
+                                PresalesModelAdapter.instructions("S1"),
+                                task,
+                                snapshot));
+        verify(conversations)
+                .saveMessage(
+                        eq("presales:1:p:run"),
+                        eq("assistant"),
+                        contains("needsHumanReview"),
+                        any(),
+                        eq("interrupted"),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        org.mockito.ArgumentMatchers.anyInt(),
+                        anyString(),
+                        anyString(),
+                        anyString());
     }
 
     @SuppressWarnings("unchecked")

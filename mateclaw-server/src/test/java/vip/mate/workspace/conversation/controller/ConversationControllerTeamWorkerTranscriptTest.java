@@ -36,8 +36,45 @@ class ConversationControllerTeamWorkerTranscriptTest {
     }
 
     @Test
+    void protectedTranscriptDenialCoversHistoryTrajectoryStatusWithoutTeamFallback() {
+        when(conversationService.isProtectedTranscript("execution")).thenReturn(true);
+        when(conversationService.conversationExists("execution")).thenReturn(true);
+        assertEquals(
+                403,
+                controller
+                        .listMessages("execution", null, null, 77L, 501L, authentication)
+                        .getCode());
+        assertEquals(
+                403,
+                controller.exportTrajectory("execution", authentication).getStatusCode().value());
+        assertEquals(403, controller.getStreamStatus("execution", authentication).getCode());
+        org.mockito.Mockito.verifyNoInteractions(teamWorkerGovernanceService, streamTracker);
+        verify(conversationService, never()).listMessageViews("execution");
+        verify(conversationService, never()).renderTrajectory("execution");
+    }
+
+    @Test
+    void authorizedProtectedStatusDisclosesReadOnlyAndServesRealStoredMessages() {
+        when(conversationService.isProtectedTranscript("execution")).thenReturn(true);
+        when(conversationService.conversationExists("execution")).thenReturn(true);
+        when(conversationService.canReadTranscript("execution", "workspace-admin"))
+                .thenReturn(true);
+        when(conversationService.listMessageViews("execution")).thenReturn(List.of());
+        assertEquals(
+                "true",
+                controller.getStreamStatus("execution", authentication).getData().get("readOnly"));
+        assertEquals(
+                200,
+                controller
+                        .listMessages("execution", null, null, null, null, authentication)
+                        .getCode());
+        verify(conversationService).listMessageViews("execution");
+        org.mockito.Mockito.verifyNoInteractions(teamWorkerGovernanceService);
+    }
+
+    @Test
     void listMessagesAllowsVerifiedTeamWorkerTranscriptForNonOwner() {
-        when(conversationService.isConversationOwner("worker-conversation", "workspace-admin"))
+        when(conversationService.canReadTranscript("worker-conversation", "workspace-admin"))
                 .thenReturn(false);
         when(teamWorkerGovernanceService.canReadTranscript(
                         "worker-conversation", 77L, 501L, "workspace-admin"))
@@ -54,7 +91,7 @@ class ConversationControllerTeamWorkerTranscriptTest {
 
     @Test
     void listMessagesRejectsNonOwnerWhenWorkerTranscriptIsNotVerified() {
-        when(conversationService.isConversationOwner("ordinary-conversation", "workspace-admin"))
+        when(conversationService.canReadTranscript("ordinary-conversation", "workspace-admin"))
                 .thenReturn(false);
         when(teamWorkerGovernanceService.canReadTranscript(
                         "ordinary-conversation", 77L, 501L, "workspace-admin"))

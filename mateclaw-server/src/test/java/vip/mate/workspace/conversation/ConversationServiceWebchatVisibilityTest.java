@@ -151,7 +151,7 @@ class ConversationServiceWebchatVisibilityTest {
         assertThat(sql).contains("conversation_kind is null");
         assertThat(sql).contains("conversation_kind <>");
         assertThat(captor.getValue().getParamNameValuePairs().values())
-                .contains("team_worker", "team-task-%");
+                .contains("team_worker", "team-task-%", ConversationTranscriptPolicy.KIND);
     }
 
     @Test
@@ -169,7 +169,7 @@ class ConversationServiceWebchatVisibilityTest {
         assertThat(sql).contains("conversation_kind is null");
         assertThat(sql).contains("conversation_kind <>");
         assertThat(captor.getValue().getParamNameValuePairs().values())
-                .contains("team_worker", "team-task-%");
+                .contains("team_worker", "team-task-%", ConversationTranscriptPolicy.KIND);
     }
 
     // ------------------------------------------------------------------

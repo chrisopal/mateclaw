@@ -97,6 +97,60 @@ public class ConversationService {
      */
     private vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage;
 
+    private org.springframework.beans.factory.ObjectProvider<ConversationTranscriptPolicy>
+            transcriptPolicies;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setTranscriptPolicies(
+            org.springframework.beans.factory.ObjectProvider<ConversationTranscriptPolicy>
+                    policies) {
+        this.transcriptPolicies = policies;
+    }
+
+    public boolean isProtectedTranscript(String conversationId) {
+        return isProtectedTranscript(findByConversationId(conversationId));
+    }
+
+    private static boolean isProtectedTranscript(ConversationEntity conversation) {
+        return conversation != null
+                && ConversationTranscriptPolicy.KIND.equals(conversation.getConversationKind());
+    }
+
+    /** Read authority is separate from ordinary ownership and cannot authorize chat mutation. */
+    public boolean canReadTranscript(String conversationId, String username) {
+        var conversation = findByConversationId(conversationId);
+        if (!isProtectedTranscript(conversation))
+            return isConversationOwner(conversationId, username);
+        if (transcriptPolicies == null || username == null) return false;
+        try {
+            var policies =
+                    transcriptPolicies
+                            .orderedStream()
+                            .filter(policy -> policy.supports(conversation))
+                            .toList();
+            return policies.size() == 1 && policies.getFirst().canRead(conversation, username);
+        } catch (RuntimeException unavailable) {
+            // Missing/ambiguous domain authority must not fall back to global chat ownership.
+            return false;
+        }
+    }
+
+    /** Server-only writer. Mark evidence protected before any message can be persisted. */
+    @Transactional
+    public ConversationEntity getOrCreateExecutionConversation(
+            String conversationId, Long agentId, String actorId, Long workspaceId) {
+        var conversation = getOrCreateConversation(conversationId, agentId, actorId, workspaceId);
+        if (!java.util.Objects.equals(agentId, conversation.getAgentId())
+                || (!isProtectedTranscript(conversation)
+                        && conversation.getMessageCount() != null
+                        && conversation.getMessageCount() != 0)) {
+            throw new IllegalArgumentException("Execution conversation identity changed");
+        }
+        conversation.setConversationKind(ConversationTranscriptPolicy.KIND);
+        conversationMapper.updateById(conversation);
+        return conversation;
+    }
+
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setToolResultStorage(
             vip.mate.agent.graph.executor.ToolResultStorage toolResultStorage) {
@@ -232,7 +286,10 @@ public class ConversationService {
                         kind ->
                                 kind.isNull(ConversationEntity::getConversationKind)
                                         .or()
-                                        .ne(ConversationEntity::getConversationKind, "team_worker"))
+                                        .ne(ConversationEntity::getConversationKind, "team_worker")
+                                        .ne(
+                                                ConversationEntity::getConversationKind,
+                                                ConversationTranscriptPolicy.KIND))
                 .notLikeRight(ConversationEntity::getConversationId, "team-task-");
     }
 
@@ -1957,7 +2014,7 @@ public class ConversationService {
                 conversationMapper.selectOne(
                         new LambdaQueryWrapper<ConversationEntity>()
                                 .eq(ConversationEntity::getConversationId, conversationId));
-        if (conv == null) {
+        if (conv == null || isProtectedTranscript(conv)) {
             return false;
         }
         // 直属 owner 一律放行:会话由该用户创建,workspace 自然一致,无需再做成员校验。
@@ -2000,7 +2057,7 @@ public class ConversationService {
     /** User-facing Chat endpoints may not append turns to worker evidence sessions. */
     public boolean isUserMessageAllowed(String conversationId) {
         ConversationEntity conversation = findByConversationId(conversationId);
-        return !isTeamWorkerConversation(conversation);
+        return !isTeamWorkerConversation(conversation) && !isProtectedTranscript(conversation);
     }
 
     /** Canonical server-side worker classification, including bounded legacy fallback. */

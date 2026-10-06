@@ -1896,7 +1896,9 @@ public class ChatController {
             @PathVariable String conversationId, Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
         // 权限校验：已认证用户需验证会话归属，匿名用户（permitAll）直接放行
-        if (auth != null && !conversationService.isConversationOwner(conversationId, username)) {
+        if (conversationService.isProtectedTranscript(conversationId)
+                || (auth != null
+                        && !conversationService.isConversationOwner(conversationId, username))) {
             return R.fail(403, "无权操作该会话");
         }
         boolean stopped = streamTracker.requestStop(conversationId);
@@ -1957,7 +1959,9 @@ public class ChatController {
             @RequestBody InterruptRequest request,
             Authentication auth) {
         String username = auth != null ? auth.getName() : "anonymous";
-        if (auth != null && !conversationService.isConversationOwner(conversationId, username)) {
+        if (conversationService.isProtectedTranscript(conversationId)
+                || (auth != null
+                        && !conversationService.isConversationOwner(conversationId, username))) {
             return R.fail(403, "无权操作该会话");
         }
 
@@ -2032,6 +2036,9 @@ public class ChatController {
         String username = auth != null ? auth.getName() : null;
         if (username == null) {
             return R.fail(401, "未登录，请先登录");
+        }
+        if (conversationService.isProtectedTranscript(request.getConversationId())) {
+            return R.fail(403, "无权操作该会话");
         }
         try (var permit = turnGate.tryAcquire(request.getConversationId())) {
             if (permit == null || streamTracker.isRunning(request.getConversationId())) {

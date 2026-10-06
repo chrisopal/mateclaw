@@ -12,6 +12,7 @@ import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.execution.ProjectExecutionOptions;
 import vip.mate.agent.execution.ProjectToolPolicy;
 import vip.mate.agent.model.AgentEntity;
+import vip.mate.channel.web.AgentStreamAccumulator;
 import vip.mate.llm.service.ModelConfigService;
 import vip.mate.workspace.conversation.ConversationService;
 
@@ -272,11 +273,22 @@ public class PresalesEmployeeRuntime {
                                 Long.valueOf(actor))
                         .withAgent(employee.getId());
         StringBuilder output = new StringBuilder();
+        var transcript =
+                new AgentStreamAccumulator(
+                        json,
+                        new AgentStreamAccumulator.Sink() {
+                            @Override
+                            public void broadcast(String id, String event, Object payload) {}
+
+                            @Override
+                            public void updatePhase(String id, String phase) {}
+                        });
+        var conversationService = conversations.getObject();
+        conversationService.getOrCreateExecutionConversation(
+                conversationId, employee.getId(), actor, Long.valueOf(scope));
+        conversationService.saveMessage(conversationId, "user", snapshot.path("taskGoal").asText());
+        String transcriptStatus = "error";
         try {
-            conversations
-                    .getObject()
-                    .getOrCreateConversation(
-                            conversationId, employee.getId(), actor, Long.valueOf(scope));
             String prompt =
                     instructions
                             + "\nBOUND EMPLOYEE ID: "
@@ -294,6 +306,7 @@ public class PresalesEmployeeRuntime {
                             employee.getId(), prompt, conversationId, actor, null, origin, options)
                     .doOnNext(
                             delta -> {
+                                transcript.accept(delta, conversationId);
                                 if ("tool_approval_requested".equals(delta.eventType()))
                                     throw PresalesModelAdapter.error(
                                             409, "EMPLOYEE_APPROVAL_REQUIRED");
@@ -306,6 +319,11 @@ public class PresalesEmployeeRuntime {
                                     throw PresalesModelAdapter.error(422, "MODEL_OUTPUT_LIMIT");
                             })
                     .blockLast(Duration.ofSeconds(150));
+            // A provider can finish after cancellation without interrupting this thread.
+            // Keep its actual output as evidence, but never label an invalidated run completed.
+            transcriptStatus = "interrupted";
+            revalidator.requireActive(options);
+            transcriptStatus = "error";
             String text = output.toString().trim();
             if (text.startsWith("```json") && text.endsWith("```"))
                 text = text.substring(7, text.length() - 3).trim();
@@ -326,11 +344,32 @@ public class PresalesEmployeeRuntime {
             } catch (vip.mate.semantic.web.SemanticApiException invalid) {
                 throw new PresalesOutputRejected(invalid, result);
             }
+            transcriptStatus = "completed";
             return result;
         } catch (vip.mate.semantic.web.SemanticApiException e) {
             throw e;
         } catch (Exception e) {
             throw PresalesModelAdapter.error(422, "EMPLOYEE_RUNTIME_FAILED");
+        } finally {
+            boolean interrupted = Thread.interrupted();
+            try {
+                conversationService.saveMessage(
+                        conversationId,
+                        "assistant",
+                        transcript.getContent(),
+                        transcript.toAssistantParts(),
+                        interrupted ? "interrupted" : transcriptStatus,
+                        transcript.getPromptTokens(),
+                        transcript.getCompletionTokens(),
+                        transcript.getCacheReadTokens(),
+                        transcript.getCacheWriteTokens(),
+                        transcript.getReasoningTokens(),
+                        transcript.getRuntimeModelName(),
+                        transcript.getRuntimeProviderId(),
+                        transcript.toMetadataJson());
+            } finally {
+                if (interrupted) Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded AC30 runtime UI slice only; this is not full AC30 acceptance.",
+  "verdict": "PARTIAL",
+  "boundedSliceVerdict": "PASS",
+  "sourceTree": "e6f9fe69b2a5af6bf59177df1951973c8b018e4f",
+  "environment": {
+    "backendUrl": "http://127.0.0.1:61806",
+    "classicUiUrl": "http://127.0.0.1:61807",
+    "browserSession": "mateclaw-ac30-transcript",
+    "workspaceId": "2107403454093590530",
+    "projectId": "e425ca98-a566-4574-bc60-4e3ba42235bb",
+    "viewports": [
+      { "width": 1440, "height": 900 },
+      { "width": 390, "height": 844 }
+    ]
+  },
+  "passed": [
+    {
+      "id": "cancelled-task-status-and-billing-uncertainty",
+      "runId": "aa73f52f-b318-44b2-921a-4a7182e2e484",
+      "evidence": "Desktop and narrow real UI showed 已停止接收 and the exact warning that model billing cannot be confirmed."
+    },
+    {
+      "id": "execution-transcript-readonly-refresh",
+      "runId": "aa73f52f-b318-44b2-921a-4a7182e2e484",
+      "evidence": "Composer disabled before refresh, after refresh, and after leaving /chat for /presales and navigating back. Four captured status responses returned HTTP 200, streamStatus=idle, readOnly=true. Messages read back as user/completed/23 characters and assistant/interrupted/272 characters."
+    },
+    {
+      "id": "desktop-cross-page-navigation",
+      "evidence": "Project card -> exact /chat transcript -> /presales list -> browser back to the same conversation retained readonly state."
+    },
+    {
+      "id": "narrow-cross-page-navigation-and-layout",
+      "evidence": "At 390x844, project -> exact /chat transcript -> browser back to the exact project retained cancelled status; project and chat document scrollWidth both equaled 390. The real user message and interrupted label were visible."
+    },
+    {
+      "id": "candidate-review-preview",
+      "runId": "cb9b7a49-446e-4aea-9ffc-8610dbebb74d",
+      "evidence": "The actual S1 SIMULATED_MODEL candidate opened the 项目理解草稿 review dialog on desktop and narrow. Title, draft text, AI 建议 origin, and the boundary that it does not represent customer facts or model quality were preserved. The dialog was cancelled without a presales write."
+    },
+    {
+      "id": "candidate-edit-save-refresh-readback",
+      "runId": "cb9b7a49-446e-4aea-9ffc-8610dbebb74d",
+      "savedContextId": "65134f91-a37b-49dd-947d-5abb5be76a40",
+      "evidence": "An explicitly synthetic QA edit was saved through the real UI with SAVE_CONTEXT at expected project version 12. The server returned version 13 and persisted authority=UNTRUSTED_DRAFT, originKind=AI_SUGGESTION, item version=1, author and created time. Refresh read back the same item. Candidate needsHumanReview remained true; stage/status stayed DISCOVERY/ACTIVE; baselines, reviews, releases, requirements and solutions stayed at zero; no approval or publication field appeared."
+    },
+    {
+      "id": "no-unintended-write-or-console-error",
+      "evidence": "The readonly/preview cases captured zero non-GET /api/v1/presales requests. The authorized save case captured exactly one POST to the project commands endpoint with action SAVE_CONTEXT. All cases captured zero console errors."
+    }
+  ],
+  "failed": [],
+  "unrun": [
+    {
+      "id": "presentation-preview",
+      "reason": "The existing actual output is S1 and contains no presentation artifact or slide preview control."
+    },
+    {
+      "id": "real-model-quality-or-customer-acceptance",
+      "reason": "The provider is a deterministic SIMULATED_MODEL fixture and the content is not customer fact or model-quality evidence."
+    },
+    {
+      "id": "full-ac30-control-inventory",
+      "reason": "This task covered only the assigned runtime transcript/cancel/candidate/navigation slice. The prior AC30 ledger remains incomplete."
+    }
+  ],
+  "artifacts": {
+    "desktopLog": "evidence/desktop-runtime-ui.log",
+    "narrowLog": "evidence/narrow-runtime-ui.log",
+    "narrowReadbackLog": "evidence/narrow-transcript-readback.log",
+    "candidateSaveReadbackLog": "evidence/candidate-edit-save-readback.log",
+    "screenshots": [
+      "evidence/desktop-cancelled-task.png",
+      "evidence/desktop-candidate-review.png",
+      "evidence/desktop-cancelled-transcript-before-refresh.png",
+      "evidence/desktop-cancelled-transcript-after-refresh.png",
+      "evidence/narrow-cancelled-task.png",
+      "evidence/narrow-candidate-review.png",
+      "evidence/narrow-cancelled-transcript.png",
+      "evidence/narrow-transcript-readback.png",
+      "evidence/desktop-saved-untrusted-context.png",
+      "evidence/desktop-saved-untrusted-context-readback.png"
+    ]
+  }
+}

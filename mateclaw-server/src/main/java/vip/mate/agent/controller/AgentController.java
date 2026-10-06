@@ -306,6 +306,10 @@ public class AgentController {
             String message,
             String conversationId,
             Long requestedWorkspaceId) {
+        if (conversationService.isProtectedTranscript(conversationId)) {
+            throw new MateClawException(
+                    "err.conversation.read_only", 403, "Project execution records are read-only");
+        }
         Long resolvedWorkspaceId =
                 agent != null && agent.getWorkspaceId() != null
                         ? agent.getWorkspaceId()

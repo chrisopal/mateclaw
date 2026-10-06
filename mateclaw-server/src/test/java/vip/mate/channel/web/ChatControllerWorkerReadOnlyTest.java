@@ -61,6 +61,31 @@ class ChatControllerWorkerReadOnlyTest {
     }
 
     @Test
+    void projectExecutionRejectsAnonymousStopAndQueueBeforeSideEffects() {
+        when(conversationService.isProtectedTranscript("execution")).thenReturn(true);
+        org.junit.jupiter.api.Assertions.assertEquals(
+                403, controller.stopStream("execution", null).getCode());
+        var request = new ChatController.InterruptRequest();
+        request.setMessage("continue");
+        org.junit.jupiter.api.Assertions.assertEquals(
+                403, controller.interruptStream("execution", request, null).getCode());
+        org.mockito.Mockito.verifyNoInteractions(streamTracker, inputQueue, approvalService);
+    }
+
+    @Test
+    void projectExecutionRejectsSynchronousChatBeforeSavingInput() {
+        when(authentication.getName()).thenReturn("admin");
+        when(conversationService.isProtectedTranscript("execution")).thenReturn(true);
+        var request = new ChatController.ChatRequest();
+        request.setConversationId("execution");
+        request.setMessage("continue");
+        org.junit.jupiter.api.Assertions.assertEquals(
+                403, controller.chat(7L, request, 1L, authentication).getCode());
+        org.mockito.Mockito.verifyNoInteractions(agentService, streamTracker);
+        verify(conversationService, never()).getOrCreateConversation(any(), any(), any(), any());
+    }
+
+    @Test
     void rejectsWorkerBeforeRegisteringOrStartingAUserStream() {
         ChatController.ChatStreamRequest request = new ChatController.ChatStreamRequest();
         request.setConversationId("worker-conversation");

@@ -29,6 +29,41 @@ describe('useWorkerConversationGuard', () => {
     vi.useRealTimers()
   })
 
+  it('protects a server-classified execution deep link without a worker route hint', async () => {
+    const scope = ref('execution')
+    const load = vi.fn(async () => null)
+    const guard = useWorkerConversationGuard({
+      conversationId: scope,
+      workerHint: ref(false),
+      load,
+      loadReadOnly: async (id) => id === 'execution',
+    })
+    await vi.waitFor(() => expect(guard.state.value).toBe('readOnly'))
+    expect(guard.readOnly.value).toBe(true)
+    expect(guard.context.value).toBeNull()
+    scope.value = 'ordinary'
+    await vi.waitFor(() => expect(guard.readOnly.value).toBe(false))
+  })
+
+  it('ignores a stale writable status after switching to an execution transcript', async () => {
+    const pending = deferred<boolean>()
+    const scope = ref('ordinary')
+    const guard = useWorkerConversationGuard({
+      conversationId: scope,
+      workerHint: ref(false),
+      load: async () => null,
+      loadReadOnly: (id) => (id === 'ordinary' ? pending.promise : Promise.resolve(true)),
+    })
+    await nextTick()
+    await Promise.resolve()
+    scope.value = 'execution'
+    await vi.waitFor(() => expect(guard.state.value).toBe('readOnly'))
+    pending.resolve(false)
+    await nextTick()
+    await Promise.resolve()
+    expect(guard.readOnly.value).toBe(true)
+  })
+
   it('fails closed while a worker-looking route is pending and after 403/500', async () => {
     const conversationId = ref('worker')
     const workerHint = ref(true)

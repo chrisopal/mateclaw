@@ -66,6 +66,24 @@ class AgentControllerOriginTest {
     }
 
     @Test
+    void allPublicAgentEntriesRejectProtectedEvidenceBeforeSaving() {
+        when(conversations.isProtectedTranscript(CONVERSATION_ID)).thenReturn(true);
+        org.junit.jupiter.api.Assertions.assertThrows(
+                vip.mate.exception.MateClawException.class,
+                () -> controller.chat(AGENT_ID, request(), WORKSPACE_ID));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                vip.mate.exception.MateClawException.class,
+                () -> controller.execute(AGENT_ID, request(), WORKSPACE_ID));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                vip.mate.exception.MateClawException.class,
+                () -> controller.chatStream(AGENT_ID, MESSAGE, CONVERSATION_ID, WORKSPACE_ID));
+        verify(conversations, never()).saveMessage(any(), any(), any());
+        verify(agentService, never()).chat(eq(AGENT_ID), any(), any(), any());
+        verify(agentService, never()).execute(eq(AGENT_ID), any(), any(), any());
+        verify(agentService, never()).chatStream(eq(AGENT_ID), any(), any(), any());
+    }
+
+    @Test
     void sseEntryPersistsOnceAndUsesExplicitOrigin() {
         when(agentService.chatStream(eq(AGENT_ID), eq(MESSAGE), eq(CONVERSATION_ID), any()))
                 .thenReturn(Flux.empty());

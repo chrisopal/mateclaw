@@ -1,0 +1,28 @@
+{
+  "sourceTree": "e6f9fe69b2a5af6bf59177df1951973c8b018e4f",
+  "sourceObjectType": "tree",
+  "runtimePath": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-ac30-transcript-3j4ch7pw",
+  "backendUrl": "http://127.0.0.1:61806",
+  "classicUiUrl": "http://127.0.0.1:61807",
+  "liveServerJar": {
+    "path": "server.jar",
+    "sha256": "fc3217668c57b99b191b456120a968607c0bbc71b9f6f9fee613735e5d67a377",
+    "observedPid": 45303,
+    "listenPort": 61806,
+    "processResolution": "Resolved the single LISTEN PID on TCP 61806, extracted only its .jar path from the process command, and hashed that file without recording the raw command."
+  },
+  "nonLiveBackupJar": {
+    "path": "server-cc3fc6af6403706e3d0b218cfa0350007e60a113.jar",
+    "sha256": "e7a2702342d779f060b4c6ec30fbb529deea9eb0018cb9c2c4abc812c9ed3da2"
+  },
+  "candidateAndRuntimeUiSha256": {
+    "mateclaw-ui/src/features/presales/components/PresalesOverview.vue": "f6e731c9811422fba7a47f504b474916b7d90dafac53e77e35086494c00af9d4",
+    "mateclaw-ui/src/features/presales/components/PresalesDiscoveryFields.vue": "79aca9e15ba0c567aba26ef18a146862e4f67027b33826e6d691d00f964a02a9",
+    "mateclaw-ui/src/features/presales/shared/messages.ts": "575173c8e0f261048162aa677e72d609e816a9ffbf942cac775f444aae6636f8",
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "80bdb272b59ded7fa4495b12e0a1cbceb47cf07cfdf2da341af53ae23e31762e",
+    "mateclaw-ui/src/views/ChatConsole.vue": "19a8d7bf43f8684dda5c465352416d01535c76dd9a972b67558c8007cf72e9af",
+    "mateclaw-ui/src/composables/chat/useWorkerConversationGuard.ts": "cc7015cfb8055faa462cad3f5c796ea232b44e220d2c9d2a96761637858e0804"
+  },
+  "binding": "Each listed runtime ui/src file hash matched git show <sourceTree>:<repository path>.",
+  "correction": "The first report selected the similarly named server-cc3fc6af...jar by directory inspection and hashing instead of resolving the executable artifact from the live listener PID. That file is a backup. The corrected live identity is server.jar, verified through PID 45303 listening on port 61806."
+}

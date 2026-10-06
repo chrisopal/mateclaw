@@ -1,12 +1,14 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import type { VerifiedWorkerContext } from '@/utils/conversationGovernance'
 
-export type WorkerGuardState = 'pending' | 'verified' | 'nonWorker' | 'error'
+export type WorkerGuardState = 'pending' | 'verified' | 'nonWorker' | 'readOnly' | 'error'
 
 export function useWorkerConversationGuard(options: {
   conversationId: Ref<string>
   workerHint: Ref<boolean>
   load: (conversationId: string) => Promise<VerifiedWorkerContext | null>
+  /** Additional server-owned execution transcripts share the same read-only controls. */
+  loadReadOnly?: (conversationId: string) => Promise<boolean>
   /** Initial delay for retrying an ordinary conversation while the backend restarts. */
   retryDelayMs?: number
 }) {
@@ -43,7 +45,11 @@ export function useWorkerConversationGuard(options: {
             context.value = result
             state.value = 'verified'
           } else {
-            state.value = workerHint ? 'error' : 'nonWorker'
+            const readOnly = options.loadReadOnly
+              ? await options.loadReadOnly(conversationId)
+              : false
+            if (stopped || version !== requestVersion) return
+            state.value = workerHint ? 'error' : readOnly ? 'readOnly' : 'nonWorker'
           }
         } catch {
           if (stopped || version !== requestVersion) return
