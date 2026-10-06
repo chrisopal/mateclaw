@@ -1,0 +1,17 @@
+# AQ-05 逐动作载荷与编辑意图整改计划
+
+起点27410414be0994c0bbbbe0080dc07e87c1066587，tree e7ed88ef3d06b6d2f6dca31c7416c850c17f3492，工作树干净；base/origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93。初始dev ht7tx20i SCAN_PASS。前轮真实诊断修复/提交推送/PR回读为progress，完整目标继续active。
+
+气味：PresalesCommandRequest将16种action与同一个Record<string,unknown>并列，editor command也共用整个EditorForm，页面分开传action/payload会丢失关系。按原服务applyCommand/bind/baseline/solution/release语义建立域内公开PresalesCommandPayloads、逐动作Intent判别联合和VersionedMutation交叉；JSON扩展保持unknown，已声明字段/嵌套sections/responses/review issues/ID约束类型。写载荷字段保留optional：原客户端允许缺省与不完整输入，服务端在授权、source、receipt、CAS后校验；不能用前端类型化改变错误顺序。status/origin等raw文本原样，不借展示词表批准，完整领域枚举/响应DTO不是本片假完成。
+
+范围：新增api/presalesCommandTypes.ts，现有presalesApi.ts类型导出/请求声明，shared/editorSubmission.ts command联合，pages/PresalesWorkbench.vue命令意图及6类调用位置，新增commandPayload.test.ts。没有通用schema框架、生产网络decoder、JS规范化、新依赖或数据库操作。运行时JSON/model仍由原服务端验证，类型不提供权限；scope/session、受限repair whitelist、CAS/receipt/409与字符串ID保持。
+
+先运行旧editor/mutation/workbench合同，再新增16动作逐字节请求正例和已声明字段/嵌套错误类型负例：旧vue-tsc应真实失败，类型测试的运行绿灯不能当类型通过。实现后各切片dev+定向回归，完整精确staged、正常提交/checked push，独立限定只读技术复核；所有源/日志SHA与正反例归档。页面command接受完整intent，editor strip kind/continueEmployee后传intent，保留原action→payload→CAS→operation的wire顺序；不能spread编辑元数据进HTTP，receipt仍明确原字段结构。旧测试不改断言，不改runner/gate/旧迁移/存量基线。
+
+回退恢复本批types/call-site源码，无数据写入。仍需完整Requirement/Clarification/SolutionRevision/Task/Artifact/Handoff、领域对象状态与业务校验、剩余应用用例拆分、SQL分页/V2单写迁移/多方言/浏览器/维护者QA/远端requiredCI；46正式AC保持NOT_RUN。ADR仍Proposed，工程review不替代利益相关人签收。
+
+行为保护：旧editor/mutation/真实Vue工作台3文件125项通过。首轮负例fixture数组被map推宽action:string，先修正分布式去receipt的测试类型后，旧vue-tsc真实exit2并产生17个仅合同断言失败（16错误字段/嵌套类型可入旧请求，以及Extract无法得到动作载荷）。新代码vue-tsc实际exit0，旧测试原文件未改；不能把expectTypeOf的Vitest运行时绿灯当类型证明。
+
+独立只读review发现MEDIUM：真实review issue写description而不是仅历史text；先新增description:number负例取得真实vue-tsc exit2/1条断言失败，再补description?:string保留text。最初插入脚本匹配格式化前行失败，未写负例，名为review-red的空日志实际exit0（不是红例）；真实description-red另存。同时声明服务实际读取的baselineVersion:number和不可信presentation:unknown，不映射未知状态/模型成果成已批准数据。
+
+最终限定独立复核MEDIUM已关闭，无剩余发现；独立17命令合同、vue-tsc、五文件lint exit0，LSP不可用，不替代维护者/QA。主线程最终15文件338项、vue-tsc、五文件lint、固定Prettier均exit0；dev xih076gs SCAN_PASS。下一步精确staged门禁/正常钩子和checked push；正式AC状态不升级。

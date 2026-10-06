@@ -1,0 +1,1740 @@
+package vip.mate.presales;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.sql.DriverManager;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
+import reactor.core.publisher.Flux;
+import vip.mate.agent.AgentService;
+import vip.mate.agent.execution.ProjectExecutionRevalidatorDispatcher;
+import vip.mate.agent.model.AgentEntity;
+import vip.mate.agent.repository.AgentMapper;
+import vip.mate.llm.model.ModelConfigEntity;
+import vip.mate.llm.repository.ModelConfigMapper;
+import vip.mate.llm.service.ModelCapabilityService;
+import vip.mate.llm.service.ModelConfigService;
+import vip.mate.llm.service.ModelProviderService;
+import vip.mate.semantic.support.SemanticHttpFixture;
+import vip.mate.semantic.web.SemanticApiException;
+import vip.mate.workspace.conversation.ConversationService;
+import vip.mate.workspace.core.service.ProjectAuthorityFence;
+import vip.mate.workspace.core.service.ProjectSourceAccess;
+
+/**
+ * Real policy/runtime and Spring result transaction; only external agent/chat boundaries are
+ * doubles.
+ */
+@Import({
+    PresalesRuntimeTransactionIntegrationTest.Boundaries.class,
+    PresalesAccess.class,
+    PresalesService.class,
+    vip.mate.presales.repository.PresalesRenderTaskRepository.class,
+    PresalesProjectQueryService.class,
+    vip.mate.presales.repository.PresalesProjectRepository.class,
+    vip.mate.presales.repository.PresalesArtifactRepository.class,
+    PresalesSourceAuthorization.class,
+    vip.mate.wiki.service.WikiSourceReadService.class,
+    vip.mate.wiki.repository.WikiSourceReadRepository.class,
+    vip.mate.semantic.source.SourceGovernanceReadService.class,
+    vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
+    PresalesArtifactRenderer.class,
+    PresalesEmployeeRuntime.class,
+    PresalesExecutionRevalidationProvider.class,
+    PresalesContextProvider.class,
+    ProjectSourceAccess.class,
+    ProjectExecutionRevalidatorDispatcher.class,
+    ModelConfigService.class
+})
+@TestPropertySource(
+        properties = {
+            "mateclaw.presales.enabled=true",
+            "spring.datasource.url=jdbc:h2:mem:presales_runtime_transaction;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000"
+        })
+class PresalesRuntimeTransactionIntegrationTest extends SemanticHttpFixture {
+    @DynamicPropertySource
+    static void optionalDisposableMySql(DynamicPropertyRegistry properties) throws Exception {
+        String url = System.getenv("MATECLAW_ACCEPTANCE_JDBC_URL");
+        if (url == null || url.isBlank()) return;
+        var match =
+                java.util.regex.Pattern.compile(
+                                "^jdbc:mysql://127\\.0\\.0\\.1:[0-9]+/(mateclaw_aq_acceptance_[a-z0-9]+)(?:\\?.*)?$")
+                        .matcher(url);
+        if (!match.matches())
+            throw new IllegalArgumentException(
+                    "Acceptance requires a disposable loopback database");
+        String user = Objects.requireNonNull(System.getenv("MATECLAW_ACCEPTANCE_JDBC_USER"));
+        String password =
+                Objects.requireNonNull(System.getenv("MATECLAW_ACCEPTANCE_JDBC_PASSWORD"));
+        try (var connection = DriverManager.getConnection(url, user, password);
+                var tables =
+                        connection
+                                .getMetaData()
+                                .getTables(
+                                        connection.getCatalog(),
+                                        null,
+                                        "%",
+                                        new String[] {"TABLE", "VIEW"})) {
+            if (!match.group(1).equals(connection.getCatalog()) || tables.next())
+                throw new IllegalArgumentException(
+                        "Acceptance database must be empty before Flyway migration");
+        }
+        properties.add("spring.datasource.url", () -> url);
+        properties.add("spring.datasource.username", () -> user);
+        properties.add("spring.datasource.password", () -> password);
+        properties.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+        properties.add("spring.flyway.locations", () -> "classpath:db/migration/mysql");
+    }
+
+    @TestConfiguration
+    @MapperScan("vip.mate.llm.repository")
+    static class Boundaries {
+        @Bean
+        ObservedFence fence(JdbcTemplate jdbc, SqlSessionTemplate sessions, DataSource dataSource) {
+            return new ObservedFence(jdbc, sessions, dataSource);
+        }
+    }
+
+    static class ObservedFence extends ProjectAuthorityFence {
+        final DataSource dataSource;
+        volatile CountDownLatch entered;
+        final AtomicReference<Object> resource = new AtomicReference<>();
+        volatile Integer isolation;
+
+        ObservedFence(JdbcTemplate jdbc, SqlSessionTemplate sessions, DataSource dataSource) {
+            super(jdbc, sessions);
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public boolean lockForCommand(
+                String workspaceId,
+                Collection<String> actorIds,
+                String employeeId,
+                Collection<String> kbs,
+                Collection<String> graphs,
+                Collection<Source> sources) {
+            if (entered != null) entered.countDown();
+            return super.lockForCommand(workspaceId, actorIds, employeeId, kbs, graphs, sources);
+        }
+
+        @Override
+        public boolean lockForResult(
+                String workspaceId,
+                Collection<String> actorIds,
+                String employeeId,
+                String modelConfigId,
+                Collection<Source> sources) {
+            resource.set(TransactionSynchronizationManager.getResource(dataSource));
+            isolation = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+            if (entered != null) entered.countDown();
+            return super.lockForResult(workspaceId, actorIds, employeeId, modelConfigId, sources);
+        }
+    }
+
+    enum InvalidExecution {
+        ACTOR_DISABLED,
+        EMPLOYEE_DISABLED,
+        MODEL_CHANGED,
+        VIEWER,
+        CANCELLED,
+        PROJECT_CHANGED
+    }
+
+    enum Revocation {
+        WORKSPACE,
+        MEMBER
+    }
+
+    @Autowired PresalesService service;
+    @Autowired PresalesProjectQueryService queryService;
+    @Autowired PresalesEmployeeRuntime runtime;
+    @Autowired ProjectExecutionRevalidatorDispatcher dispatcher;
+    @Autowired PresalesContextProvider contexts;
+    @MockBean AgentService agents;
+    @MockBean ConversationService conversations;
+    @MockBean ModelCapabilityService capabilities;
+    @MockBean ModelProviderService providers;
+    @Autowired AgentMapper agentMapper;
+    @Autowired ModelConfigMapper modelMapper;
+    @Autowired ObservedFence fence;
+    @Autowired PlatformTransactionManager transactionManager;
+    @Autowired DataSource dataSource;
+    private String actor, actorName, agentId;
+    private Long modelId;
+    private ObjectNode project, task, snapshot;
+
+    @Test
+    void metadataUpdatesKeepEmployeeEligibilityAndRejectSilentUnassignment() {
+        String id = project.path("id").asText();
+        var before =
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?", id);
+        int receipts =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace);
+        int revisions =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        id);
+        for (String requested : List.of("", " ", "not-an-id", "9223372036854775807")) {
+            var error =
+                    assertThrows(
+                            SemanticApiException.class,
+                            () ->
+                                    service.command(
+                                            workspace,
+                                            id,
+                                            new PresalesDtos.Command(
+                                                    project.path("version").asLong(),
+                                                    UUID.randomUUID().toString(),
+                                                    "UPDATE_PROJECT",
+                                                    json.createObjectNode()
+                                                            .put("agentId", requested)
+                                                            .put("goal", "Must not save"))));
+            assertEquals(409, error.status());
+            assertEquals("EMPLOYEE_UNAVAILABLE", error.code());
+        }
+        var replacement = new AgentEntity();
+        replacement.setName("Employee eligibility contrast");
+        replacement.setWorkspaceId(Long.valueOf(otherWorkspace));
+        replacement.setEnabled(true);
+        replacement.setDeleted(0);
+        replacement.setRuntimeType("native");
+        agentMapper.insert(replacement);
+        var command =
+                new PresalesDtos.Command(
+                        project.path("version").asLong(),
+                        UUID.randomUUID().toString(),
+                        "UPDATE_PROJECT",
+                        json.createObjectNode()
+                                .put("agentId", replacement.getId().toString())
+                                .put("goal", "Authorized update"));
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.command(workspace, id, command))
+                        .status());
+        replacement.setWorkspaceId(Long.valueOf(workspace));
+        replacement.setEnabled(false);
+        agentMapper.updateById(replacement);
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.command(workspace, id, command))
+                        .status());
+        assertEquals(
+                before,
+                jdbc.queryForList(
+                        "SELECT version,body_json FROM mate_presales_project WHERE id=?", id));
+        assertEquals(
+                receipts,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=?",
+                        Integer.class,
+                        workspace));
+        assertEquals(
+                revisions,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        id));
+        replacement.setEnabled(true);
+        agentMapper.updateById(replacement);
+        var updated = service.command(workspace, id, command);
+        assertEquals(replacement.getId().toString(), updated.path("agentId").asText());
+        assertEquals("Authorized update", updated.path("goal").asText());
+        assertEquals(project.path("version").asLong() + 1, updated.path("version").asLong());
+    }
+
+    @ParameterizedTest
+    @EnumSource(Revocation.class)
+    void ordinaryCommandRejectsRevocationAfterOuterRepeatableReadSnapshot(Revocation revocation)
+            throws Exception {
+        boolean h2 = isH2();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(
+                org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        service.get(workspace, project.path("id").asText());
+                        try {
+                            executor.submit(
+                                            () -> {
+                                                if (revocation == Revocation.WORKSPACE)
+                                                    jdbc.update(
+                                                            "UPDATE mate_workspace SET deleted=1 WHERE id=?",
+                                                            workspace);
+                                                else
+                                                    jdbc.update(
+                                                            "UPDATE mate_workspace_member SET role='viewer' WHERE workspace_id=? AND user_id=?",
+                                                            workspace,
+                                                            actor);
+                                            })
+                                    .get(10, TimeUnit.SECONDS);
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        org.junit.jupiter.api.function.Executable write =
+                                () ->
+                                        service.command(
+                                                workspace,
+                                                project.path("id").asText(),
+                                                new PresalesDtos.Command(
+                                                        project.path("version").longValue(),
+                                                        "rr-revoked",
+                                                        "UPDATE_PROJECT",
+                                                        json.createObjectNode()
+                                                                .put("name", "must-not-write")));
+                        if (h2) assertSerializationRejected(write);
+                        else {
+                            var error = assertThrows(SemanticApiException.class, write);
+                            assertEquals(
+                                    revocation == Revocation.WORKSPACE ? 404 : 403, error.status());
+                        }
+                        status.setRollbackOnly();
+                    });
+        }
+        assertEquals(
+                0,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE operation_id='rr-revoked'",
+                        Integer.class));
+        assertEquals(
+                project.path("name").asText(),
+                jdbc.queryForObject(
+                        "SELECT name FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+    }
+
+    @Test
+    void ordinaryReplayReadsReceiptCommittedAfterOuterRepeatableReadSnapshot() throws Exception {
+        boolean h2 = isH2();
+        var saved = new AtomicReference<ObjectNode>();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(
+                org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        var command =
+                new PresalesDtos.Command(
+                        project.path("version").longValue(),
+                        "rr-replay",
+                        "UPDATE_PROJECT",
+                        json.createObjectNode().put("name", "one-committed-write"));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        service.get(workspace, project.path("id").asText());
+                        ObjectNode committed;
+                        try {
+                            committed =
+                                    executor.submit(
+                                                    () -> {
+                                                        authenticate();
+                                                        try {
+                                                            return service.command(
+                                                                    workspace,
+                                                                    project.path("id").asText(),
+                                                                    command);
+                                                        } finally {
+                                                            SecurityContextHolder.clearContext();
+                                                        }
+                                                    })
+                                            .get(10, TimeUnit.SECONDS);
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        saved.set(committed);
+                        if (h2)
+                            assertSerializationRejected(
+                                    () ->
+                                            service.command(
+                                                    workspace,
+                                                    project.path("id").asText(),
+                                                    command));
+                        else
+                            assertEquals(
+                                    committed,
+                                    service.command(
+                                            workspace, project.path("id").asText(), command));
+                        status.setRollbackOnly();
+                    });
+        }
+        // H2 rejects the stale transaction itself; retry after rollback must still replay exactly.
+        assertEquals(saved.get(), service.command(workspace, project.path("id").asText(), command));
+        assertEquals(
+                1,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE operation_id='rr-replay'",
+                        Integer.class));
+        assertEquals(
+                project.path("version").longValue() + 1,
+                jdbc.queryForObject(
+                        "SELECT version FROM mate_presales_project WHERE id=?",
+                        Long.class,
+                        project.path("id").asText()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"manifest", "receipt", "write"})
+    void v2CurrentReadsResolveObjectsCommittedAfterOuterRepeatableReadSnapshot(String entry)
+            throws Exception {
+        boolean h2 = isH2();
+        String projectId = project.path("id").asText();
+        long originalVersion = project.path("version").longValue();
+        long committedVersion = originalVersion + 2;
+        String operation = "rr-v2-" + UUID.randomUUID();
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        var committed = new AtomicReference<ObjectNode>();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            outer.executeWithoutResult(
+                    status -> {
+                        // Establish an old consistent read view before another connection appends
+                        // object
+                        // revisions. Changing metadata alone cannot expose this storage isolation
+                        // defect.
+                        String oldBody =
+                                repository.findBody(workspace, projectId, false).orElseThrow();
+                        assertEquals(project, assertDoesNotThrow(() -> json.readTree(oldBody)));
+                        try {
+                            committed.set(
+                                    executor.submit(
+                                                    () ->
+                                                            new TransactionTemplate(
+                                                                            transactionManager)
+                                                                    .execute(
+                                                                            writer -> {
+                                                                                // Append then
+                                                                                // remove an object
+                                                                                // after the outer
+                                                                                // snapshot. Its
+                                                                                // immutable
+                                                                                // history must
+                                                                                // remain visible
+                                                                                // when the outer
+                                                                                // writer re-adds
+                                                                                // the identity.
+                                                                                var temporary =
+                                                                                        project
+                                                                                                .deepCopy();
+                                                                                temporary.set(
+                                                                                        "version",
+                                                                                        PresalesProjectRevision
+                                                                                                .number(
+                                                                                                        originalVersion
+                                                                                                                + 1));
+                                                                                temporary
+                                                                                        .withArray(
+                                                                                                "requirements")
+                                                                                        .addObject()
+                                                                                        .put(
+                                                                                                "id",
+                                                                                                "rr-removed")
+                                                                                        .put(
+                                                                                                "version",
+                                                                                                1)
+                                                                                        .put(
+                                                                                                "title",
+                                                                                                "removed independently");
+                                                                                String
+                                                                                        temporaryBody =
+                                                                                                temporary
+                                                                                                        .toString();
+                                                                                assertEquals(
+                                                                                        1,
+                                                                                        repository
+                                                                                                .update(
+                                                                                                        new vip
+                                                                                                                .mate
+                                                                                                                .presales
+                                                                                                                .repository
+                                                                                                                .PresalesProjectRepository
+                                                                                                                .ProjectRow(
+                                                                                                                projectId,
+                                                                                                                workspace,
+                                                                                                                originalVersion
+                                                                                                                        + 1,
+                                                                                                                temporary
+                                                                                                                        .path(
+                                                                                                                                "name")
+                                                                                                                        .asText(),
+                                                                                                                temporary
+                                                                                                                        .path(
+                                                                                                                                "status")
+                                                                                                                        .asText(),
+                                                                                                                temporaryBody,
+                                                                                                                PresalesListingProjectionV1
+                                                                                                                        .fromBody(
+                                                                                                                                temporaryBody,
+                                                                                                                                json)),
+                                                                                                        originalVersion));
+                                                                                var changed =
+                                                                                        project
+                                                                                                .deepCopy();
+                                                                                changed.set(
+                                                                                        "version",
+                                                                                        PresalesProjectRevision
+                                                                                                .number(
+                                                                                                        committedVersion));
+                                                                                changed.withArray(
+                                                                                                "requirements")
+                                                                                        .addObject()
+                                                                                        .put(
+                                                                                                "id",
+                                                                                                "rr-requirement")
+                                                                                        .put(
+                                                                                                "version",
+                                                                                                1)
+                                                                                        .put(
+                                                                                                "title",
+                                                                                                "independently committed");
+                                                                                ((ObjectNode)
+                                                                                                changed.path(
+                                                                                                                "tasks")
+                                                                                                        .get(
+                                                                                                                0))
+                                                                                        .put(
+                                                                                                "rrObjectProbe",
+                                                                                                "committed");
+                                                                                String body =
+                                                                                        changed
+                                                                                                .toString();
+                                                                                assertEquals(
+                                                                                        1,
+                                                                                        repository
+                                                                                                .update(
+                                                                                                        new vip
+                                                                                                                .mate
+                                                                                                                .presales
+                                                                                                                .repository
+                                                                                                                .PresalesProjectRepository
+                                                                                                                .ProjectRow(
+                                                                                                                projectId,
+                                                                                                                workspace,
+                                                                                                                committedVersion,
+                                                                                                                changed.path(
+                                                                                                                                "name")
+                                                                                                                        .asText(),
+                                                                                                                changed.path(
+                                                                                                                                "status")
+                                                                                                                        .asText(),
+                                                                                                                body,
+                                                                                                                PresalesListingProjectionV1
+                                                                                                                        .fromBody(
+                                                                                                                                body,
+                                                                                                                                json)),
+                                                                                                        originalVersion
+                                                                                                                + 1));
+                                                                                repository
+                                                                                        .insertRevision(
+                                                                                                projectId,
+                                                                                                committedVersion,
+                                                                                                actor,
+                                                                                                "RR_OBJECT_WRITE",
+                                                                                                body,
+                                                                                                java
+                                                                                                        .time
+                                                                                                        .LocalDateTime
+                                                                                                        .now());
+                                                                                repository
+                                                                                        .insertReceipt(
+                                                                                                workspace,
+                                                                                                actor,
+                                                                                                operation,
+                                                                                                "rr-object-hash",
+                                                                                                body);
+                                                                                return changed;
+                                                                            }))
+                                            .get(10, TimeUnit.SECONDS));
+                        } catch (Exception failure) {
+                            throw new AssertionError(failure);
+                        }
+                        if (h2) {
+                            // H2 aborts the stale RR transaction when locking the changed project
+                            // row,
+                            // rather than offering InnoDB's current-read view. Assert SQLSTATE
+                            // explicitly.
+                            assertSerializationRejected(
+                                    () -> repository.findBody(workspace, projectId, true));
+                        } else {
+                            assertDoesNotThrow(
+                                    () -> {
+                                        ObjectNode latest;
+                                        if ("receipt".equals(entry)) {
+                                            latest =
+                                                    (ObjectNode)
+                                                            json.readTree(
+                                                                    repository
+                                                                            .findReceipt(
+                                                                                    workspace,
+                                                                                    actor,
+                                                                                    operation)
+                                                                            .orElseThrow()
+                                                                            .responseJson());
+                                        } else if ("manifest".equals(entry)) {
+                                            latest =
+                                                    (ObjectNode)
+                                                            json.readTree(
+                                                                    repository
+                                                                            .findBody(
+                                                                                    workspace,
+                                                                                    projectId, true)
+                                                                            .orElseThrow());
+                                        } else {
+                                            // An already-known fresh response must still compare
+                                            // against current
+                                            // object pointers, not the caller transaction's old
+                                            // consistent view.
+                                            latest = committed.get().deepCopy();
+                                        }
+                                        assertEquals(committed.get(), latest);
+                                        latest.set(
+                                                "version",
+                                                PresalesProjectRevision.number(
+                                                        committedVersion + 1));
+                                        latest.put("goal", "outer uncommitted edit");
+                                        ((ObjectNode) latest.path("requirements").get(0))
+                                                .put("title", "outer object edit");
+                                        latest.withArray("requirements")
+                                                .addObject()
+                                                .put("id", "rr-removed")
+                                                .put("version", 1)
+                                                .put("title", "re-added in old RR transaction");
+                                        String body = latest.toString();
+                                        assertEquals(
+                                                1,
+                                                repository.update(
+                                                        new vip.mate.presales.repository
+                                                                .PresalesProjectRepository
+                                                                .ProjectRow(
+                                                                projectId,
+                                                                workspace,
+                                                                committedVersion + 1,
+                                                                latest.path("name").asText(),
+                                                                latest.path("status").asText(),
+                                                                body,
+                                                                PresalesListingProjectionV1
+                                                                        .fromBody(body, json)),
+                                                        committedVersion));
+                                        assertEquals(
+                                                2L,
+                                                jdbc.queryForObject(
+                                                        "SELECT storage_revision FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed' FOR UPDATE",
+                                                        Long.class,
+                                                        workspace,
+                                                        projectId));
+                                        repository.insertRevision(
+                                                projectId,
+                                                committedVersion + 1,
+                                                actor,
+                                                "RR_OUTER_WRITE",
+                                                body,
+                                                java.time.LocalDateTime.now());
+                                        repository.insertReceipt(
+                                                workspace,
+                                                actor,
+                                                operation + "-outer",
+                                                "rr-outer-hash",
+                                                body);
+                                        assertEquals(
+                                                latest,
+                                                json.readTree(
+                                                        repository
+                                                                .findReceipt(
+                                                                        workspace,
+                                                                        actor,
+                                                                        operation + "-outer")
+                                                                .orElseThrow()
+                                                                .responseJson()));
+                                        assertEquals(
+                                                latest,
+                                                json.readTree(
+                                                        repository
+                                                                .findRevision(
+                                                                        workspace,
+                                                                        projectId,
+                                                                        committedVersion + 1)
+                                                                .orElseThrow()));
+                                    });
+                        }
+                        status.setRollbackOnly();
+                    });
+        }
+        assertEquals(
+                committed.get(),
+                json.readTree(repository.findBody(workspace, projectId, false).orElseThrow()));
+        assertEquals(
+                committed.get(),
+                json.readTree(
+                        repository
+                                .findReceipt(workspace, actor, operation)
+                                .orElseThrow()
+                                .responseJson()));
+        assertTrue(repository.findReceipt(workspace, actor, operation + "-outer").isEmpty());
+        assertTrue(repository.findRevision(workspace, projectId, committedVersion + 1).isEmpty());
+        assertEquals(
+                0,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed'",
+                        Integer.class,
+                        workspace,
+                        projectId));
+        assertEquals(
+                1L,
+                jdbc.queryForObject(
+                        "SELECT MAX(storage_revision) FROM mate_presales_object_revision WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-removed'",
+                        Long.class,
+                        workspace,
+                        projectId));
+        assertEquals(
+                1L,
+                jdbc.queryForObject(
+                        "SELECT storage_revision FROM mate_presales_object WHERE workspace_id=? AND project_id=? AND object_kind='requirements' AND object_id='rr-requirement'",
+                        Long.class,
+                        workspace,
+                        projectId));
+    }
+
+    private boolean isH2() throws java.sql.SQLException {
+        try (var connection = dataSource.getConnection()) {
+            return "H2".equals(connection.getMetaData().getDatabaseProductName());
+        }
+    }
+
+    private static void assertSerializationRejected(
+            org.junit.jupiter.api.function.Executable operation) {
+        var error =
+                assertThrows(org.springframework.dao.CannotAcquireLockException.class, operation);
+        Throwable cause = error.getCause();
+        while (cause != null && !(cause instanceof java.sql.SQLException)) cause = cause.getCause();
+        var sql = assertInstanceOf(java.sql.SQLException.class, cause);
+        assertEquals("40001", sql.getSQLState());
+    }
+
+    @BeforeEach
+    void prepareRuntime() {
+        reset(agents, conversations);
+        fence.entered = null;
+        fence.resource.set(null);
+        actor =
+                jdbc.queryForObject(
+                                "SELECT user_id FROM mate_workspace_member WHERE workspace_id=? AND role='member' AND deleted=0",
+                                Long.class,
+                                workspace)
+                        .toString();
+        actorName = auth.findById(Long.valueOf(actor)).getUsername();
+        authenticate();
+        var model = new ModelConfigEntity();
+        model.setName("runtime-" + UUID.randomUUID());
+        model.setModelName(model.getName());
+        model.setProvider("acceptance-double");
+        model.setEnabled(true);
+        model.setIsDefault(false);
+        model.setDeleted(0);
+        modelMapper.insert(model);
+        modelId = model.getId();
+        var employee = new AgentEntity();
+        employee.setName("runtime-" + UUID.randomUUID());
+        employee.setWorkspaceId(Long.valueOf(workspace));
+        employee.setEnabled(true);
+        employee.setDeleted(0);
+        employee.setRuntimeType("native");
+        employee.setModelName(model.getModelName());
+        agentMapper.insert(employee);
+        agentId = employee.getId().toString();
+        // Employee lookup remains a real mapper read; the graph/model network is the test boundary.
+        when(agents.getAgent(anyLong()))
+                .thenAnswer(call -> agentMapper.selectById((Long) call.getArgument(0)));
+        when(agents.chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any()))
+                .thenReturn(
+                        Flux.just(
+                                AgentService.StreamDelta.finalAnswer(
+                                        "{\"schemaVersion\":1,\"needsHumanReview\":true,\"items\":[],\"unknowns\":[],\"assumptions\":[]}",
+                                        true)));
+        project =
+                service.create(
+                        workspace,
+                        new PresalesDtos.Create(
+                                "Acceptance",
+                                "Fixture",
+                                null,
+                                agentId,
+                                null,
+                                null,
+                                0L,
+                                UUID.randomUUID().toString()));
+        assertListingVersion(project);
+        snapshot = contexts.snapshot(workspace, project, "S1", "Clarify scope");
+        snapshot.put("projectVersion", project.path("version").asInt() + 1);
+        var pin = runtime.pin(workspace, agentId, "S1");
+        String run = UUID.randomUUID().toString();
+        task =
+                json.createObjectNode()
+                        .put("runId", run)
+                        .put("operationId", UUID.randomUUID().toString())
+                        .put("status", "RUNNING")
+                        .put("authority", "UNTRUSTED_DRAFT")
+                        .put("agentId", agentId)
+                        .put("skill", "S1")
+                        .put(
+                                "conversationId",
+                                "presales:"
+                                        + workspace
+                                        + ":"
+                                        + project.path("id").asText()
+                                        + ":"
+                                        + run)
+                        .put("modelConfigId", pin.modelConfigId())
+                        .put("configDigest", pin.configDigest())
+                        .put("skillName", pin.skillName())
+                        .put("skillDigest", pin.skillDigest());
+        task.set("contextSnapshot", snapshot);
+        project =
+                PresalesTaskPackageFixtures.queue(
+                        service,
+                        runtime,
+                        json,
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asLong(),
+                                UUID.randomUUID().toString(),
+                                "SAVE_AI_TASK",
+                                task));
+        task = ((ObjectNode) project.path("tasks").get(0)).deepCopy();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void storedPackageAExecutesAfterCurrentSkillChangesAndNewCaptureUsesB(boolean referenceOnly)
+            throws Exception {
+        var original = runtime.originalPackage(workspace, actor, task, snapshot);
+        try (var adapter = mockStatic(PresalesModelAdapter.class, CALLS_REAL_METHODS)) {
+            if (referenceOnly) {
+                var initial =
+                        Map.of(
+                                "SKILL.md",
+                                original.skillFiles().get("SKILL.md"),
+                                "references/detail.md",
+                                "A reference");
+                adapter.when(() -> PresalesModelAdapter.readSkillFiles("S1")).thenReturn(initial);
+                snapshot = contexts.snapshot(workspace, project, "S1", "Reference package A");
+                snapshot.put("projectVersion", project.path("version").longValue() + 1);
+                var first =
+                        task.deepCopy()
+                                .put("runId", UUID.randomUUID().toString())
+                                .put("operationId", UUID.randomUUID().toString());
+                first.put(
+                        "conversationId",
+                        "presales:"
+                                + workspace
+                                + ":"
+                                + project.path("id").asText()
+                                + ":"
+                                + first.path("runId").asText());
+                first.set("contextSnapshot", snapshot);
+                project =
+                        PresalesTaskPackageFixtures.queue(
+                                service,
+                                runtime,
+                                json,
+                                workspace,
+                                project.path("id").asText(),
+                                new PresalesDtos.Command(
+                                        project.path("version").longValue(),
+                                        UUID.randomUUID().toString(),
+                                        "SAVE_AI_TASK",
+                                        first));
+                task = (ObjectNode) project.path("tasks").get(project.path("tasks").size() - 1);
+                original = runtime.originalPackage(workspace, actor, task, snapshot);
+            }
+            var changed =
+                    Map.of(
+                            "SKILL.md",
+                            referenceOnly
+                                    ? original.skillFiles().get("SKILL.md")
+                                    : "Changed installed skill B",
+                            "references/detail.md",
+                            "B reference");
+            adapter.when(() -> PresalesModelAdapter.readSkillFiles("S1")).thenReturn(changed);
+            var next = runtime.capture(workspace, agentId, "S1");
+            assertEquals(changed, next.skillPackage().skillFiles());
+            assertNotEquals(original.digest(), next.skillPackage().digest());
+            if (referenceOnly)
+                assertEquals(original.skillDigest(), next.skillPackage().skillDigest());
+            ObjectNode output =
+                    runtime.execute(
+                            workspace,
+                            actor,
+                            agentId,
+                            task.path("conversationId").asText(),
+                            runtime.instructionsForTask(workspace, actor, task, snapshot),
+                            task,
+                            snapshot);
+            assertTrue(output.path("needsHumanReview").asBoolean());
+            var prompt = org.mockito.ArgumentCaptor.forClass(String.class);
+            var options =
+                    org.mockito.ArgumentCaptor.forClass(
+                            vip.mate.agent.execution.ProjectExecutionOptions.class);
+            verify(agents)
+                    .chatStructuredStream(
+                            anyLong(),
+                            prompt.capture(),
+                            anyString(),
+                            anyString(),
+                            isNull(),
+                            any(),
+                            options.capture());
+            assertTrue(prompt.getValue().startsWith(original.instructions()));
+            assertFalse(prompt.getValue().contains("Changed installed skill B"));
+            assertEquals(original.skillFiles(), options.getValue().skillFiles());
+            runtime.requirePinnedOptions(options.getValue(), task, snapshot);
+            var catalog = mock(vip.mate.skill.runtime.SkillRuntimeService.class);
+            var resolver = mock(vip.mate.agent.context.AgentWorkspaceResolver.class);
+            var files =
+                    new vip.mate.tool.builtin.SkillFileTool(
+                            catalog,
+                            mock(vip.mate.skill.runtime.SkillFileAccessPolicy.class),
+                            mock(vip.mate.skill.usage.SkillUsageService.class),
+                            resolver);
+            var loader = new vip.mate.tool.builtin.SkillLoadTool(catalog, files, resolver);
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    files, "projectExecutionRevalidator", dispatcher);
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    loader, "projectExecutionRevalidator", dispatcher);
+            var toolContext =
+                    new org.springframework.ai.chat.model.ToolContext(
+                            Map.of(
+                                    vip.mate.agent.execution.ProjectExecutionOptions
+                                            .TOOL_CONTEXT_KEY,
+                                    options.getValue()));
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    loader.loadSkill(original.skillName(), null, toolContext));
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    files.readSkillFile(original.skillName(), "SKILL.md", null, null, toolContext));
+            if (referenceOnly) {
+                assertEquals(
+                        "A reference",
+                        loader.loadSkill(
+                                original.skillName(), "references/detail.md", toolContext));
+                assertEquals(
+                        "A reference",
+                        files.readSkillFile(
+                                original.skillName(),
+                                "references/detail.md",
+                                null,
+                                null,
+                                toolContext));
+            } else
+                assertTrue(
+                        loader.loadSkill(original.skillName(), "references/detail.md", toolContext)
+                                .startsWith("Error:"));
+            var callback = mock(org.springframework.ai.tool.ToolCallback.class);
+            when(callback.getToolDefinition())
+                    .thenReturn(
+                            org.springframework.ai.tool.definition.ToolDefinition.builder()
+                                    .name("load_skill")
+                                    .description("actual pinned skill reader")
+                                    .inputSchema("{}")
+                                    .build());
+            when(callback.getToolMetadata())
+                    .thenReturn(
+                            org.springframework.ai.tool.metadata.ToolMetadata.builder()
+                                    .returnDirect(false)
+                                    .build());
+            when(callback.call(anyString(), any()))
+                    .thenAnswer(
+                            call -> {
+                                var arguments = json.readTree(call.<String>getArgument(0));
+                                return loader.loadSkill(
+                                        arguments.path("skillName").asText(),
+                                        arguments.path("filePath").asText(null),
+                                        call.getArgument(1));
+                            });
+            var executor =
+                    new vip.mate.agent.graph.executor.ToolExecutionExecutor(
+                            vip.mate.agent.AgentToolSet.fromCallbacks(List.of(), List.of(callback)),
+                            (name, arguments) -> vip.mate.tool.guard.ToolGuardResult.allow(),
+                            null,
+                            null);
+            executor.setProjectToolPolicy(
+                    new PresalesToolPolicy(
+                            jdbc,
+                            json,
+                            new ProjectSourceAccess(jdbc),
+                            new vip.mate.presales.repository.PresalesProjectRepository(jdbc)));
+            executor.setProjectExecutionRevalidator(dispatcher);
+            String args = json.createObjectNode().put("skillName", original.skillName()).toString();
+            var readCall =
+                    new org.springframework.ai.chat.messages.AssistantMessage.ToolCall(
+                            "load-original", "function", "load_skill", args);
+            var origin =
+                    vip.mate.agent.context.ChatOrigin.web(
+                                    task.path("conversationId").asText(),
+                                    actor,
+                                    Long.valueOf(workspace),
+                                    null)
+                            .withAgent(Long.valueOf(agentId));
+            var executed =
+                    executor.execute(
+                            List.of(readCall),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(),
+                            options.getValue());
+            assertEquals(
+                    original.skillFiles().get("SKILL.md"),
+                    executed.responses().getFirst().responseData());
+            var loaded =
+                    executed.events().stream()
+                            .filter(event -> event.type().equals("project_skill_loaded"))
+                            .toList();
+            assertEquals(1, loaded.size());
+            assertEquals(
+                    original.skillDigest(), ((Map<?, ?>) loaded.getFirst().data()).get("digest"));
+            var claimed =
+                    executor.execute(
+                            List.of(),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(original.skillName()),
+                            options.getValue());
+            assertTrue(
+                    claimed.events().stream()
+                            .noneMatch(event -> event.type().equals("project_skill_loaded")));
+            verifyNoInteractions(catalog, resolver);
+
+            var o = options.getValue();
+            var forged =
+                    new vip.mate.agent.execution.ProjectExecutionOptions(
+                            o.attemptId(),
+                            o.modelConfigId(),
+                            o.configDigest(),
+                            o.skillName(),
+                            o.skillDigest(),
+                            changed,
+                            o.allowedTools(),
+                            o.toolPolicy(),
+                            o.internalRetryLimit(),
+                            o.allowFallback(),
+                            o.injectMemory(),
+                            o.maxIterations());
+            assertEquals(
+                    "EXECUTION_PIN_CHANGED",
+                    assertThrows(
+                                    SemanticApiException.class,
+                                    () -> runtime.requirePinnedOptions(forged, task, snapshot))
+                            .code());
+            clearInvocations(callback);
+            var deniedLoad =
+                    executor.execute(
+                            List.of(readCall),
+                            task.path("conversationId").asText(),
+                            agentId,
+                            false,
+                            actor,
+                            null,
+                            origin,
+                            Set.of(),
+                            forged);
+            assertTrue(
+                    deniedLoad.events().stream()
+                            .noneMatch(event -> event.type().equals("project_skill_loaded")));
+            verify(callback, never()).call(anyString(), any());
+            var nextSnapshot = contexts.snapshot(workspace, project, "S1", "New task after update");
+            nextSnapshot.put("projectVersion", project.path("version").longValue() + 1);
+            var nextTask =
+                    task.deepCopy()
+                            .put("runId", UUID.randomUUID().toString())
+                            .put("operationId", UUID.randomUUID().toString());
+            nextTask.put(
+                    "conversationId",
+                    "presales:"
+                            + workspace
+                            + ":"
+                            + project.path("id").asText()
+                            + ":"
+                            + nextTask.path("runId").asText());
+            nextTask.set("contextSnapshot", nextSnapshot);
+            var saved =
+                    PresalesTaskPackageFixtures.queue(
+                            service,
+                            runtime,
+                            json,
+                            workspace,
+                            project.path("id").asText(),
+                            new PresalesDtos.Command(
+                                    project.path("version").longValue(),
+                                    UUID.randomUUID().toString(),
+                                    "SAVE_AI_TASK",
+                                    nextTask));
+            var storedB = (ObjectNode) saved.path("tasks").get(saved.path("tasks").size() - 1);
+            var originalB = runtime.originalPackage(workspace, actor, storedB, nextSnapshot);
+            assertEquals(changed, originalB.skillFiles());
+            assertEquals(
+                    original.digest(),
+                    runtime.originalPackage(workspace, actor, task, snapshot).digest());
+            assertTrue(
+                    runtime.execute(
+                                    workspace,
+                                    actor,
+                                    agentId,
+                                    storedB.path("conversationId").asText(),
+                                    originalB.instructions(),
+                                    storedB,
+                                    nextSnapshot)
+                            .path("needsHumanReview")
+                            .asBoolean());
+        }
+    }
+
+    @Test
+    void legacyExecutionWithoutOriginalPackageCannotUseCurrentInstructions() {
+        jdbc.update(
+                "DELETE FROM mate_presales_task_package WHERE task_id=?", task.path("id").asText());
+        assertEquals(
+                "TASK_SKILL_PACKAGE_UNAVAILABLE",
+                assertThrows(SemanticApiException.class, this::execute).code());
+        verify(agents, never())
+                .chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), any(), any(), any());
+        verifyNoInteractions(conversations);
+    }
+
+    @Test
+    void revokedEmployeeCanBeReboundUsingOnlyRepairMetadataAndEligibleCurrentSourceScope() {
+        long kbId = com.baomidou.mybatisplus.core.toolkit.IdWorker.getId();
+        jdbc.update(
+                "INSERT INTO mate_wiki_knowledge_base(id,name,workspace_id,create_time,update_time,deleted) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,0)",
+                kbId,
+                "Repair fixture",
+                Long.valueOf(workspace));
+        var kb = new vip.mate.wiki.model.WikiKnowledgeBaseEntity();
+        kb.setId(kbId);
+        kb.setWorkspaceId(Long.valueOf(workspace));
+        kb.setDeleted(0);
+        when(wikiKnowledgeBases.getById(kbId)).thenReturn(kb);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                Long.valueOf(agentId),
+                kbId);
+        var bound =
+                service.command(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asLong(),
+                                UUID.randomUUID().toString(),
+                                "BIND_MATERIAL",
+                                json.createObjectNode()
+                                        .put("kbId", Long.toString(kbId))
+                                        .put("role", "PROJECT")));
+        jdbc.update("UPDATE mate_agent SET enabled=FALSE WHERE id=?", Long.valueOf(agentId));
+        assertEquals(
+                403,
+                assertThrows(
+                                SemanticApiException.class,
+                                () -> service.get(workspace, project.path("id").asText()))
+                        .status());
+        var repair = service.repairContext(workspace, project.path("id").asText());
+        assertTrue(repair.path("sourceAccessRestricted").asBoolean());
+        assertTrue(repair.path("materials").isEmpty());
+        assertTrue(repair.path("tasks").isEmpty());
+        var replacement = new AgentEntity();
+        replacement.setName("Replacement fixture");
+        replacement.setWorkspaceId(Long.valueOf(workspace));
+        replacement.setEnabled(false);
+        replacement.setDeleted(0);
+        replacement.setRuntimeType("native");
+        replacement.setWikiDisabled(false);
+        agentMapper.insert(replacement);
+        jdbc.update(
+                "INSERT INTO mate_agent_wiki_kb(id,agent_id,kb_id,enabled,deleted) VALUES(?,?,?,TRUE,0)",
+                com.baomidou.mybatisplus.core.toolkit.IdWorker.getId(),
+                replacement.getId(),
+                kbId);
+        String operation = UUID.randomUUID().toString();
+        var command =
+                new PresalesDtos.Command(
+                        repair.path("version").asLong(),
+                        operation,
+                        "UPDATE_PROJECT",
+                        json.createObjectNode().put("agentId", replacement.getId().toString()));
+        assertEquals(
+                409,
+                assertThrows(
+                                SemanticApiException.class,
+                                () ->
+                                        service.command(
+                                                workspace, project.path("id").asText(), command))
+                        .status());
+        assertEquals(
+                bound.path("version").asInt(),
+                service.repairContext(workspace, project.path("id").asText())
+                        .path("version")
+                        .asInt());
+        replacement.setEnabled(true);
+        agentMapper.updateById(replacement);
+        var restored = service.command(workspace, project.path("id").asText(), command);
+        assertFalse(restored.path("sourceAccessRestricted").asBoolean());
+        assertEquals(replacement.getId().toString(), restored.path("agentId").asText());
+        assertEquals(1, restored.path("materials").size());
+        assertEquals(restored, service.get(workspace, project.path("id").asText()));
+        assertEquals(restored, service.command(workspace, project.path("id").asText(), command));
+        String receipt =
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation);
+        jdbc.update(
+                "UPDATE mate_agent_wiki_kb SET enabled=FALSE WHERE agent_id=? AND kb_id=?",
+                replacement.getId(),
+                kbId);
+        var replay = service.command(workspace, project.path("id").asText(), command);
+        assertTrue(replay.path("sourceAccessRestricted").asBoolean());
+        assertTrue(replay.path("materials").isEmpty());
+        assertTrue(replay.path("tasks").isEmpty());
+        assertEquals(
+                receipt,
+                jdbc.queryForObject(
+                        "SELECT response_json FROM mate_presales_operation WHERE operation_id=?",
+                        String.class,
+                        operation));
+    }
+
+    @AfterEach
+    void clearIdentity() {
+        SecurityContextHolder.clearContext();
+        fence.entered = null;
+    }
+
+    private void authenticate() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(
+                        new UsernamePasswordAuthenticationToken(actorName, "unused", List.of()));
+    }
+
+    private ObjectNode execute() {
+        return runtime.execute(
+                workspace,
+                actor,
+                agentId,
+                task.path("conversationId").asText(),
+                PresalesModelAdapter.instructions("S1"),
+                task,
+                snapshot);
+    }
+
+    private PresalesDtos.Command resultCommand() {
+        var candidate = task.deepCopy().put("status", "SUCCEEDED");
+        candidate.set("result", execute());
+        return new PresalesDtos.Command(
+                project.path("version").asLong(),
+                UUID.randomUUID().toString(),
+                "SAVE_AI_TASK",
+                candidate);
+    }
+
+    private void assertListingVersion(ObjectNode current) {
+        var page = queryService.list(workspace, null, null, null, null, 1, 100);
+        var listed =
+                page.items().stream()
+                        .filter(p -> p.path("id").asText().equals(current.path("id").asText()))
+                        .findFirst()
+                        .orElseThrow();
+        assertEquals(current.path("version"), listed.path("version"));
+        assertEquals(current.path("goal"), listed.path("goal"));
+        assertFalse(listed.has("tasks"));
+        assertFalse(listed.has("requirements"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SUCCEEDED", "FAILED", "CANCELLED", "DRAFT"})
+    void lateFailureCannotOverwriteTerminalTask(String status) throws Exception {
+        var live = task.deepCopy().put("status", status);
+        live.put("finishedAt", "already-finished");
+        live.set("result", json.createObjectNode().put("original", true));
+        replaceDurableTask(live);
+        assertFailureRejectedWithoutWrite("FAILED");
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "runId", "operationId", "agentId", "skill", "modelConfigId", "configDigest",
+                "skillName", "skillDigest", "presentationDigest", "conversationId",
+                        "contextSnapshot", "extension"
+            })
+    void failureCannotOverwriteChangedRunIdentity(String field) throws Exception {
+        var live = task.deepCopy();
+        if ("contextSnapshot".equals(field))
+            live.withObject("contextSnapshot").put("projectVersion", 999);
+        else live.put(field, "replacement");
+        replaceDurableTask(live);
+        assertFailureRejectedWithoutWrite("FAILED");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"RUNNING", "DRAFT"})
+    void employeeBoundaryRejectsNonTerminalCandidate(String status) {
+        assertFailureRejectedWithoutWrite(status);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"error", "rejectedOutput"})
+    void successIdentityStillRejectsAddedFailureDiagnostics(String field) {
+        var candidate = task.deepCopy().put("status", "SUCCEEDED");
+        candidate.set("result", json.createObjectNode().put("schemaVersion", 1));
+        candidate.put(field, "injected");
+        var before =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText());
+        int receipts = receiptCount(), revisions = revisionCount();
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.saveEmployeeTask(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        new PresalesDtos.Command(
+                                                project.path("version").asLong(),
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_AI_TASK",
+                                                candidate)));
+        assertEquals(409, error.status());
+        assertEquals("TASK_SCOPE_CHANGED", error.code());
+        assertEquals(
+                before,
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+        assertEquals(receipts, receiptCount());
+        assertEquals(revisions, revisionCount());
+        noExternalCall();
+    }
+
+    @Test
+    void matchingRunningFailureRetainsDiagnosticsAfterUnrelatedProjectEdit() {
+        project =
+                service.command(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asLong(),
+                                UUID.randomUUID().toString(),
+                                "UPDATE_PROJECT",
+                                json.createObjectNode().put("goal", "New user goal")));
+        int receipts = receiptCount(), revisions = revisionCount();
+        var candidate =
+                task.deepCopy()
+                        .put("status", "FAILED")
+                        .put("error", "PROJECT_CHANGED_DURING_GENERATION")
+                        .put("finishedAt", "finished");
+        candidate.set("rejectedOutput", json.createObjectNode().put("reason", "diagnostic"));
+        var saved =
+                service.saveEmployeeTask(
+                        workspace,
+                        project.path("id").asText(),
+                        new PresalesDtos.Command(
+                                project.path("version").asLong(),
+                                UUID.randomUUID().toString(),
+                                "SAVE_AI_TASK",
+                                candidate));
+        assertEquals(project.path("version").asInt() + 1, saved.path("version").asInt());
+        assertEquals("New user goal", saved.path("goal").asText());
+        assertEquals("FAILED", saved.path("tasks").get(0).path("status").asText());
+        assertEquals(
+                candidate.path("rejectedOutput"),
+                saved.path("tasks").get(0).path("rejectedOutput"));
+        assertTrue(saved.path("tasks").get(0).path("result").isMissingNode());
+        assertEquals(receipts + 1, receiptCount());
+        assertEquals(revisions + 1, revisionCount());
+        assertListingVersion(saved);
+        noExternalCall();
+    }
+
+    private void replaceDurableTask(ObjectNode live) throws Exception {
+        project = project.deepCopy();
+        project.withArray("tasks").set(0, live);
+        project.put("version", project.path("version").asInt() + 1);
+        var repository = new vip.mate.presales.repository.PresalesProjectRepository(jdbc);
+        var transaction =
+                new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+        String body = json.writeValueAsString(project);
+        transaction.executeWithoutResult(
+                status ->
+                        assertEquals(
+                                1,
+                                repository.updateRuntimeBody(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        project.path("version").asLong() - 1,
+                                        project.path("version").asLong(),
+                                        body,
+                                        PresalesListingProjectionV1.fromBody(body, json))));
+    }
+
+    private void assertFailureRejectedWithoutWrite(String candidateStatus) {
+        String before =
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText());
+        int receipts = receiptCount(), revisions = revisionCount();
+        var candidate =
+                task.deepCopy()
+                        .put("status", candidateStatus)
+                        .put("error", "LATE_FAILURE")
+                        .put("finishedAt", "late");
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.saveEmployeeTask(
+                                        workspace,
+                                        project.path("id").asText(),
+                                        new PresalesDtos.Command(
+                                                project.path("version").asLong(),
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_AI_TASK",
+                                                candidate)));
+        assertEquals(409, error.status());
+        assertEquals("TASK_SCOPE_CHANGED", error.code());
+        assertEquals(
+                before,
+                jdbc.queryForObject(
+                        "SELECT body_json FROM mate_presales_project WHERE id=?",
+                        String.class,
+                        project.path("id").asText()));
+        assertEquals(receipts, receiptCount());
+        assertEquals(revisions, revisionCount());
+        noExternalCall();
+    }
+
+    private void noExternalCall() {
+        verify(agents, never())
+                .chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any());
+        verifyNoInteractions(conversations);
+    }
+
+    private void unchanged(int receipts, int revisions) throws Exception {
+        var stored =
+                json.readTree(
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc)
+                                .findBody(workspace, project.path("id").asText(), false)
+                                .orElseThrow());
+        assertEquals(project, stored);
+        assertEquals(receipts, receiptCount());
+        assertEquals(revisions, revisionCount());
+    }
+
+    private int receiptCount() {
+        return jdbc.queryForObject(
+                "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=? AND actor_id=?",
+                Integer.class,
+                workspace,
+                actor);
+    }
+
+    private int revisionCount() {
+        return jdbc.queryForObject(
+                "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                Integer.class,
+                project.path("id").asText());
+    }
+
+    @ParameterizedTest
+    @EnumSource(InvalidExecution.class)
+    void invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution invalid) throws Exception {
+        invalidate(invalid);
+        int receipts = receiptCount(), revisions = revisionCount();
+        var error = assertThrows(SemanticApiException.class, this::execute);
+        rejectedAs(error, invalid, false);
+        noExternalCall();
+        unchanged(receipts, revisions);
+    }
+
+    private void invalidate(InvalidExecution invalid) {
+        switch (invalid) {
+            case ACTOR_DISABLED ->
+                    jdbc.update("UPDATE mate_user SET enabled=FALSE WHERE id=?", actor);
+            case EMPLOYEE_DISABLED ->
+                    jdbc.update("UPDATE mate_agent SET enabled=FALSE WHERE id=?", agentId);
+            case MODEL_CHANGED ->
+                    jdbc.update(
+                            "UPDATE mate_model_config SET temperature=0.123 WHERE id=?", modelId);
+            case VIEWER ->
+                    jdbc.update(
+                            "UPDATE mate_workspace_member SET role='viewer' WHERE workspace_id=? AND user_id=?",
+                            workspace,
+                            actor);
+            case CANCELLED, PROJECT_CHANGED -> {
+                project =
+                        service.command(
+                                workspace,
+                                project.path("id").asText(),
+                                new PresalesDtos.Command(
+                                        project.path("version").asLong(),
+                                        UUID.randomUUID().toString(),
+                                        invalid == InvalidExecution.CANCELLED
+                                                ? "CANCEL_AI_TASK"
+                                                : "UPDATE_PROJECT",
+                                        invalid == InvalidExecution.CANCELLED
+                                                ? json.createObjectNode()
+                                                        .put("taskId", task.path("id").asText())
+                                                : json.createObjectNode().put("goal", "Changed")));
+            }
+        }
+    }
+
+    private void rejectedAs(
+            SemanticApiException error, InvalidExecution invalid, boolean resultPhase) {
+        assertEquals(
+                invalid == InvalidExecution.ACTOR_DISABLED
+                        ? 401
+                        : invalid == InvalidExecution.VIEWER ? 403 : 409,
+                error.status());
+        assertEquals(
+                switch (invalid) {
+                    case ACTOR_DISABLED -> "UNAUTHENTICATED";
+                    case EMPLOYEE_DISABLED -> "EMPLOYEE_UNAVAILABLE";
+                    case MODEL_CHANGED -> "EXECUTION_PIN_CHANGED";
+                    case VIEWER -> "FORBIDDEN";
+                    case CANCELLED -> resultPhase ? "VERSION_CONFLICT" : "TASK_SCOPE_CHANGED";
+                    case PROJECT_CHANGED -> resultPhase ? "VERSION_CONFLICT" : "TASK_INPUT_CHANGED";
+                },
+                error.code());
+    }
+
+    @ParameterizedTest
+    @EnumSource(InvalidExecution.class)
+    void resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(
+            InvalidExecution invalid) throws Exception {
+        var command = resultCommand();
+        invalidate(invalid);
+        int receipts = receiptCount(), revisions = revisionCount();
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.saveEmployeeTask(
+                                        workspace, project.path("id").asText(), command));
+        rejectedAs(error, invalid, true);
+        unchanged(receipts, revisions);
+        verify(agents, times(1))
+                .chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {2L, 2147483647L, 2147483648L, 9007199254740990L})
+    void resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback(long version) {
+        long originalVersion = project.path("version").longValue();
+        project.set("version", PresalesProjectRevision.number(version));
+        snapshot.set("projectVersion", PresalesProjectRevision.number(version));
+        task.set("contextSnapshot", snapshot.deepCopy());
+        project.withArray("tasks").set(0, task.deepCopy());
+        String body = project.toString();
+        new TransactionTemplate(transactionManager)
+                .executeWithoutResult(
+                        status ->
+                                assertEquals(
+                                        1,
+                                        new vip.mate.presales.repository.PresalesProjectRepository(
+                                                        jdbc)
+                                                .updateRuntimeBody(
+                                                        workspace,
+                                                        project.path("id").asText(),
+                                                        originalVersion,
+                                                        version,
+                                                        body,
+                                                        PresalesListingProjectionV1.fromBody(
+                                                                body, json))));
+        assertTrue(AopUtils.isAopProxy(service));
+        var command = resultCommand();
+        var outerResource = new AtomicReference<Object>();
+        var outer = new TransactionTemplate(transactionManager);
+        outer.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        outer.executeWithoutResult(
+                                status -> {
+                                    outerResource.set(
+                                            TransactionSynchronizationManager.getResource(
+                                                    dataSource));
+                                    jdbc.update(
+                                            "UPDATE mate_workspace SET description='caller-only' WHERE id=?",
+                                            otherWorkspace);
+                                    var accepted =
+                                            service.saveEmployeeTask(
+                                                    workspace,
+                                                    project.path("id").asText(),
+                                                    command);
+                                    assertEquals(
+                                            "SUCCEEDED",
+                                            accepted.path("tasks").get(0).path("status").asText());
+                                    assertNotSame(outerResource.get(), fence.resource.get());
+                                    assertEquals(
+                                            TransactionDefinition.ISOLATION_READ_COMMITTED,
+                                            fence.isolation);
+                                    throw new IllegalStateException("Roll back caller only");
+                                }));
+        assertNotEquals(
+                "caller-only",
+                jdbc.queryForObject(
+                        "SELECT description FROM mate_workspace WHERE id=?",
+                        String.class,
+                        otherWorkspace));
+        var accepted = service.get(workspace, project.path("id").asText());
+        assertEquals(version + 1, accepted.path("version").longValue());
+        assertEquals("SUCCEEDED", accepted.path("tasks").get(0).path("status").asText());
+        assertEquals(
+                command.payload().path("result"), accepted.path("tasks").get(0).path("result"));
+        assertListingVersion(accepted);
+        verify(agents, times(1))
+                .chatStructuredStream(
+                        anyLong(), anyString(), anyString(), anyString(), isNull(), any(), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(Revocation.class)
+    void realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation revocation)
+            throws Exception {
+        var command = resultCommand();
+        int receipts = receiptCount(), revisions = revisionCount();
+        var changed = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        fence.entered = new CountDownLatch(1);
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var writer =
+                    executor.submit(
+                            () ->
+                                    new TransactionTemplate(transactionManager)
+                                            .executeWithoutResult(
+                                                    status -> {
+                                                        if (revocation == Revocation.WORKSPACE)
+                                                            jdbc.update(
+                                                                    "UPDATE mate_workspace SET deleted=1 WHERE id=?",
+                                                                    workspace);
+                                                        else
+                                                            jdbc.update(
+                                                                    "UPDATE mate_workspace_member SET role='viewer' WHERE workspace_id=? AND user_id=?",
+                                                                    workspace,
+                                                                    actor);
+                                                        changed.countDown();
+                                                        await(release);
+                                                    }));
+            assertTrue(changed.await(10, TimeUnit.SECONDS));
+            var accepted =
+                    executor.submit(
+                            () -> {
+                                authenticate();
+                                try {
+                                    var error =
+                                            assertThrows(
+                                                    SemanticApiException.class,
+                                                    () ->
+                                                            service.saveEmployeeTask(
+                                                                    workspace,
+                                                                    project.path("id").asText(),
+                                                                    command));
+                                    assertEquals(
+                                            revocation == Revocation.WORKSPACE ? 404 : 403,
+                                            error.status());
+                                    assertEquals(
+                                            revocation == Revocation.WORKSPACE
+                                                    ? "NOT_FOUND"
+                                                    : "FORBIDDEN",
+                                            error.code());
+                                } finally {
+                                    SecurityContextHolder.clearContext();
+                                }
+                            });
+            try {
+                assertTrue(fence.entered.await(10, TimeUnit.SECONDS));
+                assertThrows(
+                        TimeoutException.class, () -> accepted.get(200, TimeUnit.MILLISECONDS));
+            } finally {
+                release.countDown();
+            }
+            writer.get(10, TimeUnit.SECONDS);
+            accepted.get(10, TimeUnit.SECONDS);
+            unchanged(receipts, revisions);
+            verify(agents, times(1))
+                    .chatStructuredStream(
+                            anyLong(),
+                            anyString(),
+                            anyString(),
+                            anyString(),
+                            isNull(),
+                            any(),
+                            any());
+        } finally {
+            release.countDown();
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            assertTrue(latch.await(10, TimeUnit.SECONDS));
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(error);
+        }
+    }
+}

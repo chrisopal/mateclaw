@@ -1,0 +1,80 @@
+{
+  "task": "AQ-02 source authorization boundary",
+  "head_before": "38cedb589c7c9700c4ac1afa52bfeafbd4486528",
+  "base": "origin/dev",
+  "before": {
+    "tests": 50,
+    "failure": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "after_formatted": {
+    "tests": 71,
+    "failure": 0,
+    "error": 0,
+    "skipped": 0,
+    "breakdown": {
+      "ProjectAuthorityFenceDatabaseTest": 19,
+      "PresalesRuntimeTransactionIntegrationTest": 16,
+      "PresalesSourceAuthorizationTest": 7,
+      "PresalesAtomicResultAcceptanceTest": 5,
+      "PresalesIntegrationTest": 8,
+      "PresalesSourceScopeTest": 2,
+      "WikiSourceReadServiceTest": 10,
+      "SourceGovernanceReadServiceTest": 4
+    }
+  },
+  "red": "new contracts absent: testCompile failed; then fixture overload inference failed; not an old production behavior defect",
+  "dev": "SCAN_PASS ui8h67cs",
+  "review": "independent /root/source_boundary_review: no blockers, engineering only",
+  "formal_acceptance": "NOT_RUN",
+  "source_hashes": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "be4784388f1b8b66eea3032015ba7c6e439fbe7cfe194b0e33e38ed9c77d93cd",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java": "cb68cbb1a0fcd648ddcf8471e7da08d4ccb19b9b0513b3d63a5bfa0978f0302b",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "b61fe4043e51aa1c593bcdf047ee5d11315f54f5e0f9fdb87a946460e9f1fd7b",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesRuntimeTransactionIntegrationTest.java": "75cc19f55be5548301df43c6b89833910ac000385b413c28ff819db131541ffd",
+    "mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java": "0eaa6ee2cdb920e6f248a169f9bfcefeceacfbcfef823745f08bb33aa8536205",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesSourceAuthorization.java": "90adfa3787b934df0d119c1ef6215fd96bddab3ced22adc81f93b70e1db2e8bf",
+    "mateclaw-server/src/main/java/vip/mate/semantic/source/SourceGovernanceReadService.java": "8ff1e39971427c6d74982c902e062395706493cc6307e865633e15d185fc2883",
+    "mateclaw-server/src/main/java/vip/mate/semantic/source/repository/SourceGovernanceReadRepository.java": "b2c7e62e3ac5500b57b6d586e5a7946f92a3fcdd291f59cc89a7e543693d6811",
+    "mateclaw-server/src/main/java/vip/mate/wiki/repository/WikiSourceReadRepository.java": "1504b580da5a8d6a030921eb025cc817dcbc52a4291a44386bc6525cb2e371db",
+    "mateclaw-server/src/main/java/vip/mate/wiki/service/WikiSourceReadService.java": "f149306461a90f0157717fa248f17ddf60a7f618ab20b0765bf656f8c512ef60",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesSourceAuthorizationTest.java": "ccf1f5f3d5d67f163436b3bc4831f4fcd381a4872be3eba33999a13c41b42f42",
+    "mateclaw-server/src/test/java/vip/mate/semantic/source/SourceGovernanceReadServiceTest.java": "e5e890688fc75b01f0cca7e6a6fe6da2626298765713678d5d47ae8128aa558e",
+    "mateclaw-server/src/test/java/vip/mate/wiki/service/WikiSourceReadServiceTest.java": "f31f8fb3a0e7004dcc3f0fb9df3457a7882e23bcc4c30876327579344761fc35"
+  },
+  "logs": {
+    "start": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/start.log",
+      "sha256": "456080efb01951c3cca834603dc851358c09b83c762d7365d1de67357e448cbe"
+    },
+    "before": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/before.log",
+      "sha256": "7e38bc60817dab8696857676ec8029ca714797bbd85ec8811ecce77ff005e5b8"
+    },
+    "red": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/red.log",
+      "sha256": "19a5cb0bdc66cef5c70c71ab7315325914f1ec2c0a96ffadeca76468e15b4bfb"
+    },
+    "after": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/after.log",
+      "sha256": "1f342fcdbee01aac8fdd0ffebf0064a662f2442487538b95cab90d788c61d85a"
+    },
+    "final": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/final.log",
+      "sha256": "965b0347271d6a2e5f760b1184c3ab7a4f69c46da53fa5cffd350746ceda04a1"
+    },
+    "format": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/format.log",
+      "sha256": "eea57f3dab4c68b0c5cdb3ee1207437bacd28acfa8592a6670ac9b20690757cc"
+    },
+    "formatted": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/formatted.log",
+      "sha256": "d761274bd48460224b7f82427816f014335cb6f4f97c1aded4508f8fbd90441a"
+    },
+    "dev": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/source-boundary-tests/dev.log",
+      "sha256": "4ae494de3be67ee32cf30f8914e59278c1fe9a47ef0294a6052897faa2d11c15"
+    }
+  }
+}

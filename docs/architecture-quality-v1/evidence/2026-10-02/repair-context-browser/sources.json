@@ -1,0 +1,6 @@
+{
+  "mateclaw-ui/src/features/presales/api/presalesApi.ts": "ae830bc7e883e712de1dac68402e49dbb9736ca004f1d78d711c00a0f03fb9a6",
+  "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue": "7b6bcc4bd9a88015740b419134d9f3f4df1e91477bed246e6afed4f020c53b58",
+  "mateclaw-ui/src/features/presales/shared/messages.ts": "f16e1168c855acbde9f41292a8362d54dadb0b368a6398cbec4752af03df4e09",
+  "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts": "55574f6c34a2cce137edd8e6dd587015e7cfd886b614b89922542eee8a544994"
+}

@@ -3,39 +3,38 @@ package vip.mate.agent.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import vip.mate.channel.web.Utf8SseEmitter;
-import vip.mate.agent.AgentService;
-import vip.mate.agent.AgentState;
-import vip.mate.agent.model.AgentEntity;
-import vip.mate.agent.service.AgentGenerationService;
-import vip.mate.agent.vo.AgentCapabilitiesVO;
-import vip.mate.agent.vo.AgentDraftVO;
-import vip.mate.audit.service.AuditEventService;
-import vip.mate.llm.model.ModelConfigEntity;
-import vip.mate.llm.service.ModelCapabilityService;
-import vip.mate.llm.service.ModelConfigService;
-import vip.mate.system.model.SystemSettingsDTO;
-import vip.mate.system.service.SystemSettingService;
-import vip.mate.auth.model.UserEntity;
-import vip.mate.auth.service.AuthService;
-import vip.mate.common.result.R;
-import vip.mate.exception.MateClawException;
-import vip.mate.workspace.core.annotation.RequireWorkspaceRole;
-import vip.mate.workspace.core.service.WorkspaceService;
-import vip.mate.agent.context.ChatOrigin;
-import vip.mate.workspace.conversation.ConversationService;
-import vip.mate.workspace.conversation.model.MessageEntity;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import vip.mate.agent.AgentService;
+import vip.mate.agent.AgentState;
+import vip.mate.agent.context.ChatOrigin;
+import vip.mate.agent.model.AgentEntity;
+import vip.mate.agent.service.AgentGenerationService;
+import vip.mate.agent.vo.AgentCapabilitiesVO;
+import vip.mate.agent.vo.AgentDraftVO;
+import vip.mate.audit.service.AuditEventService;
+import vip.mate.auth.model.UserEntity;
+import vip.mate.auth.service.AuthService;
+import vip.mate.channel.web.Utf8SseEmitter;
+import vip.mate.common.result.R;
+import vip.mate.exception.MateClawException;
+import vip.mate.llm.model.ModelConfigEntity;
+import vip.mate.llm.service.ModelCapabilityService;
+import vip.mate.llm.service.ModelConfigService;
+import vip.mate.system.model.SystemSettingsDTO;
+import vip.mate.system.service.SystemSettingService;
+import vip.mate.workspace.conversation.ConversationService;
+import vip.mate.workspace.conversation.model.MessageEntity;
+import vip.mate.workspace.core.annotation.RequireWorkspaceRole;
+import vip.mate.workspace.core.service.WorkspaceService;
 
 /**
  * Agent 管理接口
@@ -77,8 +76,9 @@ public class AgentController {
     @Operation(summary = "获取Agent详情")
     @GetMapping("/{id}")
     @RequireWorkspaceRole("viewer")
-    public R<AgentEntity> get(@PathVariable Long id,
-                              @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
+    public R<AgentEntity> get(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
         AgentEntity agent = agentService.getAgent(id);
         verifyResourceWorkspace(agent.getWorkspaceId(), workspaceId);
         return R.ok(agent);
@@ -99,12 +99,13 @@ public class AgentController {
         } catch (Exception e) {
             // No default model configured yet — return a capabilities snapshot that
             // tells the UI "we can't say anything about this agent's modalities".
-            return R.ok(AgentCapabilitiesVO.builder()
-                    .agentId(id)
-                    .modelName("")
-                    .providerId("")
-                    .modalities(List.of())
-                    .build());
+            return R.ok(
+                    AgentCapabilitiesVO.builder()
+                            .agentId(id)
+                            .modelName("")
+                            .providerId("")
+                            .modalities(List.of())
+                            .build());
         }
         java.util.Set<ModelCapabilityService.Modality> modalities =
                 modelCapabilityService.resolve(primary.getModelName(), primary.getModalities());
@@ -113,16 +114,17 @@ public class AgentController {
         Long visionId = settings.getDefaultVisionModelId();
         Long videoId = settings.getDefaultVideoModelId();
 
-        return R.ok(AgentCapabilitiesVO.builder()
-                .agentId(id)
-                .modelName(primary.getModelName())
-                .providerId(primary.getProvider())
-                .modalities(modalities.stream().map(Enum::name).toList())
-                .defaultVisionModelId(visionId)
-                .defaultVisionModelLabel(resolveSidecarLabel(visionId))
-                .defaultVideoModelId(videoId)
-                .defaultVideoModelLabel(resolveSidecarLabel(videoId))
-                .build());
+        return R.ok(
+                AgentCapabilitiesVO.builder()
+                        .agentId(id)
+                        .modelName(primary.getModelName())
+                        .providerId(primary.getProvider())
+                        .modalities(modalities.stream().map(Enum::name).toList())
+                        .defaultVisionModelId(visionId)
+                        .defaultVisionModelLabel(resolveSidecarLabel(visionId))
+                        .defaultVideoModelId(videoId)
+                        .defaultVideoModelLabel(resolveSidecarLabel(videoId))
+                        .build());
     }
 
     private String resolveSidecarLabel(Long modelId) {
@@ -157,15 +159,18 @@ public class AgentController {
         // RFC-077 §4.4: 记录创建者，让 member 后续可删除自建 Agent
         agent.setCreatorUserId(resolveUserId(auth));
         AgentEntity created = agentService.createAgent(agent);
-        auditEventService.record("CREATE", "AGENT", String.valueOf(created.getId()), created.getName(), null);
+        auditEventService.record(
+                "CREATE", "AGENT", String.valueOf(created.getId()), created.getName(), null);
         return R.ok(created);
     }
 
     @Operation(summary = "更新Agent")
     @PutMapping("/{id}")
     @RequireWorkspaceRole("member")
-    public R<AgentEntity> update(@PathVariable Long id, @RequestBody Map<String, Object> body,
-                                 @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
+    public R<AgentEntity> update(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body,
+            @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
         AgentEntity existing = agentService.getAgent(id);
         verifyResourceWorkspace(existing.getWorkspaceId(), workspaceId);
         AgentEntity agent = objectMapper.convertValue(body, AgentEntity.class);
@@ -182,20 +187,24 @@ public class AgentController {
     @Operation(summary = "删除Agent")
     @DeleteMapping("/{id}")
     @RequireWorkspaceRole("member")
-    public R<Void> delete(@PathVariable Long id,
-                          @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId,
-                          Authentication auth) {
+    public R<Void> delete(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId,
+            Authentication auth) {
         AgentEntity agent = agentService.getAgent(id);
         verifyResourceWorkspace(agent.getWorkspaceId(), workspaceId);
 
         // RFC-077 §4.4: 三选一鉴权 — 系统 admin / workspace admin+ / 创建者本人
         Long userId = resolveUserId(auth);
         boolean systemAdmin = isSystemAdmin(auth);
-        boolean workspaceAdmin = !systemAdmin
-                && workspaceService.hasPermission(agent.getWorkspaceId(), userId, "admin");
+        boolean workspaceAdmin =
+                !systemAdmin
+                        && workspaceService.hasPermission(agent.getWorkspaceId(), userId, "admin");
         boolean isCreator = userId.equals(agent.getCreatorUserId());
         if (!systemAdmin && !workspaceAdmin && !isCreator) {
-            throw new MateClawException("err.agent.delete_forbidden", 403,
+            throw new MateClawException(
+                    "err.agent.delete_forbidden",
+                    403,
                     "Only the creator or a workspace admin can delete this Agent");
         }
 
@@ -219,30 +228,40 @@ public class AgentController {
 
         // RFC-058 PR-1: Utf8SseEmitter 显式 charset=UTF-8，防止中文 SSE 乱码
         SseEmitter emitter = new Utf8SseEmitter(5 * 60 * 1000L);
-        sseExecutor.execute(() -> {
-            try {
-                agentService.chatStream(id, message, conversationId, origin)
-                        .doOnNext(chunk -> {
-                            try {
-                                emitter.send(SseEmitter.event().name("message").data(chunk));
-                            } catch (IOException e) {
-                                log.warn("SSE send error: {}", e.getMessage());
-                            }
-                        })
-                        .doOnComplete(() -> {
-                            try {
-                                emitter.send(SseEmitter.event().name("done").data("[DONE]"));
-                                emitter.complete();
-                            } catch (IOException e) {
-                                emitter.completeWithError(e);
-                            }
-                        })
-                        .doOnError(emitter::completeWithError)
-                        .subscribe();
-            } catch (Exception e) {
-                emitter.completeWithError(e);
-            }
-        });
+        sseExecutor.execute(
+                () -> {
+                    try {
+                        agentService
+                                .chatStream(id, message, conversationId, origin)
+                                .doOnNext(
+                                        chunk -> {
+                                            try {
+                                                emitter.send(
+                                                        SseEmitter.event()
+                                                                .name("message")
+                                                                .data(chunk));
+                                            } catch (IOException e) {
+                                                log.warn("SSE send error: {}", e.getMessage());
+                                            }
+                                        })
+                                .doOnComplete(
+                                        () -> {
+                                            try {
+                                                emitter.send(
+                                                        SseEmitter.event()
+                                                                .name("done")
+                                                                .data("[DONE]"));
+                                                emitter.complete();
+                                            } catch (IOException e) {
+                                                emitter.completeWithError(e);
+                                            }
+                                        })
+                                .doOnError(emitter::completeWithError)
+                                .subscribe();
+                    } catch (Exception e) {
+                        emitter.completeWithError(e);
+                    }
+                });
         return emitter;
     }
 
@@ -256,9 +275,11 @@ public class AgentController {
         AgentEntity agent = agentService.getAgent(id);
         verifyResourceWorkspace(agent != null ? agent.getWorkspaceId() : null, workspaceId);
         verifyAgentEnabled(agent);
-        ChatOrigin origin = persistOrigin(agent, id, request.getMessage(),
-                request.getConversationId(), workspaceId);
-        return R.ok(agentService.chat(id, request.getMessage(), request.getConversationId(), origin));
+        ChatOrigin origin =
+                persistOrigin(
+                        agent, id, request.getMessage(), request.getConversationId(), workspaceId);
+        return R.ok(
+                agentService.chat(id, request.getMessage(), request.getConversationId(), origin));
     }
 
     @Operation(summary = "执行复杂任务（Plan-Execute）")
@@ -271,18 +292,29 @@ public class AgentController {
         AgentEntity agent = agentService.getAgent(id);
         verifyResourceWorkspace(agent != null ? agent.getWorkspaceId() : null, workspaceId);
         verifyAgentEnabled(agent);
-        ChatOrigin origin = persistOrigin(agent, id, request.getMessage(),
-                request.getConversationId(), workspaceId);
-        return R.ok(agentService.execute(id, request.getMessage(), request.getConversationId(), origin));
+        ChatOrigin origin =
+                persistOrigin(
+                        agent, id, request.getMessage(), request.getConversationId(), workspaceId);
+        return R.ok(
+                agentService.execute(
+                        id, request.getMessage(), request.getConversationId(), origin));
     }
 
-    private ChatOrigin persistOrigin(AgentEntity agent, Long agentId, String message,
-                                     String conversationId, Long requestedWorkspaceId) {
-        Long resolvedWorkspaceId = agent != null && agent.getWorkspaceId() != null
-                ? agent.getWorkspaceId()
-                : requestedWorkspaceId != null ? requestedWorkspaceId : 1L;
-        MessageEntity savedUser = conversationService.saveMessage(
-                conversationId, "user", message);
+    private ChatOrigin persistOrigin(
+            AgentEntity agent,
+            Long agentId,
+            String message,
+            String conversationId,
+            Long requestedWorkspaceId) {
+        if (conversationService.isProtectedTranscript(conversationId)) {
+            throw new MateClawException(
+                    "err.conversation.read_only", 403, "Project execution records are read-only");
+        }
+        Long resolvedWorkspaceId =
+                agent != null && agent.getWorkspaceId() != null
+                        ? agent.getWorkspaceId()
+                        : requestedWorkspaceId != null ? requestedWorkspaceId : 1L;
+        MessageEntity savedUser = conversationService.saveMessage(conversationId, "user", message);
         return ChatOrigin.web(conversationId, "anonymous", resolvedWorkspaceId, null)
                 .withAgent(agentId)
                 .withOriginMessageId(savedUser == null ? null : savedUser.getId());
@@ -291,8 +323,9 @@ public class AgentController {
     @Operation(summary = "获取Agent运行状态")
     @GetMapping("/{id}/state")
     @RequireWorkspaceRole("viewer")
-    public R<AgentState> getState(@PathVariable Long id,
-                                   @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
+    public R<AgentState> getState(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Workspace-Id", required = false) Long workspaceId) {
         AgentEntity agent = agentService.getAgent(id);
         verifyResourceWorkspace(agent != null ? agent.getWorkspaceId() : null, workspaceId);
         return R.ok(agentService.getAgentState(id));
@@ -309,10 +342,7 @@ public class AgentController {
         private String requirement;
     }
 
-    /**
-     * 校验目标资源实际归属的 workspace 与请求 header 一致。
-     * 防止 "在 workspace A 鉴权，操作 workspace B 资源" 的跨域攻击。
-     */
+    /** 校验目标资源实际归属的 workspace 与请求 header 一致。 防止 "在 workspace A 鉴权，操作 workspace B 资源" 的跨域攻击。 */
     private void verifyResourceWorkspace(Long resourceWorkspaceId, Long headerWorkspaceId) {
         long requestedWs = headerWorkspaceId != null ? headerWorkspaceId : 1L;
         if (resourceWorkspaceId != null && !resourceWorkspaceId.equals(requestedWs)) {
@@ -323,11 +353,10 @@ public class AgentController {
     /**
      * Block runtime calls against an agent flagged as disabled.
      *
-     * <p>{@code AgentService#getOrBuildAgent} also checks the flag, but only on
-     * a cache miss — once the {@code BaseAgent} instance is warm, a flip to
-     * disabled would silently keep serving requests until something else
-     * invalidates the cache. Enforcing here at the controller closes that gap
-     * for every external entry point.
+     * <p>{@code AgentService#getOrBuildAgent} also checks the flag, but only on a cache miss — once
+     * the {@code BaseAgent} instance is warm, a flip to disabled would silently keep serving
+     * requests until something else invalidates the cache. Enforcing here at the controller closes
+     * that gap for every external entry point.
      */
     private void verifyAgentEnabled(AgentEntity agent) {
         if (agent != null && !Boolean.TRUE.equals(agent.getEnabled())) {
@@ -341,7 +370,8 @@ public class AgentController {
         }
         UserEntity user = authService.findByUsername(auth.getName());
         if (user == null) {
-            throw new MateClawException("err.auth.user_not_found", 401, "User not found: " + auth.getName());
+            throw new MateClawException(
+                    "err.auth.user_not_found", 401, "User not found: " + auth.getName());
         }
         return user.getId();
     }

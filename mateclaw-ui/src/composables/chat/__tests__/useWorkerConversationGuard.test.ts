@@ -6,7 +6,10 @@ import type { VerifiedWorkerContext } from '@/utils/conversationGovernance'
 function deferred<T>() {
   let resolve!: (value: T) => void
   let reject!: (reason?: unknown) => void
-  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej })
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res
+    reject = rej
+  })
   return { promise, resolve, reject }
 }
 
@@ -14,12 +17,51 @@ const worker = (conversationId: string): VerifiedWorkerContext => ({
   verified: true,
   conversationKind: 'team_worker',
   conversationId,
-  runId: '77', taskId: '501', teamId: '20', leadConversationId: 'lead', agentId: '41',
+  runId: '77',
+  taskId: '501',
+  teamId: '20',
+  leadConversationId: 'lead',
+  agentId: '41',
 })
 
 describe('useWorkerConversationGuard', () => {
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  it('protects a server-classified execution deep link without a worker route hint', async () => {
+    const scope = ref('execution')
+    const load = vi.fn(async () => null)
+    const guard = useWorkerConversationGuard({
+      conversationId: scope,
+      workerHint: ref(false),
+      load,
+      loadReadOnly: async (id) => id === 'execution',
+    })
+    await vi.waitFor(() => expect(guard.state.value).toBe('readOnly'))
+    expect(guard.readOnly.value).toBe(true)
+    expect(guard.context.value).toBeNull()
+    scope.value = 'ordinary'
+    await vi.waitFor(() => expect(guard.readOnly.value).toBe(false))
+  })
+
+  it('ignores a stale writable status after switching to an execution transcript', async () => {
+    const pending = deferred<boolean>()
+    const scope = ref('ordinary')
+    const guard = useWorkerConversationGuard({
+      conversationId: scope,
+      workerHint: ref(false),
+      load: async () => null,
+      loadReadOnly: (id) => (id === 'ordinary' ? pending.promise : Promise.resolve(true)),
+    })
+    await nextTick()
+    await Promise.resolve()
+    scope.value = 'execution'
+    await vi.waitFor(() => expect(guard.state.value).toBe('readOnly'))
+    pending.resolve(false)
+    await nextTick()
+    await Promise.resolve()
+    expect(guard.readOnly.value).toBe(true)
   })
 
   it('fails closed while a worker-looking route is pending and after 403/500', async () => {
@@ -29,20 +71,23 @@ describe('useWorkerConversationGuard', () => {
     const guard = useWorkerConversationGuard({
       conversationId,
       workerHint,
-      load: id => id === 'worker'
-        ? pending.promise
-        : Promise.reject(Object.assign(new Error('server error'), { status: 500 })),
+      load: (id) =>
+        id === 'worker'
+          ? pending.promise
+          : Promise.reject(Object.assign(new Error('server error'), { status: 500 })),
     })
 
     expect(guard.state.value).toBe('pending')
     expect(guard.readOnly.value).toBe(true)
     pending.reject(Object.assign(new Error('forbidden'), { status: 403 }))
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('error')
     expect(guard.readOnly.value).toBe(true)
 
     conversationId.value = 'worker-500'
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('error')
     expect(guard.readOnly.value).toBe(true)
   })
@@ -55,19 +100,21 @@ describe('useWorkerConversationGuard', () => {
     const guard = useWorkerConversationGuard({
       conversationId,
       workerHint,
-      load: id => id === 'old-worker' ? oldRequest.promise : newRequest.promise,
+      load: (id) => (id === 'old-worker' ? oldRequest.promise : newRequest.promise),
     })
 
     conversationId.value = 'ordinary'
     workerHint.value = false
     await nextTick()
     newRequest.resolve(null)
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('nonWorker')
     expect(guard.readOnly.value).toBe(false)
 
     oldRequest.resolve(worker('old-worker'))
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('nonWorker')
     expect(guard.context.value).toBeNull()
   })
@@ -77,9 +124,10 @@ describe('useWorkerConversationGuard', () => {
     const guard = useWorkerConversationGuard({
       conversationId,
       workerHint: ref(false),
-      load: async id => worker(id),
+      load: async (id) => worker(id),
     })
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('verified')
     expect(guard.readOnly.value).toBe(true)
   })
@@ -91,7 +139,8 @@ describe('useWorkerConversationGuard', () => {
       load: async () => null,
     })
 
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('error')
     expect(guard.readOnly.value).toBe(true)
   })
@@ -110,7 +159,8 @@ describe('useWorkerConversationGuard', () => {
       retryDelayMs: 100,
     })
 
-    await nextTick(); await Promise.resolve()
+    await nextTick()
+    await Promise.resolve()
     expect(guard.state.value).toBe('error')
     expect(guard.readOnly.value).toBe(true)
 

@@ -1,0 +1,48 @@
+{
+  "archive": "review-dto-regression.tar.gz",
+  "archive_sha256": "add3a42a8c4e4e5e103b5b1b5257210a65cb6bdfba5911f77e548e1e52624eac",
+  "files": [
+    {
+      "path": "after-sources.json",
+      "original_sha256": "c6fd9c0473622143741d4e4b942780b2e2723e4aa5a6f283edd238747163b097",
+      "archived_sha256": "c6fd9c0473622143741d4e4b942780b2e2723e4aa5a6f283edd238747163b097",
+      "redactions": 0
+    },
+    {
+      "path": "before.sha256",
+      "original_sha256": "6a0d4ca28c0e72337910205208e4907c1bee139d5e72299e0314521576351a1e",
+      "archived_sha256": "6a0d4ca28c0e72337910205208e4907c1bee139d5e72299e0314521576351a1e",
+      "redactions": 0
+    },
+    {
+      "path": "characterization.log",
+      "original_sha256": "0e6fe531a33baf626d1a39533b9077835c6ad43c864126b99afc5f41cffeab8e",
+      "archived_sha256": "c68f54db3f9d1af75e3044b28ae05e39fecc304bd0a9a28b3a46b9961fd3f19e",
+      "redactions": 1
+    },
+    {
+      "path": "dev-after.log",
+      "original_sha256": "36894d2d4777b275a6027bd41324d1c4e780ecbe23ddcf1c2a3f280289440e61",
+      "archived_sha256": "36894d2d4777b275a6027bd41324d1c4e780ecbe23ddcf1c2a3f280289440e61",
+      "redactions": 0
+    },
+    {
+      "path": "dev-before.log",
+      "original_sha256": "db6f070d24413502bdf943ce7a109389e8312df17426a6c1d886c1bba745a6f1",
+      "archived_sha256": "db6f070d24413502bdf943ce7a109389e8312df17426a6c1d886c1bba745a6f1",
+      "redactions": 0
+    },
+    {
+      "path": "format.log",
+      "original_sha256": "e6896d397e775527aa544a058e5a756cfd944f9ab643882465bbd62e03f8e031",
+      "archived_sha256": "e6896d397e775527aa544a058e5a756cfd944f9ab643882465bbd62e03f8e031",
+      "redactions": 0
+    },
+    {
+      "path": "green.log",
+      "original_sha256": "eb34d39b9e0d755a3b007fad3b4f159263c218bd5128222446e7edc0a57b133e",
+      "archived_sha256": "b911151164cf874efc31c3be1aead4e7a10a3acb31edc73e7acb354bb419d7f2",
+      "redactions": 1
+    }
+  ]
+}

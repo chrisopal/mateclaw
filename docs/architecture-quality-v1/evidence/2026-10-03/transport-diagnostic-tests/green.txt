@@ -1,0 +1,32 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/bidding/__tests__/workspaceRequestTransport.test.ts (5 tests | 1 failed) 30ms
+   × sends a real multipart boundary, exact fields and captured scope to loopback 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/bidding/__tests__/workspaceRequestTransport.test.ts > sends a real multipart boundary, exact fields and captured scope to loopback
+AssertionError: expected undefined to be truthy
+
+- Expected:
+true
+
++ Received:
+undefined
+
+ ❯ src/features/bidding/__tests__/workspaceRequestTransport.test.ts:56:20
+     54|     /^multipart\/form-data; boundary=(.+)$/,
+     55|   )?.[1]
+     56|   expect(boundary).toBeTruthy()
+       |                    ^
+     57|   expect(loopback.received?.body).toContain(`--${boundary}`)
+     58|   expect(loopback.received?.body).toContain('name="file"; filename="te…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  08:09:18
+   Duration  216ms (transform 54ms, setup 0ms, import 101ms, tests 30ms, environment 0ms)

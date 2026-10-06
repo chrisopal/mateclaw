@@ -2,16 +2,6 @@ package vip.mate.channel.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import reactor.core.Disposable;
-import vip.mate.tool.mcp.runtime.McpProgressContext;
-import vip.mate.workspace.conversation.model.MessageContentPart;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,32 +13,38 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.Disposable;
+import vip.mate.tool.mcp.runtime.McpProgressContext;
+import vip.mate.workspace.conversation.model.MessageContentPart;
 
 /**
  * 聊天流状态追踪器
- * <p>
- * 采用生产者-消费者解耦设计：将 SSE 事件的生产（Flux 订阅）与消费（SseEmitter 连接）解耦。
- * 一个后台 Flux 生产者持续产出事件，广播给所有 SseEmitter 订阅者并缓存到 buffer。
- * 新连接（重连）到来时，先回放 buffer，再接入实时流。
+ *
+ * <p>采用生产者-消费者解耦设计：将 SSE 事件的生产（Flux 订阅）与消费（SseEmitter 连接）解耦。 一个后台 Flux 生产者持续产出事件，广播给所有 SseEmitter
+ * 订阅者并缓存到 buffer。 新连接（重连）到来时，先回放 buffer，再接入实时流。
  *
  * <h2>Single-instance assumption</h2>
- * <p><strong>The {@link #runs} map is process-local memory.</strong> A reconnect
- * request can only re-attach to a {@code RunState} that lives on the <em>same</em>
- * JVM that originally created it. In a multi-node deployment behind a load
- * balancer, the LB MUST be configured for sticky session by {@code conversationId}
- * (Nginx {@code hash $arg_conversationId consistent;}, K8s Ingress
+ *
+ * <p><strong>The {@link #runs} map is process-local memory.</strong> A reconnect request can only
+ * re-attach to a {@code RunState} that lives on the <em>same</em> JVM that originally created it.
+ * In a multi-node deployment behind a load balancer, the LB MUST be configured for sticky session
+ * by {@code conversationId} (Nginx {@code hash $arg_conversationId consistent;}, K8s Ingress
  * cookie-based affinity, AWS ALB target-group stickiness, etc.).
  *
- * <p>This is an explicit CE constraint — see
- * {@code rfcs/community/90-appendix/02-tech-debt-inventory.md §4.1} and
- * {@code rfc-054 §0}. Cross-node SSE relay (Redis Stream / NATS / Kafka) is
- * tracked under the EE roadmap.
+ * <p>This is an explicit CE constraint — see {@code
+ * rfcs/community/90-appendix/02-tech-debt-inventory.md §4.1} and {@code rfc-054 §0}. Cross-node SSE
+ * relay (Redis Stream / NATS / Kafka) is tracked under the EE roadmap.
  *
- * <p>Operator-facing diagnostics: callers should use
- * {@link #streamExistsOnThisNode(String)} when distinguishing "stream finished
- * normally" from "stream is on a different node" — both return {@code false}
- * from {@link #attach(String, SseEmitter)} but mean very different things to
- * the user.
+ * <p>Operator-facing diagnostics: callers should use {@link #streamExistsOnThisNode(String)} when
+ * distinguishing "stream finished normally" from "stream is on a different node" — both return
+ * {@code false} from {@link #attach(String, SseEmitter)} but mean very different things to the
+ * user.
  *
  * @author MateClaw Team
  */
@@ -58,61 +54,57 @@ public class ChatStreamTracker {
 
     /** buffer 最大事件数，超出后丢弃最早的 thinking_delta 事件以释放空间 */
     private static final int MAX_BUFFER_SIZE = 16000;
+
     private static final SseEventIdGenerator EVENT_IDS =
             new SseEventIdGenerator(System::currentTimeMillis);
 
     private final ObjectMapper objectMapper;
 
     /**
-     * Maximum size, in bytes, of a single SSE event JSON payload before
-     * {@link #broadcastChunked} splits the body into ordered
-     * {@code tool_result_chunk} events.
+     * Maximum size, in bytes, of a single SSE event JSON payload before {@link #broadcastChunked}
+     * splits the body into ordered {@code tool_result_chunk} events.
      */
     static final int CHUNK_SIZE = 8192;
 
     // ===== Configurable knobs (mateclaw.stream.*) =====
 
     /**
-     * Gate for chunked tool-result transport. When {@code false},
-     * {@link #broadcastChunked} falls back to a single broadcast call so
-     * environments that prefer the legacy single-event behavior can opt out.
+     * Gate for chunked tool-result transport. When {@code false}, {@link #broadcastChunked} falls
+     * back to a single broadcast call so environments that prefer the legacy single-event behavior
+     * can opt out.
      */
     @Value("${mateclaw.stream.chunked-tool-results:true}")
     private boolean chunkedToolResultsEnabled = true;
 
     /**
-     * Gate for {@code iteration_start} / {@code iteration_end} events emitted
-     * from graph nodes. Off-by-default deployments can suppress them without
-     * touching node code.
+     * Gate for {@code iteration_start} / {@code iteration_end} events emitted from graph nodes.
+     * Off-by-default deployments can suppress them without touching node code.
      */
     @Value("${mateclaw.stream.iteration-events:true}")
     private boolean iterationEventsEnabled = true;
 
     /**
-     * Heartbeat cadence (seconds) before the first model token arrives. Short
-     * because pre-token gaps strand the UI on a blank "正在生成中" placeholder
-     * with no visible activity.
+     * Heartbeat cadence (seconds) before the first model token arrives. Short because pre-token
+     * gaps strand the UI on a blank "正在生成中" placeholder with no visible activity.
      */
     @Value("${mateclaw.stream.heartbeat.pre-token-sec:2}")
     private int heartbeatPreTokenSec = 2;
 
     /**
-     * Heartbeat cadence (seconds) once the model is actively streaming tokens —
-     * deltas themselves keep the connection warm, so heartbeats relax.
+     * Heartbeat cadence (seconds) once the model is actively streaming tokens — deltas themselves
+     * keep the connection warm, so heartbeats relax.
      */
     @Value("${mateclaw.stream.heartbeat.streaming-sec:10}")
     private int heartbeatStreamingSec = 10;
 
     /**
-     * Heartbeat cadence (seconds) while a tool call is in flight. Tools can
-     * take longer than streaming chunks but should still tick faster than the
-     * default proxy idle timeout.
+     * Heartbeat cadence (seconds) while a tool call is in flight. Tools can take longer than
+     * streaming chunks but should still tick faster than the default proxy idle timeout.
      */
     @Value("${mateclaw.stream.heartbeat.tool-sec:5}")
     private int heartbeatToolSec = 5;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    @Autowired private ApplicationContext applicationContext;
 
     public ChatStreamTracker(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -132,15 +124,12 @@ public class ChatStreamTracker {
     }
 
     /**
-     * One buffered SSE event. The {@code id} is process-global and monotonic,
-     * with a wall-clock floor so a normally restarted process starts above
-     * ids emitted by its predecessor.
+     * One buffered SSE event. The {@code id} is process-global and monotonic, with a wall-clock
+     * floor so a normally restarted process starts above ids emitted by its predecessor.
      */
     record SseEvent(long id, String name, String json) {}
 
-    /**
-     * 中断类型：区分用户主动停止和用户在运行中追加新消息
-     */
+    /** 中断类型：区分用户主动停止和用户在运行中追加新消息 */
     public enum InterruptType {
         /** 用户点击 Stop，终止当前 turn，不自动续跑 */
         USER_STOP,
@@ -154,25 +143,30 @@ public class ChatStreamTracker {
         final List<SseEvent> buffer = new ArrayList<>();
         final Object lock = new Object();
         volatile boolean done;
+
         /** Guarded by lock; once true, cleanup owns this state. */
         boolean evicting;
+
         /** Flux 订阅的 Disposable，用于取消 LLM 流 */
         volatile Disposable disposable;
+
         /** 停止标志：requestStop() 设为 true，各图节点和 LLM 调用检查此标志以提前退出 */
         final AtomicBoolean stopRequested = new AtomicBoolean(false);
+
         /**
-         * Cancellation hooks owned by work that has escaped the Reactor
-         * subscription (most notably synchronous ToolCallback invocations).
-         * Guarded by {@link #lock}; requestStop snapshots and invokes them
-         * outside the lock so a hook may safely deregister itself.
+         * Cancellation hooks owned by work that has escaped the Reactor subscription (most notably
+         * synchronous ToolCallback invocations). Guarded by {@link #lock}; requestStop snapshots
+         * and invokes them outside the lock so a hook may safely deregister itself.
          */
         final java.util.Set<Runnable> cancellationHooks = new java.util.HashSet<>();
+
         /** Completed only after the run's finalization path has drained. */
         final java.util.concurrent.CompletableFuture<Void> termination =
                 new java.util.concurrent.CompletableFuture<>();
+
         /**
-         * 当前活跃的 Flux 数量（原始流 + 审批 Replay 流共享同一个 RunState）。
-         * complete() 仅在计数归零时才真正移除 RunState，防止 Replay 仍在运行时被原始流的完成误删。
+         * 当前活跃的 Flux 数量（原始流 + 审批 Replay 流共享同一个 RunState）。 complete() 仅在计数归零时才真正移除 RunState，防止
+         * Replay 仍在运行时被原始流的完成误删。
          */
         volatile int activeFluxCount = 0;
 
@@ -194,14 +188,14 @@ public class ChatStreamTracker {
         final AtomicBoolean queuedInputPending = new AtomicBoolean(false);
 
         /**
-         * Emergency save callback registered by the SSE chain owner (ChatController).
-         * Invoked from {@link #onShutdown()} so the accumulated assistant content + tool_calls
-         * are persisted before the JVM tears down — without this, a `mvn spring-boot:run`
-         * restart wipes any in-flight turn and leaves only the user message in DB.
-         * <p>
-         * The callback must be idempotent (will not be called twice for the same run, but
-         * may race with normal doOnComplete/doOnError; both paths must tolerate the other
-         * having saved already).
+         * Emergency save callback registered by the SSE chain owner (ChatController). Invoked from
+         * {@link #onShutdown()} so the accumulated assistant content + tool_calls are persisted
+         * before the JVM tears down — without this, a `mvn spring-boot:run` restart wipes any
+         * in-flight turn and leaves only the user message in DB.
+         *
+         * <p>The callback must be idempotent (will not be called twice for the same run, but may
+         * race with normal doOnComplete/doOnError; both paths must tolerate the other having saved
+         * already).
          */
         volatile Runnable emergencySaveCallback;
 
@@ -209,36 +203,35 @@ public class ChatStreamTracker {
         volatile ScheduledFuture<?> heartbeatFuture;
 
         /**
-         * Flips the first time any content/thinking delta is observed for this
-         * run. Heartbeat scheduling watches this flag to switch from the short
-         * pre-token cadence to the streaming cadence — pre-token gaps need
-         * frequent keep-alives because the UI has no other signal of activity.
+         * Flips the first time any content/thinking delta is observed for this run. Heartbeat
+         * scheduling watches this flag to switch from the short pre-token cadence to the streaming
+         * cadence — pre-token gaps need frequent keep-alives because the UI has no other signal of
+         * activity.
          */
         volatile boolean firstTokenReceived = false;
 
         /** 已广播的 pending approval ID 集合（用于幂等去重） */
-        final java.util.Set<String> broadcastedApprovalIds = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        final java.util.Set<String> broadcastedApprovalIds =
+                java.util.concurrent.ConcurrentHashMap.newKeySet();
 
         /** 创建时间（用于 stale 检测和清理） */
         final long createdAt = System.currentTimeMillis();
 
         /**
-         * Wall-clock millis of the most recent meaningful event on this run.
-         * Updated whenever {@link #broadcast(String, String, String)} pushes a
-         * non-heartbeat event so a watchdog can tell "actively producing"
-         * apart from "alive but silent".
+         * Wall-clock millis of the most recent meaningful event on this run. Updated whenever
+         * {@link #broadcast(String, String, String)} pushes a non-heartbeat event so a watchdog can
+         * tell "actively producing" apart from "alive but silent".
          */
         volatile long lastEventAt = System.currentTimeMillis();
 
         /**
-         * Wall-clock millis at which the subscriber list last became empty
-         * while the run was still alive (not done). Null when there is at
-         * least one subscriber, or when the run already finished via the
-         * normal {@code done} path. Drives the orphan-grace eviction in
-         * {@link ChatStreamTracker#cleanupStaleRuns()} (issue #587): a run
-         * whose only subscriber disconnected is invisible to its owner and
-         * unreachable (webchat has no re-attach endpoint), so it is torn down
-         * after a grace period instead of burning tokens until the idle sweep.
+         * Wall-clock millis at which the subscriber list last became empty while the run was still
+         * alive (not done). Null when there is at least one subscriber, or when the run already
+         * finished via the normal {@code done} path. Drives the orphan-grace eviction in {@link
+         * ChatStreamTracker#cleanupStaleRuns()} (issue #587): a run whose only subscriber
+         * disconnected is invisible to its owner and unreachable (webchat has no re-attach
+         * endpoint), so it is torn down after a grace period instead of burning tokens until the
+         * idle sweep.
          */
         volatile Long subscribersZeroSince;
 
@@ -254,9 +247,9 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Opaque lease for one exact RunState generation. Async producers should
-     * retain this handle so late callbacks cannot mutate a replacement run
-     * that happens to reuse the same conversation ID.
+     * Opaque lease for one exact RunState generation. Async producers should retain this handle so
+     * late callbacks cannot mutate a replacement run that happens to reuse the same conversation
+     * ID.
      */
     public static final class RunHandle {
         private final RunState state;
@@ -269,35 +262,35 @@ public class ChatStreamTracker {
     private final ConcurrentHashMap<String, RunState> runs = new ConcurrentHashMap<>();
 
     /**
-     * Conversations whose run was force-recycled by an admin. Maps to the
-     * recycle timestamp so a scheduled cleanup can age entries out (TTL
-     * matches {@link #DONE_RETENTION_MS} — long enough that any in-flight
-     * doOnComplete / doOnError firing after the dispose still finds the
-     * marker, short enough not to leak across sessions).
-     * <p>
-     * Read by the SSE doOn* handlers in ChatController to skip a duplicate
-     * saveMessage when the recycle path already wrote the "[已被用户中止]"
-     * placeholder. Without this, the agent's late-yielding doOnComplete
-     * inserts a second assistant row carrying whatever the agent produced
-     * after the user pressed stop — exactly the behavior the user does
-     * <em>not</em> want when force-recycling.
+     * Conversations whose run was force-recycled by an admin. Maps to the recycle timestamp so a
+     * scheduled cleanup can age entries out (TTL matches {@link #DONE_RETENTION_MS} — long enough
+     * that any in-flight doOnComplete / doOnError firing after the dispose still finds the marker,
+     * short enough not to leak across sessions).
+     *
+     * <p>Read by the SSE doOn* handlers in ChatController to skip a duplicate saveMessage when the
+     * recycle path already wrote the "[已被用户中止]" placeholder. Without this, the agent's
+     * late-yielding doOnComplete inserts a second assistant row carrying whatever the agent
+     * produced after the user pressed stop — exactly the behavior the user does <em>not</em> want
+     * when force-recycling.
      */
     private final ConcurrentHashMap<String, Long> recycledConversations = new ConcurrentHashMap<>();
 
     /** 事件 relay：子会话事件转发到父会话（用于 Agent 委派进度可见性） */
-    private final ConcurrentHashMap<String, List<java.util.function.BiConsumer<String, String>>> eventRelays = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, List<java.util.function.BiConsumer<String, String>>>
+            eventRelays = new ConcurrentHashMap<>();
 
-    /**
-     * 注册事件 relay：将 sourceConversationId 的广播事件同时转发给 listener。
-     * 返回一个 Runnable，调用后取消注册。
-     */
-    public Runnable addEventRelay(String sourceConversationId,
-                                   java.util.function.BiConsumer<String, String> listener) {
-        eventRelays.computeIfAbsent(sourceConversationId, k -> new java.util.concurrent.CopyOnWriteArrayList<>())
+    /** 注册事件 relay：将 sourceConversationId 的广播事件同时转发给 listener。 返回一个 Runnable，调用后取消注册。 */
+    public Runnable addEventRelay(
+            String sourceConversationId, java.util.function.BiConsumer<String, String> listener) {
+        eventRelays
+                .computeIfAbsent(
+                        sourceConversationId,
+                        k -> new java.util.concurrent.CopyOnWriteArrayList<>())
                 .add(listener);
         log.debug("Event relay registered for conversation {}", sourceConversationId);
         return () -> {
-            List<java.util.function.BiConsumer<String, String>> listeners = eventRelays.get(sourceConversationId);
+            List<java.util.function.BiConsumer<String, String>> listeners =
+                    eventRelays.get(sourceConversationId);
             if (listeners != null) {
                 listeners.remove(listener);
                 if (listeners.isEmpty()) {
@@ -309,14 +302,14 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Batching variant of {@link #addEventRelay} for sub-conversation streams
-     * whose tool-call chatter would flood the parent transcript. Tool start /
-     * complete events accumulate into a buffer; lifecycle and error events
-     * (subagent_*, error, tool_approval_requested, phase, done) bypass the
-     * buffer but flush it first so ordering is preserved.
-     * <p>
-     * Buffered events are emitted as a single {@code delegation_batch}
-     * envelope on the parent conversation listener:
+     * Batching variant of {@link #addEventRelay} for sub-conversation streams whose tool-call
+     * chatter would flood the parent transcript. Tool start / complete events accumulate into a
+     * buffer; lifecycle and error events (subagent_*, error, tool_approval_requested, phase, done)
+     * bypass the buffer but flush it first so ordering is preserved.
+     *
+     * <p>Buffered events are emitted as a single {@code delegation_batch} envelope on the parent
+     * conversation listener:
+     *
      * <pre>
      * {
      *   "kind":   "delegation_batch",
@@ -326,28 +319,34 @@ public class ChatStreamTracker {
      * </pre>
      *
      * @param sourceConversationId conversation to listen on
-     * @param parentConversationId parent conversation context (currently
-     *                              forwarded only as listener metadata; the
-     *                              tracker itself does not target it)
-     * @param batchSize             flush threshold by event count
-     * @param flushMs               flush threshold by elapsed millis since
-     *                              first buffered event
-     * @return Runnable that deregisters the relay (and flushes any pending
-     *         events first)
+     * @param parentConversationId parent conversation context (currently forwarded only as listener
+     *     metadata; the tracker itself does not target it)
+     * @param batchSize flush threshold by event count
+     * @param flushMs flush threshold by elapsed millis since first buffered event
+     * @return Runnable that deregisters the relay (and flushes any pending events first)
      */
-    public Runnable addBatchedEventRelay(String sourceConversationId,
-                                          String parentConversationId,
-                                          int batchSize,
-                                          long flushMs,
-                                          java.util.function.BiConsumer<String, String> listener) {
-        BatchedRelay relay = new BatchedRelay(parentConversationId, listener,
-                Math.max(1, batchSize), Math.max(1, flushMs));
+    public Runnable addBatchedEventRelay(
+            String sourceConversationId,
+            String parentConversationId,
+            int batchSize,
+            long flushMs,
+            java.util.function.BiConsumer<String, String> listener) {
+        BatchedRelay relay =
+                new BatchedRelay(
+                        parentConversationId,
+                        listener,
+                        Math.max(1, batchSize),
+                        Math.max(1, flushMs));
         java.util.function.BiConsumer<String, String> wrapper = relay::accept;
-        eventRelays.computeIfAbsent(sourceConversationId,
+        eventRelays
+                .computeIfAbsent(
+                        sourceConversationId,
                         k -> new java.util.concurrent.CopyOnWriteArrayList<>())
                 .add(wrapper);
-        log.debug("Batched relay registered for conversation {} -> parent={}",
-                sourceConversationId, parentConversationId);
+        log.debug(
+                "Batched relay registered for conversation {} -> parent={}",
+                sourceConversationId,
+                parentConversationId);
         return () -> {
             relay.shutdown();
             List<java.util.function.BiConsumer<String, String>> listeners =
@@ -358,16 +357,17 @@ public class ChatStreamTracker {
                     eventRelays.remove(sourceConversationId);
                 }
             }
-            log.debug("Batched relay removed for {} -> parent={}",
-                    sourceConversationId, parentConversationId);
+            log.debug(
+                    "Batched relay removed for {} -> parent={}",
+                    sourceConversationId,
+                    parentConversationId);
         };
     }
 
     /**
-     * Internal helper holding the batch buffer and the scheduled flush. Each
-     * relay owns its own state but reuses {@link #heartbeatScheduler} for
-     * timer ticks (sharing the daemon-thread scheduler avoids one-thread-per
-     * -relay sprawl in long agent sessions).
+     * Internal helper holding the batch buffer and the scheduled flush. Each relay owns its own
+     * state but reuses {@link #heartbeatScheduler} for timer ticks (sharing the daemon-thread
+     * scheduler avoids one-thread-per -relay sprawl in long agent sessions).
      */
     private final class BatchedRelay {
         private final String parentConversationId;
@@ -379,9 +379,11 @@ public class ChatStreamTracker {
         private ScheduledFuture<?> pendingFlush;
         private volatile boolean closed;
 
-        BatchedRelay(String parentConversationId,
-                     java.util.function.BiConsumer<String, String> downstream,
-                     int batchSize, long flushMs) {
+        BatchedRelay(
+                String parentConversationId,
+                java.util.function.BiConsumer<String, String> downstream,
+                int batchSize,
+                long flushMs) {
             this.parentConversationId = parentConversationId;
             this.downstream = downstream;
             this.batchSize = batchSize;
@@ -414,8 +416,9 @@ public class ChatStreamTracker {
                 if (buffer.size() >= batchSize) {
                     shouldFlush = true;
                 } else if (pendingFlush == null || pendingFlush.isDone()) {
-                    pendingFlush = heartbeatScheduler.schedule(this::flushNow,
-                            flushMs, TimeUnit.MILLISECONDS);
+                    pendingFlush =
+                            heartbeatScheduler.schedule(
+                                    this::flushNow, flushMs, TimeUnit.MILLISECONDS);
                 }
             }
             if (shouldFlush) {
@@ -477,42 +480,47 @@ public class ChatStreamTracker {
 
     /** 心跳调度线程池（守护线程） */
     private final ScheduledExecutorService heartbeatScheduler =
-            Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "stream-heartbeat");
-                t.setDaemon(true);
-                return t;
-            });
+            Executors.newSingleThreadScheduledExecutor(
+                    r -> {
+                        Thread t = new Thread(r, "stream-heartbeat");
+                        t.setDaemon(true);
+                        return t;
+                    });
 
-    /**
-     * 注册流状态（开始生成时调用）。
-     * 幂等：如果已存在活跃的 RunState（Replay 与原始流共享场景），复用它而非覆盖。
-     */
+    /** 注册流状态（开始生成时调用）。 幂等：如果已存在活跃的 RunState（Replay 与原始流共享场景），复用它而非覆盖。 */
     public RunHandle register(String conversationId) {
         long registeredAt = System.currentTimeMillis();
-        RunState state = runs.compute(conversationId, (id, current) -> {
-            if (current == null) {
-                return new RunState(id);
-            }
-            synchronized (current.lock) {
-                if (current.evicting) {
-                    log.info("[ChatStreamTracker] Replacing evicting run on register: {}", id);
-                    return new RunState(id);
-                }
-                if (current.done) {
-                    stopHeartbeat(current);
-                    return new RunState(id);
-                }
-                // Registration is a fresh lifecycle entrance. Refresh every
-                // stale-run input while holding the same lock cleanup uses to
-                // claim eviction, closing the former post-compute race window.
-                current.subscribersZeroSince = null;
-                current.lastEventAt = registeredAt;
-                if (current.stopRequested.compareAndSet(true, false)) {
-                    log.info("[ChatStreamTracker] Reset stale stopRequested on register: {}", id);
-                }
-            }
-            return current;
-        });
+        RunState state =
+                runs.compute(
+                        conversationId,
+                        (id, current) -> {
+                            if (current == null) {
+                                return new RunState(id);
+                            }
+                            synchronized (current.lock) {
+                                if (current.evicting) {
+                                    log.info(
+                                            "[ChatStreamTracker] Replacing evicting run on register: {}",
+                                            id);
+                                    return new RunState(id);
+                                }
+                                if (current.done) {
+                                    stopHeartbeat(current);
+                                    return new RunState(id);
+                                }
+                                // Registration is a fresh lifecycle entrance. Refresh every
+                                // stale-run input while holding the same lock cleanup uses to
+                                // claim eviction, closing the former post-compute race window.
+                                current.subscribersZeroSince = null;
+                                current.lastEventAt = registeredAt;
+                                if (current.stopRequested.compareAndSet(true, false)) {
+                                    log.info(
+                                            "[ChatStreamTracker] Reset stale stopRequested on register: {}",
+                                            id);
+                                }
+                            }
+                            return current;
+                        });
         // Clear the force-recycle marker on new registration — the recycle
         // tombstone is meant to suppress the late doOnComplete of the
         // *recycled* run only, not future turns on the same conversation. If
@@ -520,7 +528,9 @@ public class ChatStreamTracker {
         // the 5-min TTL, this turn must be allowed to save its assistant
         // message normally.
         if (recycledConversations.remove(conversationId) != null) {
-            log.info("[ChatStreamTracker] Cleared recycle marker on new register: {}", conversationId);
+            log.info(
+                    "[ChatStreamTracker] Cleared recycle marker on new register: {}",
+                    conversationId);
         }
         RunHandle handle = new RunHandle(state);
         startHeartbeat(state);
@@ -528,9 +538,7 @@ public class ChatStreamTracker {
         return handle;
     }
 
-    /**
-     * 设置 Flux 订阅的 Disposable（流开始后立即调用）
-     */
+    /** 设置 Flux 订阅的 Disposable（流开始后立即调用） */
     public void setDisposable(String conversationId, Disposable disposable) {
         RunState state = runs.get(conversationId);
         if (state == null || disposable == null) return;
@@ -566,24 +574,25 @@ public class ChatStreamTracker {
         try {
             disposable.dispose();
         } catch (Exception e) {
-            log.warn("Late stream disposable cancellation failed for {}: {}",
-                    conversationId, e.getMessage());
+            log.warn(
+                    "Late stream disposable cancellation failed for {}: {}",
+                    conversationId,
+                    e.getMessage());
         }
     }
 
     /**
-     * Register cancellation for work performed outside the run's Reactor
-     * subscription. The returned handle is idempotent and must be closed when
-     * that work finishes. If Stop already won the race, the hook is invoked
-     * immediately instead of being registered.
+     * Register cancellation for work performed outside the run's Reactor subscription. The returned
+     * handle is idempotent and must be closed when that work finishes. If Stop already won the
+     * race, the hook is invoked immediately instead of being registered.
      */
     public Runnable registerCancellationHook(String conversationId, Runnable hook) {
         if (conversationId == null || hook == null) {
-            return () -> { };
+            return () -> {};
         }
         RunState state = runs.get(conversationId);
         if (state == null) {
-            return () -> { };
+            return () -> {};
         }
         boolean cancelImmediately;
         synchronized (state.lock) {
@@ -594,7 +603,7 @@ public class ChatStreamTracker {
         }
         if (cancelImmediately) {
             invokeCancellationHook(conversationId, hook);
-            return () -> { };
+            return () -> {};
         }
         return () -> {
             synchronized (state.lock) {
@@ -612,9 +621,9 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Register an emergency-save callback for this run, invoked from {@link #onShutdown()}
-     * before the JVM tears down. The callback should snapshot the current accumulator
-     * state and persist it as the assistant message (status="interrupted").
+     * Register an emergency-save callback for this run, invoked from {@link #onShutdown()} before
+     * the JVM tears down. The callback should snapshot the current accumulator state and persist it
+     * as the assistant message (status="interrupted").
      */
     public void setEmergencySaveCallback(String conversationId, Runnable callback) {
         RunState state = runs.get(conversationId);
@@ -638,35 +647,42 @@ public class ChatStreamTracker {
         return !state.evicting && runs.get(state.conversationId) == state;
     }
 
-    /**
-     * 请求停止指定会话的流。
-     * 取消 Flux 订阅（底层 HTTP 连接也会随之关闭），返回 true 表示确实停止了正在运行的流。
-     */
+    /** 请求停止指定会话的流。 取消 Flux 订阅（底层 HTTP 连接也会随之关闭），返回 true 表示确实停止了正在运行的流。 */
     public boolean requestStop(String conversationId) {
+        return requestStop(conversationId, true);
+    }
+
+    /**
+     * Request Stop without synchronous phase delivery. Batch deadline owners use this before
+     * stopping the next child; their result summary carries the cancellation status. Durable Stop
+     * intent, checkpoints, cancellation hooks and disposal are unchanged.
+     */
+    public boolean requestStopWithoutNotification(String conversationId) {
+        return requestStop(conversationId, false);
+    }
+
+    private boolean requestStop(String conversationId, boolean notify) {
         // A goal may be between finite segments, with no live RunState to cancel.
         // Persist the user's intent before looking up that ephemeral state.
         try {
             if (applicationContext != null) {
-                applicationContext.publishEvent(new vip.mate.goal.service.GoalExecutionSignal.Stop(conversationId));
+                applicationContext.publishEvent(
+                        new vip.mate.goal.service.GoalExecutionSignal.Stop(conversationId));
             }
         } catch (RuntimeException persistenceFailure) {
             // Still cancel live work, but do not acknowledge a durable Stop that failed.
-            requestStopLive(conversationId);
+            requestStopLive(runs.get(conversationId), notify);
             throw persistenceFailure;
         }
-        return requestStopLive(conversationId);
-    }
-
-    private boolean requestStopLive(String conversationId) {
-        return requestStopLive(runs.get(conversationId));
+        return requestStopLive(runs.get(conversationId), notify);
     }
 
     /** Cancel only this generation, without publishing a new user Stop intent. */
     public boolean cancelRun(RunHandle handle) {
-        return handle != null && requestStopLive(handle.state);
+        return handle != null && requestStopLive(handle.state, true);
     }
 
-    private boolean requestStopLive(RunState state) {
+    private boolean requestStopLive(RunState state, boolean notify) {
         if (state == null) return false;
         String conversationId = state.conversationId;
 
@@ -688,9 +704,12 @@ public class ChatStreamTracker {
         // Let the UI render an explicit transition before cancellation closes
         // the stream. This mirrors qwenpaw's cancel envelope instead of making
         // the Stop button look unresponsive until final persistence finishes.
-        broadcastObject(conversationId, "phase", Map.of(
-                "phase", "interrupting",
-                "timestamp", System.currentTimeMillis()));
+        if (notify) {
+            broadcastObject(
+                    conversationId,
+                    "phase",
+                    Map.of("phase", "interrupting", "timestamp", System.currentTimeMillis()));
+        }
 
         // Disposing the Flux alone cannot stop a synchronous callback already
         // running on another thread. Cancel those escaped executions first.
@@ -705,20 +724,16 @@ public class ChatStreamTracker {
         return firstRequest;
     }
 
-    /**
-     * 检查指定会话是否已被请求停止。
-     * 图节点在每次迭代入口处调用此方法，若返回 true 则抛出 CancellationException 中断执行。
-     */
+    /** 检查指定会话是否已被请求停止。 图节点在每次迭代入口处调用此方法，若返回 true 则抛出 CancellationException 中断执行。 */
     public boolean isStopRequested(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null && state.stopRequested.get();
     }
 
     /**
-     * Wait briefly for cancellation finalization (partial-message persistence,
-     * done envelope, and lifecycle cleanup). This gives Stop callers the same
-     * acknowledgement semantics as qwenpaw's request_stop(), which awaits the
-     * cancelled task instead of merely sending a signal.
+     * Wait briefly for cancellation finalization (partial-message persistence, done envelope, and
+     * lifecycle cleanup). This gives Stop callers the same acknowledgement semantics as qwenpaw's
+     * request_stop(), which awaits the cancelled task instead of merely sending a signal.
      */
     public boolean awaitTermination(String conversationId, long timeoutMillis) {
         RunState state = runs.get(conversationId);
@@ -732,11 +747,10 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Whether this conversation was force-recycled by an admin within the
-     * recycle marker's TTL ({@link #DONE_RETENTION_MS}). The SSE doOn*
-     * handlers consult this to skip a duplicate saveMessage when the recycle
-     * path already wrote the placeholder. Survives {@code runs.remove(...)},
-     * unlike {@link #isStopRequested(String)}.
+     * Whether this conversation was force-recycled by an admin within the recycle marker's TTL
+     * ({@link #DONE_RETENTION_MS}). The SSE doOn* handlers consult this to skip a duplicate
+     * saveMessage when the recycle path already wrote the placeholder. Survives {@code
+     * runs.remove(...)}, unlike {@link #isStopRequested(String)}.
      */
     public boolean isRecycled(String conversationId) {
         Long ts = recycledConversations.get(conversationId);
@@ -750,22 +764,22 @@ public class ChatStreamTracker {
 
     /**
      * 广播事件到所有订阅者并缓存到 buffer.
-     * <p>
-     * Lifecycle event categories survive {@code state.done=true}:
+     *
+     * <p>Lifecycle event categories survive {@code state.done=true}:
+     *
      * <ul>
-     *   <li>{@code "done"} — the lifecycle marker itself. If a client missed
-     *       this on a broken pipe and reconnects within the 5-minute retention
-     *       window, replay surfaces it so the UI exits "生成中" state.</li>
-     *   <li>{@code "goal_continuation"} — durable scheduling is settled after
-     *       the graph segment completes, and remains available on reconnect.</li>
-     *   <li>{@code "async_task_*"} — task lifecycle events from
-     *       {@code AsyncTaskService} (image/video/music generation). These
-     *       routinely fire <em>after</em> the agent's reasoning turn finishes
-     *       (long-running upstream calls). Without this carve-out the events
-     *       are silently dropped and the UI never sees the audio/error.</li>
+     *   <li>{@code "done"} — the lifecycle marker itself. If a client missed this on a broken pipe
+     *       and reconnects within the 5-minute retention window, replay surfaces it so the UI exits
+     *       "生成中" state.
+     *   <li>{@code "goal_continuation"} — durable scheduling is settled after the graph segment
+     *       completes, and remains available on reconnect.
+     *   <li>{@code "async_task_*"} — task lifecycle events from {@code AsyncTaskService}
+     *       (image/video/music generation). These routinely fire <em>after</em> the agent's
+     *       reasoning turn finishes (long-running upstream calls). Without this carve-out the
+     *       events are silently dropped and the UI never sees the audio/error.
      * </ul>
-     * For all other events, the prior {@code state==null || state.done}
-     * early-return remains.
+     *
+     * For all other events, the prior {@code state==null || state.done} early-return remains.
      */
     public void broadcast(String conversationId, String eventName, String jsonData) {
         broadcast(conversationId, eventName, jsonData, false);
@@ -779,8 +793,9 @@ public class ChatStreamTracker {
         if (handle == null) return;
         RunState state = handle.state;
         boolean isDone = "done".equals(eventName);
-        boolean isPostTurnEvent = "goal_continuation".equals(eventName)
-                || (eventName != null && eventName.startsWith("async_task_"));
+        boolean isPostTurnEvent =
+                "goal_continuation".equals(eventName)
+                        || (eventName != null && eventName.startsWith("async_task_"));
         boolean isHeartbeat = "heartbeat".equals(eventName);
         List<SseEmitter> targets;
         long eventId = 0L;
@@ -808,23 +823,29 @@ public class ChatStreamTracker {
         List<SseEmitter> dead = new ArrayList<>();
         for (SseEmitter emitter : targets) {
             try {
-                SseEmitter.SseEventBuilder event = SseEmitter.event().name(eventName).data(jsonData);
+                SseEmitter.SseEventBuilder event =
+                        SseEmitter.event().name(eventName).data(jsonData);
                 if (!isHeartbeat && !skipBuffer) {
                     event.id(String.valueOf(eventId));
                 }
                 emitter.send(event);
             } catch (IOException | IllegalStateException e) {
                 dead.add(emitter);
-                log.debug("Removing dead subscriber for {} while sending {} event: {}",
-                        state.conversationId, eventName, e.getMessage());
+                log.debug(
+                        "Removing dead subscriber for {} while sending {} event: {}",
+                        state.conversationId,
+                        eventName,
+                        e.getMessage());
             }
         }
         if (!dead.isEmpty()) {
             synchronized (state.lock) {
                 if (isCurrent(state)) {
                     boolean removed = state.subscribers.removeAll(dead);
-                    if (removed && state.subscribers.isEmpty()
-                            && !state.done && state.subscribersZeroSince == null) {
+                    if (removed
+                            && state.subscribers.isEmpty()
+                            && !state.done
+                            && state.subscribersZeroSince == null) {
                         state.subscribersZeroSince = System.currentTimeMillis();
                     }
                 }
@@ -839,8 +860,10 @@ public class ChatStreamTracker {
                     try {
                         relay.accept(eventName, jsonData);
                     } catch (Exception e) {
-                        log.debug("Event relay error for {}: {}",
-                                state.conversationId, e.getMessage());
+                        log.debug(
+                                "Event relay error for {}: {}",
+                                state.conversationId,
+                                e.getMessage());
                     }
                 }
             }
@@ -849,15 +872,18 @@ public class ChatStreamTracker {
 
     /**
      * Broadcast an event to all subscribers (optionally skip buffer).
-     * @param skipBuffer if true, do not write to the ring buffer — used for
-     *                   high-frequency transient events (e.g. progress).
+     *
+     * @param skipBuffer if true, do not write to the ring buffer — used for high-frequency
+     *     transient events (e.g. progress).
      */
-    public void broadcast(String conversationId, String eventName, String jsonData, boolean skipBuffer) {
+    public void broadcast(
+            String conversationId, String eventName, String jsonData, boolean skipBuffer) {
         RunState state = runs.get(conversationId);
 
         boolean isDone = "done".equals(eventName);
-        boolean isPostTurnEvent = "goal_continuation".equals(eventName)
-                || (eventName != null && eventName.startsWith("async_task_"));
+        boolean isPostTurnEvent =
+                "goal_continuation".equals(eventName)
+                        || (eventName != null && eventName.startsWith("async_task_"));
         boolean isHeartbeat = "heartbeat".equals(eventName);
 
         // Stamp last activity for stuck detection. Heartbeats are excluded
@@ -880,13 +906,21 @@ public class ChatStreamTracker {
                 while (it.hasNext()) {
                     SseEmitter emitter = it.next();
                     try {
-                        emitter.send(SseEmitter.event().id(String.valueOf(id)).name(eventName).data(jsonData));
+                        emitter.send(
+                                SseEmitter.event()
+                                        .id(String.valueOf(id))
+                                        .name(eventName)
+                                        .data(jsonData));
                         if (isDone) {
-                            log.debug("Sent final 'done' event to subscriber for {}", conversationId);
+                            log.debug(
+                                    "Sent final 'done' event to subscriber for {}", conversationId);
                         }
                     } catch (IOException | IllegalStateException e) {
-                        log.debug("Removing dead subscriber for {} while sending {} event: {}",
-                                conversationId, eventName, e.getMessage());
+                        log.debug(
+                                "Removing dead subscriber for {} while sending {} event: {}",
+                                conversationId,
+                                eventName,
+                                e.getMessage());
                         it.remove();
                     }
                 }
@@ -909,8 +943,10 @@ public class ChatStreamTracker {
                     try {
                         emitter.send(SseEmitter.event().name(eventName).data(jsonData));
                     } catch (IOException | IllegalStateException e) {
-                        log.debug("Removing dead subscriber for {} while sending heartbeat: {}",
-                                conversationId, e.getMessage());
+                        log.debug(
+                                "Removing dead subscriber for {} while sending heartbeat: {}",
+                                conversationId,
+                                e.getMessage());
                         it.remove();
                     }
                 }
@@ -940,17 +976,23 @@ public class ChatStreamTracker {
                     if (skipBuffer) {
                         emitter.send(SseEmitter.event().name(eventName).data(jsonData));
                     } else {
-                        emitter.send(SseEmitter.event().id(String.valueOf(eventId)).name(eventName).data(jsonData));
+                        emitter.send(
+                                SseEmitter.event()
+                                        .id(String.valueOf(eventId))
+                                        .name(eventName)
+                                        .data(jsonData));
                     }
                 } catch (IOException | IllegalStateException e) {
-                    log.debug("Removing dead subscriber for {}: {}", conversationId, e.getMessage());
+                    log.debug(
+                            "Removing dead subscriber for {}: {}", conversationId, e.getMessage());
                     it.remove();
                 }
             }
         }
 
         // 事件 relay：转发给注册的监听器（用于子会话→父会话进度传递）
-        List<java.util.function.BiConsumer<String, String>> relays = eventRelays.get(conversationId);
+        List<java.util.function.BiConsumer<String, String>> relays =
+                eventRelays.get(conversationId);
         if (relays != null) {
             for (var relay : relays) {
                 try {
@@ -964,36 +1006,37 @@ public class ChatStreamTracker {
 
     /**
      * 直推事件（Object 自动序列化为 JSON）。
-     * <p>
-     * 用于在 Node 内部直接向前端推送 SSE 事件，绕过 NodeOutput 管道。
-     * 典型场景：审批请求在 awaitDecision() 阻塞前必须先送达前端。
+     *
+     * <p>用于在 Node 内部直接向前端推送 SSE 事件，绕过 NodeOutput 管道。 典型场景：审批请求在 awaitDecision() 阻塞前必须先送达前端。
      *
      * @param conversationId 会话 ID
-     * @param eventName      SSE 事件名称（如 tool_approval_requested）
-     * @param data           事件载荷，将被 Jackson 序列化为 JSON
+     * @param eventName SSE 事件名称（如 tool_approval_requested）
+     * @param data 事件载荷，将被 Jackson 序列化为 JSON
      */
     public void broadcastObject(String conversationId, String eventName, Object data) {
         broadcastObject(conversationId, eventName, data, false);
     }
 
-    /**
-     * Broadcast an Object directly (auto-serialized to JSON), optionally skipping the buffer.
-     */
-    public void broadcastObject(String conversationId, String eventName, Object data, boolean skipBuffer) {
+    /** Broadcast an Object directly (auto-serialized to JSON), optionally skipping the buffer. */
+    public void broadcastObject(
+            String conversationId, String eventName, Object data, boolean skipBuffer) {
         String json;
         try {
             json = objectMapper.writeValueAsString(data);
         } catch (Exception e) {
-            log.warn("Failed to serialize broadcast data for event {}: {}", eventName, e.getMessage());
+            log.warn(
+                    "Failed to serialize broadcast data for event {}: {}",
+                    eventName,
+                    e.getMessage());
             json = "{\"error\":\"serialization_failed\"}";
         }
         broadcast(conversationId, eventName, json, skipBuffer);
     }
 
     /**
-     * Deliver MCP progress snapshots on SSE reconnect. Progress events do not
-     * participate in buffer replay, so the latest snapshot is read from
-     * {@link McpProgressContext} and delivered separately on attach.
+     * Deliver MCP progress snapshots on SSE reconnect. Progress events do not participate in buffer
+     * replay, so the latest snapshot is read from {@link McpProgressContext} and delivered
+     * separately on attach.
      */
     private void sendProgressSnapshots(String conversationId, SseEmitter emitter) {
         try {
@@ -1002,25 +1045,31 @@ public class ChatStreamTracker {
             if (snapshots != null && !snapshots.isEmpty()) {
                 for (Map.Entry<String, String> entry : snapshots.entrySet()) {
                     try {
-                        emitter.send(SseEmitter.event()
-                                .name("tool_call_progress")
-                                .data(entry.getValue()));
+                        emitter.send(
+                                SseEmitter.event()
+                                        .name("tool_call_progress")
+                                        .data(entry.getValue()));
                     } catch (IOException e) {
-                        log.debug("Failed to send progress snapshot for {}: {}", conversationId, e.getMessage());
+                        log.debug(
+                                "Failed to send progress snapshot for {}: {}",
+                                conversationId,
+                                e.getMessage());
                     }
                 }
             }
         } catch (Exception e) {
-            log.debug("Failed to send progress snapshots for {}: {}", conversationId, e.getMessage());
+            log.debug(
+                    "Failed to send progress snapshots for {}: {}", conversationId, e.getMessage());
         }
     }
 
     /**
-     * Broadcast {@code payload} as a single SSE event when its serialized form
-     * fits within {@link #CHUNK_SIZE}; otherwise extract the long {@code result}
-     * field and emit it as ordered {@code tool_result_chunk} events.
-     * <p>
-     * Each chunk carries:
+     * Broadcast {@code payload} as a single SSE event when its serialized form fits within {@link
+     * #CHUNK_SIZE}; otherwise extract the long {@code result} field and emit it as ordered {@code
+     * tool_result_chunk} events.
+     *
+     * <p>Each chunk carries:
+     *
      * <pre>
      * {
      *   "kind":  "tool_result",
@@ -1031,26 +1080,28 @@ public class ChatStreamTracker {
      *   "delta": "&lt;text&gt;"
      * }
      * </pre>
-     * The last chunk has {@code "final": true}; consumers reassemble by
-     * concatenating {@code delta} in seq order keyed on {@code ref}. When the
-     * payload's {@code result} field cannot be located (or chunked transport
-     * is disabled), the entire envelope is sent unchanged.
+     *
+     * The last chunk has {@code "final": true}; consumers reassemble by concatenating {@code delta}
+     * in seq order keyed on {@code ref}. When the payload's {@code result} field cannot be located
+     * (or chunked transport is disabled), the entire envelope is sent unchanged.
      *
      * @param conversationId target conversation
-     * @param eventName      SSE event name for the small-payload path
-     * @param payload        envelope; the {@code result} field (or, failing
-     *                       that, the {@code arguments} field) is split
-     * @param refKey         identifier consumers use to group chunks; usually
-     *                       {@code toolCallId} or the step index as a string
+     * @param eventName SSE event name for the small-payload path
+     * @param payload envelope; the {@code result} field (or, failing that, the {@code arguments}
+     *     field) is split
+     * @param refKey identifier consumers use to group chunks; usually {@code toolCallId} or the
+     *     step index as a string
      */
-    public void broadcastChunked(String conversationId, String eventName,
-                                  Object payload, String refKey) {
+    public void broadcastChunked(
+            String conversationId, String eventName, Object payload, String refKey) {
         String json;
         try {
             json = objectMapper.writeValueAsString(payload);
         } catch (Exception e) {
-            log.warn("Failed to serialize chunked broadcast for event {}: {}",
-                    eventName, e.getMessage());
+            log.warn(
+                    "Failed to serialize chunked broadcast for event {}: {}",
+                    eventName,
+                    e.getMessage());
             return;
         }
 
@@ -1144,31 +1195,28 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Diagnostic helper for the multi-node deployment edge case (issue #17):
-     * tells the caller whether a {@link RunState} for this conversation
-     * exists on <em>this</em> JVM at all (regardless of done state).
+     * Diagnostic helper for the multi-node deployment edge case (issue #17): tells the caller
+     * whether a {@link RunState} for this conversation exists on <em>this</em> JVM at all
+     * (regardless of done state).
      *
-     * <p>{@link #attach(String, SseEmitter)} returns {@code false} both when
-     * the stream finished normally <em>and</em> when no state exists on this
-     * node. Callers that need to distinguish those two cases (e.g. to send a
-     * different SSE event to the client) should consult this method first.
+     * <p>{@link #attach(String, SseEmitter)} returns {@code false} both when the stream finished
+     * normally <em>and</em> when no state exists on this node. Callers that need to distinguish
+     * those two cases (e.g. to send a different SSE event to the client) should consult this method
+     * first.
      *
-     * @return {@code true} when a RunState exists locally for this
-     *         conversationId; {@code false} when it never existed here OR was
-     *         already cleaned up after completion
+     * @return {@code true} when a RunState exists locally for this conversationId; {@code false}
+     *     when it never existed here OR was already cleaned up after completion
      */
     public boolean streamExistsOnThisNode(String conversationId) {
         return runs.containsKey(conversationId);
     }
 
     /**
-     * 将 emitter 附着到现有的运行中或刚刚完成的流。
-     * 先回放 buffer 中的全部事件，再加入订阅者列表接收后续实时事件（仅当流仍在运行时）。
-     * <p>
-     * 兼容"流已完成"语义：如果 RunState 还在 map 里但 done=true，仍然回放 buffer
-     * （包含 done 事件本身），让重连客户端拿到完成信号后正常退出"生成中"状态。
-     * RunState 完成后会保留 DONE_RETENTION_MS（5 分钟），由 cleanupStaleRuns 异步清理；
-     * 这段窗口期内任何刷新页面都能拿到 done 回放。
+     * 将 emitter 附着到现有的运行中或刚刚完成的流。 先回放 buffer 中的全部事件，再加入订阅者列表接收后续实时事件（仅当流仍在运行时）。
+     *
+     * <p>兼容"流已完成"语义：如果 RunState 还在 map 里但 done=true，仍然回放 buffer （包含 done
+     * 事件本身），让重连客户端拿到完成信号后正常退出"生成中"状态。 RunState 完成后会保留 DONE_RETENTION_MS（5 分钟），由 cleanupStaleRuns
+     * 异步清理； 这段窗口期内任何刷新页面都能拿到 done 回放。
      *
      * @return true 如果成功附着或重放（订阅者已加入或事件已重放完毕），false 如果没有任何状态可恢复
      */
@@ -1185,17 +1233,14 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Reconnect-aware attach: replays only events whose id &gt;
-     * {@code lastEventId}. Pass 0 to replay everything (fresh attach
-     * behavior — same as the no-arg overload).
+     * Reconnect-aware attach: replays only events whose id &gt; {@code lastEventId}. Pass 0 to
+     * replay everything (fresh attach behavior — same as the no-arg overload).
      *
-     * <p>The id is the process-global monotonic value stamped on each
-     * {@link SseEvent} when it was first emitted. Frontend tracks
-     * the last id it processed and echoes it back via the request
-     * body's {@code lastEventId} field, eliminating the duplicate-
-     * delivery class of bugs (the symptom: thinking segments rendered
-     * with the wrong iterationIndex because frontend processed the
-     * same {@code iteration_start} twice).
+     * <p>The id is the process-global monotonic value stamped on each {@link SseEvent} when it was
+     * first emitted. Frontend tracks the last id it processed and echoes it back via the request
+     * body's {@code lastEventId} field, eliminating the duplicate- delivery class of bugs (the
+     * symptom: thinking segments rendered with the wrong iterationIndex because frontend processed
+     * the same {@code iteration_start} twice).
      */
     public boolean attach(String conversationId, SseEmitter emitter, long lastEventId) {
         RunState state = runs.get(conversationId);
@@ -1225,17 +1270,26 @@ public class ChatStreamTracker {
                     continue;
                 }
                 try {
-                    emitter.send(SseEmitter.event().id(String.valueOf(event.id())).name(event.name()).data(event.json()));
+                    emitter.send(
+                            SseEmitter.event()
+                                    .id(String.valueOf(event.id()))
+                                    .name(event.name())
+                                    .data(event.json()));
                     replayed++;
                 } catch (IOException | IllegalStateException e) {
-                    log.warn("Failed to replay buffer to reconnecting client for {}: {}",
-                            conversationId, e.getMessage());
+                    log.warn(
+                            "Failed to replay buffer to reconnecting client for {}: {}",
+                            conversationId,
+                            e.getMessage());
                     return false;
                 }
             }
             if (lastEventId > 0 && skipped > 0) {
-                log.info("[SSE] Reconnect dedup for {}: skipped {} already-seen events, replayed {} new",
-                        conversationId, skipped, replayed);
+                log.info(
+                        "[SSE] Reconnect dedup for {}: skipped {} already-seen events, replayed {} new",
+                        conversationId,
+                        skipped,
+                        replayed);
             }
             // Stream complete: buffer replayed (including the `done` event itself).
             // We DO NOT auto-complete the emitter here — keep it subscribed so any
@@ -1257,8 +1311,10 @@ public class ChatStreamTracker {
             sendProgressSnapshots(conversationId, emitter);
 
             if (state.done) {
-                log.info("[SSE] Replayed {} buffered events; emitter stays subscribed for late async events: {}",
-                        state.buffer.size(), conversationId);
+                log.info(
+                        "[SSE] Replayed {} buffered events; emitter stays subscribed for late async events: {}",
+                        state.buffer.size(),
+                        conversationId);
                 // Restart heartbeat so the proxy/Tomcat 60s idle timeout doesn't
                 // close the reconnected emitter before the async_task_* event fires.
                 // The scheduler self-stops once subscribers go empty (see startHeartbeat).
@@ -1266,21 +1322,23 @@ public class ChatStreamTracker {
                 return true;
             }
         }
-        log.info("[SSE] Client reconnected for conversation={}, replaying {} buffered events",
-                conversationId, state.buffer.size());
+        log.info(
+                "[SSE] Client reconnected for conversation={}, replaying {} buffered events",
+                conversationId,
+                state.buffer.size());
         return true;
     }
 
-    /**
-     * 递增活跃 Flux 计数（每个 Flux 订阅开始时调用）。
-     * 原始流和审批 Replay 流共享同一个 RunState，通过计数协调生命周期。
-     */
+    /** 递增活跃 Flux 计数（每个 Flux 订阅开始时调用）。 原始流和审批 Replay 流共享同一个 RunState，通过计数协调生命周期。 */
     public void incrementFlux(String conversationId) {
         RunState state = runs.get(conversationId);
         if (state != null) {
             synchronized (state.lock) {
                 state.activeFluxCount++;
-                log.debug("Flux count incremented: {} (count={})", conversationId, state.activeFluxCount);
+                log.debug(
+                        "Flux count incremented: {} (count={})",
+                        conversationId,
+                        state.activeFluxCount);
             }
         }
     }
@@ -1290,11 +1348,11 @@ public class ChatStreamTracker {
 
     /**
      * 标记一个 Flux 完成。仅在所有 Flux 都完成时才真正移除 RunState。
-     * <p>
-     * 这解决了"原始流完成关闭 SSE，但 Replay 流仍在运行"的竞态问题。
-     * <p>
-     * <b>无副作用</b>：不消费排队消息。适用于不关心 queue 的路径（approval deny、setup error 等）。
-     * 需要链式续跑的路径应使用 {@link #completeAndConsumeIfLast(String)}。
+     *
+     * <p>这解决了"原始流完成关闭 SSE，但 Replay 流仍在运行"的竞态问题。
+     *
+     * <p><b>无副作用</b>：不消费排队消息。适用于不关心 queue 的路径（approval deny、setup error 等）。 需要链式续跑的路径应使用 {@link
+     * #completeAndConsumeIfLast(String)}。
      *
      * @return true 如果这是最后一个 Flux（RunState 已被移除），false 如果仍有活跃 Flux
      */
@@ -1319,8 +1377,10 @@ public class ChatStreamTracker {
             }
             state.activeFluxCount = Math.max(0, state.activeFluxCount - 1);
             if (state.activeFluxCount > 0) {
-                log.debug("Stream partially completed (no queue drain): {} (remaining flux={})",
-                        conversationId, state.activeFluxCount);
+                log.debug(
+                        "Stream partially completed (no queue drain): {} (remaining flux={})",
+                        conversationId,
+                        state.activeFluxCount);
                 return false;
             }
             state.done = true;
@@ -1336,16 +1396,18 @@ public class ChatStreamTracker {
         if (oldHeartbeat != null) {
             oldHeartbeat.cancel(false);
         }
-        log.debug("Stream fully completed (no queue drain): {} (kept in map for {}ms reconnect window)",
-                conversationId, DONE_RETENTION_MS);
+        log.debug(
+                "Stream fully completed (no queue drain): {} (kept in map for {}ms reconnect window)",
+                conversationId,
+                DONE_RETENTION_MS);
         return true;
     }
 
     /**
      * 原子地递减 activeFluxCount，仅在最后一个 Flux 完成时消费排队消息并移除 RunState。
-     * <p>
-     * 将「递减计数 → 消费 queue → 删除 RunState」三步收口到同一个临界区，
-     * 避免非最后一个 flux 提前 consume 导致 queue 丢失，也避免 complete 后查不到 queue。
+     *
+     * <p>将「递减计数 → 消费 queue → 删除 RunState」三步收口到同一个临界区， 避免非最后一个 flux 提前 consume 导致 queue 丢失，也避免
+     * complete 后查不到 queue。
      *
      * @return CompletionResult(allDone, queuedInput)
      */
@@ -1361,8 +1423,11 @@ public class ChatStreamTracker {
             }
             state.activeFluxCount = Math.max(0, state.activeFluxCount - 1);
             if (state.activeFluxCount > 0) {
-                log.debug("Stream partially completed: {} (remaining flux={}, queuedInputPending={})",
-                        conversationId, state.activeFluxCount, state.queuedInputPending.get());
+                log.debug(
+                        "Stream partially completed: {} (remaining flux={}, queuedInputPending={})",
+                        conversationId,
+                        state.activeFluxCount,
+                        state.queuedInputPending.get());
                 return new CompletionResult(false);
             }
             state.done = true;
@@ -1376,22 +1441,21 @@ public class ChatStreamTracker {
         if (oldHeartbeat != null) {
             oldHeartbeat.cancel(false);
         }
-        log.debug("Stream fully completed: {} (queuedInputPending={}, kept in map for {}ms reconnect window)",
-                conversationId, state.queuedInputPending.get(), DONE_RETENTION_MS);
+        log.debug(
+                "Stream fully completed: {} (queuedInputPending={}, kept in map for {}ms reconnect window)",
+                conversationId,
+                state.queuedInputPending.get(),
+                DONE_RETENTION_MS);
         return new CompletionResult(true);
     }
 
-    /**
-     * 检查指定会话是否有正在运行的流
-     */
+    /** 检查指定会话是否有正在运行的流 */
     public boolean isRunning(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null && !state.done;
     }
 
-    /**
-     * 从订阅者列表中移除指定 emitter（连接断开/超时时调用）
-     */
+    /** 从订阅者列表中移除指定 emitter（连接断开/超时时调用） */
     public void detach(String conversationId, SseEmitter emitter) {
         RunState state = runs.get(conversationId);
         detach(state, emitter, false);
@@ -1416,22 +1480,25 @@ public class ChatStreamTracker {
             // is now invisible to its owner and (for webchat) unreachable, so
             // cleanupStaleRuns will reclaim it after the grace window unless a
             // fresh subscriber re-attaches (which clears the clock in attach()).
-            if ((removed || armWhenAlreadyAbsent) && state.subscribers.isEmpty()
-                    && !state.done && state.subscribersZeroSince == null) {
+            if ((removed || armWhenAlreadyAbsent)
+                    && state.subscribers.isEmpty()
+                    && !state.done
+                    && state.subscribersZeroSince == null) {
                 state.subscribersZeroSince = System.currentTimeMillis();
             }
         }
-        log.debug("Emitter detached from stream: {} (remaining={})",
-                conversationId, state.subscribers.size());
+        log.debug(
+                "Emitter detached from stream: {} (remaining={})",
+                conversationId,
+                state.subscribers.size());
     }
 
     // ===== Heartbeat =====
 
     /**
-     * Pick the heartbeat cadence (seconds) that matches the run's current
-     * phase. Pre-token gaps need fast keep-alives so the UI shows activity;
-     * tool execution stretches slightly; mid-stream is rate-limited because
-     * deltas already keep the connection warm.
+     * Pick the heartbeat cadence (seconds) that matches the run's current phase. Pre-token gaps
+     * need fast keep-alives so the UI shows activity; tool execution stretches slightly; mid-stream
+     * is rate-limited because deltas already keep the connection warm.
      */
     private int currentHeartbeatIntervalSec(RunState state) {
         if (state.runningToolName != null && !state.runningToolName.isEmpty()) {
@@ -1440,10 +1507,7 @@ public class ChatStreamTracker {
         return state.firstTokenReceived ? heartbeatStreamingSec : heartbeatPreTokenSec;
     }
 
-    /**
-     * 启动心跳定时器。在流注册后调用，定期向前端发送 heartbeat 事件。
-     * 防止 useStream 的 60 秒无数据 timeout 误杀等待审批/长工具的流。
-     */
+    /** 启动心跳定时器。在流注册后调用，定期向前端发送 heartbeat 事件。 防止 useStream 的 60 秒无数据 timeout 误杀等待审批/长工具的流。 */
     public void startHeartbeat(String conversationId) {
         RunState state = runs.get(conversationId);
         startHeartbeat(state);
@@ -1458,50 +1522,73 @@ public class ChatStreamTracker {
             if (state.heartbeatFuture != null && !state.heartbeatFuture.isDone()) return;
             int intervalSec = currentHeartbeatIntervalSec(state);
             RunHandle heartbeatHandle = new RunHandle(state);
-            state.heartbeatFuture = heartbeatScheduler.scheduleAtFixedRate(() -> {
-                try {
-                    boolean shouldStop;
-                    synchronized (state.lock) {
-                        shouldStop = !isCurrent(state)
-                                || (state.done && state.subscribers.isEmpty());
-                    }
-                    // Continue heartbeating post-done as long as someone is still listening
-                    // (reconnected emitter waiting for late async_task_* events). Stop only
-                    // when the run is done AND the subscribers list is empty — otherwise the
-                    // 60s idle proxy timeout drops the reconnected emitter and async events
-                    // never reach the client live.
-                    if (shouldStop) {
-                        stopHeartbeat(state);
-                        return;
-                    }
-                    String json;
-                    try {
-                        json = objectMapper.writeValueAsString(Map.of(
-                                "conversationId", conversationId,
-                                "currentPhase", safe(state.currentPhase),
-                                "waitingReason", safe(state.waitingReason),
-                                "runningToolName", safe(state.runningToolName),
-                                "queueLength", state.queuedInputPending.get() ? 1 : 0,
-                                "timestamp", System.currentTimeMillis()
-                        ));
-                    } catch (Exception e) {
-                        json = "{\"conversationId\":\"" + conversationId + "\"}";
-                    }
-                    broadcast(heartbeatHandle, "heartbeat", json);
-                } catch (Exception e) {
-                    log.debug("Heartbeat error for {}: {}", conversationId, e.getMessage());
-                }
-            }, intervalSec, intervalSec, TimeUnit.SECONDS);
+            state.heartbeatFuture =
+                    heartbeatScheduler.scheduleAtFixedRate(
+                            () -> {
+                                try {
+                                    boolean shouldStop;
+                                    synchronized (state.lock) {
+                                        shouldStop =
+                                                !isCurrent(state)
+                                                        || (state.done
+                                                                && state.subscribers.isEmpty());
+                                    }
+                                    // Continue heartbeating post-done as long as someone is still
+                                    // listening
+                                    // (reconnected emitter waiting for late async_task_* events).
+                                    // Stop only
+                                    // when the run is done AND the subscribers list is empty —
+                                    // otherwise the
+                                    // 60s idle proxy timeout drops the reconnected emitter and
+                                    // async events
+                                    // never reach the client live.
+                                    if (shouldStop) {
+                                        stopHeartbeat(state);
+                                        return;
+                                    }
+                                    String json;
+                                    try {
+                                        json =
+                                                objectMapper.writeValueAsString(
+                                                        Map.of(
+                                                                "conversationId", conversationId,
+                                                                "currentPhase",
+                                                                        safe(state.currentPhase),
+                                                                "waitingReason",
+                                                                        safe(state.waitingReason),
+                                                                "runningToolName",
+                                                                        safe(state.runningToolName),
+                                                                "queueLength",
+                                                                        state.queuedInputPending
+                                                                                        .get()
+                                                                                ? 1
+                                                                                : 0,
+                                                                "timestamp",
+                                                                        System
+                                                                                .currentTimeMillis()));
+                                    } catch (Exception e) {
+                                        json = "{\"conversationId\":\"" + conversationId + "\"}";
+                                    }
+                                    broadcast(heartbeatHandle, "heartbeat", json);
+                                } catch (Exception e) {
+                                    log.debug(
+                                            "Heartbeat error for {}: {}",
+                                            conversationId,
+                                            e.getMessage());
+                                }
+                            },
+                            intervalSec,
+                            intervalSec,
+                            TimeUnit.SECONDS);
         }
     }
 
     /**
-     * Mark that the first content/thinking token has been received for this
-     * run and reschedule the heartbeat at the streaming cadence.
-     * <p>
-     * Called from the LLM streaming layer so the heartbeat relaxes once the
-     * connection is naturally being kept warm by data deltas. Idempotent — a
-     * second call is a no-op.
+     * Mark that the first content/thinking token has been received for this run and reschedule the
+     * heartbeat at the streaming cadence.
+     *
+     * <p>Called from the LLM streaming layer so the heartbeat relaxes once the connection is
+     * naturally being kept warm by data deltas. Idempotent — a second call is a no-op.
      */
     public void markFirstTokenReceived(String conversationId) {
         RunState state = runs.get(conversationId);
@@ -1512,9 +1599,9 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Cancels the active heartbeat (if any) and starts a new one at the
-     * cadence currently appropriate for the run state. Public so callers that
-     * mutate {@code runningToolName} can request a tool-cadence heartbeat.
+     * Cancels the active heartbeat (if any) and starts a new one at the cadence currently
+     * appropriate for the run state. Public so callers that mutate {@code runningToolName} can
+     * request a tool-cadence heartbeat.
      */
     public void rescheduleHeartbeat(String conversationId) {
         RunState state = runs.get(conversationId);
@@ -1526,9 +1613,7 @@ public class ChatStreamTracker {
         startHeartbeat(conversationId);
     }
 
-    /**
-     * 停止心跳定时器
-     */
+    /** 停止心跳定时器 */
     public void stopHeartbeat(String conversationId) {
         stopHeartbeat(runs.get(conversationId));
     }
@@ -1542,9 +1627,7 @@ public class ChatStreamTracker {
 
     // ===== Phase tracking =====
 
-    /**
-     * 更新当前执行阶段（用于 heartbeat 和前端状态展示）
-     */
+    /** 更新当前执行阶段（用于 heartbeat 和前端状态展示） */
     public void updatePhase(String conversationId, String phase) {
         RunState state = runs.get(conversationId);
         if (state != null) {
@@ -1552,9 +1635,7 @@ public class ChatStreamTracker {
         }
     }
 
-    /**
-     * 更新当前正在执行的工具名称
-     */
+    /** 更新当前正在执行的工具名称 */
     public void updateRunningTool(String conversationId, String toolName) {
         RunState state = runs.get(conversationId);
         if (state != null) {
@@ -1571,10 +1652,9 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Read-only accessor for the currently running tool name on a conversation.
-     * Returns {@code null} when no run state exists or no tool is in flight.
-     * Used by external observers (heartbeat watchdog, status APIs) that need
-     * to probe progress without mutating the run.
+     * Read-only accessor for the currently running tool name on a conversation. Returns {@code
+     * null} when no run state exists or no tool is in flight. Used by external observers (heartbeat
+     * watchdog, status APIs) that need to probe progress without mutating the run.
      */
     public String getRunningToolName(String conversationId) {
         RunState state = runs.get(conversationId);
@@ -1582,18 +1662,16 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Read-only accessor for the current execution phase. Returns {@code null}
-     * when no run state exists. Mirrors {@link #getRunningToolName(String)} so
-     * external observers can read both fields without touching internals.
+     * Read-only accessor for the current execution phase. Returns {@code null} when no run state
+     * exists. Mirrors {@link #getRunningToolName(String)} so external observers can read both
+     * fields without touching internals.
      */
     public String getCurrentPhase(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null ? state.currentPhase : null;
     }
 
-    /**
-     * 设置等待原因
-     */
+    /** 设置等待原因 */
     public void setWaitingReason(String conversationId, String reason) {
         RunState state = runs.get(conversationId);
         if (state != null) {
@@ -1604,17 +1682,21 @@ public class ChatStreamTracker {
     // ===== Interrupt with follow-up =====
 
     /**
-     * 请求中断当前流并排队一条用户消息。
-     * 与 requestStop 的区别：中断后自动续跑排队消息，而非停在原地。
+     * 请求中断当前流并排队一条用户消息。 与 requestStop 的区别：中断后自动续跑排队消息，而非停在原地。
      *
      * @return true 如果成功请求了中断
      */
-    public boolean requestInterrupt(String conversationId, String queuedMessage, Long agentId, boolean persisted) {
+    public boolean requestInterrupt(
+            String conversationId, String queuedMessage, Long agentId, boolean persisted) {
         return requestInterrupt(conversationId, queuedMessage, agentId, persisted, null);
     }
 
-    public boolean requestInterrupt(String conversationId, String queuedMessage, Long agentId,
-                                    boolean persisted, List<MessageContentPart> contentParts) {
+    public boolean requestInterrupt(
+            String conversationId,
+            String queuedMessage,
+            Long agentId,
+            boolean persisted,
+            List<MessageContentPart> contentParts) {
         RunState state = runs.get(conversationId);
         if (state == null || state.done) {
             return false;
@@ -1638,14 +1720,22 @@ public class ChatStreamTracker {
         // 锁外执行 dispose 和 broadcast（这些可能阻塞或耗时）
         if (canInterrupt) {
             toDispose.dispose();
-            log.info("Stream interrupted for follow-up: {} (queued: {})", conversationId,
-                    queuedMessage != null ? queuedMessage.substring(0, Math.min(30, queuedMessage.length())) : "null");
+            log.info(
+                    "Stream interrupted for follow-up: {} (queued: {})",
+                    conversationId,
+                    queuedMessage != null
+                            ? queuedMessage.substring(0, Math.min(30, queuedMessage.length()))
+                            : "null");
             try {
-                String json = objectMapper.writeValueAsString(Map.of(
-                        "conversationId", conversationId,
-                        "queuedMessage", queuedMessage != null ? queuedMessage : "",
-                        "timestamp", System.currentTimeMillis()
-                ));
+                String json =
+                        objectMapper.writeValueAsString(
+                                Map.of(
+                                        "conversationId",
+                                        conversationId,
+                                        "queuedMessage",
+                                        queuedMessage != null ? queuedMessage : "",
+                                        "timestamp",
+                                        System.currentTimeMillis()));
                 broadcast(conversationId, "turn_interrupt_requested", json);
             } catch (Exception e) {
                 log.warn("Failed to broadcast turn_interrupt_requested: {}", e.getMessage());
@@ -1653,15 +1743,22 @@ public class ChatStreamTracker {
             return true;
         }
 
-        log.info("Interrupt requested but Disposable unavailable, message queued only: {} (queued: {})",
+        log.info(
+                "Interrupt requested but Disposable unavailable, message queued only: {} (queued: {})",
                 conversationId,
-                queuedMessage != null ? queuedMessage.substring(0, Math.min(30, queuedMessage.length())) : "null");
+                queuedMessage != null
+                        ? queuedMessage.substring(0, Math.min(30, queuedMessage.length()))
+                        : "null");
         try {
-            String json = objectMapper.writeValueAsString(Map.of(
-                    "conversationId", conversationId,
-                    "queuedMessage", queuedMessage != null ? queuedMessage : "",
-                    "timestamp", System.currentTimeMillis()
-            ));
+            String json =
+                    objectMapper.writeValueAsString(
+                            Map.of(
+                                    "conversationId",
+                                    conversationId,
+                                    "queuedMessage",
+                                    queuedMessage != null ? queuedMessage : "",
+                                    "timestamp",
+                                    System.currentTimeMillis()));
             broadcast(conversationId, "queued_input_accepted", json);
         } catch (Exception e) {
             log.warn("Failed to broadcast queued_input_accepted: {}", e.getMessage());
@@ -1669,15 +1766,18 @@ public class ChatStreamTracker {
         return false;
     }
 
-    /**
-     * 将消息加入队列但不中断当前执行（用于不可中断阶段）。
-     */
-    public boolean enqueueMessage(String conversationId, String message, Long agentId, boolean persisted) {
+    /** 将消息加入队列但不中断当前执行（用于不可中断阶段）。 */
+    public boolean enqueueMessage(
+            String conversationId, String message, Long agentId, boolean persisted) {
         return enqueueMessage(conversationId, message, agentId, persisted, null);
     }
 
-    public boolean enqueueMessage(String conversationId, String message, Long agentId, boolean persisted,
-                                  List<MessageContentPart> contentParts) {
+    public boolean enqueueMessage(
+            String conversationId,
+            String message,
+            Long agentId,
+            boolean persisted,
+            List<MessageContentPart> contentParts) {
         RunState state = runs.get(conversationId);
         // Reject when there's no live producer to drain the queue:
         //   - state == null:  conversation truly gone (cleanup completed)
@@ -1696,11 +1796,12 @@ public class ChatStreamTracker {
         state.queuedInputPending.set(true);
         // broadcast 在锁外
         try {
-            String json = objectMapper.writeValueAsString(Map.of(
-                    "conversationId", conversationId,
-                    "queuedMessage", message,
-                    "timestamp", System.currentTimeMillis()
-            ));
+            String json =
+                    objectMapper.writeValueAsString(
+                            Map.of(
+                                    "conversationId", conversationId,
+                                    "queuedMessage", message,
+                                    "timestamp", System.currentTimeMillis()));
             broadcast(conversationId, "queued_input_accepted", json);
         } catch (Exception e) {
             log.warn("Failed to broadcast queued_input_accepted: {}", e.getMessage());
@@ -1708,20 +1809,18 @@ public class ChatStreamTracker {
         return true;
     }
 
-    /**
-     * 排队输入的原子快照（message + agentId + persisted + contentParts 一起返回，避免分离读取导致不一致）
-     */
-    public record QueuedInput(String message, Long agentId, boolean persisted,
-                              List<MessageContentPart> contentParts) {
+    /** 排队输入的原子快照（message + agentId + persisted + contentParts 一起返回，避免分离读取导致不一致） */
+    public record QueuedInput(
+            String message,
+            Long agentId,
+            boolean persisted,
+            List<MessageContentPart> contentParts) {
         public QueuedInput(String message, Long agentId, boolean persisted) {
             this(message, agentId, persisted, null);
         }
     }
 
-    /**
-     * 原子消费排队的输入（流完成/中断后调用）。
-     * 从队列头部取出一条消息。
-     */
+    /** 原子消费排队的输入（流完成/中断后调用）。 从队列头部取出一条消息。 */
     public QueuedInput consumeQueuedInput(String conversationId) {
         return null;
     }
@@ -1744,17 +1843,13 @@ public class ChatStreamTracker {
         return true;
     }
 
-    /**
-     * 获取中断类型
-     */
+    /** 获取中断类型 */
     public InterruptType getInterruptType(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null ? state.interruptType : null;
     }
 
-    /**
-     * 清除中断状态
-     */
+    /** 清除中断状态 */
     public void clearInterruptState(String conversationId) {
         RunState state = runs.get(conversationId);
         if (state != null) {
@@ -1762,17 +1857,13 @@ public class ChatStreamTracker {
         }
     }
 
-    /**
-     * 检查是否有排队消息
-     */
+    /** 检查是否有排队消息 */
     public boolean hasQueuedMessage(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null && state.queuedInputPending.get();
     }
 
-    /**
-     * 获取当前排队消息数量
-     */
+    /** 获取当前排队消息数量 */
     public int getQueueSize(String conversationId) {
         RunState state = runs.get(conversationId);
         return state != null && state.queuedInputPending.get() ? 1 : 0;
@@ -1793,9 +1884,7 @@ public class ChatStreamTracker {
 
     // ===== Approval idempotency =====
 
-    /**
-     * 尝试标记一个 approval ID 为已广播。如果已经广播过则返回 false（幂等去重）。
-     */
+    /** 尝试标记一个 approval ID 为已广播。如果已经广播过则返回 false（幂等去重）。 */
     public boolean markApprovalBroadcasted(String conversationId, String pendingId) {
         RunState state = runs.get(conversationId);
         if (state == null) return false;
@@ -1809,28 +1898,26 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Trim the replay buffer to {@link #MAX_BUFFER_SIZE} entries while
-     * preserving SSE-id semantics required by reconnect dedup.
+     * Trim the replay buffer to {@link #MAX_BUFFER_SIZE} entries while preserving SSE-id semantics
+     * required by reconnect dedup.
      *
-     * <p>We deliberately do NOT merge delta events even though it would
-     * reduce entry count more aggressively. Merging concatenates a range
-     * of original event ids into a single record; on reconnect a client
-     * whose {@code lastEventId} falls inside the merged range would
-     * either re-receive the head text (replay = duplicate) or lose the
-     * tail text (skip = data loss). Both are correctness bugs, and the
-     * dropping strategy below avoids them entirely — events kept in the
-     * buffer always correspond 1:1 to the ids the client originally saw.
+     * <p>We deliberately do NOT merge delta events even though it would reduce entry count more
+     * aggressively. Merging concatenates a range of original event ids into a single record; on
+     * reconnect a client whose {@code lastEventId} falls inside the merged range would either
+     * re-receive the head text (replay = duplicate) or lose the tail text (skip = data loss). Both
+     * are correctness bugs, and the dropping strategy below avoids them entirely — events kept in
+     * the buffer always correspond 1:1 to the ids the client originally saw.
      *
      * <p>Strategy (must be called under {@code state.lock}):
+     *
      * <ol>
-     *   <li>Drop earliest {@code thinking_delta} entries — thinking text
-     *       is not part of the canonical answer; losing the head of a
-     *       very long reasoning trace on reconnect is acceptable.</li>
-     *   <li>If still over the cap, drop earliest {@code content_delta}
-     *       entries. This loses visible answer text, but only after we've
-     *       buffered &gt; {@link #MAX_BUFFER_SIZE} events — &gt;1 MB of
-     *       output. Rare enough that we accept the trade-off rather
-     *       than mangle reconnect semantics.</li>
+     *   <li>Drop earliest {@code thinking_delta} entries — thinking text is not part of the
+     *       canonical answer; losing the head of a very long reasoning trace on reconnect is
+     *       acceptable.
+     *   <li>If still over the cap, drop earliest {@code content_delta} entries. This loses visible
+     *       answer text, but only after we've buffered &gt; {@link #MAX_BUFFER_SIZE} events — &gt;1
+     *       MB of output. Rare enough that we accept the trade-off rather than mangle reconnect
+     *       semantics.
      * </ol>
      */
     private static void trimBuffer(List<SseEvent> buffer) {
@@ -1870,46 +1957,38 @@ public class ChatStreamTracker {
     static final long STALE_RUN_SWEEP_INTERVAL_MS = 30_000L;
 
     /**
-     * RunState 最长无活动时间。从 wall-clock {@code MAX_LIFETIME_MS=30min}
-     * 切换到 inactivity-based 后默认 30 min（1800s 空闲超时）：只要 agent 还在持续产事件
-     * （tool call / content delta / phase transition / progress_update），
-     * 就一直活下去，墙钟跑 1 小时 2 小时都可以。只有真正"完全静默 ≥ N 分钟"
-     * 才视为卡死并强制清理。
+     * RunState 最长无活动时间。从 wall-clock {@code MAX_LIFETIME_MS=30min} 切换到 inactivity-based 后默认 30
+     * min（1800s 空闲超时）：只要 agent 还在持续产事件 （tool call / content delta / phase transition /
+     * progress_update）， 就一直活下去，墙钟跑 1 小时 2 小时都可以。只有真正"完全静默 ≥ N 分钟" 才视为卡死并强制清理。
      *
-     * <p>修复的背景：round-6 的 10-LLM 横评任务实际跑了 47 min，全程都在
-     * 出 tool call，但旧的 wall-clock 30 min 死线在 iter 128 / 8 of 10
-     * 就把 RunState 清掉了 — SSE 流死、UI 空白、用户以为任务挂了。换成
-     * inactivity 后，那种长任务永远不会被误清，而真正卡死的 agent（无活动
-     * 5+ 分钟）会按时清理。可通过 property
-     * {@code mateclaw.sse.idle-timeout-minutes} 调整。
+     * <p>修复的背景：round-6 的 10-LLM 横评任务实际跑了 47 min，全程都在 出 tool call，但旧的 wall-clock 30 min 死线在 iter 128
+     * / 8 of 10 就把 RunState 清掉了 — SSE 流死、UI 空白、用户以为任务挂了。换成 inactivity 后，那种长任务永远不会被误清，而真正卡死的
+     * agent（无活动 5+ 分钟）会按时清理。可通过 property {@code mateclaw.sse.idle-timeout-minutes} 调整。
      */
     @org.springframework.beans.factory.annotation.Value("${mateclaw.sse.idle-timeout-minutes:30}")
     private int idleTimeoutMinutes = 30;
 
     /**
-     * Grace period (seconds) before an orphaned run is reclaimed. A run is
-     * "orphaned" when its subscriber list has been empty since some instant
-     * (the only SSE client disconnected) while the agent Flux is still
-     * running — invisible to its owner and, for the WebChat channel,
-     * unreachable (no re-attach endpoint). The default 2 minutes tolerates a
-     * network blip + a client-side regenerate retry; once it elapses with no
-     * subscriber returning, the run is disposed and its partial assistant
-     * content is flushed via {@code emergencySaveCallback} (issue #587).
-     * <p>
-     * Note: a run that keeps producing events but has no subscribers is NOT
-     * considered stuck — {@code lastEventAt} keeps it out of the idle bucket.
-     * The orphan bucket specifically catches "alive but nobody's watching",
-     * which the idle watchdog cannot see.
+     * Grace period (seconds) before an orphaned run is reclaimed. A run is "orphaned" when its
+     * subscriber list has been empty since some instant (the only SSE client disconnected) while
+     * the agent Flux is still running — invisible to its owner and, for the WebChat channel,
+     * unreachable (no re-attach endpoint). The default 2 minutes tolerates a network blip + a
+     * client-side regenerate retry; once it elapses with no subscriber returning, the run is
+     * disposed and its partial assistant content is flushed via {@code emergencySaveCallback}
+     * (issue #587).
+     *
+     * <p>Note: a run that keeps producing events but has no subscribers is NOT considered stuck —
+     * {@code lastEventAt} keeps it out of the idle bucket. The orphan bucket specifically catches
+     * "alive but nobody's watching", which the idle watchdog cannot see.
      */
     @org.springframework.beans.factory.annotation.Value("${mateclaw.webchat.orphan-grace-sec:120}")
     private int orphanGraceSeconds = 120;
 
     /**
-     * Test hook — backdates the {@code lastEventAt} timestamp on an
-     * existing RunState so {@link #cleanupStaleRuns()} can be exercised
-     * deterministically without sleeping for minutes. Package-private on
-     * purpose; production callers go through {@link #broadcast} which
-     * stamps the field forward.
+     * Test hook — backdates the {@code lastEventAt} timestamp on an existing RunState so {@link
+     * #cleanupStaleRuns()} can be exercised deterministically without sleeping for minutes.
+     * Package-private on purpose; production callers go through {@link #broadcast} which stamps the
+     * field forward.
      */
     void backdateLastEventForTesting(String conversationId, long lastEventAt) {
         RunState state = runs.get(conversationId);
@@ -1964,15 +2043,11 @@ public class ChatStreamTracker {
     }
 
     /**
-     * 定期清理过期的 RunState，防止内存泄漏。
-     * - 已完成超过 {@link #DONE_RETENTION_MS} 的 → 移除
-     * - 自 {@link RunState#lastEventAt} 算起静默超过
-     *   {@link #idleTimeoutMinutes} 分钟的 → 强制移除（视为卡死）
-     * - 订阅者清零超过 {@link #orphanGraceSeconds} 且仍在运行的孤儿 →
-     *   移除（webchat 无重连端点，运行对调用方不可见不可达，见 #587）
+     * 定期清理过期的 RunState，防止内存泄漏。 - 已完成超过 {@link #DONE_RETENTION_MS} 的 → 移除 - 自 {@link
+     * RunState#lastEventAt} 算起静默超过 {@link #idleTimeoutMinutes} 分钟的 → 强制移除（视为卡死） - 订阅者清零超过 {@link
+     * #orphanGraceSeconds} 且仍在运行的孤儿 → 移除（webchat 无重连端点，运行对调用方不可见不可达，见 #587）
      */
-    @org.springframework.scheduling.annotation.Scheduled(
-            fixedDelay = STALE_RUN_SWEEP_INTERVAL_MS)
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = STALE_RUN_SWEEP_INTERVAL_MS)
     public void cleanupStaleRuns() {
         long now = System.currentTimeMillis();
         long idleThresholdMs = (long) idleTimeoutMinutes * 60_000L;
@@ -1994,20 +2069,31 @@ public class ChatStreamTracker {
 
                     if (state.done && age > DONE_RETENTION_MS) {
                         reason = "completed and expired";
-                    } else if (!state.done && state.subscribers.isEmpty()
-                            && orphanSince != null && orphanMs > orphanGraceMs) {
+                    } else if (!state.done
+                            && state.subscribers.isEmpty()
+                            && orphanSince != null
+                            && orphanMs > orphanGraceMs) {
                         // Orphan: subscriber list empty longer than the grace window
                         // while the agent Flux is still running. Invisible + (for
                         // webchat) unreachable, so reclaim it instead of letting it
                         // burn tokens until the idle sweep (issue #587). A run that's
                         // actively producing events is NOT exempt — the whole point is
                         // nobody is watching those events.
-                        reason = "orphaned: no subscribers for " + (orphanMs / 1000)
-                                + "s (grace " + orphanGraceSeconds + "s); run still active";
+                        reason =
+                                "orphaned: no subscribers for "
+                                        + (orphanMs / 1000)
+                                        + "s (grace "
+                                        + orphanGraceSeconds
+                                        + "s); run still active";
                     } else if (idleMs > idleThresholdMs) {
-                        reason = "idle for " + (idleMs / 1000) + "s (threshold "
-                                + idleTimeoutMinutes + "min); total wall-clock age "
-                                + (age / 1000) + "s";
+                        reason =
+                                "idle for "
+                                        + (idleMs / 1000)
+                                        + "s (threshold "
+                                        + idleTimeoutMinutes
+                                        + "min); total wall-clock age "
+                                        + (age / 1000)
+                                        + "s";
                     }
 
                     if (reason != null) {
@@ -2030,27 +2116,34 @@ public class ChatStreamTracker {
                         if (cb != null) {
                             try {
                                 cb.run();
-                                log.info("[SSE] Emergency-saved state for conversation={} before eviction",
+                                log.info(
+                                        "[SSE] Emergency-saved state for conversation={} before eviction",
                                         entry.getKey());
                             } catch (Exception ex) {
-                                log.warn("[SSE] Emergency save failed for conversation={}: {}",
-                                        entry.getKey(), ex.getMessage());
+                                log.warn(
+                                        "[SSE] Emergency save failed for conversation={}: {}",
+                                        entry.getKey(),
+                                        ex.getMessage());
                             }
                         }
                     }
                     try {
                         stopHeartbeat(state);
                     } catch (Exception ex) {
-                        log.warn("[SSE] Heartbeat stop failed for conversation={}: {}",
-                                entry.getKey(), ex.getMessage());
+                        log.warn(
+                                "[SSE] Heartbeat stop failed for conversation={}: {}",
+                                entry.getKey(),
+                                ex.getMessage());
                     }
                     // Close subscriber SSE connections so an evicted run does not
                     // leave clients hanging until their own emitter timeout.
                     try {
                         closeSubscribers(state, false);
                     } catch (Exception ex) {
-                        log.warn("[SSE] Subscriber close failed for conversation={}: {}",
-                                entry.getKey(), ex.getMessage());
+                        log.warn(
+                                "[SSE] Subscriber close failed for conversation={}: {}",
+                                entry.getKey(),
+                                ex.getMessage());
                     }
                     try {
                         state.stopRequested.set(true);
@@ -2067,8 +2160,10 @@ public class ChatStreamTracker {
                             d.dispose();
                         }
                     } catch (Exception ex) {
-                        log.warn("[SSE] Disposable teardown failed for conversation={}: {}",
-                                entry.getKey(), ex.getMessage());
+                        log.warn(
+                                "[SSE] Disposable teardown failed for conversation={}: {}",
+                                entry.getKey(),
+                                ex.getMessage());
                     }
                 } finally {
                     state.termination.complete(null);
@@ -2077,17 +2172,23 @@ public class ChatStreamTracker {
                     if (mappingRemoved) {
                         mappingsRemoved++;
                     }
-                    log.warn("[SSE] Reclaimed stale RunState resources for conversation={}: {}; "
+                    log.warn(
+                            "[SSE] Reclaimed stale RunState resources for conversation={}: {}; "
                                     + "mappingRemoved={}",
-                            entry.getKey(), reason, mappingRemoved);
+                            entry.getKey(),
+                            reason,
+                            mappingRemoved);
                 }
             }
         }
 
         if (reclaimed > 0) {
-            log.info("[SSE] Cleanup completed: reclaimed {} stale RunState resource set(s), "
+            log.info(
+                    "[SSE] Cleanup completed: reclaimed {} stale RunState resource set(s), "
                             + "removed {} map entry/entries, {} remaining",
-                    reclaimed, mappingsRemoved, runs.size());
+                    reclaimed,
+                    mappingsRemoved,
+                    runs.size());
         }
 
         // Age out the recycled-marker map alongside RunState cleanup. Same
@@ -2098,25 +2199,26 @@ public class ChatStreamTracker {
 
     /**
      * Flush in-flight runs before JVM shutdown.
-     * <p>
-     * Spring closes singleton beans in reverse construction order; ConversationService /
-     * Hikari outlive ChatStreamTracker, so saveMessage from {@link #onShutdown()} still
-     * has a working DB connection. Without this, a {@code mvn spring-boot:run} restart or
-     * SIGTERM during a turn races against the Reactor cancellation: the doOnError /
-     * doOnComplete saveMessage may not run before HikariPool shuts down, leaving the
-     * conversation with only the user message and no assistant reply (the
-     * "对话框里除了问题外什么也没留下" symptom seen in production logs at 07:23:02).
-     * <p>
-     * Behavior:
+     *
+     * <p>Spring closes singleton beans in reverse construction order; ConversationService / Hikari
+     * outlive ChatStreamTracker, so saveMessage from {@link #onShutdown()} still has a working DB
+     * connection. Without this, a {@code mvn spring-boot:run} restart or SIGTERM during a turn
+     * races against the Reactor cancellation: the doOnError / doOnComplete saveMessage may not run
+     * before HikariPool shuts down, leaving the conversation with only the user message and no
+     * assistant reply (the "对话框里除了问题外什么也没留下" symptom seen in production logs at 07:23:02).
+     *
+     * <p>Behavior:
+     *
      * <ol>
-     *   <li>Walk every active (not-done) RunState.</li>
-     *   <li>Invoke its registered emergencySaveCallback synchronously — the callback
-     *       (set by ChatController) snapshots the current accumulator and persists it
-     *       as an "interrupted" assistant message.</li>
-     *   <li>Dispose the Reactor disposable so the LLM stream terminates promptly.</li>
+     *   <li>Walk every active (not-done) RunState.
+     *   <li>Invoke its registered emergencySaveCallback synchronously — the callback (set by
+     *       ChatController) snapshots the current accumulator and persists it as an "interrupted"
+     *       assistant message.
+     *   <li>Dispose the Reactor disposable so the LLM stream terminates promptly.
      * </ol>
-     * The callback must tolerate normal doOnError/doOnComplete having raced and saved
-     * already; the latest commit wins for that conversation.
+     *
+     * The callback must tolerate normal doOnError/doOnComplete having raced and saved already; the
+     * latest commit wins for that conversation.
      */
     @PreDestroy
     public void onShutdown() {
@@ -2125,8 +2227,7 @@ public class ChatStreamTracker {
             log.info("[ChatStreamTracker] Shutdown: no active runs to flush");
             return;
         }
-        log.warn("[ChatStreamTracker] Shutdown: flushing {} active run(s) before JVM exit",
-                active);
+        log.warn("[ChatStreamTracker] Shutdown: flushing {} active run(s) before JVM exit", active);
         for (Map.Entry<String, RunState> entry : runs.entrySet()) {
             RunState state = entry.getValue();
             if (state.done) continue;
@@ -2137,12 +2238,17 @@ public class ChatStreamTracker {
                     log.info("[ChatStreamTracker] Emergency-saving in-flight run: {}", cid);
                     callback.run();
                 } else {
-                    log.warn("[ChatStreamTracker] No emergency-save callback for active run: {} " +
-                            "(content may be lost)", cid);
+                    log.warn(
+                            "[ChatStreamTracker] No emergency-save callback for active run: {} "
+                                    + "(content may be lost)",
+                            cid);
                 }
             } catch (Exception e) {
-                log.error("[ChatStreamTracker] Emergency save failed for {}: {}",
-                        cid, e.getMessage(), e);
+                log.error(
+                        "[ChatStreamTracker] Emergency save failed for {}: {}",
+                        cid,
+                        e.getMessage(),
+                        e);
             }
             state.stopRequested.set(true);
             List<Runnable> hooks;
@@ -2159,8 +2265,10 @@ public class ChatStreamTracker {
                     d.dispose();
                 }
             } catch (Exception e) {
-                log.warn("[ChatStreamTracker] Disposable.dispose failed for {}: {}",
-                        cid, e.getMessage());
+                log.warn(
+                        "[ChatStreamTracker] Disposable.dispose failed for {}: {}",
+                        cid,
+                        e.getMessage());
             }
             state.termination.complete(null);
         }
@@ -2169,10 +2277,9 @@ public class ChatStreamTracker {
     // ===== Runtime snapshot surface (admin Live view) =====
 
     /**
-     * Bind the resolved agent + owner to the active run so the runtime
-     * snapshot can label cards without re-querying the conversation table.
-     * Idempotent — overwrites are fine because both fields are observation-
-     * only metadata.
+     * Bind the resolved agent + owner to the active run so the runtime snapshot can label cards
+     * without re-querying the conversation table. Idempotent — overwrites are fine because both
+     * fields are observation- only metadata.
      */
     public void bindRunMeta(String conversationId, Long agentId, String username) {
         RunState s = runs.get(conversationId);
@@ -2182,9 +2289,8 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Immutable view of one in-flight run. Computed eagerly under the
-     * RunState lock so the receiver sees a consistent picture even if the
-     * underlying state mutates while it iterates.
+     * Immutable view of one in-flight run. Computed eagerly under the RunState lock so the receiver
+     * sees a consistent picture even if the underlying state mutates while it iterates.
      */
     public record RunSnapshot(
             String conversationId,
@@ -2202,13 +2308,12 @@ public class ChatStreamTracker {
             long createdAt,
             long lastEventAt,
             long ageMs,
-            long msSinceLastEvent
-    ) {}
+            long msSinceLastEvent) {}
 
     /**
-     * Snapshot every active run. Used by the admin Live view to render the
-     * global "what are my agents doing right now" view. Returned list is a
-     * defensive copy — callers may freely sort / filter it.
+     * Snapshot every active run. Used by the admin Live view to render the global "what are my
+     * agents doing right now" view. Returned list is a defensive copy — callers may freely sort /
+     * filter it.
      */
     public List<RunSnapshot> getAllSnapshot() {
         long now = System.currentTimeMillis();
@@ -2220,47 +2325,45 @@ public class ChatStreamTracker {
                 subs = s.subscribers.size();
                 queue = s.queuedInputPending.get() ? 1 : 0;
             }
-            out.add(new RunSnapshot(
-                    s.conversationId,
-                    s.agentId,
-                    s.username,
-                    s.currentPhase,
-                    s.runningToolName,
-                    s.waitingReason,
-                    s.done,
-                    s.stopRequested.get(),
-                    s.firstTokenReceived,
-                    subs,
-                    queue,
-                    s.activeFluxCount,
-                    s.createdAt,
-                    s.lastEventAt,
-                    now - s.createdAt,
-                    now - s.lastEventAt
-            ));
+            out.add(
+                    new RunSnapshot(
+                            s.conversationId,
+                            s.agentId,
+                            s.username,
+                            s.currentPhase,
+                            s.runningToolName,
+                            s.waitingReason,
+                            s.done,
+                            s.stopRequested.get(),
+                            s.firstTokenReceived,
+                            subs,
+                            queue,
+                            s.activeFluxCount,
+                            s.createdAt,
+                            s.lastEventAt,
+                            now - s.createdAt,
+                            now - s.lastEventAt));
         }
         return out;
     }
 
     /**
      * Close every live subscriber's SSE connection for this run.
-     * <p>
-     * For the WebChat channel (issue #586), {@code done}/{@code error} is the
-     * logical end of the stream and downstream integrators reading the SSE
-     * stream by standard semantics ("read until the server closes") must see
-     * the connection actually close — otherwise a 5-second answer holds a
-     * backend connection pool slot for the full 10-minute SseEmitter timeout.
-     * The in-house web channel does NOT call this (it keeps the emitter open
-     * for reconnect + buffer replay of late {@code async_task_*} events); the
-     * close-on-done policy is channel-scoped, not global.
-     * <p>
-     * Also the shared closing sequence invoked by {@link #cleanupStaleRuns()}
-     * on eviction so a forcibly-reclaimed run does not leave subscribers
-     * hanging in silence until their own timeout fires.
-     * <p>
-     * Idempotent: safe to call when no run exists or subscribers are already
-     * empty. Each {@code em.complete()} is wrapped so one dead subscriber
-     * cannot abort the loop before later subscribers are closed.
+     *
+     * <p>For the WebChat channel (issue #586), {@code done}/{@code error} is the logical end of the
+     * stream and downstream integrators reading the SSE stream by standard semantics ("read until
+     * the server closes") must see the connection actually close — otherwise a 5-second answer
+     * holds a backend connection pool slot for the full 10-minute SseEmitter timeout. The in-house
+     * web channel does NOT call this (it keeps the emitter open for reconnect + buffer replay of
+     * late {@code async_task_*} events); the close-on-done policy is channel-scoped, not global.
+     *
+     * <p>Also the shared closing sequence invoked by {@link #cleanupStaleRuns()} on eviction so a
+     * forcibly-reclaimed run does not leave subscribers hanging in silence until their own timeout
+     * fires.
+     *
+     * <p>Idempotent: safe to call when no run exists or subscribers are already empty. Each {@code
+     * em.complete()} is wrapped so one dead subscriber cannot abort the loop before later
+     * subscribers are closed.
      */
     public void closeSubscribers(String conversationId) {
         closeSubscribers(runs.get(conversationId), true);
@@ -2293,10 +2396,9 @@ public class ChatStreamTracker {
     }
 
     /**
-     * Force a wedged run to terminate. Used by the admin Live view's
-     * "End it" action when the friendly stop has been observed not to take
-     * effect (model wedged in a tool call beyond the timeout). Sequence
-     * matches what {@link #onShutdown()} does for individual runs.
+     * Force a wedged run to terminate. Used by the admin Live view's "End it" action when the
+     * friendly stop has been observed not to take effect (model wedged in a tool call beyond the
+     * timeout). Sequence matches what {@link #onShutdown()} does for individual runs.
      *
      * @return true when a run was found and torn down; false if already gone
      */
@@ -2316,7 +2418,10 @@ public class ChatStreamTracker {
             try {
                 callback.run();
             } catch (Exception e) {
-                log.warn("forceRecycle: emergency save failed for {}: {}", conversationId, e.getMessage());
+                log.warn(
+                        "forceRecycle: emergency save failed for {}: {}",
+                        conversationId,
+                        e.getMessage());
             }
         }
         try {
@@ -2343,11 +2448,17 @@ public class ChatStreamTracker {
             state.termination.complete(null);
             stopHeartbeat(conversationId);
         } catch (Exception e) {
-            log.warn("forceRecycle: heartbeat stop failed for {}: {}", conversationId, e.getMessage());
+            log.warn(
+                    "forceRecycle: heartbeat stop failed for {}: {}",
+                    conversationId,
+                    e.getMessage());
         }
         synchronized (state.lock) {
             for (SseEmitter em : state.subscribers) {
-                try { em.complete(); } catch (Exception ignored) {}
+                try {
+                    em.complete();
+                } catch (Exception ignored) {
+                }
             }
             state.subscribers.clear();
         }

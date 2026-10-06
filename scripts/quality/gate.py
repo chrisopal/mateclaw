@@ -29,6 +29,7 @@ DEFAULT_POLICY = {
     "zero_tolerance": {},
     "source_limit_bytes": 5_000_000,
 }
+FROZEN_MIGRATIONS = ".quality/frozen-migrations.json"
 
 
 class GateError(RuntimeError):
@@ -128,7 +129,8 @@ def snapshot(repo: Path, mode: str, ref: str = "HEAD", limit: int = 5_000_000) -
         if target.stat().st_size > limit:
             raise GateError(f"SOURCE_TOO_LARGE: {path}")
         try:
-            result[path] = target.read_text(encoding="utf-8")
+            # Preserve the same bytes as Git blobs; read_text normalizes CRLF.
+            result[path] = target.read_bytes().decode("utf-8")
         except UnicodeDecodeError as exc:
             raise GateError(f"SOURCE_NOT_UTF8: {path}") from exc
     digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -278,11 +280,70 @@ def scan(files: dict[str, str]) -> list[Finding]:
 
 
 def is_migration(path: str) -> bool:
-    return bool(re.search(r"/db/migration/(?:h2|mysql|kingbase)/V[^/]+\.sql$", path))
+    return bool(re.search(r"/db/migration/(?:h2|mysql|kingbase)/V[^/]+\.(?:sql|java)$", path))
+
+
+def frozen_sources(raw: str) -> dict[str, str]:
+    """Validate an explicit source closure; never infer Java dependencies."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate key")
+            result[key] = value
+        return result
+
+    data = json.loads(raw, object_pairs_hook=unique_object)
+    if (not isinstance(data, dict) or set(data) != {"version", "files"}
+            or type(data["version"]) is not int or data["version"] != 1
+            or not isinstance(data["files"], dict) or not data["files"]):
+        raise ValueError("invalid source-freeze schema")
+    for path, digest in data["files"].items():
+        if (not isinstance(path, str) or str(PurePosixPath(path)) != path
+                or ".." in PurePosixPath(path).parts
+                or not re.fullmatch(r"mateclaw-[^/]+/src/main/java/[^\\]+\.java", path)
+                or not eligible(path) or not isinstance(digest, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+            raise ValueError("invalid frozen source path or SHA-256")
+    return data["files"]
+
+
+def frozen_migration_changes(before: dict[str, str], after: dict[str, str]) -> list[Finding]:
+    out = []
+    declarations = []
+    for files in (before, after):
+        raw = files.get(FROZEN_MIGRATIONS)
+        try:
+            declared = frozen_sources(raw) if raw is not None else {}
+        except ValueError:
+            out.append(finding("DB-003", FROZEN_MIGRATIONS, raw, 0,
+                               "冻结迁移清单格式无效；版本、路径、摘要与重复键需审核", "invalid manifest"))
+            declared = {}
+        declarations.append(declared)
+        for path, digest in declared.items():
+            text = files.get(path)
+            if text is None or hashlib.sha256(text.encode("utf-8")).hexdigest() != digest:
+                out.append(finding("DB-004", path, text or "", 0,
+                                   "冻结源码缺失或不匹配已声明 SHA-256；新增版本替代", path))
+
+    old, new = declarations
+    for path, digest in old.items():
+        if new.get(path) != digest or after.get(path) != before.get(path):
+            out.append(finding("DB-004", path, before.get(path, ""), 0,
+                               "基线冻结源码及摘要不可删除、修改或重命名", path))
+    for path in new.keys() - old.keys():
+        if path in before and before[path] != after.get(path):
+            out.append(finding("DB-004", path, before[path], 0,
+                               "首次冻结已有源码必须保持基线字节；不能同时重写历史", path))
+    for path, text in after.items():
+        if path.endswith(".java") and is_migration(path) and path not in new:
+            out.append(finding("DB-003", path, text, 0,
+                               "Java Flyway 入口及算法闭包必须登记冻结清单", path))
+    return out
 
 
 def invariant_changes(before: dict[str, str], after: dict[str, str]) -> list[Finding]:
-    out = []
+    out = frozen_migration_changes(before, after)
     for p, text in before.items():
         if is_migration(p) and after.get(p) != text:
             out.append(finding("DB-001", p, text, 0, "已存在 Flyway 迁移不可修改、删除或重命名；新增版本迁移", p))

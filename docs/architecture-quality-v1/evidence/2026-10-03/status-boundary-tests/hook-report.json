@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "mode": "commit",
+  "started_at": "2026-10-02T23:56:49.860816+00:00",
+  "steps": [
+    {
+      "name": "architecture-ratchet",
+      "status": "PASS",
+      "new_violations": 0,
+      "existing_violations": 2439
+    },
+    {
+      "name": "guard-self-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/scripts/quality/tests",
+        "-v"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/guard-self-tests.log",
+      "log_sha256": "d7e30f9c05c8dee93c238456be9928177161c11a20ae6df19c96164992d83239",
+      "elapsed_seconds": 1.257
+    },
+    {
+      "name": "java-toolchain",
+      "status": "NOT_APPLICABLE",
+      "reason": "No backend/control-plane changes"
+    },
+    {
+      "name": "ui-format",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "--config",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/.quality/prettier.json",
+        "src/features/presales/__tests__/presalesWorkbench.test.ts",
+        "src/features/presales/__tests__/status.test.ts",
+        "src/features/presales/pages/PresalesWorkbench.vue",
+        "src/features/presales/shared/messages.ts",
+        "src/features/presales/shared/status.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-format.log",
+      "log_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "elapsed_seconds": 0.609
+    },
+    {
+      "name": "ui-lint",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "--max-warnings=0",
+        "src/features/presales/__tests__/presalesWorkbench.test.ts",
+        "src/features/presales/__tests__/status.test.ts",
+        "src/features/presales/pages/PresalesWorkbench.vue",
+        "src/features/presales/shared/messages.ts",
+        "src/features/presales/shared/status.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-lint.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 1.106
+    },
+    {
+      "name": "ui-typecheck",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "vue-tsc",
+        "--noEmit"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-typecheck.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 11.501
+    },
+    {
+      "name": "id-precision",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "bash",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/scripts/check-snowflake-precision.sh"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/id-precision.log",
+      "log_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "elapsed_seconds": 0.127
+    },
+    {
+      "name": "ui-vitest",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--reporter=json",
+        "--outputFile=/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/vitest.json"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-vitest.log",
+      "log_sha256": "1f691cf209bc71386ae6ea78f97e195ee1e049161b2efe22fb02eb1a52b7c826",
+      "elapsed_seconds": 52.721,
+      "executed_tests": 1018
+    },
+    {
+      "name": "ui-node-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "--test-reporter=tap",
+        "test/agentBindingSearch.test.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-node-tests.log",
+      "log_sha256": "48996e43f5c1a9c05babffe1ecf7391c6805fce425c9dac6432cc49018cec972",
+      "elapsed_seconds": 0.184
+    },
+    {
+      "name": "ui-build-enterprise",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "build",
+        "--mode",
+        "enterprise"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-build-enterprise.log",
+      "log_sha256": "78624fe8fedb1d92ac2a11fd7d587506e48c87dd45049cd27844a89444918300",
+      "elapsed_seconds": 38.83
+    },
+    {
+      "name": "ui-build-classic",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "build",
+        "--mode",
+        "classic"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w/ui-build-classic.log",
+      "log_sha256": "9c1b3ccd6969ccb90fa233bd90ce5f54868156f555f25cef8a3c61791ca39ff8",
+      "elapsed_seconds": 38.091
+    },
+    {
+      "name": "cost-tool",
+      "status": "NOT_APPLICABLE",
+      "reason": "No standalone cost tool change"
+    }
+  ],
+  "application_acceptance": "NOT_RUN",
+  "report_dir": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-1vibwo9w",
+  "base_commit": "b535c6d1970e93e491a3227a88abab5a052dafb0",
+  "policy_sha256": "2b4bb7752b64f1d18824022bae5036644f75c4a9d8a06f22b434e9ed98922d5c",
+  "runner_sha256": "d81bb05eb5ece4b4974b5d6ccf7466945524c3d573682834dd4f76b6b69a89f0",
+  "target_identity": "10855a6082a43f7d8963cc60a23491f4f25c80a3",
+  "changed_files": [
+    "docs/architecture-quality-v1/evidence/2026-10-03/AQ05_STATUS_BOUNDARY_PLAN.md",
+    "mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts",
+    "mateclaw-ui/src/features/presales/__tests__/status.test.ts",
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+    "mateclaw-ui/src/features/presales/shared/messages.ts",
+    "mateclaw-ui/src/features/presales/shared/status.ts"
+  ],
+  "plan": {
+    "java": false,
+    "ui": true,
+    "control": false,
+    "cost_tool": false
+  },
+  "status": "PASS",
+  "submission_ready": true,
+  "finished_at": "2026-10-02T23:59:41.753516+00:00"
+}

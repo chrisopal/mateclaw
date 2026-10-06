@@ -1,0 +1,803 @@
+{
+  "schema_version": 1,
+  "task": "AQ05 / AQ06 handoff freezing and read boundary",
+  "status": "ENGINEERING_HANDOFF_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "head_tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "source_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "bd54092e53ad315b19fc65a26c90bb423065f060d06626b88363b312680f6d39",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "670f7bae73fdac08a308bae22e9ece0f504bae506bd3d673eb616742fa38a166",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesHandoffReadContractTest.java": "986922545d57d1be29a59b376750967ad6b87833fa01eeb4707e344abfc087e5"
+  },
+  "service_lines": {
+    "before_this_slice": 1194,
+    "after": 1173,
+    "removed_net": 21
+  },
+  "source_scope": "Only the two handoff read methods and a shared helper changed since the archived pre-slice Service; publishing/approval/receipt/hash/auth/transaction code outside this region is byte-identical",
+  "red": {
+    "initial_contract": {
+      "tests": 7,
+      "failures": 5,
+      "fixture_error": "viewer in other Workspace returns 403, not 404"
+    },
+    "actual_corrected_contract": {
+      "tests": 7,
+      "failures": 4
+    },
+    "real_publish_flow": {
+      "tests": 1,
+      "failures": 1
+    },
+    "semantic_flag_contract": {
+      "tests": 1,
+      "failures": 1
+    },
+    "auxiliary_archive_script_error": "SyntaxError before any repair/write, followed by unchanged original RED repeat; repeat XML is not first-run XML"
+  },
+  "maven": {
+    "status": "PASS",
+    "exit": 0,
+    "actual_classes": 46,
+    "counts": {
+      "tests": 384,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "actual_test_classes": [
+      "vip.mate.presales.PresalesProjectItemsTest",
+      "vip.mate.presales.PresalesPresentationCompilerTest",
+      "vip.mate.presales.PresalesArtifactPersistenceContractTest",
+      "vip.mate.presales.ProjectAuthorityFenceDatabaseTest",
+      "vip.mate.presales.PresalesContextProviderTest",
+      "vip.mate.presales.PresalesAccessPolicyTest",
+      "vip.mate.presales.PresalesArtifactReadContractTest",
+      "vip.mate.presales.PresalesProjectListingContractTest",
+      "vip.mate.presales.PresalesSqlListingTest",
+      "vip.mate.presales.PresalesModelAdapterTest",
+      "vip.mate.presales.PresalesArtifactRepositoryTest",
+      "vip.mate.presales.PresalesCommandKindsTest",
+      "vip.mate.presales.PresalesExecutionRevalidationProviderTest",
+      "vip.mate.presales.PresalesHandoffReadContractTest",
+      "vip.mate.presales.PresalesRequestHashMigrationTest",
+      "vip.mate.presales.PresalesProjectPersistenceContractTest",
+      "vip.mate.presales.PresalesQueryDtosTest",
+      "vip.mate.presales.PresalesArtifactRendererTest",
+      "vip.mate.presales.PresalesPresentationServiceTest",
+      "vip.mate.presales.PresalesCommandPayloadTest",
+      "vip.mate.presales.PresalesRuntimeTransactionIntegrationTest",
+      "vip.mate.presales.PresalesRequestHashV2Test",
+      "vip.mate.presales.PresalesProjectListingTest",
+      "vip.mate.presales.PresalesEmployeeRuntimeTest",
+      "vip.mate.presales.PresalesQueryDtoContractTest",
+      "vip.mate.presales.PresalesGenerationControllerTest",
+      "vip.mate.presales.PresalesGenerationCoordinatorTest",
+      "vip.mate.presales.PresalesSolutionPolicyTest",
+      "vip.mate.presales.PresalesTerminalReceptionTest",
+      "vip.mate.presales.PresalesProjectRepositoryTest",
+      "vip.mate.presales.PresalesCommandPayloadContractTest",
+      "vip.mate.presales.PresalesPresentationPinTest",
+      "vip.mate.presales.PresalesSourceAuthorizationTest",
+      "vip.mate.presales.PresalesSolutionPolicyContractTest",
+      "vip.mate.presales.PresalesCommandKindContractTest",
+      "vip.mate.presales.PresalesListingProjectionBackfillTest",
+      "vip.mate.presales.PresalesAtomicResultAcceptanceTest",
+      "vip.mate.presales.PresalesEmployeeResultProjectionTest",
+      "vip.mate.presales.PresalesIntegrationTest",
+      "vip.mate.presales.PresalesAccessActorTest",
+      "vip.mate.presales.PresalesSourceScopeTest",
+      "vip.mate.architecture.WorkbenchArchitectureTest",
+      "vip.mate.bidding.BiddingHandoffReceiptTest",
+      "vip.mate.bidding.BiddingMaterialsTest",
+      "vip.mate.bidding.BiddingHandoffTest",
+      "vip.mate.semantic.SemanticCoreArchitectureTest"
+    ],
+    "log": "handoff-freeze-tests/green.log.gz",
+    "reports": "handoff-freeze-tests/green-*-TEST-*.xml.gz",
+    "skip": "Existing PresentationCompiler test lacks PRESALES_PPT_SKILL_ROOT",
+    "command": "JAVA_HOME=<installed JDK21> mvn -B -pl mateclaw-server -am -Dtest=Presales*,ProjectAuthorityFenceDatabaseTest,WorkbenchArchitectureTest,SemanticCoreArchitectureTest,BiddingHandoffTest,BiddingHandoffReceiptTest,BiddingMaterialsTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.compiler.proc=full test"
+  },
+  "spotless": {
+    "apply": {
+      "exit": 0,
+      "files": 3,
+      "changed": 2,
+      "command": "mvn -B -pl mateclaw-server -Dquality.base=origin/dev -DspotlessFiles=.*(PresalesService|PresalesIntegrationTest|PresalesHandoffReadContractTest)\\.java spotless:apply"
+    },
+    "check": {
+      "exit": 0,
+      "files": 120,
+      "cached_clean": 120,
+      "command": "JAVA_HOME=<installed JDK21> mvn -B -pl mateclaw-server -Dquality.base=origin/dev spotless:check"
+    }
+  },
+  "mysql": {
+    "status": "PASS",
+    "command": "python3 /tmp/mateclaw-handoff-freeze-mysql-runner.py",
+    "exit": 0,
+    "server_version": "8.0.46",
+    "image": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+    "java_results": {
+      "found": 10,
+      "started": 10,
+      "succeeded": 10,
+      "failed": 0,
+      "aborted": 0,
+      "skipped": 0,
+      "container_failures": 0,
+      "cases": [
+        {
+          "name": "g1RequiresAcceptedFactsAndReleasePublishesExactBytes()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "actualMysqlMigrationIdentityIsExplicit()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestAndExactReauthorizeWorkspaceBeforeExposingFrozenContent()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestAndExactValidateStoredBytesBeforeMissingSnapshotError()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestMissingFrozenSnapshotCannotRebuildHistoryFromCurrentProject()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "historicalReadsMatchExactRouteWhenSemanticMutationsAreDisabled()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "noPublishedReleaseRetainsLatestAndExactStatusErrors()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestChoosesTheLastPublishedReleaseWithoutUsingPendingCandidates()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestUsesTheFrozenReleaseAfterCurrentProjectChanges()",
+          "status": "SUCCESSFUL"
+        },
+        {
+          "name": "latestNonObjectFrozenSnapshotCannotRebuildHistoryFromCurrentProject()",
+          "status": "SUCCESSFUL"
+        }
+      ],
+      "status": "PASS"
+    },
+    "test_adaptations": [
+      {
+        "original": "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java",
+        "original_sha256": "670f7bae73fdac08a308bae22e9ece0f504bae506bd3d673eb616742fa38a166",
+        "adapted_existing_body_sha256": "3351e7f2b1d756ff6c7179ae6772e2f3577e631b385b64049c02ca90baa3be40",
+        "changes": [
+          "class rename",
+          "add isolated DynamicPropertySource",
+          "add actual MySQL/Flyway identity test"
+        ],
+        "original_behavior_assertions_preserved": true
+      },
+      {
+        "original": "mateclaw-server/src/test/java/vip/mate/presales/PresalesHandoffReadContractTest.java",
+        "original_sha256": "986922545d57d1be29a59b376750967ad6b87833fa01eeb4707e344abfc087e5",
+        "adapted_existing_body_sha256": "a36318a6cbe0da2d93cf6d0805672bb5d730b9db54b291d4bfdd9b7bb940f25c",
+        "changes": [
+          "class rename",
+          "add isolated DynamicPropertySource"
+        ],
+        "original_behavior_assertions_preserved": true
+      }
+    ],
+    "history_rows": 212,
+    "history_all_success": true,
+    "baseline_rows": 0,
+    "current_version": "219",
+    "pending": 0,
+    "validate": "PASS",
+    "request_hash_width": 67,
+    "source_count": 244,
+    "runtime_class_count": 8219,
+    "external_class_count": 5,
+    "counts_are_not_class_load_or_coverage_claims": true,
+    "own_schema_empty_guard": "Launcher checks once before both contexts boot",
+    "own_container_cleanup_exit": 0,
+    "own_container_absent_readback": true,
+    "credential_env_file_absent": true,
+    "scope": "MockMvc with real MySQL and actual JWT/Workspace/source services; existing Wiki/PAT/I18n mocks retained",
+    "full_production_socket_and_browser": "NOT_RUN",
+    "original_results_archive": "handoff-freeze-tests/mysql-results.json.gz"
+  },
+  "gate": {
+    "initial_task_id": "22sodt3d",
+    "slice_task_id": "par7g7gj",
+    "initial_and_slice_status": "SCAN_PASS",
+    "final_report": "handoff-freeze-tests/final-dev-report.json.gz",
+    "final_log": "handoff-freeze-tests/final-dev.log.gz",
+    "application_toolchains_in_dev": "NOT_RUN",
+    "submission_ready": false,
+    "commit": "NOT_RUN"
+  },
+  "independent_review": {
+    "agent": "artifact_read_review",
+    "verdict": "COMMENT",
+    "scope": "read-only source, RED/GREEN/XML/archive hashes and MySQL external adaptation/results; final MySQL review recorded in acceptance document",
+    "maintainer_approval": "NOT_VERIFIED",
+    "java_lsp": "NOT_RUN",
+    "mysql_verdict": "COMMENT",
+    "substantive_findings": 0,
+    "source_and_xml_archive_readback": "PASS",
+    "mysql_adaptation_and_history_readback": "PASS"
+  },
+  "compatibility": [
+    "Latest handoff uses the frozen published snapshot with existing optional releaseId/materials/sourceRefs/history markers/extensions",
+    "Historical latest records with absent/non-object snapshots return 409 HISTORICAL_SNAPSHOT_UNAVAILABLE, never rebuild",
+    "Semantic mutation flag false permits historical latest reads just as exact reads; CREATE_RELEASE remains 409 SEMANTIC_DISABLED; test does not cover module disabled at startup"
+  ],
+  "formal_ac": "All 46 remain NOT_RUN",
+  "not_run": [
+    "Kingbase",
+    "production database upgrade/backup restore",
+    "real historical snapshot/Office corpus",
+    "browser enterprise/classic/narrow layout and full background/source chains",
+    "legacy hash writer policy/integration",
+    "complete object V2 migration",
+    "remote required CI",
+    "maintainer approval"
+  ],
+  "git_submission": "No new commit or push",
+  "rollback": "Review and revert this isolated handoff region and additive tests; no database migration/data write in this slice; must keep original auth and artifact integrity protections",
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/first-red.log.gz",
+      "archive_sha256": "00f7082b8f9def9bf0be1553881de102d3e982be8e7b940e7e68a294b528eb04",
+      "decoded_sha256": "e967a99cbc6cc842d24cd489cfb18d4cd5b6e663a89dc50083f6be65b0f04fd2",
+      "redacted_fields": 77
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/original-red-repeat.log.gz",
+      "archive_sha256": "a7a347a73759081dd21a87636a345126cb045812801374a9e1af450f815eee29",
+      "decoded_sha256": "6e92482fdd97da1a7809dbb24a01b388bb565b57737ac6025684deae70302384",
+      "redacted_fields": 77
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/original-red-repeat-PresalesHandoffReadContractTest.xml.gz",
+      "archive_sha256": "522ecc81da539e33e2efa47f38a7e791009a10a0b57025dce4c56b44705961f5",
+      "decoded_sha256": "c823344ed9cae7f8bd3483b8c134c7f9b65d7e70692f7f7d154ee580ee16ac90",
+      "redacted_fields": 37
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/before-PresalesHandoffReadContractTest.java.gz",
+      "archive_sha256": "83b5783fdd4d6cf31c018cbe45d8c69d0ceaded0008b1ffb9a30c2e94e230db0",
+      "decoded_sha256": "1d50628dfdccbb8108d66252166ddf821a6d454d11cbde4b0645f87826a6455d",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/original-red-repeat-PresalesIntegrationTest.xml.gz",
+      "archive_sha256": "3c212cb0712f2ff04e8abf67888adfa2200e049fbe887bd9f7fc6abdacaa5641",
+      "decoded_sha256": "bc1590f97546b6441f9d42d7c1aff1b31b0941d0239d7d662a47988287915aa3",
+      "redacted_fields": 40
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/before-PresalesIntegrationTest.java.gz",
+      "archive_sha256": "1c5ed97df61be3e9b914573e4f422f208857a5ada5037f9f6dea73f8d2a967a0",
+      "decoded_sha256": "32406f0fcc8b1360714444c2618082ea6af7a78a37087cbb5c9949f66586bf01",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/before-service.java.gz",
+      "archive_sha256": "c6c87576c0a3177aae87057e89637751b036ad125158004dbe7a74e634bdfe2b",
+      "decoded_sha256": "1348a29e91420b3a53f12d136bfe6474e01afd9f520fb75ee0bfe0ea6bb23d14",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/corrected-red.log.gz",
+      "archive_sha256": "d84e51c87d3a0e3cdee9a5d20c6f80cba650bdac9a880419814b857623c653ca",
+      "decoded_sha256": "71919cec49e006eeafab39fa5c174af0f9b84b90a99a08b1c8c4fba01d27bdbb",
+      "redacted_fields": 70
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/corrected-red-Handoff.xml.gz",
+      "archive_sha256": "02f083be816adfaea65e2046e5f788807478e81e8549691aca12bfb5cc40f41b",
+      "decoded_sha256": "a2b509232d1c5d80382f1d1853d25b247ced62589b68d1014e19f02c2e5cdbc6",
+      "redacted_fields": 30
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/corrected-red-Integration.xml.gz",
+      "archive_sha256": "24e725ee23a742103415d142d158d436541bebed4515cc5c625c9fae81a11e68",
+      "decoded_sha256": "d6ffc31a9b825b355bc2a175b0dbe9ee84ca037fdce5f63e51226f01632e7dfb",
+      "redacted_fields": 40
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/before-all-HandoffTest.java.gz",
+      "archive_sha256": "0863391fb5b75ddf8be0b3da77d64e9ad586be4fcabad61a32224270079b27ad",
+      "decoded_sha256": "4f07298b3f0ee484ec58c58cacd20a91d5163d2ba24090512716047c146228fa",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/feature-red.log.gz",
+      "archive_sha256": "2c945cdd7315d16bc6f9520a72da1ecbf1cf9c04a5c6fba0f9c781cb1d27010f",
+      "decoded_sha256": "0362a64e390be567393cec3b94fc3759579d7ebd19ecc8e9bd0f89c06d546e07",
+      "redacted_fields": 9
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/feature-red.xml.gz",
+      "archive_sha256": "cc23a406e75df4ffee889c92a38a5c6ee3a0137709055428b98cab76c06be0a3",
+      "decoded_sha256": "3a42cf8727d9f178074b20bcae25f3968cf8a5896fc895eb626286811b940cbc",
+      "redacted_fields": 9
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green.log.gz",
+      "archive_sha256": "201e20122134c339810afe882bfaee8b810ce91d7a0b5663b16cfe1ccdffc985",
+      "decoded_sha256": "b974636a4520be86eb16e9299d842a7e69ce3dd94fe3c4f87a069635f1e8d434",
+      "redacted_fields": 6
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/format.log.gz",
+      "archive_sha256": "786e27fce3eeb73c1e849acb21b0c202b2f3767c538dbfa3692ef57dffd95edd",
+      "decoded_sha256": "92cc87f37781e4166931b9e8377438099bc4460af0469c48b4250ff4c6315bbe",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/initial-dev.log.gz",
+      "archive_sha256": "1d89a59c1587a9c0c10d35093ea58278f0e6e4397fc2d30b5b084770ee3a0196",
+      "decoded_sha256": "a35ee811846f96fa1ab7cbf2d7cee0d024d395f765fd275f03ddf699dfec2197",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/slice-dev.log.gz",
+      "archive_sha256": "881e5b49538704b69e47dc2eeb2934b807afa21c660f1363a623c7bc56b8521b",
+      "decoded_sha256": "f93ee0bc9b8515ba91dbc3367199d88f52c9b2366ac5b03383e24d796439bb48",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesProjectItemsTest.xml.gz",
+      "archive_sha256": "84692728a7d7fc7927f7f698fa8fe085fe6871027034a57ab046b14df957a734",
+      "decoded_sha256": "4c38e3139d1b9fd27accc03aca8c241fa73f2eb2247c63ad715cc95cbdd98cee",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml.gz",
+      "archive_sha256": "32ef8a9ccda181f7b223dd3ef08de19fb213677315e285c2b1612389bd452475",
+      "decoded_sha256": "1bd08ede6ec9ca74a1330d86a80b9d238ac4ec698de772a314930415be498b86",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml.gz",
+      "archive_sha256": "1493961479de8c2ea43daac91f7d2459d21696f21e08ebb755b416474f0a0126",
+      "decoded_sha256": "746ef7ce3194233e243eba4c03d5a5d11edd25e0d4592b0c0bb54567d4e759e1",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.ProjectAuthorityFenceDatabaseTest.xml.gz",
+      "archive_sha256": "0485258cfcf797e29717f95957a588a04ebbf491bed864e012e32acd76c95d93",
+      "decoded_sha256": "8c043d968e3414a899909235ed1a45f540cb087bd60fb1c619b2f530ade1f329",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesContextProviderTest.xml.gz",
+      "archive_sha256": "d49318d5c3c2b62f38264d990d6efd679ef140bc48b21b187d61d8c6b5a18e02",
+      "decoded_sha256": "72a43a1104b867b9308e6c28b99081fe5060aa6c6bc90bdc99afd866c346590f",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesAccessPolicyTest.xml.gz",
+      "archive_sha256": "3b03e8f24e1b818f239c0a13f9652d78dad1194da727e4a267bdc040694fb7d1",
+      "decoded_sha256": "e55bd6bc49cdbb5ddabe518ab64209bdcafb24592da9080a95d5e54fca503653",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml.gz",
+      "archive_sha256": "4998d5b81b6f1f88ba0e21865fec52b8e58b40e5fb56193a5d01ead98188e80f",
+      "decoded_sha256": "cc10158bb59f20500f553e170aec52cd40885113272e8f78e97dfc980d4473b2",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesProjectListingContractTest.xml.gz",
+      "archive_sha256": "3fbebf271cdce2c45a158e544feb97befabcf5243003724a86bfa037d39bebfe",
+      "decoded_sha256": "cc0999e86fdd089fb802394b76b3ece9ec57bae3996ff0ede0f4eb7708be63ff",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesSqlListingTest.xml.gz",
+      "archive_sha256": "9fd70da6b9712ec593769ca650e86bbecda8a2fa284a1069eb5d1bcbe6df9466",
+      "decoded_sha256": "f2f873cb80f3ff5320497c25a562c4b4fec9557353a6f21b6179b4129f91edb1",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesModelAdapterTest.xml.gz",
+      "archive_sha256": "3e68c2066f73ba92c9f946f028a9b89a475ce8d79aa8e180b30bd64d9a043a0a",
+      "decoded_sha256": "ff576dba64b14ca74d6138d7e09062b3f3a1708761305dfbda6de4e6af628e26",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml.gz",
+      "archive_sha256": "298b57353ddf0994cc4c320964c9b4d48d06ee5d6296f301e21dd59b1caedb4f",
+      "decoded_sha256": "48a66db39c371289d9271ba747b147b2f8415798c1d89771e21466a26f60a978",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesCommandKindsTest.xml.gz",
+      "archive_sha256": "0668747b2ad4327485985e4af3bf101c0f121a5bf948b1ee34c7a4acc99f45b3",
+      "decoded_sha256": "76f38f23d7a533b8a0028c2ffbc6f6c0bc63e5d63ef893b7d230549e7bcabf1c",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml.gz",
+      "archive_sha256": "a8218e616467def8dc481611d5885b6794a6ea8b98899cb7e1dde2a5a39af4b9",
+      "decoded_sha256": "2c92094813c8d68aa275f74275d231bc9ab26ac51159cf52bf72248766c6d7ad",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesHandoffReadContractTest.xml.gz",
+      "archive_sha256": "f448500e59fe4833f1887e0ad4f195e5bb80871b8645a39acad7443255d97e72",
+      "decoded_sha256": "e8f34b858f7c8ced8c88e90cf8ebb7ffb3c96cdc23835b978c92bf62d07e3a00",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "archive_sha256": "8afed0462f906bfed462b54a2c477628725cc97c19e2b3187073df57355eef57",
+      "decoded_sha256": "d781cd47110615602dca3263b67eb6b37248c4a8bf61bb3c6b15b1c85286fe37",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml.gz",
+      "archive_sha256": "51a06d44266b6fcac440e64e4cfda710c32f22ffd101a2af8379aca19e3a6b43",
+      "decoded_sha256": "aae57ce1f1fb0aaef747bc6cdd5a0478fdfdd791836860c827a69988b8180c29",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesQueryDtosTest.xml.gz",
+      "archive_sha256": "eb5d9a008987edcdc6a38d69e5040fb797b5f29693fffec054b7dcf7c00f5d50",
+      "decoded_sha256": "6ae5a79b4921a112017c6ceca468a07922f494e1da1999b59ea1c25c443b1ae9",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesArtifactRendererTest.xml.gz",
+      "archive_sha256": "0dea20a9191189a154a58c6ec5026e1936e3f0e2ad7b6cf91a64ccafb3c24a6c",
+      "decoded_sha256": "54ef93a6f2b7b52188bf6bd5c514e75944a1c5420d5fb7fef63cb7e7fcb6f6d4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesPresentationServiceTest.xml.gz",
+      "archive_sha256": "ff8fe159f33b1993a5a80b2b16162f5943d15624ef219dacc51794fa086098a0",
+      "decoded_sha256": "91f004510a1b76dc3716bce8f864d2091c85a01685330947d1ac46345583c79a",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesCommandPayloadTest.xml.gz",
+      "archive_sha256": "421f0a4dfb9b3e3c012306ed90670687e04b3043002f4a4e6a30f843a9004392",
+      "decoded_sha256": "b53d8e24f9ac991f349256ff5a5f4170d8971ec2d0c334f9c53b962d8e92e259",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml.gz",
+      "archive_sha256": "b14ccdecae17cb1a0679b4a89a36c14e0d1dc9313501d8ef3a7db4c5a7d5c69b",
+      "decoded_sha256": "9c4412294efad5fdf7ccca8f73d6a11c356e03c3a5719ef9d68ac79a5b010957",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "archive_sha256": "d43c6ed148a02825ad9a3a72db06235d85a95c75058dec385a596a6b589c0d76",
+      "decoded_sha256": "16435fe5edaad969b6685e4b729982cadbf8aae9655d42def0a4e8faed106ddd",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesProjectListingTest.xml.gz",
+      "archive_sha256": "4fcd0950b5adc4ca18973db7f226aef5269916a79a8c2cb4a6957d0de32c6618",
+      "decoded_sha256": "50ad17132bda73da6eaf837778327898fcfae123078149d47d514c89a8164f89",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml.gz",
+      "archive_sha256": "4c20fab239eed971ea7183cba2f6110a5e385c3350219964edafdc58e88b4b1f",
+      "decoded_sha256": "fb93bda7c20c07c35da2e6878e691ec920754732f5e2e1c37aa9503aaa125546",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml.gz",
+      "archive_sha256": "a29ab324c7b16c5aa8e51522d7fb33a926db6f4b03e81cee6c73e81dad481d98",
+      "decoded_sha256": "9a81da4439b5a6f431731e69e1476cada6a9f6cf604c7468f34349383e46ca08",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesGenerationControllerTest.xml.gz",
+      "archive_sha256": "1a482d87f8c0ed8116fda1b830f2193a1a22f535df33382802efffb0390201f1",
+      "decoded_sha256": "61dba6815952f226dc8d3c476880e16980759666dac1932f7ebefeeaf8574e77",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml.gz",
+      "archive_sha256": "54ab85400d717256d8ed1bcc8ea96e75e01944c7057d23629c2f2e8fcb9d9289",
+      "decoded_sha256": "9e18e99b28b238a56197dd76edc1ae606b2840b262503ee9b61681729ae4fb8a",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml.gz",
+      "archive_sha256": "23bce8b259eda104f1d6ceaaf2915ddbcfc58be120b9fd3b3d3f013985610a5e",
+      "decoded_sha256": "3071085d1a594cba94331915f5d9fd7733f75f598f1ed28cb26cf33b0458db4c",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml.gz",
+      "archive_sha256": "2e66983714648d2d7ecdad963360038fc410abcc7362ecf9e011f05c81eb6b8d",
+      "decoded_sha256": "6755ebaa5ff5c049a0239d7421655bcdcb73f229ba43068ae5cbb0162ba26359",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml.gz",
+      "archive_sha256": "b196c188eabfdf7257d402b8bf276e780472d4c6aabdb81303366e2cf764e0d6",
+      "decoded_sha256": "58b9ca0431e1de0a70fb91040f7ea993bed9ae8980fb7212496df2ee24219f8e",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml.gz",
+      "archive_sha256": "62f5516619b02ff69765b34b2a014f586db0b1ed4045bcf175fe774cbcae3dcf",
+      "decoded_sha256": "0afd16c80c63d52fbc00fd8fa0e2e8bd33b7a42030a6fb5ac29d372d9f326b19",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesPresentationPinTest.xml.gz",
+      "archive_sha256": "8a3d37277c784a0d5f24d85135cf7dd92f6fd6e4f806444868e14599aa11ca3b",
+      "decoded_sha256": "c05d0b904d0f3c535855f84d728e3a48501972ec60fb4478fcc539316021531e",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml.gz",
+      "archive_sha256": "0f45c5f120eda426e23cc9316da125d28ecbecb686127e88c344c8ee00a1f424",
+      "decoded_sha256": "a4bc7dc7729fbc652fd170532a9183b4337d4cc9106e977ba3c200a06fac370a",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml.gz",
+      "archive_sha256": "773e42cfd246ebd09983b605dcb1646aca9654182e09078d0ba62c28b41eb77a",
+      "decoded_sha256": "dc2bb971d500c0bd0a820e62ac6e179fd15c010712724ae8d2da9092251e4589",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesCommandKindContractTest.xml.gz",
+      "archive_sha256": "7f570ac5e6d7833709442751504252d9f41720f9771fbcccb0187c474cbd8672",
+      "decoded_sha256": "cdc81d88d00928fc6c6c53dbb72f3ab1ade4cc91035cf8f4b2bab8aff49d946e",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml.gz",
+      "archive_sha256": "db936fecb1ae846e1ac6ff5c01f3cc6555085c1221d51079f082b37c38fbb073",
+      "decoded_sha256": "976dce96fbad2835140d1894b68add274c1d977a5fd4d4d3d189f8e65cf2f620",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml.gz",
+      "archive_sha256": "278cfef3b6006c658930430e1872b3c53a0e44db89ba9a1a4107a9e708a61d4b",
+      "decoded_sha256": "0c1834dc9a171bc20a8e8c2f8ada554980ed44782e9d3b2cdf654fc52802c299",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml.gz",
+      "archive_sha256": "2b4c765226b2753b510188d44257949fb5e23b071be736b135b11c16ab1a91d2",
+      "decoded_sha256": "f549ddf5a60dba55e655b34e6c47e85d3f9c8faa35e853f9cbb7ca58b1e35178",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesIntegrationTest.xml.gz",
+      "archive_sha256": "1391189d9bfa71e223abd465f45839902b8d6ec036de2f486f8742ebdec3989c",
+      "decoded_sha256": "813f7ca82fa623dd5173a7ec62f02af3e32a66846ccbd8818929510b249a6ea9",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesAccessActorTest.xml.gz",
+      "archive_sha256": "a2dd49c39893ec44b175e75af7f8fc10bad6d9fe3408923a446ffdf5910d4059",
+      "decoded_sha256": "34db2c28f2408c14d70436060625c72c8a15714a1e6c60d636d09c8259617891",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.presales.PresalesSourceScopeTest.xml.gz",
+      "archive_sha256": "991f7c0d5fed354489e19559f5d28e1fb02cd1379b0ecc9cdb2190aa559029cc",
+      "decoded_sha256": "260e98d578c15fdf6c1748428ac3469098b0ff3f15bb868390fe644cc54bc59b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.architecture.WorkbenchArchitectureTest.xml.gz",
+      "archive_sha256": "48c51ffe682ce81c694a255e8816a45f7b1877a45268b66a0a7d157905203bed",
+      "decoded_sha256": "4b9b501bf1fb959c6d803c71a4277af24cc658528c2d1033f007da57e65d9194",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.bidding.BiddingHandoffReceiptTest.xml.gz",
+      "archive_sha256": "96d36f6aeb17c5632a865c125c8f5827d4bce6652ecfafbd364a1bf794433ef5",
+      "decoded_sha256": "7f415ba8b7bf25b43aa655f8efa4071d19316c4d6a34678861deb8b141cf3bfb",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.bidding.BiddingMaterialsTest.xml.gz",
+      "archive_sha256": "46dde729bee70fc0ed19c861d528f4af18e6f59a5117ac6343f8bc017fb00b60",
+      "decoded_sha256": "8dc8746be2a950145fc08dab4f6722fa56362afd1ce99e5966ad0f1cc7f751fd",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.bidding.BiddingHandoffTest.xml.gz",
+      "archive_sha256": "80d67e7c646bfd4fbcd26ea87f7e47c5bc09115658f230cfede63a15eb7b7797",
+      "decoded_sha256": "50da414467fad02a64319df7a89f26f8813c473d49b7f8be4f6f6fb8c37893c4",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-mateclaw-server-TEST-vip.mate.semantic.SemanticCoreArchitectureTest.xml.gz",
+      "archive_sha256": "1f9e568912fe24421fdc4613b4aea45ab2f8c490bab7c02e5946378f115118c1",
+      "decoded_sha256": "c9a8ec7817b2f2ceaec8d1ee9529ef591a68469f2b9b3b6cbc1b05dc02c3b36c",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-PresalesService.java.gz",
+      "archive_sha256": "b2713e08d94871ece8b56ab3985c651156e95f350bb14b57fce34eb85fe6e8fb",
+      "decoded_sha256": "bd54092e53ad315b19fc65a26c90bb423065f060d06626b88363b312680f6d39",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-PresalesIntegrationTest.java.gz",
+      "archive_sha256": "64b90f9d753e5e392aa2b4ade71fe2c91b3af3574aa878727e4f9bab3c0df65a",
+      "decoded_sha256": "670f7bae73fdac08a308bae22e9ece0f504bae506bd3d673eb616742fa38a166",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/green-PresalesHandoffReadContractTest.java.gz",
+      "archive_sha256": "afeeb6224d525c4908c420a3f24e38e13d62663318c1e59cd941ffffd3f5bbd0",
+      "decoded_sha256": "986922545d57d1be29a59b376750967ad6b87833fa01eeb4707e344abfc087e5",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/format-check.log.gz",
+      "archive_sha256": "eb61a9da08fa32a7ff5ab0ea22c62068ee4acca13f6573490dc6795043818825",
+      "decoded_sha256": "32e6f23c5211f05bf0faba22e8bb7815c2225c9885418d83b4f0e2be34519b22",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "ff29458951ee0786fa27d6bfd069a6385ac8451669bf72b78292175dd8f96a39",
+      "decoded_sha256": "a9c1ea2f5b7b16f47ba1402a1a1199c08226ecbc54366a050b8f13bd0f7223a0",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-PresalesHandoffMysqlIntegrationTest.java.gz",
+      "archive_sha256": "b26e797b5eaca6d6bd48b408c87a9dff246f022e4ecf5abf7f817239d3fdc0c8",
+      "decoded_sha256": "df1cb87cb752fd9691d1ad89e32fa745e4d9c5e5c63dc10d3fe8d8164379f2e5",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-PresalesHandoffMysqlReadContractTest.java.gz",
+      "archive_sha256": "95eb8578baa9db8e8ba3c011eca2cc5edb3046c48489a42d1a22c2af1eb0bd43",
+      "decoded_sha256": "57f79f31fb151cf189311b8f6db581c7b24bc645826eb6b87ad37a9586404da4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-cleanup.log.gz",
+      "archive_sha256": "040175a6fe4e1287a8fbc2f91b0f958f518b856b33cedc2415e41aaf649f02be",
+      "decoded_sha256": "59680047961703424a69e79f415041b365f26f34bbabe67a31a0ea57db85d8d4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-compile.log.gz",
+      "archive_sha256": "7d6a3b7f8231a3eff73e62920bfe79dc3ad321e7cfae52754d3211388eafc4ad",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-container-start.log.gz",
+      "archive_sha256": "040175a6fe4e1287a8fbc2f91b0f958f518b856b33cedc2415e41aaf649f02be",
+      "decoded_sha256": "59680047961703424a69e79f415041b365f26f34bbabe67a31a0ea57db85d8d4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-empty-schema.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-flyway-history.log.gz",
+      "archive_sha256": "14578c0f07875175855d3d282b9795df3db64f90f6d02403dad337365ce066f8",
+      "decoded_sha256": "acf6ffb6d71a8b65fe2c0001d0eff62c0192ef44f1ebb807177c8db36a326d35",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-h2-original.xml.gz",
+      "archive_sha256": "f448500e59fe4833f1887e0ad4f195e5bb80871b8645a39acad7443255d97e72",
+      "decoded_sha256": "e8f34b858f7c8ced8c88e90cf8ebb7ffb3c96cdc23835b978c92bf62d07e3a00",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-image.log.gz",
+      "archive_sha256": "15679a82dd29b3f206b6fc1dd6e0f6b3565a668c8e139f63a6278425ca3add3c",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-java-results.json.gz",
+      "archive_sha256": "838617a7e751584f6e9cd47bec3c901437bc3e7cc827317aee69138563db45ee",
+      "decoded_sha256": "30a8d8a6ce302302aab917c2d058683951e8783bdd222581ec9df087ab024bcd",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-jdk21.log.gz",
+      "archive_sha256": "cdeeed1d3af9312900e755bb1316e9ca8c812c3d63b96544a576e3d4277439f8",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-mysql-http-tests.log.gz",
+      "archive_sha256": "039e8077080a1db46ea88d772e8b0aff787045b77cf9285c9baea0446649d070",
+      "decoded_sha256": "30a475f1fd2dfdc34ec7acc341c93eccd23498be0f7701a6d4bec54a3d799f79",
+      "redacted_fields": 2
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-mysql-version.log.gz",
+      "archive_sha256": "98f55566f81c245f67a0259f43fe9ccf338ac7c6911ba82106abe1682c10ee52",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-results.json.gz",
+      "archive_sha256": "a10aca6434314b957354ddbaebf29366d084086cd83139e7bafabb63f7459ac3",
+      "decoded_sha256": "a51e20d61aebac2ea412cbf8c8f1c9b595e4172c76fdec10a58d30811bc82be4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-vip__mate__presales__ArtifactMysqlHttpLauncher$1.class.gz",
+      "archive_sha256": "7be95070d3898874034f40cf423733749cb59763c160277431f10a3a5f43d38c",
+      "decoded_sha256": "ef9c2fb704e081f7b904495a1ecb274b54e609cb1ba5a1dbdc24611acbf3030f",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-vip__mate__presales__ArtifactMysqlHttpLauncher.class.gz",
+      "archive_sha256": "368cbbc9c2688dae7d1575887e570ebba27a6fed8fc9cdce8aa6d6432270d9a9",
+      "decoded_sha256": "d74d8fbf9cbba62038d3542638879a4bdbebdc22ddf4d54c4a5771b94954d9ad",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-vip__mate__presales__PresalesHandoffMysqlIntegrationTest$Fixture.class.gz",
+      "archive_sha256": "263e8735af9ad611a1827401e319b8973575c131464a2edd1d0be80ffe49e145",
+      "decoded_sha256": "1824765a5e7e62ff545a0aabf0ff6a8b06d42560363498651a9ce63d16b8062e",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-vip__mate__presales__PresalesHandoffMysqlIntegrationTest.class.gz",
+      "archive_sha256": "32aa627f0bc7a3930a951b2830a2c9c1d5dad4ba5ca2fb4577018ace99fdcdf2",
+      "decoded_sha256": "828cd3b15091bf68e0b5ccf2041314bc0dab850a761021ac1e2c78c79bd5a3dc",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/mysql-vip__mate__presales__PresalesHandoffMysqlReadContractTest.class.gz",
+      "archive_sha256": "07056f3191b6a4ee12740a96e1a062d47cf1e686258a086f4151d4cc5479d143",
+      "decoded_sha256": "f09f5a2d031ac920861648c0ece6ac72e44b456000025a82ff9990d119ec860b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/external-mateclaw-handoff-freeze-mysql-runner.py.gz",
+      "archive_sha256": "d02a1d5bb7f06854cc0eb89ab16313fbe834a33862b9c846a7e81cd54a0ced19",
+      "decoded_sha256": "38a2b3d8af56a3319192e843bed65af32f199b374159f112353315b5fc3ecf8f",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/external-handoff-freeze-archive.py.gz",
+      "archive_sha256": "185e7ff3f7644ca60c57c39d8fbd8bb1737d8d21173d58d1e595fa4abaf5f2c4",
+      "decoded_sha256": "1f58c94f1381a2c56fc13cbd2e44edf98d4fa0b117457e1f58f4911094ef2b67",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/external-mateclaw-handoff-freeze-mysql-driver.log.gz",
+      "archive_sha256": "b009c3389dab37f2f0e17db60f7c65250ad43c22d8a32c8259c3395c5718a5c3",
+      "decoded_sha256": "f8baafe090a97e093bb235d1e5312922c8164a570794e312725653514df9c511",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/handoff-freeze-tests/external-handoff-freeze-green-counts.json.gz",
+      "archive_sha256": "6577b2ba42bc9746a21fc38629ede2f3ef6d47520b47327bef1424dc9232f32c",
+      "decoded_sha256": "8b490339950dc9bd02808e70e0846b06baea1df4581c653ab757ea3e28e55317",
+      "redacted_fields": 0
+    }
+  ]
+}

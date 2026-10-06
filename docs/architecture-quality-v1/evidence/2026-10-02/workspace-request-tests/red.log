@@ -1,0 +1,50 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/api/__tests__/workspaceRequest.test.ts (4 tests | 4 failed) 8ms
+     × preserves caller function transforms and pins scope after them 5ms
+     × preserves caller array transforms and pins scope after them 1ms
+     × preserves a pre-cancelled config signal when no separate signal is supplied 2ms
+     × respects an explicit empty transform list 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/__tests__/workspaceRequest.test.ts > captured Workspace request contract > preserves caller function transforms and pins scope after them
+Unknown Error: expected '{"value":"payload"}' to be 'custom:payload' // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/api/__tests__/workspaceRequest.test.ts > captured Workspace request contract > preserves caller array transforms and pins scope after them
+Unknown Error: expected '{"value":"payload"}' to be 'custom:payload' // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/api/__tests__/workspaceRequest.test.ts > captured Workspace request contract > preserves a pre-cancelled config signal when no separate signal is supplied
+AssertionError: promise resolved "'accepted'" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+"accepted"
+
+ ❯ src/api/__tests__/workspaceRequest.test.ts:39:88
+     37|     const adapter = vi.fn(async config => ({ data: { code: 200, data: …
+     38|     http.defaults.adapter = adapter
+     39|     await expect(semanticRequest('ws', { url: '/contract', signal: con…
+       |                                                                                        ^
+     40|     expect(adapter).not.toHaveBeenCalled()
+     41|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/api/__tests__/workspaceRequest.test.ts > captured Workspace request contract > respects an explicit empty transform list
+Unknown Error: expected '{"value":"raw"}' to deeply equal { value: 'raw' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  13:22:22
+   Duration  294ms (transform 55ms, setup 0ms, import 86ms, tests 8ms, environment 109ms)
+

@@ -1,0 +1,14 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:548:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 2 skipped (3)
+   Start at  08:06:15
+   Duration  333ms (transform 57ms, setup 0ms, import 92ms, tests 18ms, environment 129ms)

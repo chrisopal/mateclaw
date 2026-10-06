@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "files": {
+    "mateclaw-server/src/main/java/db/migration/h2/V218__backfill_presales_listing_projection.java": "ca5d9f4dc4c0b0914a901d29de6fa63c17babb56c4d00b87543a559557ac6867",
+    "mateclaw-server/src/main/java/db/migration/kingbase/V218__backfill_presales_listing_projection.java": "905cc12fc65748bf97833306b84786ea88bf60afc4818beb3636f29e6fb16920",
+    "mateclaw-server/src/main/java/db/migration/mysql/V218__backfill_presales_listing_projection.java": "a1b3b382261230f3fe06603c7d10ecef5396c4a205286a48066dbffacc1c4f05",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesListingProjectionV1.java": "855fe1891f23d06046539e1c0a8834c41a175c0397cf554ceb19b5f2a1c1b0d4",
+    "mateclaw-server/src/main/java/vip/mate/presales/migration/PresalesListingProjectionBackfillV1.java": "64d9dc5ce7d13fd2d3203d0fa0595e12f56ab83738eaccd208ef2bd7108c9cce"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task": "AQ-07 Java migration/source-freeze guard slice",
+  "base_head": "bf7a12f5406f46fcac1e3292a078f45414be3c6e",
+  "origin_dev": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "red": {
+    "exit": 1,
+    "tests": 19,
+    "assertion_or_subtest_failures": 35
+  },
+  "green": {
+    "exit": 0,
+    "guard_tests": 91
+  },
+  "published_source_cli": {
+    "scenarios": 18,
+    "checks": 36,
+    "all_expected_results": true
+  },
+  "independent_technical_review": {
+    "reviewer": "/root/java_migration_guard_review",
+    "verdict": "COMMENT",
+    "substantive_findings": 0,
+    "lsp": "NOT_RUN: tsc skipped; no tsconfig",
+    "ast_grep": "NOT_RUN: tool unavailable",
+    "python_ast": "PASS",
+    "maintainer_approval": "NOT_RUN",
+    "documentation_delta": "COMMENT: no material discrepancies; all 46 formal AC remain NOT_RUN; archive SHA and 18/36 CLI records checked."
+  },
+  "formal_ac_status": "NOT_RUN",
+  "remote_enforcement": "NOT_VERIFIED",
+  "archive_sha256": {
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/cli-probe.py": "f16dce0aa541e0eb480957cb4ceee72653b534937e88245b4a64cfd40c18ae69",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/cli-results.json": "1b51f820d67609ddaf465d695523bc61767dd1c334e28c3d153815dbb0829ff5",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/slice-dev.txt.gz": "cb5c6775c8389a4fd3fd83afda0aaed54e3302ab5dadcce370d131496e12d38e",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/red.txt.gz": "62f77f463f9e0d6f28e20953994d365758a4900ad27a16a7ee15aefec51da39d",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/green.txt.gz": "437a02e2c18572f34c9a63f81a76c2c33ac222c0b876cc0e077f77b14c0202d2",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/constraint-dev.txt.gz": "783b5c5761f4cb0eb793fe9a4ae8ab27ac87ca38688bbd9f2fd64ec1c0754ae7",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/initial-dev.txt.gz": "e9c2db66870a8fd630cd10a95624f79638f7a2ec1db715cc00e54bc2523a983e",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-full-report.json": "0b472d4a170046dfd540f0bf63dd496b6dceab93ad3ba869c9a2f781fa944a9d",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-architecture.json": "713ad4246face99022f5fde25ea1cd4b966d30a5725c55c073af3790729c6682",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-java-summary.json": "255078b04edabc80e66cbccfb4d63817ccbf85fd8fdefc44e7cdd2b16e5e5526",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-guard.txt.gz": "602a418f223f100be04d7e2778b0b13236df54cd4637a004e83cbe6233535251",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-java-tests.txt.gz": "93ebd9053e6f583c9af61263b262ac17f20652429656c9f00b731901ec329d30",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-java-format.txt.gz": "a08d5d1f22dc85a7ba72d0a245545b1929e8cfa80cab5c3b63fb18ab2e35514f",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-ui-node-tests.txt.gz": "b80ad8b5b445963c21e67274c613ed4a922338025a9fe0426d8b717628b5f98e",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-ui-typecheck.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-ui-build-enterprise.txt.gz": "8f35ea036366cd609cba40c77578d53a8069fa521e567c0b76b93e48632c1178",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-ui-build-classic.txt.gz": "a65e8ddf22483ca8f065649054c437aecd6302b7c3faa12f6f228c8665f6cab5",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-id-precision.txt.gz": "2c41332dc154b73751b3df90a426e067ea807d9265958f92f6aea7c5157c18e8",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-cost-tool-tests.txt.gz": "30ffa5b8d55201239cdc040f7a705e29b0ebedb436fe851e0d842a022e654986",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/source-vitest.json.gz": "08496f088cca3df82cba79b8fb1a8d15f1ae9a8e4a63a4f2329b2794ce1ce837",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/hook-full-report.json": "c54dc570efc2fc9faf1b3b5d463a2f8eed36ca36be09ab91731b435281a323cc",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/hook-architecture.json": "713ad4246face99022f5fde25ea1cd4b966d30a5725c55c073af3790729c6682",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/hook-java-summary.json": "d5de4b63e50bfc964079979e53b40c9a02fa820f866271e292c8632dccbc1c03",
+    "docs/architecture-quality-v1/evidence/2026-10-03/java-migration-guard-tests/hook-guard.txt.gz": "2c32e9ded98888e2d6be24325c7aa27ca1b85c0dcb75f5b091c1c9813e8971f7"
+  },
+  "archive_encoding": "Raw verification logs stored as lossless gzip; original whitespace/CRLF preserved. Initial staged diff whitespace check rejected plain log records; no rules changed.",
+  "source_full_gate": {
+    "actual_exit": 0,
+    "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-kkn2cd20/report.json",
+    "base_commit": "bf7a12f5406f46fcac1e3292a078f45414be3c6e",
+    "target_identity": "a2797580d24cf75b82feb2eb278ff0905313c16b",
+    "status": "PASS",
+    "submission_ready": true,
+    "executed": {
+      "java-tests": 6171,
+      "ui-vitest": 1093,
+      "cost-tool-tests": 16
+    },
+    "java_total_and_existing_skips": {
+      "total": 6241,
+      "failures": 0,
+      "errors": 0,
+      "existing_condition_skips": 70
+    }
+  },
+  "hook_full_gate": {
+    "actual_exit": 0,
+    "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-05efgipv/report.json",
+    "base_commit": "bf7a12f5406f46fcac1e3292a078f45414be3c6e",
+    "target_identity": "a2797580d24cf75b82feb2eb278ff0905313c16b",
+    "status": "PASS",
+    "submission_ready": true,
+    "executed": {
+      "java-tests": 6171,
+      "ui-vitest": 1093,
+      "cost-tool-tests": 16
+    },
+    "java_total_and_existing_skips": {
+      "total": 6241,
+      "failures": 0,
+      "errors": 0,
+      "existing_condition_skips": 70
+    }
+  },
+  "source_commit": "6992bf9e2387aaeb554cd866a22b9ba4f0f11e95",
+  "source_tree": "a2797580d24cf75b82feb2eb278ff0905313c16b",
+  "log_redaction_count": 30
+}

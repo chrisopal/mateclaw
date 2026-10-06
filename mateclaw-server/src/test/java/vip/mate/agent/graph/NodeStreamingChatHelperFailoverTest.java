@@ -1,5 +1,11 @@
 package vip.mate.agent.graph;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,22 +22,13 @@ import vip.mate.llm.failover.FallbackEntry;
 import vip.mate.llm.failover.ProviderHealthProperties;
 import vip.mate.llm.failover.ProviderHealthTracker;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 /**
  * Regression test for the AUTH_ERROR-must-fall-back fix.
  *
- * <p>Prior to this fix, primary AUTH_ERROR (e.g. Kimi 401 with an invalid
- * API key) returned immediately without trying the fallback chain — a
- * fallback provider with a different, valid key never got a chance.
- * After the fix, AUTH_ERROR breaks out of the same-model retry loop
- * and falls through to the chain walker, mirroring how BILLING and
- * MODEL_NOT_FOUND already behave.</p>
+ * <p>Prior to this fix, primary AUTH_ERROR (e.g. Kimi 401 with an invalid API key) returned
+ * immediately without trying the fallback chain — a fallback provider with a different, valid key
+ * never got a chance. After the fix, AUTH_ERROR breaks out of the same-model retry loop and falls
+ * through to the chain walker, mirroring how BILLING and MODEL_NOT_FOUND already behave.
  */
 class NodeStreamingChatHelperFailoverTest {
 
@@ -46,7 +43,9 @@ class NodeStreamingChatHelperFailoverTest {
         healthTracker = new ProviderHealthTracker(props);
     }
 
-    /** Build a chat-model mock whose stream() emits a single successful chunk with the given text. */
+    /**
+     * Build a chat-model mock whose stream() emits a single successful chunk with the given text.
+     */
     private static ChatModel successModel(String text) {
         ChatModel m = mock(ChatModel.class);
         Generation gen = new Generation(new AssistantMessage(text), ChatGenerationMetadata.NULL);
@@ -65,10 +64,12 @@ class NodeStreamingChatHelperFailoverTest {
         return m;
     }
 
-    private NodeStreamingChatHelper helper(ChatModel primary, List<FallbackEntry> chain, String primaryProviderId) {
+    private NodeStreamingChatHelper helper(
+            ChatModel primary, List<FallbackEntry> chain, String primaryProviderId) {
         // Construct via the full constructor so health tracking is wired and the
         // chain walker has provider-id context.
-        return new NodeStreamingChatHelper(streamTracker, chain, null, healthTracker, primaryProviderId);
+        return new NodeStreamingChatHelper(
+                streamTracker, chain, null, healthTracker, primaryProviderId);
     }
 
     private static Prompt smallPrompt() {
@@ -80,7 +81,8 @@ class NodeStreamingChatHelperFailoverTest {
     // ============================================================
 
     @Test
-    @DisplayName("C1: primary AUTH_ERROR triggers fallback chain (was: returned immediately, never tried fallback)")
+    @DisplayName(
+            "C1: primary AUTH_ERROR triggers fallback chain (was: returned immediately, never tried fallback)")
     void primaryAuthErrorFallsBackToHealthyProvider() {
         ChatModel primary = errorModel(new RuntimeException("401 Unauthorized: Invalid API Key"));
         ChatModel fallback = successModel("hello from fallback");
@@ -88,12 +90,15 @@ class NodeStreamingChatHelperFailoverTest {
 
         var result = helper.streamCall(primary, smallPrompt(), "conv-c1", "reasoning");
 
-        assertEquals("hello from fallback", result.text(),
+        assertEquals(
+                "hello from fallback",
+                result.text(),
                 "fallback provider must succeed and its text must surface as the result");
         assertEquals(NodeStreamingChatHelper.ErrorType.NONE, result.errorType());
         // Primary was tried exactly once (no same-model retries on AUTH_ERROR — fix verified)
         verify(primary, times(1)).stream(any(Prompt.class));
         verify(fallback, times(1)).stream(any(Prompt.class));
+        verify(streamTracker, never()).broadcast(eq("conv-c1"), eq("error"), anyString());
     }
 
     // ============================================================
@@ -106,9 +111,13 @@ class NodeStreamingChatHelperFailoverTest {
         ChatModel primary = errorModel(new RuntimeException("401 Unauthorized"));
         ChatModel fbBad = errorModel(new RuntimeException("401 Unauthorized: bad key"));
         ChatModel fbGood = successModel("ok via 2nd fallback");
-        var helper = helper(primary, List.of(
-                new FallbackEntry("openai", fbBad),
-                new FallbackEntry("dashscope", fbGood)), "kimi");
+        var helper =
+                helper(
+                        primary,
+                        List.of(
+                                new FallbackEntry("openai", fbBad),
+                                new FallbackEntry("dashscope", fbGood)),
+                        "kimi");
 
         var result = helper.streamCall(primary, smallPrompt(), "conv-c2", "reasoning");
 
@@ -124,28 +133,39 @@ class NodeStreamingChatHelperFailoverTest {
     // ============================================================
 
     @Test
-    @DisplayName("C3: when entire chain is auth-failing, last AUTH_ERROR is surfaced (not silently dropped)")
+    @DisplayName(
+            "C3: when entire chain is auth-failing, last AUTH_ERROR is surfaced (not silently dropped)")
     void allChainAuthFailsSurfacesLastError() {
         ChatModel primary = errorModel(new RuntimeException("401 Unauthorized — kimi"));
         ChatModel fb1 = errorModel(new RuntimeException("401 Unauthorized — openai"));
         ChatModel fb2 = errorModel(new RuntimeException("401 Unauthorized — dashscope"));
-        var helper = helper(primary, List.of(
-                new FallbackEntry("openai", fb1),
-                new FallbackEntry("dashscope", fb2)), "kimi");
+        var helper =
+                helper(
+                        primary,
+                        List.of(
+                                new FallbackEntry("openai", fb1),
+                                new FallbackEntry("dashscope", fb2)),
+                        "kimi");
 
         var result = helper.streamCall(primary, smallPrompt(), "conv-c3", "reasoning");
 
         assertNotNull(result, "result must not be null even when whole chain fails");
-        assertEquals(NodeStreamingChatHelper.ErrorType.AUTH_ERROR, result.errorType(),
+        assertEquals(
+                NodeStreamingChatHelper.ErrorType.AUTH_ERROR,
+                result.errorType(),
                 "last seen AUTH_ERROR must propagate so callers can surface a real error");
         // Each rung tried exactly once
         verify(primary, times(1)).stream(any(Prompt.class));
         verify(fb1, times(1)).stream(any(Prompt.class));
         verify(fb2, times(1)).stream(any(Prompt.class));
+        verify(streamTracker, times(1)).broadcast(eq("conv-c3"), eq("error"), anyString());
         // Health tracker should have recorded a failure against every fallback provider
         var snap = healthTracker.snapshot();
-        assertTrue(snap.get("openai").consecutiveFailures() >= 1, "openai failure must be recorded");
-        assertTrue(snap.get("dashscope").consecutiveFailures() >= 1, "dashscope failure must be recorded");
+        assertTrue(
+                snap.get("openai").consecutiveFailures() >= 1, "openai failure must be recorded");
+        assertTrue(
+                snap.get("dashscope").consecutiveFailures() >= 1,
+                "dashscope failure must be recorded");
     }
 
     // ============================================================
@@ -153,9 +173,11 @@ class NodeStreamingChatHelperFailoverTest {
     // ============================================================
 
     @Test
-    @DisplayName("C4 (regression): primary BILLING still triggers fallback (unchanged from RFC-009 P3.2)")
+    @DisplayName(
+            "C4 (regression): primary BILLING still triggers fallback (unchanged from RFC-009 P3.2)")
     void billingStillFallsBack() {
-        ChatModel primary = errorModel(new RuntimeException("402 Payment Required: insufficient_quota"));
+        ChatModel primary =
+                errorModel(new RuntimeException("402 Payment Required: insufficient_quota"));
         ChatModel fallback = successModel("recovered via fallback");
         var helper = helper(primary, List.of(new FallbackEntry("dashscope", fallback)), "openai");
 
@@ -171,15 +193,13 @@ class NodeStreamingChatHelperFailoverTest {
     // ============================================================
 
     /**
-     * Prior to this fix a rate-limited primary exhausted its 2 same-model
-     * retries and then {@code return}ed the 429 error result directly,
-     * skipping the fallback chain entirely — the 429 surfaced as the
-     * conversation's answer even though other providers were healthy.
-     * After the fix RATE_LIMIT breaks out to the chain walker, mirroring
-     * AUTH_ERROR / BILLING.
+     * Prior to this fix a rate-limited primary exhausted its 2 same-model retries and then {@code
+     * return}ed the 429 error result directly, skipping the fallback chain entirely — the 429
+     * surfaced as the conversation's answer even though other providers were healthy. After the fix
+     * RATE_LIMIT breaks out to the chain walker, mirroring AUTH_ERROR / BILLING.
      *
-     * <p>Note: this test waits out two real retry backoffs (~3s + ~6s) on
-     * the primary before the hand-off, so it runs for ~10s by design.</p>
+     * <p>Note: this test waits out two real retry backoffs (~3s + ~6s) on the primary before the
+     * hand-off, so it runs for ~10s by design.
      */
     @Test
     @DisplayName("C5 (regression): primary RATE_LIMIT (429) hands off to the fallback chain")
@@ -190,7 +210,9 @@ class NodeStreamingChatHelperFailoverTest {
 
         var result = helper.streamCall(primary, smallPrompt(), "conv-c5", "reasoning");
 
-        assertEquals("recovered after rate limit", result.text(),
+        assertEquals(
+                "recovered after rate limit",
+                result.text(),
                 "a rate-limited primary must fail over instead of surfacing the 429");
         verify(primary, atLeast(2)).stream(any(Prompt.class));
         verify(fallback, times(1)).stream(any(Prompt.class));
@@ -206,10 +228,12 @@ class NodeStreamingChatHelperFailoverTest {
         ChatModel primary = successModel("primary works fine");
         AtomicInteger fallbackCalls = new AtomicInteger();
         ChatModel fallback = mock(ChatModel.class);
-        when(fallback.stream(any(Prompt.class))).thenAnswer(inv -> {
-            fallbackCalls.incrementAndGet();
-            return Flux.just((ChatResponse) null);
-        });
+        when(fallback.stream(any(Prompt.class)))
+                .thenAnswer(
+                        inv -> {
+                            fallbackCalls.incrementAndGet();
+                            return Flux.just((ChatResponse) null);
+                        });
         var helper = helper(primary, List.of(new FallbackEntry("dashscope", fallback)), "openai");
 
         var result = helper.streamCall(primary, smallPrompt(), "conv-bonus", "reasoning");

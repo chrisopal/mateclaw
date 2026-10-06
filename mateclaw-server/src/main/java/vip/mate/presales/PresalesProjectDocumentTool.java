@@ -13,6 +13,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.execution.ProjectConversationToolBoundary;
+import vip.mate.presales.repository.PresalesProjectRepository;
 
 /** Read a document already stored in a knowledge base bound to the presales project. */
 @Component
@@ -21,12 +22,17 @@ public class PresalesProjectDocumentTool {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
     private final PresalesToolPolicy policy;
+    private final PresalesProjectRepository projects;
 
     public PresalesProjectDocumentTool(
-            JdbcTemplate jdbc, ObjectMapper json, PresalesToolPolicy policy) {
+            JdbcTemplate jdbc,
+            ObjectMapper json,
+            PresalesToolPolicy policy,
+            PresalesProjectRepository projects) {
         this.jdbc = jdbc;
         this.json = json;
         this.policy = policy;
+        this.projects = projects;
     }
 
     @Tool(
@@ -64,12 +70,7 @@ public class PresalesProjectDocumentTool {
         if (!decision.allowed()) return error(decision.reason());
         int limit = maxChars == null || maxChars <= 0 ? 30_000 : Math.min(maxChars, 50_000);
         try {
-            String body =
-                    jdbc.queryForObject(
-                            "SELECT body_json FROM mate_presales_project WHERE id=? AND workspace_id=?",
-                            String.class,
-                            parts[2],
-                            parts[1]);
+            String body = projects.findBody(parts[1], parts[2], false).orElseThrow();
             var project = json.readTree(body);
             boolean bound = false;
             for (var material : project.path("materials")) {

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "verdict": "ENGINEERING_EVIDENCE_SUFFICIENT",
+  "formalAcceptanceRegister": "NOT_RUN_UNCHANGED",
+  "full77ControlMatrix": "INCOMPLETE_NOT_REQUIRED_FOR_ORIGINAL_AC30",
+  "originalRequirement": {
+    "aq09": "two profiles, narrow viewport, Workspace switch visual and functional regression without unrelated behavior/content changes",
+    "ac30": "enterprise/classic, readonly, empty, error, narrow viewport, real browser evidence"
+  },
+  "categories": [
+    {"id": "enterprise-classic", "status": "PASS", "evidenceVersion": "5a02519f / tree 017fefc", "reuse": "presales feature UI unchanged in current candidate"},
+    {"id": "narrow", "status": "PASS", "evidenceVersion": "5a02519f and e6f9fe69", "reuse": "profile UI unchanged; e6 chat/runtime UI unchanged in current candidate"},
+    {"id": "readonly", "status": "PASS", "evidenceVersion": "5a02519f viewer plus e6f9fe69 transcript", "reuse": "behavior-specific reuse only"},
+    {"id": "empty", "status": "PASS", "evidenceVersion": "5a02519f", "reuse": "presales feature UI unchanged"},
+    {"id": "error", "status": "PASS", "evidenceVersion": "5a02519f plus current 4862bf66", "reuse": "injected HTTP UI behavior distinguished from actual backend success/readback"},
+    {"id": "workspace-switch", "status": "PASS", "evidenceVersion": "e6f9fe69", "reuse": "current production delta is unrelated empty-agent UPDATE_PROJECT branch"},
+    {"id": "representative-functional-regression", "status": "FINITE_PASS", "evidenceVersion": "59 preparation slots plus two e6 packages and current save package", "reuse": "no claim of exhaustive 77-control matrix"},
+    {"id": "current-unassigned-save-fix", "status": "PASS", "evidenceVersion": "base e70924e3 / candidate tree 4862bf66 / live JAR 0c1d90e3"}
+  ],
+  "inventory": {
+    "controlsOrAreas": 77,
+    "genericSlots": 367,
+    "finitePass": 59,
+    "notRun": 308,
+    "interpretation": "The 308 NOT_RUN values are generalized matrix dimensions, not 308 independent original AC30 requirements."
+  },
+  "currentRuntime": {
+    "backendPid": 19617,
+    "backendPort": 61806,
+    "serverJarSha256": "0c1d90e324591260d1c667ac09d06752f0dd56233e83946f363abe6e46ad2b5b",
+    "classicUi": "http://127.0.0.1:61807",
+    "baseHead": "e70924e3bd0a4c8e4527a9f805313b19cc34f60c",
+    "candidateTree": "4862bf6660e57a4b2515830c58134a17ab290a1c"
+  },
+  "currentRuntimeSmoke": {
+    "status": "PASS",
+    "enterpriseUi": "http://127.0.0.1:50043",
+    "classicUi": "http://127.0.0.1:61807",
+    "adminRuns": 2,
+    "viewerRuns": 2,
+    "writes": 0,
+    "modelCalls": 0,
+    "published": false
+  },
+  "remainingGaps": [
+    "Formal QA and acceptance-register decision",
+    "Optional high-risk preview/download failure regression after original AC30 closure",
+    "Optional narrow English editor regression"
+  ],
+  "excludedAsNewPrerequisites": [
+    "S6 real-model presentation generation",
+    "customer approval",
+    "forced Workspace click through an open modal",
+    "all 77 controls crossed with four dimensions",
+    "308 generic NOT_RUN slots"
+  ]
+}

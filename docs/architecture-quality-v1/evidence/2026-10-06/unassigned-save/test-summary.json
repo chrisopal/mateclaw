@@ -1,0 +1,91 @@
+{
+  "scope": "AC30 unassigned project metadata bug",
+  "red": {
+    "tests": 63,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "green": {
+    "tests": 63,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "regression": {
+    "tests": 861,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skip": "PresalesPresentationCompilerTest existing platform condition"
+  },
+  "logs": {
+    "red": {
+      "path": "/tmp/ac30-unassigned-red.log",
+      "sha256": "bf7a337514d6335593d121d0cc4c0a3ac691ccab08d52ada6738a089f8a72467",
+      "buildSuccess": false,
+      "totals": [
+        [
+          "63",
+          "4",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    "green": {
+      "path": "/tmp/ac30-unassigned-green.log",
+      "sha256": "3972fa03eaadbc7440cd2ad6a6cb2a354ff3ae2b54d82fe91a50e2c95bf68dd9",
+      "buildSuccess": true,
+      "totals": [
+        [
+          "63",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    "format": {
+      "path": "/tmp/ac30-unassigned-format.log",
+      "sha256": "506203153aeb4eb5166bc13ce9ead382ec946d105d0178f90f6092b6266db0d2",
+      "buildSuccess": false,
+      "totals": []
+    },
+    "format-fixed": {
+      "path": "/tmp/ac30-unassigned-format-fixed.log",
+      "sha256": "858217624f45b60207f34964ac30ff3b87b7dd4ac00a0753dedd8b9c11e029b8",
+      "buildSuccess": true,
+      "totals": []
+    },
+    "regression-package": {
+      "path": "/tmp/ac30-unassigned-regression-package.log",
+      "sha256": "ed34f821ecada900c450f946cf707d09d3f031d7064daefe10219756933ce5a3",
+      "buildSuccess": true,
+      "totals": [
+        [
+          "861",
+          "0",
+          "0",
+          "1"
+        ]
+      ]
+    },
+    "dev-before": {
+      "path": "/tmp/ac30-unassigned-dev-before.log",
+      "sha256": "c85b791e1a95a77c2d07ac9366a10569567b00d8a9d8f3927452871e1630c8ba",
+      "buildSuccess": false,
+      "totals": []
+    },
+    "dev-after": {
+      "path": "/tmp/ac30-unassigned-dev-after.log",
+      "sha256": "8a5305f3a84d104d65d70700416c113b648f21747e644607093bd1ef401298b5",
+      "buildSuccess": false,
+      "totals": []
+    }
+  },
+  "dev": "SCAN_PASS; submission_ready=false",
+  "formalAcceptance": false,
+  "fullAc30": false,
+  "modelCalls": false
+}

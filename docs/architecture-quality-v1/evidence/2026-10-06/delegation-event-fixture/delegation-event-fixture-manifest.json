@@ -1,0 +1,90 @@
+{
+  "archive": "delegation-event-fixture.tar.gz",
+  "archive_sha256": "eff2f38706637817f14fa2272c789b158f6a08115bb9b244bc7a6c187e245c60",
+  "files": [
+    {
+      "path": "DelegateEventSequenceTest.java",
+      "original_sha256": "bec5cc85244382772cde20aa1972f725d29233f250bb05e726898147e4d9632e",
+      "archived_sha256": "bec5cc85244382772cde20aa1972f725d29233f250bb05e726898147e4d9632e",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateAgentToolContextInheritanceTest.xml",
+      "original_sha256": "bdac597f084c78f2bf2bc6f8728831182510149a32cc06bc25aea6069987981c",
+      "archived_sha256": "bdac597f084c78f2bf2bc6f8728831182510149a32cc06bc25aea6069987981c",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateAgentToolDenyListTest.xml",
+      "original_sha256": "eadb75ff407431017276801d956cb7d09c11a77bb4429805f7ec09319c6f1612",
+      "archived_sha256": "eadb75ff407431017276801d956cb7d09c11a77bb4429805f7ec09319c6f1612",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateAgentToolTest.xml",
+      "original_sha256": "84cbc98f567b8508f4ac311c7be2b15252940a980b4e8feaaf1a5815a0d95512",
+      "archived_sha256": "84cbc98f567b8508f4ac311c7be2b15252940a980b4e8feaaf1a5815a0d95512",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateAsyncTaskOutputAttributionTest.xml",
+      "original_sha256": "cffb43c5556a1ab1a4766b7732da6bd0760e9eef312d9536e5c55910f0fefd11",
+      "archived_sha256": "cffb43c5556a1ab1a4766b7732da6bd0760e9eef312d9536e5c55910f0fefd11",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateAsyncToolTest.xml",
+      "original_sha256": "456aff48742d6f3c38157185c8af66accd60172aad0a6f6a3800d8f3b26ceefc",
+      "archived_sha256": "456aff48742d6f3c38157185c8af66accd60172aad0a6f6a3800d8f3b26ceefc",
+      "redactions": 0
+    },
+    {
+      "path": "TEST-vip.mate.tool.builtin.DelegateEventSequenceTest.xml",
+      "original_sha256": "08480413eb5b14e579ca6555a3e4eb47b45e9e2e5ecc71f228496a0cd45b4a35",
+      "archived_sha256": "08480413eb5b14e579ca6555a3e4eb47b45e9e2e5ecc71f228496a0cd45b4a35",
+      "redactions": 0
+    },
+    {
+      "path": "aq-delegation-fixture-final-dev.log",
+      "original_sha256": "df66704e39cf2f3d3e288845fb2610a58e955cb9426d41a58c8f61866d2502a2",
+      "archived_sha256": "df66704e39cf2f3d3e288845fb2610a58e955cb9426d41a58c8f61866d2502a2",
+      "redactions": 0
+    },
+    {
+      "path": "aq-delegation-fixture-format.log",
+      "original_sha256": "02d3ca1c85d1f4621ffefb2bfbb454dabc5c324bb2b93a45eba40432207adb46",
+      "archived_sha256": "02d3ca1c85d1f4621ffefb2bfbb454dabc5c324bb2b93a45eba40432207adb46",
+      "redactions": 0
+    },
+    {
+      "path": "aq-delegation-fixture-green.log",
+      "original_sha256": "d5891d4de3e95c2077bc7a7fc77e8bd1791fae29a3dc9d3afac82dc1c3d3cf11",
+      "archived_sha256": "d5891d4de3e95c2077bc7a7fc77e8bd1791fae29a3dc9d3afac82dc1c3d3cf11",
+      "redactions": 0
+    },
+    {
+      "path": "aq-delegation-fixture-initial-dev.log",
+      "original_sha256": "39875bbfe89a4ed73b9070b3488c013835a52892657d4eb31a57db593e3a5363",
+      "archived_sha256": "39875bbfe89a4ed73b9070b3488c013835a52892657d4eb31a57db593e3a5363",
+      "redactions": 0
+    },
+    {
+      "path": "aq-delegation-fixture-red.log",
+      "original_sha256": "9348591db363393a714bc33dec606c557428f5b9d44ea37bc17e57fc37e11e1b",
+      "archived_sha256": "9348591db363393a714bc33dec606c557428f5b9d44ea37bc17e57fc37e11e1b",
+      "redactions": 0
+    },
+    {
+      "path": "independent-review.txt",
+      "original_sha256": "4ebe6c77fdb67bbaa18107b9fe054a9bb0d9ec9600bc80379311843e32601d4c",
+      "archived_sha256": "4ebe6c77fdb67bbaa18107b9fe054a9bb0d9ec9600bc80379311843e32601d4c",
+      "redactions": 0
+    },
+    {
+      "path": "source-identity.json",
+      "original_sha256": "f2981e542fbc4ffad374a1e38263d0bd9583a4a4542e47fbd212d6994a78a22d",
+      "archived_sha256": "f2981e542fbc4ffad374a1e38263d0bd9583a4a4542e47fbd212d6994a78a22d",
+      "redactions": 0
+    }
+  ]
+}

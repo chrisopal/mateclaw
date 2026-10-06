@@ -1,0 +1,21 @@
+{
+  "matrixMeasurements": 18,
+  "referenceSelfComparisons": 9,
+  "projectedReferenceComparisons": 9,
+  "exactSerializedJsonEquality": true,
+  "rawLatencySamples": 540,
+  "schemaVersions": [
+    "8.0.46",
+    "8.0.46",
+    "8.0.46"
+  ],
+  "migrationHistoriesVerified": 3,
+  "javacExitCode": 0,
+  "measurementExitCode": 0,
+  "ownedContainerStoppedThenRemoved": true,
+  "privateFilesAbsent": true,
+  "secretLiteralScanFindings": [],
+  "javaLsp": "UNAVAILABLE",
+  "repositoryGates": "NOT_RUN_BY_EXTERNAL_WORKER",
+  "independentReview": "COMMENT_PARENT_BOUNDED_NO_NEW_BLOCKER"
+}

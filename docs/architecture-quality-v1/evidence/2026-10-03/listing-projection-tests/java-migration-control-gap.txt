@@ -1,0 +1,5 @@
+JAVA_MIGRATION_INVARIANT_GAP_CONFIRMED
+is_migration(java_entry)= False
+changed_existing_java_entry_findings= 0
+missing_other_dialect_java_entries_findings= 0
+NOT_ARCHITECTURE_ACCEPTED: SQL-only DB-001/DB-002 do not protect Java entries or frozen factory closure; independent control-plane review required

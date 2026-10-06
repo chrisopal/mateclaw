@@ -1,0 +1,81 @@
+[
+  {
+    "path": "/tmp/ac30-transcript-red.log",
+    "sha256": "2ef61c316ed4ee7c0406ae9976a865432082d0a92b4f164e8a0ceb0b3c0cab10",
+    "bytes": 42800,
+    "terminal": [
+      "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.580 s <<< FAILURE! -- in vip.mate.presales.PresalesEmployeeRuntimeTest",
+      "Wanted but not invoked:",
+      "[ERROR] Failures: ",
+      "Wanted but not invoked:",
+      "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0",
+      "[INFO] BUILD FAILURE"
+    ]
+  },
+  {
+    "path": "/tmp/ac30-agent-entry-red.log",
+    "sha256": "fdb737dee123fe75b07a852bbd3e8902504d36da44e2df5deff27a534b56dce1",
+    "bytes": 41873,
+    "terminal": [
+      "[ERROR] Tests run: 4, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.512 s <<< FAILURE! -- in vip.mate.agent.controller.AgentControllerOriginTest",
+      "[ERROR] Failures: ",
+      "[ERROR] Tests run: 4, Failures: 1, Errors: 0, Skipped: 0",
+      "[INFO] BUILD FAILURE"
+    ]
+  },
+  {
+    "path": "/tmp/ac30-late-transcript-red.log",
+    "sha256": "7827f2de37e2476a6d2eb1a6021e5e461fe4c550b735c04b4273081f6c1ea054",
+    "bytes": 41881,
+    "terminal": [
+      "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.575 s <<< FAILURE! -- in vip.mate.presales.PresalesEmployeeRuntimeTest",
+      "[ERROR] Failures: ",
+      "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0",
+      "[INFO] BUILD FAILURE"
+    ]
+  },
+  {
+    "path": "/tmp/ac30-transcript-package-final.log",
+    "sha256": "b7da86a121b32af3ab4016b89927afaff6695056ef107f588b9db14e5ff43c61",
+    "bytes": 956919,
+    "terminal": [
+      "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in vip.mate.channel.web.ChatControllerPreviewRouteTest",
+      "[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in vip.mate.channel.web.ChatControllerWorkerReadOnlyTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in vip.mate.channel.web.ConversationInputQueueStoreTest",
+      "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in vip.mate.channel.web.ChatControllerUploadPathTest",
+      "[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.090 s -- in vip.mate.architecture.WorkbenchArchitectureTest",
+      "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s -- in vip.mate.approval.grant.listener.ConversationLifecycleListenerTest",
+      "[INFO] Tests run: 1024, Failures: 0, Errors: 0, Skipped: 1",
+      "[INFO] BUILD SUCCESS"
+    ]
+  },
+  {
+    "path": "/tmp/ac30-transcript-ui-final.log",
+    "sha256": "dab0f0ec3c253d9f0ca398008febaad30f8d34114d537f61d04649b89ba9008d",
+    "bytes": 261,
+    "terminal": [
+      " Test Files  2 passed (2)",
+      "      Tests  20 passed (20)"
+    ]
+  },
+  {
+    "path": "/tmp/ac30-transcript-typecheck.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "terminal": []
+  },
+  {
+    "path": "/tmp/ac30-transcript-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "terminal": []
+  },
+  {
+    "path": "/tmp/ac30-transcript-dev-delivery.log",
+    "sha256": "7e292b7a3c44767f1855b61714ca1ca80ac61d6df980b35f36d5738190a45caa",
+    "bytes": 316,
+    "terminal": [
+      "{\"status\": \"SCAN_PASS\", \"report\": \"/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-g1wt8zsr/report.json\", \"submission_ready\": false, \"error\": null}"
+    ]
+  }
+]

@@ -1,0 +1,629 @@
+package vip.mate.presales;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import vip.mate.semantic.support.SemanticHttpFixture;
+
+@Import({
+    PresalesAccess.class,
+    PresalesService.class,
+    vip.mate.presales.repository.PresalesRenderTaskRepository.class,
+    vip.mate.presales.repository.PresalesProjectRepository.class,
+    vip.mate.presales.repository.PresalesArtifactRepository.class,
+    PresalesSourceAuthorization.class,
+    vip.mate.wiki.service.WikiSourceReadService.class,
+    vip.mate.wiki.repository.WikiSourceReadRepository.class,
+    vip.mate.semantic.source.SourceGovernanceReadService.class,
+    vip.mate.semantic.source.repository.SourceGovernanceReadRepository.class,
+    PresalesController.class,
+    PresalesSourceQueryService.class,
+    PresalesProjectQueryService.class,
+    PresalesExceptionHandler.class,
+    PresalesArtifactRenderer.class,
+    vip.mate.workspace.core.service.ProjectSourceAccess.class,
+    vip.mate.workspace.core.service.ProjectAuthorityFence.class
+})
+@TestPropertySource(properties = "mateclaw.presales.enabled=true")
+class PresalesCommandPayloadContractTest extends SemanticHttpFixture {
+    private JsonNode api(String method, String path, String role, Object body, int status)
+            throws Exception {
+        var r =
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
+                                org.springframework.http.HttpMethod.valueOf(method),
+                                "/api/v1/presales" + path)
+                        .header("Authorization", tokens.get(role))
+                        .header("X-Workspace-Id", workspace)
+                        .contentType("application/json");
+        if (body != null) r.content(json.writeValueAsString(body));
+        var response = mvc.perform(r).andReturn().getResponse();
+        assertEquals(status, response.getStatus(), response.getContentAsString());
+        return json.readTree(response.getContentAsString());
+    }
+
+    private ObjectNode project() throws Exception {
+        return (ObjectNode)
+                api(
+                                "POST",
+                                "/projects",
+                                "member",
+                                Map.of(
+                                        "name",
+                                        "command types",
+                                        "customer",
+                                        "customer",
+                                        "expectedVersion",
+                                        0,
+                                        "operationId",
+                                        UUID.randomUUID().toString()),
+                                200)
+                        .path("data");
+    }
+
+    private ObjectNode cmd(Integer version, String operation, String action, ObjectNode payload) {
+        var r = json.createObjectNode().put("operationId", operation);
+        if (version == null) r.putNull("expectedVersion");
+        else r.put("expectedVersion", version);
+        if (action == null) r.putNull("action");
+        else r.put("action", action);
+        r.set("payload", payload);
+        return r;
+    }
+
+    private JsonNode command(ObjectNode p, ObjectNode c, String role, int status) throws Exception {
+        return api("POST", "/projects/" + p.path("id").asText() + "/commands", role, c, status);
+    }
+
+    private String stored(ObjectNode p) {
+        return PresalesStorageTestSupport.body(jdbc, workspace, p.path("id").asText());
+    }
+
+    private void error(JsonNode r, String code, String message) {
+        assertEquals(code, r.path("data").path("code").asText());
+        if (message != null) assertEquals(message, r.path("msg").asText());
+    }
+
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> malformed() {
+        return java.util.stream.Stream.of(
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "UPDATE_PROJECT", "{\"name\":123}", "name"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "UPDATE_PROJECT", "{\"customer\":false}", "customer"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "UPDATE_PROJECT", "{\"agentId\":123}", "agentId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "UPDATE_PROJECT", "{\"ownerId\":123}", "ownerId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "BIND_MATERIAL", "{\"kbId\":1001}", "kbId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_REQUIREMENT", "{\"title\":123}", "title"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_REQUIREMENT",
+                        "{\"title\":\"valid\",\"description\":false}",
+                        "description"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_REQUIREMENT",
+                        "{\"title\":\"valid\",\"statementRevision\":1.5}",
+                        "statementRevision"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_CLARIFICATION", "{\"question\":false}", "question"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_CLARIFICATION",
+                        "{\"question\":\"valid\",\"requirementId\":123}",
+                        "requirementId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "UNBIND_MATERIAL", "{\"id\":123}", "id"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "CANCEL_AI_TASK", "{\"taskId\":123}", "taskId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_AI_TASK", "{\"skill\":123}", "skill"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_AI_TASK", "{\"result\":[]}", "result"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_AI_TASK", "{\"contextSnapshot\":\"wrong\"}", "contextSnapshot"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_CONTEXT", "{\"text\":123}", "text"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_CONTEXT", "{\"sourceRefs\":[123]}", "sourceRefs[0]"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_REVIEW", "{\"solutionId\":123}", "solutionId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_REVIEW",
+                        "{\"issues\":[{\"description\":false}]}",
+                        "issues[0].description"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "CREATE_RELEASE", "{\"solutionId\":123}", "solutionId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "APPROVE_RELEASE", "{\"releaseId\":123}", "releaseId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "PUBLISH_RELEASE", "{\"releaseId\":123}", "releaseId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "APPROVE_BASELINE", "{\"reason\":123}", "reason"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_FIT_GAP", "{\"requirementId\":123}", "requirementId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_FIT_GAP", "{\"evidenceIds\":[false]}", "evidenceIds[0]"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_SOLUTION", "{\"title\":123}", "title"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_SOLUTION", "{\"sections\":[{\"title\":false}]}", "sections[0].title"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_SOLUTION",
+                        "{\"sections\":[{\"requirementRefs\":{\"key\":\"x\"}}]}",
+                        "sections[0].requirementRefs"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_SOLUTION",
+                        "{\"requirementResponses\":[{\"requirementId\":123}]}",
+                        "requirementResponses[0].requirementId"),
+                org.junit.jupiter.params.provider.Arguments.of(
+                        "SAVE_SOLUTION", "{\"baselineVersion\":\"1\"}", "baselineVersion"));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("malformed")
+    void malformedWritesAreRejectedWithoutBodyRevisionOrReceipt(
+            String action, String payload, String field) throws Exception {
+        var p = project();
+        String before = stored(p);
+        String operation = UUID.randomUUID().toString();
+        error(
+                command(
+                        p,
+                        cmd(1, operation, action, (ObjectNode) json.readTree(payload)),
+                        "admin",
+                        400),
+                "INVALID_REQUEST",
+                "Invalid payload field: " + field);
+        assertEquals(before, stored(p));
+        assertEquals(
+                1,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                        Integer.class,
+                        p.path("id").asText()));
+        assertEquals(
+                0,
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=? AND operation_id=?",
+                        Integer.class,
+                        workspace,
+                        operation));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "UPDATE_PROJECT,name",
+        "SAVE_CLARIFICATION,question",
+        "SAVE_REVIEW,summary"
+    })
+    void authorizationReplayCasAndArchiveStillPrecedeShapeValidation(String action, String field)
+            throws Exception {
+        var p = project();
+        var payload = json.createObjectNode().put(field, 123);
+        String operation = UUID.randomUUID().toString();
+        var c = cmd(1, operation, action, payload);
+        command(p, c, "viewer", 403);
+        error(
+                command(p, cmd(0, operation, action, payload), "member", 409),
+                "VERSION_CONFLICT",
+                null);
+        // A historical matching receipt is replayed without validating or re-writing its request.
+        String hash =
+                vip.mate.semantic.statement.StatementApplicationService.hash(
+                        json.writeValueAsString(
+                                List.of(
+                                        p.path("id").asText(),
+                                        json.treeToValue(c, PresalesDtos.Command.class))));
+        PresalesStorageTestSupport.receipt(
+                jdbc, json, workspace, p.path("createdBy").asText(), operation, hash, p);
+        assertEquals(p, command(p, c, "member", 200).path("data"));
+        payload.put(field, 456);
+        error(command(p, c, "member", 409), "OPERATION_CONFLICT", null);
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                1,
+                                                UUID.randomUUID().toString(),
+                                                "ARCHIVE",
+                                                json.createObjectNode()),
+                                        "member",
+                                        200)
+                                .path("data");
+        error(
+                command(p, cmd(2, UUID.randomUUID().toString(), action, payload), "member", 409),
+                "PROJECT_ARCHIVED",
+                null);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "UPDATE_PROJECT,name",
+        "SAVE_CLARIFICATION,question",
+        "SAVE_REVIEW,summary"
+    })
+    void revokedSourceStillPrecedesMalformedPayloadAndRepairIsNotWidened(
+            String action, String field) throws Exception {
+        var p = project();
+        p.withArray("materials")
+                .addObject()
+                .put("id", "opaque-binding")
+                .put("kbId", "1001")
+                .put("role", "PROJECT");
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
+        when(wikiKnowledgeBases.getById(1001L)).thenReturn(null);
+        error(
+                command(
+                        p,
+                        cmd(
+                                1,
+                                UUID.randomUUID().toString(),
+                                action,
+                                json.createObjectNode().put(field, 123)),
+                        "member",
+                        403),
+                "MATERIAL_UNAVAILABLE",
+                null);
+        error(
+                command(
+                        p,
+                        cmd(
+                                1,
+                                UUID.randomUUID().toString(),
+                                "UNBIND_MATERIAL",
+                                json.createObjectNode().put("id", 123)),
+                        "member",
+                        403),
+                "MATERIAL_UNAVAILABLE",
+                null);
+        var response =
+                command(
+                                p,
+                                cmd(
+                                        1,
+                                        UUID.randomUUID().toString(),
+                                        "UNBIND_MATERIAL",
+                                        json.createObjectNode().put("id", "opaque-binding")),
+                                "member",
+                                200)
+                        .path("data");
+        assertTrue(response.path("materials").isEmpty());
+    }
+
+    @Test
+    void validLegacyDefaultsUnknownExtensionsAndStringRevisionAreNotNormalized() throws Exception {
+        var p = project();
+        var payload = json.createObjectNode().put("title", "原文 Ω").put("statementRevision", "01");
+        payload.putNull("scope").putNull("priority");
+        payload.putObject("extension").put("id", 123).putNull("raw");
+        String before = payload.toString();
+        var c = cmd(1, UUID.randomUUID().toString(), "SAVE_REQUIREMENT", payload);
+        p = (ObjectNode) command(p, c, "member", 200).path("data");
+        var item = p.path("requirements").get(0);
+        assertEquals("UNKNOWN", item.path("scope").asText());
+        assertEquals("MEDIUM", item.path("priority").asText());
+        assertEquals("01", item.path("statementRevision").asText());
+        assertTrue(item.path("statementRevision").isTextual());
+        assertEquals(payload.path("extension"), item.path("extension"));
+        assertEquals(before, payload.toString());
+        var task = json.createObjectNode().putNull("status");
+        task.putObject("result").put("schemaVersion", "1").put("needsHumanReview", "true");
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(2, UUID.randomUUID().toString(), "SAVE_AI_TASK", task),
+                                        "member",
+                                        200)
+                                .path("data");
+        assertEquals("DRAFT", p.path("tasks").get(0).path("status").asText());
+        assertEquals(task.path("result"), p.path("tasks").get(0).path("result"));
+        assertEquals(p, json.readTree(stored(p)));
+    }
+
+    @Test
+    void reviewErrorsKeepDomainOrderAndLeaveAllRowsUntouched() throws Exception {
+        var p = project();
+        // Historical solution fixture isolates review rules from solution creation prerequisites.
+        p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
+        var cases =
+                List.of(
+                        new String[] {
+                            "{\"solutionId\":\"foreign\",\"summary\":\"\"}",
+                            "404",
+                            "NOT_FOUND",
+                            "solutions item not found"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "summary required, max 10000 characters"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Review issues required"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[{\"severity\":\"BAD\",\"status\":\"BAD\"}]}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid severity"
+                        },
+                        new String[] {
+                            "{\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[{\"status\":\"BAD\"},{\"severity\":\"BAD\"}]}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid status"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"solutionId\":\"solution\",\"summary\":\"s\",\"issues\":[]}",
+                            "404",
+                            "NOT_FOUND",
+                            "reviews item not found"
+                        });
+        String before = stored(p);
+        for (var sample : cases) {
+            String operation = UUID.randomUUID().toString();
+            error(
+                    command(
+                            p,
+                            cmd(1, operation, "SAVE_REVIEW", (ObjectNode) json.readTree(sample[0])),
+                            "member",
+                            Integer.parseInt(sample[1])),
+                    sample[2],
+                    sample[3]);
+            assertEquals(before, stored(p));
+            assertEquals(
+                    1,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_revision WHERE project_id=?",
+                            Integer.class,
+                            p.path("id").asText()));
+            assertEquals(
+                    0,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation WHERE workspace_id=? AND operation_id=?",
+                            Integer.class,
+                            workspace,
+                            operation));
+        }
+    }
+
+    @Test
+    void reviewDefaultsExtensionsAuthorityAndImmutableRevisionsSurviveReadback() throws Exception {
+        var p = project();
+        p.withArray("solutions").addObject().put("id", "solution").put("version", 1);
+        PresalesStorageTestSupport.write(
+                jdbc, json, workspace, p.path("id").asText(), p.toString());
+        var payload =
+                json.createObjectNode().put("solutionId", "solution").put("summary", "review");
+        var issues = payload.putArray("issues");
+        issues.addObject().putNull("severity").putNull("status").putNull("extension");
+        issues.addObject()
+                .put("severity", "BLOCKER")
+                .put("status", "RESOLVED")
+                .put("description", "closed");
+        issues.addObject().put("severity", "INFO").put("status", "ACCEPTED");
+        issues.addObject();
+        payload.put("authority", "forged").put("kind", "forged").put("authorId", "forged");
+        payload.putObject("extension").putNull("raw").put("opaque", "90071992547409999");
+        var input = payload.deepCopy();
+        var c = cmd(1, UUID.randomUUID().toString(), "SAVE_REVIEW", payload);
+        p = (ObjectNode) command(p, c, "member", 200).path("data");
+        var first = p.path("reviews").get(0).deepCopy();
+        assertEquals("HUMAN_REVIEW", first.path("kind").asText());
+        assertEquals("HUMAN_REVIEW", first.path("authority").asText());
+        assertEquals(p.path("createdBy"), first.path("authorId"));
+        assertEquals("WARNING", first.path("issues").get(0).path("severity").asText());
+        assertEquals("OPEN", first.path("issues").get(0).path("status").asText());
+        assertTrue(first.path("issues").get(0).path("extension").isNull());
+        assertEquals(input.path("issues").get(1), first.path("issues").get(1));
+        assertEquals(input.path("issues").get(2), first.path("issues").get(2));
+        assertEquals("WARNING", first.path("issues").get(3).path("severity").asText());
+        assertEquals("OPEN", first.path("issues").get(3).path("status").asText());
+        assertEquals(input.path("extension"), first.path("extension"));
+        assertFalse(first.has("previousId"));
+        var fields = new ArrayList<String>();
+        first.fieldNames().forEachRemaining(fields::add);
+        assertEquals(
+                List.of(
+                        "solutionId",
+                        "summary",
+                        "issues",
+                        "kind",
+                        "authorId",
+                        "extension",
+                        "authority",
+                        "id",
+                        "version",
+                        "createdAt"),
+                fields);
+        assertEquals(input, payload);
+        assertEquals(p, command(p, c, "member", 200).path("data"));
+        String firstId = first.path("id").asText();
+        var replacement =
+                json.createObjectNode()
+                        .put("id", firstId)
+                        .put("solutionId", "solution")
+                        .put("summary", "new review");
+        replacement.putArray("issues");
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                2,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_REVIEW",
+                                                replacement),
+                                        "member",
+                                        200)
+                                .path("data");
+        assertEquals(2, p.path("reviews").size());
+        assertEquals(first, p.path("reviews").get(0));
+        var saved = p.path("reviews").get(1);
+        assertNotEquals(firstId, saved.path("id").asText());
+        assertEquals(firstId, saved.path("previousId").asText());
+        assertEquals(2, saved.path("version").asInt());
+        assertFalse(saved.has("extension"));
+        assertTrue(saved.path("issues").isEmpty());
+        assertEquals(
+                p,
+                api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
+        assertEquals(p, json.readTree(stored(p)));
+    }
+
+    @Test
+    void clarificationMultipleErrorsKeepDomainOrderAndLeaveAllRowsUntouched() throws Exception {
+        var p = project();
+        var cases =
+                List.of(
+                        new String[] {
+                            "{\"question\":\"\",\"status\":\"UNKNOWN\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "question required, max 5000 characters"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"UNKNOWN\",\"requirementId\":\"foreign\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "Invalid status"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"ANSWERED\",\"requirementId\":\"foreign\",\"ownerId\":\"999999999\"}",
+                            "404",
+                            "NOT_FOUND",
+                            "requirements item not found"
+                        },
+                        new String[] {
+                            "{\"question\":\"q\",\"status\":\"ANSWERED\",\"ownerId\":\"999999999\"}",
+                            "400",
+                            "INVALID_OWNER",
+                            "Owner must be a workspace member"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"question\":\"q\",\"status\":\"ANSWERED\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "answer required, max 10000 characters"
+                        },
+                        new String[] {
+                            "{\"id\":\"missing\",\"question\":\"q\",\"status\":\"ANSWERED\",\"answer\":\"a\"}",
+                            "400",
+                            "INVALID_REQUEST",
+                            "answer source required, max 2000 characters"
+                        });
+        var before = stored(p);
+        var revisions =
+                jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_revision", Long.class);
+        var receipts =
+                jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_operation", Long.class);
+        for (var sample : cases) {
+            var payload = (ObjectNode) json.readTree(sample[0]);
+            var result =
+                    command(
+                            p,
+                            cmd(1, UUID.randomUUID().toString(), "SAVE_CLARIFICATION", payload),
+                            "member",
+                            Integer.parseInt(sample[1]));
+            error(result, sample[2], sample[3]);
+            assertEquals(before, stored(p));
+            assertEquals(
+                    revisions,
+                    jdbc.queryForObject("SELECT COUNT(*) FROM mate_presales_revision", Long.class));
+            assertEquals(
+                    receipts,
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM mate_presales_operation", Long.class));
+        }
+    }
+
+    @Test
+    void clarificationCodecPreservesOpaqueFieldsReplayAndReplacementOrder() throws Exception {
+        var p = project();
+        var payload = json.createObjectNode().put("question", "Question 1").putNull("status");
+        payload.put("answer", "retained draft").put("answerSourceId", "raw source");
+        payload.put("answeredBy", "forged").put("answeredAt", "forged");
+        payload.putObject("extension").putNull("raw").put("number", "90071992547409999");
+        var input = payload.deepCopy();
+        var c = cmd(1, UUID.randomUUID().toString(), "SAVE_CLARIFICATION", payload);
+        p = (ObjectNode) command(p, c, "member", 200).path("data");
+        var first = p.path("clarifications").get(0);
+        assertEquals("OPEN", first.path("status").asText());
+        assertFalse(first.has("answeredBy"));
+        assertFalse(first.has("answeredAt"));
+        assertFalse(first.has("ownerId"));
+        assertFalse(first.has("requirementId"));
+        assertEquals("retained draft", first.path("answer").asText());
+        assertEquals("raw source", first.path("answerSourceId").asText());
+        assertEquals(input.path("extension"), first.path("extension"));
+        var fields = new ArrayList<String>();
+        first.fieldNames().forEachRemaining(fields::add);
+        assertEquals(
+                List.of(
+                        "question",
+                        "status",
+                        "answer",
+                        "answerSourceId",
+                        "extension",
+                        "id",
+                        "version",
+                        "authorId",
+                        "createdAt"),
+                fields);
+        assertEquals(input, payload);
+        assertEquals(p, command(p, c, "member", 200).path("data"));
+        var firstId = first.path("id").asText();
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                2,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_CLARIFICATION",
+                                                json.createObjectNode()
+                                                        .put("question", "Question 2")),
+                                        "member",
+                                        200)
+                                .path("data");
+        var secondId = p.path("clarifications").get(1).path("id").asText();
+        var replacement = json.createObjectNode().put("id", firstId).put("question", "Replaced");
+        p =
+                (ObjectNode)
+                        command(
+                                        p,
+                                        cmd(
+                                                3,
+                                                UUID.randomUUID().toString(),
+                                                "SAVE_CLARIFICATION",
+                                                replacement),
+                                        "member",
+                                        200)
+                                .path("data");
+        assertEquals(secondId, p.path("clarifications").get(0).path("id").asText());
+        var saved = p.path("clarifications").get(1);
+        assertEquals(firstId, saved.path("id").asText());
+        assertEquals(2, saved.path("version").asInt());
+        assertFalse(saved.has("extension"));
+        assertFalse(saved.has("answer"));
+        assertEquals(
+                p,
+                api("GET", "/projects/" + p.path("id").asText(), "member", null, 200).path("data"));
+        assertEquals(p, json.readTree(stored(p)));
+    }
+}

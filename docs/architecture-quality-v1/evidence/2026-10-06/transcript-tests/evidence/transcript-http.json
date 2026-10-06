@@ -1,0 +1,71 @@
+{
+  "conversationId": "presales:2107403454093590530:e425ca98-a566-4574-bc60-4e3ba42235bb:aa73f52f-b318-44b2-921a-4a7182e2e484",
+  "sourceTree": "e6f9fe69b2a5af6bf59177df1951973c8b018e4f",
+  "checks": [
+    {
+      "role": "admin",
+      "path": "/messages",
+      "code": 200
+    },
+    {
+      "role": "admin",
+      "path": "/trajectory",
+      "code": 200
+    },
+    {
+      "role": "admin",
+      "path": "/status",
+      "code": 200
+    },
+    {
+      "role": "viewer",
+      "path": "/messages",
+      "code": 200
+    },
+    {
+      "role": "viewer",
+      "path": "/trajectory",
+      "code": 200
+    },
+    {
+      "role": "viewer",
+      "path": "/status",
+      "code": 200
+    },
+    {
+      "method": "POST",
+      "path": "/agents/2107403456102662146/chat",
+      "code": 403
+    },
+    {
+      "method": "POST",
+      "path": "/agents/2107403456102662146/execute",
+      "code": 403
+    },
+    {
+      "method": "PUT",
+      "path": "/conversations/presales%3A2107403454093590530%3Ae425ca98-a566-4574-bc60-4e3ba42235bb%3Aaa73f52f-b318-44b2-921a-4a7182e2e484/title",
+      "code": 403
+    },
+    {
+      "method": "DELETE",
+      "path": "/conversations/presales%3A2107403454093590530%3Ae425ca98-a566-4574-bc60-4e3ba42235bb%3Aaa73f52f-b318-44b2-921a-4a7182e2e484/messages",
+      "code": 403
+    },
+    {
+      "method": "POST",
+      "path": "/chat?agentId=2107403456102662146",
+      "code": 403
+    },
+    {
+      "method": "POST",
+      "path": "/chat/presales%3A2107403454093590530%3Ae425ca98-a566-4574-bc60-4e3ba42235bb%3Aaa73f52f-b318-44b2-921a-4a7182e2e484/stop",
+      "code": 403
+    },
+    {
+      "method": "POST",
+      "path": "/chat/presales%3A2107403454093590530%3Ae425ca98-a566-4574-bc60-4e3ba42235bb%3Aaa73f52f-b318-44b2-921a-4a7182e2e484/interrupt",
+      "code": 403
+    }
+  ]
+}

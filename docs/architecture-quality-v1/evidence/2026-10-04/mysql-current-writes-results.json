@@ -1,0 +1,54 @@
+{
+  "container": "mateclaw-aq-hash-8c0894d6ce",
+  "schema_prefix": "mateclaw_aq_acceptance_29a0ead9dd",
+  "state": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-hash-mysql-ly6w_uow",
+  "phase_results": [
+    {
+      "phase": "actual-current-application-sql-listing-writes-replay-rollback",
+      "exit": 0
+    }
+  ],
+  "image": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+  "id": "f3cc7ef5f034846472304adb5f16c7314f92202a5330888101201c7fe7638681",
+  "port": "53920",
+  "test_counts": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "presales_migration_target": "218",
+  "V219_and_versioned_writer_claimed": false,
+  "server_version": "8.0.46",
+  "status": "PASS",
+  "own_container_cleanup_exit": 0,
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/mysql-current-writes-tests/results.json.gz",
+      "decoded_sha256": "c6486fbd7c1efe735f70403fe7e605260d9dd8166c6a855177638458d8157f20",
+      "archive_sha256": "04e371d00d7f60d7c970bc11d8a050516e9c12229398b15b7c231a806684a62c",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/mysql-current-writes-tests/probe.log.gz",
+      "decoded_sha256": "ff9b70a34c6589c6fc949092755a65c443bb3a87da31388eb3e9d6c7fa973a9b",
+      "archive_sha256": "f76d2bd9a1844422a5b16e2e265fa8927ca2d967d5b48706ff2811d1b09c5884",
+      "redaction_changed_bytes": false
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/mysql-current-writes-tests/mysql-surefire.xml.gz",
+      "decoded_sha256": "5e9a90595ea6755086f9d71133bd519b350beb074b8639a7fa3d5e44b1e30c28",
+      "archive_sha256": "b55f9f87d0e6fc43b0558322687d5dd24fd7f3680322d0f5265ac4f21b40f933",
+      "redaction_changed_bytes": false
+    }
+  ],
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "sources": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "bd2925098d96d6f564a0eab01062c76d09b0062ffebd3d8d7003009569069672",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeResultProjection.java": "6e4c552fff76fca4642b7ada148d84b8b8c4f8a6e0637f9be3e92ed984406150",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesSqlListingTest.java": "739ef9e65fb6f71cd757808db60981ec1bdbbb578bd10498863c6e57e3390a16"
+  },
+  "formal_acceptance": "NOT_RUN",
+  "employee_projection_mysql_path": "NOT_RUN",
+  "kingbase": "NOT_RUN"
+}

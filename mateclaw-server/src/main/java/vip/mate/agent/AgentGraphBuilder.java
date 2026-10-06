@@ -838,6 +838,7 @@ public class AgentGraphBuilder {
                         chatModel,
                         conversationWindowManager,
                         toolSet);
+        agent.setProjectExecutionRevalidator(projectExecutionRevalidator);
         if (reasoningRetentionProperties != null) {
             agent.setPersistEveryIterationReasoning(
                     reasoningRetentionProperties.persistsEveryIteration());
@@ -966,7 +967,8 @@ public class AgentGraphBuilder {
                             llmCacheMetricsAggregator,
                             providerHealthTracker,
                             primaryModelConfig != null ? primaryModelConfig.getProvider() : null,
-                            providerPool);
+                            providerPool,
+                            primaryModelConfig != null ? primaryModelConfig.getModelName() : null);
             if (primaryModelConfig != null) {
                 // Feed "prompt too long" rejections back into the window resolver
                 // so the next turn budgets against the server-reported limit.
@@ -1116,6 +1118,8 @@ public class AgentGraphBuilder {
                             .addStrategy(MateClawStateKeys.LLM_CALL_COUNT, KeyStrategy.REPLACE)
                             .addStrategy(MateClawStateKeys.RUNTIME_MODEL_NAME, KeyStrategy.REPLACE)
                             .addStrategy(MateClawStateKeys.RUNTIME_PROVIDER_ID, KeyStrategy.REPLACE)
+                            .addStrategy(
+                                    MateClawStateKeys.MODEL_RESPONSE_OBSERVED, KeyStrategy.REPLACE)
                             // SourceEvidenceLedger: ActionNode 把每轮 ToolResponse 抽取出的
                             // (sourcePaths, sourceSymbols, failedPaths) merge 进这个 ledger，
                             // 后续 ReasoningNode / FinalAnswerNode 调 validateAnswer 校验
@@ -1477,7 +1481,10 @@ public class AgentGraphBuilder {
                             llmCacheMetricsAggregator,
                             providerHealthTracker,
                             primaryModelConfig != null ? primaryModelConfig.getProvider() : null,
-                            providerPool);
+                            providerPool,
+                            primaryModelConfig != null ? primaryModelConfig.getModelName() : null,
+                            projectOptions,
+                            projectExecutionRevalidator);
             if (projectOptions != null) streamingHelper.setRetryDisabled(true);
             if (primaryModelConfig != null) {
                 // Feed "prompt too long" rejections back into the window resolver
@@ -1658,6 +1665,8 @@ public class AgentGraphBuilder {
                             .addStrategy(MateClawStateKeys.REASONING_TOKENS, KeyStrategy.REPLACE)
                             .addStrategy(MateClawStateKeys.RUNTIME_MODEL_NAME, KeyStrategy.REPLACE)
                             .addStrategy(MateClawStateKeys.RUNTIME_PROVIDER_ID, KeyStrategy.REPLACE)
+                            .addStrategy(
+                                    MateClawStateKeys.MODEL_RESPONSE_OBSERVED, KeyStrategy.REPLACE)
                             // SourceEvidenceLedger: ActionNode 把每轮 ToolResponse 抽取出的
                             // (sourcePaths, sourceSymbols, failedPaths) merge 进这个 ledger，
                             // 后续 ReasoningNode / FinalAnswerNode 调 validateAnswer 校验
@@ -2044,7 +2053,9 @@ public class AgentGraphBuilder {
                 ChatModel m =
                         buildRuntimeChatModel(
                                 fallbackConfig, RetryTemplate.builder().maxAttempts(1).build());
-                chain.add(new vip.mate.llm.failover.FallbackEntry(pid, m));
+                chain.add(
+                        new vip.mate.llm.failover.FallbackEntry(
+                                pid, m, fallbackConfig.getModelName()));
                 log.info(
                         "[LlmFailover] chain[{}] = {}/{}",
                         chain.size(),

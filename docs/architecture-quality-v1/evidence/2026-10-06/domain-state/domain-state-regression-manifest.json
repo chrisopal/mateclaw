@@ -1,0 +1,306 @@
+{
+  "archive": "domain-state-regression.tar.gz",
+  "archive_sha256": "8f08eb6e738beb6005b3a307216b87bc653604d03497b62c0318a0cbd350b6e8",
+  "files": [
+    {
+      "path": "aq-domain-count-red.log",
+      "original_sha256": "77b5e65df55e587251608d52ff865ac99b8da48d2d6c8b3191f1e9ee8e6e8f7c",
+      "archived_sha256": "77b5e65df55e587251608d52ff865ac99b8da48d2d6c8b3191f1e9ee8e6e8f7c",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-dev-final.log",
+      "original_sha256": "ee7abf12ece4e12ddf4c6409dd83247484c283adfef75346d8dd9ce4a7c03dd7",
+      "archived_sha256": "ee7abf12ece4e12ddf4c6409dd83247484c283adfef75346d8dd9ce4a7c03dd7",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-green-final.log",
+      "original_sha256": "b349ec7650550eb51226d9132536aa30b272f9612e91007616b268f072ceaa28",
+      "archived_sha256": "b349ec7650550eb51226d9132536aa30b272f9612e91007616b268f072ceaa28",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-green-verified.log",
+      "original_sha256": "7894a0124087c851b46e7f0dad59b1e0374b8241e7275c1273f23df71792c5fb",
+      "archived_sha256": "7894a0124087c851b46e7f0dad59b1e0374b8241e7275c1273f23df71792c5fb",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-green.log",
+      "original_sha256": "1216ed5ab5b6228c98ce91211501dab9c2862615846e7e74784cf820c62155b3",
+      "archived_sha256": "1216ed5ab5b6228c98ce91211501dab9c2862615846e7e74784cf820c62155b3",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-typecheck-final.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archived_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-error-typecheck.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archived_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-browser-final.log",
+      "original_sha256": "5e2a34f209e2d383c78688bb4d6db1f1ccaa465d96eb69c1e240417550afd966",
+      "archived_sha256": "5e2a34f209e2d383c78688bb4d6db1f1ccaa465d96eb69c1e240417550afd966",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-browser-fixture-failure.log",
+      "original_sha256": "48ab5fd1d7e11788e5021bff445ec65cea3aaf8164c52e843dc0302bcb5c166b",
+      "archived_sha256": "48ab5fd1d7e11788e5021bff445ec65cea3aaf8164c52e843dc0302bcb5c166b",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-browser-label-failure.log",
+      "original_sha256": "b9ab9b3cf3abdf75edd5bc0ab4bc9cffb7dcfd69d4dc758dc324473f09c8b1be",
+      "archived_sha256": "b9ab9b3cf3abdf75edd5bc0ab4bc9cffb7dcfd69d4dc758dc324473f09c8b1be",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-dev.log",
+      "original_sha256": "5baca30efa7c038df11212a55b0c604c612a25c16e38fe7c2810be3584b048dd",
+      "archived_sha256": "5baca30efa7c038df11212a55b0c604c612a25c16e38fe7c2810be3584b048dd",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-green.log",
+      "original_sha256": "088479e5f470f5b4274aad3de3574b5a4f4da39740a016bd08e325416e03ad06",
+      "archived_sha256": "088479e5f470f5b4274aad3de3574b5a4f4da39740a016bd08e325416e03ad06",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-green2.log",
+      "original_sha256": "3d6282470607401d7da088ed77c1e44efc0b2c28f2a0e1e752c98a99747a202a",
+      "archived_sha256": "3d6282470607401d7da088ed77c1e44efc0b2c28f2a0e1e752c98a99747a202a",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-red-tests.log",
+      "original_sha256": "93e9040b8fef8948c0c722c9b97ba50f38b1d038e02b1e9159f1c481594f18a7",
+      "archived_sha256": "93e9040b8fef8948c0c722c9b97ba50f38b1d038e02b1e9159f1c481594f18a7",
+      "redactions": 0
+    },
+    {
+      "path": "aq-domain-state-red.log",
+      "original_sha256": "bbcaec1510d9d523955bcbca6f31a19bfe77cb687788947fbd9df1816f44c055",
+      "archived_sha256": "bbcaec1510d9d523955bcbca6f31a19bfe77cb687788947fbd9df1816f44c055",
+      "redactions": 0
+    },
+    {
+      "path": "aq-error-projection-red.log",
+      "original_sha256": "a662f3fff4f7054bdf9811bc0481520d5c61cc5bc9572e60659b1073badfaca5",
+      "archived_sha256": "a662f3fff4f7054bdf9811bc0481520d5c61cc5bc9572e60659b1073badfaca5",
+      "redactions": 0
+    },
+    {
+      "path": "browser-interactions.js",
+      "original_sha256": "f77f3c855770d066386fb5fa2fd174159b705e972b157dc09566cb74aab9cc28",
+      "archived_sha256": "f77f3c855770d066386fb5fa2fd174159b705e972b157dc09566cb74aab9cc28",
+      "redactions": 0
+    },
+    {
+      "path": "browser-results.json",
+      "original_sha256": "5b050fab8155d7a3c572da9f7d350cd787cb7f3fccbfe70f49f26c046ec92a58",
+      "archived_sha256": "5b050fab8155d7a3c572da9f7d350cd787cb7f3fccbfe70f49f26c046ec92a58",
+      "redactions": 0
+    },
+    {
+      "path": "classic-1440.png",
+      "original_sha256": "23defce933c7de1813ade49b159b2c9ebec65f9b5855523408f792154521ede0",
+      "archived_sha256": "23defce933c7de1813ade49b159b2c9ebec65f9b5855523408f792154521ede0",
+      "redactions": 0
+    },
+    {
+      "path": "classic-390.png",
+      "original_sha256": "486a1554882bf7bc6ba2a760a1aa17d0395f7630ed195d5ae30d8f77050f31d3",
+      "archived_sha256": "486a1554882bf7bc6ba2a760a1aa17d0395f7630ed195d5ae30d8f77050f31d3",
+      "redactions": 0
+    },
+    {
+      "path": "enterprise-1440.png",
+      "original_sha256": "a4ac86e121387c2de856b2b0f537611496f04cfed73456ca02483e27051f99f4",
+      "archived_sha256": "a4ac86e121387c2de856b2b0f537611496f04cfed73456ca02483e27051f99f4",
+      "redactions": 0
+    },
+    {
+      "path": "enterprise-390.png",
+      "original_sha256": "39af847add9f773357d0c348c036c79fbda11f73b9fe59b2aac0bc0bbcf968db",
+      "archived_sha256": "39af847add9f773357d0c348c036c79fbda11f73b9fe59b2aac0bc0bbcf968db",
+      "redactions": 0
+    },
+    {
+      "path": "fixture/index.html",
+      "original_sha256": "8566441b646a55898bc23dfb4e78f5149c4faecb6481bf6b26af59d871b69d81",
+      "archived_sha256": "8566441b646a55898bc23dfb4e78f5149c4faecb6481bf6b26af59d871b69d81",
+      "redactions": 0
+    },
+    {
+      "path": "fixture/package.json",
+      "original_sha256": "6dc1b06d6b093e9cccb20bee06a93836eee0420ae26803ca2ce4065d82f070d1",
+      "archived_sha256": "6dc1b06d6b093e9cccb20bee06a93836eee0420ae26803ca2ce4065d82f070d1",
+      "redactions": 0
+    },
+    {
+      "path": "fixture/src/main.ts",
+      "original_sha256": "cfc270db52ddf1c77fc95b8a6ebcc0a3af86c0ae9b2ffac5c54b507e7731b63f",
+      "archived_sha256": "cfc270db52ddf1c77fc95b8a6ebcc0a3af86c0ae9b2ffac5c54b507e7731b63f",
+      "redactions": 0
+    },
+    {
+      "path": "fixture/vite.config.ts",
+      "original_sha256": "a9c3b153247752915f34b07040a580102d2d568b68913863dea5625f4bdc5cb1",
+      "archived_sha256": "a9c3b153247752915f34b07040a580102d2d568b68913863dea5625f4bdc5cb1",
+      "redactions": 0
+    },
+    {
+      "path": "independent-review.md",
+      "original_sha256": "68f9ee631d56d575123ef3fb6b4b6aaf104a762b59f36232e5a3cd187ba12327",
+      "archived_sha256": "68f9ee631d56d575123ef3fb6b4b6aaf104a762b59f36232e5a3cd187ba12327",
+      "redactions": 0
+    },
+    {
+      "path": "results.json",
+      "original_sha256": "6010efff03f20c63c1678a7c0fc19cd88ce4c88e03b6047b46ca3fc4493d7bea",
+      "archived_sha256": "6010efff03f20c63c1678a7c0fc19cd88ce4c88e03b6047b46ca3fc4493d7bea",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/__tests__/dashboardContract.test.ts",
+      "original_sha256": "e8a04844aeceafa27d650428b2cf96d710af2052f29f71d57c2dddd1aa1901b9",
+      "archived_sha256": "e8a04844aeceafa27d650428b2cf96d710af2052f29f71d57c2dddd1aa1901b9",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/__tests__/editorSession.test.ts",
+      "original_sha256": "a2d1dfb7ed0200121ffe5c26e5696f6e1b924a88598ed1c860a4176b7247baf9",
+      "archived_sha256": "a2d1dfb7ed0200121ffe5c26e5696f6e1b924a88598ed1c860a4176b7247baf9",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/__tests__/presalesWorkbench.test.ts",
+      "original_sha256": "8b7955e5e6533af923e9cb3d9e77e66d64b1fd08a80790f05afcb37e5f299ab9",
+      "archived_sha256": "8b7955e5e6533af923e9cb3d9e77e66d64b1fd08a80790f05afcb37e5f299ab9",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/__tests__/state.test.ts",
+      "original_sha256": "4a45789309ea9dbb0c869f2e0e51d78b2ce4df1e709a27c61eac8fac9960e1b0",
+      "archived_sha256": "4a45789309ea9dbb0c869f2e0e51d78b2ce4df1e709a27c61eac8fac9960e1b0",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/__tests__/status.test.ts",
+      "original_sha256": "e0cd2b99e8d3a0779c595b694ebe0bf4a3ea29ec39cdf8d4cfba0f3b5147e327",
+      "archived_sha256": "e0cd2b99e8d3a0779c595b694ebe0bf4a3ea29ec39cdf8d4cfba0f3b5147e327",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesDashboard.vue",
+      "original_sha256": "3dc3310493e366b4271d6abcc76612a3745599e197ec8a97e868141f48593c89",
+      "archived_sha256": "3dc3310493e366b4271d6abcc76612a3745599e197ec8a97e868141f48593c89",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesDiscoveryFields.vue",
+      "original_sha256": "aefad22605be89e30f5e87c12b39462f8a6bbb492e0696b0722c49a423385c19",
+      "archived_sha256": "aefad22605be89e30f5e87c12b39462f8a6bbb492e0696b0722c49a423385c19",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesFitGap.vue",
+      "original_sha256": "d1f87ede4ba9fbe1e4b5460ac8f1cfde39e1cf4e2867662e599743b0654446e7",
+      "archived_sha256": "d1f87ede4ba9fbe1e4b5460ac8f1cfde39e1cf4e2867662e599743b0654446e7",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesMaterials.vue",
+      "original_sha256": "cf4101cbee304b6ea57d30ffcecd2b7f5b513fd7cfcbd039c6d55983b8bddc38",
+      "archived_sha256": "cf4101cbee304b6ea57d30ffcecd2b7f5b513fd7cfcbd039c6d55983b8bddc38",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesOutputFields.vue",
+      "original_sha256": "f19d43cf3672c2ec83431e8e2b1cc94b18d3351cdc543365a77f6167b5961aa5",
+      "archived_sha256": "f19d43cf3672c2ec83431e8e2b1cc94b18d3351cdc543365a77f6167b5961aa5",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesOutputs.vue",
+      "original_sha256": "b2f2cb249bb5f84612a67488387265a888f407215ac181e5f1e866a44a9ae349",
+      "archived_sha256": "b2f2cb249bb5f84612a67488387265a888f407215ac181e5f1e866a44a9ae349",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesOverview.vue",
+      "original_sha256": "9e9b95e4dc582197eef7fd89dcd0791aa176a7b087ac20d577a7f675e19aa000",
+      "archived_sha256": "9e9b95e4dc582197eef7fd89dcd0791aa176a7b087ac20d577a7f675e19aa000",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesProjectLedger.vue",
+      "original_sha256": "4a8fa3df7c2697fd045b5278ab35ad8695bacf071ba92367906a253061963617",
+      "archived_sha256": "4a8fa3df7c2697fd045b5278ab35ad8695bacf071ba92367906a253061963617",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesRequirements.vue",
+      "original_sha256": "e5ac4532290dbe666fe8e2b64273af1eb6176cd7282e60e81a91bd8af8c29aac",
+      "archived_sha256": "e5ac4532290dbe666fe8e2b64273af1eb6176cd7282e60e81a91bd8af8c29aac",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/components/PresalesSolutions.vue",
+      "original_sha256": "87ad039a55e52c84acae1f4f14203884414b0d60d7e55361bab5b4e0741bca9f",
+      "archived_sha256": "87ad039a55e52c84acae1f4f14203884414b0d60d7e55361bab5b4e0741bca9f",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/composables/usePresalesExecutionSession.ts",
+      "original_sha256": "224bb77905e6bbeb7722e8f1903c66f0c7b68ea49ca8cbabd532dab8a42c0986",
+      "archived_sha256": "224bb77905e6bbeb7722e8f1903c66f0c7b68ea49ca8cbabd532dab8a42c0986",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/composables/usePresalesTaskPolling.ts",
+      "original_sha256": "1b71848c0bc1318affbf4c5af189d277e9be77d57f41bc2b0276cc8585900548",
+      "archived_sha256": "1b71848c0bc1318affbf4c5af189d277e9be77d57f41bc2b0276cc8585900548",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+      "original_sha256": "b64cf471431132aae0ac57d5d271991afff63b7beaa0e020d17e39fb3e06c288",
+      "archived_sha256": "b64cf471431132aae0ac57d5d271991afff63b7beaa0e020d17e39fb3e06c288",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/shared/messages.ts",
+      "original_sha256": "4a38437040e0f1037568974790e40cb8512c0f596f7aa9b788218b55aac4defd",
+      "archived_sha256": "4a38437040e0f1037568974790e40cb8512c0f596f7aa9b788218b55aac4defd",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/shared/state.ts",
+      "original_sha256": "53203a584b5099351f57c377c485353b58e9bcada6c244133ee7856d279ae119",
+      "archived_sha256": "53203a584b5099351f57c377c485353b58e9bcada6c244133ee7856d279ae119",
+      "redactions": 0
+    },
+    {
+      "path": "source/mateclaw-ui/src/features/presales/shared/status.ts",
+      "original_sha256": "1894486beca440dd736f7409eb4033bdf6dc67f77ba24efc1e9e0e3797b1d285",
+      "archived_sha256": "1894486beca440dd736f7409eb4033bdf6dc67f77ba24efc1e9e0e3797b1d285",
+      "redactions": 0
+    },
+    {
+      "path": "source-hashes.json",
+      "original_sha256": "b608d96552ea615713dcddb00ff1506cda3969ed0a0b920485b824399f54b366",
+      "archived_sha256": "b608d96552ea615713dcddb00ff1506cda3969ed0a0b920485b824399f54b366",
+      "redactions": 0
+    }
+  ]
+}

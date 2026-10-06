@@ -1,0 +1,66 @@
+{
+  "archive": "clarification-dto-regression.tar.gz",
+  "archive_sha256": "3e037387bf98c558058fe76a333d60481970cc6a9edc821fdc87b5fcbdcc3101",
+  "files": [
+    {
+      "path": "aq-clarification-broad-final.log",
+      "original_sha256": "d95a57c6048ee1f1e77bde4e82c0472efdbbe7e436d0e76ad32451dc00a8b4e4",
+      "archived_sha256": "4accafb0e90af89274f058a96c20cccab64a4d2ec880be9f9c5f2e22620d0393",
+      "redactions": 8
+    },
+    {
+      "path": "aq-clarification-characterization.log",
+      "original_sha256": "3b281e68445d3adcdd6cdcd53559b6b1627eba8ba49945d9fe746ad539db5c81",
+      "archived_sha256": "66847bd3143e33bc4a6cdab188cfb815dcc0436c949bd567a2c3eb4220f24e95",
+      "redactions": 1
+    },
+    {
+      "path": "aq-clarification-dev-final.log",
+      "original_sha256": "f6dc1c48106c5dabf6d57ebc8b8983cb63759b2905147d53d1930d36dc2b5881",
+      "archived_sha256": "f6dc1c48106c5dabf6d57ebc8b8983cb63759b2905147d53d1930d36dc2b5881",
+      "redactions": 0
+    },
+    {
+      "path": "aq-clarification-dev.log",
+      "original_sha256": "2a9736a83d8486460e9db8b3fa75a3c58499638088920c60da9954f6abb70bcf",
+      "archived_sha256": "2a9736a83d8486460e9db8b3fa75a3c58499638088920c60da9954f6abb70bcf",
+      "redactions": 0
+    },
+    {
+      "path": "aq-clarification-format-order.log",
+      "original_sha256": "5d416da5f3be24525a6718d8337fe591de026da16501bbd933675256e4dc2e62",
+      "archived_sha256": "5d416da5f3be24525a6718d8337fe591de026da16501bbd933675256e4dc2e62",
+      "redactions": 0
+    },
+    {
+      "path": "aq-clarification-green.log",
+      "original_sha256": "febc208dbadc1f87610985e59c36b86d0ef1c7f62c08673e671f10194b3760f5",
+      "archived_sha256": "57d9eb01484278227adda13ae9462a724c447ce6f31435f3cd478fa368d5da75",
+      "redactions": 1
+    },
+    {
+      "path": "aq-clarification-order.log",
+      "original_sha256": "7c9da078920c076c06b9c4c873e29f8fc143d8b5e8f48ed5c3862bd298fdf394",
+      "archived_sha256": "6e75730db0f669efc0c2158778e7c214be5c1296448528a0207ab1ed3db11652",
+      "redactions": 1
+    },
+    {
+      "path": "aq-domain-dto-baseline.log",
+      "original_sha256": "ee80a4b82a74e7bcc4806da92fc8fbe1bb01a496140899d1a50f8757ad05d3cf",
+      "archived_sha256": "cfb68476dc8d8d7b0576f75d8db6cc46ae881e50ad59f3353ba9dcd8e6396c7d",
+      "redactions": 1
+    },
+    {
+      "path": "aq-recovery-initial-dev.log",
+      "original_sha256": "c3d03d1e51619c1eab6257a228347ec2fe2d8d35f23b27bd590e1262d6c5817f",
+      "archived_sha256": "c3d03d1e51619c1eab6257a228347ec2fe2d8d35f23b27bd590e1262d6c5817f",
+      "redactions": 0
+    },
+    {
+      "path": "source-hashes.json",
+      "original_sha256": "a40c203a0adce546d4bf70c383c94712cfcc8901baed06871da5d8808d2ea3da",
+      "archived_sha256": "a40c203a0adce546d4bf70c383c94712cfcc8901baed06871da5d8808d2ea3da",
+      "redactions": 0
+    }
+  ]
+}

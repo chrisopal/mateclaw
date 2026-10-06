@@ -1,0 +1,31 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< vip.mate:mateclaw-server >----------------------
+[INFO] Building MateClaw Server 2.3.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- spotless:3.5.0:apply (default-cli) @ mateclaw-server ---
+[INFO] Index file does not exist. Fallback to an empty index
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/workspace/core/service/WorkspaceAccessService.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/auth/service/ActorResolverTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/presales/PresalesAccessPolicyTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/semantic/support/SemanticHttpFixture.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/semantic/security/SemanticAccessService.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/auth/service/ActorResolver.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/presales/PresalesAccess.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/workspace/core/service/WorkspaceAccessServiceTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/bidding/BiddingAccess.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/semantic/SemanticPrincipalResolverTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/presales/PresalesAccessActorTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingAccessPolicyTest.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/main/java/vip/mate/semantic/security/SemanticPrincipalResolver.java
+[INFO] clean file: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/src/test/java/vip/mate/bidding/BiddingHttpFixture.java
+[INFO] Spotless.Java is keeping 15 files clean - 15 were changed to be clean, 0 were already clean, 0 were skipped because caching determined they were already clean
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.418 s
+[INFO] Finished at: 2026-10-02T11:36:59+08:00
+[INFO] ------------------------------------------------------------------------

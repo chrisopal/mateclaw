@@ -1,0 +1,895 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts (30 tests | 25 failed) 16ms
+   × rejects invalid project admission {"id":922337} 5ms
+   × rejects invalid project admission {"workspaceId":"other"} 1ms
+   × rejects invalid project admission {"id":"other"} 1ms
+   × rejects invalid project admission {"version":1.5} 0ms
+   × rejects invalid project admission {"version":9007199254740992} 1ms
+   × rejects invalid project admission {"materials":null} 0ms
+   × rejects invalid project admission {"requirements":[{}]} 0ms
+   × rejects invalid project admission {"tasks":[{"id":"t","status":3}]} 0ms
+   × rejects invalid project admission {"solutions":[{"id":"s","sections":[{"title":7}]}]} 1ms
+   × rejects invalid project admission {"solutions":[{"id":"s","presentation":{"artifactId":"a","skill":"S7","pageCount":1}}]} 1ms
+   × rejects invalid project admission {"sourceAccessRestricted":"false"} 0ms
+   × guards create project responses 0ms
+   × guards update project responses 0ms
+   × guards command project responses 1ms
+   × guards generate project responses 0ms
+   × guards cancelTask project responses 0ms
+   × rejects unsafe total -1 0ms
+   × rejects unsafe total "01" 0ms
+   × rejects unsafe total "9007199254740992" 0ms
+   × rejects unsafe total 9007199254740992 0ms
+   × rejects collection-bearing summaries 0ms
+   × rejects invalid repair projection {"context":{"secret":"LEAK_MARKER"}} 0ms
+   × rejects invalid repair projection {"tasks":[{"id":"t","status":"DONE"}]} 0ms
+   × rejects invalid repair projection {"repairBindings":[{"id":3,"role":"UNKNOWN"}]} 0ms
+   × rejects invalid repair projection {"sourceAccessRestricted":false} 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 25 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"id":922337}
+AssertionError: promise resolved "{ id: 922337, …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": 922337,
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"workspaceId":"other"}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "other",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"id":"other"}
+AssertionError: promise resolved "{ id: 'other', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "other",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"version":1.5}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1.5,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"version":9007199254740992}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 9007199254740992,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"materials":null}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": null,
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"requirements":[{}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [
++     {},
++   ],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"tasks":[{"id":"t","status":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [
++     {
++       "id": "t",
++       "status": 3,
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"solutions":[{"id":"s","sections":[{"title":7}]}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [
++     {
++       "id": "s",
++       "sections": [
++         {
++           "title": 7,
++         },
++       ],
++     },
++   ],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"solutions":[{"id":"s","presentation":{"artifactId":"a","skill":"S7","pageCount":1}}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [
++     {
++       "id": "s",
++       "presentation": {
++         "artifactId": "a",
++         "pageCount": 1,
++         "skill": "S7",
++       },
++     },
++   ],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid project admission {"sourceAccessRestricted":"false"}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(19) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "sourceAccessRestricted": "false",
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:27:39
+     25| it.each(invalid)('rejects invalid project admission %j', async patch =…
+     26|   respond({ ...project(), ...patch })
+     27|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+     28| })
+     29| it('preserves raw extensions and nested records without fabricated ide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > guards create project responses
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > guards update project responses
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > guards command project responses
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > guards generate project responses
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > guards cancelTask project responses
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(18) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "other",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:45:31
+     43|     cancelTask: () => presalesApi.cancelTask(ws, id, 't', { operationI…
+     44|   }
+     45|   await expect(calls[method]()).rejects.toMatchObject({ code: 'PRESALE…
+       |                               ^
+     46| })
+     47| it.each([0, '0', '42'])('retains wire total %j', async total => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects unsafe total -1
+AssertionError: promise resolved "{ items: [ { …(7) } ], total: -1, …(2) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "items": [
++     {
++       "customer": "Customer",
++       "id": "p/9223372036854775800",
++       "name": "Factory",
++       "ownerId": "9223372036854775802",
++       "status": "HISTORICAL_STATUS",
++       "version": 1,
++       "workspaceId": "9223372036854775801",
++     },
++   ],
++   "page": 1,
++   "pageSize": 100,
++   "total": -1,
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:53:40
+     51| it.each([-1, '01', '9007199254740992', Number.MAX_SAFE_INTEGER + 1])('…
+     52|   respond({ items: [summary], total, page: 1, pageSize: 100 })
+     53|   await expect(presalesApi.list(ws, {})).rejects.toMatchObject({ code:…
+       |                                        ^
+     54| })
+     55| it('rejects collection-bearing summaries', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects unsafe total "01"
+AssertionError: promise resolved "{ items: [ { …(7) } ], …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "items": [
++     {
++       "customer": "Customer",
++       "id": "p/9223372036854775800",
++       "name": "Factory",
++       "ownerId": "9223372036854775802",
++       "status": "HISTORICAL_STATUS",
++       "version": 1,
++       "workspaceId": "9223372036854775801",
++     },
++   ],
++   "page": 1,
++   "pageSize": 100,
++   "total": "01",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:53:40
+     51| it.each([-1, '01', '9007199254740992', Number.MAX_SAFE_INTEGER + 1])('…
+     52|   respond({ items: [summary], total, page: 1, pageSize: 100 })
+     53|   await expect(presalesApi.list(ws, {})).rejects.toMatchObject({ code:…
+       |                                        ^
+     54| })
+     55| it('rejects collection-bearing summaries', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects unsafe total "9007199254740992"
+AssertionError: promise resolved "{ items: [ { …(7) } ], …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "items": [
++     {
++       "customer": "Customer",
++       "id": "p/9223372036854775800",
++       "name": "Factory",
++       "ownerId": "9223372036854775802",
++       "status": "HISTORICAL_STATUS",
++       "version": 1,
++       "workspaceId": "9223372036854775801",
++     },
++   ],
++   "page": 1,
++   "pageSize": 100,
++   "total": "9007199254740992",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:53:40
+     51| it.each([-1, '01', '9007199254740992', Number.MAX_SAFE_INTEGER + 1])('…
+     52|   respond({ items: [summary], total, page: 1, pageSize: 100 })
+     53|   await expect(presalesApi.list(ws, {})).rejects.toMatchObject({ code:…
+       |                                        ^
+     54| })
+     55| it('rejects collection-bearing summaries', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects unsafe total 9007199254740992
+AssertionError: promise resolved "{ items: [ { …(7) } ], …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "items": [
++     {
++       "customer": "Customer",
++       "id": "p/9223372036854775800",
++       "name": "Factory",
++       "ownerId": "9223372036854775802",
++       "status": "HISTORICAL_STATUS",
++       "version": 1,
++       "workspaceId": "9223372036854775801",
++     },
++   ],
++   "page": 1,
++   "pageSize": 100,
++   "total": 9007199254740992,
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:53:40
+     51| it.each([-1, '01', '9007199254740992', Number.MAX_SAFE_INTEGER + 1])('…
+     52|   respond({ items: [summary], total, page: 1, pageSize: 100 })
+     53|   await expect(presalesApi.list(ws, {})).rejects.toMatchObject({ code:…
+       |                                        ^
+     54| })
+     55| it('rejects collection-bearing summaries', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects collection-bearing summaries
+AssertionError: promise resolved "{ items: [ { …(19) } ], total: 1, …(2) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "items": [
++     {
++       "baselines": [],
++       "cases": [],
++       "clarifications": [],
++       "contextCards": [],
++       "customer": "Customer",
++       "fitGaps": [],
++       "id": "p/9223372036854775800",
++       "materials": [],
++       "name": "Factory",
++       "ownerId": "9223372036854775802",
++       "releases": [],
++       "requirements": [],
++       "reviewDrafts": [],
++       "reviews": [],
++       "solutions": [],
++       "status": "HISTORICAL_STATUS",
++       "tasks": [],
++       "version": 1,
++       "workspaceId": "9223372036854775801",
++     },
++   ],
++   "page": 1,
++   "pageSize": 100,
++   "total": 1,
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:57:40
+     55| it('rejects collection-bearing summaries', async () => {
+     56|   respond({ items: [project()], total: 1, page: 1, pageSize: 100 })
+     57|   await expect(presalesApi.list(ws, {})).rejects.toMatchObject({ code:…
+       |                                        ^
+     58| })
+     59| it('accepts exact repair projection with UNKNOWN role', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid repair projection {"context":{"secret":"LEAK_MARKER"}}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(21) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "context": {
++     "secret": "LEAK_MARKER",
++   },
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "repairBindings": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "sourceAccessRestricted": true,
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:67:49
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid repair projection {"tasks":[{"id":"t","status":"DONE"}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(20) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "repairBindings": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "sourceAccessRestricted": true,
++   "status": "HISTORICAL_STATUS",
++   "tasks": [
++     {
++       "id": "t",
++       "status": "DONE",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:67:49
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid repair projection {"repairBindings":[{"id":3,"role":"UNKNOWN"}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(20) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "repairBindings": [
++     {
++       "id": 3,
++       "role": "UNKNOWN",
++     },
++   ],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "sourceAccessRestricted": true,
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:67:49
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/25]⎯
+
+ FAIL  src/features/presales/__tests__/projectResponse.test.ts > rejects invalid repair projection {"sourceAccessRestricted":false}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(20) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [],
++   "cases": [],
++   "clarifications": [],
++   "contextCards": [],
++   "customer": "Customer",
++   "fitGaps": [],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "Factory",
++   "ownerId": "9223372036854775802",
++   "releases": [],
++   "repairBindings": [],
++   "requirements": [],
++   "reviewDrafts": [],
++   "reviews": [],
++   "solutions": [],
++   "sourceAccessRestricted": false,
++   "status": "HISTORICAL_STATUS",
++   "tasks": [],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/projectResponse.test.ts:67:49
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/25]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  25 failed | 5 passed (30)
+   Start at  23:21:46
+   Duration  315ms (transform 52ms, setup 0ms, import 82ms, tests 16ms, environment 106ms)

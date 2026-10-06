@@ -1,0 +1,19 @@
+# AQ-04 真实传输取消诊断整改计划
+
+起点79106130dc8f4c90fc3b083a35557817d5f9ac62，tree217eff6b0b6725aa9c0719eb7c7c0da9dbe328e5，隔离工作树干净。origin/dev固定ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93；初始dev d_yfpopa SCAN_PASS。前一轮代码/证据提交推送和PR回读，分类progress；完整目标仍active。
+
+反馈循环：实际运行workspaceRequestTransport三个HTTP测试，exit0/3通过却输出ECONNRESET。取消单项约0.3秒稳定复现同诊断，上传/二进制两项无诊断；-t仅用于最小诊断，不用于交付门禁或绕过全套测试。三假设：Happy DOM取消底层HTTP后仍记录预期reset、服务器closeAllConnections提前断连、keep-alive复用。取消单项复现且成功两项无诊断排除普通关闭/复用路径；安装HappyDOM Fetch.onSignalAbort先finalizeRequest.destroy，再abort，onError无条件console.error可解释现象。不会改node_modules、依赖或生产helper去掩盖测试环境问题。
+
+范围：仅真实HTTP workspaceRequestTransport.test.ts 与已有同一loopback fixture/type声明。先新增服务端真实断连观测和取消无意外console诊断断言（spy仅观测，不替换console.error实现），在旧HappyDOM真实传输证明失败。随后仅这份非DOM网络合同使用原生Node环境，fetch/File/FormData/Blob/AbortSignal走实际Node原生传输；用窄localStorage fixture供原宿主拦截器读写，没有生产global shim或adapter mock。3个原HTTP断言全部保留，新增断言确认cancel拒绝后服务器真实关闭连接且无错误日志；增加真实HTTP非取消失败应必然拒绝的反例，不能将错误吞掉。组件/DOM测试仍使用原HappyDOM；Node测试不证明真实浏览器CORS或主题QA。
+
+测试环境选择属于控制面影响，必须限定独立审阅：展示旧红例、覆盖差异、真实网络正反例、没有删除断言/过滤日志/修改runner配置或依赖。无需全局切换环境或降低超时；独立native工程审阅仍不是维护者正式签收，PR保持draft。产物说明固定工具链/两构建/完整UI、dev、精确staged/正常commit/push；检查进程期间caffeinate，不调整系统设置。日志原始SHA/归档SHA保留，正式46AC保持NOT_RUN。
+
+回退只恢复测试环境/fixture源码，会恢复已复现的HappyDOM取消诊断；生产API、权限、事务、wire、CAS/receipt/迁移无变化。完整稳定领域DTO/action payload、SQL分页/V2迁移、浏览器/多方言/QA及远端requiredCI继续未完成。
+
+实施定位：console.error spy仅观测时，旧3项仍绿且仍输出socket诊断，说明HappyDOM浏览器console在初始化时持有另一对象，窄console断言无法覆盖晚到输出。新增Node runner子进程回归直接检查同一Vitest整份3项HTTP结果和真实stderr，旧实现实际exit1/1红例；不把spy绿灯当修复。新回归由已有legacy rglob自动纳入门禁，不改runner或筛选配置，也不递归运行自身。CLI -t诊断选项仅在/tmp日志记录，最终执行整套。
+
+Native迁移首轮5项4通过/1失败：Axios在纯Node模式对FormData采用Node头规则，原multipart boundary断言正确暴露差异，未删除或放宽它。仅在这份测试import前hoisted安装window.location.href和document.cookie最小调用方事实，以让安装的Axios采用原browser FormData规则；fetch/File/FormData/Blob/AbortSignal仍用原生Node，不替换网络或构造器。localStorage只有原拦截器使用的三方法，所有global均由vi.unstubAllGlobals恢复。最终5项通过且无socket输出。该最小globals不是DOM/browser/CORS验收，独立环境review必须核对header分支、取消服务端断连、HTTP409和unexpected disconnect拒绝。
+
+操作记录：新增Node回归最初在UI cwd使用重复mateclaw-ui路径，未写文件且Node找不到测试；随后绝对路径写入并取得真实旧红例。不能将tail命令exit0或定位过程中被-t筛选的通过数当全量门禁。
+
+独立限定审阅提出两项修正：取消spy恢复必须覆盖整个异步流程；setImmediate不在当前工程类型环境内。实际vue-tsc首轮exit2/TS2304保留，改用已有类型的原生setTimeout(resolve,0)并扩展try/finally后，最终5项HTTP/1项子进程/vue-tsc/ESLint实际exit0；相关29文件438项通过。未新增Node类型依赖，裸checkJs缺Node类型仅记录为未完成，不能冒充类型通过。最终精确staged与正常提交/推送日志另行归档。

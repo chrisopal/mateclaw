@@ -1,0 +1,33 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts (40 tests | 1 failed) 10ms
+   × preserves nullable semantic fact metadata only inside baseline references 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > preserves nullable semantic fact metadata only inside baseline references
+Error: Unable to read project data. Reload and try again.
+ ❯ invalid src/features/presales/api/presalesResponse.ts:141:23
+    139|
+    140| function invalid(): never {
+    141|   throw Object.assign(new Error('Unable to read project data. Reload a…
+       |                       ^
+    142|     code: 'PRESALES_RESPONSE_INVALID',
+    143|   })
+ ❯ string src/features/presales/api/presalesResponse.ts:149:34
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ record src/features/presales/api/presalesResponse.ts:182:38
+ ❯ src/features/presales/api/presalesResponse.ts:330:9
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ project src/features/presales/api/presalesResponse.ts:324:5
+ ❯ decodeProject src/features/presales/api/presalesResponse.ts:354:3
+ ❯ requestProject src/features/presales/api/presalesApi.ts:197:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 39 passed (40)
+   Start at  09:04:39
+   Duration  292ms (transform 55ms, setup 0ms, import 86ms, tests 10ms, environment 108ms)

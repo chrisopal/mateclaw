@@ -1,0 +1,86 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT test
+> vitest run --run src/features/presales
+
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > ignores a cancelled same-project poll that resolves after a restricted reload
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps a newer cancellation response when an older poll resolves
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > uses one project read to poll multiple running operations
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (27 tests | 3 failed) 13054ms
+     × ignores a cancelled same-project poll that resolves after a restricted reload 1241ms
+     × keeps a newer cancellation response when an older poll resolves 1206ms
+     × uses one project read to poll multiple running operations 1181ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > ignores a cancelled same-project poll that resolves after a restricted reload
+AssertionError: expected '← ProjectsPlant AEdit projectActiveCu…' to contain 'Source access is restricted'
+
+- Expected
++ Received
+
+- Source access is restricted
++ ← ProjectsPlant AEdit projectActiveCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions0Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedContext card{
++   "text": "Old authorized content"
++ }Employee activity · RunningDiscard this run resultInput snapshotLegacy generationWorkEmployeeStatusFailure reasonPrevious taskRunningAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeNo solution. Confirm the outline before drafting sections.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and references
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:353:39
+    351|     finish()
+    352|     await settle()
+    353|     expect(document.body.textContent).toContain('Source access is rest…
+       |                                       ^
+    354|     expect(document.body.textContent).not.toContain('Old authorized co…
+    355|     expect(button('Edit project').disabled).toBe(true)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > keeps a newer cancellation response when an older poll resolves
+AssertionError: expected '← ProjectsPlant AEdit projectActiveCu…' to contain 'Current cancellation state'
+
+- Expected
++ Received
+
+- Current cancellation state
++ ← ProjectsPlant AEdit projectActiveCustomerOwner: Jane DoeRecord version 3ArchiveAssigned digital employeeNo presales employee assignedAssign employeeDelegate to employeeRequirements00 openSources0Solutions0Published releases0OverviewMaterials & evidenceRequirements & questionsCapabilities & casesSolution designReview & outputsContext and open itemsAsk employee to analyzeCustomerCustomerGoal—Industry—Requirement confirmationNot confirmedContext card{
++   "text": "Old authorized content"
++ }Employee activity · RunningDiscard this run resultInput snapshotLegacy generationWorkEmployeeStatusFailure reasonPrevious taskRunningAuthorized sourcesBind materialRoleKnowledge baseGraphStatusActionsNo DataRequirementsAsk employee to assess requirementsConfirm requirementsAbout confirmation stepsFact review, internal requirement confirmation and customer confirmation are separate. Review employee findings and evidence before confirming scope.RequirementOriginPriorityScopeCustomer confirmationActionsNo DataInformation requested by employeeContinue employee workAll 0Open 0Answered 0QuestionRequirement / impactOwnerAnswer and sourceStatusActionsNo DataRequirement confirmation historyIDDecision reasonCreatedNo DataRequirement capability matchingMatch capabilitiesAbout capability assessmentMark as unverified when evidence is missing. A similar case does not prove current deliverability.RequirementFulfillment approachProduct versionBasis / gapActionsNo DataVersioned solutionsAsk employee to composeNo solution. Confirm the outline before drafting sections.Independent reviewAsk employee to reviewRecord independent reviewCreate release candidateSolutionSummaryFindingsNo DataRelease versionsExport internal handoffVersionStatusFilesActionsNo DataRelease rulesRelease approval covers the exact files. Publishing does not send files to customers.Evidence and references
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:381:39
+    379|     finish()
+    380|     await settle()
+    381|     expect(document.body.textContent).toContain('Current cancellation …
+       |                                       ^
+    382|     expect(document.body.textContent).not.toContain('Old authorized co…
+    383|     expect(document.body.textContent).not.toContain('Discard this run …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > uses one project read to poll multiple running operations
+AssertionError: expected "vi.fn()" to be called 2 times, but got 3 times
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:396:29
+    394|     await new Promise((resolve) => setTimeout(resolve, 1100))
+    395|     await settle()
+    396|     expect(presalesApi.get).toHaveBeenCalledTimes(2)
+       |                             ^
+    397|   })
+    398|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 35 passed (38)
+   Start at  12:16:17
+   Duration  13.88s (transform 352ms, setup 0ms, import 669ms, tests 13.06s, environment 380ms)
+

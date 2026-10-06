@@ -25,8 +25,12 @@
 | TEST-001 | 测试新增 @Disabled/@Ignore 或 it/test/describe 的 skip/only | ratchet；不能据此证明全部断言未被弱化 |
 | STYLE-001 | 目标生产 Java/UI 新增 >200 字符的密集源码行 | 快速可读性提示；完整格式另跑 formatter |
 | STYLE-002 | 新增/修改非 Markdown 行的行尾空格 | 硬失败；Markdown 硬换行保留 |
-| DB-001 | 基线中已存在 V*.sql 的修改/删除/重命名 | 硬失败，不以旧问题放行 |
-| DB-002 | 新 V*.sql 未覆盖 h2/mysql/kingbase 同名文件 | 硬失败；不是跨数据库实测 |
+| DB-001 | 基线中已存在 V*.sql / V*.java 的修改/删除/重命名 | 硬失败，不以旧问题放行 |
+| DB-002 | 新 V*.sql / V*.java 未覆盖 h2/mysql/kingbase 同名同后缀文件 | 硬失败；不是跨数据库实测 |
+| DB-003 | Java 入口未登记冻结清单，或清单格式/重复键/路径/摘要无效 | 硬失败；每个入口的共享算法闭包须人工核对 |
+| DB-004 | 冻结源码缺失/摘要不匹配，基线清单项被移除/改写，首次冻结已有源码时同时修改 | 硬失败；基线声明和候选声明同时检查，不允许 rehash 绕过 |
+
+`.quality/frozen-migrations.json` 是版本 1 的显式源码清单：`files` 映射仓库内 Java 源码路径到 SHA-256。所有 Java Flyway 入口必须登记，共享算法/工厂及嵌套类型随其源码一起冻结。清单只能追加新版本源码，不能删除或改写基线项；已有源码首次登记也必须保持基线字节。初次安装需独立核对摘要等于已发布源码。未来新增依赖须补闭包并独立审阅；此检查不自动分析 Java 依赖，也不检测 JDK/compiler/Jackson 二进制变化或代替 Flyway 实际 checksum/validate。详见 [AQ07 证据](evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md)。
 
 扫描忽略注释及常见字符串中的假 Java 引用，避免把原文当代码；但不是 Java/TS parser。反射、别名重导出、计算型 import、已导入类型的新用法、动态 SQL、运行时授权和实际回调仍需 ESLint/编译/ArchUnit/测试/审查。不得声称全部架构违规必然被这一个脚本发现。
 

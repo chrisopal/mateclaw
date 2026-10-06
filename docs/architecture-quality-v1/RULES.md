@@ -37,7 +37,7 @@ python3 -B scripts/quality/verify.py --mode commit
 
 **R-05 版本与幂等**：精确输入、独立对象修订、同键同请求回放、同键异请求拒绝。已发布字节不重新渲染。取消和过期结果不覆盖新业务对象。
 
-**R-06 数据迁移**：旧 Flyway 只读；新增迁移覆盖支持的方言。备份/恢复/影子比对/单写切换必须有证据。删除、重建、回滚生产数据必须另行授权。
+**R-06 数据迁移**：旧 Flyway 只读；新增迁移覆盖支持的方言。备份/恢复/影子比对/单写切换必须有证据。删除、重建、回滚生产数据必须另行授权。Java Flyway 入口及其冻结算法/工厂闭包同属只读约束；审阅必须核对入口发现、实际 checksum、JDK/Jackson 兼容及各方言 validate 配置。DB-001/002 覆盖 SQL/Java 入口；DB-003/004 校验 `.quality/frozen-migrations.json` 的源码摘要和基线项不可删改。每个 Java 入口必须登记，闭包完整性仍由独立审核负责。不得重写摘要放行历史变更；新语义用新版本。初装摘要需对照已发布 HEAD；本地通过不等于远端强制生效或真实数据库验收。
 
 **R-07 类型与 UI**：数据库 ID 保持 string；稳定 DTO 不新增 any；模型输入 unknown 经验证；i18n/主题复用宿主；严禁带演示数据假装加载成功。
 
@@ -58,6 +58,8 @@ python3 -B scripts/quality/verify.py --mode commit
 ## 4. 例外与存量
 
 初始词法检查以固定 Git base 中同一路径/同一规范化代码指纹的既有问题为存量，不提供“重新生成基线”命令。新增重复出现会失败；改名搬走旧问题不会洗白。修复完成后将路径加入 zero_tolerance，使其不可回退。
+
+当前 AR-001 的 agent/common/auth/workspace/tool/skill main 路径及 AR-002 的 presales/bidding/delivery main 路径已封口；新增路径时同时审核范围映射。实际 `WorkbenchArchitectureTest` 检查生产字节码并以正反例证明规则，拒绝聚合范围为空；纯语义层自有 port 与 Controller DAL 分类分开。原 `SemanticCoreArchitectureTest` 的更严格 JDK/自身包限制保持。证据见 [AQ07_ARCHUNIT_INSTALL_ACCEPTANCE.md](evidence/2026-10-04/AQ07_ARCHUNIT_INSTALL_ACCEPTANCE.md)。
 
 本工具没有开发者可自行写的 waiver 开关。确需调整规则误报或业务边界，先提供最小反例/理由/责任人/期限/ADR，独立审阅控制面 PR。绝不能以该流程豁免跨工作区读取、旧迁移篡改、未批准发布或模型自批。
 

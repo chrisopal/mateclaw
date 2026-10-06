@@ -1,0 +1,312 @@
+{
+  "task": "AQ-06 listing projection subtask",
+  "status": "ENGINEERING_VERIFIED_FORMAL_ACCEPTANCE_PENDING",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "start_head": "200aaaa07a1d1fd4e1df78124f2a709ec91e3c5b",
+  "source_commit": "b69e62fd4d03c3f6e1f5a880b6fcd323c8c94e63",
+  "source_tree": "a9ccad01fa74eb437908bc68897735efbc8dcef8",
+  "reports": [
+    {
+      "task_id": "l2c835j5",
+      "status": "PASS",
+      "submission_ready": true,
+      "checked_tree": "a9ccad01fa74eb437908bc68897735efbc8dcef8",
+      "java_tests": 6171,
+      "ui_tests": 1093
+    },
+    {
+      "task_id": "opmadhgv",
+      "status": "PASS",
+      "submission_ready": true,
+      "checked_tree": "a9ccad01fa74eb437908bc68897735efbc8dcef8",
+      "java_tests": 6171,
+      "ui_tests": 1093
+    }
+  ],
+  "mysql_tests": {
+    "database_version": "8.0.46",
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "initial_red_tests": 28,
+    "initial_red_failures": 2,
+    "red_source": "preserved actual Surefire XML and text before successful rerun"
+  },
+  "mysql_backup_restore": {
+    "legacy_rows": 205,
+    "page_rows": 7,
+    "database_product": "MySQL",
+    "database_version": "8.0.46",
+    "legacy_snapshot_sha256": "a6735750f1adc3dad0464382749751f33e653cf063baabe46b7d904e2c7005f7",
+    "backup_sha256": "f55271990dbc43f3c52b5e5f370d4e1ba3521150ecc9c7fe92112eea4c4419e6",
+    "probe_source_sha256": "d43fcd478d1f3fad3aac0e85fef6aa7fbcdd3fed7d8c8b63b0e7d321081d6055",
+    "business_acceptance": false
+  },
+  "h2_focused_tests_before_final": 122,
+  "full_final_h2_is_in_exact_source_gates": true,
+  "existing_full_java_condition_skips": 70,
+  "formal_ac_status": "all46 NOT_RUN",
+  "pending": [
+    "Kingbase real migration/restore",
+    "production rollout/rollback",
+    "authoritative Presales V2 and Delivery specs",
+    "full V2 object/dependency/attempt migration",
+    "versioned request hash and legacy collision policy",
+    "DB-001/DB-002 Java migration and frozen closure protection under independent control-plane review",
+    "real browser/model/role/concurrency acceptance",
+    "maintainer/stakeholder/business QA",
+    "remote required CI enforcement"
+  ],
+  "files": [
+    {
+      "archive": "listing-projection-tests/staged-report.json",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/report.json",
+      "raw_sha256": "f3819f74fac6748ee8fc606df0eb814c7db6d167d224132014b9936c9f0c8216",
+      "archive_sha256": "f3819f74fac6748ee8fc606df0eb814c7db6d167d224132014b9936c9f0c8216",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-guard-self-tests.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/guard-self-tests.log",
+      "raw_sha256": "2ff3d5ab3f7b7ad058ecdda805140fe85f72f43f29c6e21ebb593f20478cdbf0",
+      "archive_sha256": "2ff3d5ab3f7b7ad058ecdda805140fe85f72f43f29c6e21ebb593f20478cdbf0",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-java-format.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/java-format.log",
+      "raw_sha256": "538048cd96e33527ab28e9999486257b47c34c4c3a46a0501b39d3fcc5b63b87",
+      "archive_sha256": "538048cd96e33527ab28e9999486257b47c34c4c3a46a0501b39d3fcc5b63b87",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-java-tests.log.gz",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/java-tests.log",
+      "raw_sha256": "e26470120e04ac20022f4a2a919c744df63c4a16065ec364f0c2090bfb6d9284",
+      "archive_sha256": "0db58bf11fbff67c737da8a2878053c0b69d28c814e3eb85694d88e22fa90ec7",
+      "redactions": 38
+    },
+    {
+      "archive": "listing-projection-tests/staged-ui-typecheck.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/ui-typecheck.log",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-id-precision.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/id-precision.log",
+      "raw_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "archive_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-ui-vitest.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/ui-vitest.log",
+      "raw_sha256": "8f819849a93f5e3fb7220a0918321e4d34125baa7643ebf336971347c8b06738",
+      "archive_sha256": "8f819849a93f5e3fb7220a0918321e4d34125baa7643ebf336971347c8b06738",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-ui-node-tests.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/ui-node-tests.log",
+      "raw_sha256": "8c99ec7ef35fded5614d732d79452a174dcdfc0ab4afad2d7ed4198b765b5533",
+      "archive_sha256": "8c99ec7ef35fded5614d732d79452a174dcdfc0ab4afad2d7ed4198b765b5533",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-ui-build-enterprise.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/ui-build-enterprise.log",
+      "raw_sha256": "72a58c2e1b9b44a466a33523a070c56c6a390a69029a9f4ef2ba8a150ed34075",
+      "archive_sha256": "72a58c2e1b9b44a466a33523a070c56c6a390a69029a9f4ef2ba8a150ed34075",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/staged-ui-build-classic.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-l2c835j5/ui-build-classic.log",
+      "raw_sha256": "f05ca1f1b821c983b59080cec6a359c9dddc9269812f70033e0c97c7e1328e95",
+      "archive_sha256": "f05ca1f1b821c983b59080cec6a359c9dddc9269812f70033e0c97c7e1328e95",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-report.json",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/report.json",
+      "raw_sha256": "42879018a2ab0157c87bfe3c987ce9e12d2e41a9664f0cd03f4bd435db2d3a80",
+      "archive_sha256": "42879018a2ab0157c87bfe3c987ce9e12d2e41a9664f0cd03f4bd435db2d3a80",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-guard-self-tests.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/guard-self-tests.log",
+      "raw_sha256": "e7dd9c305dfe45273a9092cd0eec250c0cb9755b305dc458e092276b141b2ff4",
+      "archive_sha256": "e7dd9c305dfe45273a9092cd0eec250c0cb9755b305dc458e092276b141b2ff4",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-java-format.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/java-format.log",
+      "raw_sha256": "72b2b2e073b23b443cab1f97e89b024514e67ead2b329f55f4ebde6e1679b339",
+      "archive_sha256": "72b2b2e073b23b443cab1f97e89b024514e67ead2b329f55f4ebde6e1679b339",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-java-summary.txt",
+      "source": "/tmp/mateclaw-projection-hook-java-summary.txt",
+      "raw_sha256": "e800ad6fce57ce091e10d61c4e496eca5b0694e1e2ab2d39c5cc9e3acde7b05f",
+      "archive_sha256": "e800ad6fce57ce091e10d61c4e496eca5b0694e1e2ab2d39c5cc9e3acde7b05f",
+      "redactions": 0,
+      "full_log_sha256": "7b0f86cecbebb9b8627b5a9f99b144adaa76db473297e3f626e6f38c6d3770d3",
+      "full_log_source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/java-tests.log"
+    },
+    {
+      "archive": "listing-projection-tests/hook-ui-typecheck.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/ui-typecheck.log",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-id-precision.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/id-precision.log",
+      "raw_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "archive_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-ui-vitest.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/ui-vitest.log",
+      "raw_sha256": "7a353967824d165e8f8ca1cb6f14238875f83516d481f01d02c089dc6ff9aa94",
+      "archive_sha256": "7a353967824d165e8f8ca1cb6f14238875f83516d481f01d02c089dc6ff9aa94",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-ui-node-tests.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/ui-node-tests.log",
+      "raw_sha256": "42089590ff8ffe47d263fc6730ae87bcc0ee56db56d6d551f31f83a3c244a812",
+      "archive_sha256": "42089590ff8ffe47d263fc6730ae87bcc0ee56db56d6d551f31f83a3c244a812",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-ui-build-enterprise.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/ui-build-enterprise.log",
+      "raw_sha256": "9345b6b23695ec746d30809ddcf7eff7b03c3097d215e6c6afddd443b56fc2d6",
+      "archive_sha256": "9345b6b23695ec746d30809ddcf7eff7b03c3097d215e6c6afddd443b56fc2d6",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/hook-ui-build-classic.log",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-opmadhgv/ui-build-classic.log",
+      "raw_sha256": "c358f3a78e6a701b3b21358cd0f0466de1c2e8ae0ff3d6a036e5303dc5f3ffaf",
+      "archive_sha256": "c358f3a78e6a701b3b21358cd0f0466de1c2e8ae0ff3d6a036e5303dc5f3ffaf",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-red.xml",
+      "source": "/tmp/mateclaw-projection-mysql-red-xml",
+      "raw_sha256": "be44907b2784306526f1d42725e8529f5d97f52ed421b97d9510998717f78875",
+      "archive_sha256": "be44907b2784306526f1d42725e8529f5d97f52ed421b97d9510998717f78875",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-red.txt",
+      "source": "/tmp/mateclaw-projection-mysql-red-txt",
+      "raw_sha256": "8e4f89c1ffd322c3d97a61d63a71425a16d734de99053b5e8e7efab54ae0adb1",
+      "archive_sha256": "8e4f89c1ffd322c3d97a61d63a71425a16d734de99053b5e8e7efab54ae0adb1",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/surrogate-fixture-compile-failure.txt",
+      "source": "/tmp/mateclaw-projection-surrogate-compile-failure.log",
+      "raw_sha256": "3950d52fc26fa9df6f6fb47c3880f9fa4edd77af95dbeb09346985a3a8f32c89",
+      "archive_sha256": "3950d52fc26fa9df6f6fb47c3880f9fa4edd77af95dbeb09346985a3a8f32c89",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-green.txt",
+      "source": "/tmp/mateclaw-projection-mysql.log",
+      "raw_sha256": "ae0748d2ea9caa134f5f76fcb9707f790a0d87f8cb4a21be2248b927c4a56e84",
+      "archive_sha256": "ae0748d2ea9caa134f5f76fcb9707f790a0d87f8cb4a21be2248b927c4a56e84",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-restore.txt",
+      "source": "/tmp/mateclaw-projection-mysql-restore.log",
+      "raw_sha256": "e358defe412819b50a83fb4feb17c9f1f1b7eb893d007003dcf34f4c5be1d734",
+      "archive_sha256": "e358defe412819b50a83fb4feb17c9f1f1b7eb893d007003dcf34f4c5be1d734",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-restore-probe.java.txt",
+      "source": "/tmp/MateclawListingRestoreProbe.java",
+      "raw_sha256": "d43fcd478d1f3fad3aac0e85fef6aa7fbcdd3fed7d8c8b63b0e7d321081d6055",
+      "archive_sha256": "d43fcd478d1f3fad3aac0e85fef6aa7fbcdd3fed7d8c8b63b0e7d321081d6055",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-restore-runner.py.txt",
+      "source": "/tmp/mateclaw-listing-restore.py",
+      "raw_sha256": "506ee99576f9bb22175202fa69510b48dfd2a733108df0b857a6310a370b5702",
+      "archive_sha256": "506ee99576f9bb22175202fa69510b48dfd2a733108df0b857a6310a370b5702",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/h2-writers.txt",
+      "source": "/tmp/mateclaw-projection-writers-h2.log",
+      "raw_sha256": "bd7a250153dc1c08cb2c9a5a61ed27122b5b5af24ace9a9b530409105d133f12",
+      "archive_sha256": "3ae26d5d1914c0ca3b3ba6292bf36f70d6684f91ae8d209963c1fa618f560293",
+      "redactions": 2
+    },
+    {
+      "archive": "listing-projection-tests/all-body-red.txt",
+      "source": "/tmp/mateclaw-projection-sql-red-ledger.log",
+      "raw_sha256": "7492b32bf2083774ffb5f6576b26758977791171331d84a778fd62df451d1f73",
+      "archive_sha256": "7492b32bf2083774ffb5f6576b26758977791171331d84a778fd62df451d1f73",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/numeric-node-shadow-failure.txt",
+      "source": "/tmp/mateclaw-projection-shadow-h2.log",
+      "raw_sha256": "bb9b61608cbfc8ebbed35c5cb0765bd25e78be7120156119650dda962f739bd3",
+      "archive_sha256": "95f216b4406511cb8c34c98513022dcf63327066ae10576a49b9e8233fb084cf",
+      "redactions": 1
+    },
+    {
+      "archive": "listing-projection-tests/java-migration-control-gap.txt",
+      "source": "/tmp/mateclaw-projection-java-migration-control-gap.log",
+      "raw_sha256": "dc35d1a9a90c78fa3e7c1d6cd9a19c1cd6eb15afb4950ac6a18df86bcfbdd5b1",
+      "archive_sha256": "dc35d1a9a90c78fa3e7c1d6cd9a19c1cd6eb15afb4950ac6a18df86bcfbdd5b1",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/dev.txt",
+      "source": "/tmp/mateclaw-projection-ready-dev.log",
+      "raw_sha256": "cfdc98343e7fa02214181333697a5d534a64769ea7c4e523466fc1ffd97c784a",
+      "archive_sha256": "cfdc98343e7fa02214181333697a5d534a64769ea7c4e523466fc1ffd97c784a",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-legacy-snapshot.json.gz",
+      "source": "/tmp/mateclaw-aq-listing-mysql/legacy-snapshot.json",
+      "raw_sha256": "a6735750f1adc3dad0464382749751f33e653cf063baabe46b7d904e2c7005f7",
+      "archive_sha256": "f62ef62b6968c0e29489d04eb228015b6537b55ed2ad818e2b01859bf15f1689",
+      "redactions": 0
+    },
+    {
+      "archive": "listing-projection-tests/mysql-legacy-backup.sql.gz",
+      "source": "/tmp/mateclaw-aq-listing-mysql/legacy-backup.sql",
+      "raw_sha256": "f55271990dbc43f3c52b5e5f370d4e1ba3521150ecc9c7fe92112eea4c4419e6",
+      "archive_sha256": "df78e05de18faa6a9b7c96c31285ad27459370a6fa64468d885271cbb1c8f21c",
+      "redactions": 0
+    }
+  ],
+  "review_constraint_clarification": {
+    "files": [
+      "RULES.md",
+      "REVIEW_CHECKLIST.md"
+    ],
+    "reason": "R-06 already covers immutable Flyway; clarify Java closure and honestly expose SQL-only executable coverage",
+    "runtime_gate_changed": false,
+    "independent_maintainer_approval": "NOT_VERIFIED"
+  }
+}

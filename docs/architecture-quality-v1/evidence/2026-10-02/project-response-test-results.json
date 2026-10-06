@@ -1,0 +1,347 @@
+{
+  "task": "AQ-05 runtime project response boundary",
+  "start_head": "a4504532caa5e2acdc22c63883d98a86ffb2508d",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "source_commit": "89672035069e4a61d2a4f8419249fae235743acf",
+  "source_tree": "6cfa8fa252eb58d91f85104c57fe37a3854ca1d8",
+  "old_valid_tests": 26,
+  "red_tests_failed": 25,
+  "red_tests_passed": 5,
+  "response_tests": 37,
+  "final_presales_tests": 215,
+  "full_ui_tests": 912,
+  "reports": [
+    {
+      "name": "staged",
+      "status": "FAIL",
+      "submission_ready": false,
+      "target_identity": "b900221bd1e153057e630962b5fcd092b697aa8f"
+    },
+    {
+      "name": "staged-final",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "6cfa8fa252eb58d91f85104c57fe37a3854ca1d8"
+    },
+    {
+      "name": "hook",
+      "status": "PASS",
+      "submission_ready": true,
+      "target_identity": "6cfa8fa252eb58d91f85104c57fe37a3854ca1d8"
+    }
+  ],
+  "source_files": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_RESPONSE_PLAN.md",
+      "sha256": "ceb586822faff2122453d0c57537ced04826450cbfed8879a1389148ec2db24f"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/__tests__/mutationRequest.test.ts",
+      "sha256": "c20933b1cb04b682b7813b219607ceaa6a8511c711c5eaf338e8b65f8b7844c5"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/__tests__/projectResponse.test.ts",
+      "sha256": "a5fe95a936954e45f0f3e5a2655f1ebda0ebe6cef3c431aaf5f6bf69700c78c1"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/__tests__/projectSummary.test.ts",
+      "sha256": "a7b27c4221af638b106d55a4c1be7bf344e3e9b52b5b483edecfaa5ea80357b6"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/api/presalesApi.ts",
+      "sha256": "c9396a92117cb8dfae86cbcb47574e0a483476217058b3d91b2a3cca11a96a16"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/api/presalesResponse.ts",
+      "sha256": "9809b314a7c3e9e8d7847e8b021b0ea741e84626bf9b5b5fa00a6030b4d067b2"
+    },
+    {
+      "file": "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+      "sha256": "aa9d980d2091effb7a2d84fe18c184506ffbb21f4422564b929033bc705ebdda"
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/positive.txt",
+      "input_sha256": "976624cc1d6bc0b56ed0eb3ff729db418048e314506be1860983c591e01b58cd",
+      "sha256": "677bf8a0689038d9ad092a71813f5f81d1b9b239a7f793da1af8268e9c30591b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/red.txt",
+      "input_sha256": "77cd9345adfb8ba3ba760c8bd834ee2bdd8d37253062fcc0e5a425085ec1b4cd",
+      "sha256": "4740e0c9ef3d9bc592422422798e1ff796720e555d894f89c51957c79b134cba",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/green.txt",
+      "input_sha256": "4d96e26644d8fdbb36da7dd69681d8dde5904f300031ed91dba25749ea8940cc",
+      "sha256": "93635b6dd33ae67ea85c51b5e6549ceb5d69735343ab5e762fe497a481999217",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/format.txt",
+      "input_sha256": "a176235dbe7196d0d6934a9cd371abd304dc7354da14829f7dcd7774134b9827",
+      "sha256": "a176235dbe7196d0d6934a9cd371abd304dc7354da14829f7dcd7774134b9827",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/format-final.txt",
+      "input_sha256": "eefb86e74ff62c53dd3b600734f1af845d3d5779083e24aef249e2019a283093",
+      "sha256": "eefb86e74ff62c53dd3b600734f1af845d3d5779083e24aef249e2019a283093",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/format-last.txt",
+      "input_sha256": "8b81714e4f3b0a5aa2a855ef13cff25ca28ba84624aeda49655a735370535bb7",
+      "sha256": "8b81714e4f3b0a5aa2a855ef13cff25ca28ba84624aeda49655a735370535bb7",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/presales-final.txt",
+      "input_sha256": "455bd962f2b5259c0098b690499777d17ba5ee18f5283b078f1287861f5ef128",
+      "sha256": "52d39d3474b4d814ed34087552a2acc10e11e88b0ca2136456bf62f6a6eb9a66",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/types-final.txt",
+      "input_sha256": "884612d4877745f7c3c445fefd238cd2c23c9fb11bd26b9b590610d5ec43d151",
+      "sha256": "884612d4877745f7c3c445fefd238cd2c23c9fb11bd26b9b590610d5ec43d151",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/types-verified.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/lint.txt",
+      "input_sha256": "bf3ef2e8c6c2726769e2445575735be97f1845b9a10cf7ef4a2ec431ddf2adbb",
+      "sha256": "bf3ef2e8c6c2726769e2445575735be97f1845b9a10cf7ef4a2ec431ddf2adbb",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/lint-changed.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/dev.txt",
+      "input_sha256": "b907470d112bacdad27b7c5d500cedc1f697d8365116d0513e2f364f145b73e7",
+      "sha256": "344e7687cd0ddb0be205f12f6174cd81ab5a1fc3d799cda01ae57a301f2a7c8c",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/dev-final.txt",
+      "input_sha256": "69f1d952ca0f7ca8a3726e1c30075740812af860ffdc7eec7d6c3519ec8dea7a",
+      "sha256": "184a82321a1f884df8b6bf21ddfe7f597a51c36e65baae629cdbe03c644882b8",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged.txt",
+      "input_sha256": "ff3d285017b3e2dcb8a6542a27eb13d1bb1252c5c425e000c441ed5f985eade3",
+      "sha256": "47d3c99cf915ee3b7bf4f8be3bce71e1edc55776ba8b0045dce03863274d4ba2",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final.txt",
+      "input_sha256": "6e6ebdb82fc4c2a5b944d7cacecbd1298b999fd269ee608dbe3c7259336324c1",
+      "sha256": "091df924f42dbdf207068b825ca39dbf0060ddb916a0815fa3cc8bbb654393df",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/hook.txt",
+      "input_sha256": "86b314b487543ef14f02701e371be13a6f3750c48df84a11902974cc7fb61c03",
+      "sha256": "7b0a7f33ec30bb8651c3b184e99c75d587eb8d4d113e1b0e2257181e855673f6",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/full-retry.txt",
+      "input_sha256": "703766f51fb94bc2c32c5b77c52a345b173c4128f48213b988c6ab845ae2eba7",
+      "sha256": "acb1cbc2c6a18b99429d2d04748d25f05acbf3aa3b7d19314799106cb8d9dbcc",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/timeout-recheck.txt",
+      "input_sha256": "a917a693fd5302dd1599fb1fbfff1ecf0b2eea6f6ae64c27c08a1dfa290fc17a",
+      "sha256": "233245efde5a28a05a1bb0c3c878ad1203066e73f882e3bac45911b0881afb4f",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/host-sleep.txt",
+      "input_sha256": "09cc1ee8a4dd8a44cb97a6e3c5b2226efdbd2facbbd78f345bc158101b91e14d",
+      "sha256": "326faf7656aa75dc53178b644ee42359d4a9c40cabc02cb9fbe410d803e0afc6",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-report.json",
+      "input_sha256": "d459029b398d52ac629b807359e2e566a313c562de06f0d30df8da73b46ef134",
+      "sha256": "d459029b398d52ac629b807359e2e566a313c562de06f0d30df8da73b46ef134",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-guard-self-tests.txt",
+      "input_sha256": "28ac8f4d8495f04e31c083ec10ea9dd67f4348667671300f8553e4376afc4587",
+      "sha256": "28ac8f4d8495f04e31c083ec10ea9dd67f4348667671300f8553e4376afc4587",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-format.txt",
+      "input_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-vitest.txt",
+      "input_sha256": "94e8a6eef5f69ea481ec3695d600f00578e8596ea5a07abd5d52cd8bfbbdea02",
+      "sha256": "94e8a6eef5f69ea481ec3695d600f00578e8596ea5a07abd5d52cd8bfbbdea02",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-node-tests.txt",
+      "input_sha256": "02271a9bb6639dc29cfb1a6047200b20d97017be81a267af7301d0fbeee6879b",
+      "sha256": "02271a9bb6639dc29cfb1a6047200b20d97017be81a267af7301d0fbeee6879b",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-build-enterprise.txt",
+      "input_sha256": "7a6d32807a5119106aa48680f1dbc314b7b1682e7f99cf42d5c5932ef4dabd0f",
+      "sha256": "7a6d32807a5119106aa48680f1dbc314b7b1682e7f99cf42d5c5932ef4dabd0f",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-ui-build-classic.txt",
+      "input_sha256": "6fbccf67b49596230cba0a312b65929d28d7a8676801a496e20e1981be29a024",
+      "sha256": "6fbccf67b49596230cba0a312b65929d28d7a8676801a496e20e1981be29a024",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-vitest.json",
+      "input_sha256": "3622e583a2573ea718f1ac70313c7d408cfdab0bb9bbe2200d492982c6bf05a8",
+      "sha256": "f4fc154aedfc182d21b0b8deebffdfbe4472299b261dab24c6be40ad11b61b96",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-report.json",
+      "input_sha256": "8f9795a266f95a3c10280a90188d898efc162b4a442544e9e56071b265ad6d97",
+      "sha256": "8f9795a266f95a3c10280a90188d898efc162b4a442544e9e56071b265ad6d97",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-guard-self-tests.txt",
+      "input_sha256": "45334c8710f506bd7a5c8857964cc064a46f67450e10b205661d8ff01a259a2d",
+      "sha256": "45334c8710f506bd7a5c8857964cc064a46f67450e10b205661d8ff01a259a2d",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-format.txt",
+      "input_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-lint.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-typecheck.txt",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-id-precision.txt",
+      "input_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-vitest.txt",
+      "input_sha256": "275fa647cbceeaaf3f70a96d4d9b73a33df52861894886480d6bb7a85ce9466f",
+      "sha256": "275fa647cbceeaaf3f70a96d4d9b73a33df52861894886480d6bb7a85ce9466f",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-node-tests.txt",
+      "input_sha256": "b38a60243d3806be44543f88ec52bba4ddacb0b6530ac8e69ee23113b31fdfca",
+      "sha256": "b38a60243d3806be44543f88ec52bba4ddacb0b6530ac8e69ee23113b31fdfca",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-build-enterprise.txt",
+      "input_sha256": "9a4131dccbf501782296f277fc111b04f2b2e7dc975565e2e49e4e2aa9496e0f",
+      "sha256": "9a4131dccbf501782296f277fc111b04f2b2e7dc975565e2e49e4e2aa9496e0f",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-ui-build-classic.txt",
+      "input_sha256": "c3a8848b663714549210456c9279e28ef87af36af8b5a8a0be8369d6ec2c6979",
+      "sha256": "c3a8848b663714549210456c9279e28ef87af36af8b5a8a0be8369d6ec2c6979",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/staged-final-vitest.json",
+      "input_sha256": "f7a20cd920b827f2c47f330cd83ca6d9db01796969ca86f0c1051fc8aadfa962",
+      "sha256": "1eab033f62182c0a5ef3aa3b05056efa65ec1f77293971ee0904f55add7c6fa6",
+      "redactions": 0,
+      "normalization": "Trailing whitespace and terminal blank lines removed from display copy; input SHA retains raw source"
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/hook-report.json",
+      "input_sha256": "bbf7ae85559a726441837931df2552793aaffa1eb4c735d475e8862cd69c56fa",
+      "sha256": "bbf7ae85559a726441837931df2552793aaffa1eb4c735d475e8862cd69c56fa",
+      "redactions": 0
+    },
+    {
+      "file": "docs/architecture-quality-v1/evidence/2026-10-02/project-response-tests/docs-intermediate-invalidated.txt",
+      "input_sha256": "5fc0aa327afb10ae864c812e9a1f5be9a1e666e2dc9d1b94be6f32d761f9d8d4",
+      "sha256": "02f13074b588a5dedfdb15a61af6f5642422ffd66e9b7bf36f802cf7a410501b",
+      "redactions": 0,
+      "normalization": "Trailing whitespace removed from display copy"
+    }
+  ],
+  "formal_acceptance": "NOT_RUN",
+  "required_remote_ci": "NOT_VERIFIED",
+  "docs_intermediate_check": "Discarded exit 2: staged tree changed during archived log whitespace normalization; final exact tree rechecked before commit"
+}

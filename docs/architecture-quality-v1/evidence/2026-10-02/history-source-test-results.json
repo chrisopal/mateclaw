@@ -1,0 +1,113 @@
+{
+  "task": "AQ-02 historical employee source authority",
+  "base_commit": "233fccecd21a1c5dc5ba8e967af236cee6585a3d",
+  "environment": "H2 full existing Flyway HTTP/service fixture; JDK21",
+  "log": "/tmp/mateclaw-aq-history-final.log",
+  "log_sha256": "b483eb4ff8ce79381e7c702b280e8e3ecf0726b7fa5906812f47a1c1ec4c61ed",
+  "sources": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "f9394ff0a02235a5d0f16702a65a86196b4f9b46941865032c1417b9bffd2085",
+    "mateclaw-server/src/main/java/vip/mate/workspace/core/service/ProjectSourceAccess.java": "a0d4a593eafc4ac13dc19347262b8680d9ac9ac63c6695b8054f9a2750048fbc",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesIntegrationTest.java": "dea250fb40f35868d96d6ad005d69fb8d9e8a2242ecdee9cb6c5307dc4e0c12e",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesAtomicResultAcceptanceTest.java": "75b7b28e5d57f6e022aae743571d10bfe17c7d2f51c19b9e47310e0421967135",
+    "mateclaw-server/src/test/java/vip/mate/presales/ProjectAuthorityFenceDatabaseTest.java": "ae36ba05340bb204ead55698b8c58faad223d890f682c01d57c5bcf42f7a4cda"
+  },
+  "suites": [
+    {
+      "name": "PresalesIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_sha256": "82ccd8a525c1411e7a1f3029c4016600c8a25dfd10d62ce0625c926751357d12",
+      "cases": [
+        "historicalSourcesUseActualKbOwnershipEvenWithoutCurrentMaterialBindings",
+        "clarificationRequiresTraceableAnswerAndScopedReferences",
+        "g1RequiresAcceptedFactsAndReleasePublishesExactBytes",
+        "authenticatedPersistenceIdempotencyAndConflict",
+        "semanticDisabledStillAllowsProjectWorkAndRejectsGates",
+        "concurrentCommandsCannotLoseAnUpdate"
+      ]
+    },
+    {
+      "name": "PresalesSourceScopeTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_sha256": "960da27b8c0c32ab709d6b09ebe009b4ff9a7d1a76e9095f94cf0cd06dfe7a4f",
+      "cases": [
+        "nameBasedToolReadUsesTheSameEmployeeKbScope",
+        "contextCannotIncludeKbOutsideEmployeeScopeAndRevocationInvalidatesSnapshot"
+      ]
+    },
+    {
+      "name": "PresalesRuntimeTransactionIntegrationTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_sha256": "140742dc199c47bdefed02a61f5a06a2cffe7c06b4f49dfec19c255220280079",
+      "cases": [
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[1]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[2]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[3]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[4]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[5]",
+        "invalidExecutionIsRejectedBeforeExternalCalls(InvalidExecution)[6]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[1]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[2]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[3]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[4]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[5]",
+        "resultProducedBeforeAuthorityOrTaskChangedCannotOverwriteDurableState(InvalidExecution)[6]",
+        "resultCommitsInIndependentReadCommittedTransactionDespiteCallerRollback",
+        "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[1]",
+        "realRuntimeRejectsRevocationCommittedWhileResultWaitedForAuthority(Revocation)[2]"
+      ]
+    },
+    {
+      "name": "PresalesAtomicResultAcceptanceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_sha256": "0b7b464d2a2f20e13e848aa6d66b7df0db4f07465aa0634e431637ecd40a5ae2",
+      "cases": [
+        "sourceEditWaitsForResultAuthorityTransaction",
+        "sourceWithdrawalWaitsForResultAuthorityTransaction",
+        "actorRevocationWaitsForResultAuthorityTransaction",
+        "lateRevocationUnderProjectLockCannotCommitSuccess",
+        "employeeRevocationWaitsForResultAuthorityTransaction"
+      ]
+    },
+    {
+      "name": "ProjectAuthorityFenceDatabaseTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_sha256": "2bfcb039d579a4323b0baf1ee831be7ff4a704ac1d9023a155839202c406be8b",
+      "cases": [
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[1]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[2]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[3]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[4]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[5]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[6]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[7]",
+        "revocationFirstIsVisibleAfterWaitingForAuthorityLock(Authority)[8]",
+        "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[1]",
+        "postLockAccessRejectsRevocationDespiteEarlierMyBatisRead(Authority)[2]",
+        "graphFirstWriterDoesNotCompeteWithResultForKnowledgeBaseWhileHoldingGraph",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[1]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[2]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[3]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[4]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[5]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[6]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[7]",
+        "resultFirstBlocksRevocationUntilResultTransactionCompletes(Authority)[8]"
+      ]
+    }
+  ]
+}

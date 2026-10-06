@@ -1,8 +1,16 @@
 package vip.mate.tool.builtin;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,8 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import vip.mate.agent.AgentService;
 import vip.mate.agent.AgentService.ChatResult;
 import vip.mate.agent.delegation.SubagentRegistry;
@@ -24,22 +32,13 @@ import vip.mate.audit.service.AuditEventService;
 import vip.mate.channel.web.ChatStreamTracker;
 import vip.mate.workspace.conversation.ConversationService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 /**
- * Minimal E2E-style test verifying the delegation event sequence:
- * delegation_start → delegation_progress → delegation_end.
- * <p>
- * To cover delegation_progress, the test captures the relay listener registered via
- * {@code addEventRelay} and simulates child events during {@code agentService.chat()},
- * triggering the relay path that broadcasts progress to the parent conversation.
+ * Minimal E2E-style test verifying the delegation event sequence: delegation_start →
+ * delegation_progress → delegation_end.
+ *
+ * <p>To cover delegation_progress, the test captures the relay listener registered via {@code
+ * addEventRelay} and simulates child events during {@code agentService.chat()}, triggering the
+ * relay path that broadcasts progress to the parent conversation.
  */
 @ExtendWith(MockitoExtension.class)
 class DelegateEventSequenceTest {
@@ -50,7 +49,9 @@ class DelegateEventSequenceTest {
     @Mock ConversationService conversationService;
     @Mock AuditEventService auditEventService;
     @Spy SubagentRegistry subagentRegistry = new SubagentRegistry();
-    @Spy vip.mate.agent.delegation.DelegatedUsageAccumulator delegatedUsageAccumulator =
+
+    @Spy
+    vip.mate.agent.delegation.DelegatedUsageAccumulator delegatedUsageAccumulator =
             new vip.mate.agent.delegation.DelegatedUsageAccumulator();
 
     @InjectMocks DelegateAgentTool delegateAgentTool;
@@ -69,6 +70,11 @@ class DelegateEventSequenceTest {
         var field = DelegateAgentTool.class.getDeclaredField("objectMapper");
         field.setAccessible(true);
         field.set(delegateAgentTool, objectMapper);
+
+        // Mockito does not inject Spring @Value; zero would race immediate cancellation.
+        var timeoutField = DelegateAgentTool.class.getDeclaredField("parallelTimeoutSeconds");
+        timeoutField.setAccessible(true);
+        timeoutField.setInt(delegateAgentTool, 3);
     }
 
     @AfterEach
@@ -104,25 +110,33 @@ class DelegateEventSequenceTest {
         // Capture the relay listener so we can simulate child events
         AtomicReference<BiConsumer<String, String>> relayRef = new AtomicReference<>();
         // Single + parallel delegation now route the relay through the batched API.
-        when(streamTracker.addBatchedEventRelay(anyString(), anyString(), anyInt(), anyLong(), any()))
-                .thenAnswer(invocation -> {
-                    relayRef.set(invocation.getArgument(4));
-                    return (Runnable) () -> {};
-                });
+        when(streamTracker.addBatchedEventRelay(
+                        anyString(), anyString(), anyInt(), anyLong(), any()))
+                .thenAnswer(
+                        invocation -> {
+                            relayRef.set(invocation.getArgument(4));
+                            return (Runnable) () -> {};
+                        });
 
         // During chat(), simulate the child broadcasting a tool_call_started event
         when(agentService.chatWithUsage(eq(100L), eq("summarize the report"), anyString(), any()))
-                .thenAnswer(invocation -> {
-                    // The relay listener should have been registered by now — fire it
-                    BiConsumer<String, String> relay = relayRef.get();
-                    assertNotNull(relay, "Relay should be registered before child chat starts");
-                    relay.accept("tool_call_started", "{\"name\":\"searchWeb\"}");
-                    relay.accept("tool_call_completed", "{\"name\":\"searchWeb\",\"success\":true}");
-                    return ChatResult.contentOnly("The report shows growth of 15% YoY.");
-                });
+                .thenAnswer(
+                        invocation -> {
+                            // The relay listener should have been registered by now — fire it
+                            BiConsumer<String, String> relay = relayRef.get();
+                            assertNotNull(
+                                    relay, "Relay should be registered before child chat starts");
+                            relay.accept("tool_call_started", "{\"name\":\"searchWeb\"}");
+                            relay.accept(
+                                    "tool_call_completed",
+                                    "{\"name\":\"searchWeb\",\"success\":true}");
+                            return ChatResult.contentOnly("The report shows growth of 15% YoY.");
+                        });
 
         // Act
-        String result = delegateAgentTool.delegateToAgent("HelperAgent", "summarize the report", null, null);
+        String result =
+                delegateAgentTool.delegateToAgent(
+                        "HelperAgent", "summarize the report", null, null);
 
         // Assert: result is successful
         assertTrue(result.contains("15%"), "Should contain the child's response");
@@ -130,23 +144,27 @@ class DelegateEventSequenceTest {
         // Capture all broadcastObject calls
         ArgumentCaptor<String> convIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> eventCaptor = ArgumentCaptor.forClass(String.class);
-        verify(streamTracker, atLeast(3)).broadcastObject(
-                convIdCaptor.capture(), eventCaptor.capture(), any());
+        verify(streamTracker, atLeast(3))
+                .broadcastObject(convIdCaptor.capture(), eventCaptor.capture(), any());
 
         List<String> eventNames = eventCaptor.getAllValues();
 
         // Verify full sequence: start → progress(es) → end
-        assertTrue(eventNames.size() >= 3,
+        assertTrue(
+                eventNames.size() >= 3,
                 "Should have at least 3 events (start + progress + end), got: " + eventNames);
-        assertEquals("delegation_start", eventNames.get(0),
-                "First event should be delegation_start");
+        assertEquals(
+                "delegation_start", eventNames.get(0), "First event should be delegation_start");
 
         // There should be at least one delegation_progress between start and end
         List<String> middle = eventNames.subList(1, eventNames.size() - 1);
-        assertTrue(middle.contains("delegation_progress"),
+        assertTrue(
+                middle.contains("delegation_progress"),
                 "Should have delegation_progress between start and end, got: " + eventNames);
 
-        assertEquals("delegation_end", eventNames.get(eventNames.size() - 1),
+        assertEquals(
+                "delegation_end",
+                eventNames.get(eventNames.size() - 1),
                 "Last event should be delegation_end");
 
         // All events target the parent conversation
@@ -158,7 +176,8 @@ class DelegateEventSequenceTest {
     // ===== Parallel delegation event sequence =====
 
     @Test
-    @DisplayName("Parallel delegation broadcasts delegation_start and delegation_end with parallel=true")
+    @DisplayName(
+            "Parallel delegation broadcasts delegation_start and delegation_end with parallel=true")
     void parallelDelegationEventSequence() {
         AgentEntity agentA = makeAgent(101L, "AgentA");
         AgentEntity agentB = makeAgent(102L, "AgentB");
@@ -170,7 +189,8 @@ class DelegateEventSequenceTest {
         String parentConvId = "parent-parallel-456";
         ToolExecutionContext.set(parentConvId, "admin");
         when(streamTracker.isRunning(parentConvId)).thenReturn(true);
-        when(streamTracker.addBatchedEventRelay(anyString(), anyString(), anyInt(), anyLong(), any()))
+        when(streamTracker.addBatchedEventRelay(
+                        anyString(), anyString(), anyInt(), anyLong(), any()))
                 .thenReturn(() -> {});
 
         when(agentService.chatWithUsage(eq(101L), anyString(), anyString(), any()))
@@ -178,22 +198,32 @@ class DelegateEventSequenceTest {
         when(agentService.chatWithUsage(eq(102L), anyString(), anyString(), any()))
                 .thenReturn(ChatResult.contentOnly("Result B"));
 
-        String json = "[{\"agentName\":\"AgentA\",\"task\":\"task A\"},{\"agentName\":\"AgentB\",\"task\":\"task B\"}]";
+        String json =
+                "[{\"agentName\":\"AgentA\",\"task\":\"task A\"},{\"agentName\":\"AgentB\",\"task\":\"task B\"}]";
 
         // Act
         String result = delegateAgentTool.delegateParallel(json, null);
 
         assertTrue(result.contains("AgentA"), "Should mention AgentA");
         assertTrue(result.contains("AgentB"), "Should mention AgentB");
+        assertTrue(result.contains("Result A"), result);
+        assertTrue(result.contains("Result B"), result);
+        assertTrue(
+                result.startsWith(
+                        "[PARALLEL_DELEGATION_RESULT] total=2 success=2 blank_success=0 timeout=0 cancelled=0 error=0"),
+                result);
 
         // Capture events
         ArgumentCaptor<String> eventCaptor = ArgumentCaptor.forClass(String.class);
-        verify(streamTracker, atLeast(2)).broadcastObject(
-                eq(parentConvId), eventCaptor.capture(), any());
+        verify(streamTracker, atLeast(2))
+                .broadcastObject(eq(parentConvId), eventCaptor.capture(), any());
 
         List<String> eventNames = eventCaptor.getAllValues();
-        assertEquals("delegation_start", eventNames.get(0), "First event should be delegation_start");
-        assertEquals("delegation_end", eventNames.get(eventNames.size() - 1),
+        assertEquals(
+                "delegation_start", eventNames.get(0), "First event should be delegation_start");
+        assertEquals(
+                "delegation_end",
+                eventNames.get(eventNames.size() - 1),
                 "Last event should be delegation_end");
     }
 
@@ -224,7 +254,8 @@ class DelegateEventSequenceTest {
     // ===== Relay only forwards recognized event types =====
 
     @Test
-    @DisplayName("Relay ignores unrecognized event types, only forwards tool_call_started/completed/phase")
+    @DisplayName(
+            "Relay ignores unrecognized event types, only forwards tool_call_started/completed/phase")
     void relayFiltersEventTypes() {
         AgentEntity target = makeAgent(300L, "FilterAgent");
         when(agentMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(target);
@@ -235,53 +266,61 @@ class DelegateEventSequenceTest {
 
         AtomicReference<BiConsumer<String, String>> relayRef = new AtomicReference<>();
         // Single + parallel delegation now route the relay through the batched API.
-        when(streamTracker.addBatchedEventRelay(anyString(), anyString(), anyInt(), anyLong(), any()))
-                .thenAnswer(invocation -> {
-                    relayRef.set(invocation.getArgument(4));
-                    return (Runnable) () -> {};
-                });
+        when(streamTracker.addBatchedEventRelay(
+                        anyString(), anyString(), anyInt(), anyLong(), any()))
+                .thenAnswer(
+                        invocation -> {
+                            relayRef.set(invocation.getArgument(4));
+                            return (Runnable) () -> {};
+                        });
 
         when(agentService.chatWithUsage(eq(300L), anyString(), anyString(), any()))
-                .thenAnswer(invocation -> {
-                    BiConsumer<String, String> relay = relayRef.get();
-                    // These should produce delegation_progress:
-                    relay.accept("tool_call_started", "{\"name\":\"search\"}");
-                    relay.accept("phase", "{\"phase\":\"reasoning\"}");
-                    // These should be ignored by the relay filter:
-                    relay.accept("heartbeat", "{}");
-                    relay.accept("token", "{\"text\":\"hello\"}");
-                    return ChatResult.contentOnly("filtered result");
-                });
+                .thenAnswer(
+                        invocation -> {
+                            BiConsumer<String, String> relay = relayRef.get();
+                            // These should produce delegation_progress:
+                            relay.accept("tool_call_started", "{\"name\":\"search\"}");
+                            relay.accept("phase", "{\"phase\":\"reasoning\"}");
+                            // These should be ignored by the relay filter:
+                            relay.accept("heartbeat", "{}");
+                            relay.accept("token", "{\"text\":\"hello\"}");
+                            return ChatResult.contentOnly("filtered result");
+                        });
 
         delegateAgentTool.delegateToAgent("FilterAgent", "filter task", null, null);
 
         ArgumentCaptor<String> eventCaptor = ArgumentCaptor.forClass(String.class);
-        verify(streamTracker, atLeast(1)).broadcastObject(
-                eq(parentConvId), eventCaptor.capture(), any());
+        verify(streamTracker, atLeast(1))
+                .broadcastObject(eq(parentConvId), eventCaptor.capture(), any());
 
         List<String> events = eventCaptor.getAllValues();
         long progressCount = events.stream().filter("delegation_progress"::equals).count();
         // 2 recognized events → 2 progress broadcasts (heartbeat and token are filtered out)
-        assertEquals(2, progressCount,
-                "Should have exactly 2 delegation_progress events (tool_call_started + phase), got: " + events);
+        assertEquals(
+                2,
+                progressCount,
+                "Should have exactly 2 delegation_progress events (tool_call_started + phase), got: "
+                        + events);
     }
 
     // ===== Nested delegation: grandchild events route to root with tree identity =====
 
     @Test
-    @DisplayName("A child delegating a grandchild broadcasts to root with parentSubagentId + depth=2")
+    @DisplayName(
+            "A child delegating a grandchild broadcasts to root with parentSubagentId + depth=2")
     @SuppressWarnings("unchecked")
     void nestedDelegationRoutesGrandchildToRootWithIdentity() {
         AgentEntity child = makeAgent(100L, "Child");
         AgentEntity grandchild = makeAgent(200L, "Grandchild");
         when(agentMapper.selectOne(any(LambdaQueryWrapper.class)))
-                .thenReturn(child)        // root delegates Child
-                .thenReturn(grandchild);  // Child delegates Grandchild
+                .thenReturn(child) // root delegates Child
+                .thenReturn(grandchild); // Child delegates Grandchild
 
         String rootConv = "root-conv";
         ToolExecutionContext.set(rootConv, "admin");
         when(streamTracker.isRunning(rootConv)).thenReturn(true);
-        when(streamTracker.addBatchedEventRelay(anyString(), anyString(), anyInt(), anyLong(), any()))
+        when(streamTracker.addBatchedEventRelay(
+                        anyString(), anyString(), anyInt(), anyLong(), any()))
                 .thenReturn(() -> {});
 
         // Capture each created child conversation + its immediate parent so we can
@@ -289,28 +328,33 @@ class DelegateEventSequenceTest {
         // not the root — the createChildConversation(childConvId, ..., parent) call.
         List<String> createdConvs = new java.util.ArrayList<>();
         List<String> createdParents = new java.util.ArrayList<>();
-        doAnswer(inv -> {
-            createdConvs.add(inv.getArgument(0));
-            createdParents.add(inv.getArgument(4));
-            return null;
-        }).when(conversationService).createChildConversation(
-                anyString(), anyLong(), anyString(), anyLong(), anyString());
+        doAnswer(
+                        inv -> {
+                            createdConvs.add(inv.getArgument(0));
+                            createdParents.add(inv.getArgument(4));
+                            return null;
+                        })
+                .when(conversationService)
+                .createChildConversation(
+                        anyString(), anyLong(), anyString(), anyLong(), anyString());
 
         // When the Child runs, the real ToolExecutionExecutor would switch the
         // ToolExecutionContext to the Child's own conversation. Reproduce that so
         // the grandchild's immediate parent resolves to childConv, while its
         // events must still target rootConv (carried via DelegationContext).
         when(agentService.chatWithUsage(eq(100L), anyString(), anyString(), any()))
-                .thenAnswer(inv -> {
-                    String childConv = inv.getArgument(2);
-                    ToolExecutionContext.set(childConv, "admin");
-                    try {
-                        return ChatResult.contentOnly(
-                                delegateAgentTool.delegateToAgent("Grandchild", "gtask", null, null));
-                    } finally {
-                        ToolExecutionContext.set(rootConv, "admin");
-                    }
-                });
+                .thenAnswer(
+                        inv -> {
+                            String childConv = inv.getArgument(2);
+                            ToolExecutionContext.set(childConv, "admin");
+                            try {
+                                return ChatResult.contentOnly(
+                                        delegateAgentTool.delegateToAgent(
+                                                "Grandchild", "gtask", null, null));
+                            } finally {
+                                ToolExecutionContext.set(rootConv, "admin");
+                            }
+                        });
         when(agentService.chatWithUsage(eq(200L), anyString(), anyString(), any()))
                 .thenReturn(ChatResult.contentOnly("grandchild done"));
 
@@ -319,7 +363,8 @@ class DelegateEventSequenceTest {
         ArgumentCaptor<String> convCap = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> evCap = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Object> payloadCap = ArgumentCaptor.forClass(Object.class);
-        verify(streamTracker, atLeast(4)).broadcastObject(convCap.capture(), evCap.capture(), payloadCap.capture());
+        verify(streamTracker, atLeast(4))
+                .broadcastObject(convCap.capture(), evCap.capture(), payloadCap.capture());
 
         Map<String, Object> childStart = null;
         Map<String, Object> grandStart = null;
@@ -327,7 +372,9 @@ class DelegateEventSequenceTest {
             if (!"delegation_start".equals(evCap.getAllValues().get(i))) continue;
             Map<String, Object> p = (Map<String, Object>) payloadCap.getAllValues().get(i);
             // Every delegation_start — at any depth — targets the root conversation.
-            assertEquals(rootConv, convCap.getAllValues().get(i),
+            assertEquals(
+                    rootConv,
+                    convCap.getAllValues().get(i),
                     "delegation_start must target the root conversation");
             String name = String.valueOf(p.get("childAgentName"));
             if ("Child".equals(name)) childStart = p;
@@ -343,14 +390,21 @@ class DelegateEventSequenceTest {
         // depth-2 grandchild: depth=2, parented to the child's subagentId.
         assertEquals(2, ((Number) grandStart.get("depth")).intValue());
         assertNotNull(grandStart.get("parentSubagentId"), "grandchild must carry parentSubagentId");
-        assertEquals(childStart.get("subagentId"), grandStart.get("parentSubagentId"),
+        assertEquals(
+                childStart.get("subagentId"),
+                grandStart.get("parentSubagentId"),
                 "grandchild's parentSubagentId must equal the child's subagentId");
 
         // Two child conversations were created: [0] = Child (parent=root),
         // [1] = Grandchild (parent must be the Child's conversation, not root).
         assertEquals(2, createdConvs.size(), "Child + Grandchild conversations created");
-        assertEquals(rootConv, createdParents.get(0), "Child's immediate parent is the root conversation");
-        assertEquals(createdConvs.get(0), createdParents.get(1),
+        assertEquals(
+                rootConv,
+                createdParents.get(0),
+                "Child's immediate parent is the root conversation");
+        assertEquals(
+                createdConvs.get(0),
+                createdParents.get(1),
                 "Grandchild's immediate parent must be the Child's conversation");
     }
 }

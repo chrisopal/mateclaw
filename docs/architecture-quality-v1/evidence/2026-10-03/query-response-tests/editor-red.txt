@@ -1,0 +1,36 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/editorSession.test.ts (18 tests | 1 failed) 10ms
+     × keeps raw nullable fact evidence while admitting only actual IDs into a selected draft 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/editorSession.test.ts > presales editor session ownership > keeps raw nullable fact evidence while admitting only actual IDs into a selected draft
+AssertionError: expected [ 'e2', null, 'e1', 'e2' ] to deeply equal [ 'e2', 'e1', 'e2' ]
+
+- Expected
++ Received
+
+  [
+    "e2",
++   null,
+    "e1",
+    "e2",
+  ]
+
+ ❯ src/features/presales/__tests__/editorSession.test.ts:164:43
+    162|     await settle()
+    163|     editor.selectStatement('graph:fact')
+    164|     expect(editor.form.value.evidenceIds).toEqual(['e2', 'e1', 'e2'])
+       |                                           ^
+    165|     expect(editor.statementOptions.value[0].evidenceIds).toEqual(['e2'…
+    166|     expect(raw.evidenceIds).toEqual(['e2', null, 'e1', 'e2'])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  07:28:56
+   Duration  267ms (transform 35ms, setup 0ms, import 69ms, tests 10ms, environment 102ms)

@@ -1,0 +1,53 @@
+{
+  "task": "WebChat attachment test storage isolation",
+  "failed_hook": "b981u6v9: FAIL; no commit created; old tree 8d8899ffc1782d89ef7e210cc46c17f666f08150",
+  "red": {
+    "tests": 1,
+    "failures": 1,
+    "reason": "HTTP 400 Too many files (max 50)"
+  },
+  "first": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "second_independent_process": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "untouched_default_folders": {
+    "webchat_testkey1_vAtt-dl-notoken_s-dl-2": 50,
+    "webchat_testkey1_vAtt-roundtrip_s-att-1": 50,
+    "webchat_testkey1_vAtt-alice": 50,
+    "webchat_testkey1_vAtt-download_s-dl-1": 50
+  },
+  "dev": "SCAN_PASS lwi2npyg; application toolchains NOT_RUN",
+  "review": "independent source_boundary_review: no blockers; engineering only",
+  "parallel_test_execution": "NOT_RUN; current suite sequential",
+  "logs": {
+    "red": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/webchat-isolation-tests/red.log",
+      "sha256": "e93778e9e2c1eca521838093a6e954d4f35961db36803e09d2a61aa7d1a9ca1f"
+    },
+    "first": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/webchat-isolation-tests/first.log",
+      "sha256": "cbb0c69f487b3f45c93fbf5490e625528b39c327db38799a97ab770316e932c2"
+    },
+    "second": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/webchat-isolation-tests/second.log",
+      "sha256": "d9624d2dd00074410037df109f1a89da6e5f8c95fc3162ecfb31626fd330c5e1"
+    },
+    "format": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/webchat-isolation-tests/format.log",
+      "sha256": "9c7f22b48c8e9b5811dc5b51650fbdd6acfce639fd7d144a63557048a2d66bb6"
+    },
+    "dev": {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-02/webchat-isolation-tests/dev.log",
+      "sha256": "b580efa271b810ceecd8bcf9fd4c15cb9ec7b895c95d4d2c9e2717ca85faaee3"
+    }
+  },
+  "source_sha256": "ef58052611cec9ea4bb14b234baeaf809683a7922faa814175551a4dd6af2e52"
+}

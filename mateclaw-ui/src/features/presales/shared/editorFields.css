@@ -1,0 +1,17 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.section-editor {
+  border-top: 1px solid var(--el-border-color-light);
+  padding-top: 16px;
+}
+.el-form .el-select {
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

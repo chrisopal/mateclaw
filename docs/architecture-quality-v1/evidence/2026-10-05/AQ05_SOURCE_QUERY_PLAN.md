@@ -1,0 +1,11 @@
+# AQ-05 来源与语义读取用例拆分
+
+起点HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，91条WIP保留。初始dev ndn5db4_ SCAN_PASS/submission_ready=false。上轮修复策略提取/输入不变性修复属于进展，不缩小完整架构目标。
+
+PresalesService959行仍混合来源目录、capabilities、可信事实和证据读取。本片将四个只读用例移入条件启用的PresalesSourceQueryService，由Controller直接调用，删除旧Service公开读取方法而不保留转发。项目详情读取暂复用原Service.get的viewer、来源/冻结历史完整授权链，依赖单向Query→现有应用服务；写服务不能反向依赖新查询服务。保持200来源上限、500事实上限、顺序/图去重、字段null/省略、大ID字符串、错误传播及禁用模块行为。
+
+AR-004禁止新业务类导入semantic.web身份/错误类型。来源查询原行为捕获图绑定404回退为KB来源、其余错误传播；先在语义GraphApplicationService提供通用Optional绑定读取入口，复用现有get全部权限/KB校验，只将原404转empty，售前通过公开接口消费。既有get/HTTP行为不变，不能反射读取异常/吞全部错误绕过规则。不引入新依赖、SQL、表或迁移。共享项目图绑定不变量复用既有ProjectItems或合适领域规则，保留原异常wire；语义可用性判断不得放宽或放到授权之前。
+
+先执行并归档现有PresalesQueryDtoContractTest、PresalesIntegrationTest、PresalesDisabledStartupReadContractTest、SemanticGraphBindingTest及相关源码；确认基线成功后改生产。补可选绑定允许/404/401/403/409/非领域异常合同，源码查询HTTP测试应继续走真实新bean（仅真实外部语义服务边界mock），有缺口时新增HTTP证据query的角色/来源/绑定/错误顺序。同步全部显式Controller测试上下文导入，不移除断言或改为mock新用例；mock get的现有查询fixture可让新findBinding调用真实实现以保持原错误刺激。执行售前/执行/架构全回归、语义Graph集成、完整main模块矩阵（真实新bean启用/禁用），Spotless、dev和独立审阅。
+
+影响为控制器接线/只读职责边界，授权/来源/事务/CAS/回放/生成/取消/冻结不变。不能把纯方法减少行数当作全部结构整改完成。新语义方法引发的存量格式变更单独识别、检查diff -w；不为压缩diff绕过格式门禁。证据需记录真实命令、源码摘要、未测方言/真实模型/浏览器/正式QA/commit和远端门禁。回退恢复四个Service方法和Controller两依赖，撤销新查询bean/可选绑定入口及其接线；无DB回退，不覆盖其他WIP。

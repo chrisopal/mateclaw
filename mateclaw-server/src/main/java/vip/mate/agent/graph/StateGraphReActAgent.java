@@ -1,51 +1,42 @@
 package vip.mate.agent.graph;
 
+import static vip.mate.agent.graph.state.MateClawStateKeys.*;
+
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.NodeOutput;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import vip.mate.agent.AgentService;
 import vip.mate.agent.AgentState;
 import vip.mate.agent.BaseAgent;
 import vip.mate.agent.ContentKind;
-import vip.mate.agent.delegation.DelegatedUsageAccumulator;
 import vip.mate.agent.GraphEventPublisher;
 import vip.mate.agent.StructuredStreamCapable;
 import vip.mate.agent.context.ConversationWindowManager;
+import vip.mate.agent.delegation.DelegatedUsageAccumulator;
 import vip.mate.agent.graph.state.MateClawStateKeys;
 import vip.mate.workspace.conversation.ConversationService;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static vip.mate.agent.graph.state.MateClawStateKeys.*;
-
 /**
  * 基于 StateGraph v2 的 ReAct Agent
- * <p>
- * 使用 spring-ai-alibaba-graph-core 的 StateGraph 引擎，
- * 实现显式可控的 Thought → Action → Observation 循环，
- * 含 Summarizing、LimitExceeded 和 FinalAnswer 节点。
- * <p>
- * 关键特性：
- * - 迭代次数强制控制（maxIterations 真正生效）
- * - ToolGuard 安全拦截（在 ActionNode 中执行）
- * - 工具调用过程可观测
- * - Summarizing 阶段收束冗长上下文
- * - 超限友好提示
- * - 结构化生命周期日志
- * <p>
- * content_delta 和 thinking_delta 由节点内 {@link NodeStreamingChatHelper} 直推，
- * chatStructuredStream() 只处理 phase/tool/事件等结构化事件。
- * 不再从 NodeOutput 二次整段下发已流式推送的内容。
+ *
+ * <p>使用 spring-ai-alibaba-graph-core 的 StateGraph 引擎， 实现显式可控的 Thought → Action → Observation 循环， 含
+ * Summarizing、LimitExceeded 和 FinalAnswer 节点。
+ *
+ * <p>关键特性： - 迭代次数强制控制（maxIterations 真正生效） - ToolGuard 安全拦截（在 ActionNode 中执行） - 工具调用过程可观测 -
+ * Summarizing 阶段收束冗长上下文 - 超限友好提示 - 结构化生命周期日志
+ *
+ * <p>content_delta 和 thinking_delta 由节点内 {@link NodeStreamingChatHelper} 直推， chatStructuredStream()
+ * 只处理 phase/tool/事件等结构化事件。 不再从 NodeOutput 二次整段下发已流式推送的内容。
  *
  * @author MateClaw Team
  */
@@ -55,21 +46,28 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     private final CompiledGraph compiledGraph;
     private final org.springframework.ai.chat.model.ChatModel chatModel;
     private final ConversationWindowManager conversationWindowManager;
+
+    private vip.mate.agent.execution.ProjectToolPolicy.Revalidator projectExecutionRevalidator;
+
+    public void setProjectExecutionRevalidator(
+            vip.mate.agent.execution.ProjectToolPolicy.Revalidator revalidator) {
+        this.projectExecutionRevalidator = revalidator;
+    }
+
     /**
-     * Held only so {@link #buildInitialState} can include the tools schema in
-     * the context-window budget — those bytes ride along on every LLM call
-     * and were previously ignored, making compression decisions fire late.
-     * Nullable for the legacy 5-arg constructor used by older tests.
+     * Held only so {@link #buildInitialState} can include the tools schema in the context-window
+     * budget — those bytes ride along on every LLM call and were previously ignored, making
+     * compression decisions fire late. Nullable for the legacy 5-arg constructor used by older
+     * tests.
      */
     private final vip.mate.agent.AgentToolSet toolSet;
 
     /**
-     * Whether every iteration's reasoning is persisted, or only the terminal
-     * one. Set from {@code mate.agent.reasoning.retention}; defaults to keeping
-     * everything so a turn stays replayable without operator opt-in. A setter
-     * rather than a constructor argument — the agent is built per request in a
-     * builder that already threads a dozen collaborators, and this is a single
-     * boolean with a safe default.
+     * Whether every iteration's reasoning is persisted, or only the terminal one. Set from {@code
+     * mate.agent.reasoning.retention}; defaults to keeping everything so a turn stays replayable
+     * without operator opt-in. A setter rather than a constructor argument — the agent is built per
+     * request in a builder that already threads a dozen collaborators, and this is a single boolean
+     * with a safe default.
      */
     private boolean persistEveryIterationReasoning = true;
 
@@ -77,19 +75,28 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
         this.persistEveryIterationReasoning = persistEveryIterationReasoning;
     }
 
-    public StateGraphReActAgent(ChatClient chatClient, ConversationService conversationService,
-                                CompiledGraph compiledGraph,
-                                org.springframework.ai.chat.model.ChatModel chatModel,
-                                ConversationWindowManager conversationWindowManager) {
-        this(chatClient, conversationService, compiledGraph, chatModel,
-                conversationWindowManager, null);
+    public StateGraphReActAgent(
+            ChatClient chatClient,
+            ConversationService conversationService,
+            CompiledGraph compiledGraph,
+            org.springframework.ai.chat.model.ChatModel chatModel,
+            ConversationWindowManager conversationWindowManager) {
+        this(
+                chatClient,
+                conversationService,
+                compiledGraph,
+                chatModel,
+                conversationWindowManager,
+                null);
     }
 
-    public StateGraphReActAgent(ChatClient chatClient, ConversationService conversationService,
-                                CompiledGraph compiledGraph,
-                                org.springframework.ai.chat.model.ChatModel chatModel,
-                                ConversationWindowManager conversationWindowManager,
-                                vip.mate.agent.AgentToolSet toolSet) {
+    public StateGraphReActAgent(
+            ChatClient chatClient,
+            ConversationService conversationService,
+            CompiledGraph compiledGraph,
+            org.springframework.ai.chat.model.ChatModel chatModel,
+            ConversationWindowManager conversationWindowManager,
+            vip.mate.agent.AgentToolSet toolSet) {
         super(chatClient, conversationService);
         this.compiledGraph = compiledGraph;
         this.chatModel = chatModel;
@@ -109,13 +116,11 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             // unique threadId, consecutive sync runs (e.g. back-to-back cron
             // executions) inherit the prior run's accumulated messages and
             // counters. Mirrors the streaming paths, which already do this.
-            RunnableConfig config = RunnableConfig.builder()
-                    .threadId(UUID.randomUUID().toString()).build();
+            RunnableConfig config =
+                    RunnableConfig.builder().threadId(UUID.randomUUID().toString()).build();
             Optional<OverAllState> result = compiledGraph.invoke(inputs, config);
 
-            return result
-                    .flatMap(s -> s.<String>value(FINAL_ANSWER))
-                    .orElse("未能生成回答。");
+            return result.flatMap(s -> s.<String>value(FINAL_ANSWER)).orElse("未能生成回答。");
         } catch (Exception e) {
             log.error("[{}] StateGraph chat failed: {}", agentName, e.getMessage(), e);
             setState(AgentState.ERROR);
@@ -141,13 +146,17 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
                     .filter(this::hasFinalAnswer)
                     .map(this::extractFinalAnswer)
                     .filter(content -> content != null && !content.isEmpty())
-                    .next()     // 只取第一个 finalAnswer，避免多个节点重复 emit
+                    .next() // 只取第一个 finalAnswer，避免多个节点重复 emit
                     .flux()
                     .doOnComplete(() -> setState(AgentState.IDLE))
-                    .doOnError(e -> {
-                        log.error("[{}] StateGraph stream error: {}", agentName, e.getMessage());
-                        setState(AgentState.ERROR);
-                    });
+                    .doOnError(
+                            e -> {
+                                log.error(
+                                        "[{}] StateGraph stream error: {}",
+                                        agentName,
+                                        e.getMessage());
+                                setState(AgentState.ERROR);
+                            });
         } catch (Exception e) {
             log.error("[{}] StateGraph stream setup failed: {}", agentName, e.getMessage(), e);
             setState(AgentState.ERROR);
@@ -161,23 +170,23 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     @Override
-    public String chatWithReplay(String userMessage, String conversationId, String toolCallPayload) {
+    public String chatWithReplay(
+            String userMessage, String conversationId, String toolCallPayload) {
         setState(AgentState.RUNNING);
         try {
-            log.info("[{}] StateGraph chatWithReplay: conversationId={}", agentName, conversationId);
+            log.info(
+                    "[{}] StateGraph chatWithReplay: conversationId={}", agentName, conversationId);
 
             Map<String, Object> inputs = buildInitialState(userMessage, conversationId);
             if (toolCallPayload != null && !toolCallPayload.isEmpty()) {
                 inputs.put(FORCED_TOOL_CALL, toolCallPayload);
             }
             // Fresh thread per invocation — see chat() for rationale.
-            RunnableConfig config = RunnableConfig.builder()
-                    .threadId(UUID.randomUUID().toString()).build();
+            RunnableConfig config =
+                    RunnableConfig.builder().threadId(UUID.randomUUID().toString()).build();
             Optional<OverAllState> result = compiledGraph.invoke(inputs, config);
 
-            return result
-                    .flatMap(s -> s.<String>value(FINAL_ANSWER))
-                    .orElse("工具已执行。");
+            return result.flatMap(s -> s.<String>value(FINAL_ANSWER)).orElse("工具已执行。");
         } catch (Exception e) {
             log.error("[{}] StateGraph chatWithReplay failed: {}", agentName, e.getMessage(), e);
             setState(AgentState.ERROR);
@@ -190,17 +199,20 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     @Override
-    public Flux<AgentService.StreamDelta> chatWithReplayStream(String userMessage, String conversationId,
-                                                                String toolCallPayload) {
+    public Flux<AgentService.StreamDelta> chatWithReplayStream(
+            String userMessage, String conversationId, String toolCallPayload) {
         return chatWithReplayStream(userMessage, conversationId, toolCallPayload, "");
     }
 
     @Override
-    public Flux<AgentService.StreamDelta> chatWithReplayStream(String userMessage, String conversationId,
-                                                                String toolCallPayload, String requesterId) {
+    public Flux<AgentService.StreamDelta> chatWithReplayStream(
+            String userMessage, String conversationId, String toolCallPayload, String requesterId) {
         setState(AgentState.RUNNING);
         try {
-            log.info("[{}] StateGraph chatWithReplayStream: conversationId={}", agentName, conversationId);
+            log.info(
+                    "[{}] StateGraph chatWithReplayStream: conversationId={}",
+                    agentName,
+                    conversationId);
 
             Map<String, Object> inputs = buildInitialState(userMessage, conversationId);
             inputs.put(REQUESTER_ID, requesterId != null ? requesterId : "");
@@ -216,6 +228,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             AtomicInteger finalCacheReadTokens = new AtomicInteger(0);
             AtomicInteger finalCacheWriteTokens = new AtomicInteger(0);
             AtomicInteger finalReasoningTokens = new AtomicInteger(0);
+            AtomicBoolean observedModelResponse = new AtomicBoolean(false);
             AtomicReference<String> finalModelName = new AtomicReference<>("");
             AtomicReference<String> finalProviderId = new AtomicReference<>("");
             // 防重保护：同 chatStructuredStream
@@ -229,189 +242,423 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             AtomicInteger lastSoftCap = new AtomicInteger(0);
             AtomicBoolean sawLegitimateExit = new AtomicBoolean(false);
 
-            return BaseAgent.routingStartupDelta(inputs).concatWith(compiledGraph.stream(inputs, config)
-                    .flatMapIterable(output -> {
-                        List<AgentService.StreamDelta> deltas = new ArrayList<>();
-                        List<GraphEventPublisher.GraphEvent> allEvents = GraphEventPublisher.extractEvents(output);
-                        int newStart = sentEventCount.get();
-                        if (newStart < allEvents.size()) {
-                            for (int i = newStart; i < allEvents.size(); i++) {
-                                var event = allEvents.get(i);
-                                deltas.add(AgentService.StreamDelta.event(event.type(), event.data()));
-                            }
-                            sentEventCount.set(allEvents.size());
-                        }
+            return BaseAgent.routingStartupDelta(inputs)
+                    .concatWith(
+                            compiledGraph.stream(inputs, config)
+                                    .flatMapIterable(
+                                            output -> {
+                                                List<AgentService.StreamDelta> deltas =
+                                                        new ArrayList<>();
+                                                List<GraphEventPublisher.GraphEvent> allEvents =
+                                                        GraphEventPublisher.extractEvents(output);
+                                                int newStart = sentEventCount.get();
+                                                if (newStart < allEvents.size()) {
+                                                    for (int i = newStart;
+                                                            i < allEvents.size();
+                                                            i++) {
+                                                        var event = allEvents.get(i);
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        event.type(),
+                                                                        event.data()));
+                                                    }
+                                                    sentEventCount.set(allEvents.size());
+                                                }
 
-                        boolean contentAlreadyStreamed = output.state().value(CONTENT_STREAMED, false);
-                        boolean thinkingAlreadyStreamed = output.state().value(THINKING_STREAMED, false);
+                                                boolean contentAlreadyStreamed =
+                                                        output.state()
+                                                                .value(CONTENT_STREAMED, false);
+                                                boolean thinkingAlreadyStreamed =
+                                                        output.state()
+                                                                .value(THINKING_STREAMED, false);
 
-                        // Thinking is emitted BEFORE any content delta of the same
-                        // batch. The reasoning that produced an answer precedes the
-                        // answer, and the accumulator builds its segment timeline in
-                        // delta arrival order — emitting thinking last appended a
-                        // thinking segment after the content segment, which readers
-                        // then had to reorder. FINAL_THINKING and FINAL_ANSWER are
-                        // written by the same node output, so ordering them here is
-                        // enough to make the persisted timeline match reality.
-                        //
-                        // Every iteration's reasoning is persisted, not just the
-                        // terminal one. A tool-calling iteration parks its reasoning
-                        // in STREAMED_THINKING (REPLACE, one value per node), which
-                        // the live channel already broadcast — persistOnly carries it
-                        // into the accumulator without a second broadcast. Without
-                        // this, a turn that ran N tool rounds kept only the last
-                        // round's thinking, so the persisted turn read as a bare
-                        // conclusion and the reasoning that justified each tool call
-                        // survived nowhere.
-                        //
-                        // The cursor tracks STREAMED_THINKING and nothing else. A
-                        // shared cursor would let the stale value re-qualify: the key
-                        // keeps its last write for the rest of the run, so once an
-                        // unrelated emission moved a shared cursor past it, the same
-                        // span was emitted a second time — after the final answer,
-                        // since the later nodes run after the answer was streamed.
-                        String iterationThinking = output.state().<String>value(STREAMED_THINKING).orElse("");
-                        if (persistEveryIterationReasoning
-                                && !iterationThinking.isEmpty()
-                                && !iterationThinking.equals(lastEmittedIterationThinking.get())) {
-                            lastEmittedIterationThinking.set(iterationThinking);
-                            deltas.add(AgentService.StreamDelta.persistOnly(null, iterationThinking));
-                        }
+                                                // Thinking is emitted BEFORE any content delta of
+                                                // the same
+                                                // batch. The reasoning that produced an answer
+                                                // precedes the
+                                                // answer, and the accumulator builds its segment
+                                                // timeline in
+                                                // delta arrival order — emitting thinking last
+                                                // appended a
+                                                // thinking segment after the content segment, which
+                                                // readers
+                                                // then had to reorder. FINAL_THINKING and
+                                                // FINAL_ANSWER are
+                                                // written by the same node output, so ordering them
+                                                // here is
+                                                // enough to make the persisted timeline match
+                                                // reality.
+                                                //
+                                                // Every iteration's reasoning is persisted, not
+                                                // just the
+                                                // terminal one. A tool-calling iteration parks its
+                                                // reasoning
+                                                // in STREAMED_THINKING (REPLACE, one value per
+                                                // node), which
+                                                // the live channel already broadcast — persistOnly
+                                                // carries it
+                                                // into the accumulator without a second broadcast.
+                                                // Without
+                                                // this, a turn that ran N tool rounds kept only the
+                                                // last
+                                                // round's thinking, so the persisted turn read as a
+                                                // bare
+                                                // conclusion and the reasoning that justified each
+                                                // tool call
+                                                // survived nowhere.
+                                                //
+                                                // The cursor tracks STREAMED_THINKING and nothing
+                                                // else. A
+                                                // shared cursor would let the stale value
+                                                // re-qualify: the key
+                                                // keeps its last write for the rest of the run, so
+                                                // once an
+                                                // unrelated emission moved a shared cursor past it,
+                                                // the same
+                                                // span was emitted a second time — after the final
+                                                // answer,
+                                                // since the later nodes run after the answer was
+                                                // streamed.
+                                                String iterationThinking =
+                                                        output.state()
+                                                                .<String>value(STREAMED_THINKING)
+                                                                .orElse("");
+                                                if (persistEveryIterationReasoning
+                                                        && !iterationThinking.isEmpty()
+                                                        && !iterationThinking.equals(
+                                                                lastEmittedIterationThinking
+                                                                        .get())) {
+                                                    lastEmittedIterationThinking.set(
+                                                            iterationThinking);
+                                                    deltas.add(
+                                                            AgentService.StreamDelta.persistOnly(
+                                                                    null, iterationThinking));
+                                                }
 
-                        String thinking = extractFinalThinking(output);
-                        if (thinking != null && !thinking.isEmpty()
-                                && !thinking.equals(lastEmittedIterationThinking.get())
-                                && finalThinkingEmitted.compareAndSet(false, true)) {
-                            deltas.add(thinkingAlreadyStreamed
-                                    ? AgentService.StreamDelta.persistOnly(null, thinking)
-                                    : new AgentService.StreamDelta(null, thinking));
-                        }
+                                                String thinking = extractFinalThinking(output);
+                                                if (thinking != null
+                                                        && !thinking.isEmpty()
+                                                        && !thinking.equals(
+                                                                lastEmittedIterationThinking.get())
+                                                        && finalThinkingEmitted.compareAndSet(
+                                                                false, true)) {
+                                                    deltas.add(
+                                                            thinkingAlreadyStreamed
+                                                                    ? AgentService.StreamDelta
+                                                                            .persistOnly(
+                                                                                    null, thinking)
+                                                                    : new AgentService.StreamDelta(
+                                                                            null, thinking));
+                                                }
 
-                        // Route per-iteration STREAMED_CONTENT (reasoning preamble +
-                        // SummarizingNode output) into segments only — final-answer
-                        // text arrives via the FINAL_ANSWER branch below. Pre-#120
-                        // this used persistOnly, which appended every iteration's
-                        // narration into the persisted assistant content; next-turn
-                        // replay then saw a chain of "Let me try X..." with no
-                        // observations and looped retrying tools.
-                        //
-                        // Exception — evidence-insufficient terminal turn
-                        // (ReasoningNode.java:617): when an answer is rejected for
-                        // unsupported references, FINAL_ANSWER is replaced with a
-                        // short "[证据不足]" warning and STREAMED_CONTENT carries the
-                        // actual answer body the user/UI need to see. Falling back
-                        // to persistOnly for that case keeps both the original
-                        // answer text and the warning in mate_message.content; with
-                        // pure segmentOnly the persisted content would shrink to
-                        // just the warning, breaking single-segment renderers like
-                        // copy / TTS / history reload (segments.length<=1 disables
-                        // the segmented view in MessageBubble).
-                        boolean isFinalAnswerTurn = hasFinalAnswer(output);
-                        String streamed = output.state().<String>value(STREAMED_CONTENT).orElse("");
-                        if (!streamed.isEmpty() && !streamed.equals(lastEmittedStreamedContent.get())) {
-                            lastEmittedStreamedContent.set(streamed);
-                            boolean completionRetry = output.state().value(CONTINUE_REASONING, false);
-                            boolean longFormAccumulation = !output.state()
-                                    .value(LONG_FORM_DRAFT, "").isEmpty();
-                            String resolvedFinalAnswer = isFinalAnswerTurn
-                                    ? extractFinalAnswer(output) : "";
-                            if (shouldEmitStreamedContent(isFinalAnswerTurn, longFormAccumulation,
-                                    streamed, resolvedFinalAnswer)) {
-                                addWithKindEvent(deltas, streamedContentDelta(isFinalAnswerTurn,
-                                        completionRetry || output.state().value(NEEDS_TOOL_CALL, false),
-                                        completionRetry ? 0 : output.state().value(TOOL_CALL_COUNT, 0),
-                                        streamed));
-                            }
-                        }
+                                                // Route per-iteration STREAMED_CONTENT (reasoning
+                                                // preamble +
+                                                // SummarizingNode output) into segments only —
+                                                // final-answer
+                                                // text arrives via the FINAL_ANSWER branch below.
+                                                // Pre-#120
+                                                // this used persistOnly, which appended every
+                                                // iteration's
+                                                // narration into the persisted assistant content;
+                                                // next-turn
+                                                // replay then saw a chain of "Let me try X..." with
+                                                // no
+                                                // observations and looped retrying tools.
+                                                //
+                                                // Exception — evidence-insufficient terminal turn
+                                                // (ReasoningNode.java:617): when an answer is
+                                                // rejected for
+                                                // unsupported references, FINAL_ANSWER is replaced
+                                                // with a
+                                                // short "[证据不足]" warning and STREAMED_CONTENT
+                                                // carries the
+                                                // actual answer body the user/UI need to see.
+                                                // Falling back
+                                                // to persistOnly for that case keeps both the
+                                                // original
+                                                // answer text and the warning in
+                                                // mate_message.content; with
+                                                // pure segmentOnly the persisted content would
+                                                // shrink to
+                                                // just the warning, breaking single-segment
+                                                // renderers like
+                                                // copy / TTS / history reload (segments.length<=1
+                                                // disables
+                                                // the segmented view in MessageBubble).
+                                                boolean isFinalAnswerTurn = hasFinalAnswer(output);
+                                                String streamed =
+                                                        output.state()
+                                                                .<String>value(STREAMED_CONTENT)
+                                                                .orElse("");
+                                                if (!streamed.isEmpty()
+                                                        && !streamed.equals(
+                                                                lastEmittedStreamedContent.get())) {
+                                                    lastEmittedStreamedContent.set(streamed);
+                                                    boolean completionRetry =
+                                                            output.state()
+                                                                    .value(
+                                                                            CONTINUE_REASONING,
+                                                                            false);
+                                                    boolean longFormAccumulation =
+                                                            !output.state()
+                                                                    .value(LONG_FORM_DRAFT, "")
+                                                                    .isEmpty();
+                                                    String resolvedFinalAnswer =
+                                                            isFinalAnswerTurn
+                                                                    ? extractFinalAnswer(output)
+                                                                    : "";
+                                                    if (shouldEmitStreamedContent(
+                                                            isFinalAnswerTurn,
+                                                            longFormAccumulation,
+                                                            streamed,
+                                                            resolvedFinalAnswer)) {
+                                                        addWithKindEvent(
+                                                                deltas,
+                                                                streamedContentDelta(
+                                                                        isFinalAnswerTurn,
+                                                                        completionRetry
+                                                                                || output.state()
+                                                                                        .value(
+                                                                                                NEEDS_TOOL_CALL,
+                                                                                                false),
+                                                                        completionRetry
+                                                                                ? 0
+                                                                                : output.state()
+                                                                                        .value(
+                                                                                                TOOL_CALL_COUNT,
+                                                                                                0),
+                                                                        streamed));
+                                                    }
+                                                }
 
-                        if (isFinalAnswerTurn && finalAnswerEmitted.compareAndSet(false, true)) {
-                            String answer = extractFinalAnswer(output);
-                            if (answer != null && !answer.isEmpty()) {
-                                addWithKindEvent(deltas, AgentService.StreamDelta.finalAnswer(answer, contentAlreadyStreamed));
-                            }
-                        }
+                                                if (isFinalAnswerTurn
+                                                        && finalAnswerEmitted.compareAndSet(
+                                                                false, true)) {
+                                                    String answer = extractFinalAnswer(output);
+                                                    if (answer != null && !answer.isEmpty()) {
+                                                        addWithKindEvent(
+                                                                deltas,
+                                                                AgentService.StreamDelta
+                                                                        .finalAnswer(
+                                                                                answer,
+                                                                                contentAlreadyStreamed));
+                                                    }
+                                                }
 
-                        Object projectOptions = inputs.get(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS);
-                        String terminalReason = output.state().<String>value(FINISH_REASON).orElse("");
-                        if (projectOptions instanceof vip.mate.agent.execution.ProjectExecutionOptions projectExecution
-                                && !terminalReason.isBlank() && projectTerminalEventEmitted.compareAndSet(false, true)) {
-                            String answer = extractFinalAnswer(output);
-                            if (("normal".equals(terminalReason) || "summarized".equals(terminalReason))
-                                    && answer != null && !answer.isEmpty()) {
-                                deltas.add(AgentService.StreamDelta.event("project_execution_completed", Map.of(
-                                        "attemptId", projectExecution.attemptId(),
-                                        "configDigest", projectExecution.configDigest(),
-                                        "skillDigest", projectExecution.skillDigest())));
-                            } else {
-                                deltas.add(AgentService.StreamDelta.event("project_execution_failed", Map.of(
-                                        "code", "EXECUTION_NOT_COMPLETED",
-                                        "category", "TRANSIENT",
-                                        "retryAfterMs", 0L,
-                                        "resultUnknown", true,
-                                        "partial", answer != null && !answer.isEmpty(),
-                                        "stopped", "stopped".equals(terminalReason))));
-                            }
-                        }
+                                                Object projectOptions =
+                                                        inputs.get(
+                                                                MateClawStateKeys
+                                                                        .PROJECT_EXECUTION_OPTIONS);
+                                                String terminalReason =
+                                                        output.state()
+                                                                .<String>value(FINISH_REASON)
+                                                                .orElse("");
+                                                if (projectOptions
+                                                                instanceof
+                                                                vip.mate.agent.execution
+                                                                                        .ProjectExecutionOptions
+                                                                                projectExecution
+                                                        && !terminalReason.isBlank()
+                                                        && projectTerminalEventEmitted
+                                                                .compareAndSet(false, true)) {
+                                                    String answer = extractFinalAnswer(output);
+                                                    if (("normal".equals(terminalReason)
+                                                                    || "summarized"
+                                                                            .equals(terminalReason))
+                                                            && answer != null
+                                                            && !answer.isEmpty()) {
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        "project_execution_completed",
+                                                                        Map.of(
+                                                                                "attemptId",
+                                                                                        projectExecution
+                                                                                                .attemptId(),
+                                                                                "configDigest",
+                                                                                        projectExecution
+                                                                                                .configDigest(),
+                                                                                "skillDigest",
+                                                                                        projectExecution
+                                                                                                .skillDigest())));
+                                                    } else {
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        "project_execution_failed",
+                                                                        Map.of(
+                                                                                "code",
+                                                                                "EXECUTION_NOT_COMPLETED",
+                                                                                "category",
+                                                                                "TRANSIENT",
+                                                                                "retryAfterMs",
+                                                                                0L,
+                                                                                "resultUnknown",
+                                                                                true,
+                                                                                "partial",
+                                                                                answer != null
+                                                                                        && !answer
+                                                                                                .isEmpty(),
+                                                                                "stopped",
+                                                                                "stopped"
+                                                                                        .equals(
+                                                                                                terminalReason))));
+                                                    }
+                                                }
 
-                        finalPromptTokens.set(output.state().value(PROMPT_TOKENS, 0));
-                        finalCompletionTokens.set(output.state().value(COMPLETION_TOKENS, 0));
-                        finalCacheReadTokens.set(output.state().value(CACHE_READ_TOKENS, 0));
-                        finalCacheWriteTokens.set(output.state().value(CACHE_WRITE_TOKENS, 0));
-                        finalReasoningTokens.set(output.state().value(REASONING_TOKENS, 0));
-                        finalModelName.set(output.state().value(RUNTIME_MODEL_NAME, ""));
-                        finalProviderId.set(output.state().value(RUNTIME_PROVIDER_ID, ""));
+                                                finalPromptTokens.set(
+                                                        output.state().value(PROMPT_TOKENS, 0));
+                                                finalCompletionTokens.set(
+                                                        output.state().value(COMPLETION_TOKENS, 0));
+                                                finalCacheReadTokens.set(
+                                                        output.state().value(CACHE_READ_TOKENS, 0));
+                                                finalCacheWriteTokens.set(
+                                                        output.state()
+                                                                .value(CACHE_WRITE_TOKENS, 0));
+                                                finalReasoningTokens.set(
+                                                        output.state().value(REASONING_TOKENS, 0));
+                                                if (output.state()
+                                                                .value(
+                                                                        MODEL_RESPONSE_OBSERVED,
+                                                                        false)
+                                                        || output.state()
+                                                                                .<Integer>value(
+                                                                                        LLM_CALL_COUNT,
+                                                                                        0)
+                                                                        > 0
+                                                                && (output.state()
+                                                                                .value(
+                                                                                        NEEDS_TOOL_CALL,
+                                                                                        false)
+                                                                        || "normal"
+                                                                                .equals(
+                                                                                        output.state()
+                                                                                                .value(
+                                                                                                        FINISH_REASON,
+                                                                                                        "")))) {
+                                                    observedModelResponse.set(true);
+                                                }
+                                                finalModelName.set(
+                                                        output.state()
+                                                                .value(RUNTIME_MODEL_NAME, ""));
+                                                finalProviderId.set(
+                                                        output.state()
+                                                                .value(RUNTIME_PROVIDER_ID, ""));
 
-                        lastIteration.set(output.state().value(CURRENT_ITERATION, 0));
-                        lastSoftCap.set(output.state().value(MAX_ITERATIONS, 0));
-                        if (hasFinalAnswer(output)
-                                || Boolean.TRUE.equals(output.state().value(LIMIT_EXCEEDED, false))
-                                || !output.state().<String>value(FINISH_REASON).orElse("").isBlank()) {
-                            sawLegitimateExit.set(true);
-                        }
+                                                lastIteration.set(
+                                                        output.state().value(CURRENT_ITERATION, 0));
+                                                lastSoftCap.set(
+                                                        output.state().value(MAX_ITERATIONS, 0));
+                                                if (hasFinalAnswer(output)
+                                                        || Boolean.TRUE.equals(
+                                                                output.state()
+                                                                        .value(
+                                                                                LIMIT_EXCEEDED,
+                                                                                false))
+                                                        || !output.state()
+                                                                .<String>value(FINISH_REASON)
+                                                                .orElse("")
+                                                                .isBlank()) {
+                                                    sawLegitimateExit.set(true);
+                                                }
 
-                        return deltas;
-                    })
-                    .concatWith(Mono.fromSupplier(() -> {
-                        DelegatedUsageAccumulator acc = DelegatedUsageAccumulator.getInstance();
-                        DelegatedUsageAccumulator.Drained delegated = acc != null
-                                ? acc.drain(conversationId)
-                                : new DelegatedUsageAccumulator.Drained(0, 0);
-                        long promptTokens = finalPromptTokens.get() + delegated.promptTokens();
-                        long completionTokens = finalCompletionTokens.get() + delegated.completionTokens();
-                        if (promptTokens > 0 || completionTokens > 0) {
-                            return AgentService.StreamDelta.event("_usage_final", Map.of(
-                                    "promptTokens", promptTokens,
-                                    "completionTokens", completionTokens,
-                                    "delegatedPromptTokens", delegated.promptTokens(),
-                                    "delegatedCompletionTokens", delegated.completionTokens(),
-                                    "cacheReadTokens", finalCacheReadTokens.get(),
-                                    "cacheWriteTokens", finalCacheWriteTokens.get(),
-                                    "reasoningTokens", finalReasoningTokens.get(),
-                                    "runtimeModelName", finalModelName.get(),
-                                    "runtimeProviderId", finalProviderId.get()
-                            ));
-                        }
-                        return null;
-                    }).flatMapMany(d -> d != null ? Flux.just(d) : Flux.empty())))
-                    .doOnComplete(() -> {
-                        setState(AgentState.IDLE);
-                        if (!sawLegitimateExit.get()) {
-                            log.error("[{}] StateGraph replay stream completed WITHOUT a final answer / "
-                                            + "limit_exceeded / finish_reason — likely framework-level silent "
-                                            + "termination. conversationId={}, lastIteration={}, softCap={}",
-                                    agentName, conversationId, lastIteration.get(), lastSoftCap.get());
-                        }
-                    })
-                    .doOnError(e -> {
-                        log.error("[{}] StateGraph replay stream error: {}", agentName, e.getMessage());
-                        setState(AgentState.ERROR);
-                    })
+                                                return deltas;
+                                            })
+                                    .concatWith(
+                                            Mono.fromSupplier(
+                                                            () -> {
+                                                                DelegatedUsageAccumulator acc =
+                                                                        DelegatedUsageAccumulator
+                                                                                .getInstance();
+                                                                DelegatedUsageAccumulator.Drained
+                                                                        delegated =
+                                                                                acc != null
+                                                                                        ? acc.drain(
+                                                                                                conversationId)
+                                                                                        : new DelegatedUsageAccumulator
+                                                                                                .Drained(
+                                                                                                0,
+                                                                                                0);
+                                                                long promptTokens =
+                                                                        finalPromptTokens.get()
+                                                                                + delegated
+                                                                                        .promptTokens();
+                                                                long completionTokens =
+                                                                        finalCompletionTokens.get()
+                                                                                + delegated
+                                                                                        .completionTokens();
+                                                                // Providers may omit usage; an
+                                                                // responding model still owns the
+                                                                // saved reply.
+                                                                if (promptTokens > 0
+                                                                        || completionTokens > 0
+                                                                        || observedModelResponse
+                                                                                .get()) {
+                                                                    return AgentService.StreamDelta
+                                                                            .event(
+                                                                                    "_usage_final",
+                                                                                    Map.of(
+                                                                                            "promptTokens",
+                                                                                                    promptTokens,
+                                                                                            "completionTokens",
+                                                                                                    completionTokens,
+                                                                                            "delegatedPromptTokens",
+                                                                                                    delegated
+                                                                                                            .promptTokens(),
+                                                                                            "delegatedCompletionTokens",
+                                                                                                    delegated
+                                                                                                            .completionTokens(),
+                                                                                            "cacheReadTokens",
+                                                                                                    finalCacheReadTokens
+                                                                                                            .get(),
+                                                                                            "cacheWriteTokens",
+                                                                                                    finalCacheWriteTokens
+                                                                                                            .get(),
+                                                                                            "reasoningTokens",
+                                                                                                    finalReasoningTokens
+                                                                                                            .get(),
+                                                                                            "runtimeModelName",
+                                                                                                    finalModelName
+                                                                                                            .get(),
+                                                                                            "runtimeProviderId",
+                                                                                                    finalProviderId
+                                                                                                            .get()));
+                                                                }
+                                                                return null;
+                                                            })
+                                                    .flatMapMany(
+                                                            d ->
+                                                                    d != null
+                                                                            ? Flux.just(d)
+                                                                            : Flux.empty())))
+                    .doOnComplete(
+                            () -> {
+                                setState(AgentState.IDLE);
+                                if (!sawLegitimateExit.get()) {
+                                    log.error(
+                                            "[{}] StateGraph replay stream completed WITHOUT a final answer / "
+                                                    + "limit_exceeded / finish_reason — likely framework-level silent "
+                                                    + "termination. conversationId={}, lastIteration={}, softCap={}",
+                                            agentName,
+                                            conversationId,
+                                            lastIteration.get(),
+                                            lastSoftCap.get());
+                                }
+                            })
+                    .doOnError(
+                            e -> {
+                                log.error(
+                                        "[{}] StateGraph replay stream error: {}",
+                                        agentName,
+                                        e.getMessage());
+                                setState(AgentState.ERROR);
+                            })
                     // Leak guard: discard delegated usage if the turn ends without
                     // emitting _usage_final (error / cancel).
-                    .doFinally(sig -> {
-                        DelegatedUsageAccumulator acc = DelegatedUsageAccumulator.getInstance();
-                        if (acc != null) acc.clear(conversationId);
-                    });
+                    .doFinally(
+                            sig -> {
+                                DelegatedUsageAccumulator acc =
+                                        DelegatedUsageAccumulator.getInstance();
+                                if (acc != null) acc.clear(conversationId);
+                            });
         } catch (Exception e) {
             setState(AgentState.ERROR);
             return Flux.error(e);
@@ -419,23 +666,30 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     @Override
-    public Flux<AgentService.StreamDelta> chatStructuredStream(String userMessage, String conversationId) {
+    public Flux<AgentService.StreamDelta> chatStructuredStream(
+            String userMessage, String conversationId) {
         return chatStructuredStream(userMessage, conversationId, "");
     }
 
     @Override
-    public Flux<AgentService.StreamDelta> chatStructuredStream(String userMessage, String conversationId,
-                                                                String requesterId) {
+    public Flux<AgentService.StreamDelta> chatStructuredStream(
+            String userMessage, String conversationId, String requesterId) {
         return chatStructuredStream(userMessage, conversationId, requesterId, null);
     }
 
-    public Flux<AgentService.StreamDelta> chatStructuredStream(String userMessage, String conversationId,
-            String requesterId, vip.mate.agent.execution.ProjectExecutionOptions options) {
+    public Flux<AgentService.StreamDelta> chatStructuredStream(
+            String userMessage,
+            String conversationId,
+            String requesterId,
+            vip.mate.agent.execution.ProjectExecutionOptions options) {
         setState(AgentState.RUNNING);
         try {
-            log.info("[{}] StateGraph structured stream: conversationId={}", agentName, conversationId);
+            log.info(
+                    "[{}] StateGraph structured stream: conversationId={}",
+                    agentName,
+                    conversationId);
 
-            Map<String, Object> inputs = buildInitialState(userMessage, conversationId);
+            Map<String, Object> inputs = buildInitialState(userMessage, conversationId, options);
             inputs.put(REQUESTER_ID, requesterId != null ? requesterId : "");
             if (options != null) inputs.put(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS, options);
             String threadId = UUID.randomUUID().toString();
@@ -449,6 +703,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             AtomicInteger finalCacheReadTokens = new AtomicInteger(0);
             AtomicInteger finalCacheWriteTokens = new AtomicInteger(0);
             AtomicInteger finalReasoningTokens = new AtomicInteger(0);
+            AtomicBoolean observedModelResponse = new AtomicBoolean(false);
             AtomicReference<String> finalModelName = new AtomicReference<>("");
             AtomicReference<String> finalProviderId = new AtomicReference<>("");
             // 防重保护：StateGraph 对每个节点都 emit NodeOutput，FINAL_ANSWER 一旦写入后续节点都携带，
@@ -474,177 +729,390 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
             AtomicInteger lastSoftCap = new AtomicInteger(0);
             AtomicBoolean sawLegitimateExit = new AtomicBoolean(false);
 
-            return BaseAgent.routingStartupDelta(inputs).concatWith(compiledGraph.stream(inputs, config)
-                    .flatMapIterable(output -> {
-                        List<AgentService.StreamDelta> deltas = new ArrayList<>();
-                        // 1. 提取所有累积的事件，只发送新增部分
-                        List<GraphEventPublisher.GraphEvent> allEvents = GraphEventPublisher.extractEvents(output);
-                        int newStart = sentEventCount.get();
-                        if (newStart < allEvents.size()) {
-                            for (int i = newStart; i < allEvents.size(); i++) {
-                                var event = allEvents.get(i);
-                                deltas.add(AgentService.StreamDelta.event(event.type(), event.data()));
-                            }
-                            sentEventCount.set(allEvents.size());
-                        }
+            return BaseAgent.routingStartupDelta(inputs)
+                    .concatWith(
+                            compiledGraph.stream(inputs, config)
+                                    .flatMapIterable(
+                                            output -> {
+                                                List<AgentService.StreamDelta> deltas =
+                                                        new ArrayList<>();
+                                                // 1. 提取所有累积的事件，只发送新增部分
+                                                List<GraphEventPublisher.GraphEvent> allEvents =
+                                                        GraphEventPublisher.extractEvents(output);
+                                                int newStart = sentEventCount.get();
+                                                if (newStart < allEvents.size()) {
+                                                    for (int i = newStart;
+                                                            i < allEvents.size();
+                                                            i++) {
+                                                        var event = allEvents.get(i);
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        event.type(),
+                                                                        event.data()));
+                                                    }
+                                                    sentEventCount.set(allEvents.size());
+                                                }
 
-                        // 2. 内容始终通过 StreamDelta 发给 Accumulator 用于持久化
-                        //    已由 NodeStreamingChatHelper 广播过的标记 persistOnly，避免前端收到重复 content_delta
-                        boolean contentAlreadyStreamed = output.state()
-                                .value(CONTENT_STREAMED, false);
-                        boolean thinkingAlreadyStreamed = output.state()
-                                .value(THINKING_STREAMED, false);
+                                                // 2. 内容始终通过 StreamDelta 发给 Accumulator 用于持久化
+                                                //    已由 NodeStreamingChatHelper 广播过的标记
+                                                // persistOnly，避免前端收到重复 content_delta
+                                                boolean contentAlreadyStreamed =
+                                                        output.state()
+                                                                .value(CONTENT_STREAMED, false);
+                                                boolean thinkingAlreadyStreamed =
+                                                        output.state()
+                                                                .value(THINKING_STREAMED, false);
 
-                        // 2a. Thinking first — see the ordering note in
-                        //     chatStructuredStream. The accumulator builds its
-                        //     segment timeline in delta arrival order, so the
-                        //     reasoning must be emitted ahead of the answer it
-                        //     produced. Every iteration's reasoning is persisted —
-                        //     see the note in chatStructuredStream for why the
-                        //     terminal one alone is not enough.
-                        String iterationThinking = output.state().<String>value(STREAMED_THINKING).orElse("");
-                        if (persistEveryIterationReasoning
-                                && !iterationThinking.isEmpty()
-                                && !iterationThinking.equals(lastEmittedIterationThinking.get())) {
-                            lastEmittedIterationThinking.set(iterationThinking);
-                            deltas.add(AgentService.StreamDelta.persistOnly(null, iterationThinking));
-                        }
+                                                // 2a. Thinking first — see the ordering note in
+                                                //     chatStructuredStream. The accumulator builds
+                                                // its
+                                                //     segment timeline in delta arrival order, so
+                                                // the
+                                                //     reasoning must be emitted ahead of the answer
+                                                // it
+                                                //     produced. Every iteration's reasoning is
+                                                // persisted —
+                                                //     see the note in chatStructuredStream for why
+                                                // the
+                                                //     terminal one alone is not enough.
+                                                String iterationThinking =
+                                                        output.state()
+                                                                .<String>value(STREAMED_THINKING)
+                                                                .orElse("");
+                                                if (persistEveryIterationReasoning
+                                                        && !iterationThinking.isEmpty()
+                                                        && !iterationThinking.equals(
+                                                                lastEmittedIterationThinking
+                                                                        .get())) {
+                                                    lastEmittedIterationThinking.set(
+                                                            iterationThinking);
+                                                    deltas.add(
+                                                            AgentService.StreamDelta.persistOnly(
+                                                                    null, iterationThinking));
+                                                }
 
-                        String thinking = extractFinalThinking(output);
-                        if (thinking != null && !thinking.isEmpty()
-                                && !thinking.equals(lastEmittedIterationThinking.get())
-                                && finalThinkingEmitted.compareAndSet(false, true)) {
-                            deltas.add(thinkingAlreadyStreamed
-                                    ? AgentService.StreamDelta.persistOnly(null, thinking)
-                                    : new AgentService.StreamDelta(null, thinking));
-                        }
+                                                String thinking = extractFinalThinking(output);
+                                                if (thinking != null
+                                                        && !thinking.isEmpty()
+                                                        && !thinking.equals(
+                                                                lastEmittedIterationThinking.get())
+                                                        && finalThinkingEmitted.compareAndSet(
+                                                                false, true)) {
+                                                    deltas.add(
+                                                            thinkingAlreadyStreamed
+                                                                    ? AgentService.StreamDelta
+                                                                            .persistOnly(
+                                                                                    null, thinking)
+                                                                    : new AgentService.StreamDelta(
+                                                                            null, thinking));
+                                                }
 
-                        // 2b. Route per-iteration narrative into the segments timeline
-                        //     so the segmented UI view still shows "我来…" preludes
-                        //     between tool cards, but keep the top-level content
-                        //     field (= persisted mate_message.content) reserved for
-                        //     the final-answer span. NodeStreamingChatHelper already
-                        //     broadcast the live deltas; segmentOnly suppresses
-                        //     re-broadcast and skips content.append while still
-                        //     populating the segments[] entry.
-                        //
-                        //     Exception — evidence-insufficient terminal turn
-                        //     (ReasoningNode.java:617): STREAMED_CONTENT carries
-                        //     the rejected answer body, FINAL_ANSWER is just the
-                        //     short "[证据不足]" warning. Use persistOnly there so
-                        //     mate_message.content keeps both the answer text and
-                        //     the warning — single-segment renderers (copy / TTS /
-                        //     history reload) read content, not segments.
-                        boolean isFinalAnswerTurn = hasFinalAnswer(output);
-                        String streamed = output.state().<String>value(STREAMED_CONTENT).orElse("");
-                        if (!streamed.isEmpty() && !streamed.equals(lastEmittedStreamedContent.get())) {
-                            lastEmittedStreamedContent.set(streamed);
-                            boolean completionRetry = output.state().value(CONTINUE_REASONING, false);
-                            boolean longFormAccumulation = !output.state()
-                                    .value(LONG_FORM_DRAFT, "").isEmpty();
-                            String resolvedFinalAnswer = isFinalAnswerTurn
-                                    ? extractFinalAnswer(output) : "";
-                            if (shouldEmitStreamedContent(isFinalAnswerTurn, longFormAccumulation,
-                                    streamed, resolvedFinalAnswer)) {
-                                addWithKindEvent(deltas, streamedContentDelta(isFinalAnswerTurn,
-                                        completionRetry || output.state().value(NEEDS_TOOL_CALL, false),
-                                        completionRetry ? 0 : output.state().value(TOOL_CALL_COUNT, 0),
-                                        streamed));
-                            }
-                        }
+                                                // 2b. Route per-iteration narrative into the
+                                                // segments timeline
+                                                //     so the segmented UI view still shows "我来…"
+                                                // preludes
+                                                //     between tool cards, but keep the top-level
+                                                // content
+                                                //     field (= persisted mate_message.content)
+                                                // reserved for
+                                                //     the final-answer span.
+                                                // NodeStreamingChatHelper already
+                                                //     broadcast the live deltas; segmentOnly
+                                                // suppresses
+                                                //     re-broadcast and skips content.append while
+                                                // still
+                                                //     populating the segments[] entry.
+                                                //
+                                                //     Exception — evidence-insufficient terminal
+                                                // turn
+                                                //     (ReasoningNode.java:617): STREAMED_CONTENT
+                                                // carries
+                                                //     the rejected answer body, FINAL_ANSWER is
+                                                // just the
+                                                //     short "[证据不足]" warning. Use persistOnly there
+                                                // so
+                                                //     mate_message.content keeps both the answer
+                                                // text and
+                                                //     the warning — single-segment renderers (copy
+                                                // / TTS /
+                                                //     history reload) read content, not segments.
+                                                boolean isFinalAnswerTurn = hasFinalAnswer(output);
+                                                String streamed =
+                                                        output.state()
+                                                                .<String>value(STREAMED_CONTENT)
+                                                                .orElse("");
+                                                if (!streamed.isEmpty()
+                                                        && !streamed.equals(
+                                                                lastEmittedStreamedContent.get())) {
+                                                    lastEmittedStreamedContent.set(streamed);
+                                                    boolean completionRetry =
+                                                            output.state()
+                                                                    .value(
+                                                                            CONTINUE_REASONING,
+                                                                            false);
+                                                    boolean longFormAccumulation =
+                                                            !output.state()
+                                                                    .value(LONG_FORM_DRAFT, "")
+                                                                    .isEmpty();
+                                                    String resolvedFinalAnswer =
+                                                            isFinalAnswerTurn
+                                                                    ? extractFinalAnswer(output)
+                                                                    : "";
+                                                    if (shouldEmitStreamedContent(
+                                                            isFinalAnswerTurn,
+                                                            longFormAccumulation,
+                                                            streamed,
+                                                            resolvedFinalAnswer)) {
+                                                        addWithKindEvent(
+                                                                deltas,
+                                                                streamedContentDelta(
+                                                                        isFinalAnswerTurn,
+                                                                        completionRetry
+                                                                                || output.state()
+                                                                                        .value(
+                                                                                                NEEDS_TOOL_CALL,
+                                                                                                false),
+                                                                        completionRetry
+                                                                                ? 0
+                                                                                : output.state()
+                                                                                        .value(
+                                                                                                TOOL_CALL_COUNT,
+                                                                                                0),
+                                                                        streamed));
+                                                    }
+                                                }
 
-                        if (isFinalAnswerTurn && finalAnswerEmitted.compareAndSet(false, true)) {
-                            String answer = extractFinalAnswer(output);
-                            if (answer != null && !answer.isEmpty()) {
-                                addWithKindEvent(deltas, AgentService.StreamDelta.finalAnswer(answer, contentAlreadyStreamed));
-                            }
-                        }
-                        Object projectOptions = inputs.get(MateClawStateKeys.PROJECT_EXECUTION_OPTIONS);
-                        String terminalReason = output.state().<String>value(FINISH_REASON).orElse("");
-                        if (projectOptions instanceof vip.mate.agent.execution.ProjectExecutionOptions projectExecution
-                                && !terminalReason.isBlank()
-                                && structuredProjectTerminalEventEmitted.compareAndSet(false, true)) {
-                            String answer = extractFinalAnswer(output);
-                            if (("normal".equals(terminalReason) || "summarized".equals(terminalReason))
-                                    && answer != null && !answer.isEmpty()) {
-                                deltas.add(AgentService.StreamDelta.event("project_execution_completed", Map.of(
-                                        "attemptId", projectExecution.attemptId(),
-                                        "configDigest", projectExecution.configDigest(),
-                                        "skillDigest", projectExecution.skillDigest())));
-                            } else {
-                                deltas.add(AgentService.StreamDelta.event("project_execution_failed", Map.of(
-                                        "code", "EXECUTION_NOT_COMPLETED",
-                                        "category", "TRANSIENT",
-                                        "retryAfterMs", 0L,
-                                        "resultUnknown", true,
-                                        "partial", answer != null && !answer.isEmpty(),
-                                        "stopped", "stopped".equals(terminalReason))));
-                            }
-                        }
+                                                if (isFinalAnswerTurn
+                                                        && finalAnswerEmitted.compareAndSet(
+                                                                false, true)) {
+                                                    String answer = extractFinalAnswer(output);
+                                                    if (answer != null && !answer.isEmpty()) {
+                                                        addWithKindEvent(
+                                                                deltas,
+                                                                AgentService.StreamDelta
+                                                                        .finalAnswer(
+                                                                                answer,
+                                                                                contentAlreadyStreamed));
+                                                    }
+                                                }
+                                                Object projectOptions =
+                                                        inputs.get(
+                                                                MateClawStateKeys
+                                                                        .PROJECT_EXECUTION_OPTIONS);
+                                                String terminalReason =
+                                                        output.state()
+                                                                .<String>value(FINISH_REASON)
+                                                                .orElse("");
+                                                if (projectOptions
+                                                                instanceof
+                                                                vip.mate.agent.execution
+                                                                                        .ProjectExecutionOptions
+                                                                                projectExecution
+                                                        && !terminalReason.isBlank()
+                                                        && structuredProjectTerminalEventEmitted
+                                                                .compareAndSet(false, true)) {
+                                                    String answer = extractFinalAnswer(output);
+                                                    if (("normal".equals(terminalReason)
+                                                                    || "summarized"
+                                                                            .equals(terminalReason))
+                                                            && answer != null
+                                                            && !answer.isEmpty()) {
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        "project_execution_completed",
+                                                                        Map.of(
+                                                                                "attemptId",
+                                                                                        projectExecution
+                                                                                                .attemptId(),
+                                                                                "configDigest",
+                                                                                        projectExecution
+                                                                                                .configDigest(),
+                                                                                "skillDigest",
+                                                                                        projectExecution
+                                                                                                .skillDigest())));
+                                                    } else {
+                                                        deltas.add(
+                                                                AgentService.StreamDelta.event(
+                                                                        "project_execution_failed",
+                                                                        Map.of(
+                                                                                "code",
+                                                                                "EXECUTION_NOT_COMPLETED",
+                                                                                "category",
+                                                                                "TRANSIENT",
+                                                                                "retryAfterMs",
+                                                                                0L,
+                                                                                "resultUnknown",
+                                                                                true,
+                                                                                "partial",
+                                                                                answer != null
+                                                                                        && !answer
+                                                                                                .isEmpty(),
+                                                                                "stopped",
+                                                                                "stopped"
+                                                                                        .equals(
+                                                                                                terminalReason))));
+                                                    }
+                                                }
 
-                        // 3. 更新最新累计 token usage
-                        finalPromptTokens.set(output.state().value(PROMPT_TOKENS, 0));
-                        finalCompletionTokens.set(output.state().value(COMPLETION_TOKENS, 0));
-                        finalCacheReadTokens.set(output.state().value(CACHE_READ_TOKENS, 0));
-                        finalCacheWriteTokens.set(output.state().value(CACHE_WRITE_TOKENS, 0));
-                        finalReasoningTokens.set(output.state().value(REASONING_TOKENS, 0));
-                        finalModelName.set(output.state().value(RUNTIME_MODEL_NAME, ""));
-                        finalProviderId.set(output.state().value(RUNTIME_PROVIDER_ID, ""));
+                                                // 3. 更新最新累计 token usage
+                                                finalPromptTokens.set(
+                                                        output.state().value(PROMPT_TOKENS, 0));
+                                                finalCompletionTokens.set(
+                                                        output.state().value(COMPLETION_TOKENS, 0));
+                                                finalCacheReadTokens.set(
+                                                        output.state().value(CACHE_READ_TOKENS, 0));
+                                                finalCacheWriteTokens.set(
+                                                        output.state()
+                                                                .value(CACHE_WRITE_TOKENS, 0));
+                                                finalReasoningTokens.set(
+                                                        output.state().value(REASONING_TOKENS, 0));
+                                                if (output.state()
+                                                                .value(
+                                                                        MODEL_RESPONSE_OBSERVED,
+                                                                        false)
+                                                        || output.state()
+                                                                                .<Integer>value(
+                                                                                        LLM_CALL_COUNT,
+                                                                                        0)
+                                                                        > 0
+                                                                && (output.state()
+                                                                                .value(
+                                                                                        NEEDS_TOOL_CALL,
+                                                                                        false)
+                                                                        || "normal"
+                                                                                .equals(
+                                                                                        output.state()
+                                                                                                .value(
+                                                                                                        FINISH_REASON,
+                                                                                                        "")))) {
+                                                    observedModelResponse.set(true);
+                                                }
+                                                finalModelName.set(
+                                                        output.state()
+                                                                .value(RUNTIME_MODEL_NAME, ""));
+                                                finalProviderId.set(
+                                                        output.state()
+                                                                .value(RUNTIME_PROVIDER_ID, ""));
 
-                        // 4. Silent-termination guard inputs
-                        lastIteration.set(output.state().value(CURRENT_ITERATION, 0));
-                        lastSoftCap.set(output.state().value(MAX_ITERATIONS, 0));
-                        if (hasFinalAnswer(output)
-                                || Boolean.TRUE.equals(output.state().value(LIMIT_EXCEEDED, false))
-                                || !output.state().<String>value(FINISH_REASON).orElse("").isBlank()) {
-                            sawLegitimateExit.set(true);
-                        }
+                                                // 4. Silent-termination guard inputs
+                                                lastIteration.set(
+                                                        output.state().value(CURRENT_ITERATION, 0));
+                                                lastSoftCap.set(
+                                                        output.state().value(MAX_ITERATIONS, 0));
+                                                if (hasFinalAnswer(output)
+                                                        || Boolean.TRUE.equals(
+                                                                output.state()
+                                                                        .value(
+                                                                                LIMIT_EXCEEDED,
+                                                                                false))
+                                                        || !output.state()
+                                                                .<String>value(FINISH_REASON)
+                                                                .orElse("")
+                                                                .isBlank()) {
+                                                    sawLegitimateExit.set(true);
+                                                }
 
-                        return deltas;
-                    })
-                    // 流正常完成后追加内部 usage 事件
-                    .concatWith(Mono.fromSupplier(() -> {
-                        DelegatedUsageAccumulator acc = DelegatedUsageAccumulator.getInstance();
-                        DelegatedUsageAccumulator.Drained delegated = acc != null
-                                ? acc.drain(conversationId)
-                                : new DelegatedUsageAccumulator.Drained(0, 0);
-                        long promptTokens = finalPromptTokens.get() + delegated.promptTokens();
-                        long completionTokens = finalCompletionTokens.get() + delegated.completionTokens();
-                        if (promptTokens > 0 || completionTokens > 0) {
-                            return AgentService.StreamDelta.event("_usage_final", Map.of(
-                                    "promptTokens", promptTokens,
-                                    "completionTokens", completionTokens,
-                                    "delegatedPromptTokens", delegated.promptTokens(),
-                                    "delegatedCompletionTokens", delegated.completionTokens(),
-                                    "cacheReadTokens", finalCacheReadTokens.get(),
-                                    "cacheWriteTokens", finalCacheWriteTokens.get(),
-                                    "reasoningTokens", finalReasoningTokens.get(),
-                                    "runtimeModelName", finalModelName.get(),
-                                    "runtimeProviderId", finalProviderId.get()
-                            ));
-                        }
-                        return null;
-                    }).flatMapMany(d -> d != null ? Flux.just(d) : Flux.empty())))
-                    .doOnComplete(() -> {
-                        setState(AgentState.IDLE);
-                        if (!sawLegitimateExit.get()) {
-                            log.error("[{}] StateGraph structured stream completed WITHOUT a final answer / "
-                                            + "limit_exceeded / finish_reason — likely framework-level silent "
-                                            + "termination (recursionLimit reached or upstream truncation). "
-                                            + "conversationId={}, lastIteration={}, softCap={}",
-                                    agentName, conversationId, lastIteration.get(), lastSoftCap.get());
-                        }
-                    })
-                    .doOnError(e -> {
-                        log.error("[{}] StateGraph structured stream error: {}", agentName, e.getMessage());
-                        setState(AgentState.ERROR);
-                    })
+                                                return deltas;
+                                            })
+                                    // 流正常完成后追加内部 usage 事件
+                                    .concatWith(
+                                            Mono.fromSupplier(
+                                                            () -> {
+                                                                DelegatedUsageAccumulator acc =
+                                                                        DelegatedUsageAccumulator
+                                                                                .getInstance();
+                                                                DelegatedUsageAccumulator.Drained
+                                                                        delegated =
+                                                                                acc != null
+                                                                                        ? acc.drain(
+                                                                                                conversationId)
+                                                                                        : new DelegatedUsageAccumulator
+                                                                                                .Drained(
+                                                                                                0,
+                                                                                                0);
+                                                                long promptTokens =
+                                                                        finalPromptTokens.get()
+                                                                                + delegated
+                                                                                        .promptTokens();
+                                                                long completionTokens =
+                                                                        finalCompletionTokens.get()
+                                                                                + delegated
+                                                                                        .completionTokens();
+                                                                // Providers may omit usage; an
+                                                                // responding model still owns the
+                                                                // saved reply.
+                                                                if (promptTokens > 0
+                                                                        || completionTokens > 0
+                                                                        || observedModelResponse
+                                                                                .get()) {
+                                                                    return AgentService.StreamDelta
+                                                                            .event(
+                                                                                    "_usage_final",
+                                                                                    Map.of(
+                                                                                            "promptTokens",
+                                                                                                    promptTokens,
+                                                                                            "completionTokens",
+                                                                                                    completionTokens,
+                                                                                            "delegatedPromptTokens",
+                                                                                                    delegated
+                                                                                                            .promptTokens(),
+                                                                                            "delegatedCompletionTokens",
+                                                                                                    delegated
+                                                                                                            .completionTokens(),
+                                                                                            "cacheReadTokens",
+                                                                                                    finalCacheReadTokens
+                                                                                                            .get(),
+                                                                                            "cacheWriteTokens",
+                                                                                                    finalCacheWriteTokens
+                                                                                                            .get(),
+                                                                                            "reasoningTokens",
+                                                                                                    finalReasoningTokens
+                                                                                                            .get(),
+                                                                                            "runtimeModelName",
+                                                                                                    finalModelName
+                                                                                                            .get(),
+                                                                                            "runtimeProviderId",
+                                                                                                    finalProviderId
+                                                                                                            .get()));
+                                                                }
+                                                                return null;
+                                                            })
+                                                    .flatMapMany(
+                                                            d ->
+                                                                    d != null
+                                                                            ? Flux.just(d)
+                                                                            : Flux.empty())))
+                    .doOnComplete(
+                            () -> {
+                                setState(AgentState.IDLE);
+                                if (!sawLegitimateExit.get()) {
+                                    log.error(
+                                            "[{}] StateGraph structured stream completed WITHOUT a final answer / "
+                                                    + "limit_exceeded / finish_reason — likely framework-level silent "
+                                                    + "termination (recursionLimit reached or upstream truncation). "
+                                                    + "conversationId={}, lastIteration={}, softCap={}",
+                                            agentName,
+                                            conversationId,
+                                            lastIteration.get(),
+                                            lastSoftCap.get());
+                                }
+                            })
+                    .doOnError(
+                            e -> {
+                                log.error(
+                                        "[{}] StateGraph structured stream error: {}",
+                                        agentName,
+                                        e.getMessage());
+                                setState(AgentState.ERROR);
+                            })
                     // Leak guard: discard delegated usage if the turn ends without
                     // emitting _usage_final (error / cancel).
-                    .doFinally(sig -> {
-                        DelegatedUsageAccumulator acc = DelegatedUsageAccumulator.getInstance();
-                        if (acc != null) acc.clear(conversationId);
-                    });
+                    .doFinally(
+                            sig -> {
+                                DelegatedUsageAccumulator acc =
+                                        DelegatedUsageAccumulator.getInstance();
+                                if (acc != null) acc.clear(conversationId);
+                            });
         } catch (Exception e) {
             setState(AgentState.ERROR);
             return Flux.error(e);
@@ -652,29 +1120,55 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     private Map<String, Object> buildInitialState(String userMessage, String conversationId) {
+        return buildInitialState(userMessage, conversationId, null);
+    }
+
+    private Map<String, Object> buildInitialState(
+            String userMessage,
+            String conversationId,
+            vip.mate.agent.execution.ProjectExecutionOptions options) {
         // 加载会话历史
         List<Message> historyMessages = buildConversationHistory(conversationId, userMessage);
 
         // 上下文窗口管理：裁剪超出模型 context window 的历史（含当前消息预算）
         if (conversationWindowManager != null) {
             Long parsedAgentId = null;
-            try { parsedAgentId = Long.valueOf(agentId); } catch (Exception ignored) {}
-            historyMessages = conversationWindowManager.fitToWindow(
-                    historyMessages,
-                    systemPrompt != null ? systemPrompt : "",
-                    userMessage,
-                    maxInputTokens,
-                    chatModel,
-                    conversationId,
-                    parsedAgentId,
-                    toolSet != null ? toolSet.callbacks() : null,
-                    workspaceBasePath);
+            try {
+                parsedAgentId = Long.valueOf(agentId);
+            } catch (Exception ignored) {
+            }
+            // The initial history summary calls ChatModel synchronously, outside the graph's
+            // streaming helper. Guard only this summary delegate so provider-specific model
+            // types used by the graph nodes remain unchanged.
+            org.springframework.ai.chat.model.ChatModel summaryModel = chatModel;
+            if (options != null) {
+                summaryModel =
+                        prompt -> {
+                            if (projectExecutionRevalidator == null)
+                                throw new IllegalStateException(
+                                        "Project execution revalidator is required");
+                            projectExecutionRevalidator.requireActive(options);
+                            return chatModel.call(prompt);
+                        };
+            }
+            historyMessages =
+                    conversationWindowManager.fitToWindow(
+                            historyMessages,
+                            systemPrompt != null ? systemPrompt : "",
+                            userMessage,
+                            maxInputTokens,
+                            summaryModel,
+                            conversationId,
+                            parsedAgentId,
+                            toolSet != null ? toolSet.callbacks() : null,
+                            workspaceBasePath);
         }
 
         List<Message> messages = new ArrayList<>(historyMessages);
         // 构建当前用户消息：支持 multimodal（如果有图片附件，直接注入 Media）
         // 同步获取 routing decision，写入 state 供后续节点 / accumulator 读取。
-        BaseAgent.CurrentTurnUserMessage currentTurn = buildCurrentUserMessageWithRouting(conversationId, userMessage);
+        BaseAgent.CurrentTurnUserMessage currentTurn =
+                buildCurrentUserMessageWithRouting(conversationId, userMessage);
         messages.add(currentTurn.userMessage());
 
         Map<String, Object> inputs = new HashMap<>();
@@ -690,13 +1184,14 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
         // 否则 thinking-on 会把"无限"误算成 5（变成"5 步就停"）。
         String thinkingLevel = vip.mate.llm.chatmodel.ThinkingLevelHolder.get();
         boolean thinkingOn = thinkingLevel != null && !"off".equalsIgnoreCase(thinkingLevel);
-        int effectiveMaxIterations = (maxIterations <= 0)
-                ? 0
-                : (thinkingOn ? maxIterations + 5 : maxIterations);
+        int effectiveMaxIterations =
+                (maxIterations <= 0) ? 0 : (thinkingOn ? maxIterations + 5 : maxIterations);
         inputs.put(MAX_ITERATIONS, effectiveMaxIterations);
         inputs.put(CURRENT_ITERATION, 0);
         // 初始化新字段
         inputs.put(TOOL_CALL_COUNT, 0);
+        inputs.put(LLM_CALL_COUNT, 0);
+        inputs.put(MODEL_RESPONSE_OBSERVED, false);
         inputs.put(ERROR_COUNT, 0);
         inputs.put(SHOULD_SUMMARIZE, false);
         inputs.put(LONG_FORM_DRAFT, "");
@@ -721,8 +1216,11 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
         // the primary model already covers the modalities. Stored as a Map so
         // graph state stays JSON-friendly.
         if (currentTurn.routingDecision() != null
-                && currentTurn.routingDecision().strategy() != vip.mate.llm.routing.model.MultimodalRoutingDecision.Strategy.NONE
-                || (currentTurn.routingDecision() != null && !currentTurn.routingDecision().skipped().isEmpty())) {
+                        && currentTurn.routingDecision().strategy()
+                                != vip.mate.llm.routing.model.MultimodalRoutingDecision.Strategy
+                                        .NONE
+                || (currentTurn.routingDecision() != null
+                        && !currentTurn.routingDecision().skipped().isEmpty())) {
             inputs.put(MateClawStateKeys.ROUTING_DECISION, currentTurn.routingDecision().toMap());
         }
 
@@ -731,12 +1229,16 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
         // StepExecutionNode can forward it to ToolExecutionExecutor → ToolContext.
         vip.mate.agent.context.ChatOrigin origin = vip.mate.agent.context.ChatOriginHolder.get();
         Long parsedAgentIdForOrigin = null;
-        try { parsedAgentIdForOrigin = agentId != null ? Long.valueOf(agentId) : null; } catch (Exception ignored) {}
+        try {
+            parsedAgentIdForOrigin = agentId != null ? Long.valueOf(agentId) : null;
+        } catch (Exception ignored) {
+        }
         if (parsedAgentIdForOrigin != null) {
             origin = origin.withAgent(parsedAgentIdForOrigin);
         }
-        origin = origin.withConversationId(conversationId)
-                .withWorkspace(origin.workspaceId(), workspaceBasePath);
+        origin =
+                origin.withConversationId(conversationId)
+                        .withWorkspace(origin.workspaceId(), workspaceBasePath);
         inputs.put(CHAT_ORIGIN, origin);
 
         // RFC 48 — inject active goal snapshot for GoalEvaluationNode.
@@ -765,90 +1267,92 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
     }
 
     /**
-     * Pick the right {@link AgentService.StreamDelta} flavor for the per-iteration
-     * {@code STREAMED_CONTENT} the graph just emitted.
+     * Pick the right {@link AgentService.StreamDelta} flavor for the per-iteration {@code
+     * STREAMED_CONTENT} the graph just emitted.
      *
      * <p>The contract:
-     * <ul>
-     *   <li>Intermediate ReAct iterations (no {@code FINAL_ANSWER} yet) →
-     *       {@code segmentOnly}. The content is reasoning preamble / mid-loop
-     *       summary that belongs in the segments timeline, not in the persisted
-     *       {@code mate_message.content}.</li>
-     *   <li>Terminal turn where {@code FINAL_ANSWER} is set →
-     *       {@code persistOnly}. This covers the evidence-insufficient path
-     *       (ReasoningNode.java:617) where {@code STREAMED_CONTENT} carries the
-     *       actual rejected answer body and {@code FINAL_ANSWER} is just a short
-     *       "[证据不足]" warning. Persisting the streamed body keeps single-segment
-     *       renderers (copy / TTS / history reload) showing the full text.</li>
-     * </ul>
-     *
-     * <p>Beyond flavor, this is the single assignment point for the delta's
-     * {@link ContentKind}: the graph is the only layer that definitively knows
-     * whether the completion carried tool calls ({@code NEEDS_TOOL_CALL}) and
-     * whether any tool observation preceded the text this turn
-     * ({@code TOOL_CALL_COUNT} — ObservationNode adds each round's observed
-     * results to it, so 0 means "no observation yet"). Downstream consumers
-     * read the tag instead of re-deriving it from stream structure.
-     *
-     * <p>The observation signal MUST be the observation counter, not
-     * {@code CURRENT_ITERATION}: the latter is an iteration <em>budget</em>
-     * counter that ObservationNode refunds for progressive-disclosure rounds
-     * (load_skill / enable_tool) and GoalEvaluationNode resets to 0 on a hard
-     * continuation. Either path leaves the budget at 0 after real observations
-     * already landed, which tagged grounded narration as provisional and made
-     * renderers collapse it.
      *
      * <ul>
-     *   <li>terminal turn → {@code FINAL_ANSWER};</li>
-     *   <li>completion carries tool calls and no tool observation happened yet
-     *       this turn → {@code PRE_TOOL_NARRATION} (provisional, may be
-     *       replaced by the turn's next content);</li>
-     *   <li>otherwise → {@code GROUNDED_NARRATION} (follows an observation, or
-     *       closed its completion without tool calls — never replaced).</li>
+     *   <li>Intermediate ReAct iterations (no {@code FINAL_ANSWER} yet) → {@code segmentOnly}. The
+     *       content is reasoning preamble / mid-loop summary that belongs in the segments timeline,
+     *       not in the persisted {@code mate_message.content}.
+     *   <li>Terminal turn where {@code FINAL_ANSWER} is set → {@code persistOnly}. This covers the
+     *       evidence-insufficient path (ReasoningNode.java:617) where {@code STREAMED_CONTENT}
+     *       carries the actual rejected answer body and {@code FINAL_ANSWER} is just a short
+     *       "[证据不足]" warning. Persisting the streamed body keeps single-segment renderers (copy /
+     *       TTS / history reload) showing the full text.
      * </ul>
      *
-     * <p>Package-private so the unit test can pin the decision without standing
-     * up a full StateGraph fixture. Returning {@code null} for blank input is the
-     * caller's responsibility — this helper just decides flavor for non-blank
-     * content.
+     * <p>Beyond flavor, this is the single assignment point for the delta's {@link ContentKind}:
+     * the graph is the only layer that definitively knows whether the completion carried tool calls
+     * ({@code NEEDS_TOOL_CALL}) and whether any tool observation preceded the text this turn
+     * ({@code TOOL_CALL_COUNT} — ObservationNode adds each round's observed results to it, so 0
+     * means "no observation yet"). Downstream consumers read the tag instead of re-deriving it from
+     * stream structure.
+     *
+     * <p>The observation signal MUST be the observation counter, not {@code CURRENT_ITERATION}: the
+     * latter is an iteration <em>budget</em> counter that ObservationNode refunds for
+     * progressive-disclosure rounds (load_skill / enable_tool) and GoalEvaluationNode resets to 0
+     * on a hard continuation. Either path leaves the budget at 0 after real observations already
+     * landed, which tagged grounded narration as provisional and made renderers collapse it.
+     *
+     * <ul>
+     *   <li>terminal turn → {@code FINAL_ANSWER};
+     *   <li>completion carries tool calls and no tool observation happened yet this turn → {@code
+     *       PRE_TOOL_NARRATION} (provisional, may be replaced by the turn's next content);
+     *   <li>otherwise → {@code GROUNDED_NARRATION} (follows an observation, or closed its
+     *       completion without tool calls — never replaced).
+     * </ul>
+     *
+     * <p>Package-private so the unit test can pin the decision without standing up a full
+     * StateGraph fixture. Returning {@code null} for blank input is the caller's responsibility —
+     * this helper just decides flavor for non-blank content.
      */
     /**
-     * Append a content-bearing delta plus, when it carries a producer-assigned
-     * kind, a {@code segment_kind} broadcast event tagging the just-emitted
-     * content span. The kind cannot ride on the live {@code content_delta}
-     * broadcasts — text streams before the producer knows whether the
-     * completion carries tool calls — so it is delivered as a follow-up event
-     * once the completion resolves, letting the client tag its running content
-     * segment and collapse a provisional narration the moment later content
-     * arrives, without waiting for the persisted-metadata round-trip.
+     * Append a content-bearing delta plus, when it carries a producer-assigned kind, a {@code
+     * segment_kind} broadcast event tagging the just-emitted content span. The kind cannot ride on
+     * the live {@code content_delta} broadcasts — text streams before the producer knows whether
+     * the completion carries tool calls — so it is delivered as a follow-up event once the
+     * completion resolves, letting the client tag its running content segment and collapse a
+     * provisional narration the moment later content arrives, without waiting for the
+     * persisted-metadata round-trip.
      */
-    static void addWithKindEvent(List<AgentService.StreamDelta> deltas, AgentService.StreamDelta delta) {
+    static void addWithKindEvent(
+            List<AgentService.StreamDelta> deltas, AgentService.StreamDelta delta) {
         deltas.add(delta);
         if (delta.kind() != null) {
-            deltas.add(AgentService.StreamDelta.event("segment_kind",
-                    Map.of("kind", delta.kind().wireName())));
+            deltas.add(
+                    AgentService.StreamDelta.event(
+                            "segment_kind", Map.of("kind", delta.kind().wireName())));
         }
     }
 
-    static AgentService.StreamDelta streamedContentDelta(boolean isFinalAnswerTurn, boolean carriesToolCalls,
-                                                         int observationCount, String streamed) {
+    static AgentService.StreamDelta streamedContentDelta(
+            boolean isFinalAnswerTurn,
+            boolean carriesToolCalls,
+            int observationCount,
+            String streamed) {
         if (isFinalAnswerTurn) {
             return AgentService.StreamDelta.persistOnly(streamed, null, ContentKind.FINAL_ANSWER);
         }
-        ContentKind kind = carriesToolCalls && observationCount == 0
-                ? ContentKind.PRE_TOOL_NARRATION
-                : ContentKind.GROUNDED_NARRATION;
+        ContentKind kind =
+                carriesToolCalls && observationCount == 0
+                        ? ContentKind.PRE_TOOL_NARRATION
+                        : ContentKind.GROUNDED_NARRATION;
         return AgentService.StreamDelta.segmentOnly(streamed, null, kind);
     }
 
-    static boolean shouldEmitStreamedContent(boolean isFinalAnswerTurn,
-                                             boolean longFormAccumulation,
-                                             String streamed,
-                                             String finalAnswer) {
+    static boolean shouldEmitStreamedContent(
+            boolean isFinalAnswerTurn,
+            boolean longFormAccumulation,
+            String streamed,
+            String finalAnswer) {
         if (longFormAccumulation) {
             return false;
         }
-        return !isFinalAnswerTurn || finalAnswer == null || streamed == null
+        return !isFinalAnswerTurn
+                || finalAnswer == null
+                || streamed == null
                 || !finalAnswer.contains(streamed);
     }
 
@@ -856,9 +1360,7 @@ public class StateGraphReActAgent extends BaseAgent implements StructuredStreamC
         if (output == null || output.state() == null) {
             return false;
         }
-        return output.state().<String>value(FINAL_ANSWER)
-                .filter(s -> !s.isEmpty())
-                .isPresent();
+        return output.state().<String>value(FINAL_ANSWER).filter(s -> !s.isEmpty()).isPresent();
     }
 
     private String extractFinalAnswer(NodeOutput output) {

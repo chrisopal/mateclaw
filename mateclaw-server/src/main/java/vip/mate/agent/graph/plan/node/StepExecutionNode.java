@@ -2,6 +2,13 @@ package vip.mate.agent.graph.plan.node;
 
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -13,47 +20,34 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.util.StringUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import vip.mate.agent.AgentToolSet;
 import vip.mate.agent.GraphEventPublisher;
-import vip.mate.agent.graph.NodeStreamingChatHelper;
-import vip.mate.agent.graph.node.ActionNode;
-import vip.mate.agent.graph.plan.state.PlanStateAccessor;
-import vip.mate.agent.graph.plan.state.PlanStateKeys;
-import vip.mate.agent.graph.state.DirectToolOutput;
-import vip.mate.agent.graph.state.MateClawStateKeys;
+import vip.mate.agent.context.ChatOrigin;
 import vip.mate.agent.context.ConversationWindowManager;
 import vip.mate.agent.context.RuntimeContextInjector;
+import vip.mate.agent.graph.NodeStreamingChatHelper;
 import vip.mate.agent.graph.executor.ToolExecutionExecutor;
+import vip.mate.agent.graph.node.ActionNode;
+import vip.mate.agent.graph.plan.state.PlanStateAccessor;
+import vip.mate.agent.graph.state.DirectToolOutput;
+import vip.mate.agent.graph.state.MateClawStateKeys;
 import vip.mate.channel.web.ChatStreamTracker;
 import vip.mate.planning.service.PlanningService;
-import vip.mate.agent.context.ChatOrigin;
 import vip.mate.skill.runtime.SkillCatalogRenderer;
 import vip.mate.tool.builtin.DelegateAgentTool;
 import vip.mate.tool.builtin.DelegateAgentTool.ChildResult;
 import vip.mate.tool.builtin.DelegationContext;
 import vip.mate.tool.builtin.ToolExecutionContext;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * 步骤执行节点
- * <p>
- * 执行当前步骤，使用显式工具执行循环（internalToolExecutionEnabled=false）。
- * 单步最大工具调用次数限制为 {@link #MAX_TOOL_CALLS_PER_STEP} 次，与
- * {@code BaseAgent.MAX_ITERATIONS_HARD_CEILING} 对齐——因此实际生效的上限
- * 永远是 agent 的 {@code max_iterations}（DB 列），单步本身不会先于 agent
- * 的整体预算被打掉。早期 5 次的硬限制对"查新闻 + 整理 Word"这种合理多
- * 工具任务过紧，被 LimitExceededNode 提前拦截后用户看到的是冷冰冰的
- * "工具调用次数超出最大限制"。
- * <p>
- * 支持 NEEDS_APPROVAL 审批流程：对需要审批的工具调用创建 pending，
- * 发出 SSE 事件后立即返回审批提示（非阻塞）。审批通过后通过 replay 重新执行。
+ *
+ * <p>执行当前步骤，使用显式工具执行循环（internalToolExecutionEnabled=false）。 单步最大工具调用次数限制为 {@link
+ * #MAX_TOOL_CALLS_PER_STEP} 次，与 {@code BaseAgent.MAX_ITERATIONS_HARD_CEILING} 对齐——因此实际生效的上限 永远是
+ * agent 的 {@code max_iterations}（DB 列），单步本身不会先于 agent 的整体预算被打掉。早期 5 次的硬限制对"查新闻 + 整理 Word"这种合理多
+ * 工具任务过紧，被 LimitExceededNode 提前拦截后用户看到的是冷冰冰的 "工具调用次数超出最大限制"。
+ *
+ * <p>支持 NEEDS_APPROVAL 审批流程：对需要审批的工具调用创建 pending， 发出 SSE 事件后立即返回审批提示（非阻塞）。审批通过后通过 replay 重新执行。
  *
  * @author MateClaw Team
  */
@@ -69,17 +63,18 @@ public class StepExecutionNode implements NodeAction {
     private final String reasoningEffort;
     private final NodeStreamingChatHelper streamingHelper;
     private final long stepWallClockTimeoutMs;
+
     /**
-     * Renders the {@code ## Skills} catalog at runtime. Null in legacy / test
-     * constructors — when null, no catalog segment is appended (the Plan path's
-     * pre-disclosure behavior of baking it into the system prompt is gone).
+     * Renders the {@code ## Skills} catalog at runtime. Null in legacy / test constructors — when
+     * null, no catalog segment is appended (the Plan path's pre-disclosure behavior of baking it
+     * into the system prompt is gone).
      */
     private final SkillCatalogRenderer skillCatalogRenderer;
 
     /**
-     * Optional per-step delegation executor. Set after construction (this node is
-     * built by AgentGraphBuilder, not Spring) so a plan step assigned to a
-     * specialist agent runs on that agent. Null disables per-step delegation.
+     * Optional per-step delegation executor. Set after construction (this node is built by
+     * AgentGraphBuilder, not Spring) so a plan step assigned to a specialist agent runs on that
+     * agent. Null disables per-step delegation.
      */
     private DelegateAgentTool delegateAgentTool;
 
@@ -89,82 +84,116 @@ public class StepExecutionNode implements NodeAction {
 
     /**
      * Per-step tool-call ceiling, aligned with {@code BaseAgent.MAX_ITERATIONS_HARD_CEILING}.
-     * Matching the agent-level cap means this constant is never the bottleneck —
-     * the agent's own {@code max_iterations} (DB column) will fire first if a
-     * task is genuinely runaway, and a well-budgeted multi-tool step (e.g.
-     * web_search + browser_navigate + browser_read*N + file_write) is no longer
-     * cut short by an arbitrary 5-call ceiling.
+     * Matching the agent-level cap means this constant is never the bottleneck — the agent's own
+     * {@code max_iterations} (DB column) will fire first if a task is genuinely runaway, and a
+     * well-budgeted multi-tool step (e.g. web_search + browser_navigate + browser_read*N +
+     * file_write) is no longer cut short by an arbitrary 5-call ceiling.
      */
     private static final int MAX_TOOL_CALLS_PER_STEP = 100;
 
     /**
-     * Wall-clock budget per step, complementing {@link #MAX_TOOL_CALLS_PER_STEP}.
-     * The call-count cap doesn't help when a single LLM stream stalls or a
-     * concurrency-unsafe tool runs synchronously without a per-tool deadline
-     * (the parallel batch path enforces {@code ToolTimeoutProperties}, but the
-     * single-unsafe path in {@code ToolExecutionExecutor#executeSingleTool}
-     * currently does not). 10 minutes is generous for legitimate long steps
-     * (large file edits, multi-page browser flows) while still cutting off the
-     * pathological cases where the agent appears frozen to the user.
+     * Wall-clock budget per step, complementing {@link #MAX_TOOL_CALLS_PER_STEP}. The call-count
+     * cap doesn't help when a single LLM stream stalls or a concurrency-unsafe tool runs
+     * synchronously without a per-tool deadline (the parallel batch path enforces {@code
+     * ToolTimeoutProperties}, but the single-unsafe path in {@code
+     * ToolExecutionExecutor#executeSingleTool} currently does not). 10 minutes is generous for
+     * legitimate long steps (large file edits, multi-page browser flows) while still cutting off
+     * the pathological cases where the agent appears frozen to the user.
      */
     private static final long STEP_WALL_CLOCK_TIMEOUT_MS = 10 * 60 * 1000L;
 
     /**
-     * Max re-plans per graph run. When a step throws, the executor re-plans the
-     * remaining work around the failure instead of aborting the whole plan — a
-     * single transient tool error or one badly-scoped step no longer kills the
-     * task. Bounded so a step that fails every attempt can't re-plan forever;
-     * once exhausted the plan aborts as before. Kept small (the recursion
-     * ceiling already accommodates it) — raise with care.
+     * Max re-plans per graph run. When a step throws, the executor re-plans the remaining work
+     * around the failure instead of aborting the whole plan — a single transient tool error or one
+     * badly-scoped step no longer kills the task. Bounded so a step that fails every attempt can't
+     * re-plan forever; once exhausted the plan aborts as before. Kept small (the recursion ceiling
+     * already accommodates it) — raise with care.
      */
     private static final int MAX_REPLANS_PER_RUN = 1;
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public StepExecutionNode(ChatModel chatModel, AgentToolSet toolSet,
-                             ToolExecutionExecutor executor,
-                             PlanningService planningService,
-                             ChatStreamTracker streamTracker,
-                             String reasoningEffort, NodeStreamingChatHelper streamingHelper,
-                             ConversationWindowManager conversationWindowManager) {
-        this(chatModel, toolSet, executor, planningService, streamTracker,
-                reasoningEffort, streamingHelper, conversationWindowManager,
-                null, STEP_WALL_CLOCK_TIMEOUT_MS);
+    public StepExecutionNode(
+            ChatModel chatModel,
+            AgentToolSet toolSet,
+            ToolExecutionExecutor executor,
+            PlanningService planningService,
+            ChatStreamTracker streamTracker,
+            String reasoningEffort,
+            NodeStreamingChatHelper streamingHelper,
+            ConversationWindowManager conversationWindowManager) {
+        this(
+                chatModel,
+                toolSet,
+                executor,
+                planningService,
+                streamTracker,
+                reasoningEffort,
+                streamingHelper,
+                conversationWindowManager,
+                null,
+                STEP_WALL_CLOCK_TIMEOUT_MS);
     }
 
     /** Production constructor with the runtime skill-catalog renderer. */
-    public StepExecutionNode(ChatModel chatModel, AgentToolSet toolSet,
-                             ToolExecutionExecutor executor,
-                             PlanningService planningService,
-                             ChatStreamTracker streamTracker,
-                             String reasoningEffort, NodeStreamingChatHelper streamingHelper,
-                             ConversationWindowManager conversationWindowManager,
-                             SkillCatalogRenderer skillCatalogRenderer) {
-        this(chatModel, toolSet, executor, planningService, streamTracker,
-                reasoningEffort, streamingHelper, conversationWindowManager,
-                skillCatalogRenderer, STEP_WALL_CLOCK_TIMEOUT_MS);
+    public StepExecutionNode(
+            ChatModel chatModel,
+            AgentToolSet toolSet,
+            ToolExecutionExecutor executor,
+            PlanningService planningService,
+            ChatStreamTracker streamTracker,
+            String reasoningEffort,
+            NodeStreamingChatHelper streamingHelper,
+            ConversationWindowManager conversationWindowManager,
+            SkillCatalogRenderer skillCatalogRenderer) {
+        this(
+                chatModel,
+                toolSet,
+                executor,
+                planningService,
+                streamTracker,
+                reasoningEffort,
+                streamingHelper,
+                conversationWindowManager,
+                skillCatalogRenderer,
+                STEP_WALL_CLOCK_TIMEOUT_MS);
     }
 
     /** Test-friendly overload — production callers use the default timeout. */
-    StepExecutionNode(ChatModel chatModel, AgentToolSet toolSet,
-                      ToolExecutionExecutor executor,
-                      PlanningService planningService,
-                      ChatStreamTracker streamTracker,
-                      String reasoningEffort, NodeStreamingChatHelper streamingHelper,
-                      ConversationWindowManager conversationWindowManager,
-                      long stepWallClockTimeoutMs) {
-        this(chatModel, toolSet, executor, planningService, streamTracker,
-                reasoningEffort, streamingHelper, conversationWindowManager,
-                null, stepWallClockTimeoutMs);
+    StepExecutionNode(
+            ChatModel chatModel,
+            AgentToolSet toolSet,
+            ToolExecutionExecutor executor,
+            PlanningService planningService,
+            ChatStreamTracker streamTracker,
+            String reasoningEffort,
+            NodeStreamingChatHelper streamingHelper,
+            ConversationWindowManager conversationWindowManager,
+            long stepWallClockTimeoutMs) {
+        this(
+                chatModel,
+                toolSet,
+                executor,
+                planningService,
+                streamTracker,
+                reasoningEffort,
+                streamingHelper,
+                conversationWindowManager,
+                null,
+                stepWallClockTimeoutMs);
     }
 
-    StepExecutionNode(ChatModel chatModel, AgentToolSet toolSet,
-                      ToolExecutionExecutor executor,
-                      PlanningService planningService,
-                      ChatStreamTracker streamTracker,
-                      String reasoningEffort, NodeStreamingChatHelper streamingHelper,
-                      ConversationWindowManager conversationWindowManager,
-                      SkillCatalogRenderer skillCatalogRenderer,
-                      long stepWallClockTimeoutMs) {
+    StepExecutionNode(
+            ChatModel chatModel,
+            AgentToolSet toolSet,
+            ToolExecutionExecutor executor,
+            PlanningService planningService,
+            ChatStreamTracker streamTracker,
+            String reasoningEffort,
+            NodeStreamingChatHelper streamingHelper,
+            ConversationWindowManager conversationWindowManager,
+            SkillCatalogRenderer skillCatalogRenderer,
+            long stepWallClockTimeoutMs) {
         this.chatModel = chatModel;
         this.toolSet = toolSet;
         this.executor = executor;
@@ -200,7 +229,10 @@ public class StepExecutionNode implements NodeAction {
         Set<String> loadedSkills = new LinkedHashSet<>(accessor.loadedSkills());
 
         if (stepIndex >= steps.size()) {
-            log.warn("[StepExecution] stepIndex {} >= steps.size() {}, skipping", stepIndex, steps.size());
+            log.warn(
+                    "[StepExecution] stepIndex {} >= steps.size() {}, skipping",
+                    stepIndex,
+                    steps.size());
             return PlanStateAccessor.output()
                     .currentStepResult("步骤索引越界")
                     .completedResults(formatStepResult(stepIndex, "步骤索引越界"))
@@ -218,7 +250,8 @@ public class StepExecutionNode implements NodeAction {
         // "plan_step" so consumers can distinguish it from ReAct's
         // "react_step" / "first_turn" markers when both stream into the
         // same SSE feed.
-        boolean iterationEventsOn = streamTracker == null || streamTracker.isIterationEventsEnabled();
+        boolean iterationEventsOn =
+                streamTracker == null || streamTracker.isIterationEventsEnabled();
 
         // Per-step delegation: when this step is assigned to a different
         // specialist agent, run it on that agent (as an isolated child) and use
@@ -226,23 +259,40 @@ public class StepExecutionNode implements NodeAction {
         // parent agent's tools. assignedAgentId comes from the DB so it survives
         // replay / approval-resume.
         Long assignedAgentId = planningService.getStepAssignedAgent(planId, stepIndex);
-        if (delegateAgentTool != null && assignedAgentId != null
+        if (delegateAgentTool != null
+                && assignedAgentId != null
                 && !assignedAgentId.equals(parseLongOrNull(agentId))) {
-            return executeDelegatedStep(accessor, stepIndex, step, planId, assignedAgentId,
-                    conversationId, chatOrigin, events, iterationEventsOn);
+            return executeDelegatedStep(
+                    accessor,
+                    stepIndex,
+                    step,
+                    planId,
+                    assignedAgentId,
+                    conversationId,
+                    chatOrigin,
+                    events,
+                    iterationEventsOn);
         }
 
         if (iterationEventsOn) {
             events.add(GraphEventPublisher.iterationStart(stepIndex, "plan_step", "parent", null));
         }
         events.add(GraphEventPublisher.stepStarted(stepIndex, step));
-        events.add(GraphEventPublisher.phase("executing", Map.of("stepIndex", stepIndex, "stepTitle", step)));
+        events.add(
+                GraphEventPublisher.phase(
+                        "executing", Map.of("stepIndex", stepIndex, "stepTitle", step)));
 
         planningService.updateSubPlanStatus(planId, stepIndex, "running");
 
         // 构建消息列表
-        List<Message> messages = buildStepMessages(accessor, step, systemPrompt, workspaceBasePath,
-                runtimeModelName, runtimeProviderId);
+        List<Message> messages =
+                buildStepMessages(
+                        accessor,
+                        step,
+                        systemPrompt,
+                        workspaceBasePath,
+                        runtimeModelName,
+                        runtimeProviderId);
 
         // 显式工具执行循环
         String finalResult = null;
@@ -255,6 +305,7 @@ public class StepExecutionNode implements NodeAction {
         int stepCacheReadTokens = 0;
         int stepCacheWriteTokens = 0;
         int stepReasoningTokens = 0;
+        NodeStreamingChatHelper.RuntimeIdentity stepResponseIdentity = null;
 
         // RFC-052: any returnDirect tool that fires inside this step must
         // short-circuit the entire plan (not just this step). We accumulate
@@ -279,9 +330,13 @@ public class StepExecutionNode implements NodeAction {
             while (toolCallCount < MAX_TOOL_CALLS_PER_STEP) {
                 long elapsedMs = System.currentTimeMillis() - stepStartedAtMs;
                 if (elapsedMs > stepWallClockTimeoutMs) {
-                    log.warn("[StepExecution] Step {} exceeded wall-clock budget " +
-                            "({} ms > {} ms) after {} tool round(s); aborting step",
-                            stepIndex, elapsedMs, stepWallClockTimeoutMs, toolCallCount);
+                    log.warn(
+                            "[StepExecution] Step {} exceeded wall-clock budget "
+                                    + "({} ms > {} ms) after {} tool round(s); aborting step",
+                            stepIndex,
+                            elapsedMs,
+                            stepWallClockTimeoutMs,
+                            toolCallCount);
                     wallClockExceeded = true;
                     break;
                 }
@@ -291,9 +346,8 @@ public class StepExecutionNode implements NodeAction {
                 // null (e.g. DeepSeek-Reasoner whose thinking is model-inherent,
                 // or Kimi-K2.5) would bypass the relay and multi-round tool-calls
                 // would 400 again.
-                OpenAiChatOptions oaiOpts = OpenAiChatOptions.builder()
-                        .toolCallbacks(toolSet.callbacks())
-                        .build();
+                OpenAiChatOptions oaiOpts =
+                        OpenAiChatOptions.builder().toolCallbacks(toolSet.callbacks()).build();
                 if (StringUtils.hasText(reasoningEffort)) {
                     oaiOpts.setReasoningEffort(reasoningEffort);
                 }
@@ -304,29 +358,41 @@ public class StepExecutionNode implements NodeAction {
                     // Pass conversationId + workspaceBasePath so oversized
                     // older tool results can be spilled to disk instead of
                     // being rewritten into a lossy single-line summary.
-                    messages = conversationWindowManager.pruneOldToolResultsForModelInput(
-                            messages, conversationId, workspaceBasePath);
+                    messages =
+                            conversationWindowManager.pruneOldToolResultsForModelInput(
+                                    messages, conversationId, workspaceBasePath);
                 }
 
-                NodeStreamingChatHelper.StreamResult result = streamingHelper.streamCall(
-                        chatModel, new Prompt(messages, options), conversationId,
-                        "step_execution[" + stepIndex + "]");
+                NodeStreamingChatHelper.StreamResult result =
+                        streamingHelper.streamCall(
+                                chatModel,
+                                new Prompt(messages, options),
+                                conversationId,
+                                "step_execution[" + stepIndex + "]");
 
                 // PTL 处理：压缩后重试
                 if (result.isPromptTooLong() && conversationWindowManager != null) {
-                    log.warn("[StepExecution] Prompt too long at step {}, attempting compaction", stepIndex);
-                    List<Message> compactedMessages = conversationWindowManager.compactForRetry(
-                            messages.subList(1, messages.size()));
+                    log.warn(
+                            "[StepExecution] Prompt too long at step {}, attempting compaction",
+                            stepIndex);
+                    List<Message> compactedMessages =
+                            conversationWindowManager.compactForRetry(
+                                    messages.subList(1, messages.size()));
                     if (compactedMessages != null) {
                         List<Message> retryMessages = new ArrayList<>();
                         retryMessages.add(messages.get(0));
                         retryMessages.addAll(compactedMessages);
-                        result = streamingHelper.streamCall(
-                                chatModel, new Prompt(retryMessages, options), conversationId,
-                                "step_execution_compact_retry[" + stepIndex + "]");
+                        result =
+                                streamingHelper.streamCall(
+                                        chatModel,
+                                        new Prompt(retryMessages, options),
+                                        conversationId,
+                                        "step_execution_compact_retry[" + stepIndex + "]");
                     }
                 }
 
+                if (result.runtimeIdentity() != null)
+                    stepResponseIdentity = result.runtimeIdentity();
                 stepPromptTokens += result.promptTokens();
                 stepCompletionTokens += result.completionTokens();
                 stepCacheReadTokens += result.cacheReadTokens();
@@ -349,27 +415,45 @@ public class StepExecutionNode implements NodeAction {
                 List<AssistantMessage.ToolCall> allToolCalls = result.toolCalls();
 
                 // 从 state 读取预批准的工具调用（replay 注入）
-                String preApprovedPayload = state.value(MateClawStateKeys.PRE_APPROVED_TOOL_CALL, "");
+                String preApprovedPayload =
+                        state.value(MateClawStateKeys.PRE_APPROVED_TOOL_CALL, "");
 
                 if (!preApprovedPayload.isEmpty()) {
                     // Replay 路径：处理预批准工具
                     for (AssistantMessage.ToolCall toolCall : allToolCalls) {
                         if (isPreApprovedToolCall(toolCall.name(), preApprovedPayload)) {
-                            String storedArguments = extractArgumentsFromPayload(preApprovedPayload);
-                            events.add(GraphEventPublisher.toolStart(toolCall.name(), toolCall.arguments()));
+                            String storedArguments =
+                                    extractArgumentsFromPayload(preApprovedPayload);
+                            events.add(
+                                    GraphEventPublisher.toolStart(
+                                            toolCall.name(), toolCall.arguments()));
                             // RFC-052: pass the directOutputs collector so that an
                             // approved direct tool's full content is captured here
                             // (instead of leaking into the next LLM round).
-                            ToolResponseMessage.ToolResponse response = executor.executePreApproved(
-                                    toolCall, storedArguments, events, conversationId, workspaceBasePath,
-                                    stepDirectOutputs, agentId, chatOrigin);
+                            ToolResponseMessage.ToolResponse response =
+                                    executor.executePreApproved(
+                                            toolCall,
+                                            storedArguments,
+                                            events,
+                                            conversationId,
+                                            workspaceBasePath,
+                                            stepDirectOutputs,
+                                            agentId,
+                                            chatOrigin);
                             toolResponses.add(response);
                             preApprovedPayload = ""; // 只消费一次
                         } else {
                             // 非预批准工具走正常执行器
-                            ToolExecutionExecutor.ToolExecutionResult execResult = executor.execute(
-                                    List.of(toolCall), conversationId, agentId, false, "", workspaceBasePath,
-                                    chatOrigin, loadedSkills);
+                            ToolExecutionExecutor.ToolExecutionResult execResult =
+                                    executor.execute(
+                                            List.of(toolCall),
+                                            conversationId,
+                                            agentId,
+                                            false,
+                                            "",
+                                            workspaceBasePath,
+                                            chatOrigin,
+                                            loadedSkills);
                             toolResponses.addAll(execResult.responses());
                             events.addAll(execResult.events());
                             if (execResult.hasDirectOutputs()) {
@@ -385,9 +469,16 @@ public class StepExecutionNode implements NodeAction {
                 } else {
                     // 正常路径：委托 ToolExecutionExecutor（支持并发执行 + 审批 barrier）
                     if (!allToolCalls.isEmpty()) {
-                        ToolExecutionExecutor.ToolExecutionResult execResult = executor.execute(
-                                allToolCalls, conversationId, agentId, false, "", workspaceBasePath,
-                                chatOrigin, loadedSkills);
+                        ToolExecutionExecutor.ToolExecutionResult execResult =
+                                executor.execute(
+                                        allToolCalls,
+                                        conversationId,
+                                        agentId,
+                                        false,
+                                        "",
+                                        workspaceBasePath,
+                                        chatOrigin,
+                                        loadedSkills);
                         toolResponses.addAll(execResult.responses());
                         events.addAll(execResult.events());
                         if (execResult.hasDirectOutputs()) {
@@ -395,21 +486,24 @@ public class StepExecutionNode implements NodeAction {
                         }
                         if (execResult.awaitingApproval()) {
                             approvalTriggered = true;
-                            approvalToolName = execResult.barrierToolName() != null
-                                    ? execResult.barrierToolName() : "unknown";
+                            approvalToolName =
+                                    execResult.barrierToolName() != null
+                                            ? execResult.barrierToolName()
+                                            : "unknown";
                         }
                     }
                 }
 
                 Set<String> requestedSkills = ActionNode.extractLoadedSkillNames(allToolCalls);
                 if (!requestedSkills.isEmpty() && loadedSkills.addAll(requestedSkills)) {
-                    log.debug("[StepExecution] pinned loaded skills in plan state: {}", requestedSkills);
+                    log.debug(
+                            "[StepExecution] pinned loaded skills in plan state: {}",
+                            requestedSkills);
                 }
 
                 // 将工具响应追加到消息
-                ToolResponseMessage toolResponseMessage = ToolResponseMessage.builder()
-                        .responses(toolResponses)
-                        .build();
+                ToolResponseMessage toolResponseMessage =
+                        ToolResponseMessage.builder().responses(toolResponses).build();
                 messages.add(toolResponseMessage);
                 toolCallCount++;
 
@@ -430,15 +524,20 @@ public class StepExecutionNode implements NodeAction {
                     }
                 }
                 for (ToolResponseMessage.ToolResponse tr : toolResponses) {
-                    var nudge = progressTracker.record(
-                            tr.name(), idToArgs.getOrDefault(tr.id(), ""), tr.responseData());
+                    var nudge =
+                            progressTracker.record(
+                                    tr.name(),
+                                    idToArgs.getOrDefault(tr.id(), ""),
+                                    tr.responseData());
                     if (nudge.isPresent()) {
                         messages.add(new SystemMessage(nudge.get()));
                     }
                 }
                 if (progressTracker.isStuck()) {
-                    log.warn("[StepExecution] Step {} stalled ({}); stopping inner loop to re-plan",
-                            stepIndex, progressTracker.haltReason());
+                    log.warn(
+                            "[StepExecution] Step {} stalled ({}); stopping inner loop to re-plan",
+                            stepIndex,
+                            progressTracker.haltReason());
                     break;
                 }
 
@@ -446,9 +545,11 @@ public class StepExecutionNode implements NodeAction {
                 // step ends the plan immediately; the dispatcher routes via
                 // currentPhase=plan_aborted so no further LLM call happens.
                 if (!stepDirectOutputs.isEmpty()) {
-                    log.info("[StepExecution] RETURN_DIRECT — step {} produced {} direct " +
-                            "tool output(s); aborting plan execution",
-                            stepIndex, stepDirectOutputs.size());
+                    log.info(
+                            "[StepExecution] RETURN_DIRECT — step {} produced {} direct "
+                                    + "tool output(s); aborting plan execution",
+                            stepIndex,
+                            stepDirectOutputs.size());
                     break;
                 }
             }
@@ -456,16 +557,23 @@ public class StepExecutionNode implements NodeAction {
             // 处理审批暂停
             if (approvalTriggered) {
                 planningService.updateSubPlanStatus(planId, stepIndex, "awaiting_approval");
-                String awaitingResult = "[APPROVAL_PENDING] " + approvalToolName + " awaiting user decision";
+                String awaitingResult =
+                        "[APPROVAL_PENDING] " + approvalToolName + " awaiting user decision";
                 return PlanStateAccessor.output()
                         .currentStepResult(awaitingResult)
-                        .currentStepIndex(stepIndex)  // 不递增！下次重放从同一步开始
+                        .currentStepIndex(stepIndex) // 不递增！下次重放从同一步开始
                         .currentPhase("awaiting_approval")
                         .contentStreamed(true)
                         .thinkingStreamed(!stepThinking.isEmpty())
                         .loadedSkills(Set.copyOf(loadedSkills))
-                        .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                                stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                        .runtimeIdentity(stepResponseIdentity)
+                        .addStepUsage(
+                                state,
+                                stepPromptTokens,
+                                stepCompletionTokens,
+                                stepCacheReadTokens,
+                                stepCacheWriteTokens,
+                                stepReasoningTokens)
                         .events(events)
                         .build();
             }
@@ -484,25 +592,37 @@ public class StepExecutionNode implements NodeAction {
             if (!stepDirectOutputs.isEmpty()) {
                 String assembled = assembleDirectAnswerText(stepDirectOutputs);
                 planningService.updateSubPlanResult(planId, stepIndex, assembled);
-                planningService.completePlan(planId,
-                        "Plan completed via returnDirect tool: " +
-                        stepDirectOutputs.get(0).toolName());
+                planningService.completePlan(
+                        planId,
+                        "Plan completed via returnDirect tool: "
+                                + stepDirectOutputs.get(0).toolName());
                 events.add(GraphEventPublisher.stepCompleted(stepIndex, assembled));
                 if (iterationEventsOn) {
-                    events.add(GraphEventPublisher.iterationEnd(stepIndex, "parent", null,
-                            assembled != null ? assembled.length() : 0, 0));
+                    events.add(
+                            GraphEventPublisher.iterationEnd(
+                                    stepIndex,
+                                    "parent",
+                                    null,
+                                    assembled != null ? assembled.length() : 0,
+                                    0));
                 }
                 return PlanStateAccessor.output()
                         .currentStepResult(assembled)
-                        .currentStepIndex(steps.size())  // 越界 → dispatcher 收束
+                        .currentStepIndex(steps.size()) // 越界 → dispatcher 收束
                         .currentPhase("plan_aborted")
                         .finalSummary(assembled)
-                        .contentStreamed(false)  // 由 StateGraphPlanExecuteAgent 经 finalSummary 推送
+                        .contentStreamed(false) // 由 StateGraphPlanExecuteAgent 经 finalSummary 推送
                         .put(MateClawStateKeys.RETURN_DIRECT_TRIGGERED, true)
                         .put(MateClawStateKeys.DIRECT_TOOL_OUTPUTS, List.copyOf(stepDirectOutputs))
                         .loadedSkills(Set.copyOf(loadedSkills))
-                        .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                                stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                        .runtimeIdentity(stepResponseIdentity)
+                        .addStepUsage(
+                                state,
+                                stepPromptTokens,
+                                stepCompletionTokens,
+                                stepCacheReadTokens,
+                                stepCacheWriteTokens,
+                                stepReasoningTokens)
                         .events(events)
                         .build();
             }
@@ -515,30 +635,41 @@ public class StepExecutionNode implements NodeAction {
             // junk. Shares PLAN_REPLAN_COUNT with the exception path; once the
             // budget is spent we fall through to the legacy "complete with a
             // failure note" path below so the plan still terminates.
-            boolean noUsableResult = progressTracker.isStuck()
-                    || finalResult == null || finalResult.isBlank();
+            boolean noUsableResult =
+                    progressTracker.isStuck() || finalResult == null || finalResult.isBlank();
             int noProgressReplanCount = accessor.replanCount();
             if (noUsableResult && noProgressReplanCount < MAX_REPLANS_PER_RUN) {
-                String reason = progressTracker.isStuck()
-                        ? "本步骤陷入停滞（" + progressTracker.haltReason() + "），未取得有效结果"
-                        : wallClockExceeded
-                            ? "本步骤超过最大耗时限制，未取得有效结果"
-                            : finalResult == null
-                                ? "本步骤超过最大工具调用次数，未取得有效结果"
-                                : "本步骤未产出有效结果";
+                String reason =
+                        progressTracker.isStuck()
+                                ? "本步骤陷入停滞（" + progressTracker.haltReason() + "），未取得有效结果"
+                                : wallClockExceeded
+                                        ? "本步骤超过最大耗时限制，未取得有效结果"
+                                        : finalResult == null
+                                                ? "本步骤超过最大工具调用次数，未取得有效结果"
+                                                : "本步骤未产出有效结果";
                 planningService.updateSubPlanFailure(planId, stepIndex, reason);
                 planningService.markPlanFailed(planId, "步骤" + (stepIndex + 1) + "：" + reason);
                 events.add(GraphEventPublisher.stepCompleted(stepIndex, reason));
                 if (iterationEventsOn) {
-                    events.add(GraphEventPublisher.iterationEnd(stepIndex, "parent", null, reason.length(), 0));
+                    events.add(
+                            GraphEventPublisher.iterationEnd(
+                                    stepIndex, "parent", null, reason.length(), 0));
                 }
-                events.add(new GraphEventPublisher.GraphEvent("plan_replan", Map.of(
-                        "failedStepIndex", stepIndex,
-                        "attempt", noProgressReplanCount + 1,
-                        "maxReplans", MAX_REPLANS_PER_RUN,
-                        "reason", reason), System.currentTimeMillis()));
-                log.warn("[StepExecution] Step {} produced no usable result ({}); re-planning (attempt {}/{})",
-                        stepIndex + 1, reason, noProgressReplanCount + 1, MAX_REPLANS_PER_RUN);
+                events.add(
+                        new GraphEventPublisher.GraphEvent(
+                                "plan_replan",
+                                Map.of(
+                                        "failedStepIndex", stepIndex,
+                                        "attempt", noProgressReplanCount + 1,
+                                        "maxReplans", MAX_REPLANS_PER_RUN,
+                                        "reason", reason),
+                                System.currentTimeMillis()));
+                log.warn(
+                        "[StepExecution] Step {} produced no usable result ({}); re-planning (attempt {}/{})",
+                        stepIndex + 1,
+                        reason,
+                        noProgressReplanCount + 1,
+                        MAX_REPLANS_PER_RUN);
                 return PlanStateAccessor.output()
                         .workingContext(buildReplanContext(accessor, stepIndex, reason))
                         .currentPhase("plan_replan")
@@ -552,16 +683,21 @@ public class StepExecutionNode implements NodeAction {
                         .currentStepResult("")
                         .contentStreamed(false)
                         .loadedSkills(Set.copyOf(loadedSkills))
-                        .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                                stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                        .runtimeIdentity(stepResponseIdentity)
+                        .addStepUsage(
+                                state,
+                                stepPromptTokens,
+                                stepCompletionTokens,
+                                stepCacheReadTokens,
+                                stepCacheWriteTokens,
+                                stepReasoningTokens)
                         .events(events)
                         .build();
             }
 
             if (finalResult == null) {
                 if (wallClockExceeded) {
-                    finalResult = "步骤执行超过最大耗时限制（"
-                            + (stepWallClockTimeoutMs / 1000) + "秒），已中止本步骤";
+                    finalResult = "步骤执行超过最大耗时限制（" + (stepWallClockTimeoutMs / 1000) + "秒），已中止本步骤";
                 } else {
                     finalResult = "步骤执行超过最大工具调用次数限制（" + MAX_TOOL_CALLS_PER_STEP + "次）";
                     log.warn("[StepExecution] Step {} exceeded max tool call limit", stepIndex);
@@ -575,8 +711,13 @@ public class StepExecutionNode implements NodeAction {
             planningService.markPlanFailed(planId, "步骤" + (stepIndex + 1) + " 执行失败：" + shortError);
             events.add(GraphEventPublisher.stepCompleted(stepIndex, shortError));
             if (iterationEventsOn) {
-                events.add(GraphEventPublisher.iterationEnd(stepIndex, "parent", null,
-                        shortError != null ? shortError.length() : 0, 0));
+                events.add(
+                        GraphEventPublisher.iterationEnd(
+                                stepIndex,
+                                "parent",
+                                null,
+                                shortError != null ? shortError.length() : 0,
+                                0));
             }
 
             // Step-failure recovery: rather than aborting the whole plan on a
@@ -588,14 +729,24 @@ public class StepExecutionNode implements NodeAction {
             int replanCount = accessor.replanCount();
             if (replanCount < MAX_REPLANS_PER_RUN) {
                 String replanContext = buildReplanContext(accessor, stepIndex, shortError);
-                events.add(new GraphEventPublisher.GraphEvent("plan_replan", Map.of(
-                        "failedStepIndex", stepIndex,
-                        "attempt", replanCount + 1,
-                        "maxReplans", MAX_REPLANS_PER_RUN,
-                        "error", shortError == null ? "" : shortError),
-                        System.currentTimeMillis()));
-                log.warn("[StepExecution] Step {} failed; re-planning remaining work (attempt {}/{})",
-                        stepIndex + 1, replanCount + 1, MAX_REPLANS_PER_RUN);
+                events.add(
+                        new GraphEventPublisher.GraphEvent(
+                                "plan_replan",
+                                Map.of(
+                                        "failedStepIndex",
+                                        stepIndex,
+                                        "attempt",
+                                        replanCount + 1,
+                                        "maxReplans",
+                                        MAX_REPLANS_PER_RUN,
+                                        "error",
+                                        shortError == null ? "" : shortError),
+                                System.currentTimeMillis()));
+                log.warn(
+                        "[StepExecution] Step {} failed; re-planning remaining work (attempt {}/{})",
+                        stepIndex + 1,
+                        replanCount + 1,
+                        MAX_REPLANS_PER_RUN);
                 return PlanStateAccessor.output()
                         .workingContext(replanContext)
                         .currentPhase("plan_replan")
@@ -611,14 +762,22 @@ public class StepExecutionNode implements NodeAction {
                         .currentStepResult("")
                         .contentStreamed(false)
                         .loadedSkills(Set.copyOf(loadedSkills))
-                        .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                                stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                        .runtimeIdentity(stepResponseIdentity)
+                        .addStepUsage(
+                                state,
+                                stepPromptTokens,
+                                stepCompletionTokens,
+                                stepCacheReadTokens,
+                                stepCacheWriteTokens,
+                                stepReasoningTokens)
                         .events(events)
                         .build();
             }
 
-            log.warn("[StepExecution] Step {} failed and re-plan budget exhausted ({}); aborting plan",
-                    stepIndex + 1, MAX_REPLANS_PER_RUN);
+            log.warn(
+                    "[StepExecution] Step {} failed and re-plan budget exhausted ({}); aborting plan",
+                    stepIndex + 1,
+                    MAX_REPLANS_PER_RUN);
             return PlanStateAccessor.output()
                     .currentStepResult(shortError)
                     .currentPhase("plan_aborted")
@@ -628,8 +787,14 @@ public class StepExecutionNode implements NodeAction {
                     .finalSummary(shortError)
                     .contentStreamed(false)
                     .loadedSkills(Set.copyOf(loadedSkills))
-                    .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                            stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                    .runtimeIdentity(stepResponseIdentity)
+                    .addStepUsage(
+                            state,
+                            stepPromptTokens,
+                            stepCompletionTokens,
+                            stepCacheReadTokens,
+                            stepCacheWriteTokens,
+                            stepReasoningTokens)
                     .events(events)
                     .build();
         }
@@ -637,13 +802,19 @@ public class StepExecutionNode implements NodeAction {
         planningService.updateSubPlanResult(planId, stepIndex, finalResult);
         events.add(GraphEventPublisher.stepCompleted(stepIndex, finalResult));
         if (iterationEventsOn) {
-            events.add(GraphEventPublisher.iterationEnd(stepIndex, "parent", null,
-                    finalResult != null ? finalResult.length() : 0,
-                    stepThinking != null ? stepThinking.length() : 0));
+            events.add(
+                    GraphEventPublisher.iterationEnd(
+                            stepIndex,
+                            "parent",
+                            null,
+                            finalResult != null ? finalResult.length() : 0,
+                            stepThinking != null ? stepThinking.length() : 0));
         }
 
-        log.info("[StepExecution] Step {}/{} completed: {}",
-                stepIndex + 1, steps.size(),
+        log.info(
+                "[StepExecution] Step {}/{} completed: {}",
+                stepIndex + 1,
+                steps.size(),
                 finalResult.length() > 100 ? finalResult.substring(0, 100) + "..." : finalResult);
 
         // RFC-008 P4.2: incremental working-context update.
@@ -658,10 +829,11 @@ public class StepExecutionNode implements NodeAction {
         // captured.
         String prevWorkingContext = accessor.workingContext();
         String formattedNewStep = formatStepResult(stepIndex, finalResult);
-        String updatedWorkingContext = prevWorkingContext.isEmpty()
-                ? rebuildWorkingContext(accessor,
-                    appendOne(accessor.completedResults(), formattedNewStep))
-                : appendStepIncremental(prevWorkingContext, formattedNewStep);
+        String updatedWorkingContext =
+                prevWorkingContext.isEmpty()
+                        ? rebuildWorkingContext(
+                                accessor, appendOne(accessor.completedResults(), formattedNewStep))
+                        : appendStepIncremental(prevWorkingContext, formattedNewStep);
 
         return PlanStateAccessor.output()
                 .currentStepResult(finalResult)
@@ -673,32 +845,50 @@ public class StepExecutionNode implements NodeAction {
                 .contentStreamed(true)
                 .thinkingStreamed(!stepThinking.isEmpty())
                 .loadedSkills(Set.copyOf(loadedSkills))
-                .addStepUsage(state, stepPromptTokens, stepCompletionTokens,
-                        stepCacheReadTokens, stepCacheWriteTokens, stepReasoningTokens)
+                .runtimeIdentity(stepResponseIdentity)
+                .addStepUsage(
+                        state,
+                        stepPromptTokens,
+                        stepCompletionTokens,
+                        stepCacheReadTokens,
+                        stepCacheWriteTokens,
+                        stepReasoningTokens)
                 .events(events)
                 .build();
     }
 
     /**
-     * Execute a step by delegating it to its assigned specialist agent. The
-     * delegated agent runs the step description as a self-contained goal and its
-     * reply becomes the step result. Mirrors the success/failure bookkeeping of
-     * the local execution path (sub-plan status, completed-results accumulation,
-     * incremental working-context update) so the rest of the plan graph is
-     * unaffected by where the step ran.
+     * Execute a step by delegating it to its assigned specialist agent. The delegated agent runs
+     * the step description as a self-contained goal and its reply becomes the step result. Mirrors
+     * the success/failure bookkeeping of the local execution path (sub-plan status,
+     * completed-results accumulation, incremental working-context update) so the rest of the plan
+     * graph is unaffected by where the step ran.
      */
     private Map<String, Object> executeDelegatedStep(
-            PlanStateAccessor accessor, int stepIndex, String step, Long planId,
-            Long assignedAgentId, String conversationId, ChatOrigin chatOrigin,
-            List<GraphEventPublisher.GraphEvent> events, boolean iterationEventsOn) {
+            PlanStateAccessor accessor,
+            int stepIndex,
+            String step,
+            Long planId,
+            Long assignedAgentId,
+            String conversationId,
+            ChatOrigin chatOrigin,
+            List<GraphEventPublisher.GraphEvent> events,
+            boolean iterationEventsOn) {
 
         if (iterationEventsOn) {
             events.add(GraphEventPublisher.iterationStart(stepIndex, "plan_step", "parent", null));
         }
         events.add(GraphEventPublisher.stepStarted(stepIndex, step));
-        events.add(GraphEventPublisher.phase("executing", Map.of(
-                "stepIndex", stepIndex, "stepTitle", step,
-                "delegatedAgentId", String.valueOf(assignedAgentId))));
+        events.add(
+                GraphEventPublisher.phase(
+                        "executing",
+                        Map.of(
+                                "stepIndex",
+                                stepIndex,
+                                "stepTitle",
+                                step,
+                                "delegatedAgentId",
+                                String.valueOf(assignedAgentId))));
         planningService.updateSubPlanStatus(planId, stepIndex, "running");
 
         log.info("[StepExecution] Delegating step {} to agent {}", stepIndex + 1, assignedAgentId);
@@ -709,7 +899,8 @@ public class StepExecutionNode implements NodeAction {
         // plan-execute path carries no conversationId, so the delegation can't
         // derive the parent on its own — we provide it here.
         boolean seeded = false;
-        if (conversationId != null && !conversationId.isBlank()
+        if (conversationId != null
+                && !conversationId.isBlank()
                 && DelegationContext.parentConversationId() == null
                 && ToolExecutionContext.conversationId() == null) {
             DelegationContext.enter(conversationId, Set.of(), conversationId, null, 0);
@@ -718,7 +909,9 @@ public class StepExecutionNode implements NodeAction {
         ChildResult childResult = null;
         String delegateError = null;
         try {
-            childResult = delegateAgentTool.delegateByAgentIdStructured(assignedAgentId, step, chatOrigin);
+            childResult =
+                    delegateAgentTool.delegateByAgentIdStructured(
+                            assignedAgentId, step, chatOrigin);
         } catch (Exception e) {
             log.error("[StepExecution] Delegated step {} threw: {}", stepIndex, e.getMessage(), e);
             delegateError = e.getMessage();
@@ -732,12 +925,17 @@ public class StepExecutionNode implements NodeAction {
         // prefix out of the reply text: a successful child with non-empty content
         // is the only "ok" case; blank / error / missing all count as failure.
         boolean ok = childResult != null && childResult.success() && !childResult.isBlank();
-        String finalResult = ok
-                ? (childResult.result() != null ? childResult.result() : "")
-                : "[错误] 委派执行失败：" + (delegateError != null ? delegateError
-                    : childResult != null && childResult.error() != null ? childResult.error()
-                    : childResult != null && childResult.isBlank() ? "子 Agent 返回内容为空"
-                    : "未知错误");
+        String finalResult =
+                ok
+                        ? (childResult.result() != null ? childResult.result() : "")
+                        : "[错误] 委派执行失败："
+                                + (delegateError != null
+                                        ? delegateError
+                                        : childResult != null && childResult.error() != null
+                                                ? childResult.error()
+                                                : childResult != null && childResult.isBlank()
+                                                        ? "子 Agent 返回内容为空"
+                                                        : "未知错误");
         boolean failed = !ok;
         if (failed) {
             planningService.updateSubPlanFailure(planId, stepIndex, finalResult);
@@ -747,16 +945,20 @@ public class StepExecutionNode implements NodeAction {
 
         events.add(GraphEventPublisher.stepCompleted(stepIndex, finalResult));
         if (iterationEventsOn) {
-            events.add(GraphEventPublisher.iterationEnd(stepIndex, "parent", null, finalResult.length(), 0));
+            events.add(
+                    GraphEventPublisher.iterationEnd(
+                            stepIndex, "parent", null, finalResult.length(), 0));
         }
 
         // Keep the rolling working-context in sync exactly like the local path
         // so later steps see this delegated step's result.
         String prevWorkingContext = accessor.workingContext();
         String formattedNewStep = formatStepResult(stepIndex, finalResult);
-        String updatedWorkingContext = prevWorkingContext.isEmpty()
-                ? rebuildWorkingContext(accessor, appendOne(accessor.completedResults(), formattedNewStep))
-                : appendStepIncremental(prevWorkingContext, formattedNewStep);
+        String updatedWorkingContext =
+                prevWorkingContext.isEmpty()
+                        ? rebuildWorkingContext(
+                                accessor, appendOne(accessor.completedResults(), formattedNewStep))
+                        : appendStepIncremental(prevWorkingContext, formattedNewStep);
 
         return PlanStateAccessor.output()
                 .currentStepResult(finalResult)
@@ -782,10 +984,9 @@ public class StepExecutionNode implements NodeAction {
     }
 
     /**
-     * RFC-052: assemble the final answer text from direct tool outputs in this
-     * step. Mirrors {@code FinalAnswerNode#assembleDirectAnswer} so the user
-     * sees the same shape regardless of which graph (ReAct / Plan-Execute)
-     * produced the answer.
+     * RFC-052: assemble the final answer text from direct tool outputs in this step. Mirrors {@code
+     * FinalAnswerNode#assembleDirectAnswer} so the user sees the same shape regardless of which
+     * graph (ReAct / Plan-Execute) produced the answer.
      */
     private static String assembleDirectAnswerText(List<DirectToolOutput> outputs) {
         if (outputs.size() == 1) {
@@ -801,12 +1002,19 @@ public class StepExecutionNode implements NodeAction {
         return sb.toString();
     }
 
-    private List<Message> buildStepMessages(PlanStateAccessor accessor, String step, String systemPrompt,
-                                            String workspaceBasePath, String runtimeModelName, String runtimeProviderId) {
+    private List<Message> buildStepMessages(
+            PlanStateAccessor accessor,
+            String step,
+            String systemPrompt,
+            String workspaceBasePath,
+            String runtimeModelName,
+            String runtimeProviderId) {
         List<Message> messages = new ArrayList<>();
 
         // Layer 1: System prompt（增强指令）
-        String enhancedSystemPrompt = systemPrompt + """
+        String enhancedSystemPrompt =
+                systemPrompt
+                        + """
 
                 你是任务执行器，只负责执行"当前步骤"。
 
@@ -830,16 +1038,19 @@ public class StepExecutionNode implements NodeAction {
             }
         }
         // 注入运行时上下文（当前时间 + 工作目录 + 发起者上下文 + 模型身份）
-        messages.add(new UserMessage(
-                RuntimeContextInjector.buildContextMessage(
-                        workspaceBasePath, null, accessor.chatOrigin(), runtimeModelName, runtimeProviderId)));
+        messages.add(
+                new UserMessage(
+                        RuntimeContextInjector.buildContextMessage(
+                                workspaceBasePath,
+                                null,
+                                accessor.chatOrigin(),
+                                runtimeModelName,
+                                runtimeProviderId)));
 
         // Layer 2: Working context（对话历史 + 步骤结果的受控长度摘要）
         String workingContext = accessor.workingContext();
         if (!workingContext.isEmpty()) {
-            messages.add(new UserMessage(
-                    "以下是此前对话上下文和已完成工作的摘要，请参考但不必重复验证：\n\n"
-                            + workingContext));
+            messages.add(new UserMessage("以下是此前对话上下文和已完成工作的摘要，请参考但不必重复验证：\n\n" + workingContext));
         }
 
         // Layer 3: Plan context + current step instruction
@@ -854,7 +1065,13 @@ public class StepExecutionNode implements NodeAction {
         context.append("执行计划（共 ").append(steps.size()).append(" 步）：\n");
         for (int i = 0; i < steps.size(); i++) {
             String status = i < currentIndex ? "✓" : (i == currentIndex ? "→" : "○");
-            context.append("  ").append(status).append(" 步骤").append(i + 1).append("：").append(steps.get(i)).append("\n");
+            context.append("  ")
+                    .append(status)
+                    .append(" 步骤")
+                    .append(i + 1)
+                    .append("：")
+                    .append(steps.get(i))
+                    .append("\n");
         }
         context.append("\n");
 
@@ -862,9 +1079,11 @@ public class StepExecutionNode implements NodeAction {
         if (!completedResults.isEmpty()) {
             context.append("最近完成的步骤结果：\n");
             // 只保留最近 3 条，每条截断至 500 字
-            List<String> recentResults = completedResults.size() > 3
-                    ? completedResults.subList(completedResults.size() - 3, completedResults.size())
-                    : completedResults;
+            List<String> recentResults =
+                    completedResults.size() > 3
+                            ? completedResults.subList(
+                                    completedResults.size() - 3, completedResults.size())
+                            : completedResults;
             for (String result : recentResults) {
                 String summary = result.length() > 500 ? result.substring(0, 500) + "…" : result;
                 context.append(summary).append("\n");
@@ -885,8 +1104,8 @@ public class StepExecutionNode implements NodeAction {
     }
 
     /**
-     * 判断当前工具调用是否与预批准 payload 中的工具名匹配。
-     * payload 格式: {"name":"toolName","arguments":"...","status":"running"}
+     * 判断当前工具调用是否与预批准 payload 中的工具名匹配。 payload 格式:
+     * {"name":"toolName","arguments":"...","status":"running"}
      */
     private boolean isPreApprovedToolCall(String toolName, String preApprovedPayload) {
         if (preApprovedPayload == null || preApprovedPayload.isEmpty()) return false;
@@ -901,34 +1120,40 @@ public class StepExecutionNode implements NodeAction {
     }
 
     /**
-     * Augment the working context with a note about the failed step so the next
-     * PlanGeneration pass re-plans around it. The completed-step results are
-     * already encoded in {@code WORKING_CONTEXT}; this appends only the failure
-     * so the planner can skip what's done, retry differently, or route around
-     * the broken step. The note is an internal LLM prompt (Chinese, matching the
-     * surrounding planning/execution prompts).
+     * Augment the working context with a note about the failed step so the next PlanGeneration pass
+     * re-plans around it. The completed-step results are already encoded in {@code
+     * WORKING_CONTEXT}; this appends only the failure so the planner can skip what's done, retry
+     * differently, or route around the broken step. The note is an internal LLM prompt (Chinese,
+     * matching the surrounding planning/execution prompts).
      */
-    static String buildReplanContext(PlanStateAccessor accessor, int failedStepIndex, String error) {
+    static String buildReplanContext(
+            PlanStateAccessor accessor, int failedStepIndex, String error) {
         List<String> steps = accessor.planSteps();
-        String failedTitle = (failedStepIndex >= 0 && failedStepIndex < steps.size())
-                ? steps.get(failedStepIndex) : ("步骤 " + (failedStepIndex + 1));
+        String failedTitle =
+                (failedStepIndex >= 0 && failedStepIndex < steps.size())
+                        ? steps.get(failedStepIndex)
+                        : ("步骤 " + (failedStepIndex + 1));
         StringBuilder sb = new StringBuilder(accessor.workingContext());
         if (sb.length() > 0) {
             sb.append("\n\n");
         }
-        sb.append("【上一轮计划执行失败】步骤 ").append(failedStepIndex + 1)
-          .append("（").append(failedTitle).append("）执行失败：")
-          .append(error == null ? "未知错误" : error)
-          .append("\n请基于上面已完成的工作，重新规划达成总目标所需的剩余步骤：")
-          .append("绕开或换一种方式完成失败的部分，不要重复已经完成的步骤。");
+        sb.append("【上一轮计划执行失败】步骤 ")
+                .append(failedStepIndex + 1)
+                .append("（")
+                .append(failedTitle)
+                .append("）执行失败：")
+                .append(error == null ? "未知错误" : error)
+                .append("\n请基于上面已完成的工作，重新规划达成总目标所需的剩余步骤：")
+                .append("绕开或换一种方式完成失败的部分，不要重复已经完成的步骤。");
         return sb.toString();
     }
 
     /**
      * 将异常转换为简短的错误摘要，避免将完整异常体（尤其是 429 JSON）写入后续 prompt。
+     *
      * <ul>
-     *   <li>限流错误（429 / rate_limit / overloaded）→ 固定简短提示</li>
-     *   <li>其他错误 → 取前 200 字符</li>
+     *   <li>限流错误（429 / rate_limit / overloaded）→ 固定简短提示
+     *   <li>其他错误 → 取前 200 字符
      * </ul>
      */
     private static String summarizeError(Exception e) {
@@ -937,16 +1162,18 @@ public class StepExecutionNode implements NodeAction {
             msg = e.getClass().getSimpleName();
         }
         String lower = msg.toLowerCase();
-        if (lower.contains("429") || lower.contains("rate limit") || lower.contains("rate_limit")
-                || lower.contains("too many requests") || lower.contains("overloaded")) {
+        if (lower.contains("429")
+                || lower.contains("rate limit")
+                || lower.contains("rate_limit")
+                || lower.contains("too many requests")
+                || lower.contains("overloaded")) {
             return "LLM 限流（rate limit），请稍后重试";
         }
         return msg.length() > 200 ? msg.substring(0, 200) + "…" : msg;
     }
 
     /**
-     * 从预批准 payload 中提取完整的 arguments 字符串。
-     * 审批创建时存储的是原始完整参数，优先使用，避免 LLM 流式截断导致 JSON 残缺。
+     * 从预批准 payload 中提取完整的 arguments 字符串。 审批创建时存储的是原始完整参数，优先使用，避免 LLM 流式截断导致 JSON 残缺。
      *
      * @return arguments 字符串，若解析失败返回 null（调用方回退到 LLM 流式参数）
      */
@@ -958,7 +1185,9 @@ public class StepExecutionNode implements NodeAction {
             if (argsNode.isMissingNode() || argsNode.isNull()) return null;
             return argsNode.asText();
         } catch (Exception e) {
-            log.warn("[StepExecution] Failed to extract arguments from pre-approved payload: {}", e.getMessage());
+            log.warn(
+                    "[StepExecution] Failed to extract arguments from pre-approved payload: {}",
+                    e.getMessage());
             return null;
         }
     }
@@ -971,22 +1200,22 @@ public class StepExecutionNode implements NodeAction {
     }
 
     /**
-     * Incrementally extend the previous working context with one new step
-     * result. Cheap O(1) path used for steps 2..N: avoids walking the full
-     * conversation history again. The result is trimmed from the head if it
-     * exceeds the same overall cap that {@link #rebuildWorkingContext}
+     * Incrementally extend the previous working context with one new step result. Cheap O(1) path
+     * used for steps 2..N: avoids walking the full conversation history again. The result is
+     * trimmed from the head if it exceeds the same overall cap that {@link #rebuildWorkingContext}
      * enforces, so the budget invariant is preserved.
      *
-     * <p>Per-step truncation: a single step result longer than 800 chars is
-     * abbreviated before append, mirroring the per-step caps in
-     * {@code rebuildWorkingContext}.</p>
+     * <p>Per-step truncation: a single step result longer than 800 chars is abbreviated before
+     * append, mirroring the per-step caps in {@code rebuildWorkingContext}.
      */
-    private static String appendStepIncremental(String previousContext, String formattedStepResult) {
+    private static String appendStepIncremental(
+            String previousContext, String formattedStepResult) {
         final int OVERALL_CAP = 6000;
         final int PER_STEP_CAP = 800;
-        String stepLine = formattedStepResult.length() > PER_STEP_CAP
-                ? formattedStepResult.substring(0, PER_STEP_CAP) + "…"
-                : formattedStepResult;
+        String stepLine =
+                formattedStepResult.length() > PER_STEP_CAP
+                        ? formattedStepResult.substring(0, PER_STEP_CAP) + "…"
+                        : formattedStepResult;
         String combined = previousContext + "\n" + stepLine + "\n";
         if (combined.length() <= OVERALL_CAP) {
             return combined;
@@ -1004,15 +1233,16 @@ public class StepExecutionNode implements NodeAction {
     }
 
     /**
-     * Full rebuild of working context from conversation history plus all
-     * completed step results. Reused on the cold path (first step, or when
-     * the incremental path can't be applied). Mirrors
+     * Full rebuild of working context from conversation history plus all completed step results.
+     * Reused on the cold path (first step, or when the incremental path can't be applied). Mirrors
      * {@code StateGraphPlanExecuteAgent.buildWorkingContext}.
      */
-    private static String rebuildWorkingContext(PlanStateAccessor accessor, List<String> allCompletedResults) {
+    private static String rebuildWorkingContext(
+            PlanStateAccessor accessor, List<String> allCompletedResults) {
         List<Message> messages = accessor.messages();
         // messages 中最后一条通常是当前 UserMessage（goal），前面的是历史
-        List<Message> history = messages.size() > 1 ? messages.subList(0, messages.size() - 1) : List.of();
+        List<Message> history =
+                messages.size() > 1 ? messages.subList(0, messages.size() - 1) : List.of();
 
         StringBuilder sb = new StringBuilder();
 
@@ -1025,7 +1255,8 @@ public class StepExecutionNode implements NodeAction {
                 String role = msg.getMessageType().name().toLowerCase();
                 String content = msg.getText();
                 if (content != null && !content.isEmpty()) {
-                    String truncated = content.length() > 500 ? content.substring(0, 500) + "…" : content;
+                    String truncated =
+                            content.length() > 500 ? content.substring(0, 500) + "…" : content;
                     sb.append("[").append(role).append("] ").append(truncated).append("\n");
                 }
             }

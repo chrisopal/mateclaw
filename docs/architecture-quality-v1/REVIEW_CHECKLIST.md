@@ -1,6 +1,10 @@
 # 全项目开发与审核检查台账
 
+**当前范围调整（2026-10-06）**：按用户要求采用新数据完成售前 V2、真实生成和 Delivery；不验收旧数据/旧消费者兼容；Kingbase=TODO。实施与覆盖差异见[新数据设计](../plans/2026-10-06-presales-v2-newdata-design.md)，该调整不等于相关功能已通过。
+
 适用全部后续开发，检查项可按真实情况演进；调整规则本身需要证据和审核。此台账是评审入口，不是 PASS 清单。设计见 [IMPLEMENTATION_DESIGN](IMPLEMENTATION_DESIGN.md)，实测见 [SETUP_EVIDENCE](SETUP_EVIDENCE.md)。
+
+最新实施状态见[整改收口表](ACCEPTANCE_PROGRESS.md)和[46项工程分类](acceptance-progress.json)。分类依据实际证据，不替代[正式签收台账](acceptance-register.json)。后续历史切片段落保留当时状态，不能据此重复立项已修复问题。
 
 ## 每次变更默认审核
 
@@ -15,38 +19,47 @@
 
 | 检查 | 触发/命令 | 本轮接入 | 局限与整改任务 |
 |---|---|---|---|
-| AR-001 runtime 反向依赖 | gate.py / verify dev | 已安装 ratchet | AQ-01 后目标路径零容忍 |
-| AR-002 Controller DAL | 同上 | 已安装 ratchet | AQ-03/07 字节码补充 |
+| AR-001 runtime 反向依赖 | gate.py / verify dev | 已安装 ratchet；六个宿主 main 路径已封口 | 未来新增路径需审定映射；正式签收另验 |
+| AR-002 Controller DAL | 同上 | 已安装 ratchet；三个工作台 main 路径已封口 | 编译 ArchUnit 已执行；新路径需审定映射 |
 | AR-003 跨 feature 内部依赖 | 同上 | 已安装 ratchet | AQ-04 后封口，动态计算导入需补 AST/审核 |
 | AR-004 semantic 基础身份借用 | 同上 | 已安装 ratchet | AQ-02 |
 | AR-005 跨域直接 SQL | 同上 | 已安装 ratchet | AQ-02/03/06；不能代替权限行为测试 |
 | TS-001 / UI-001 | 同上 | 已安装 ratchet | AQ-05/09，any/内联双语 |
 | TEST-001 | 同上 | 已安装 ratchet | 防新增 skip/only；不能证明所有断言强度 |
 | STYLE-001 / STYLE-002 | 同上 | 已安装 | 长行存量 ratchet；修改行尾空白硬失败 |
-| DB-001 / DB-002 | 同上 | 已安装 | 旧迁移只读，新迁移三方言；不等于真实 DB 验证 |
+| DB-001 / DB-002 | 同上 | SQL/Java 入口已实现 | 旧入口只读与新入口三方言；源码规则不等于真实 DB 验收 |
+| DB-003 / DB-004 | 同上 | 冻结清单与基线项保护已实现 | 初装摘要/闭包人工核对；技术审阅不是维护人审批，远端强制仍 NOT_VERIFIED |
 | Python 门禁自测 | verify 所有模式 | 已安装并执行 | 数量和日志见实测；非应用验收 |
 | Java 格式 | Spotless + AOSP，commit/CI 适用时 | 根 POM 已配置 | 增量格式，不格式化原文/历史字节 |
 | 前端格式 | Prettier 3.6.2 + 固定 config | package/lock 已配置 | 只检查适用变更文件；不自动 --write |
 | Java 测试 | 根 reactor clean verify，解析 XML | wrapper 已配置 | 当前基线结果见实测，不忽略失败 |
-| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置 | 构建不是浏览器/人工验收 |
+| UI lint/type/tests/build | 非修复 ESLint、vue-tsc、Vitest、Node、precision、两 mode build | wrapper 已配置；Vitest 最多 2 个 worker、单测 20 秒超时 | 构建不是浏览器/人工验收；共享机器负载仍可能影响耗时 |
 | 独立成本分析工具 | Python 依赖探测、unittest、Python/JS 语法 | wrapper 已配置 | 模拟样本通过不等于真实经营数据验收；缺 openpyxl 阻断 |
-| ArchUnit | integration/WorkbenchArchitectureTest.java | 仅模板，NOT_INSTALLED | AQ-01/03 清零后接入 AQ-07；不能冻结新增违规 |
+| ArchUnit | mateclaw-server/src/test/java/vip/mate/architecture/WorkbenchArchitectureTest.java | LOCAL_COMPILED；生产字节码 + 非空聚合 + 正反例 | AQ07_ARCHUNIT_INSTALL_ACCEPTANCE；逐包完整性、维护人批准和远端强制另验 |
+| policy 封口 | .quality/policy.json | AR-001 六个宿主 main 路径、AR-002 三个工作台 main 路径零容忍 | 9 个源快照反例拒绝旧违规；未改 baseline，独立技术审核不是维护人批准 |
 | pre-commit / pre-push | 当前工作区 .githooks | 已安装 worktree-local | 可绕过；其他工作区需显式独立安装 |
-| 远端 CI | 所有 pull_request + merge_group | workflow 已写入 | 首次 trusted base bootstrap 未完成 |
+| 远端 CI | 所有 pull_request + merge_group | PR可信base实际runner与Required汇总已运行通过 | 最新候选仍须核验；目标分支强制保护未启用 |
 | 控制面审核 | CODEOWNERS + PR 模板 + 根 AGENTS/Skill | 文件已设置 | 账号候选 @chrisopal；独立审阅人可用性待维护人核实 |
 | 分支保护 | Engineering Gate Required + 过期审批失效 | NOT_CONFIGURED_BY_THIS_TASK | 不在本轮改仓库管理设置；AQ-08 实测 |
 
 ## 阶段台账
 
+Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker 启动和跨文件用例超时，失败分布覆盖未改动的售前、语义和本体测试；定向 54/54 通过。将 worker 上限设为 2、单测超时设为 20 秒后，使用门禁相同的默认 Vitest 命令复跑 703/703 通过。调整只影响测试运行调度与超时，不删除、跳过或放宽断言；完整提交门禁和远端结果仍需按候选提交重新验证。
+
 | 任务 | 当前状态 | 下一道出口 |
 |---|---|---|
-| AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
-| AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
-| AQ-02–06 | DESIGNED / NOT_IMPLEMENTED | 按实施设计逐切片行为刻画与改造 |
-| AQ-07 | DESIGNED / NOT_IMPLEMENTED | 清零后 ArchUnit + policy 封口 |
-| AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
-| AQ-09–10 | DESIGNED / NOT_IMPLEMENTED | P0 之后格式/UI/性能整改 |
-| AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账 |
+| AQ-00 | LOCAL_CONFIGURED；PR可信base与真实CI已执行 | 独立维护人签收；dev保护与部署状态另验 |
+| AQ-01 | 公共策略/分派/模块组合已有工程证据；本批取消修复已提交 | 取消异常边界及正式验收；不重复已完成结构拆分 |
+| AQ-02 | 公共主体/来源/领域批准边界已实现；AC07缓存模型外发已修复、AC09矩阵证据齐备 | 当前候选门禁/CI及正式业务签收；不重复已闭合的实现与补证 |
+| AQ-03 | Controller依赖/任务查询已有编译与行为证据 | 原条款正式签收；新回归按源码变化触发 |
+| AQ-04 | scope/transform/二进制/冲突已有有限工程证据 | 正式签收；不把真实模型等无关条件追加到传输合同 |
+| AQ-05 | 本轮Service/DTO/错误/制品/渲染事务边界已收口 | 历史样本、正式验收；对象持久化迁移归AQ06 |
+| AQ-06 | 局部CAS/幂等/恢复/SQL投影已实现；完整V2迁移未完成 | 正式V2/Delivery规格、独立对象依赖、单写切换及回退 |
+| AQ-07 | Java迁移保护、编译ArchUnit与零容忍路径已安装执行 | 独立维护人审批、远端强制及未来路径映射 |
+| AQ-08 | 真实CI已通过，分支保护未启用 | required检查、审批失效/Code Owner及绕过策略实际强制与签收 |
+| AQ-09 | 本轮Workbench/组件/会话/状态/i18n结构及AC30原类别工程复核已收口 | 正式QA签收；扩展控件组合保留未测，不追加为原条款 |
+| AQ-10 | PARTIALLY_MEASURED / NOT_ACCEPTED | [H2](evidence/2026-10-06/AQ10_LISTING_MEASUREMENT.md)与[隔离MySQL](evidence/2026-10-06/AQ10_MYSQL_LISTING_MEASUREMENT.md)各18组列表测量已有证据；并发HTTP、Kingbase、V2依赖影响图和端到端可观测性仍待验，不承诺生产提速 |
+| AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账；调整仍需证据和审核 |
 
 ## AC 全量追踪
 
@@ -100,6 +113,14 @@
 | AC-44 | 改workflow/CODEOWNERS/测试配置削弱门禁 | AQ-08 | 仓库维护人 + 独立审核 / 远端临时违规PR/管理设置回读 | NOT_RUN |
 | AC-45 | 真实长文/模型质量 | AQ-08/AQ-11 | 业务负责人 + QA / 授权真实样本/真实模型/人工质量审核 | NOT_RUN |
 | AC-46 | 日志与测试环境 | AQ-08/AQ-11 | 领域开发 + QA / 行为/集成回归 | NOT_RUN |
+
+## Java 迁移与 SQL 投影的默认审核补充
+
+每次涉及此边界，核对 Java 入口及全部冻结闭包，不只看 SQL 文件；比较实际 checksum 与历史版本，检查 Flyway 所有方言的发现和 validate 配置。固定 V1 算法不能为新业务需求直接修改，未来语义须新版本/迁移；编译器、JDK、Jackson 变化也需兼容证据。核对所有正文 writer 同事务维护派生版本、故障顺序、Workspace/CAS及失败回滚；旧 writer 混跑和新增写入后直接回退未获验证时不能部署切换。
+
+AQ06 当时仅澄清 R-06，未修改 gate；历史反例/真实 MySQL 与 H2 证据见 [AQ06_LISTING_PROJECTION_ACCEPTANCE](evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md)。后续 AQ07 已补 Java/冻结源码检查，原因、覆盖差异、正反例及独立技术审阅见 [AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE](evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md)。无 baseline/policy 放宽或豁免。真实 Kingbase、生产回退、版本化请求 hash/历史回执政策、闭包人工审核及独立维护人批准仍待完成。
+
+Java 迁移审核须核对清单新增项与已发布 HEAD 源码摘要、全部直接/间接算法依赖及嵌套类型；不得只核对入口文件。清单移除、改摘要、同时修改历史源码应分别触发失败。验证使用 trusted base runner 的实际版本；未合入安装或未启用 required CI 不能宣称远端强制。AC-39/46 的正式状态不从门禁自测或 Agent 技术审阅自动升级。
 
 ## 检查规则如何调整
 

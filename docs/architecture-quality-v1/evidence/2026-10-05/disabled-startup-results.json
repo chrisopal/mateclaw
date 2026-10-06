@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "task": "AQ05 plus AQ01/AC05 partial startup-disabled source-read contract",
+  "status": "ENGINEERING_SCOPED_STARTUP_VERIFIED_UNSUBMITTED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "head_tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "new_test_sha256": "e017d8192e971ee9184b1d24e8c295591063dbdb6f2134660b8952c4e858bc64",
+  "new_test": "mateclaw-server/src/test/java/vip/mate/presales/PresalesDisabledStartupReadContractTest.java",
+  "unchanged_production_java_count": 32,
+  "unchanged_production_java_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectItems.java": "e3b214b431273dd83b0bc4a95d00139a6d82cd22935d2079e22d42e8017acd74",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesExceptionHandler.java": "7966981d5e2ebf1d2b5f3d97818f756767f6b0e168fe3d544ed0146f0fc2ceca",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesCommandPayload.java": "a2c1a6a81f394afb124c5bdbd252e72c57c5a5261bfed67e6c74436aa0941da9",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationCoordinator.java": "81f5a7027b48a2ea15a6ee79c2001320eeca5e41fe47623b7e25a29ca2065ab0",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesContextProvider.java": "4f67913a61561f2b57f8cdfeef188407952185ea2659bd9adb47c2fbf43b80ad",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesModelAdapter.java": "4753bc268c9335584a95254445bf592c5787a07092c698a1fef7cc831e70a7cd",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesToolPolicy.java": "2936949c118c460891dc38e03b4c87a83e9da40f4e33c014288a4d9a7b836fd8",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeResultProjection.java": "6e4c552fff76fca4642b7ada148d84b8b8c4f8a6e0637f9be3e92ed984406150",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesPresentationHook.java": "21b065b12cf3eca8a6d9baba49848f832515fcaaa387dc0062c9ea05b854424b",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesSolutionPolicy.java": "d1cf6bd2ca5c842b800d1d379df26a7f04dd0a362ceeb665fdf3ffc4552b0f4d",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesListingProjectionV1.java": "855fe1891f23d06046539e1c0a8834c41a175c0397cf554ceb19b5f2a1c1b0d4",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectDocumentTool.java": "3885f8c6ff25007125efcf9c1275aeafb179ae7b4bb0b6100bd2f103d911cc4b",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesGenerationController.java": "3c7593bad740c47cacbbb71cf6edd7d5631c8f4a1164fd484aee073bd83a4f25",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java": "6934323e095626b53c2f953cb2a7e22a54a86a9421d6a429f86e50bbe667b55b",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesArtifactReader.java": "1b3e52b50cba926abf8f60bb2a6eb3bef70c876b36e11cec01141c9e17c06a38",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesAccess.java": "946223d2f36824f7d8ffecda1b19d3323ae7f24dfef82dd5096ef44768067785",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesExecutionRevalidationProvider.java": "08df1fa20e4864334dcc36aef160205f67d3995dc2eabc37e79e75b579c1af41",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesOutputRejected.java": "7edfc3d5fe1ec3e39f240ee0809c8d74b4a18d5a4a860b40c4006fb4ed12d39a",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeRuntime.java": "1e314e4b2b87c2fefad3f0a25b32611cdc97b60d39f371c72c13a2b7a8033f92",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesToolScope.java": "ed02c27aff0131b513cb44ebf1a4473831a0b3b9507fbe18e8f4fda6492e7ebc",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesController.java": "802d4a86e105eeee43391de81e394f9b2f78fb314145f1bca1354a29c314d0e6",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesDtos.java": "81cacbc73c0cf8507085601adaad180e5b726befbc72da5fe3c6ca4c8a90212b",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesProjectListing.java": "4938687d9e11224e101810a75781649befa8ce798375822ac9d3949e062e4aa8",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesRequestHashV2.java": "b365bac533aa93e44b4dd3892cd078477a143b86dbed597edadcc83d8cdebdfd",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesSourceAuthorization.java": "02667f1a679b359846eeddf916dda16264d5bc31ef9ef71cee1f050553ab6810",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesPresentationService.java": "5f95a1db00dad77c253b4f7ded8e5622ceb794d4695286621e9cd2ccb1c0febc",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesArtifactRenderer.java": "6875ef39d4d6e2fc9fde7473a0b6fba413ebe4a4d6bc85ce4fbd4285ee971f77",
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesProjectRepository.java": "ae6d2e30cb425e6e84c88fccbfa9a65c931ac98e3a59050283685558867f3a77",
+    "mateclaw-server/src/main/java/vip/mate/presales/repository/PresalesArtifactRepository.java": "8c0ede776d19b270be07a48debc19200ed8cd9142847c4272b802c239c1ce002",
+    "mateclaw-server/src/main/java/vip/mate/presales/migration/PresalesListingProjectionBackfillV1.java": "64d9dc5ce7d13fd2d3203d0fa0595e12f56ab83738eaccd208ef2bd7108c9cce",
+    "mateclaw-server/src/main/java/vip/mate/semantic/source/SourceGovernanceReadService.java": "bea3872742e61296f5ea61cf7688d45109b0674fdbe2c646b60ba32fb78e14ea",
+    "mateclaw-server/src/main/java/vip/mate/semantic/source/repository/SourceGovernanceReadRepository.java": "8e253ccf7d1e1f0aef08631ead69722efefec920d5a321591a4693eb801de844"
+  },
+  "h2": {
+    "status": "PASS",
+    "actual_classes": 2,
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "new_contracts": 8,
+    "existing_disabled_status_cases": 1,
+    "fixture_config": "SemanticHttpFixture targeted Spring/Flyway/JWT/Workspace with existing Wiki/PAT/I18n mocks",
+    "historical_data": "Synthetic SQL seeded frozen history, not real publication or legacy-upgrade proof"
+  },
+  "mysql": [
+    {
+      "name": "first_mysql",
+      "status": "PASS",
+      "version": "8.0.46",
+      "cases": {
+        "found": 9,
+        "started": 9,
+        "succeeded": 9,
+        "failed": 0,
+        "aborted": 0,
+        "skipped": 0,
+        "container_failures": 0,
+        "cases": [
+          {
+            "name": "frozenFitSourceRevocationStillStopsAllFourReadsAtDisabledStartup()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "startupActuallyOmitsSemanticMutationBeans()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "validFrozenHistoryReadsExactBytesAndHandoffWithoutSemanticBeans()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "actualMysqlMigrationIdentityIsExplicit()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "workspaceAndRoleBoundariesDoNotDependOnSemanticEnablement()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "incompleteFrozenHistoryStillUsesTheLegacyPublicationGate()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "employeeIntersectionRemainsCurrentWhenSemanticBeansAreAbsent()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "disabledStartupDoesNotDisablePublishedDigestVerification()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "newPublicationStillRequiresSemanticAndDoesNotWriteAReceipt()",
+            "status": "SUCCESSFUL"
+          }
+        ],
+        "status": "PASS"
+      },
+      "migration_history_count": 212,
+      "no_baseline": true,
+      "all_success": true,
+      "validate": "PASS",
+      "pending": 0,
+      "source_inventory": 247,
+      "absolute_classpath_directory_inventory": 4091,
+      "external_classes": 4,
+      "inventory_is_loaded_coverage": false,
+      "before_after_sha_match": true,
+      "own_cleanup_exit": 0,
+      "own_container_independently_absent": true,
+      "credentials_file_removed": true,
+      "configured_database_collation": "utf8mb4_bin",
+      "actual_source_kind_ci_column_and_sql_equality_asserted": false
+    },
+    {
+      "name": "ci_mysql",
+      "status": "PASS",
+      "version": "8.0.46",
+      "cases": {
+        "found": 9,
+        "started": 9,
+        "succeeded": 9,
+        "failed": 0,
+        "aborted": 0,
+        "skipped": 0,
+        "container_failures": 0,
+        "cases": [
+          {
+            "name": "frozenFitSourceRevocationStillStopsAllFourReadsAtDisabledStartup()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "startupActuallyOmitsSemanticMutationBeans()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "validFrozenHistoryReadsExactBytesAndHandoffWithoutSemanticBeans()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "actualMysqlMigrationIdentityIsExplicit()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "workspaceAndRoleBoundariesDoNotDependOnSemanticEnablement()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "incompleteFrozenHistoryStillUsesTheLegacyPublicationGate()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "employeeIntersectionRemainsCurrentWhenSemanticBeansAreAbsent()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "disabledStartupDoesNotDisablePublishedDigestVerification()",
+            "status": "SUCCESSFUL"
+          },
+          {
+            "name": "newPublicationStillRequiresSemanticAndDoesNotWriteAReceipt()",
+            "status": "SUCCESSFUL"
+          }
+        ],
+        "status": "PASS"
+      },
+      "migration_history_count": 212,
+      "no_baseline": true,
+      "all_success": true,
+      "validate": "PASS",
+      "pending": 0,
+      "source_inventory": 247,
+      "absolute_classpath_directory_inventory": 4091,
+      "external_classes": 4,
+      "inventory_is_loaded_coverage": false,
+      "before_after_sha_match": true,
+      "own_cleanup_exit": 0,
+      "own_container_independently_absent": true,
+      "credentials_file_removed": true,
+      "configured_database_collation": "utf8mb4_0900_ai_ci",
+      "actual_source_kind_ci_column_and_sql_equality_asserted": true
+    }
+  ],
+  "format": {
+    "command": "mvn -B -Dquality.base=origin/dev spotless:check",
+    "exit": 0,
+    "status": "PASS"
+  },
+  "independent_review": {
+    "reviewer": "/root/artifact_read_review",
+    "verdict": "COMMENT",
+    "substantive_findings": 0,
+    "verified": "H2 9/9;MySQL first9/9 and CI9/9;original8 contract body unchanged;45 archive SHA pairs;247 sources/4091 absolute classpath classes/4 external classes;CI identity verifies column and SQL equality",
+    "maintainer_approval": "NOT_VERIFIED",
+    "Java_LSP": "NOT_RUN",
+    "full_application_and_chat_and_AC05": "NOT_RUN"
+  },
+  "fixture_failures": [
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 7,
+      "cause": "raw title missing, before reads"
+    },
+    {
+      "tests": 8,
+      "failures": 0,
+      "errors": 1,
+      "cause": "agent KB binding id missing"
+    }
+  ],
+  "original_assertions_weakened": false,
+  "collation_claim_correction": "First schema configured bin; earlier CI statement was too broad. Additional actual CI column/SQL equality identity case plus unchanged negative/restore branch now executed.",
+  "not_run": [
+    "complete MateClawApplication startup",
+    "ordinary chat and all module combinations",
+    "full formal AC01-46",
+    "Kingbase",
+    "real legacy corpus/publication/upgrade/backup/restore/Office",
+    "browser/customer acceptance",
+    "Java LSP",
+    "full commit gate"
+  ],
+  "not_verified": [
+    "maintainer approval",
+    "remote required CI"
+  ],
+  "submission_ready": false,
+  "checked_worktree_identity": "final-gate.report.json.gz",
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-title.log.gz",
+      "archive_sha256": "ae9b5f0a66bf8a57e6359ae6985e62f6679f1fb5d9f12f832f4a0a9a47f65357",
+      "decoded_sha256": "8f51a434844864c63fc88206adf57db66c2ed61b87667cd51ff923e50c7000f8",
+      "redacted_fields": 44
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-title.xml.gz",
+      "archive_sha256": "92e6ec24ee59bed63ca2ed2059d54c95f119a7d7ff15d31c16d934f59dee48db",
+      "decoded_sha256": "52a582e449cac4a2301816ef1d1c32a0d0c2ab3eb5f489d309f2a680faa45f03",
+      "redacted_fields": 43
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-title.java.gz",
+      "archive_sha256": "91f5a6a6a93e107ec7535947dd1c5e662d7a63cad16b8ce3708a78d4ec81db5f",
+      "decoded_sha256": "bed88ce807112e2923c22c3d54be8e73d22fc26cff5c14f432a5946223a7175b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-binding-id.log.gz",
+      "archive_sha256": "405048c6a344a083f24cca87b69a66d95a8c40dff8d0763c5303f535fc276891",
+      "decoded_sha256": "2ce4a1ad1b6329f57e8210d4162798167e8abd127c26d6a64dd8cbf07e46e036",
+      "redacted_fields": 8
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-binding-id.xml.gz",
+      "archive_sha256": "fd82459065f1ee12760324a92bd0e66ab80f0e6bc0a5cbb32fdf5205a1511e31",
+      "decoded_sha256": "a619c77c0165db9c85cf38a059db0af0a8c002cc27f1078951032478c391d480",
+      "redacted_fields": 7
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/fixture-missing-binding-id.java.gz",
+      "archive_sha256": "ae3962755af43af34f45f6a8336ff35063dccfae9fd18030be6504c5cbdaf003",
+      "decoded_sha256": "97c108c308a6b1eb915a275a0456799b7bd52c5822908f0d535ee6f547ec77d4",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/h2-green.log.gz",
+      "archive_sha256": "dbe6f27491b084e2520958ba2e06348fbeb3216dcd7ba45dfc92273a6f5ffc36",
+      "decoded_sha256": "288db5c3460133483f8b9add6ca53aa0646770b1d03d2f37d3fdbbe5aec9742d",
+      "redacted_fields": 2
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/h2-green.java.gz",
+      "archive_sha256": "591221ceca9f10f6a136571021983c6ec4ba3344cd335e0b25ee85f99fb3ef26",
+      "decoded_sha256": "e017d8192e971ee9184b1d24e8c295591063dbdb6f2134660b8952c4e858bc64",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/h2-green-vip.mate.presales.PresalesDisabledStartupReadContractTest.xml.gz",
+      "archive_sha256": "4a8b28afdd0efa8036850a0f1ab7d4ee260e294a5cba4464b10b862aedc7cdf4",
+      "decoded_sha256": "10e8af6ee798e148707771d0b787af854f3f6aa586b301b3498fe0a251a43ed6",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/h2-green-vip.mate.semantic.SemanticDisabledTest.xml.gz",
+      "archive_sha256": "4c069b236ac7f8fa309681b1ab73e02975a0ede7f7f2858ab33303f13377437d",
+      "decoded_sha256": "49d63134761acaa8dbab83358b16afc80ab2910264e708806df9a2524187db57",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-runner.py.gz",
+      "archive_sha256": "f4b169628eb24d31686c7b758dec70447232acb6a8b83c902760cc8edcf571ef",
+      "decoded_sha256": "e2129c63cf9d7b63c39e51f67dfa808e6dbcd33a2395b6b94e435add66cb4e71",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-run.log.gz",
+      "archive_sha256": "b3d2ac8b77304b13bf0239dde5eb898c2ec8392d49f23cb95940ae60b434de84",
+      "decoded_sha256": "dc6bd36a528e2386920117c1d46f208121d693f2243db9cea289175ca53c2beb",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/format-check.log.gz",
+      "archive_sha256": "b73991d406f557748dda00959871464afbfb2c8da1c563391a6aeccb7550a5f5",
+      "decoded_sha256": "cf9f92757c0c46dbf60ca6bf8974bd4d56c1d8ad0a97d5e81f9be9b2689d2fa6",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/before-dev.log.gz",
+      "archive_sha256": "2235276bdca03eeab9b8c64ee4039f2452233616cdb6921652573a5e39caae41",
+      "decoded_sha256": "1d340ab832a2a5708b249b50be6990a143ba5214a67667c1d3e7ec13128ff20f",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/slice-dev.log.gz",
+      "archive_sha256": "6db0c19370b90f2327de8be66d5f58ad7e7316659886cf19c5b5de9a5e33884e",
+      "decoded_sha256": "e37635dae294cd3ac7d8d94069f85fe7c1bf4c8a4a25be76e1c313b42778e39a",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "82a8eeeb564bc4d2916cf699207494fb6d36cd6428f57b31715d72d1091222cb",
+      "decoded_sha256": "f399fff2ff80ecd08a3e6f6df780ed2a8b5c9e40ca382eec3f0e211e998cba2b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-PresalesDisabledStartupMysqlTest.java.gz",
+      "archive_sha256": "3b13955d9a7a23a171836f1c449c4b464831233664fe013d356018138d2f34e6",
+      "decoded_sha256": "762be0ca4a468b6dde329af02f221640e7dec7ab8af334971e57f25a7b4dfddf",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-cleanup.log.gz",
+      "archive_sha256": "529021e1ddd96361fc7cdbfba32bba0209a39a09cdbc8902c23554151fc70b39",
+      "decoded_sha256": "7d0a7194311587729f1a8b55557bdcf6da7a0af2ee06eaa63d8194e848f63d10",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-compile.log.gz",
+      "archive_sha256": "7d6a3b7f8231a3eff73e62920bfe79dc3ad321e7cfae52754d3211388eafc4ad",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-container-start.log.gz",
+      "archive_sha256": "529021e1ddd96361fc7cdbfba32bba0209a39a09cdbc8902c23554151fc70b39",
+      "decoded_sha256": "7d0a7194311587729f1a8b55557bdcf6da7a0af2ee06eaa63d8194e848f63d10",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-empty-schema.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-flyway-history.log.gz",
+      "archive_sha256": "14578c0f07875175855d3d282b9795df3db64f90f6d02403dad337365ce066f8",
+      "decoded_sha256": "acf6ffb6d71a8b65fe2c0001d0eff62c0192ef44f1ebb807177c8db36a326d35",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-h2-original.xml.gz",
+      "archive_sha256": "4a8b28afdd0efa8036850a0f1ab7d4ee260e294a5cba4464b10b862aedc7cdf4",
+      "decoded_sha256": "10e8af6ee798e148707771d0b787af854f3f6aa586b301b3498fe0a251a43ed6",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-image.log.gz",
+      "archive_sha256": "15679a82dd29b3f206b6fc1dd6e0f6b3565a668c8e139f63a6278425ca3add3c",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-java-results.json.gz",
+      "archive_sha256": "157c3f53c46eb42ac21c527eaa0a62f245fcee07c6c9a00a6705a1b96e03b70c",
+      "decoded_sha256": "3d57c415cb9397ea8d1b53f6945bc2a02bd97a83a9eb49191f07d0eec81c9227",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-jdk21.log.gz",
+      "archive_sha256": "cdeeed1d3af9312900e755bb1316e9ca8c812c3d63b96544a576e3d4277439f8",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-mysql-http-tests.log.gz",
+      "archive_sha256": "9d66540a13e08e20aef578733b9a75412b70cf61284b9c843b53083848c3a44e",
+      "decoded_sha256": "c1ed3aa3e931ed6f5a4964ce7abf8d9df8082caf918299104c23fff015819b4c",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-mysql-version.log.gz",
+      "archive_sha256": "98f55566f81c245f67a0259f43fe9ccf338ac7c6911ba82106abe1682c10ee52",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-results.json.gz",
+      "archive_sha256": "e3ccd23ab650bb6d4c10872d17740b2d8217030b90d9c85e339363d83591f4bc",
+      "decoded_sha256": "9030c7b4118e0d236dba82d84f2b188605f68cabe64b8825d0441b446cda9da3",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-runner.py.gz",
+      "archive_sha256": "fb3900fc5d1208648366ee37340c26ef12e5d98581a8e2c98cb7edeb766b013c",
+      "decoded_sha256": "1f3f303ad1eeeccf3718879480181f884cc844673008188b4cc50690d93ef245",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-run.log.gz",
+      "archive_sha256": "a1b69b1285ac94269c14bd3cbfc5c57c644a51c307d45cf8a51c7fc7a05f2096",
+      "decoded_sha256": "3506a21b308c1e3796c6e673b2cedda7865a24573e251f1418fb0235eeec1519",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-ArtifactMysqlHttpLauncher.java.gz",
+      "archive_sha256": "07b34766a97a6ea7883873388678a5df3111fc012ff9890de372f8020265fbfe",
+      "decoded_sha256": "f399fff2ff80ecd08a3e6f6df780ed2a8b5c9e40ca382eec3f0e211e998cba2b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-PresalesDisabledStartupMysqlTest.java.gz",
+      "archive_sha256": "b68f89b3d40d62ece8500f9f2031eb9cffba3373aab5ecdccd180c73cf19f472",
+      "decoded_sha256": "fcfc5f13e504c5de05f6f9b1767efcc5192173929ef1d2da963222a7f5acb53b",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-cleanup.log.gz",
+      "archive_sha256": "11781a67bd71b4b79630dac154f50e4dc339bdea30fa125ebfc952355b87531d",
+      "decoded_sha256": "57f2411672e043921033ea1a24998b726c1d5293c07ea649b9b2ecf0c6720a75",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-compile.log.gz",
+      "archive_sha256": "ca11cde52e7d967f54d980873d0d8ea13fb3ed46acb4a2ffe2b85dba9b412b18",
+      "decoded_sha256": "8a025e1c0067165313b0bf2065ecefec53acbd4ac15129477ef3821689f13aed",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-container-start.log.gz",
+      "archive_sha256": "11781a67bd71b4b79630dac154f50e4dc339bdea30fa125ebfc952355b87531d",
+      "decoded_sha256": "57f2411672e043921033ea1a24998b726c1d5293c07ea649b9b2ecf0c6720a75",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-empty-schema.log.gz",
+      "archive_sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-flyway-history.log.gz",
+      "archive_sha256": "bfffb80765e574e47a342c8e7b37959c061224a53397801b7370c129ce617929",
+      "decoded_sha256": "acf6ffb6d71a8b65fe2c0001d0eff62c0192ef44f1ebb807177c8db36a326d35",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-h2-original.xml.gz",
+      "archive_sha256": "af39225d9e1c616ac867cd14170532faf6bec5654e741ae2f099a419ed31c44f",
+      "decoded_sha256": "10e8af6ee798e148707771d0b787af854f3f6aa586b301b3498fe0a251a43ed6",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-image.log.gz",
+      "archive_sha256": "a2a4e6493a58af1e47e2bf9130289434f1a326232587c354c9af9ec443da5298",
+      "decoded_sha256": "7f43a3012a5bc28c403205ac0de7d039180c9ae361cb404bd09e11043160153d",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-java-results.json.gz",
+      "archive_sha256": "e595cf327a3b415dff9fb826b3d2e0ee0069a5a44407ccf1bb703131247f759a",
+      "decoded_sha256": "3d57c415cb9397ea8d1b53f6945bc2a02bd97a83a9eb49191f07d0eec81c9227",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-jdk21.log.gz",
+      "archive_sha256": "edf698cb6c8f2ef05cdd0a29fd96c0269fd71a2f7afcdc260e49641c36f82162",
+      "decoded_sha256": "c0288c5dd5a7c676f5c73b7779ebde949a0828dff7f20615b5f59db6ca6a71cb",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-mysql-http-tests.log.gz",
+      "archive_sha256": "92ffafd82706aa6d6d7a477ecd7f51d189b4bfe1be6d64d69506921d6e738163",
+      "decoded_sha256": "097f699254202da4c3678205d8c2a4f3bef236b63686626ac8a49dd8a2f7ba99",
+      "redacted_fields": 1
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-mysql-version.log.gz",
+      "archive_sha256": "d8e68a9ebbc91126ead0c540561106aa3dc659530bfd4b4ec6f4e4c879a0eb13",
+      "decoded_sha256": "f970ac65c6a5169e951014fd121fbf42aaaa3665b133e6409afa2d2df48b37f1",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/mysql-ci-results.json.gz",
+      "archive_sha256": "ceee776903d98ff4dba7f0926f72a94380443473b5605d79752c20eb228f9dfe",
+      "decoded_sha256": "03f5aca51c9e5f76b98b65bb2cc80deb0a72ec5a6f964df6bc0b672c5b777ddc",
+      "redacted_fields": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-05/disabled-startup-tests/independent-review.json.gz",
+      "archive_sha256": "9750076ae7610133870b6963a798895f93b155604e5508df5bbd8cb63833fd3e",
+      "decoded_sha256": "32acd1529efd160c2e58df285c7c839230fddc56c651a1c9375b78e96f0d9d23",
+      "redacted_fields": 0
+    }
+  ],
+  "rollback": "Remove only the added test/docs to revert this verification slice; production, migrations and published bytes were unchanged."
+}

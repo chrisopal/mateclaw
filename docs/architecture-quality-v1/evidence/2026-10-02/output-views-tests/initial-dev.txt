@@ -1,0 +1,4 @@
+{"status": "SCAN_PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-w97yyfs7/report.json", "submission_ready": false, "error": null}
+PASS: architecture-ratchet 
+PASS: guard-self-tests 
+NOT_RUN: application-toolchains Quick scan only. commit/ci is required before submission.

@@ -1,0 +1,124 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts (40 tests | 16 failed) 16ms
+   × preserves actual domain fields, nullable percentage, sparse historical items and opaque snapshots 3ms
+   × preserves nullable semantic fact metadata only inside baseline references 1ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","fitGapRefs":[3]}]} 2ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","reviewId":3}]} 1ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","templateVersion":3}]} 1ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","size":-1}]}]} 0ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","sha256":3}]}]} 1ms
+   × rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","finishedAt":3}]} 0ms
+   × rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","queuedAt":3}]} 0ms
+   × returns the exact handoff object and JSON after scoped admission 0ms
+   × rejects malformed or cross-project handoff {"release":{}} 0ms
+   × rejects malformed or cross-project handoff {"fitGaps":null} 0ms
+   × rejects malformed or cross-project handoff {"clarifications":[{"id":3}]} 0ms
+   × rejects malformed or cross-project handoff {"risksAndUnknowns":[null]} 0ms
+   × rejects malformed or cross-project handoff {"historicalClarificationsAvailable":"true"} 0ms
+   × rejects malformed or cross-project handoff {"releaseId":3} 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > preserves actual domain fields, nullable percentage, sparse historical items and opaque snapshots
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > preserves nullable semantic fact metadata only inside baseline references
+ReferenceError: entryReference is not defined
+ ❯ src/features/presales/api/presalesResponse.ts:225:11
+    223|         array(item)
+    224|         item.forEach((value) => {
+    225|           if (entryReference && key === 'evidenceIds' && value === nul…
+       |           ^
+    226|           string(value)
+    227|         })
+ ❯ src/features/presales/api/presalesResponse.ts:224:14
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ validateRecord src/features/presales/api/presalesResponse.ts:221:7
+ ❯ record src/features/presales/api/presalesResponse.ts:179:3
+ ❯ src/features/presales/api/presalesResponse.ts:350:9
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ project src/features/presales/api/presalesResponse.ts:344:5
+ ❯ decodeProject src/features/presales/api/presalesResponse.ts:374:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","fitGapRefs":[3]}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","reviewId":3}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","templateVersion":3}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","size":-1}]}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","sha256":3}]}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","finishedAt":3}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","queuedAt":3}]}
+AssertionError: expected ReferenceError: entryReference is not def… to match object { code: 'PRESALES_RESPONSE_INVALID' }
+
+- Expected
++ Received
+
+- {
+-   "code": "PRESALES_RESPONSE_INVALID",
++ ReferenceError {
++   "message": "entryReference is not defined",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:145:39
+    143| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    144|   respond({ ...project(), ...patch })
+    145|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    146| })
+    147| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > returns the exact handoff object and JSON after scoped admission
+ReferenceError: entryReference is not defined
+ ❯ src/features/presales/api/presalesResponse.ts:225:11
+    223|         array(item)
+    224|         item.forEach((value) => {
+    225|           if (entryReference && key === 'evidenceIds' && value === nul…
+       |           ^
+    226|           string(value)
+    227|         })
+ ❯ src/features/presales/api/presalesResponse.ts:224:14
+ ❯ optional src/features/presales/api/presalesResponse.ts:161:34
+ ❯ validateRecord src/features/presales/api/presalesResponse.ts:221:7
+ ❯ record src/features/presales/api/presalesResponse.ts:179:3
+ ❯ entity src/features/presales/api/presalesResponse.ts:520:3
+ ❯ handoff src/features/presales/api/presalesResponse.ts:499:58
+ ❯ decodeHandoff src/features/presales/api/presalesResponse.ts:475:3
+ ❯ src/features/presales/api/presalesApi.ts:210:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"release":{}}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"fitGaps":null}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"clarifications":[{"id":3}]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"risksAndUnknowns":[null]}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"historicalClarificationsAvailable":"true"}
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"releaseId":3}
+AssertionError: expected ReferenceError: entryReference is not def… to match object { code: 'PRESALES_RESPONSE_INVALID' }
+
+- Expected
++ Received
+
+- {
+-   "code": "PRESALES_RESPONSE_INVALID",
++ ReferenceError {
++   "message": "entryReference is not defined",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:175:43
+    173| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    174|   respond({ ...handoff(), ...patch })
+    175|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    176|     code: 'PRESALES_RESPONSE_INVALID',
+    177|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  16 failed | 61 passed (77)
+   Start at  09:05:02
+   Duration  336ms (transform 117ms, setup 0ms, import 189ms, tests 32ms, environment 241ms)

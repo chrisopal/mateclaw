@@ -1,0 +1,333 @@
+{
+  "task": "AQ20/AC20/R05",
+  "status": "SUBSTRATE_VERIFIED_APPLICATION_NOT_INTEGRATED",
+  "head": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2",
+  "tree": "3a16cabe1768953a4887c2613a1238b222815f55",
+  "base": "ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93",
+  "source_files": [
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesRequestHashV2.java",
+      "sha256": "b365bac533aa93e44b4dd3892cd078477a143b86dbed597edadcc83d8cdebdfd"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/h2/V219__presales_versioned_request_hash.sql",
+      "sha256": "2817cd290115cd0dd204f461a3fcbb82627384dfd0aaeb603f8789d623de9082"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/kingbase/V219__presales_versioned_request_hash.sql",
+      "sha256": "755a7c937bad1e2c31a80ba20da601a473a18d41c3f7e645026430a9c3a49f78"
+    },
+    {
+      "path": "mateclaw-server/src/main/resources/db/migration/mysql/V219__presales_versioned_request_hash.sql",
+      "sha256": "c86934050fff1944c355194314fb8267b712ca27821581153bbbcb4f1830971a"
+    },
+    {
+      "path": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashMigrationTest.java",
+      "sha256": "725b8a914777e9648d0b045150b4e2aa60659eb01d5afb63d8848a1f15429ced"
+    },
+    {
+      "path": "mateclaw-server/src/test/java/vip/mate/presales/PresalesRequestHashV2Test.java",
+      "sha256": "8875b0b38ef09ccd61bf771f840278113edfff3d118a8b696d202741295e7d2d"
+    }
+  ],
+  "red": {
+    "exit": 1,
+    "hash": {
+      "tests": 14,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0
+    },
+    "migration": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 7,
+      "skipped": 0
+    }
+  },
+  "final_presales": {
+    "exit": 0,
+    "tests": 313,
+    "actual": 312,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skip": "PRESALES_PPT_SKILL_ROOT absent"
+  },
+  "new_tests": [
+    {
+      "class": "vip.mate.presales.PresalesRequestHashMigrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "vip.mate.presales.PresalesRequestHashV2Test",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "mysql": {
+    "container": "mateclaw-aq-hash-bc39e9c895",
+    "schema_prefix": "mateclaw_aq_acceptance_d55a4fd5a4",
+    "state": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-hash-mysql-4rr9g0xe",
+    "phase_results": [
+      {
+        "phase": "seed",
+        "exit": 0
+      },
+      {
+        "phase": "restore-upgrade",
+        "exit": 0
+      },
+      {
+        "phase": "upgrade",
+        "exit": 0
+      },
+      {
+        "phase": "fresh",
+        "exit": 0
+      }
+    ],
+    "image": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b",
+    "id": "a96524714341d5cd36218f375358fe63f7cd9120a6d81ef8b196c94569daa9d6",
+    "port": "53071",
+    "status": "PASS",
+    "own_container_cleanup_exit": 0
+  },
+  "frozen_sources": [
+    {
+      "path": "mateclaw-server/src/main/java/db/migration/h2/V218__backfill_presales_listing_projection.java",
+      "sha256": "ca5d9f4dc4c0b0914a901d29de6fa63c17babb56c4d00b87543a559557ac6867",
+      "same_as_published_HEAD": true
+    },
+    {
+      "path": "mateclaw-server/src/main/java/db/migration/kingbase/V218__backfill_presales_listing_projection.java",
+      "sha256": "905cc12fc65748bf97833306b84786ea88bf60afc4818beb3636f29e6fb16920",
+      "same_as_published_HEAD": true
+    },
+    {
+      "path": "mateclaw-server/src/main/java/db/migration/mysql/V218__backfill_presales_listing_projection.java",
+      "sha256": "a1b3b382261230f3fe06603c7d10ecef5396c4a205286a48066dbffacc1c4f05",
+      "same_as_published_HEAD": true
+    },
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesListingProjectionV1.java",
+      "sha256": "855fe1891f23d06046539e1c0a8834c41a175c0397cf554ceb19b5f2a1c1b0d4",
+      "same_as_published_HEAD": true
+    },
+    {
+      "path": "mateclaw-server/src/main/java/vip/mate/presales/migration/PresalesListingProjectionBackfillV1.java",
+      "sha256": "64d9dc5ce7d13fd2d3203d0fa0595e12f56ab83738eaccd208ef2bd7108c9cce",
+      "same_as_published_HEAD": true
+    }
+  ],
+  "production_sources_unchanged": [
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesService.java",
+    "mateclaw-server/src/main/java/vip/mate/semantic/statement/StatementApplicationService.java"
+  ],
+  "not_run": [
+    "Service version dispatch and writer/replay integration",
+    "historical receipt policy pending",
+    "HTTP 409 preservation/concurrency rollout",
+    "Kingbase dialect/runtime",
+    "whole-system fresh install",
+    "production upgrade/reverse migration",
+    "business acceptance",
+    "remote required CI"
+  ],
+  "archives": [
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/red-maven.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-red.log",
+      "sha256": "7d7b60299364439591bbbe152241f80daa05edf6a59685120d80338a8f94b749",
+      "decoded_sha256": "a266b88b3a355ae74fbb144a9cc7ae59eb8fc7ff56a06ae93f2c788b437107a2",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/first-green-maven.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-green.log",
+      "sha256": "b97a213abe82c4d23aa3d73ee6dc8b852f9234d67cf829bb179f314f112185b1",
+      "decoded_sha256": "8e450c7368bd041a9d340214e7af1ec1b58d6275c14c94a9e95e6272cd400925",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-presales-maven.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-presales-final.log",
+      "sha256": "ea84fcc29f9b9eaad8b1dead5295f383bb7150f7fe5b1377bdb2fb894b45ad14",
+      "decoded_sha256": "047b2256000cf57c84e779a1445700f15c1dcc4575903206ad0da37e9f9eb1e2",
+      "redactions": 3
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-initial-failure.log.gz",
+      "source": "/tmp/mateclaw-hash-mysql-probe-run.log",
+      "sha256": "052a9cc2c33d35f1ef93c50e482e0eb13b2a98afa6bdcafd18f0c37b7dc7a7de",
+      "decoded_sha256": "a395898266888f3eb046fd3670783bab9d4b93fd7147846d428357a98a6e7909",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-final-run.log.gz",
+      "source": "/tmp/mateclaw-hash-mysql-probe-final.log",
+      "sha256": "1f81448700a05abc2ed32a32716ed1555f1193819e14a0dda51a28f3cc4ef519",
+      "decoded_sha256": "ef69258e76b7977f521a9f1e50123818666326860ca663179d94fd6c55877e19",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/substrate-dev.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-substrate-dev.log",
+      "sha256": "c3cb8c6f61c3961ae0c34b119d98c07b427ff95c0cc9ae1c4d0b492b89ecddce",
+      "decoded_sha256": "c7ddb1c863da00c4426e1027bad8a4fbf49d1b592feabaf1accd351111faf319",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/red-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "source": "/tmp/mateclaw-hash-v2-red-reports/TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml",
+      "sha256": "edf34dd20c800da593d1fdff5d32b3d8a569d5da4ad8437ee22364491b64f1e6",
+      "decoded_sha256": "107e13b7e8a87eadac0ac6c77f32c6b6509080c5e98783a0b86c46597b885a6e",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/red-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "source": "/tmp/mateclaw-hash-v2-red-reports/TEST-vip.mate.presales.PresalesRequestHashV2Test.xml",
+      "sha256": "0143906a60ecbeac7cbd706b80dffacae37ce3bbefffa2eb131b60807a3889e8",
+      "decoded_sha256": "f269fb59577ffa6dffbdd36d02912ddbc2ac08f0b88610857cdaaf9a6d9bb9eb",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/red-vip.mate.presales.PresalesRequestHashMigrationTest.txt.gz",
+      "source": "/tmp/mateclaw-hash-v2-red-reports/vip.mate.presales.PresalesRequestHashMigrationTest.txt",
+      "sha256": "243034584e3b304bafe9f717f43a627d8fd5689f688074469dce877a2392a29e",
+      "decoded_sha256": "46a94193717f75e4b0660d399283a621087729552a551b82915dc40877af8c7c",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/red-vip.mate.presales.PresalesRequestHashV2Test.txt.gz",
+      "source": "/tmp/mateclaw-hash-v2-red-reports/vip.mate.presales.PresalesRequestHashV2Test.txt",
+      "sha256": "31c79be7215eb4c9c69536e6cd01494614212ac80778351593aa030d69f949c7",
+      "decoded_sha256": "7afd5d9b41efc9199dff306407a46c4355407445f903260b2e44db0d4f34820b",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml",
+      "sha256": "89e9eb5a947ba532260a1552da81633433612745d69dea0e3ae6912b4b5c9192",
+      "decoded_sha256": "33e11b3bb56af1cf88a19374ceb8b1b44b6254d58cbf238f0c691315783b2b63",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-TEST-vip.mate.presales.PresalesRequestHashV2Test.xml.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/TEST-vip.mate.presales.PresalesRequestHashV2Test.xml",
+      "sha256": "0f02d998f1f3cfad05dff5fe44d41b9a8eeaebf6503f2ff5e80fb39d48880deb",
+      "decoded_sha256": "d7c95b0e79d2d2365b1f1fcf4cf58c0f1997302bae01f7bb39dff73d43d81f1d",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-vip.mate.presales.PresalesRequestHashMigrationTest.txt.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/vip.mate.presales.PresalesRequestHashMigrationTest.txt",
+      "sha256": "e23e1da206a4881db1122bc286e0f08fd6d55a7ec5722ff47a39debe4b683572",
+      "decoded_sha256": "d4702818e8ede42aaf2e628f5b5d1736723e3b1892427f361eca273f910e1fd0",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-vip.mate.presales.PresalesRequestHashV2Test.txt.gz",
+      "source": "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports/vip.mate.presales.PresalesRequestHashV2Test.txt",
+      "sha256": "100b6aef58be54524c61d369921cb9b550ee776dbaaefef86580a960b4815767",
+      "decoded_sha256": "08182c2a138d0ba358b05c29acc11708945c70e509dab612c137277f69781f8c",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-results.json.gz",
+      "source": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-hash-mysql-4rr9g0xe/results.json",
+      "sha256": "715875e706343eced5210a8be9636fbf78fab4eaf641e54d317b9ae113e1ca2d",
+      "decoded_sha256": "0a3eac3e6f25262d2053894d623c3d496dea2f610375f952af24b4ec443b25a9",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-probe.log.gz",
+      "source": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-hash-mysql-4rr9g0xe/probe.log",
+      "sha256": "b3566dc559f6c57cbd296e80798c5009b25f0b59b46aeaf3529286d6a7dcae33",
+      "decoded_sha256": "3eee1720c9cef7d86fcc4b2fde03e594684f33c0b0eced396929d8600ab04203",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-initial-results.json.gz",
+      "source": "/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-hash-mysql-ipxsq9e2/results.json",
+      "sha256": "11be026e21d88f0ea2db726ae65e728a3a913087a9f72b4571f781c7633e26d9",
+      "decoded_sha256": "f2827e95cb9ee2cc89ed5e2d502532774bb20a1609ca9f7b449048a830bb60f7",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-probe.java.gz",
+      "source": "/tmp/PresalesHashMysqlProbe.java",
+      "sha256": "21666440c1349af265b65ddcdc10275aedafb93c98775a65ac6101e78225c2af",
+      "decoded_sha256": "cd25d59324b8f7fe51893f8b3a8e5a903cd732884aaafba6b9d1d568fe4375c6",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/mysql-probe-runner.py.gz",
+      "source": "/tmp/mateclaw-hash-mysql-probe.py",
+      "sha256": "329355459e4a686e82884b3618ffd86186c594b7f364e9bb591b5be8763df8e6",
+      "decoded_sha256": "1c7301b7436043d881633bfeb4cda913fcfa150fbd82432c91b9399860cf8197",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/initial-dev-report.json.gz",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-szxr7ysm/report.json",
+      "sha256": "2c20600aaec5937fb39c491510317ae6be9035d5179b34a7e644e8662c1f35ff",
+      "decoded_sha256": "2f0a6658ed6cb58d7b0da1ad61d5f88ca4ab14b30a996cba15d436cbc1ba1fb5",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/substrate-dev-report.json.gz",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-g4k0xzzq/report.json",
+      "sha256": "561fff28177ef9ae9585fbcca3560945b99473d17b995381516a0c0db28d995f",
+      "decoded_sha256": "abdaa8a40d73b0064d45a6abaf3287faf1f74520b62017757cba41329496862c",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-dev.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-final-dev.log",
+      "sha256": "c4ddfdb14167bb490e378f1480e3cbbee16f4eec686da5a76bade5d4e23bc23d",
+      "decoded_sha256": "e7bf2b83a002c2cd1a796273b928abe63f0ee836be52616aee6ef709ab526ac2",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-dev-report.json.gz",
+      "source": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-b93ai_6r/report.json",
+      "sha256": "bc1529928ea111188eab400d87b726dfcc512a2b3aa30501859290dbc6b00c07",
+      "decoded_sha256": "06911d03319ca0b7a560c48530db919c544bb2d6c094a02532dc08f9b12ae7ab",
+      "redactions": 0
+    },
+    {
+      "path": "docs/architecture-quality-v1/evidence/2026-10-04/hash-v2-substrate-tests/final-format-check.log.gz",
+      "source": "/tmp/mateclaw-hash-v2-final-format-check.log",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "decoded_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redactions": 0
+    }
+  ],
+  "final_dev": {
+    "task": "b93ai_6r",
+    "exit": 0,
+    "status": "SCAN_PASS",
+    "submission_ready": false,
+    "application_toolchains": "NOT_RUN"
+  },
+  "format_check": {
+    "tool": "Google Java Format1.22.0 AOSP",
+    "mode": "dry-run/set-exit-if-changed",
+    "exit": 0,
+    "scope": "three new Java files"
+  },
+  "independent_review": {
+    "agent": "/root/authority_writer_audit",
+    "verdict": "COMMENT",
+    "substantive_blockers": 0,
+    "original_low_evidence_findings": "both addressed, read-back confirmed",
+    "Java_LSP": "NOT_RUN",
+    "integration_approval": false
+  }
+}

@@ -1,0 +1,761 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] MateClaw                                                           [pom]
+[INFO] MateClaw Plugin API                                                [jar]
+[INFO] MateClaw Semantic Core                                             [jar]
+[INFO] MateClaw Semantic OWL Adapter                                      [jar]
+[INFO] MateClaw Semantic Application                                      [jar]
+[INFO] MateClaw Server                                                    [jar]
+[INFO] 
+[INFO] -------------------------< vip.mate:mateclaw >--------------------------
+[INFO] Building MateClaw 2.3.0-SNAPSHOT                                   [1/6]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw:pom:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --------------------< vip.mate:mateclaw-plugin-api >--------------------
+[INFO] Building MateClaw Plugin API 2.3.0-SNAPSHOT                        [2/6]
+[INFO]   from mateclaw-plugin-api/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-plugin-api ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-plugin-api/src/main/resources
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-plugin-api ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-plugin-api:jar:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-plugin-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-plugin-api ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-plugin-api/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-plugin-api ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-plugin-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------------< vip.mate:mateclaw-semantic-core >-------------------
+[INFO] Building MateClaw Semantic Core 2.3.0-SNAPSHOT                     [3/6]
+[INFO]   from mateclaw-semantic-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-core ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-core/src/main/resources
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-core ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-core:jar:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-core ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-core/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-core ---
+[INFO] 
+[INFO] -------------------< vip.mate:mateclaw-semantic-owl >-------------------
+[INFO] Building MateClaw Semantic OWL Adapter 2.3.0-SNAPSHOT              [4/6]
+[INFO]   from mateclaw-semantic-owl/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-owl ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-owl/src/main/resources
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-owl ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-owl:jar:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-owl ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-owl ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-owl/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-owl ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-owl ---
+[INFO] 
+[INFO] ---------------< vip.mate:mateclaw-semantic-application >---------------
+[INFO] Building MateClaw Semantic Application 2.3.0-SNAPSHOT              [5/6]
+[INFO]   from mateclaw-semantic-application/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-semantic-application ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-application/src/main/resources
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-semantic-application ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-semantic-application:jar:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-semantic-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-semantic-application ---
+[INFO] skip non existing resourceDirectory /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-semantic-application/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-semantic-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-semantic-application ---
+[INFO] 
+[INFO] ----------------------< vip.mate:mateclaw-server >----------------------
+[INFO] Building MateClaw Server 2.3.0-SNAPSHOT                            [6/6]
+[INFO]   from mateclaw-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.8.1:properties (resolve-test-classpath-properties) @ mateclaw-server ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ mateclaw-server ---
+[INFO] Copying 1657 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- flatten:1.7.3:flatten (flatten) @ mateclaw-server ---
+[INFO] Generating flattened POM of project vip.mate:mateclaw-server:jar:2.3.0-SNAPSHOT...
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ mateclaw-server ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ mateclaw-server ---
+[INFO] Copying 11 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ mateclaw-server ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ mateclaw-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running vip.mate.channel.webchat.WebChatAttachmentE2ETest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+10:45:52.581 INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+10:45:52.606 INFO  v.m.c.w.WebChatAttachmentE2ETest - Starting WebChatAttachmentE2ETest using Java 21.0.7 with PID 75734 (started by guojiexie in /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server)
+10:45:52.607 DEBUG v.m.c.w.WebChatAttachmentE2ETest - Running with Spring Boot v3.5.16, Spring v6.2.19
+10:45:52.607 INFO  v.m.c.w.WebChatAttachmentE2ETest - The following 1 profile is active: "dev"
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+10:45:54.376 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+10:45:54.385 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+10:45:54.385 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+10:45:54.385 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.55]
+10:45:54.420 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+10:45:54.420 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1742 ms
+10:45:54.503 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+10:45:54.597 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:webchat_att_e2e_4767418f-4583-4d06-b255-f97c5a7ee1ea user=SA
+10:45:54.598 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+10:45:54.601 INFO  vip.mate.MateClawApplication - Detected database type: H2 (product=h2)
+ _ _   |_  _ _|_. ___ _ |    _ 
+| | |\/|_)(_| | |_\  |_)||_|_\ 
+     /               |         
+                        3.5.16 
+10:45:54.788 INFO  vip.mate.config.FlywayRepairConfig - [Flyway] Running repair before migrate (auto-fix failed/changed migrations)...
+10:45:54.817 INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:h2:mem:webchat_att_e2e_4767418f-4583-4d06-b255-f97c5a7ee1ea (H2 2.3)
+10:45:54.830 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Repair of failed migration in Schema History table "public"."flyway_schema_history" not necessary as table doesn't exist.
+10:45:54.868 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "public"."flyway_schema_history" does not exist yet
+10:45:54.871 INFO  o.f.core.internal.command.DbRepair - Successfully repaired schema history table "public"."flyway_schema_history" (execution time 00:00.042s).
+10:45:54.903 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "public"."flyway_schema_history" does not exist yet
+10:45:54.904 INFO  o.f.core.internal.command.DbValidate - Successfully validated 209 migrations (execution time 00:00.023s)
+10:45:54.906 INFO  org.flywaydb.core.Flyway - All configured schemas are empty; baseline operation skipped. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended.
+10:45:54.907 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "public"."flyway_schema_history" ...
+10:45:54.920 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+10:45:54.931 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "1 - baseline schema"
+10:45:54.957 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "2 - workspace base path"
+10:45:54.963 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "3 - register cron job tool"
+10:45:54.966 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "4 - agent thinking level"
+10:45:54.971 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "5 - conversation parent"
+10:45:54.975 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "6 - plugin table"
+10:45:54.978 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "7 - wiki last processed hash"
+10:45:54.982 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "8 - wiki raw progress"
+10:45:54.988 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "9 - usage cache tokens"
+10:45:54.994 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "10 - hook system"
+10:45:54.997 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "11 - skill synthesis"
+10:45:55.001 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "12 - wiki chunk table"
+10:45:55.004 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "13 - wiki chunk embedding"
+10:45:55.008 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "14 - embedding model config"
+10:45:55.013 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "15 - purge unavailable dashscope models"
+10:45:55.016 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "16 - purge dot version dashscope models"
+10:45:55.018 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "20 - purge soft deleted rows"
+10:45:55.022 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "21 - provider fallback priority"
+10:45:55.025 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "23 - wiki relation model"
+10:45:55.032 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "24 - wiki processing job"
+10:45:55.035 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "25 - agent provider preference"
+10:45:55.037 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "26 - dream report"
+10:45:55.039 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "27 - memory recall review fields"
+10:45:55.044 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "28 - morning card seen"
+10:45:55.046 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "29 - memory fact projection"
+10:45:55.049 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "30 - register collab skills"
+10:45:55.051 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "31 - register docx render tool"
+10:45:55.053 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "32 - bailian team provider"
+10:45:55.056 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "33 - expand api key column"
+10:45:55.059 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "34 - siliconflow opencode providers"
+10:45:55.063 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "35 - skill security scan result"
+10:45:55.067 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "36 - skill i18n name"
+10:45:55.071 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "37 - wiki page source entries"
+10:45:55.074 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "38 - wiki chunk content mediumtext"
+10:45:55.076 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "39 - rfc051 chunk metadata"
+10:45:55.080 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "40 - rfc051 page locked"
+10:45:55.082 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "41 - rfc051 page archived"
+10:45:55.085 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "42 - claude 47 gpt 55 models"
+10:45:55.087 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "43 - rfc062 claude code oauth provider"
+10:45:55.089 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "44 - fix claude sonnet 47 does not exist"
+10:45:55.091 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "45 - deepseek v4 models"
+10:45:55.093 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "46 - stt default enabled"
+10:45:55.095 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "47 - agent max iterations 100"
+10:45:55.096 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "48 - agent max iterations and agents md tools"
+10:45:55.100 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "49 - reenable write edit file tools"
+10:45:55.102 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "50 - fix agents md tool guidance concat"
+10:45:55.104 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "51 - remove write edit file from toolguard"
+10:45:55.105 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "52 - feishu default connection mode"
+10:45:55.106 INFO  o.f.c.i.s.DefaultSqlScriptExecutor - +---+
+| 1 |
++---+
+| 1 |
++---+
+
+10:45:55.108 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "53 - feishu connection mode recover"
+10:45:55.110 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "54 - channel names to chinese for zh locale"
+10:45:55.113 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "55 - provider enabled"
+10:45:55.118 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "56 - volcengine plan provider"
+10:45:55.121 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "57 - cron run delivery status"
+10:45:55.124 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "58 - cron channel binding"
+10:45:55.127 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "59 - approval chat origin snapshot"
+10:45:55.129 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "60 - fix invalid workspace member roles"
+10:45:55.132 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "61 - agent creator user id"
+10:45:55.134 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "62 - cron job workspace id"
+10:45:55.136 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "63 - channel identity json"
+10:45:55.137 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "64 - cleanup unused channel seeds"
+10:45:55.139 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "65 - seed tasks conversation per workspace"
+10:45:55.142 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "66 - add model capabilities"
+10:45:55.145 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "67 - add skill manifest"
+10:45:55.147 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "68 - add acp endpoints"
+10:45:55.149 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "69 - cron job dedup unique"
+10:45:55.150 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "70 - cron job dedup safety"
+10:45:55.151 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "71 - hunyuan 3d provider"
+10:45:55.153 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "72 - hunyuan 3d model config"
+10:45:55.155 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "73 - add skill secret"
+10:45:55.156 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "74 - shedlock table"
+10:45:55.157 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "75 - model config request timeout"
+10:45:55.159 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "76 - personal access token"
+10:45:55.161 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "77 - wiki relation table"
+10:45:55.163 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "78 - feature flag"
+10:45:55.165 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "79 - wiki image caption cache"
+10:45:55.167 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "80 - wiki raw material mime type"
+10:45:55.170 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "81 - refresh bailian qwen catalog"
+10:45:55.172 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "82 - wiki hot cache"
+10:45:55.174 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "84 - widen raw material mime type"
+10:45:55.175 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "85 - ckjia mcp seed"
+10:45:55.176 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "87 - skill usage stat"
+10:45:55.178 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "88 - convert default agent icons to pixelart"
+10:45:55.179 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "89 - chatgpt oauth model discovery"
+10:45:55.180 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "90 - zhipu coding plan provider"
+10:45:55.183 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "91 - widen message and skill content"
+10:45:55.186 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "92 - mcp server tools cache"
+10:45:55.188 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "93 - xiaomi mimo provider"
+10:45:55.190 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "94 - register office render tools"
+10:45:55.191 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "95 - wiki raw material cancel"
+10:45:55.193 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "96 - workflow foundations"
+10:45:55.196 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "97 - workflow purge tombstones"
+10:45:55.197 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "98 - trigger last error"
+10:45:55.199 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "99 - dashscope compat provider"
+10:45:55.200 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "100 - multimodal default models"
+10:45:55.202 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "101 - cleanup blank tool guard rule id"
+10:45:55.205 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "102 - agent unique name per workspace"
+10:45:55.207 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "103 - drop fact entity ref"
+10:45:55.208 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "104 - wiki chunk embedding text version"
+10:45:55.210 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "105 - wiki transformation"
+10:45:55.212 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "106 - wiki transformation output target"
+10:45:55.215 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "107 - wiki page embedding"
+10:45:55.217 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "108 - wiki transformation starter pack"
+10:45:55.221 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "109 - wiki transformation output format"
+10:45:55.223 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "110 - wiki transformation run tokens"
+10:45:55.226 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "111 - wiki transformation output schema"
+10:45:55.227 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "112 - skill file"
+10:45:55.228 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "113 - workspace memory search and async indexes"
+10:45:55.229 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "114 - conversation pinned"
+10:45:55.232 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "115 - xai grok provider"
+10:45:55.234 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "116 - conversation model"
+10:45:55.236 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "117 - skill lifecycle"
+10:45:55.240 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "118 - purge model config tombstones"
+10:45:55.241 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "119 - channel tool support"
+10:45:55.247 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "120 - agent goal"
+10:45:55.248 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "121 - tool disclosure tier"
+10:45:55.251 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "122 - fix generative tool tier names"
+10:45:55.252 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "123 - conversation progress ledger"
+10:45:55.254 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "124 - agent max iterations 150"
+10:45:55.255 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "125 - agent workspace base path"
+10:45:55.257 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "126 - agent binding disabled flags"
+10:45:55.259 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "127 - approval auto grant"
+10:45:55.260 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "128 - approval resolution log"
+10:45:55.261 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "129 - wiki page broken links"
+10:45:55.262 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "130 - agent primary kb"
+10:45:55.264 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "131 - claude 48 models"
+10:45:55.265 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "132 - memory consolidation cron tier discipline"
+10:45:55.267 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "133 - wiki agent page type permission"
+10:45:55.269 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "134 - wiki page type profile"
+10:45:55.272 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "135 - wiki layered knowledge"
+10:45:55.275 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "136 - wiki pipeline runtime"
+10:45:55.277 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "137 - memory owner scope"
+10:45:55.282 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "138 - rename search tool to web search"
+10:45:55.283 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "139 - mcp default read timeout 60s"
+10:45:55.284 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "140 - goal criteria checklist"
+10:45:55.286 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "141 - agent wiki kb scope"
+10:45:55.287 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "142 - wiki transformation target page type"
+10:45:55.288 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "143 - register code execute tool"
+10:45:55.293 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "144 - ckjia mcp fix production endpoint"
+10:45:55.294 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "145 - claude fable 5 models"
+10:45:55.295 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "146 - wiki kb watcher enabled"
+10:45:55.296 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "147 - wiki page aliases"
+10:45:55.297 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "148 - wiki entity"
+10:45:55.298 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "149 - wiki entity mention"
+10:45:55.299 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "150 - wiki entity relation"
+10:45:55.300 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "151 - webchat session id"
+10:45:55.301 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "152 - webchat archive and revocation"
+10:45:55.303 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "153 - zhipu glm 5 2"
+10:45:55.305 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "154 - agent wiki disabled"
+10:45:55.306 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "155 - plan conversation id"
+10:45:55.307 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "156 - sub plan assigned agent"
+10:45:55.309 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "157 - register session list tool"
+10:45:55.310 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "158 - register session send tool"
+10:45:55.311 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "159 - sso external identity"
+10:45:55.312 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "160 - register local tools"
+10:45:55.313 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "161 - agent provider preference model"
+10:45:55.315 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "162 - wiki raw material error code"
+10:45:55.316 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "163 - wiki raw material warning"
+10:45:55.318 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "164 - kb open api key"
+10:45:55.319 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "165 - wiki transformation starter pack global"
+10:45:55.320 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "166 - message usage detail"
+10:45:55.322 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "167 - volcengine agent plan provider"
+10:45:55.323 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "168 - content studio seed"
+10:45:55.325 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "169 - content item ledger"
+10:45:55.326 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "170 - guard audit auto approve outcome"
+10:45:55.327 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "171 - widen conversation id for channel scoping"
+10:45:55.328 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "172 - agent team foundation"
+10:45:55.329 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "173 - register team tasks tool"
+10:45:55.329 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "174 - team task event timeline"
+10:45:55.330 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "175 - register channel message tool"
+10:45:55.331 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "176 - skill routine candidate"
+10:45:55.332 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "177 - skill origin and snapshot"
+10:45:55.333 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "178 - skill curator seen at"
+10:45:55.334 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "179 - skill snapshot workspace"
+10:45:55.335 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "180 - team workspace isolation"
+10:45:55.337 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "181 - team run foundation"
+10:45:55.338 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "182 - team run stable history indexes"
+10:45:55.339 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "183 - conversation kind"
+10:45:55.340 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "184 - team task conversation index"
+10:45:55.341 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "185 - register officecli support"
+10:45:55.342 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "186 - agent runtime provider"
+10:45:55.343 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "187 - acp prompt timeout"
+10:45:55.345 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "188 - goal continuation"
+10:45:55.346 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "189 - goal attempt and input queue"
+10:45:55.349 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "190 - cron run heartbeat"
+10:45:55.351 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "191 - semantic ontology"
+10:45:55.353 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "192 - semantic graph"
+10:45:55.354 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "193 - semantic facts and sources"
+10:45:55.356 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "194 - register semantic tool"
+10:45:55.357 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "195 - semantic conflict member kind"
+10:45:55.358 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "196 - semantic governance events"
+10:45:55.359 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "197 - semantic extraction"
+10:45:55.360 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "198 - register ontology authoring tool"
+10:45:55.361 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "199 - semantic owl document"
+10:45:55.371 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "200 - semantic owl assertion"
+10:45:55.373 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "201 - semantic ontology sources"
+10:45:55.374 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "202 - register semantic context tool"
+10:45:55.375 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "203 - register semantic reasoning tool"
+10:45:55.376 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "204 - semantic source review snapshots"
+10:45:55.378 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "206 - semantic source change review"
+10:45:55.379 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "207 - semantic graph owl migration"
+10:45:55.380 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "208 - semantic modeling tasks"
+10:45:55.381 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "209 - semantic validation reports"
+10:45:55.382 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "210 - semantic ontology archive"
+10:45:55.384 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "211 - presales projects"
+10:45:55.385 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "212 - bidding foundation"
+10:45:55.387 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "213 - bidding source read state"
+10:45:55.388 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "214 - bidding task actor"
+10:45:55.390 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "215 - bidding materials"
+10:45:55.390 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "216 - bidding artifacts"
+10:45:55.393 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 209 migrations to schema "public", now at version v216 (execution time 00:00.135s)
+10:45:55.490 DEBUG vip.mate.config.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+10:45:55.491 DEBUG v.m.kbopen.auth.KbOpenApiAuthFilter - Filter 'kbOpenApiAuthFilter' configured for use
+10:45:55.692 INFO  v.m.t.search.SearchProviderRegistry - 注册搜索提供商 4 个: [searxng(order=50), duckduckgo(order=100), serper(order=300), tavily(order=400)]
+10:45:55.692 WARN  v.mate.system.service.SettingCrypto - [SettingCrypto] No MATECLAW_SETTING_KEY set — encrypting sensitive settings with a built-in default key (obfuscation only). Set MATECLAW_SETTING_KEY to a strong secret in production and back it up; losing it makes stored secrets unreadable.
+10:45:55.782 INFO  vip.mate.skill.acp.AcpSkillBridge - AcpSkillBridge initialized (virtual ID range: -4611686018427387904+endpointId)
+10:45:55.854 INFO  v.m.s.runtime.SkillRuntimeService - SkillRuntimeService initialized
+10:45:55.884 INFO  v.mate.tool.guard.WorkspacePathGuard - [WorkspacePathGuard] Trusted root added: /var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw/tool-results
+10:45:56.004 INFO  v.m.t.guard.engine.ToolGuardEngine - [ToolGuardEngine] Initialized with 5 guardians: [WorkspaceBoundaryGuardian, FilePathGuardian, CredentialExposureGuardian, ShellCommandGuardian, DbRuleGuardian]
+10:45:56.017 INFO  v.m.approval.ApprovalWorkflowService - [ApprovalWorkflow] GC scheduler started (interval=5min)
+10:45:56.094 DEBUG v.m.s.featureflag.FeatureFlagService - [FeatureFlag] refreshed 9 flags from DB
+10:45:56.095 INFO  vip.mate.memory.spi.MemoryManager - [MemoryManager] Active providers (5): builtin, structured, session_search, wiki_hot_cache, fact_store 
+10:45:56.219 INFO  v.m.w.service.WikiEmbeddingService - [WikiEmbedding] Embedding input version: v1 (from builder)
+10:45:56.220 INFO  vip.mate.wiki.metrics.WikiMetrics - [WikiMetrics] MeterRegistry available; metrics enabled
+10:45:56.279 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'append_file' as unsafe (AppendFileTool#append_file): append file — must serialize with reads/writes on overlapping paths
+10:45:56.281 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'execute_code' as unsafe (CodeExecuteTool#execute_code): code execution can have arbitrary side effects on the host process and filesystem
+10:45:56.281 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'create_cron_job' as unsafe (CronJobTool#create_cron_job): cron job creation persists to mate_cron_job; concurrent creates can race on name
+10:45:56.281 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'create_reminder' as unsafe (CronJobTool#create_reminder): reminder creation persists to mate_cron_job; concurrent creates can race on name
+10:45:56.282 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'toggle_cron_job' as unsafe (CronJobTool#toggle_cron_job): toggles row state in mate_cron_job; serialize to keep enabled/disabled deterministic
+10:45:56.282 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'delete_cron_job' as unsafe (CronJobTool#delete_cron_job): destructive — removes row from mate_cron_job
+10:45:56.283 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'delegateToAgent' as unsafe (DelegateAgentTool#delegateToAgent): spawns a child agent session and writes to mate_conversation; serialize to keep session graph deterministic
+10:45:56.283 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'delegateParallel' as unsafe (DelegateAgentTool#delegateParallel): internally fans out to its own thread pool; outer executor must not double-parallelize
+10:45:56.283 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'edit_file' as unsafe (EditFileTool#edit_file): in-place file edit — must not race with reads/writes on the same path
+10:45:56.284 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'image_generate' as unsafe (ImageGenerateTool#image_generate): creates async tasks and persists generated artifacts; provider rate limits also forbid parallel calls
+10:45:56.284 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'office_document' as unsafe (OfficeCliTool#office_document): OfficeCLI starts native processes and may use document-level locks
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'execute_shell_command' as unsafe (ShellExecuteTool#execute_shell_command): shell command execution can mutate global state in ways the executor can't reason about
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'skill_manage' as unsafe (SkillManageTool#skill_manage): create/edit/patch/delete on the shared skill registry; concurrent ops on the same skill name race
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'runSkillScript' as unsafe (SkillScriptTool#runSkillScript): script execution can have arbitrary side effects on the host process and filesystem
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'video_generate' as unsafe (VideoGenerateTool#video_generate): creates async tasks and persists generated artifacts; provider rate limits also forbid parallel calls
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'write_workspace_memory_file' as unsafe (WorkspaceMemoryTool#write_workspace_memory_file): workspace memory write — concurrent writes to the same file would clobber each other
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'edit_workspace_memory_file' as unsafe (WorkspaceMemoryTool#edit_workspace_memory_file): workspace memory edit — find/replace must serialize per file
+10:45:56.285 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'write_file' as unsafe (WriteFileTool#write_file): file write — must serialize with reads/writes on overlapping paths
+10:45:56.293 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'local_write_file' as unsafe (LocalFileTools#local_write_file): local file write — must serialize with reads/writes on overlapping paths
+10:45:56.294 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'local_edit_file' as unsafe (LocalFileTools#local_edit_file): local in-place edit — must not race with reads/writes on the same path
+10:45:56.294 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'local_execute_shell' as unsafe (LocalShellTool#local_execute_shell): local shell command execution can mutate global state on the user's machine
+10:45:56.294 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Marked tool 'model3d_generate' as unsafe (Model3dGenerateTool#model3d_generate): creates async tasks and persists generated 3D assets; provider rate limits also forbid parallel calls
+10:45:56.362 INFO  v.mate.tool.ToolConcurrencyRegistry - [ToolConcurrencyRegistry] Concurrency-unsafe tools (24): [create_reminder, office_document, image_generate, browser_use, video_generate, local_write_file, local_execute_shell, skill_manage, write_workspace_memory_file, model3d_generate, append_file, execute_code, local_edit_file, delegateParallel, create_cron_job, edit_file, execute_shell_command, BrowserUseTool, delete_cron_job, edit_workspace_memory_file, write_file, toggle_cron_job, delegateToAgent, runSkillScript]
+10:45:56.369 INFO  v.m.l.c.ProviderChatModelFactory - [ProviderChatModelFactory] registered builders for protocols: [ANTHROPIC_MESSAGES, OPENAI_CHATGPT, OPENAI_COMPATIBLE, DASHSCOPE_NATIVE, ANTHROPIC_CLAUDE_CODE, GEMINI_NATIVE]
+10:45:56.432 INFO  v.m.a.grant.AutoGrantSafetyFloor - [APPROVAL] SafetyFloor frozen: hardBlock=7 patterns, forceHuman=5 patterns
+10:45:56.504 INFO  v.m.a.runtime.dsh.DshRuntimeService - [DSH] runtime configured: command=dsh-jsonrpc-agent, cordisConfig=<empty>
+10:45:56.554 INFO  vip.mate.tts.TtsProviderRegistry - 注册 TTS 提供商 3 个: [edge-tts(order=100), dashscope(order=150), openai(order=200)]
+10:45:56.559 INFO  v.m.c.w.cards.WeComCardDispatcher - [wecom-cards] Registered card kind: name=tool_guard_approval messageType=tool_guard_approval taskIdPrefix=tg_approval_
+10:45:56.561 INFO  v.m.c.f.cards.FeishuCardDispatcher - [feishu-cards] Registered card kind: name=tool_guard_approval actionPrefix=tg_approval.
+10:45:56.562 INFO  vip.mate.stt.SttProviderRegistry - 注册 STT 提供商 2 个: [dashscope(default-order=150), openai(default-order=100)]
+10:45:56.563 INFO  vip.mate.cron.config.ShedLockConfig - [ShedLock] Initializing JDBC LockProvider for cron scheduling (usingDbTime=true)
+10:45:56.570 INFO  v.m.c.v.ChannelVerifierRegistry - ChannelVerifierRegistry indexed 7 verifier(s): [feishu, discord, slack, telegram, wecom, dingtalk, weixin]
+10:45:56.573 INFO  v.m.c.q.ChannelQRCodeAuthRegistry - [qrcode-auth] registered 3 provider(s): [dingtalk, qq, feishu]
+10:45:56.574 INFO  v.m.channel.tool.ChannelToolService - [channel-tool] Registered providers: [feishu]
+10:45:56.612 INFO  vip.mate.cli.MateClawCli$CliRunner - CLI ready, registered 1 command(s): [export]
+10:45:56.713 INFO  vip.mate.hook.HookRegistry - hook registry loaded: 0 hooks (0 skipped)
+10:45:56.848 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: airtable-base (prompt)
+10:45:56.848 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: claude-code-helper (acp)
+10:45:56.849 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: codex-coding-helper (acp)
+10:45:56.849 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: crm-assistant (prompt)
+10:45:56.849 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: data-analyst-prompt (prompt)
+10:45:56.849 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: email-summarizer (prompt)
+10:45:56.849 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: legal-clauses-qa (knowledge)
+10:45:56.850 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: meeting-summarizer (prompt)
+10:45:56.850 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: obsidian-vault (prompt)
+10:45:56.850 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: tcm-qa (knowledge)
+10:45:56.850 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: training-qa (knowledge)
+10:45:56.850 INFO  v.m.s.template.SkillTemplateRegistry - Loaded skill template: weekly-report (prompt)
+10:45:56.851 INFO  v.m.s.template.SkillTemplateRegistry - SkillTemplateRegistry loaded 12 template(s)
+10:45:56.852 INFO  v.mate.tool.guard.WorkspacePathGuard - [WorkspacePathGuard] Trusted skill root: /Users/guojiexie/.mateclaw/skills
+10:45:56.876 INFO  v.m.tool.image.ImageProviderRegistry - 注册图片生成提供商 7 个: [dashscope(order=100), zhipu-cogview(order=150), openai-chatgpt(order=195), openai(order=200), google-imagen(order=250), fal(order=300), minimax(order=350)]
+10:45:56.881 INFO  v.m.tool.video.VideoProviderRegistry - 注册视频生成提供商 6 个: [dashscope(order=100), zhipu-cogvideo(order=200), kling(order=250), runway(order=250), fal(order=300), minimax(order=350)]
+10:45:56.883 INFO  v.m.t.guard.ToolGuardEngineAdapter - [ToolGuardEngineAdapter] Active — new guardian engine is now handling all tool guard checks
+10:45:56.886 INFO  v.m.t.m.Model3dProviderRegistry - 注册 3D 模型生成 Provider 1 个: [hunyuan-3d(order=100)]
+10:45:56.887 INFO  v.m.tool.music.MusicProviderRegistry - 注册音乐生成 Provider 2 个: [google-lyria(order=100), minimax(order=200)]
+10:45:56.982 INFO  v.m.w.event.WikiProcessingListener - [Wiki] Listener initialized with rawMaterialSemaphore permits=3
+10:45:56.984 INFO  vip.mate.wiki.job.WikiJobDispatcher - [WikiDispatcher] Registered templates: [LightEnrichTemplate, LocalRepairTemplate, HeavyIngestTemplate]
+10:45:56.995 INFO  v.m.w.c.c.ChatUploadAutoConfiguration - [ChatUpload] Default upload dir: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/data/chat-uploads
+10:45:56.996 INFO  v.mate.tool.guard.WorkspacePathGuard - [WorkspacePathGuard] Default sandbox root: /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/data/workspace
+10:45:57.051 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+10:45:57.178 INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+10:45:57.190 WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 4366b597-7cd4-41b1-802e-f0e431eafa99
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+10:45:57.335 INFO  c.b.m.e.s.MybatisPlusApplicationContextAware - Register ApplicationContext instances org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@1d23ff23
+10:45:57.433 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+10:45:57.447 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 50690 (http) with context path '/'
+10:45:57.459 INFO  vip.mate.hook.HookRegistry - hook registry loaded: 0 hooks (0 skipped)
+10:45:57.460 INFO  v.m.c.w.WebChatAttachmentE2ETest - Started WebChatAttachmentE2ETest in 5.059 seconds (process running for 5.48)
+10:45:57.465 DEBUG v.m.s.featureflag.FeatureFlagService - [FeatureFlag] refreshed 9 flags from DB
+10:45:57.495 INFO  v.m.config.DatabaseBootstrapRunner - Auto-initializing database with default locale: zh-CN
+10:45:57.496 INFO  v.m.config.DatabaseBootstrapRunner - Detected database: h2 (MySQL mode: false)
+10:45:57.496 INFO  v.m.config.DatabaseBootstrapRunner - Initializing database with locale=zh-CN using db/data-zh.sql
+10:45:57.517 INFO  v.m.config.DatabaseBootstrapRunner - Database initialization completed successfully
+10:45:57.518 WARN  v.m.config.SecurityStartupValidator - [Security] CORS allows all origins. Set MATECLAW_CORS_ALLOWED_ORIGINS in production.
+10:45:57.518 INFO  v.m.w.c.c.WorkspaceSchemaMigration - Created default workspace (id=1, slug='default')
+10:45:57.519 INFO  v.m.w.c.c.WorkspaceSchemaMigration - Bootstrapped admin user 1 as owner of default workspace
+10:45:57.550 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'apple-notes' (version=1.0.0)
+10:45:57.551 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'architecture-diagram' (version=1.0.0)
+10:45:57.553 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'arxiv' (version=1.0.0)
+10:45:57.554 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'ascii-art' (version=4.0.0)
+10:45:57.555 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'baoyu-comic' (version=1.56.1)
+10:45:57.556 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'baoyu-infographic' (version=1.56.1)
+10:45:57.558 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-document-export' (version=1.0.1)
+10:45:57.559 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-elimination-analysis' (version=1.0.0)
+10:45:57.560 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-outline-planning' (version=1.0.0)
+10:45:57.561 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-requirement-analysis' (version=1.0.0)
+10:45:57.561 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-scoring-analysis' (version=1.0.1)
+10:45:57.562 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-technical-review' (version=1.0.0)
+10:45:57.563 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-technical-writing' (version=1.0.0)
+10:45:57.564 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'bidding-tender-profile' (version=1.0.0)
+10:45:57.565 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'blogwatcher' (version=2.0.0)
+10:45:57.568 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'browser_cdp' (version=1.2.0)
+10:45:57.569 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'browser_visible' (version=1.3.0)
+10:45:57.570 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'channel_message' (version=2.0.0)
+10:45:57.571 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'chat_with_agent' (version=1.2.0)
+10:45:57.572 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'ckjia-shopping' (version=1.0.1)
+10:45:57.572 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'claude-design' (version=1.0.0)
+10:45:57.573 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'cron' (version=1.4.0)
+10:45:57.574 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'deai_humanize' (version=1.0.0)
+10:45:57.575 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'design-md' (version=1.0.0)
+10:45:57.576 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'digital_employee' (version=1.0.0)
+10:45:57.577 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'dingtalk_channel_connect' (version=1.3.0)
+10:45:57.579 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'docx' (version=1.1.0)
+10:45:57.580 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'dspy' (version=1.0.0)
+10:45:57.581 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'file_reader' (version=1.2.0)
+10:45:57.582 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'guidance' (version=1.2.0)
+10:45:57.583 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'gzh_article' (version=1.3.0)
+10:45:57.584 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'himalaya' (version=1.0.0)
+10:45:57.585 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'humanizer' (version=2.5.1)
+10:45:57.586 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'ideation' (version=1.0.0)
+10:45:57.587 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'make_plan' (version=1.3.0)
+10:45:57.588 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'mateclaw_source_index' (version=1.0.0)
+10:45:57.589 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'multi_agent_collaboration' (version=1.4.0)
+10:45:57.590 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'news' (version=2.0.0)
+10:45:57.591 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'node-inspect-debugger' (version=1.1.0)
+10:45:57.591 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'officecli' (version=1.0.0)
+10:45:57.592 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'ontology-builder' (version=3.0.0)
+10:45:57.593 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'outlines' (version=1.0.0)
+10:45:57.593 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'p5js' (version=1.0.0)
+10:45:57.594 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'pdf' (version=1.0.0)
+10:45:57.595 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'pixel-art' (version=2.0.0)
+10:45:57.596 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'plan' (version=1.0.0)
+10:45:57.596 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'popular-web-designs' (version=1.0.0)
+10:45:57.598 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'pptx' (version=1.0.0)
+10:45:57.599 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-capability-mapping' (version=1.0.0)
+10:45:57.600 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-case-retrieval' (version=1.0.0)
+10:45:57.600 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-context-maintenance' (version=1.0.0)
+10:45:57.601 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-customer-context-analysis' (version=1.0.0)
+10:45:57.601 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-proposal-generation' (version=1.0.0)
+10:45:57.602 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-requirement-analysis-and-clarification' (version=1.0.0)
+10:45:57.602 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-solution-composer' (version=1.0.0)
+10:45:57.603 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'presales-solution-review' (version=1.0.0)
+10:45:57.604 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'pretext' (version=1.0.0)
+10:45:57.605 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'python-debugpy' (version=1.0.0)
+10:45:57.606 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'requesting-code-review' (version=2.0.0)
+10:45:57.607 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'research-paper-writing' (version=1.1.0)
+10:45:57.607 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'sketch' (version=1.0.0)
+10:45:57.608 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'skill-authoring' (version=1.0.0)
+10:45:57.608 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'songwriting-and-ai-music' (version=1.0.0)
+10:45:57.609 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'spike' (version=1.0.0)
+10:45:57.610 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'sql_query' (version=1.1.0)
+10:45:57.611 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'steve_jobs_perspective' (version=1.0.0)
+10:45:57.611 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'subagent-driven-development' (version=1.1.0)
+10:45:57.612 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'systematic-debugging' (version=1.1.0)
+10:45:57.612 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'test-driven-development' (version=1.1.0)
+10:45:57.613 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'webhook-subscriptions' (version=1.1.0)
+10:45:57.613 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'writing-plans' (version=1.1.0)
+10:45:57.614 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'x_intel' (version=1.0.0)
+10:45:57.615 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] inserted 'xhs_note' (version=1.3.0)
+10:45:57.617 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] updated 'xlsx' (version=1.0.0)
+10:45:57.617 INFO  v.m.s.i.BuiltinSkillSeedService - [SkillSeed] Builtin skills: 54 inserted, 20 updated, 0 unchanged, 0 skipped
+10:45:57.651 INFO  v.m.t.g.s.ToolGuardRuleSeedService - [RuleSeed] Builtin rules: 43 inserted, 0 updated, 0 unchanged
+10:45:57.652 INFO  v.m.t.g.engine.ToolGuardRuleRegistry - [ToolGuardRuleRegistry] Loaded 43 enabled rules
+10:45:57.653 INFO  v.m.t.mcp.service.McpServerService - No enabled MCP servers to initialize
+10:45:57.658 INFO  v.m.s.w.SkillWorkspaceBootstrapRunner - Skill workspace root ready: /Users/guojiexie/.mateclaw/skills
+10:45:57.659 DEBUG v.m.l.c.OllamaAutoDiscoveryRunner - Ollama provider disabled, skipping auto-discovery
+10:45:57.673 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'apple-notes' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.674 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'architecture-diagram' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.675 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'arxiv' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.675 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'ascii-art' workspace is current (bundled=4.0.0, workspace=4.0.0), skipping
+10:45:57.677 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'baoyu-comic' workspace is current (bundled=1.56.1, workspace=1.56.1), skipping
+10:45:57.678 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'baoyu-infographic' workspace is current (bundled=1.56.1, workspace=1.56.1), skipping
+10:45:57.679 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-document-export' workspace is current (bundled=1.0.1, workspace=1.0.1), skipping
+10:45:57.680 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-elimination-analysis' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.681 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-outline-planning' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.682 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-requirement-analysis' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.683 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-scoring-analysis' workspace is current (bundled=1.0.1, workspace=1.0.1), skipping
+10:45:57.683 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-technical-review' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.684 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-technical-writing' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.684 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'bidding-tender-profile' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.685 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'blogwatcher' workspace is current (bundled=2.0.0, workspace=2.0.0), skipping
+10:45:57.685 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'browser_cdp' workspace is current (bundled=1.2.0, workspace=1.2.0), skipping
+10:45:57.686 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'browser_visible' workspace is current (bundled=1.3.0, workspace=1.3.0), skipping
+10:45:57.686 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'channel_message' workspace is current (bundled=2.0.0, workspace=2.0.0), skipping
+10:45:57.686 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'chat_with_agent' workspace is current (bundled=1.2.0, workspace=1.2.0), skipping
+10:45:57.687 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'ckjia-shopping' workspace is current (bundled=1.0.1, workspace=1.0.1), skipping
+10:45:57.687 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'claude-design' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.688 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'cron' workspace is current (bundled=1.4.0, workspace=1.4.0), skipping
+10:45:57.688 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'deai_humanize' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.689 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'design-md' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.690 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'digital_employee' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.690 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'dingtalk_channel_connect' workspace is current (bundled=1.3.0, workspace=1.3.0), skipping
+10:45:57.692 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'docx' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.693 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'dspy' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.693 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'file_reader' workspace is current (bundled=1.2.0, workspace=1.2.0), skipping
+10:45:57.693 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'guidance' workspace is current (bundled=1.2.0, workspace=1.2.0), skipping
+10:45:57.694 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'gzh_article' workspace is current (bundled=1.3.0, workspace=1.3.0), skipping
+10:45:57.694 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'himalaya' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.695 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'humanizer' workspace is current (bundled=2.5.1, workspace=2.5.1), skipping
+10:45:57.695 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'ideation' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.696 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'make_plan' workspace is current (bundled=1.3.0, workspace=1.3.0), skipping
+10:45:57.696 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'mateclaw_source_index' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.696 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'multi_agent_collaboration' workspace is current (bundled=1.4.0, workspace=1.4.0), skipping
+10:45:57.696 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'news' workspace is current (bundled=2.0.0, workspace=2.0.0), skipping
+10:45:57.697 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'node-inspect-debugger' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.697 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'officecli' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.698 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'ontology-builder' workspace is current (bundled=3.0.0, workspace=3.0.0), skipping
+10:45:57.699 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'outlines' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.701 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'p5js' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.702 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'pdf' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.702 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'pixel-art' workspace is current (bundled=2.0.0, workspace=2.0.0), skipping
+10:45:57.703 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'plan' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.704 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'popular-web-designs' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.706 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'pptx' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.707 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-capability-mapping' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.707 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-case-retrieval' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.708 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-context-maintenance' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.708 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-customer-context-analysis' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.709 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-proposal-generation' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.709 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-requirement-analysis-and-clarification' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.709 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-solution-composer' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.710 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'presales-solution-review' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.710 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'pretext' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.711 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'python-debugpy' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.711 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'requesting-code-review' workspace is current (bundled=2.0.0, workspace=2.0.0), skipping
+10:45:57.713 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'research-paper-writing' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.714 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'sketch' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.715 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'skill-authoring' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.715 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'songwriting-and-ai-music' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.715 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'spike' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.716 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'sql_query' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.716 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'steve_jobs_perspective' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.717 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'subagent-driven-development' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.717 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'systematic-debugging' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.717 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'test-driven-development' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.717 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'webhook-subscriptions' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.718 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'writing-plans' workspace is current (bundled=1.1.0, workspace=1.1.0), skipping
+10:45:57.718 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'x_intel' workspace is current (bundled=1.0.0, workspace=1.0.0), skipping
+10:45:57.719 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'xhs_note' workspace is current (bundled=1.3.0, workspace=1.3.0), skipping
+10:45:57.720 DEBUG v.m.s.workspace.BundledSkillSyncer - Bundled skill 'xlsx' workspace is current (bundled=null, workspace=null), skipping
+10:45:57.735 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 4 bundle file(s) into mate_skill_file for skill 'xhs_note' (id=2105851753877512193)
+10:45:57.740 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 2 bundle file(s) into mate_skill_file for skill 'subagent-driven-development' (id=2105851753860734977)
+10:45:57.745 WARN  v.m.skill.workspace.SkillFileSyncer - Backfill skipped /Users/guojiexie/.mateclaw/skills/1/research-paper-writing/templates/colm2025/colm2025_conference.pdf (read failed: Input length = 1)
+10:45:57.747 WARN  v.m.skill.workspace.SkillFileSyncer - Backfill skipped /Users/guojiexie/.mateclaw/skills/1/research-paper-writing/templates/icml2026/icml_numpapers.pdf (read failed: Input length = 3)
+10:45:57.748 WARN  v.m.skill.workspace.SkillFileSyncer - Backfill skipped /Users/guojiexie/.mateclaw/skills/1/research-paper-writing/templates/icml2026/example_paper.pdf (read failed: Input length = 1)
+10:45:57.751 WARN  v.m.skill.workspace.SkillFileSyncer - Backfill skipped /Users/guojiexie/.mateclaw/skills/1/research-paper-writing/templates/iclr2026/iclr2026_conference.pdf (read failed: Input length = 1)
+10:45:57.765 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 50 bundle file(s) into mate_skill_file for skill 'research-paper-writing' (id=2105851753839763458)
+10:45:57.777 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 3 bundle file(s) into mate_skill_file for skill 'pretext' (id=2105851753831374850)
+10:45:57.795 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 53 bundle file(s) into mate_skill_file for skill 'popular-web-designs' (id=2105851753797820418)
+10:45:57.805 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 5 bundle file(s) into mate_skill_file for skill 'pixel-art' (id=2105851753793626113)
+10:45:57.810 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 15 bundle file(s) into mate_skill_file for skill 'p5js' (id=2105851753785237506)
+10:45:57.814 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 3 bundle file(s) into mate_skill_file for skill 'outlines' (id=2105851753785237505)
+10:45:57.816 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'ideation' (id=2105851753755877377)
+10:45:57.819 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 6 bundle file(s) into mate_skill_file for skill 'gzh_article' (id=2105851753743294466)
+10:45:57.821 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 3 bundle file(s) into mate_skill_file for skill 'dspy' (id=2105851753726517250)
+10:45:57.822 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'design-md' (id=2105851753709740033)
+10:45:57.824 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 2 bundle file(s) into mate_skill_file for skill 'deai_humanize' (id=2105851753705545730)
+10:45:57.826 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-tender-profile' (id=2105851753663602689)
+10:45:57.828 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-technical-review' (id=2105851753655214082)
+10:45:57.829 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-scoring-analysis' (id=2105851753651019778)
+10:45:57.830 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-requirement-analysis' (id=2105851753651019777)
+10:45:57.832 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-elimination-analysis' (id=2105851753638436865)
+10:45:57.832 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'bidding-document-export' (id=2105851753634242562)
+10:45:57.840 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 45 bundle file(s) into mate_skill_file for skill 'baoyu-infographic' (id=2105851753630048257)
+10:45:57.847 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 33 bundle file(s) into mate_skill_file for skill 'baoyu-comic' (id=2105851753625853953)
+10:45:57.850 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'arxiv' (id=2105851753613271042)
+10:45:57.851 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'architecture-diagram' (id=2105851753604882434)
+10:45:57.855 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 2 bundle file(s) into mate_skill_file for skill 'steve_jobs_perspective' (id=1000000015)
+10:45:57.869 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 52 bundle file(s) into mate_skill_file for skill 'xlsx' (id=1000000009)
+10:45:57.883 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 55 bundle file(s) into mate_skill_file for skill 'pptx' (id=1000000008)
+10:45:57.901 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 59 bundle file(s) into mate_skill_file for skill 'docx' (id=1000000007)
+10:45:57.906 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 8 bundle file(s) into mate_skill_file for skill 'pdf' (id=1000000006)
+10:45:57.909 INFO  v.m.skill.workspace.SkillFileSyncer - Backfilled 1 bundle file(s) into mate_skill_file for skill 'himalaya' (id=1000000004)
+10:45:57.911 INFO  v.m.skill.workspace.SkillFileSyncer - SkillFileSyncer pass: skills=74, materialized=0, current=411, backfilledFromDisk(skills=29, files=411)
+10:45:57.911 INFO  v.m.s.w.SkillWorkspaceBootstrapRunner - Skill file sync: skills=74, materialized=0, current=411, diskBackfilled(skills=29, files=411)
+10:45:57.912 INFO  v.mate.cron.service.CronJobService - [CronJob] Registered job 1000100001 (每日问候) ws=1, cron=0 9 * * *, tz=Asia/Shanghai
+10:45:57.912 INFO  v.mate.cron.service.CronJobService - [CronJob] Registered job 1000100010 (记忆整合) ws=1, cron=0 2 * * *, tz=Asia/Shanghai
+10:45:57.912 INFO  v.mate.cron.service.CronJobService - [CronJob] Registered job 1000100011 (记忆整合) ws=1, cron=0 2 * * *, tz=Asia/Shanghai
+10:45:57.913 INFO  v.mate.cron.service.CronJobService - [CronJob] Registered job 1000100012 (记忆整合) ws=1, cron=0 2 * * *, tz=Asia/Shanghai
+10:45:57.913 INFO  v.mate.cron.service.CronJobService - [CronJob] Scheduler initialized, 4 jobs registered
+10:45:57.913 INFO  v.m.channel.tool.ChannelToolService - [channel-tool] Startup reconcile
+10:45:57.916 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+10:45:57.916 WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+10:45:57.920 INFO  vip.mate.MateClawApplication - 
+10:45:57.920 INFO  vip.mate.MateClawApplication - ╔══════════════════════════════════════════════════════════════════════╗
+10:45:57.920 INFO  vip.mate.MateClawApplication - ║  MateClaw is READY  ✓                                              ║
+10:45:57.920 INFO  vip.mate.MateClawApplication - ║  Web UI →  http://localhost:18088                                  ║
+10:45:57.920 INFO  vip.mate.MateClawApplication - ║  Swagger → http://localhost:18088/swagger-ui.html                  ║
+10:45:57.920 INFO  vip.mate.MateClawApplication - ╚══════════════════════════════════════════════════════════════════════╝
+10:45:57.920 INFO  vip.mate.MateClawApplication - 
+10:45:57.920 INFO  vip.mate.channel.ChannelManager - Initializing ChannelManager...
+10:45:57.921 INFO  v.mate.channel.ChannelSessionStore - ChannelSessionStore initialized: loaded 0 sessions from DB
+10:45:57.921 INFO  vip.mate.plugin.PluginManager - Discovered 0 plugin JAR(s) across all paths
+10:45:57.921 INFO  vip.mate.plugin.PluginManager - Plugin loading complete: 0 loaded, 0 skipped (duplicate), 0 failed
+10:45:57.922 INFO  v.m.llm.failover.ProviderInitProbe - [ProviderInitProbe] no configured providers — nothing to probe
+10:45:57.923 INFO  v.m.channel.AbstractChannelAdapter - [web] Starting channel: Web 控制台
+10:45:57.923 INFO  v.mate.channel.web.WebChannelAdapter - [web] Web channel ready (HTTP/SSE endpoints managed by Spring MVC)
+10:45:57.923 INFO  v.m.channel.AbstractChannelAdapter - [web] Channel started successfully: Web 控制台
+10:45:57.924 INFO  vip.mate.channel.ChannelManager - Channel started: Web 控制台 (type=web, id=1000000001)
+10:45:57.924 INFO  vip.mate.channel.ChannelManager - ChannelManager initialized: 1/1 channels started
+10:45:57.960 INFO  vip.mate.tool.ToolRegistry - Total enabled tools: 62
+10:45:58.076 INFO  vip.mate.tool.ToolRegistry - Building AgentToolSet: toolBeans=62, providers=1, pluginTools=0, totalCallbacks=122
+10:45:58.140 INFO  v.m.s.runtime.SkillPackageResolver - Skill 'guidance' dependencies not satisfied: Missing: tool:search
+10:45:58.145 INFO  v.m.s.runtime.SkillPackageResolver - Skill 'himalaya' dependencies not satisfied: Missing: command:himalaya
+10:45:58.150 INFO  v.m.s.runtime.SkillPackageResolver - Skill 'news' dependencies not satisfied: Missing: tool:search
+10:45:58.157 INFO  v.m.s.runtime.SkillPackageResolver - Skill 'ontology-builder' dependencies not satisfied: Missing: tool:semantic_modeling_create_task, tool:semantic_modeling_get_task, tool:semantic_modeling_submit_proposal, tool:semantic_modeling_sources, tool:semantic_modeling_read_source, tool:semantic_ontology_list, tool:semantic_ontology_get, tool:semantic_ontology_validate, tool:semantic_ontology_prepare_publish
+10:45:58.181 INFO  v.m.s.runtime.SkillRuntimeService - Refreshed active skills: 65 enabled
+10:45:58.181 INFO  vip.mate.system.proxy.ProxyManager - Global proxy disabled; outbound traffic goes direct
+10:45:58.265 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+10:45:58.265 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+10:45:58.266 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 6.073 s <<< FAILURE! -- in vip.mate.channel.webchat.WebChatAttachmentE2ETest
+[ERROR] vip.mate.channel.webchat.WebChatAttachmentE2ETest.uploadThenStreamAttachesPath -- Time elapsed: 0.168 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+[upload response: {"code":400,"msg":"Too many files in this conversation (max 50)","data":null}] 
+expected: 200
+ but was: 400
+	at vip.mate.channel.webchat.WebChatAttachmentE2ETest.upload(WebChatAttachmentE2ETest.java:198)
+	at vip.mate.channel.webchat.WebChatAttachmentE2ETest.uploadThenStreamAttachesPath(WebChatAttachmentE2ETest.java:271)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   WebChatAttachmentE2ETest.uploadThenStreamAttachesPath:271->upload:198 [upload response: {"code":400,"msg":"Too many files in this conversation (max 50)","data":null}] 
+expected: 200
+ but was: 400
+[INFO] 
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for MateClaw 2.3.0-SNAPSHOT:
+[INFO] 
+[INFO] MateClaw ........................................... SUCCESS [  0.094 s]
+[INFO] MateClaw Plugin API ................................ SUCCESS [  0.248 s]
+[INFO] MateClaw Semantic Core ............................. SUCCESS [  0.044 s]
+[INFO] MateClaw Semantic OWL Adapter ...................... SUCCESS [  0.163 s]
+[INFO] MateClaw Semantic Application ...................... SUCCESS [  0.027 s]
+[INFO] MateClaw Server .................................... FAILURE [  7.719 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.443 s
+[INFO] Finished at: 2026-10-02T10:45:58+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project mateclaw-server: There are test failures.
+[ERROR] 
+[ERROR] See /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-server/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :mateclaw-server

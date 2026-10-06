@@ -1,0 +1,2 @@
+src/features/presales/__tests__/queryResponse.test.ts 44ms
+src/features/presales/__tests__/editorSession.test.ts 25ms

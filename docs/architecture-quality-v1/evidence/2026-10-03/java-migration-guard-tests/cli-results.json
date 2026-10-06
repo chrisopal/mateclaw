@@ -1,0 +1,443 @@
+{
+  "published_source_head": "bf7a12f5406f46fcac1e3292a078f45414be3c6e",
+  "copied_source_sha256": {
+    "mateclaw-server/src/main/java/db/migration/h2/V218__backfill_presales_listing_projection.java": "ca5d9f4dc4c0b0914a901d29de6fa63c17babb56c4d00b87543a559557ac6867",
+    "mateclaw-server/src/main/java/db/migration/kingbase/V218__backfill_presales_listing_projection.java": "905cc12fc65748bf97833306b84786ea88bf60afc4818beb3636f29e6fb16920",
+    "mateclaw-server/src/main/java/db/migration/mysql/V218__backfill_presales_listing_projection.java": "a1b3b382261230f3fe06603c7d10ecef5396c4a205286a48066dbffacc1c4f05",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesListingProjectionV1.java": "855fe1891f23d06046539e1c0a8834c41a175c0397cf554ceb19b5f2a1c1b0d4",
+    "mateclaw-server/src/main/java/vip/mate/presales/migration/PresalesListingProjectionBackfillV1.java": "64d9dc5ce7d13fd2d3203d0fa0595e12f56ab83738eaccd208ef2bd7108c9cce",
+    "mateclaw-server/src/main/resources/db/migration/h2/V217__presales_listing_projection.sql": "bafe24907baf1a5ddab1a1e2b624c1638cc63ba502983c38ffe361f84a89ae96",
+    "mateclaw-server/src/main/resources/db/migration/mysql/V217__presales_listing_projection.sql": "ed5cddfb79b88fef68087e0f6f8820e093e6a90bcbf7cc6db03cca36fce6bf90",
+    "mateclaw-server/src/main/resources/db/migration/kingbase/V217__presales_listing_projection.sql": "bafe24907baf1a5ddab1a1e2b624c1638cc63ba502983c38ffe361f84a89ae96",
+    ".quality/frozen-migrations.json": "ecb291d1eaacad1fd44a26264f892ff36d0727a51e1543d1c3d42b1600224b1e"
+  },
+  "synthetic_git_base": "dbe256b871bbbaa48a231d9c1c3fe7dd8bb9fcb1",
+  "cases": [
+    {
+      "case": "unchanged",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 0,
+          "status": "PASS",
+          "rules": [],
+          "target_identity": "f3063c3e436948e56f49d456dba324ceaa96a24ab73f9754aebc1c6af3d90d49"
+        },
+        {
+          "mode": "staged",
+          "exit": 0,
+          "status": "PASS",
+          "rules": [],
+          "target_identity": "50a58006febcb244997343cb0bfcfb1ae27f22d5"
+        }
+      ]
+    },
+    {
+      "case": "edit-h2",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "8dcb5b2fc7d0eda9c9301b5ddf65a1bfd641f5249cc3c5c6be5b3f94e329f792"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "b2ef3efdb6f19f56734e0f24048a353e9b5e4c9b"
+        }
+      ]
+    },
+    {
+      "case": "delete-h2",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "38a917104a8c9e103bf831ff26dbcf0f4fde46ac8b5736fbc14ebbf8926757a1"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "3592109081553cb755b403a5c4eb2dc0e65f6dd5"
+        }
+      ]
+    },
+    {
+      "case": "edit-kingbase",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "3a47d26eac0c4d30f719b13ae46a2977d097e8549a2ff95004d828ecc5c33e37"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "073b36c8aa72f987c462356553e3bfb72abe2072"
+        }
+      ]
+    },
+    {
+      "case": "delete-kingbase",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "51ae89355df7520600bc480061ecd72a5b593b57510065135a4b6cc31464b952"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "fae6b3f160a086d11cce83d216358508e6fa1388"
+        }
+      ]
+    },
+    {
+      "case": "edit-mysql",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "9da2353f4bdf73e016b9a9e449fd226965ed4b1f08af7bd92c4fdd796e7ae8ff"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "17aeaa0e592956f21f9d36ddc13812913958a170"
+        }
+      ]
+    },
+    {
+      "case": "delete-mysql",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "493ef73764437d44c22e054ba3e283b85f396df676b2dace75d2641a1a7de369"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-004"
+          ],
+          "target_identity": "4e3a3404a5eb1481fb38821fdc83b040c6cfc4de"
+        }
+      ]
+    },
+    {
+      "case": "edit-factory",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "e13f091126878493acce21ccc3253688b75666528dcdef5b4b52518055097759"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "ce095daef0db1403890438997d2f32521cdfb719"
+        }
+      ]
+    },
+    {
+      "case": "rehash-factory",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "ea72a98b0cddf19af40247b5b3ae6064538b75ab5e537fff85fa8192df2bd68a"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "94b20019956d6d9cae9675907dc91e6e8cb253d1"
+        }
+      ]
+    },
+    {
+      "case": "edit-backfill",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "e6e537904f67493471cf22f3369a8721d481295ce3edde0133b98aef67110766"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "ece797f75521f7a02f14bf598790a2da9b252974"
+        }
+      ]
+    },
+    {
+      "case": "rehash-backfill",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "7ee2393d2032949f63aa9a674393471552175c7c67f299dca50042ba257a2e99"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "0fb2f9e17df05542afa2ebeb404a09e5c1834f06"
+        }
+      ]
+    },
+    {
+      "case": "rename-factory",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "b31ddee545df68a07f9405b9729037a2a623833884b243e0566aa2bdbe4d4ffd"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "a8e0870e1a699c6eba30b02bb7419033e0daa63e"
+        }
+      ]
+    },
+    {
+      "case": "remove-declaration",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "469307cd1b9c1b57e5d27588f3c6804f3c96a35259972ac6c5d14c20da35c19f"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-004"
+          ],
+          "target_identity": "f73421c34efdfc039d79c43d093ce4bb93f5ebf8"
+        }
+      ]
+    },
+    {
+      "case": "delete-manifest",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-003",
+            "DB-004"
+          ],
+          "target_identity": "733b51fb0fe6bd1ae263d1bb3ca447be7e854804a8f7b3287ecfe0beddd77537"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-003",
+            "DB-004"
+          ],
+          "target_identity": "d5881e4a4b709c8717e5151029b70c7aa02c27ee"
+        }
+      ]
+    },
+    {
+      "case": "invalid-manifest",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-003",
+            "DB-004"
+          ],
+          "target_identity": "a68ed4065e751467d4ac0a49a40b4a5de5ffa169fc0c3a5d784bafc5862e0475"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-003",
+            "DB-004"
+          ],
+          "target_identity": "838640079a8f552b28b50b97e872a097943a837d"
+        }
+      ]
+    },
+    {
+      "case": "missing-new-dialects",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-002"
+          ],
+          "target_identity": "b3da04aa5635fb22c154e43d2c8db51dc359f3f263447e5bb7d771047232175b"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-002"
+          ],
+          "target_identity": "75a97613447e7533e876f52b1ee46eaca9983ef4"
+        }
+      ]
+    },
+    {
+      "case": "complete-new-version",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 0,
+          "status": "PASS",
+          "rules": [],
+          "target_identity": "76cc655d6815c75c3627cf580f39a080df37a58726d225bb100f0b6584130c2f"
+        },
+        {
+          "mode": "staged",
+          "exit": 0,
+          "status": "PASS",
+          "rules": [],
+          "target_identity": "f3829aefc5faace26f2420b5f5a70437fee7d067"
+        }
+      ]
+    },
+    {
+      "case": "existing-sql-still-blocked",
+      "checks": [
+        {
+          "mode": "worktree",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-003"
+          ],
+          "target_identity": "7fd32837d027500613db4a04c072b7cd617266367d33c3a89e56e6868e5bd0a0"
+        },
+        {
+          "mode": "staged",
+          "exit": 1,
+          "status": "FAIL",
+          "rules": [
+            "DB-001",
+            "DB-003"
+          ],
+          "target_identity": "0b3cb2e735ac7f4d2fd925740857303b058bec61"
+        }
+      ]
+    }
+  ],
+  "database_execution": "NOT_RUN",
+  "meaning": "real CLI on copied published source bytes; source freeze only"
+}

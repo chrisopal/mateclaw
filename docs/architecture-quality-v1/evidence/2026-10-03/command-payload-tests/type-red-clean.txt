@@ -1,0 +1,18 @@
+src/features/presales/__tests__/commandPayload.test.ts(46,66): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(47,62): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(48,72): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(49,77): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(50,62): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(51,65): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(52,59): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(53,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(54,78): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(55,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(56,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(57,69): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(58,67): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(59,70): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(60,78): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(61,99): error TS2554: Expected 1 arguments, but got 0.
+src/features/presales/__tests__/commandPayload.test.ts(62,117): error TS2344: Type 'string | undefined' does not satisfy the constraint '"Expected: string, Actual: never" | "Expected: undefined, Actual: never"'.
+  Type 'undefined' is not assignable to type '"Expected: string, Actual: never" | "Expected: undefined, Actual: never"'.

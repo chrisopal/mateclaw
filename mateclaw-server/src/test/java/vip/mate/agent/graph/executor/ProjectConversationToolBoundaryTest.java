@@ -61,7 +61,12 @@ class ProjectConversationToolBoundaryTest {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
         ToolCallback callback = callback("ordinary result");
         ToolExecutionExecutor executor = executor(callback);
-        executor.setProjectToolPolicy(new PresalesToolPolicy(jdbc, new ObjectMapper()));
+        executor.setProjectToolPolicy(
+                new PresalesToolPolicy(
+                        jdbc,
+                        new ObjectMapper(),
+                        new vip.mate.workspace.core.service.ProjectSourceAccess(jdbc),
+                        new vip.mate.presales.repository.PresalesProjectRepository(jdbc)));
 
         var result =
                 executor.execute(

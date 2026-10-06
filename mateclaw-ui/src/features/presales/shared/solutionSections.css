@@ -1,0 +1,107 @@
+.solution-revision {
+  border-bottom: 1px solid var(--el-border-color);
+  padding: 12px 0 24px;
+}
+.coverage {
+  margin: 20px 0 28px;
+  padding: 16px 0 20px;
+  border-top: 1px solid var(--el-border-color-light);
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+.coverage-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.coverage-heading h3 {
+  margin: 0;
+}
+.coverage-heading .inline-help {
+  margin: 0;
+}
+.coverage-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.coverage-stats > div {
+  padding: 12px 14px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: var(--el-fill-color-lighter);
+}
+.coverage-stats span {
+  display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+.coverage-stats strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.solution-version-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.solution-version-header > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.solution-version-header h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.solution-downloads {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 14px 0 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--el-border-color-lighter);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+.solution-downloads .el-button {
+  padding: 4px;
+}
+.baseline-details {
+  margin: 0 0 18px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.baseline-details summary {
+  color: var(--el-color-primary);
+  cursor: pointer;
+}
+.baseline-details p {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+.solution-section {
+  padding: 16px 0;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+.solution-section h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.solution-section .safe-content {
+  margin: 0 0 8px;
+  line-height: 1.7;
+}
+@media (max-width: 600px) {
+  .coverage-stats {
+    grid-template-columns: 1fr;
+  }
+}

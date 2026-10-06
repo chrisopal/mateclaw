@@ -1,0 +1,14 @@
+{"status": "PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-6s_fjolw/report.json", "submission_ready": true, "error": null}
+PASS: architecture-ratchet
+PASS: guard-self-tests
+PASS: java-format
+PASS: java-tests
+NOT_APPLICABLE: ui-format No changed frontend formatter-supported files
+NOT_APPLICABLE: ui-lint No changed frontend lint targets
+PASS: ui-typecheck
+PASS: id-precision
+PASS: ui-vitest
+PASS: ui-node-tests
+PASS: ui-build-enterprise
+PASS: ui-build-classic
+NOT_APPLICABLE: cost-tool No standalone cost tool change

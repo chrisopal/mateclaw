@@ -1,0 +1,6 @@
+Independent native read-only narrow follow-up: /root/project_response_wire_audit
+Scope: AQ04_TEAM_FIXTURE_PLAN.md, useTeamRuns.test.ts and workspace-request-transport.test.mjs only.
+No new defects. Paged API, cursor and deduplication assertions retained. TypeScript AST comparison confirms remaining twelve tests only format changes; this is a local AST comparison, not unavailable MCP AST gate evidence.
+Subscription mock is local to this test file. fetch spy only observes. Scope and spies release in finally, subscription and cleanup each asserted once. Default production dependency remains unchanged. Child runs both entire files, checks passed counts, no pending and real stderr; original five real HTTP cases retained. Independently co-running real module SSE protocol contracts shows no mock leakage.
+Independently verified: 13 paged tests, 18 SSE contracts, Node child regression and two-file lint passed.
+Limitations: maintainer control-plane approval, formal AC and actual SSE network end-to-end acceptance remain pending. No implementation changes or delegation by reviewer.

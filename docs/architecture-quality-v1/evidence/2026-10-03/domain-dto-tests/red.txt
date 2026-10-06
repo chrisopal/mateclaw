@@ -1,0 +1,3963 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts (37 tests | 34 failed) 25ms
+   × rejects malformed declared domain fields {"requirements":[{"id":"r","authorId":3}]} 4ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","previousId":3}]} 1ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","baselineVersion":"1"}]} 1ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","provisional":null}]} 1ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","fitGapRefs":[3]}]} 1ms
+   × rejects malformed declared domain fields {"baselines":[{"id":"b","references":[{"requirementVersion":"1"}]}]} 1ms
+   × rejects malformed declared domain fields {"baselines":[{"id":"b","projectVersion":1.5}]} 1ms
+   × rejects malformed declared domain fields {"baselines":[{"id":"b","approvedBy":3}]} 1ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","reviewId":3}]} 1ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","templateVersion":3}]} 0ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","size":-1}]}]} 1ms
+   × rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","sha256":3}]}]} 0ms
+   × rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","finishedAt":3}]} 0ms
+   × rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","startedAt":3}]} 0ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":"3"}}]} 0ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":null}}]} 0ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":-1}}]} 0ms
+   × rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":101}}]} 0ms
+   × rejects malformed or cross-project handoff {"schemaVersion":"1"} 0ms
+   × rejects malformed or cross-project handoff {"schemaVersion":0} 0ms
+   × rejects malformed or cross-project handoff {"workspaceId":"other"} 0ms
+   × rejects malformed or cross-project handoff {"engagementId":"other"} 0ms
+   × rejects malformed or cross-project handoff {"caseRef":"other"} 0ms
+   × rejects malformed or cross-project handoff {"baseline":null} 0ms
+   × rejects malformed or cross-project handoff {"baseline":{"id":3}} 0ms
+   × rejects malformed or cross-project handoff {"solution":[]} 0ms
+   × rejects malformed or cross-project handoff {"release":{}} 0ms
+   × rejects malformed or cross-project handoff {"fitGaps":null} 0ms
+   × rejects malformed or cross-project handoff {"clarifications":[{"id":3}]} 0ms
+   × rejects malformed or cross-project handoff {"risksAndUnknowns":[null]} 0ms
+   × rejects malformed or cross-project handoff {"customerConfirmationStatus":3} 1ms
+   × rejects malformed or cross-project handoff {"accessPolicy":null} 3ms
+   × rejects malformed or cross-project handoff {"historicalClarificationsAvailable":"true"} 0ms
+   × rejects malformed or cross-project handoff {"releaseId":3} 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 34 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"requirements":[{"id":"r","authorId":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": 3,
++       "id": "r",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","previousId":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "id": "s",
++       "previousId": 3,
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","baselineVersion":"1"}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "baselineVersion": "1",
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","provisional":null}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "id": "s",
++       "provisional": null,
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","fitGapRefs":[3]}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "fitGapRefs": [
++         3,
++       ],
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"baselines":[{"id":"b","references":[{"requirementVersion":"1"}]}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "id": "b",
++       "references": [
++         {
++           "requirementVersion": "1",
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"baselines":[{"id":"b","projectVersion":1.5}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "id": "b",
++       "projectVersion": 1.5,
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"baselines":[{"id":"b","approvedBy":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": 3,
++       "id": "b",
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","reviewId":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "id": "release",
++       "reviewId": 3,
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","templateVersion":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "id": "release",
++       "templateVersion": 3,
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","size":-1}]}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "x",
++           "size": -1,
++         },
++       ],
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"releases":[{"id":"release","files":[{"filename":"x","sha256":3}]}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "x",
++           "sha256": 3,
++         },
++       ],
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","finishedAt":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": 3,
++       "id": "t",
++       "status": "DONE",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"tasks":[{"id":"t","status":"DONE","startedAt":3}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "authorId": "author",
++       "baselineId": "b",
++       "baselineVersion": 1,
++       "coverage": {
++         "applicable": false,
++         "handledIn": 0,
++         "percentage": null,
++         "totalIn": 0,
++       },
++       "fitGapRefs": [
++         "fit",
++         "fit",
++       ],
++       "id": "s",
++       "previousId": "old",
++       "provisional": false,
++       "sections": [
++         {
++           "requirementRefs": [
++             "r",
++           ],
++           "text": "  Exact  ",
++           "title": "T",
++         },
++       ],
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "id": "t",
++       "startedAt": 3,
++       "status": "DONE",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":"3"}}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "coverage": {
++         "applicable": true,
++         "handledIn": 1,
++         "percentage": "3",
++         "totalIn": 2,
++       },
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":null}}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "coverage": {
++         "applicable": true,
++         "handledIn": 1,
++         "percentage": Infinity,
++         "totalIn": 2,
++       },
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":-1}}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "coverage": {
++         "applicable": true,
++         "handledIn": 1,
++         "percentage": -1,
++         "totalIn": 2,
++       },
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed declared domain fields {"solutions":[{"id":"s","coverage":{"applicable":true,"handledIn":1,"totalIn":2,"percentage":101}}]}
+AssertionError: promise resolved "{ id: 'p/9223372036854775800', …(15) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "baselines": [
++     {
++       "approvedBy": "reviewer",
++       "id": "b",
++       "projectVersion": 1,
++       "references": [
++         {
++           "assertion": {
++             "raw": null,
++           },
++           "requirementId": "r",
++           "requirementVersion": 2,
++           "sources": [
++             {
++               "extension": null,
++               "sourceRef": "kb:k:item:i",
++             },
++           ],
++         },
++       ],
++     },
++   ],
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customer": "C",
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "id": "p/9223372036854775800",
++   "materials": [],
++   "name": "P",
++   "ownerId": "owner",
++   "releases": [
++     {
++       "files": [
++         {
++           "filename": "solution.pdf",
++           "sha256": "raw-digest",
++           "size": 3,
++         },
++       ],
++       "handoffSnapshot": {
++         "untouched": null,
++       },
++       "id": "release",
++     },
++   ],
++   "requirements": [
++     {
++       "authorId": "author",
++       "id": "r",
++       "scope": " FUTURE ",
++       "title": "Raw",
++     },
++   ],
++   "reviews": [],
++   "solutions": [
++     {
++       "coverage": {
++         "applicable": true,
++         "handledIn": 1,
++         "percentage": 101,
++         "totalIn": 2,
++       },
++       "id": "s",
++     },
++   ],
++   "status": "ACTIVE",
++   "tasks": [
++     {
++       "finishedAt": "finish",
++       "id": "task",
++       "rejectedOutput": null,
++       "result": {
++         "assumptions": null,
++         "items": [
++           {
++             "extension": null,
++             "title": "Draft",
++           },
++         ],
++       },
++       "startedAt": "start",
++       "status": "SUCCEEDED",
++     },
++   ],
++   "version": 1,
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:124:39
+    122| it.each(invalidProject)('rejects malformed declared domain fields %j',…
+    123|   respond({ ...project(), ...patch })
+    124|   await expect(presalesApi.get(ws, id)).rejects.toMatchObject({ code: …
+       |                                       ^
+    125| })
+    126| it('returns the exact handoff object and JSON after scoped admission',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"schemaVersion":"1"}
+AssertionError: promise resolved "{ schemaVersion: '1', …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": "1",
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"schemaVersion":0}
+AssertionError: promise resolved "{ schemaVersion: +0, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 0,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"workspaceId":"other"}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "other",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"engagementId":"other"}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "other",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"caseRef":"other"}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "other",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"baseline":null}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": null,
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"baseline":{"id":3}}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "id": 3,
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"solution":[]}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": [],
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"release":{}}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {},
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"fitGaps":null}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": null,
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"clarifications":[{"id":3}]}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "id": 3,
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"risksAndUnknowns":[null]}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     null,
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"customerConfirmationStatus":3}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": 3,
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"accessPolicy":null}
+AssertionError: promise resolved "{ schemaVersion: 1, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": null,
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"historicalClarificationsAvailable":"true"}
+AssertionError: promise resolved "{ schemaVersion: 1, …(13) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "historicalClarificationsAvailable": "true",
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/34]⎯
+
+ FAIL  src/features/presales/__tests__/domainDto.test.ts > rejects malformed or cross-project handoff {"releaseId":3}
+AssertionError: promise resolved "{ schemaVersion: 1, …(13) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "accessPolicy": "WORKSPACE_REAUTHORIZE_ON_READ",
++   "baseline": {
++     "approvedBy": "reviewer",
++     "id": "b",
++     "projectVersion": 1,
++     "references": [
++       {
++         "assertion": {
++           "raw": null,
++         },
++         "requirementId": "r",
++         "requirementVersion": 2,
++         "sources": [
++           {
++             "extension": null,
++             "sourceRef": "kb:k:item:i",
++           },
++         ],
++       },
++     ],
++   },
++   "caseRef": "p/9223372036854775800",
++   "clarifications": [
++     {
++       "answerSourceId": "source",
++       "id": "c",
++       "question": "Q",
++       "status": "future",
++     },
++   ],
++   "customerConfirmationStatus": "UNCONFIRMED",
++   "engagementId": "p/9223372036854775800",
++   "extension": {
++     "nullable": null,
++   },
++   "fitGaps": [
++     {
++       "id": "fit",
++       "requirementId": "r",
++       "status": "future",
++     },
++   ],
++   "release": {
++     "files": [
++       {
++         "filename": "solution.pdf",
++         "sha256": "raw-digest",
++         "size": 3,
++       },
++     ],
++     "handoffSnapshot": {
++       "untouched": null,
++     },
++     "id": "release",
++   },
++   "releaseId": 3,
++   "risksAndUnknowns": [
++     {
++       "extension": null,
++       "requirementId": "r",
++       "status": "UNHANDLED",
++     },
++   ],
++   "schemaVersion": 1,
++   "solution": {
++     "authorId": "author",
++     "baselineId": "b",
++     "baselineVersion": 1,
++     "coverage": {
++       "applicable": false,
++       "handledIn": 0,
++       "percentage": null,
++       "totalIn": 0,
++     },
++     "fitGapRefs": [
++       "fit",
++       "fit",
++     ],
++     "id": "s",
++     "previousId": "old",
++     "provisional": false,
++     "sections": [
++       {
++         "requirementRefs": [
++           "r",
++         ],
++         "text": "  Exact  ",
++         "title": "T",
++       },
++     ],
++   },
++   "workspaceId": "9223372036854775801",
+  }
+
+ ❯ src/features/presales/__tests__/domainDto.test.ts:153:43
+    151| it.each(invalidHandoff)('rejects malformed or cross-project handoff %j…
+    152|   respond({ ...handoff(), ...patch })
+    153|   await expect(presalesApi.handoff(ws, id)).rejects.toMatchObject({
+       |                                           ^
+    154|     code: 'PRESALES_RESPONSE_INVALID',
+    155|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/34]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  34 failed | 3 passed (37)
+   Start at  09:00:36
+   Duration  335ms (transform 56ms, setup 0ms, import 87ms, tests 25ms, environment 106ms)

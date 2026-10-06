@@ -19,6 +19,8 @@ git rev-parse HEAD
 python3 -B scripts/quality/verify.py --mode dev --base origin/dev
 ```
 
+Java/控制面变更核对实际 `WorkbenchArchitectureTest` 的生产导入、聚合非空计数和正反例；不能以文档模板替代编译结果。AR-001 宿主六个 main 路径及 AR-002 工作台三个 main 路径已封口；新增路径同步审核映射，严禁清空封口或重写基线。纯语义层自有 port 与 Controller DAL 分类分开，保持现有更严格语义测试。
+
 保留初始存量问题与新问题的区别。没有 origin/dev 时记录阻断，由操作者按既有流程准备基线。
 
 写一个短实施计划：用例、依赖方向、数据权威、权限、兼容、事务边界、回归。复杂变更按
@@ -26,6 +28,12 @@ AQ-00→AQ-01→AQ-02→AQ-03 的优先级，不先扩大工作台功能。
 
 实现每个职责切片后重跑 dev 检查。先补行为刻画测试，再搬移权限、执行策略或数据库逻辑。
 格式化与行为修改分开。初始上下文、工具、历史和导出均复核权限，不只检查页面按钮。
+
+Java Flyway 入口必须与 h2/mysql/kingbase 同名版本对应，并在
+`.quality/frozen-migrations.json` 登记入口及共享算法/工厂源码 SHA-256。
+既有入口、基线冻结源码及摘要不可删改；新语义使用新版本。初装与追加闭包必须独立核对
+已发布源码、完整依赖、嵌套类型和编译/JDK/Jackson兼容。清单不自动发现依赖，不替代实际
+Flyway checksum/validate、方言实测或远端 required CI；不得重写摘要绕过失败。
 
 提交前检查 diff，仅暂存本次授权修改，执行：
 

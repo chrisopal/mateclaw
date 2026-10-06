@@ -1,0 +1,32 @@
+# AQ-06 请求摘要版本接入与旧回执兼容设计
+
+状态：本片工程实现及回归已完成，见[AQ06_REQUEST_HASH_ACCEPTANCE.md](AQ06_REQUEST_HASH_ACCEPTANCE.md)及[独立实现审核](AQ06_REQUEST_HASH_REVIEW.md)。正式业务签收、生产发布顺序和完整AC仍未完成。以下问题描述与决策保留为实施前设计基线；当时HEAD为6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，Service尚未接入V2。设计阶段审核见[AQ06_REQUEST_HASH_COMPATIBILITY_REVIEW.md](AQ06_REQUEST_HASH_COMPATIBILITY_REVIEW.md)。
+
+## 实施前证据和问题边界
+
+PresalesService.create哈希Create对象；applyCommand哈希List.of(projectId,Command)，包括未知扩展、null/省略与顺序。hash使用ObjectMapper.writeValueAsString后StatementApplicationService.hash的UTF-8编码。Java默认把孤立高/低代理单元编码成ASCII问号。因此同operationId下不同请求可得到相同旧摘要；PresalesSqlListingTest.historicalRequestHashSurrogateCollisionIsExplicitlyCharacterized已刻画此行为，不能把该测试绿当作拒绝异请求通过。
+
+独立JDK21/Jackson编译探针见request-hash-compat-probe：d800与dc00分别和问号的string→UTF8编码相同；ObjectMapper.writeValueAsBytes对同样节点均不同。PresalesGenerationService的task.requestHash使用后一种字节序列，不能直接套用Service的legacy算法或宣称生成任务摘要有同一碰撞。该探针是序列化证据，不是生成HTTP端到端验收。生成内部SAVE_AI_TASK仍经Service操作回执，受后者新版本策略影响。
+
+## 本片采用的设计决策
+
+1. 新create/command回执使用已有V2（域前缀+精确UTF-16单元），既有envelope字符串序列化只做一次，不能顺手排序、过滤Command payload未知字段或改变PATCH原载荷。这不是原始HTTP字节哈希；Create仍是固定record，不承诺保留原HTTP未知属性。V219已扩展至67，旧迁移/既有摘要绝不改写。
+2. 回读按stored hash精确格式分派：裸64个小写hex为legacy；v2:64hex为V2；其他版本/长度/大小写fail closed，窄范围捕获versionOf的IllegalArgumentException并转换明确409，不能悄悄回退或泄漏为500。新请求绝不因为legacy fallback而写回legacy。
+3. V2同键同请求返回原receipt，异请求409且项目/版本/回执三表无变化。legacy无歧义输入仍按旧编码计算并保留原receipt字节；旧回执不能凭新请求升级为V2。保留原receipt指存储字节不改写；command仍经原commandResponse权限裁剪，不能直接向客户端输出历史敏感正文。
+4. legacy歧义无法靠摘要恢复原请求。新请求含孤立代理单元，或者序列化文本含ASCII问号时，即使旧摘要相等也不能证明同一输入：历史原请求可能是另一个被替代单元。先比较旧摘要：不相同仍按原OPERATION_CONFLICT拒绝；只有摘要相同却存在编码歧义时返回明确409（候选码OPERATION_REPLAY_UNVERIFIABLE），不返回旧成功、不重试外发、不创建新operationId。只拒绝孤立代理而允许问号仍保留单向碰撞，不足以修复。必须扫描同一encodedRequest并正确越过合法高低代理对，合法emoji、字面量\\ud800、U+FFFD和全角问号正常回放；不能先storageJson再算legacy摘要。
+5. 客户端presalesError目前有code时只把VERSION_CONFLICT/OPERATION_CONFLICT识别为conflict；若新增候选码，必须同步映射并验证save防盲提和输入保留，不能只增加后端错误。
+6. 第4项会收紧一部分旧回执重试兼容，须在接口变更与发布说明明确。不能从当前项目/旧响应推断原请求，它们没有完整输入且可能已变；合法Unicode、正常ASCII无问号的旧请求保持回放。若真实业务要求所有旧歧义请求可重放，必须提供可信原始请求档案用于逐条校验，不能拿不完整响应伪造输入证据。当前仓库未提供此档案。
+7. 生成task.requestHash本片保持其已有字节算法与历史回放，勿与操作表混用。其权限、精确版本检查、模型提交顺序和取消语义不变；后续如统一必须另做历史byte-writer版本分派。
+
+## 必须取得的回归证据
+
+- 原实现的真实Service/HTTP create与UPDATE_PROJECT在孤立高/低代理、问号、属性名/扩展字段上产生不同输入同回执的RED；不能只测试V2 helper。先保全现有旧刻画，再将新写入断言改为拒绝异请求，同时另建手工legacy fixture保留旧算法事实。
+- 新create/POST command/PATCH均写v2；same-request重试返回原响应，无新增revision/receipt；different-request409且所有持久化事实不变。保留unknown字段、null/省略、字段顺序、projectId、expectedVersion的区别。
+- 显式seed真实legacy receipt：无歧义同请求返回原字节、异请求拒绝；问号与高/低代理的两个方向均拒绝不确定回放；未知/畸形版本拒绝；actor/Workspace隔离和先授权/先来源检查的错误顺序保持。
+- 生成既有task哈希正常重试零重复入队，特别是taskGoal含ASCII问号的历史任务仍可安全回放（其byte-writer hash并非Service legacy），内部SAVE_AI_TASK/取消回执与新V2兼容；版本冲突、source修复窄命令、员工结果写入等旧合同保持。
+- H2实测及当前隔离MySQL往返67字符、旧行字节未改；Kingbase与真实历史样本另验。数据库列宽通过不代替Service集成。
+- 两个既有HTTP测试明确断言旧哈希（PresalesCommandKindContractTest和PresalesVersionInputContractTest）：新写入预期须转为独立V2固定向量/计算证据，另留legacy seed+回放覆盖。不是删除旧兼容断言让检查变绿。
+
+## 发布与回退约束
+
+这不是完整Presales V2/Delivery schema迁移，不依赖缺失的业务V2正文。无生产数据改写；已有操作摘要和已发布成果保持。开始写V2后旧二进制无法识别新摘要，不能宣称直接回滚旧binary安全：兼容reader必须在所有请求节点先部署，或回退到仍支持双读的修复版本；补V2已写入后兼容reader仍同请求回放的验证。列宽扩展无需缩回；不得把V2截断成64字符。正式上线顺序、历史歧义请求处理和业务签收仍待证据，本设计不是部署授权或已完成声明。

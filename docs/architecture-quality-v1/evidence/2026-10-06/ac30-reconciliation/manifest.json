@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "AC30 evidence reconciliation and bounded current-runtime browser smoke",
+  "generatedAt": "2026-10-06T11:33:39.735388+00:00",
+  "root": "/Users/guojiexie/.codex/artifacts/mateclaw/aq-cumulative-20261006-fcdteqlz/ac30-reconciliation",
+  "fileCount": 38,
+  "files": [
+    {
+      "path": ".playwright-cli/console-2026-10-06T11-25-24-390Z.log",
+      "bytes": 10290,
+      "sha256": "c2b71185c39dfd1718954347e17350f88546c679568fe9ad7a0ae9beee2674a7"
+    },
+    {
+      "path": ".playwright-cli/console-2026-10-06T11-25-27-890Z.log",
+      "bytes": 3706,
+      "sha256": "ddb41a26dfb94c63035d4ed5de290cc2290e5c4cf7173068241e73b676388180"
+    },
+    {
+      "path": ".playwright-cli/console-2026-10-06T11-26-54-182Z.log",
+      "bytes": 5111,
+      "sha256": "24134e83f15bc27bc2ba761399a3dd3e06dbde7f26d16ce642d519553a98dff0"
+    },
+    {
+      "path": ".playwright-cli/console-2026-10-06T11-26-57-547Z.log",
+      "bytes": 3720,
+      "sha256": "5376883cffee8a198e93643df2296f83eb1bb8900b362303a152841c822c83f7"
+    },
+    {
+      "path": ".playwright-cli/page-2026-10-06T11-25-25-685Z.yml",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".playwright-cli/page-2026-10-06T11-25-29-124Z.yml",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".playwright-cli/page-2026-10-06T11-26-55-395Z.yml",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".playwright-cli/page-2026-10-06T11-26-58-759Z.yml",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "AC30_EVIDENCE_RECONCILIATION.md",
+      "bytes": 9682,
+      "sha256": "c8ac1cbe958fa0e3ce470cd6bd7e126124361a991a718619c4dcd2961e640c16"
+    },
+    {
+      "path": "CURRENT_RUNTIME_MINIMAL_SMOKE.json",
+      "bytes": 2860,
+      "sha256": "89f9e0d141c80958745cab9180bf604c8d7e7d4e32a084fb9ae4b0a7511a0949"
+    },
+    {
+      "path": "cases/current-admin-profile-smoke.js",
+      "bytes": 5534,
+      "sha256": "30af6fe67cbd4712408dd14e4f54eee75e7eb707ac2f4e70d4e1d0e472efbdfb"
+    },
+    {
+      "path": "cases/current-viewer-readonly.js",
+      "bytes": 4134,
+      "sha256": "9858e370454f853192844eed2c9d90ce202802013d87ab01f28f0288447f0c91"
+    },
+    {
+      "path": "cases/login-admin-classic.js",
+      "bytes": 623,
+      "sha256": "ed149a3342c95ae616861127f6910984ddb3ed2063a57a5393019ea16a3b183b"
+    },
+    {
+      "path": "cases/login-admin-enterprise.js",
+      "bytes": 626,
+      "sha256": "9bd56a48ea86c099ac309d969280558a63ea70508f97df5f6d4c38a74493b6ed"
+    },
+    {
+      "path": "current-runtime-smoke-results.json",
+      "bytes": 1894,
+      "sha256": "b34576a34d3fd7762075e2eeaacf58248b8840043b319306ba328dbb6b596f2d"
+    },
+    {
+      "path": "evidence/current-classic-admin-smoke.log",
+      "bytes": 6784,
+      "sha256": "fce4bb997d98c5ed393206536bcfcbeeae6b9e394b0b4e062bddb6de902fc295"
+    },
+    {
+      "path": "evidence/current-classic-list-error.png",
+      "bytes": 156359,
+      "sha256": "95be09c53354e777ff02b07bff8ce041c323f5f558e8e5f327ecd1dc7bde5834"
+    },
+    {
+      "path": "evidence/current-classic-list-recovered.png",
+      "bytes": 176681,
+      "sha256": "b4607d1fd346460a1c3b4dd0af50c6263e969b7836d69a6198d031d93afecc30"
+    },
+    {
+      "path": "evidence/current-classic-narrow-editor.png",
+      "bytes": 70124,
+      "sha256": "d11fe38920f87f5382d413db5c4b5a2a1087e0143094d258b6a6db528c63563e"
+    },
+    {
+      "path": "evidence/current-classic-narrow-empty.png",
+      "bytes": 62448,
+      "sha256": "de28fbef4c3ab25fb2526471642a0e4572560e29c2440928a2f1a161f09ea51d"
+    },
+    {
+      "path": "evidence/current-classic-viewer-readonly.log",
+      "bytes": 5183,
+      "sha256": "02633faba091c6d130346c9988cd5abebf25e3a9c0aa1f0f6e720687ab107411"
+    },
+    {
+      "path": "evidence/current-classic-viewer-readonly.png",
+      "bytes": 184601,
+      "sha256": "a43d8186305867efc4cc28eceb39716cfa780d3d1a8f09e51b5100fd57d2b6a0"
+    },
+    {
+      "path": "evidence/current-enterprise-admin-smoke.log",
+      "bytes": 6750,
+      "sha256": "5b1164e860a7ebdeb43e1dd32efac78b091bef5551b9d1f83a7de9750820f857"
+    },
+    {
+      "path": "evidence/current-enterprise-list-error.png",
+      "bytes": 85010,
+      "sha256": "462e9bcfe9d10202ad82632cb649c09df5d2997ef77253b340a6d0fdcc46eece"
+    },
+    {
+      "path": "evidence/current-enterprise-list-recovered.png",
+      "bytes": 107129,
+      "sha256": "6df2ce1881bd3e5448acf5ab17c9d2bb0e17920f3c60225e80cf6b4125a0bac1"
+    },
+    {
+      "path": "evidence/current-enterprise-narrow-editor.png",
+      "bytes": 60967,
+      "sha256": "c67736ea2492df1df244b9b18fcde85683a9b77bea2d77ed4424574be6d8e003"
+    },
+    {
+      "path": "evidence/current-enterprise-narrow-empty.png",
+      "bytes": 47850,
+      "sha256": "ea27b51a29c0ee528cc46593aa9f844f78013dc6dd866ed38553ed388f323d55"
+    },
+    {
+      "path": "evidence/current-enterprise-viewer-readonly.log",
+      "bytes": 5029,
+      "sha256": "fffb70987e32a19ad4768718545f64df2d4a6504fbb71dfc46f78f0d9ab4dd12"
+    },
+    {
+      "path": "evidence/current-enterprise-viewer-readonly.png",
+      "bytes": 118670,
+      "sha256": "af7d7711a9df0167e4b41e9ac0b85f3c2d5d70ca79fc2674ac4066aeba05e182"
+    },
+    {
+      "path": "evidence/login-admin-classic.log",
+      "bytes": 979,
+      "sha256": "dc1c67ffe521f1bd2aa9fda0b5428b536045550b1c3512907f4c0d41b5f90a2f"
+    },
+    {
+      "path": "evidence/login-admin-enterprise.log",
+      "bytes": 1008,
+      "sha256": "0f397b462a605435bdd04dac1aa5a4df9b9eb4f1c5c25d1ac244ed80bcf503b4"
+    },
+    {
+      "path": "evidence/login-viewer-classic.log",
+      "bytes": 910,
+      "sha256": "de6d1c2b72f56f9dbd0594ae15aedd827ed23923bba6a16f6c85f046646c15e8"
+    },
+    {
+      "path": "evidence/login-viewer-enterprise.log",
+      "bytes": 916,
+      "sha256": "693ade1353bc32af432ada56ceb47f5a3d184d99dbbe9532f63dfd4a7e965f2c"
+    },
+    {
+      "path": "login-viewer.py",
+      "bytes": 2433,
+      "sha256": "eae487fc4ca55bb9bb286e61919afc4a89554761eea7bcc7226eecff03187030"
+    },
+    {
+      "path": "reconciliation.json",
+      "bytes": 3064,
+      "sha256": "5e80695c8ba17801e09ee2e9e192419c4968cd765fc45febc245b89fe8efbd64"
+    },
+    {
+      "path": "run-case.py",
+      "bytes": 795,
+      "sha256": "0721949be8bf55610db6a694b9bd4668c3ce7c8f8fa2e1e30c52c0987ef4c0ba"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 1685,
+      "sha256": "d7afdb03ef9e58fe5c58761a52a9329057c6474793af3f897a5fdbfd6045749c"
+    },
+    {
+      "path": "verify-evidence.py",
+      "bytes": 8155,
+      "sha256": "a3ea15d5d33c52add81372983352d2454873f62c795149872f8d281ce02ffd12"
+    }
+  ]
+}

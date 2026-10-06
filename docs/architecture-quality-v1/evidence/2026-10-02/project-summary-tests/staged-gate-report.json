@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "mode": "commit",
+  "started_at": "2026-10-02T14:23:28.152272+00:00",
+  "steps": [
+    {
+      "name": "architecture-ratchet",
+      "status": "PASS",
+      "new_violations": 0,
+      "existing_violations": 2439
+    },
+    {
+      "name": "guard-self-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/scripts/quality/tests",
+        "-v"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/guard-self-tests.log",
+      "log_sha256": "164e65e4e5eadc23eb124e20156d58bd63cf3cd9fbb9d8521864690ad74d3edb",
+      "elapsed_seconds": 1.278
+    },
+    {
+      "name": "java-toolchain",
+      "status": "NOT_APPLICABLE",
+      "reason": "No backend/control-plane changes"
+    },
+    {
+      "name": "ui-format",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "--config",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/.quality/prettier.json",
+        "src/features/presales/__tests__/dashboardContract.test.ts",
+        "src/features/presales/__tests__/projectSummary.test.ts",
+        "src/features/presales/api/presalesApi.ts",
+        "src/features/presales/components/PresalesDashboard.vue",
+        "src/features/presales/pages/PresalesWorkbench.vue",
+        "src/features/presales/shared/dashboard.ts",
+        "src/features/presales/shared/messages.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-format.log",
+      "log_sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "elapsed_seconds": 0.484
+    },
+    {
+      "name": "ui-lint",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "--max-warnings=0",
+        "src/features/presales/__tests__/dashboardContract.test.ts",
+        "src/features/presales/__tests__/projectSummary.test.ts",
+        "src/features/presales/api/presalesApi.ts",
+        "src/features/presales/components/PresalesDashboard.vue",
+        "src/features/presales/pages/PresalesWorkbench.vue",
+        "src/features/presales/shared/dashboard.ts",
+        "src/features/presales/shared/messages.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-lint.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.917
+    },
+    {
+      "name": "ui-typecheck",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "vue-tsc",
+        "--noEmit"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-typecheck.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 11.833
+    },
+    {
+      "name": "id-precision",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "bash",
+        "/Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/scripts/check-snowflake-precision.sh"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/id-precision.log",
+      "log_sha256": "bdda5b36523ff53f75b6271d795b6a111661004f8d626f1e9031e707098f5f68",
+      "elapsed_seconds": 0.13
+    },
+    {
+      "name": "ui-vitest",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--reporter=json",
+        "--outputFile=/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/vitest.json"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-vitest.log",
+      "log_sha256": "f6f10139540d9904ee8dd73a39248d0b9eedc9d2c43e5088d3568e9c1e9dbe5d",
+      "elapsed_seconds": 52.603,
+      "executed_tests": 852
+    },
+    {
+      "name": "ui-node-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "--test-reporter=tap",
+        "test/agentBindingSearch.test.ts"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-node-tests.log",
+      "log_sha256": "b2e6d3ab9f6fc6610fa5d6ec6a7c3fda27bf2399662a46b20e39fb9aa6fa41fa",
+      "elapsed_seconds": 0.183
+    },
+    {
+      "name": "ui-build-enterprise",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "build",
+        "--mode",
+        "enterprise"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-build-enterprise.log",
+      "log_sha256": "9c306310c3c0c43f2dbac5c9ac9598204dfc8f1f380bdd8139301a6efe2d0f20",
+      "elapsed_seconds": 36.524
+    },
+    {
+      "name": "ui-build-classic",
+      "status": "PASS",
+      "exit_code": 0,
+      "command": [
+        "pnpm",
+        "build",
+        "--mode",
+        "classic"
+      ],
+      "log": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0/ui-build-classic.log",
+      "log_sha256": "ca7a8221716857b502a8ac706ede9e938665037e6fc91376151aaa16d25d0123",
+      "elapsed_seconds": 36.481
+    },
+    {
+      "name": "cost-tool",
+      "status": "NOT_APPLICABLE",
+      "reason": "No standalone cost tool change"
+    }
+  ],
+  "application_acceptance": "NOT_RUN",
+  "report_dir": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-bakdbli0",
+  "base_commit": "617a6c19d857f8f6d0288ec39e8ddbc5e13f5a46",
+  "policy_sha256": "2b4bb7752b64f1d18824022bae5036644f75c4a9d8a06f22b434e9ed98922d5c",
+  "runner_sha256": "d81bb05eb5ece4b4974b5d6ccf7466945524c3d573682834dd4f76b6b69a89f0",
+  "target_identity": "5177e8a8e3c5f5fa537a5607d1e63c50039c0262",
+  "changed_files": [
+    "docs/architecture-quality-v1/evidence/2026-10-02/AQ05_PROJECT_SUMMARY_PLAN.md",
+    "mateclaw-ui/src/features/presales/__tests__/dashboardContract.test.ts",
+    "mateclaw-ui/src/features/presales/__tests__/projectSummary.test.ts",
+    "mateclaw-ui/src/features/presales/api/presalesApi.ts",
+    "mateclaw-ui/src/features/presales/components/PresalesDashboard.vue",
+    "mateclaw-ui/src/features/presales/pages/PresalesWorkbench.vue",
+    "mateclaw-ui/src/features/presales/shared/dashboard.ts",
+    "mateclaw-ui/src/features/presales/shared/messages.ts"
+  ],
+  "plan": {
+    "java": false,
+    "ui": true,
+    "control": false,
+    "cost_tool": false
+  },
+  "status": "PASS",
+  "submission_ready": true,
+  "finished_at": "2026-10-02T14:26:14.776215+00:00"
+}

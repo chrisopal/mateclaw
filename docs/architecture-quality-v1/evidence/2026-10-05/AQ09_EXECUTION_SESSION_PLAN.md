@@ -1,0 +1,11 @@
+# AQ-09 员工执行会话职责拆分计划
+
+HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，初始98条WIP保留；dev rdw4jh8a SCAN_PASS/submission_ready=false。上轮查询拆分全UI1115、售前416、Node5及双构建通过。本轮沿用户要求继续售前代码结构整改，聚焦员工列表、生成对话框、生成/取消异步会话；非全页格式整理，不改后端/权限/数据模型。
+
+生产代码限定PresalesWorkbench.vue与新usePresalesExecutionSession.ts；测试限定presalesWorkbench.test.ts及新executionSession.test.ts。模板/style字节保持；共享i18n业务标签保留页面；复用现有API、presalesError、receipt和页面scope，不新造通用command bus或第二套scope规则。usePresalesEditorSession已有同类泛型Scope/getter/ref接口，可遵循其模式。新模块承接employees/employeeError/employeesLoading、employeeRequest序列、generation/generationOpen以及loadEmployees/openGeneration/continueEmployee/generate/cancelTask。页面继续拥有编辑save/command、router/workspace guards、scopeGeneration、acceptMutation版本比较、taskPolling和查询；所有入口保持直接调用，无重复转发逻辑。
+
+连接用最少typed getters/Refs与明确回调：共享saving、project、error/conflict，Workspace/project、dirty/写入/生成守卫，captureScope/isActiveScope，既有receipt、acceptMutation和轮询start，翻译和employee错误映射。不得把整个页面传作context，不把权限提升为client-only。初始化顺序特别检查editor的loadEmployees函数引用、查询resetView与watch首次load，闭包在构造时不得读尚未初始化绑定。disposed时不接纳晚到员工/生成/取消结果，也不能清除新范围的saving；保持原scope失效链。
+
+先归档页面/旧测试与原416售前回归；补真实RouterView刻画覆盖生成/取消的Workspace ABA、晚到成功/失败、409、相同operation重试及不同请求变化（优先复用已有覆盖，不重复镜像实现）。然后搬移，补模块合同保留固定Workspace、expectedVersion、字符串任务ID、不传modelId、sourceRestricted与dirty/saving守卫、员工列表同范围请求序号和错误映射。若发现真实行为缺陷，先取得原实现RED并记录，不把纯迁移新增的防御措施当旧bug已复现。
+
+每个职责完成后dev，最终售前/全UI、Node、vue-tsc、非修复eslint与项目配置Prettier、precision及两mode构建；独立审阅之后归档源码/日志/报告并最终dev核对tree。新测试不删skip或放宽断言。无真实浏览器/后端角色/正式QA证据则保持NOT_RUN，46正式AC不升级。不动其他WIP，不提交/推送；回退仅本片搬移及相应测试，无DB操作。

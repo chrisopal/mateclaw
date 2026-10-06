@@ -1,0 +1,20 @@
+{
+  "sourceTree": "e6f9fe69b2a5af6bf59177df1951973c8b018e4f",
+  "taskId": "41bfe08b-3ab4-4e01-9aa6-18e1e0b52f6a",
+  "taskStatus": "CANCELLED",
+  "resultPresent": false,
+  "contextCount": 3,
+  "messages": [
+    {
+      "role": "user",
+      "status": "completed",
+      "contentLength": 23
+    },
+    {
+      "role": "assistant",
+      "status": "interrupted",
+      "contentLength": 272
+    }
+  ],
+  "observation": "Actual GET after releasing local held provider; actual late output retained as interrupted evidence"
+}

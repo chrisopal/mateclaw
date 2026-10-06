@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Install after AQ-01..AQ-03 remove the legacy dependencies.
  * Uses the repository's existing ArchUnit dependency; do not add a second version.
- * This template has NOT been compiled against the user's repository in this package.
+ * Historical source template; executable installation and test-only canaries now live in
+ * mateclaw-server/src/test/java/vip/mate/architecture/WorkbenchArchitectureTest.java.
+ * This documentation file itself is not compiled; see AQ07_ARCHUNIT_INSTALL_ACCEPTANCE.
  */
 class WorkbenchArchitectureTest {
     private final JavaClasses classes = new ClassFileImporter()

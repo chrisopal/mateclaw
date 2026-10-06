@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 2,
+  "scope": "SIMULATED restricted-source warning, generation availability and binding repair only; not whole workbench/business QA",
+  "build": {
+    "fingerprint": "b1711a4ef038334d2e9f0b6462cf5a371c5a780b22ecd60e4943e22787bd7dad"
+  },
+  "environment": {
+    "url": "http://127.0.0.1:5197/aq-restricted-ui.html",
+    "browser": "HeadlessChrome/154.0.0.0 macOS",
+    "role": "SIMULATED canWrite/canApprove capabilities; no live identity",
+    "theme": "light Element Plus",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    }
+  },
+  "pages": [
+    {
+      "id": "workbench",
+      "url": "/aq-restricted-ui.html/90071992547409998",
+      "inventoryComplete": true
+    }
+  ],
+  "controls": [
+    {
+      "id": "warning",
+      "page": "workbench",
+      "name": "Restricted source warning",
+      "locator": "text=Source access is restricted.",
+      "checks": [
+        "warning-business",
+        "warning-interaction",
+        "warning-display",
+        "warning-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "warning-business"
+        ],
+        "interaction": [
+          "warning-interaction"
+        ],
+        "display": [
+          "warning-display"
+        ],
+        "layout": [
+          "warning-layout"
+        ]
+      }
+    },
+    {
+      "id": "generation",
+      "page": "workbench",
+      "name": "Employee generation",
+      "locator": "button=Delegate to employee",
+      "checks": [
+        "generation-business",
+        "generation-interaction",
+        "generation-display",
+        "generation-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "generation-business"
+        ],
+        "interaction": [
+          "generation-interaction"
+        ],
+        "display": [
+          "generation-display"
+        ],
+        "layout": [
+          "generation-layout"
+        ]
+      }
+    },
+    {
+      "id": "repair",
+      "page": "workbench",
+      "name": "Material binding recovery",
+      "locator": "button=Bind material",
+      "checks": [
+        "repair-business",
+        "repair-interaction",
+        "repair-display",
+        "repair-layout"
+      ],
+      "dimensions": {
+        "business": [
+          "repair-business"
+        ],
+        "interaction": [
+          "repair-interaction"
+        ],
+        "display": [
+          "repair-display"
+        ],
+        "layout": [
+          "repair-layout"
+        ]
+      }
+    }
+  ],
+  "results": [
+    {
+      "control": "warning",
+      "check": "warning-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "warning",
+      "check": "warning-interaction",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "reason": "Outside this bounded browser run; keyboard/generation activation and all repair/generation layout combinations not measured"
+    },
+    {
+      "control": "warning",
+      "check": "warning-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "warning",
+      "check": "warning-layout",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "generation",
+      "check": "generation-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "generation",
+      "check": "generation-interaction",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "reason": "Outside this bounded browser run; keyboard/generation activation and all repair/generation layout combinations not measured"
+    },
+    {
+      "control": "generation",
+      "check": "generation-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "generation",
+      "check": "generation-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "reason": "Outside this bounded browser run; keyboard/generation activation and all repair/generation layout combinations not measured"
+    },
+    {
+      "control": "repair",
+      "check": "repair-business",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "repair",
+      "check": "repair-interaction",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "repair",
+      "check": "repair-display",
+      "status": "PASS",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "steps": [
+        "Load restricted project",
+        "Assert warning and disabled generation/available repair",
+        "Open materials, bind Repair source, save",
+        "Assert warning hidden and generation restored"
+      ],
+      "expected": "Restricted disclosure is explicit and authorized binding repair restores full controls",
+      "actual": "Browser assertions passed; warning measured within 1440px viewport",
+      "evidence": [
+        {
+          "path": "result.log",
+          "sha256": "ec63f3e9e47b2458ccc724805f1ae1bf1e981e58e25b91765c19166725aa1488"
+        },
+        {
+          "path": "restricted.png",
+          "sha256": "ddfae7b44a28d9c0295b5b10b65897807ced76029539d46dbcddebb520a3b620"
+        },
+        {
+          "path": "restored.png",
+          "sha256": "8cbb32a07cb20427368a1c0c3d3ef13a8153fa13933216588347e65a1de13820"
+        }
+      ]
+    },
+    {
+      "control": "repair",
+      "check": "repair-layout",
+      "status": "NOT_RUN",
+      "preconditions": "SIMULATED HTTP responses with enabled/write/approve capabilities; actual Vue workbench in isolated router/Pinia harness",
+      "contractRefs": [
+        "AQ02_RESTRICTED_UI_PLAN.md#restricted-source workbench recovery"
+      ],
+      "reason": "Outside this bounded browser run; keyboard/generation activation and all repair/generation layout combinations not measured"
+    }
+  ],
+  "previousFailures": [
+    {
+      "path": "previous-locator-failure.log",
+      "sha256": "0cbf6f708783b1910350c07f71655aa33f5922099424ed7ebfaa459eb57a5b8b"
+    }
+  ],
+  "sourceEvidence": {
+    "path": "sources.json",
+    "sha256": "b1711a4ef038334d2e9f0b6462cf5a371c5a780b22ecd60e4943e22787bd7dad"
+  }
+}

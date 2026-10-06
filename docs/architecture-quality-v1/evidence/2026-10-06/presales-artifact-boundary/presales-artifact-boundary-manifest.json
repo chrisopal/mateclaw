@@ -1,0 +1,1296 @@
+{
+  "archive": "presales-artifact-boundary.tar.gz",
+  "archive_sha256": "e60c5c958e80c71793efb0a0d7351ac32506084152a42320133cfbbf74544224",
+  "files": [
+    {
+      "path": "ComparePresalesArtifactAst.java",
+      "original_sha256": "debedfaeed6ac7a312cd975731895e405f2f73802b29458d05756dacf8398fe6",
+      "archived_sha256": "debedfaeed6ac7a312cd975731895e405f2f73802b29458d05756dacf8398fe6",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-boundary-ast.log",
+      "original_sha256": "1b83b97461020fbd63cf3de745bd4289bff757a725cb882a6b364a78cc23d0f3",
+      "archived_sha256": "1b83b97461020fbd63cf3de745bd4289bff757a725cb882a6b364a78cc23d0f3",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-boundary-baseline.log",
+      "original_sha256": "f1f39e9fb0d45e7fb02795a637fc4660c4098257082b7f303938c2ab3acbb97f",
+      "archived_sha256": "a6e59fd65eb0e20f3e913c481ccadf9182d4212dc224800afd551e8442234f16",
+      "redactions": 1
+    },
+    {
+      "path": "aq-presales-artifact-boundary-final-dev.log",
+      "original_sha256": "aaf90ef2b6858fd5e104bbcc4181e3b8044c8563fc8599174fa7c3234520d93a",
+      "archived_sha256": "aaf90ef2b6858fd5e104bbcc4181e3b8044c8563fc8599174fa7c3234520d93a",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-boundary-final-format.log",
+      "original_sha256": "8042bd249da43ed3f288f575ae9ddb3be0042885b8df07b0109b4815e91c5c2e",
+      "archived_sha256": "8042bd249da43ed3f288f575ae9ddb3be0042885b8df07b0109b4815e91c5c2e",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-boundary-final-regression.log",
+      "original_sha256": "7264ade1cdaa06b9ea307e29f7ae03403f0d8c465c69f0f23b2eec41b9e53bd0",
+      "archived_sha256": "5d22a706f5b588666d7a0cf9dc465267927db328b1d9b4475e5386984388fb9a",
+      "redactions": 15
+    },
+    {
+      "path": "aq-presales-artifact-boundary-initial-dev.log",
+      "original_sha256": "9cb76a5b2d086187aef951c04a9790215afe076785a0dbfd63501f91f81a50f5",
+      "archived_sha256": "9cb76a5b2d086187aef951c04a9790215afe076785a0dbfd63501f91f81a50f5",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-boundary-regression.log",
+      "original_sha256": "df461e4ccdf022fded951d423acd27202d3ea5a73e22d0844f33d887bdcf2840",
+      "archived_sha256": "f05621317e423d03d02a544a3d8c3dca442c7b238b3e84a71cf4f26f4dc27559",
+      "redactions": 15
+    },
+    {
+      "path": "aq-presales-artifact-characterization-format.log",
+      "original_sha256": "c944c11106d115b053434ba243271a0f0add5e3e2d967fea9f5e3d4f909d850f",
+      "archived_sha256": "c944c11106d115b053434ba243271a0f0add5e3e2d967fea9f5e3d4f909d850f",
+      "redactions": 0
+    },
+    {
+      "path": "aq-presales-artifact-characterization.log",
+      "original_sha256": "d17337d8713cfa7862ebb5f69f1a44431218dc3847cc7d2b1a9442f65f74621e",
+      "archived_sha256": "f94fdbc1a5a12dfc9d1723aa746dc1ee50a81e1eb697a81a2d4a090eb5efd050",
+      "redactions": 1
+    },
+    {
+      "path": "before/PresalesArtifactReader.java",
+      "original_sha256": "54427c67ed7efea18fb606a54d6e56998ef0899c9762f9f2138bdd2988e3e79a",
+      "archived_sha256": "54427c67ed7efea18fb606a54d6e56998ef0899c9762f9f2138bdd2988e3e79a",
+      "redactions": 0
+    },
+    {
+      "path": "before/PresalesReleaseSnapshotContractTest.java",
+      "original_sha256": "4b74eb996094250764a8d85ef30ec3932452cdf6d30766ab5f54a9fa55495c3f",
+      "archived_sha256": "4b74eb996094250764a8d85ef30ec3932452cdf6d30766ab5f54a9fa55495c3f",
+      "redactions": 0
+    },
+    {
+      "path": "before/PresalesService.java",
+      "original_sha256": "ef52a0ca0788ef23327beee0a0375de36a7be866f4d98da688926a3600e0ae9f",
+      "archived_sha256": "ef52a0ca0788ef23327beee0a0375de36a7be866f4d98da688926a3600e0ae9f",
+      "redactions": 0
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml",
+      "original_sha256": "029c8923cebe411f1e51081bac8dbe5935979ec0694c439d3ae0b66fcca97ac7",
+      "archived_sha256": "18fa36e4f7410b51d49aaa0cb80dcd96fb28a8756825cc68448c325cbd00784e",
+      "redactions": 1
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml",
+      "original_sha256": "74263de1c7b1637103d1a703eff49104ce941ddb057c6a27315facd4c77f8227",
+      "archived_sha256": "74263de1c7b1637103d1a703eff49104ce941ddb057c6a27315facd4c77f8227",
+      "redactions": 0
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesArtifactRendererTest.xml",
+      "original_sha256": "73231da31dacaead0790ebddf43e942af1481b6e83bfbba48aa1776f54e9043d",
+      "archived_sha256": "73231da31dacaead0790ebddf43e942af1481b6e83bfbba48aa1776f54e9043d",
+      "redactions": 0
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml",
+      "original_sha256": "571c33bf058186bf53001194789d88749794763e8eb0ee7ea3e408730998ac8b",
+      "archived_sha256": "571c33bf058186bf53001194789d88749794763e8eb0ee7ea3e408730998ac8b",
+      "redactions": 0
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesHandoffReadContractTest.xml",
+      "original_sha256": "b657fbb75efb8530e381643173ec27c7abbc86c51c45d1f53f553d9db385f8cb",
+      "archived_sha256": "b657fbb75efb8530e381643173ec27c7abbc86c51c45d1f53f553d9db385f8cb",
+      "redactions": 0
+    },
+    {
+      "path": "before/TEST-vip.mate.presales.PresalesReleaseSnapshotContractTest.xml",
+      "original_sha256": "21ba19081e599bb20d671c79093be2c0fd44cc237b03e4cf59a6405112d734f2",
+      "archived_sha256": "21ba19081e599bb20d671c79093be2c0fd44cc237b03e4cf59a6405112d734f2",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesArtifactPersistenceContractTest.txt",
+      "original_sha256": "47cb3f79af450bae1069b0da5171cd4f01f7647eee5ae99777001e3189290560",
+      "archived_sha256": "47cb3f79af450bae1069b0da5171cd4f01f7647eee5ae99777001e3189290560",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesArtifactReadContractTest.txt",
+      "original_sha256": "47eae352934ba3039ba98ed353e4c9924f98ebee9eb3764dc2b338945abcaf8f",
+      "archived_sha256": "47eae352934ba3039ba98ed353e4c9924f98ebee9eb3764dc2b338945abcaf8f",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesArtifactRendererTest.txt",
+      "original_sha256": "2ab3f158865d7c1621a3dbc027156b3b5a145e8f8ff899f5ef3dd49cbe8eca89",
+      "archived_sha256": "2ab3f158865d7c1621a3dbc027156b3b5a145e8f8ff899f5ef3dd49cbe8eca89",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesArtifactRepositoryTest.txt",
+      "original_sha256": "f952a1b6c877a274dd376bc6e2f537450fb5210f79f39916621267344b073087",
+      "archived_sha256": "f952a1b6c877a274dd376bc6e2f537450fb5210f79f39916621267344b073087",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesHandoffReadContractTest.txt",
+      "original_sha256": "ac36a5193a9fb2d1551894b2a439fda8e3216471e38d0541f2b7fd3ffccc458c",
+      "archived_sha256": "ac36a5193a9fb2d1551894b2a439fda8e3216471e38d0541f2b7fd3ffccc458c",
+      "redactions": 0
+    },
+    {
+      "path": "before/vip.mate.presales.PresalesReleaseSnapshotContractTest.txt",
+      "original_sha256": "e4b9c68d3de2d1916f5eb884292202711e7620eca3f9f6698fd84f43a4ee7163",
+      "archived_sha256": "e4b9c68d3de2d1916f5eb884292202711e7620eca3f9f6698fd84f43a4ee7163",
+      "redactions": 0
+    },
+    {
+      "path": "final-dev/architecture.json",
+      "original_sha256": "3f0e4efc370f63fd298a879fab01201dce514ea716343b8483cba2350c9665ba",
+      "archived_sha256": "3f0e4efc370f63fd298a879fab01201dce514ea716343b8483cba2350c9665ba",
+      "redactions": 0
+    },
+    {
+      "path": "final-dev/guard-self-tests.log",
+      "original_sha256": "4e99de673d65ee649c95c48b232c19d12e3f07730e03a614a2a341ea9749ef6b",
+      "archived_sha256": "4e99de673d65ee649c95c48b232c19d12e3f07730e03a614a2a341ea9749ef6b",
+      "redactions": 0
+    },
+    {
+      "path": "final-dev/report.json",
+      "original_sha256": "978d1b4f12bd31f49b8e74115c862023961f332a178f22724f71f1143246c8f2",
+      "archived_sha256": "978d1b4f12bd31f49b8e74115c862023961f332a178f22724f71f1143246c8f2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.architecture.WorkbenchArchitectureTest.xml",
+      "original_sha256": "3ae109ded15d8562161ef744295aa45c481a056b77c2a7ae24a1098ff6e63300",
+      "archived_sha256": "3ae109ded15d8562161ef744295aa45c481a056b77c2a7ae24a1098ff6e63300",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingAccessPolicyTest.xml",
+      "original_sha256": "4eeed164e1897bf49ab1d5d7b2032d797930ad51c81fd9020eae48b84efe0860",
+      "archived_sha256": "4eeed164e1897bf49ab1d5d7b2032d797930ad51c81fd9020eae48b84efe0860",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingAnalysisTest.xml",
+      "original_sha256": "edbe64bce4ee52454c0c9618e3a9e676b680b34aacf05a2687efa50e82c74511",
+      "archived_sha256": "f35dbfc79b63aaf3f064b4b7dfdf5d9ef475c66eb5c579471c1fcdbf847c292f",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingApprovalEndToEndTest.xml",
+      "original_sha256": "0c8e1e12992cae6b664f32c5cf389b49eb2fc66d2cc83c61a5215e05fec11016",
+      "archived_sha256": "51170761dcaa1cc4d2b15f286be7f34d8472d1964c1b8e7fdcf1e28c33f77126",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingApprovalTest.xml",
+      "original_sha256": "34e49ac02e78322b321bf7da4a2466637a75a6172c7ee000a6ece2b7268ec9d4",
+      "archived_sha256": "34e49ac02e78322b321bf7da4a2466637a75a6172c7ee000a6ece2b7268ec9d4",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingArtifactTest.xml",
+      "original_sha256": "6eb1810ae48f6b3c93f33eaa86c4e8f94dc1d2018d50c7e39563d92b8f9633d4",
+      "archived_sha256": "6eb1810ae48f6b3c93f33eaa86c4e8f94dc1d2018d50c7e39563d92b8f9633d4",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingChangeImpactTest.xml",
+      "original_sha256": "7d50f2333f966304f70ac521005de33f42a48a9e3fe700e45efe6bbf00a2bbdb",
+      "archived_sha256": "7d50f2333f966304f70ac521005de33f42a48a9e3fe700e45efe6bbf00a2bbdb",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingContentBlocksTest.xml",
+      "original_sha256": "bb6da3af24e8b66feaef5f52d01abc12f5738b8695b416a5009d800e9784bd8f",
+      "archived_sha256": "bb6da3af24e8b66feaef5f52d01abc12f5738b8695b416a5009d800e9784bd8f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingContextBudgetEndToEndTest.xml",
+      "original_sha256": "f27ed9b37a5af5a1576b32a369ac9301e9ae1cfa19b52a5e9aea18722e5dc7e0",
+      "archived_sha256": "f27ed9b37a5af5a1576b32a369ac9301e9ae1cfa19b52a5e9aea18722e5dc7e0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingDashboardTest.xml",
+      "original_sha256": "2183a17a6a1a7b0e5fab2b5550d120e3010e6bfad81856be9754567fdb135879",
+      "archived_sha256": "2183a17a6a1a7b0e5fab2b5550d120e3010e6bfad81856be9754567fdb135879",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingDocxRendererTest.xml",
+      "original_sha256": "a3ed2de5d3e83525494b24504561f0f4b9f629aeb37200213533e4c83c6f4299",
+      "archived_sha256": "a3ed2de5d3e83525494b24504561f0f4b9f629aeb37200213533e4c83c6f4299",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingEmployeeBindingsTest.xml",
+      "original_sha256": "dea5629224538e15fd8308101a1ddb6d8957ab64b1260ea36e8b7c0e0c4a3fcc",
+      "archived_sha256": "dea5629224538e15fd8308101a1ddb6d8957ab64b1260ea36e8b7c0e0c4a3fcc",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingEmployeeRuntimeTest.xml",
+      "original_sha256": "0e05285067e978a8cbdb9ab54c7ee585e7d252d2f5fe4d6642b66104eea7d526",
+      "archived_sha256": "0e05285067e978a8cbdb9ab54c7ee585e7d252d2f5fe4d6642b66104eea7d526",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingEndToEndTest.xml",
+      "original_sha256": "83cfdbb1ebf7b9e57362f81830f12107c21010d3b1695c239c98aab635e7f3d8",
+      "archived_sha256": "1158500792ab67a46f61a34c7c191135ce06e93697bf7ecb1d1b21d9dda46d18",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingHandoffReceiptTest.xml",
+      "original_sha256": "d311ce16192cbc668eda9a72aec3c545d1cd67cff082d9f2b3923a8c128d89c8",
+      "archived_sha256": "05c246a7ab65263d914df0d677844132c83c231fe35b0d4205d755891b1ef6bb",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingHandoffTest.xml",
+      "original_sha256": "2f8a18e13de81425a8523b647d907b2d476c45135367122586bb531aa6b569fc",
+      "archived_sha256": "2f8a18e13de81425a8523b647d907b2d476c45135367122586bb531aa6b569fc",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingMaterialsTest.xml",
+      "original_sha256": "8302294aac6d711c7d2d3e1b0d6bd63eca228056fd3ed99888577e0de1d639a1",
+      "archived_sha256": "de62c2e529229a8d9db480c47edd10436870581d52c05cae32bc5f32b252f4f3",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingMigrationTest.xml",
+      "original_sha256": "442a635c3fa4a087e64cf9f9369bf4abde56b8f1d46ef73ca4ae5b90fa9abd06",
+      "archived_sha256": "442a635c3fa4a087e64cf9f9369bf4abde56b8f1d46ef73ca4ae5b90fa9abd06",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingOutlineTest.xml",
+      "original_sha256": "9742f97744667196aa7ea56ba9f6b1513a91c00f727866122d46d1d2a2bfb736",
+      "archived_sha256": "0f4e55ffb5f1958a3fa14f6e9d50ab807042dd9d5ba8e6de583860459016c1da",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingOutlineValidatorTest.xml",
+      "original_sha256": "a374357bc37ceac42629b810eef2f6af2b237f6f65d8c27e37d9a43db9d6eda7",
+      "archived_sha256": "a374357bc37ceac42629b810eef2f6af2b237f6f65d8c27e37d9a43db9d6eda7",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingProjectTest.xml",
+      "original_sha256": "957547a291e41afe630556914571d7fb9cbb14c5784c81f1ccea70799ed84ab9",
+      "archived_sha256": "957547a291e41afe630556914571d7fb9cbb14c5784c81f1ccea70799ed84ab9",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingRecoveryTest.xml",
+      "original_sha256": "8ef2ecbce76aa46699f6257f3518f44e410840d167a464794bce92973a9dfe3f",
+      "archived_sha256": "8ef2ecbce76aa46699f6257f3518f44e410840d167a464794bce92973a9dfe3f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingRetryPolicyTest.xml",
+      "original_sha256": "ec54db82a5018b8ad8b876e86eed5360b1388b4f49afbf5374e407418406d1f5",
+      "archived_sha256": "ec54db82a5018b8ad8b876e86eed5360b1388b4f49afbf5374e407418406d1f5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingReviewTest.xml",
+      "original_sha256": "25195c67956907f13a97578599cfa039e7aa2443dbe57a1860dea2bac3d98c30",
+      "archived_sha256": "c924e79d44f7af045e5a81a20be1e97555018682c697c251632d4a2762170412",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingRuntimeIsolationTest.xml",
+      "original_sha256": "8ccf62bc1f8df5294d3d67946b5f608e8527fe0462d0a8ce5124f10af8f226ae",
+      "archived_sha256": "8ccf62bc1f8df5294d3d67946b5f608e8527fe0462d0a8ce5124f10af8f226ae",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingSkillPackagesTest.xml",
+      "original_sha256": "09430dffaf4454714d278eb0d6bc1068932d2f186e8e0d5547e60f3a88c930f3",
+      "archived_sha256": "09430dffaf4454714d278eb0d6bc1068932d2f186e8e0d5547e60f3a88c930f3",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingSkillValidatorTest.xml",
+      "original_sha256": "634d04910666aeec675610ee95ec2584addecc62de0f5556db698dd077663a2c",
+      "archived_sha256": "634d04910666aeec675610ee95ec2584addecc62de0f5556db698dd077663a2c",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingSourceReaderTest.xml",
+      "original_sha256": "a32b624d33bf74a7319016851525aff28d55e7c387eb15691695ff0d604ae552",
+      "archived_sha256": "a32b624d33bf74a7319016851525aff28d55e7c387eb15691695ff0d604ae552",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingSourceTest.xml",
+      "original_sha256": "6e13bf6caf0fafd95583e80a152c15f2a4f29024e346f32b93e8886433ce265c",
+      "archived_sha256": "27acef88b3e56a838709a3f1d3f2adaab78cbc6ae97587525a4103ae862e8af4",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingTaskQueryServiceTest.xml",
+      "original_sha256": "1e3700ed56d770fcc0ef63116e19b08b92c1a22e0402caee16e47a7457700aab",
+      "archived_sha256": "1e3700ed56d770fcc0ef63116e19b08b92c1a22e0402caee16e47a7457700aab",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingTaskTest.xml",
+      "original_sha256": "5177a987268407bc9d54530f491454eccb6a20a0d40f2c66cff3dae07a8b3e2d",
+      "archived_sha256": "f41bf37f7845de6d972f16b18f5c6053ffe79c95212c533892ad19a8fac31661",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.bidding.BiddingWritingTest.xml",
+      "original_sha256": "7ac680fcf628ff8fb82b72d148085f77f64e9d215ac432f271001bfac8088f05",
+      "archived_sha256": "4fb6111151899316fa969f56c35f093836c03e2e445be049953f550ac8d7f1d6",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesAccessActorTest.xml",
+      "original_sha256": "445f5621d37382882f3fd25137a9a5e53b84f1a5a6413d62625e0c5ecbcf210f",
+      "archived_sha256": "445f5621d37382882f3fd25137a9a5e53b84f1a5a6413d62625e0c5ecbcf210f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesAccessPolicyTest.xml",
+      "original_sha256": "9adfa0f963dc80817b03b10fe1bb17654bfd616c9d85299d8f260e4fd66fdd2e",
+      "archived_sha256": "9adfa0f963dc80817b03b10fe1bb17654bfd616c9d85299d8f260e4fd66fdd2e",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesArtifactPersistenceContractTest.xml",
+      "original_sha256": "98134f571df0696602a2df6347d5c1f714ce1816101edfd8d72745611d63a9fd",
+      "archived_sha256": "a63cb2bd9d36e9111e61be3656161a21e127212b9ec73ea31946b3a9ccaabd67",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml",
+      "original_sha256": "684bf32a4ce905910aeb34cb86647dc23a3b6b7eba625325ae46f5587713be09",
+      "archived_sha256": "684bf32a4ce905910aeb34cb86647dc23a3b6b7eba625325ae46f5587713be09",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesArtifactRendererTest.xml",
+      "original_sha256": "5e13b57c10c498468ad3e2285ab1db5537036e6a5674c9ec01ab3fd488d2f0da",
+      "archived_sha256": "5e13b57c10c498468ad3e2285ab1db5537036e6a5674c9ec01ab3fd488d2f0da",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesArtifactRepositoryTest.xml",
+      "original_sha256": "3c4acfe91e74948baeeb5cd233ee5288617d57e539b963ca472a2d35a8e2ae17",
+      "archived_sha256": "3c4acfe91e74948baeeb5cd233ee5288617d57e539b963ca472a2d35a8e2ae17",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesAtomicResultAcceptanceTest.xml",
+      "original_sha256": "99cfd4209864d78858798f61d1960d032a622e49c68fc1cb0e6d6aa261be6318",
+      "archived_sha256": "99cfd4209864d78858798f61d1960d032a622e49c68fc1cb0e6d6aa261be6318",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesClarificationSaveTest.xml",
+      "original_sha256": "8645d0b22b70bcbe0df9ddffa8b6463ce78e4a5d9d5e0f3a1e9199fe4983148f",
+      "archived_sha256": "8645d0b22b70bcbe0df9ddffa8b6463ce78e4a5d9d5e0f3a1e9199fe4983148f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesCommandKindContractTest.xml",
+      "original_sha256": "96241223fce3e647d72aeddc5965226ec4285c51296ba6aa2c0f28fb9cfcabc6",
+      "archived_sha256": "96241223fce3e647d72aeddc5965226ec4285c51296ba6aa2c0f28fb9cfcabc6",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesCommandKindsTest.xml",
+      "original_sha256": "a7d020bd6b6424d61ac5709c013c748bb0a79a9fca5e68c29e8db7a9c6d00c20",
+      "archived_sha256": "a7d020bd6b6424d61ac5709c013c748bb0a79a9fca5e68c29e8db7a9c6d00c20",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesCommandPayloadContractTest.xml",
+      "original_sha256": "61ee1db84db25cf29f8ab89579a43b958b95a7e86ad5a217b7c4d5c4c856cb87",
+      "archived_sha256": "61ee1db84db25cf29f8ab89579a43b958b95a7e86ad5a217b7c4d5c4c856cb87",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesCommandPayloadTest.xml",
+      "original_sha256": "a165abb7b505fc9b7bbc521aac466dfb9d5197127b9fb2eb2924d3fc3263ceee",
+      "archived_sha256": "a165abb7b505fc9b7bbc521aac466dfb9d5197127b9fb2eb2924d3fc3263ceee",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesContextProviderTest.xml",
+      "original_sha256": "4362a469ef3dc1ae10aee01520a1baa8b3772fc7629a676829462abf883d74ba",
+      "archived_sha256": "4362a469ef3dc1ae10aee01520a1baa8b3772fc7629a676829462abf883d74ba",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesDisabledStartupReadContractTest.xml",
+      "original_sha256": "0da6ce41800b4da09e6cb7dbfc54649d3e0638c1db46a94628700a74efcb5e9b",
+      "archived_sha256": "f1c113b8aad5901a9b87f952f0d9a63c76cd0266e7c06759c59f2740a017ce24",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesEmployeeQueryContractTest.xml",
+      "original_sha256": "5fb3c3ae56079226bea483290914468d3828dc5c365c1ceab295a0d85a2dcfc7",
+      "archived_sha256": "5fb3c3ae56079226bea483290914468d3828dc5c365c1ceab295a0d85a2dcfc7",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesEmployeeResultProjectionTest.xml",
+      "original_sha256": "e0126556acbf1dd4aed7837a637db4e65f18efccf9305e9554d0c9ff74ab8697",
+      "archived_sha256": "e0126556acbf1dd4aed7837a637db4e65f18efccf9305e9554d0c9ff74ab8697",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesEmployeeRuntimeTest.xml",
+      "original_sha256": "5cb6baf7f222ae08b51aaca72e564ccb24ae792db63a92904316d09f034e547b",
+      "archived_sha256": "5cb6baf7f222ae08b51aaca72e564ccb24ae792db63a92904316d09f034e547b",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesErrorContractTest.xml",
+      "original_sha256": "99d3007129890f76fbbda52d7d3fe1e1878bf71333d0c1164395c223b234de92",
+      "archived_sha256": "99d3007129890f76fbbda52d7d3fe1e1878bf71333d0c1164395c223b234de92",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesExecutionRevalidationProviderTest.xml",
+      "original_sha256": "9b064fa045736de0f741aa0699c9863c779df9e121f14310d30af00288c58b45",
+      "archived_sha256": "9b064fa045736de0f741aa0699c9863c779df9e121f14310d30af00288c58b45",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesExecutionVersionContractTest.xml",
+      "original_sha256": "1736ffaf84e2c6eb8fe9491ed37e61fc5334cf35e89390148618d30751778a79",
+      "archived_sha256": "1736ffaf84e2c6eb8fe9491ed37e61fc5334cf35e89390148618d30751778a79",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesGenerationControllerTest.xml",
+      "original_sha256": "159c69e0b479e9f33593c19e26c31f709e93056579adfc3abd5b859c8b9a4003",
+      "archived_sha256": "159c69e0b479e9f33593c19e26c31f709e93056579adfc3abd5b859c8b9a4003",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesGenerationCoordinatorTest.xml",
+      "original_sha256": "91eba8836e60769983ebc41f1f89974eca509b1cf7fe0d9d05dca0f4c695f695",
+      "archived_sha256": "91eba8836e60769983ebc41f1f89974eca509b1cf7fe0d9d05dca0f4c695f695",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesHandoffReadContractTest.xml",
+      "original_sha256": "e573462ad550b9b19d7e01a16494b50ccc2f3c331c16054a30be731e1caf7ba0",
+      "archived_sha256": "e573462ad550b9b19d7e01a16494b50ccc2f3c331c16054a30be731e1caf7ba0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesIntegrationTest.xml",
+      "original_sha256": "14e53f6474860536e3391c905604c12193cdbcf61a9e3e6538c15479d39853c5",
+      "archived_sha256": "14e53f6474860536e3391c905604c12193cdbcf61a9e3e6538c15479d39853c5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesListingProjectionBackfillTest.xml",
+      "original_sha256": "2af458e2fbaa71320743ab40b139da2c39197a27a60dd0e4c79776e7b086d336",
+      "archived_sha256": "2af458e2fbaa71320743ab40b139da2c39197a27a60dd0e4c79776e7b086d336",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesModelAdapterTest.xml",
+      "original_sha256": "b83a1fb3d1073fd1fba7727c1efae2057aba4c6f05f0eb47df8c3e08cc77afc7",
+      "archived_sha256": "b83a1fb3d1073fd1fba7727c1efae2057aba4c6f05f0eb47df8c3e08cc77afc7",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesPresentationCompilerTest.xml",
+      "original_sha256": "366037bb988a89ee59e864277261143a116fb735ea5bea67c513284fbf18c25e",
+      "archived_sha256": "366037bb988a89ee59e864277261143a116fb735ea5bea67c513284fbf18c25e",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesPresentationPinTest.xml",
+      "original_sha256": "d7f331c9b50f0b748f0bf81bcbd870230a59549d18a51eccf1e6e036d74e6636",
+      "archived_sha256": "d7f331c9b50f0b748f0bf81bcbd870230a59549d18a51eccf1e6e036d74e6636",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesPresentationServiceTest.xml",
+      "original_sha256": "0fe80d826a3e5e574fd3b26cce6b5f21105383983ac3a1dc532227e726cc0762",
+      "archived_sha256": "0fe80d826a3e5e574fd3b26cce6b5f21105383983ac3a1dc532227e726cc0762",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectItemsTest.xml",
+      "original_sha256": "d0ad343366d44546dc40e664c7d4d3ccd80c02d03948073cefd370bd7734af17",
+      "archived_sha256": "d0ad343366d44546dc40e664c7d4d3ccd80c02d03948073cefd370bd7734af17",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectListingContractTest.xml",
+      "original_sha256": "7ff8e8d205a54e0b069e9a5448754c04fceeb696be6d4e9b6b018cc012405f78",
+      "archived_sha256": "7ff8e8d205a54e0b069e9a5448754c04fceeb696be6d4e9b6b018cc012405f78",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectListingTest.xml",
+      "original_sha256": "029804634fcb88c87e0cc5f2e6732d87655997236129df5f22a5ac9c2bd16472",
+      "archived_sha256": "029804634fcb88c87e0cc5f2e6732d87655997236129df5f22a5ac9c2bd16472",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectPersistenceContractTest.xml",
+      "original_sha256": "82e7f3a87388ee427213b99aa2cb9f34cb4c7818228a0b90182e945041296d03",
+      "archived_sha256": "82e7f3a87388ee427213b99aa2cb9f34cb4c7818228a0b90182e945041296d03",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectRepositoryTest.xml",
+      "original_sha256": "154a99f3cd61406cf0b623fc5439f545c6292a0681c46e60b1312dbe26c6fb56",
+      "archived_sha256": "154a99f3cd61406cf0b623fc5439f545c6292a0681c46e60b1312dbe26c6fb56",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectRevisionMigrationTest.xml",
+      "original_sha256": "be9c91fc97e3d9c0362586a351e7975a33bb648d2bf125e04b33d3f69c331e4f",
+      "archived_sha256": "be9c91fc97e3d9c0362586a351e7975a33bb648d2bf125e04b33d3f69c331e4f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesProjectRevisionTest.xml",
+      "original_sha256": "9e4e82a436189e1eb2748f49dd30f75bee38944b52f517237a404eb0eaaf6a32",
+      "archived_sha256": "9e4e82a436189e1eb2748f49dd30f75bee38944b52f517237a404eb0eaaf6a32",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesQueryDtoContractTest.xml",
+      "original_sha256": "de66972c95fc88bcaf39d86a30e8d17d4042027045c2559faf28741dcc16fb67",
+      "archived_sha256": "f1de7702659c7de69af72c50ab678d71f8bb243288faab6cae44b8bf8ab4ca86",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesQueryDtosTest.xml",
+      "original_sha256": "3323f3dc9ba8cc05bcc5dd7fee75554c7d62a52566552351888ce7ad872467c5",
+      "archived_sha256": "3323f3dc9ba8cc05bcc5dd7fee75554c7d62a52566552351888ce7ad872467c5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesQueuedTaskContractTest.xml",
+      "original_sha256": "598b0b6375888df189470e90b8b62ee4fda0e99a2ce9254ffca3707c81e66423",
+      "archived_sha256": "598b0b6375888df189470e90b8b62ee4fda0e99a2ce9254ffca3707c81e66423",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesQueuedTaskTest.xml",
+      "original_sha256": "8c7a07b13e135d6766097e7f27909cef62fa8c511a8c190b974b92f5082b7e52",
+      "archived_sha256": "8c7a07b13e135d6766097e7f27909cef62fa8c511a8c190b974b92f5082b7e52",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesReleaseAuthorizationTest.xml",
+      "original_sha256": "c3d45fa4e9f5380cc60d05664b433f18712ba5c7348cfbf26051c4d99d883a3f",
+      "archived_sha256": "c3d45fa4e9f5380cc60d05664b433f18712ba5c7348cfbf26051c4d99d883a3f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesReleaseSnapshotContractTest.xml",
+      "original_sha256": "560b7c07fa723f6175e78cd5732b909dc25058a6db8c74090a97f407d64ed423",
+      "archived_sha256": "560b7c07fa723f6175e78cd5732b909dc25058a6db8c74090a97f407d64ed423",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesRepairPolicyTest.xml",
+      "original_sha256": "680e5010bdcc2a5c1d66bff65577960bcbff11b450f0d178c38bc8d6b951c499",
+      "archived_sha256": "680e5010bdcc2a5c1d66bff65577960bcbff11b450f0d178c38bc8d6b951c499",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesRequestHashMigrationTest.xml",
+      "original_sha256": "5f04a1eaf612e20e7b15afedc9ed378356dfcc3e33b9438c394e8a4ad985615c",
+      "archived_sha256": "5f04a1eaf612e20e7b15afedc9ed378356dfcc3e33b9438c394e8a4ad985615c",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesRequestHashReplayTest.xml",
+      "original_sha256": "8105050e653df8bcb9bdee6a224e3bce8533512fd60ca113db3f6d95958c4ff5",
+      "archived_sha256": "8105050e653df8bcb9bdee6a224e3bce8533512fd60ca113db3f6d95958c4ff5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesRequestHashV2Test.xml",
+      "original_sha256": "01fe84c84ca88c5e6123db4a75dd94b9ac748c23e9986a17513e655b63ec5109",
+      "archived_sha256": "01fe84c84ca88c5e6123db4a75dd94b9ac748c23e9986a17513e655b63ec5109",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesReviewSaveTest.xml",
+      "original_sha256": "07a2454aa43f9dfd93b10ee764c709f238217f4e1c452678f7e77694725c90f1",
+      "archived_sha256": "07a2454aa43f9dfd93b10ee764c709f238217f4e1c452678f7e77694725c90f1",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.xml",
+      "original_sha256": "6c24978ae016a543529c0dfa86709364fd0d1766de432a3d053edd7897980a92",
+      "archived_sha256": "bd9e31060cbeeaf67d55ba805f7cd625235e7a9f9cdfccd4896f9c0c9209891c",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesSolutionPolicyContractTest.xml",
+      "original_sha256": "e6074e7337a68259a3f4ebdfea024ff3a9022e711555923edbc964a8c7a2dd6a",
+      "archived_sha256": "e6074e7337a68259a3f4ebdfea024ff3a9022e711555923edbc964a8c7a2dd6a",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesSolutionPolicyTest.xml",
+      "original_sha256": "c9a639f7e969cef4f86e7ef93a038890d6e12795075ea256bc1be012646eca75",
+      "archived_sha256": "c9a639f7e969cef4f86e7ef93a038890d6e12795075ea256bc1be012646eca75",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesSourceAuthorizationTest.xml",
+      "original_sha256": "ad46b778941c79880ca38e1a1b9d4bcf6f11af7c31959c8fe3d362674245d5f7",
+      "archived_sha256": "ad46b778941c79880ca38e1a1b9d4bcf6f11af7c31959c8fe3d362674245d5f7",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesSourceScopeTest.xml",
+      "original_sha256": "dec723cd829ded8823c44e75560c866b871fffa362d114276f8888ee7a2d70fe",
+      "archived_sha256": "dec723cd829ded8823c44e75560c866b871fffa362d114276f8888ee7a2d70fe",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesSqlListingTest.xml",
+      "original_sha256": "62932086ef5f8a1df80915715f8ee11fa4fcd6b3e228966befca8f72a59d7a94",
+      "archived_sha256": "62932086ef5f8a1df80915715f8ee11fa4fcd6b3e228966befca8f72a59d7a94",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesTaskAcceptanceTest.xml",
+      "original_sha256": "f6cde8d7afa48d151f449116bd7acfed8130b4e1eca88d22fe476d340fdbcd15",
+      "archived_sha256": "f6cde8d7afa48d151f449116bd7acfed8130b4e1eca88d22fe476d340fdbcd15",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesTerminalReceptionTest.xml",
+      "original_sha256": "4bbc032889e6f9a31225a944290a14a665c2c9a05564594c68bdcc4b73f607c1",
+      "archived_sha256": "4bbc032889e6f9a31225a944290a14a665c2c9a05564594c68bdcc4b73f607c1",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/TEST-vip.mate.presales.PresalesVersionInputContractTest.xml",
+      "original_sha256": "2dc0087be19d23b2dbf90edb38711049f816d3137f448b07ee0b00d21848b6b4",
+      "archived_sha256": "8fb2bef32362790dc814e7601b7afa9007e20801220c6cd77a20275e1608df64",
+      "redactions": 1
+    },
+    {
+      "path": "final-junit/vip.mate.architecture.WorkbenchArchitectureTest.txt",
+      "original_sha256": "c7c5619478be080fbc3d452854d95c8ecebdf00cd5381102627f6a3df6a68190",
+      "archived_sha256": "c7c5619478be080fbc3d452854d95c8ecebdf00cd5381102627f6a3df6a68190",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingAccessPolicyTest.txt",
+      "original_sha256": "6da57a9a5601b3c6e6cd0d0e7373250a0ac96904ff802050f34ee0f705f35282",
+      "archived_sha256": "6da57a9a5601b3c6e6cd0d0e7373250a0ac96904ff802050f34ee0f705f35282",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingAnalysisTest.txt",
+      "original_sha256": "15b10cd964e3a58de8d1972f033b77b1d4385be5bb52dd955e053b6fe2b39cc2",
+      "archived_sha256": "15b10cd964e3a58de8d1972f033b77b1d4385be5bb52dd955e053b6fe2b39cc2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingApprovalEndToEndTest.txt",
+      "original_sha256": "679dad74a189f73dbf8198186167d7b6f0e0ea3ded0aaca4c9cd1ba96b83b8d0",
+      "archived_sha256": "679dad74a189f73dbf8198186167d7b6f0e0ea3ded0aaca4c9cd1ba96b83b8d0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingApprovalTest.txt",
+      "original_sha256": "aecb80ab80088f01989dbca86ca09cfcafc8415ed4eff413ef946d6cb52376f0",
+      "archived_sha256": "aecb80ab80088f01989dbca86ca09cfcafc8415ed4eff413ef946d6cb52376f0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingArtifactTest.txt",
+      "original_sha256": "aa9b39f48ce8ed617289d3817fa8fcf33c60428626d351f91125ca8d4aea24f6",
+      "archived_sha256": "aa9b39f48ce8ed617289d3817fa8fcf33c60428626d351f91125ca8d4aea24f6",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingChangeImpactTest.txt",
+      "original_sha256": "b3410c2823c99a917e939c05f2bd858cf4efd04c551784b8db8b8ba3809e1b92",
+      "archived_sha256": "b3410c2823c99a917e939c05f2bd858cf4efd04c551784b8db8b8ba3809e1b92",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingContentBlocksTest.txt",
+      "original_sha256": "8fe1f3144b393b3c7d27d5aa3e7cb75b098c5ef5cda27b2e881dfa7f38fd15aa",
+      "archived_sha256": "8fe1f3144b393b3c7d27d5aa3e7cb75b098c5ef5cda27b2e881dfa7f38fd15aa",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingContextBudgetEndToEndTest.txt",
+      "original_sha256": "4143c394993a1703fbb716dd0bdb75d0906c531315fb85556f1dc6c3090aedca",
+      "archived_sha256": "4143c394993a1703fbb716dd0bdb75d0906c531315fb85556f1dc6c3090aedca",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingDashboardTest.txt",
+      "original_sha256": "42906bfb384e91dab7d505df78b29faa485595af1a0194d7a7ab9e61478548a2",
+      "archived_sha256": "42906bfb384e91dab7d505df78b29faa485595af1a0194d7a7ab9e61478548a2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingDocxRendererTest.txt",
+      "original_sha256": "dbe3d8e42f360abab7c663e6fec370cbe2fae5639ab961b1bbe79b4a2ea42a60",
+      "archived_sha256": "dbe3d8e42f360abab7c663e6fec370cbe2fae5639ab961b1bbe79b4a2ea42a60",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingEmployeeBindingsTest.txt",
+      "original_sha256": "64f19185747ce79704553a93823dc9eb80764b09db2c8f572f1dd813647722e8",
+      "archived_sha256": "64f19185747ce79704553a93823dc9eb80764b09db2c8f572f1dd813647722e8",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingEmployeeRuntimeTest.txt",
+      "original_sha256": "1c45333e0bf3149d859fb7e04a14cf37ff8f70ed635cb6bfe89184db744b0ef5",
+      "archived_sha256": "1c45333e0bf3149d859fb7e04a14cf37ff8f70ed635cb6bfe89184db744b0ef5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingEndToEndTest.txt",
+      "original_sha256": "10eb6449fe3fd65aeb7bfb281120c45237bcd0bd0f587cf050f42757465e454b",
+      "archived_sha256": "10eb6449fe3fd65aeb7bfb281120c45237bcd0bd0f587cf050f42757465e454b",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingHandoffReceiptTest.txt",
+      "original_sha256": "3d4b607b3d904b9e2c085647a794ec2a857b1a6654a1084766bc6fb53f905b50",
+      "archived_sha256": "3d4b607b3d904b9e2c085647a794ec2a857b1a6654a1084766bc6fb53f905b50",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingHandoffTest.txt",
+      "original_sha256": "07609389ac7c276063d931a1bd61dd721f86281e20add15fb8ba725da7062602",
+      "archived_sha256": "07609389ac7c276063d931a1bd61dd721f86281e20add15fb8ba725da7062602",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingMaterialsTest.txt",
+      "original_sha256": "8e940851e6b9618f1ea8dd699274acc5eb405fc57a82cc9fddcf87455a936fcc",
+      "archived_sha256": "8e940851e6b9618f1ea8dd699274acc5eb405fc57a82cc9fddcf87455a936fcc",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingMigrationTest.txt",
+      "original_sha256": "6e3278743b6a95ae945a2c86edac2feec9f55a21b8a441ad7a1533b6c5644f3f",
+      "archived_sha256": "6e3278743b6a95ae945a2c86edac2feec9f55a21b8a441ad7a1533b6c5644f3f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingOutlineTest.txt",
+      "original_sha256": "8f9e64f0e43848d8420d53af5aa6a286db813439c535acebc5a848b52ca66df0",
+      "archived_sha256": "8f9e64f0e43848d8420d53af5aa6a286db813439c535acebc5a848b52ca66df0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingOutlineValidatorTest.txt",
+      "original_sha256": "359a9fba514c9fa485b4428087e3c0fb029d3f7a496e3f570b72a2077d142b56",
+      "archived_sha256": "359a9fba514c9fa485b4428087e3c0fb029d3f7a496e3f570b72a2077d142b56",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingProjectTest.txt",
+      "original_sha256": "b7f40f339d0ac91239eadfbd5ef347626078cdd9afed5158c16bddef7c52a9ae",
+      "archived_sha256": "b7f40f339d0ac91239eadfbd5ef347626078cdd9afed5158c16bddef7c52a9ae",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingRecoveryTest.txt",
+      "original_sha256": "ead4bf586d61bfdf604c0e342b903e7817d4e7258dba2da747105ec0ca9398d0",
+      "archived_sha256": "ead4bf586d61bfdf604c0e342b903e7817d4e7258dba2da747105ec0ca9398d0",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingRetryPolicyTest.txt",
+      "original_sha256": "655416275196e1040628de626353ab58e0dcf3217bb3be1c0c44255898450dda",
+      "archived_sha256": "655416275196e1040628de626353ab58e0dcf3217bb3be1c0c44255898450dda",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingReviewTest.txt",
+      "original_sha256": "d14e5b1109b265ed9aba47cb1af7ade7165a6ea6080071acbb238a4d70a34da5",
+      "archived_sha256": "d14e5b1109b265ed9aba47cb1af7ade7165a6ea6080071acbb238a4d70a34da5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingRuntimeIsolationTest.txt",
+      "original_sha256": "e38ad90aac51df7144714d1f18d1a4711f02f8c5dc9af31b6998d967cce2fb12",
+      "archived_sha256": "e38ad90aac51df7144714d1f18d1a4711f02f8c5dc9af31b6998d967cce2fb12",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingSkillPackagesTest.txt",
+      "original_sha256": "7d3d536237af20ae1fb0c30f13372ec5ce994cd7d42c9d76be36ae6175a431d4",
+      "archived_sha256": "7d3d536237af20ae1fb0c30f13372ec5ce994cd7d42c9d76be36ae6175a431d4",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingSkillValidatorTest.txt",
+      "original_sha256": "ea8257361e9718749c5e056d69b8e3898f69d78611c595139f00922b2b71f0f6",
+      "archived_sha256": "ea8257361e9718749c5e056d69b8e3898f69d78611c595139f00922b2b71f0f6",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingSourceReaderTest.txt",
+      "original_sha256": "dc36e79b9b45562a4e5933dd3f977ed3aa4298891920b6eb662b3a4422bedf56",
+      "archived_sha256": "dc36e79b9b45562a4e5933dd3f977ed3aa4298891920b6eb662b3a4422bedf56",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingSourceTest.txt",
+      "original_sha256": "c428562ce8e229fcf29774ffff574c09af1cfceef0140c074f3ce52ad70730e2",
+      "archived_sha256": "c428562ce8e229fcf29774ffff574c09af1cfceef0140c074f3ce52ad70730e2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingTaskQueryServiceTest.txt",
+      "original_sha256": "d403d9383fc6080f54cbb45b24af5384634e49f44e5802619cc5fc772b5dc814",
+      "archived_sha256": "d403d9383fc6080f54cbb45b24af5384634e49f44e5802619cc5fc772b5dc814",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingTaskTest.txt",
+      "original_sha256": "594ec18ad4f2241f6ce95580d9e16d561b8e6e331c60afd9330cacac31634a61",
+      "archived_sha256": "594ec18ad4f2241f6ce95580d9e16d561b8e6e331c60afd9330cacac31634a61",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.bidding.BiddingWritingTest.txt",
+      "original_sha256": "d840a583b0038d07a6d85408e671e1b2cbdd2cc64756b955694f7175e0eb5860",
+      "archived_sha256": "d840a583b0038d07a6d85408e671e1b2cbdd2cc64756b955694f7175e0eb5860",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesAccessActorTest.txt",
+      "original_sha256": "043c77ea864219ed0438a3c65eb133f7ab8d138a679e348cc39ae6c8e17590ec",
+      "archived_sha256": "043c77ea864219ed0438a3c65eb133f7ab8d138a679e348cc39ae6c8e17590ec",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesAccessPolicyTest.txt",
+      "original_sha256": "d6b90d0c8bc7f1c733ffa1f4791b4c1ea6e458c624b38d8500885bc0196125cd",
+      "archived_sha256": "d6b90d0c8bc7f1c733ffa1f4791b4c1ea6e458c624b38d8500885bc0196125cd",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesArtifactPersistenceContractTest.txt",
+      "original_sha256": "17e8db00c1c9fd140d11ca7ba25a3c0c7df181d00d8804fcf0029f150eb9fb11",
+      "archived_sha256": "17e8db00c1c9fd140d11ca7ba25a3c0c7df181d00d8804fcf0029f150eb9fb11",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesArtifactReadContractTest.txt",
+      "original_sha256": "7ff9b457d32e2df6ce5e4a3ad04b18d0c32823f66ada5a017f3f66468c77a5d3",
+      "archived_sha256": "7ff9b457d32e2df6ce5e4a3ad04b18d0c32823f66ada5a017f3f66468c77a5d3",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesArtifactRendererTest.txt",
+      "original_sha256": "5696a117b18fe226f7a30aaa6ee14b9781fa3e862561303a017a57d2f2889142",
+      "archived_sha256": "5696a117b18fe226f7a30aaa6ee14b9781fa3e862561303a017a57d2f2889142",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesArtifactRepositoryTest.txt",
+      "original_sha256": "54f80734d0b65115cae4b6fabcdcedc15722b35f9eb32663ce09dc5dcd448c79",
+      "archived_sha256": "54f80734d0b65115cae4b6fabcdcedc15722b35f9eb32663ce09dc5dcd448c79",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesAtomicResultAcceptanceTest.txt",
+      "original_sha256": "9c75aba3d108a8bc96ae7a90e9e000c70a9fb2c34b9f9ed66af1cca6ea64c3f2",
+      "archived_sha256": "9c75aba3d108a8bc96ae7a90e9e000c70a9fb2c34b9f9ed66af1cca6ea64c3f2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesClarificationSaveTest.txt",
+      "original_sha256": "51b3ea4191c45ca8c02963038ac836cebc43c12099344c85d010a9f92b3e9b43",
+      "archived_sha256": "51b3ea4191c45ca8c02963038ac836cebc43c12099344c85d010a9f92b3e9b43",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesCommandKindContractTest.txt",
+      "original_sha256": "791f294a8025d2eff443d787c41d6cf6fce9090ee635940e7e6d240459d6189a",
+      "archived_sha256": "791f294a8025d2eff443d787c41d6cf6fce9090ee635940e7e6d240459d6189a",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesCommandKindsTest.txt",
+      "original_sha256": "289c52bf2be4de68aaa0cc3fd1b2cb37242cb308e1af1a173fd6ca4d52b622a3",
+      "archived_sha256": "289c52bf2be4de68aaa0cc3fd1b2cb37242cb308e1af1a173fd6ca4d52b622a3",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesCommandPayloadContractTest.txt",
+      "original_sha256": "2bdb76128a691994b7ef01426415bf954f2d60edd7c51a392643eeb5eed571aa",
+      "archived_sha256": "2bdb76128a691994b7ef01426415bf954f2d60edd7c51a392643eeb5eed571aa",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesCommandPayloadTest.txt",
+      "original_sha256": "23b3583179392e8c9ba178088912cff7e736c82c11040e5d39f174cd879d4efc",
+      "archived_sha256": "23b3583179392e8c9ba178088912cff7e736c82c11040e5d39f174cd879d4efc",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesContextProviderTest.txt",
+      "original_sha256": "0d4187caeae9f3192d4347bf204464b318b656f67e3e4683deaad0b00671f908",
+      "archived_sha256": "0d4187caeae9f3192d4347bf204464b318b656f67e3e4683deaad0b00671f908",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesDisabledStartupReadContractTest.txt",
+      "original_sha256": "bf0c4b0f1c7a7f878990dccb817cbd48f8b21be111988f83d6dbac767daea24c",
+      "archived_sha256": "bf0c4b0f1c7a7f878990dccb817cbd48f8b21be111988f83d6dbac767daea24c",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesEmployeeQueryContractTest.txt",
+      "original_sha256": "ad7e1254698121f89324e95a73aeee45abd1473d4afd9a49b842407c6400cc8d",
+      "archived_sha256": "ad7e1254698121f89324e95a73aeee45abd1473d4afd9a49b842407c6400cc8d",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesEmployeeResultProjectionTest.txt",
+      "original_sha256": "c2d26754b8f84ac8e8490dd251912d2b6b4de0da704565757fdb611440745e2e",
+      "archived_sha256": "c2d26754b8f84ac8e8490dd251912d2b6b4de0da704565757fdb611440745e2e",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesEmployeeRuntimeTest.txt",
+      "original_sha256": "4e1c38369a132b576e95ab77c268f44c6e4db1eca45f7281d2fa508ae863a2d4",
+      "archived_sha256": "4e1c38369a132b576e95ab77c268f44c6e4db1eca45f7281d2fa508ae863a2d4",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesErrorContractTest.txt",
+      "original_sha256": "fb0766db23b5739e2c0c20a6b03f727aae51fa3b3bbc4ef6d4355f75825483e8",
+      "archived_sha256": "fb0766db23b5739e2c0c20a6b03f727aae51fa3b3bbc4ef6d4355f75825483e8",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesExecutionRevalidationProviderTest.txt",
+      "original_sha256": "db2f5e185c2068ffed0e85a213fc568a4342ff870695a65b1a4111e6feac88ea",
+      "archived_sha256": "db2f5e185c2068ffed0e85a213fc568a4342ff870695a65b1a4111e6feac88ea",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesExecutionVersionContractTest.txt",
+      "original_sha256": "f18f6dc322de801041d7d2aeedf953bee2b1cac0f477e7806a7cbec33a9ad97b",
+      "archived_sha256": "f18f6dc322de801041d7d2aeedf953bee2b1cac0f477e7806a7cbec33a9ad97b",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesGenerationControllerTest.txt",
+      "original_sha256": "807e9da114ece618644b8d0f69e306c406bcdb93e7708df97773220694777f58",
+      "archived_sha256": "807e9da114ece618644b8d0f69e306c406bcdb93e7708df97773220694777f58",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesGenerationCoordinatorTest.txt",
+      "original_sha256": "d181ec4925e6fd6f31616c12cc0d905cb2e2ffc6f003598db23c7a483cc6a447",
+      "archived_sha256": "d181ec4925e6fd6f31616c12cc0d905cb2e2ffc6f003598db23c7a483cc6a447",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesHandoffReadContractTest.txt",
+      "original_sha256": "1d6a8922a1b505adc62cbc76469a71d327aa9c7bce07f2c748ed685ac5474dba",
+      "archived_sha256": "1d6a8922a1b505adc62cbc76469a71d327aa9c7bce07f2c748ed685ac5474dba",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesIntegrationTest.txt",
+      "original_sha256": "202d7662b6dfad8cbac26c97fb47bc92bb5d4aa13d001b502c67204964ac3cea",
+      "archived_sha256": "202d7662b6dfad8cbac26c97fb47bc92bb5d4aa13d001b502c67204964ac3cea",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesListingProjectionBackfillTest.txt",
+      "original_sha256": "0e18f589ec273eef857fab328628b130df9d7b6c428b46a37e4aeb72efda06ec",
+      "archived_sha256": "0e18f589ec273eef857fab328628b130df9d7b6c428b46a37e4aeb72efda06ec",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesModelAdapterTest.txt",
+      "original_sha256": "9b4a606dfcacbfa7ce75682d0d350320415fd1aee45dda38e61b918b4ee8e0a4",
+      "archived_sha256": "9b4a606dfcacbfa7ce75682d0d350320415fd1aee45dda38e61b918b4ee8e0a4",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesPresentationCompilerTest.txt",
+      "original_sha256": "d048409fe7090b7bc7db0224d396606e2daf1d4ed717820b408008624088dba2",
+      "archived_sha256": "d048409fe7090b7bc7db0224d396606e2daf1d4ed717820b408008624088dba2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesPresentationPinTest.txt",
+      "original_sha256": "7232eb9c26b6c4aa8dd08b2bcef80f6ed9fca9b68b5d0614545ab8054688578f",
+      "archived_sha256": "7232eb9c26b6c4aa8dd08b2bcef80f6ed9fca9b68b5d0614545ab8054688578f",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesPresentationServiceTest.txt",
+      "original_sha256": "1a6c9349bc2ffee3e39c7ac1fba0b04a0c6bbb7733e3268c0689d78267286862",
+      "archived_sha256": "1a6c9349bc2ffee3e39c7ac1fba0b04a0c6bbb7733e3268c0689d78267286862",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectItemsTest.txt",
+      "original_sha256": "04af76d2e37857fa2480a2ccd1d47e0aad63aa40429f276ead3f366751dd9417",
+      "archived_sha256": "04af76d2e37857fa2480a2ccd1d47e0aad63aa40429f276ead3f366751dd9417",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectListingContractTest.txt",
+      "original_sha256": "d242841e7ed35218e56e0a37ced2c51bb5fcf5635b1b994137e9fab0d52af08a",
+      "archived_sha256": "d242841e7ed35218e56e0a37ced2c51bb5fcf5635b1b994137e9fab0d52af08a",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectListingTest.txt",
+      "original_sha256": "fb40bab66bc97bb042c0762135cfd5d32084082a3daa794cfce2055d407adbcc",
+      "archived_sha256": "fb40bab66bc97bb042c0762135cfd5d32084082a3daa794cfce2055d407adbcc",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectPersistenceContractTest.txt",
+      "original_sha256": "cfb482f1ff82b1782f038fc24da5c7fef52dea7d9e97dd380d88328cc6cbbdc9",
+      "archived_sha256": "cfb482f1ff82b1782f038fc24da5c7fef52dea7d9e97dd380d88328cc6cbbdc9",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectRepositoryTest.txt",
+      "original_sha256": "5f5ac0fc8a3926388917df8be7fca7247368385aa77fac05cafb17076abf044d",
+      "archived_sha256": "5f5ac0fc8a3926388917df8be7fca7247368385aa77fac05cafb17076abf044d",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectRevisionMigrationTest.txt",
+      "original_sha256": "8d267d0e528fa58d1cb7ed42f30e695f467cc78c5d06de675224bf5ff4a42799",
+      "archived_sha256": "8d267d0e528fa58d1cb7ed42f30e695f467cc78c5d06de675224bf5ff4a42799",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesProjectRevisionTest.txt",
+      "original_sha256": "5f5462c460856dc9bdda56e94f7faf5bee17e8618e4d7478a26d39d7a8198117",
+      "archived_sha256": "5f5462c460856dc9bdda56e94f7faf5bee17e8618e4d7478a26d39d7a8198117",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesQueryDtoContractTest.txt",
+      "original_sha256": "823834221c2eaf0fd908ac5c758bc4323779e6bb38becdef07a3c0b729d6cf49",
+      "archived_sha256": "823834221c2eaf0fd908ac5c758bc4323779e6bb38becdef07a3c0b729d6cf49",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesQueryDtosTest.txt",
+      "original_sha256": "f6dc8839c54662c9e4944bd07030bdad0beb706c6c2ef1a3e1235b4dee514c1b",
+      "archived_sha256": "f6dc8839c54662c9e4944bd07030bdad0beb706c6c2ef1a3e1235b4dee514c1b",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesQueuedTaskContractTest.txt",
+      "original_sha256": "8591a116ec6f911aeb38db148dd1aa9fd559547f13acd84074ff0a24e281f7d2",
+      "archived_sha256": "8591a116ec6f911aeb38db148dd1aa9fd559547f13acd84074ff0a24e281f7d2",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesQueuedTaskTest.txt",
+      "original_sha256": "c19b8e13d02c8d1fc5e36a1cdecafa2d8b19ea2f1f801e3619dfe6e17200d1fd",
+      "archived_sha256": "c19b8e13d02c8d1fc5e36a1cdecafa2d8b19ea2f1f801e3619dfe6e17200d1fd",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesReleaseAuthorizationTest.txt",
+      "original_sha256": "92fd9da6ba85649246533b071db624c765f3d1223775162025b044f0431a5420",
+      "archived_sha256": "92fd9da6ba85649246533b071db624c765f3d1223775162025b044f0431a5420",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesReleaseSnapshotContractTest.txt",
+      "original_sha256": "855e51c2b8ac675dc8a4a116dfc914e85719b2e055d80d0dda17613213465af6",
+      "archived_sha256": "855e51c2b8ac675dc8a4a116dfc914e85719b2e055d80d0dda17613213465af6",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesRepairPolicyTest.txt",
+      "original_sha256": "a828c7c99e470a05459854d5e1d62d441cb70a723047a93465cc774780d1deb5",
+      "archived_sha256": "a828c7c99e470a05459854d5e1d62d441cb70a723047a93465cc774780d1deb5",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesRequestHashMigrationTest.txt",
+      "original_sha256": "4c85fcdc475a29f152e1480ee61a7d9ef483a46459de5b853619d36b6f253d07",
+      "archived_sha256": "4c85fcdc475a29f152e1480ee61a7d9ef483a46459de5b853619d36b6f253d07",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesRequestHashReplayTest.txt",
+      "original_sha256": "3a8c2944d5fc88d29f717ca0bed57f3dad4607b3d6ba609e66b2dc499017ae09",
+      "archived_sha256": "3a8c2944d5fc88d29f717ca0bed57f3dad4607b3d6ba609e66b2dc499017ae09",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesRequestHashV2Test.txt",
+      "original_sha256": "5e7cbcc8200502cfcfb6aa57b36d0aea0f4a805bf95700000d93187e1d725bec",
+      "archived_sha256": "5e7cbcc8200502cfcfb6aa57b36d0aea0f4a805bf95700000d93187e1d725bec",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesReviewSaveTest.txt",
+      "original_sha256": "b4478b220c1332642ff1076a462485d2e37c2cc9fa23db28a1f28c953d457f18",
+      "archived_sha256": "b4478b220c1332642ff1076a462485d2e37c2cc9fa23db28a1f28c953d457f18",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesRuntimeTransactionIntegrationTest.txt",
+      "original_sha256": "2863517f0f45f9f1877b4b32b9b02180d04110f7a3b87285edb25a290402f08a",
+      "archived_sha256": "2863517f0f45f9f1877b4b32b9b02180d04110f7a3b87285edb25a290402f08a",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesSolutionPolicyContractTest.txt",
+      "original_sha256": "7157b7903dbf7295d76baee2df8c856c78131db175e1a3c1d12eeea7636ca27c",
+      "archived_sha256": "7157b7903dbf7295d76baee2df8c856c78131db175e1a3c1d12eeea7636ca27c",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesSolutionPolicyTest.txt",
+      "original_sha256": "e748549501cdcb41570624662c375b921426245071d151bdc150f887029d192a",
+      "archived_sha256": "e748549501cdcb41570624662c375b921426245071d151bdc150f887029d192a",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesSourceAuthorizationTest.txt",
+      "original_sha256": "4bafe3269b4b70d0893a1f946ab129a8306a50166595ce6012ae3412352505f8",
+      "archived_sha256": "4bafe3269b4b70d0893a1f946ab129a8306a50166595ce6012ae3412352505f8",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesSourceScopeTest.txt",
+      "original_sha256": "5bb66e1e1818a5927744685c9fd09e4104f02db22f8b43352a24f3dee487b66c",
+      "archived_sha256": "5bb66e1e1818a5927744685c9fd09e4104f02db22f8b43352a24f3dee487b66c",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesSqlListingTest.txt",
+      "original_sha256": "54dadd29138c05b3cd78cc6d2f4c4f47152141bb0d035785046c13152892a633",
+      "archived_sha256": "54dadd29138c05b3cd78cc6d2f4c4f47152141bb0d035785046c13152892a633",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesTaskAcceptanceTest.txt",
+      "original_sha256": "4f1e0ef3915b0b98704fba168cafefdc55b838fa654380f281ea636aa94d6b20",
+      "archived_sha256": "4f1e0ef3915b0b98704fba168cafefdc55b838fa654380f281ea636aa94d6b20",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesTerminalReceptionTest.txt",
+      "original_sha256": "0d7cf29a407fe0001b123a5a716ff456c634e2e23e0ba1dfe8bde5a30e8de0f6",
+      "archived_sha256": "0d7cf29a407fe0001b123a5a716ff456c634e2e23e0ba1dfe8bde5a30e8de0f6",
+      "redactions": 0
+    },
+    {
+      "path": "final-junit/vip.mate.presales.PresalesVersionInputContractTest.txt",
+      "original_sha256": "1868a7eab3f4b419de362670b103d8547bc72198d56908fb2cfb3e0198c5d22b",
+      "archived_sha256": "1868a7eab3f4b419de362670b103d8547bc72198d56908fb2cfb3e0198c5d22b",
+      "redactions": 0
+    },
+    {
+      "path": "final-source/PresalesArtifactReadContractTest.java",
+      "original_sha256": "e05fa891575eea3e586ab3fc12e0dfe19ba440096ab1c95b31a71f021792a739",
+      "archived_sha256": "e05fa891575eea3e586ab3fc12e0dfe19ba440096ab1c95b31a71f021792a739",
+      "redactions": 0
+    },
+    {
+      "path": "final-source/PresalesArtifacts.java",
+      "original_sha256": "852f7d688c30fc1a16cb34c2bfa9ecc2864e6fee3661837ca67b7db39fa0ba1b",
+      "archived_sha256": "852f7d688c30fc1a16cb34c2bfa9ecc2864e6fee3661837ca67b7db39fa0ba1b",
+      "redactions": 0
+    },
+    {
+      "path": "final-source/PresalesReleaseSnapshotContractTest.java",
+      "original_sha256": "4b74eb996094250764a8d85ef30ec3932452cdf6d30766ab5f54a9fa55495c3f",
+      "archived_sha256": "4b74eb996094250764a8d85ef30ec3932452cdf6d30766ab5f54a9fa55495c3f",
+      "redactions": 0
+    },
+    {
+      "path": "final-source/PresalesService.java",
+      "original_sha256": "b506962747e0c75fb353edcfc4d9d055371676aaef5e326ecbc0a52da9af4339",
+      "archived_sha256": "b506962747e0c75fb353edcfc4d9d055371676aaef5e326ecbc0a52da9af4339",
+      "redactions": 0
+    },
+    {
+      "path": "independent-review.md",
+      "original_sha256": "c5a2134b5412c36d08c228cc945d41b6db31cb0c48dad5fedcf10ff43b989790",
+      "archived_sha256": "c5a2134b5412c36d08c228cc945d41b6db31cb0c48dad5fedcf10ff43b989790",
+      "redactions": 0
+    },
+    {
+      "path": "initial-dev/architecture.json",
+      "original_sha256": "763fb2c1901140a49799c837056bc5ae4f197a4d4780ada43c8e680579704eab",
+      "archived_sha256": "763fb2c1901140a49799c837056bc5ae4f197a4d4780ada43c8e680579704eab",
+      "redactions": 0
+    },
+    {
+      "path": "initial-dev/guard-self-tests.log",
+      "original_sha256": "7d0dd373c9d878269a7609303e6f053905b1b04a8704014b5b85914744893e8a",
+      "archived_sha256": "7d0dd373c9d878269a7609303e6f053905b1b04a8704014b5b85914744893e8a",
+      "redactions": 0
+    },
+    {
+      "path": "initial-dev/report.json",
+      "original_sha256": "8f13c6ccef1227722a460e69652bda0e06a91fce0ff801983bc95158247c8d02",
+      "archived_sha256": "8f13c6ccef1227722a460e69652bda0e06a91fce0ff801983bc95158247c8d02",
+      "redactions": 0
+    },
+    {
+      "path": "reflection-failure/TEST-vip.mate.presales.PresalesArtifactReadContractTest.xml",
+      "original_sha256": "aeab744e93b911246dc5453b8d4138833f95c0e114e41a643bfcc873f355f95f",
+      "archived_sha256": "aeab744e93b911246dc5453b8d4138833f95c0e114e41a643bfcc873f355f95f",
+      "redactions": 0
+    },
+    {
+      "path": "reflection-failure/before-PresalesArtifactReadContractTest.java",
+      "original_sha256": "23e5d1b7b674fe9b15c0fbf48f140afaca170747f8d9bc3cd8d53785b99742e9",
+      "archived_sha256": "23e5d1b7b674fe9b15c0fbf48f140afaca170747f8d9bc3cd8d53785b99742e9",
+      "redactions": 0
+    },
+    {
+      "path": "reflection-failure/vip.mate.presales.PresalesArtifactReadContractTest.txt",
+      "original_sha256": "3205dc491be33fbdb12c8280e14312e4b08ee3c48ecf3d15ea62a5c97c8c08f8",
+      "archived_sha256": "3205dc491be33fbdb12c8280e14312e4b08ee3c48ecf3d15ea62a5c97c8c08f8",
+      "redactions": 0
+    }
+  ]
+}

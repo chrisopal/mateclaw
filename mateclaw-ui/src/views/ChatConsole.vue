@@ -1,285 +1,369 @@
 <template>
   <div class="mc-page-shell chat-console-shell">
     <div class="mc-page-frame chat-console-frame">
-      <div v-if="route.query.modelingTaskId && route.query.ontologyId" class="modeling-chat-context">
+      <div
+        v-if="route.query.modelingTaskId && route.query.ontologyId"
+        class="modeling-chat-context"
+      >
         <span>业务建模：建议需返回草稿确认</span>
-        <el-button @click="router.push({ name: 'OntologyEditor', params: { id: String(route.query.ontologyId) }, query: { taskId: String(route.query.modelingTaskId) } })">
+        <el-button
+          @click="
+            router.push({
+              name: 'OntologyEditor',
+              params: { id: String(route.query.ontologyId) },
+              query: { taskId: String(route.query.modelingTaskId) },
+            })
+          "
+        >
           返回建议确认
         </el-button>
       </div>
       <div class="chat-layout mc-surface-card">
         <!-- 移动端会话面板遮罩 -->
         <Transition name="fade">
-          <div v-if="isMobile && convPanelOpen" class="conv-backdrop" @click="convPanelOpen = false"></div>
+          <div
+            v-if="isMobile && convPanelOpen"
+            class="conv-backdrop"
+            @click="convPanelOpen = false"
+          ></div>
         </Transition>
 
-    <!-- 会话侧边栏 -->
-    <ConversationSidebar
-      :conversations="conversations"
-      :current-conversation-id="currentConversationId"
-      :agents="agents"
-      :selected-agent-id="selectedAgentId"
-      :collapsed="convPanelCollapsed"
-      :mobile-open="convPanelOpen"
-      :is-mobile="isMobile"
-      @select="selectConversation"
-      @new-chat="newConversation"
-      @agent-picked="onAgentPicked"
-      @toggle-collapse="toggleConvPanel"
-      @refresh="loadConversations"
-      @deleted="onConversationsDeleted"
-    />
+        <!-- 会话侧边栏 -->
+        <ConversationSidebar
+          :conversations="conversations"
+          :current-conversation-id="currentConversationId"
+          :agents="agents"
+          :selected-agent-id="selectedAgentId"
+          :collapsed="convPanelCollapsed"
+          :mobile-open="convPanelOpen"
+          :is-mobile="isMobile"
+          @select="selectConversation"
+          @new-chat="newConversation"
+          @agent-picked="onAgentPicked"
+          @toggle-collapse="toggleConvPanel"
+          @refresh="loadConversations"
+          @deleted="onConversationsDeleted"
+        />
 
-    <!-- 主聊天区域 -->
-    <div
-      class="chat-area"
-      @dragenter.prevent="onDragEnter"
-      @dragover.prevent
-      @dragleave="onDragLeave"
-      @drop.prevent="onDrop"
-    >
-      <!-- 拖拽上传遮罩 -->
-      <Transition name="fade">
-        <div v-if="isDragging" class="drop-overlay">
-          <div class="drop-overlay__content">
-            <el-icon><UploadFilled /></el-icon>
-            <span>{{ $t('chat.dropToUpload') }}</span>
-          </div>
-        </div>
-      </Transition>
-      <!-- 头部 -->
-      <div class="chat-header">
-        <div class="chat-header-left">
-          <button v-if="isMobile" class="conv-toggle-btn" @click="convPanelOpen = !convPanelOpen" :title="$t('chat.conversations')">
-            <el-icon><ChatDotRound /></el-icon>
-          </button>
-          <div class="chat-stage-copy" v-if="currentAgent">
-            <div class="chat-stage-kicker">{{ $t('nav.chat') }}</div>
-            <!--
+        <!-- 主聊天区域 -->
+        <div
+          class="chat-area"
+          @dragenter.prevent="onDragEnter"
+          @dragover.prevent
+          @dragleave="onDragLeave"
+          @drop.prevent="onDrop"
+        >
+          <!-- 拖拽上传遮罩 -->
+          <Transition name="fade">
+            <div
+              v-if="isDragging"
+              class="drop-overlay"
+            >
+              <div class="drop-overlay__content">
+                <el-icon><UploadFilled /></el-icon>
+                <span>{{ $t('chat.dropToUpload') }}</span>
+              </div>
+            </div>
+          </Transition>
+          <!-- 头部 -->
+          <div class="chat-header">
+            <div class="chat-header-left">
+              <button
+                v-if="isMobile"
+                class="conv-toggle-btn"
+                @click="convPanelOpen = !convPanelOpen"
+                :title="$t('chat.conversations')"
+              >
+                <el-icon><ChatDotRound /></el-icon>
+              </button>
+              <div
+                class="chat-stage-copy"
+                v-if="currentAgent"
+              >
+                <div class="chat-stage-kicker">{{ $t('nav.chat') }}</div>
+                <!--
               Header reads as "who is this employee" — name + tagline.
               The runtime mode (ReAct / Plan-Execute) is technical jargon
               to end users and lives in the badge tooltip instead, so the
               header doesn't get polluted.
             -->
-            <div
-              class="agent-badge"
-              :title="`${currentAgent.name}${currentAgentRuntimeMode ? ' · ' + currentAgentRuntimeMode : ''}`"
-            >
-              <span class="agent-badge-icon" :style="{ color: agentIconColor(currentAgent.icon) }"><SkillIcon :value="currentAgent.icon" :size="22" :fallback="'🤖'" /></span>
-              <div class="agent-badge-text">
-                <span class="agent-badge-name">{{ currentAgent.name }}</span>
+                <div
+                  class="agent-badge"
+                  :title="`${currentAgent.name}${currentAgentRuntimeMode ? ' · ' + currentAgentRuntimeMode : ''}`"
+                >
+                  <span
+                    class="agent-badge-icon"
+                    :style="{ color: agentIconColor(currentAgent.icon) }"
+                    ><SkillIcon
+                      :value="currentAgent.icon"
+                      :size="22"
+                      :fallback="'🤖'"
+                  /></span>
+                  <div class="agent-badge-text">
+                    <span class="agent-badge-name">{{ currentAgent.name }}</span>
+                  </div>
+                  <span
+                    class="agent-runtime-badge"
+                    :class="{ 'agent-runtime-badge--dsh': currentAgentRuntimeType === 'dsh' }"
+                    :title="currentAgentRuntimeLabel"
+                  >
+                    {{ currentAgentRuntimeLabel }}
+                  </span>
+                  <span
+                    class="status-dot"
+                    :class="connectionStatusClass"
+                    :title="connectionStatusLabel"
+                  ></span>
+                </div>
               </div>
-              <span
-                class="agent-runtime-badge"
-                :class="{ 'agent-runtime-badge--dsh': currentAgentRuntimeType === 'dsh' }"
-                :title="currentAgentRuntimeLabel"
+              <div
+                v-else
+                class="no-agent-hint"
               >
-                {{ currentAgentRuntimeLabel }}
-              </span>
-              <span class="status-dot" :class="connectionStatusClass" :title="connectionStatusLabel"></span>
+                {{ $t('chat.selectAgent') }}
+              </div>
             </div>
-          </div>
-          <div v-else class="no-agent-hint">{{ $t('chat.selectAgent') }}</div>
-        </div>
-        <div class="chat-header-right">
-          <!-- Model selector — Issue #81 v2 R3: always pass full providers + show-all-states
+            <div class="chat-header-right">
+              <!-- Model selector — Issue #81 v2 R3: always pass full providers + show-all-states
                so unhealthy rows render as dimmed entries with status chips and a Fix
                button instead of disappearing entirely. -->
-          <ModelSelector
-            :providers="providers"
-            :active-value="activeModelValue"
-            :active-label="activeModelLabel"
-            :saving="modelSaving"
-            :show-all-states="true"
-            :can-configure="canConfigureModels"
-            :empty-hint="modelSelectorEmptyHint"
-            @select="selectModel"
-            @navigate-fix="onModelSelectorFix"
-          />
-          <!-- Overflow menu -->
-          <div class="header-overflow-wrap">
-            <button ref="headerBtnRef" class="header-btn" @click="headerMenuOpen = !headerMenuOpen" :title="$t('common.more')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-            </button>
-            <DropdownMenu
-              :open="headerMenuOpen"
-              :anchor="headerBtnRef"
-              :items="headerMenuItems"
-              @select="onHeaderMenuSelect"
-              @close="headerMenuOpen = false"
-            >
-              <template #item-icon="{ item }">
-                <el-icon v-if="item.key === 'config'"><Setting /></el-icon>
-                <el-icon v-else-if="item.key === 'clear'"><Delete /></el-icon>
-              </template>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      <TeamWorkerBanner
-        v-if="workerRunContext"
-        :run-id="workerRunContext.runId"
-        :task-id="workerRunContext.taskId"
-        :team-id="workerRunContext.teamId"
-        :lead-conversation-id="workerRunContext.leadConversationId"
-        @navigate="router.push($event)"
-      />
-
-      <!-- 使用组件化的 MessageList -->
-      <MessageList
-        ref="messageListRef"
-        :messages="messages"
-        :loading="isGenerating"
-        :assistant-icon="currentAgent?.icon || '🤖'"
-        :user-icon="userInitial"
-        :title="blockingPrompt ? modelPromptText.title : $t('app.title')"
-        :subtitle="blockingPrompt ? modelPromptText.desc : $t('chat.subtitle')"
-        :suggestions="blockingPrompt ? [] : suggestions"
-        :team-runs="teamRuns"
-        :expanded-team-run-id="teamRunRouteQuery.teamRunId || null"
-        :selected-team-task-id="teamRunRouteQuery.taskId || null"
-        :team-runs-has-more="Boolean(teamRunsNextCursor)"
-        :team-runs-loading-more="teamRunsLoadingMore"
-        :readonly="workerConversationReadOnly"
-        @regenerate="handleRegenerate"
-        @rewind="handleRewind"
-        @suggestion-click="sendSuggestion"
-        @toggle-thinking="handleToggleThinking"
-        @approve="handleApprove"
-        @approve-always="handleApproveAlways"
-        @deny="handleDeny"
-        @team-run-navigate="router.push($event)"
-        @team-runs-load-more="loadMoreTeamRuns"
-      >
-        <!-- Issue #81 v2 R2: blocking-only popup. Recoverable cases use the
-             non-blocking <RecoverableModelBanner> below instead. -->
-        <template v-if="blockingPrompt" #empty>
-          <div class="model-prompt">
-            <div class="model-prompt-title">{{ modelPromptText.title }}</div>
-            <div class="model-prompt-desc">{{ modelPromptText.desc }}</div>
-            <div class="model-prompt-actions">
-              <button class="btn-primary" @click="handlePrimaryAction">
-                {{ primaryActionLabel }}
-              </button>
-              <button
-                v-if="bestSwitchTarget"
-                class="btn-secondary"
-                @click="switchToBestTarget"
-              >
-                {{ $t('chat.promptAction.switchToModel', { name: bestSwitchTarget.label }) }}
-              </button>
+              <ModelSelector
+                :providers="providers"
+                :active-value="activeModelValue"
+                :active-label="activeModelLabel"
+                :saving="modelSaving"
+                :show-all-states="true"
+                :can-configure="canConfigureModels"
+                :empty-hint="modelSelectorEmptyHint"
+                @select="selectModel"
+                @navigate-fix="onModelSelectorFix"
+              />
+              <!-- Overflow menu -->
+              <div class="header-overflow-wrap">
+                <button
+                  ref="headerBtnRef"
+                  class="header-btn"
+                  @click="headerMenuOpen = !headerMenuOpen"
+                  :title="$t('common.more')"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <circle
+                      cx="12"
+                      cy="5"
+                      r="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="19"
+                      r="1.5"
+                    />
+                  </svg>
+                </button>
+                <DropdownMenu
+                  :open="headerMenuOpen"
+                  :anchor="headerBtnRef"
+                  :items="headerMenuItems"
+                  @select="onHeaderMenuSelect"
+                  @close="headerMenuOpen = false"
+                >
+                  <template #item-icon="{ item }">
+                    <el-icon v-if="item.key === 'config'"><Setting /></el-icon>
+                    <el-icon v-else-if="item.key === 'clear'"><Delete /></el-icon>
+                  </template>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
-        </template>
-      </MessageList>
 
-      <!-- Issue #81: non-blocking banner — active provider is unhealthy but the
+          <TeamWorkerBanner
+            v-if="workerRunContext"
+            :run-id="workerRunContext.runId"
+            :task-id="workerRunContext.taskId"
+            :team-id="workerRunContext.teamId"
+            :lead-conversation-id="workerRunContext.leadConversationId"
+            @navigate="router.push($event)"
+          />
+
+          <!-- 使用组件化的 MessageList -->
+          <MessageList
+            ref="messageListRef"
+            :messages="messages"
+            :loading="isGenerating"
+            :assistant-icon="currentAgent?.icon || '🤖'"
+            :user-icon="userInitial"
+            :title="blockingPrompt ? modelPromptText.title : $t('app.title')"
+            :subtitle="blockingPrompt ? modelPromptText.desc : $t('chat.subtitle')"
+            :suggestions="blockingPrompt ? [] : suggestions"
+            :team-runs="teamRuns"
+            :expanded-team-run-id="teamRunRouteQuery.teamRunId || null"
+            :selected-team-task-id="teamRunRouteQuery.taskId || null"
+            :team-runs-has-more="Boolean(teamRunsNextCursor)"
+            :team-runs-loading-more="teamRunsLoadingMore"
+            :readonly="workerConversationReadOnly"
+            @regenerate="handleRegenerate"
+            @rewind="handleRewind"
+            @suggestion-click="sendSuggestion"
+            @toggle-thinking="handleToggleThinking"
+            @approve="handleApprove"
+            @approve-always="handleApproveAlways"
+            @deny="handleDeny"
+            @team-run-navigate="router.push($event)"
+            @team-runs-load-more="loadMoreTeamRuns"
+          >
+            <!-- Issue #81 v2 R2: blocking-only popup. Recoverable cases use the
+             non-blocking <RecoverableModelBanner> below instead. -->
+            <template
+              v-if="blockingPrompt"
+              #empty
+            >
+              <div class="model-prompt">
+                <div class="model-prompt-title">{{ modelPromptText.title }}</div>
+                <div class="model-prompt-desc">{{ modelPromptText.desc }}</div>
+                <div class="model-prompt-actions">
+                  <button
+                    class="btn-primary"
+                    @click="handlePrimaryAction"
+                  >
+                    {{ primaryActionLabel }}
+                  </button>
+                  <button
+                    v-if="bestSwitchTarget"
+                    class="btn-secondary"
+                    @click="switchToBestTarget"
+                  >
+                    {{ $t('chat.promptAction.switchToModel', { name: bestSwitchTarget.label }) }}
+                  </button>
+                </div>
+              </div>
+            </template>
+          </MessageList>
+
+          <!-- Issue #81: non-blocking banner — active provider is unhealthy but the
            backend fallback chain has a LIVE provider to take over. -->
-      <RecoverableModelBanner
-        v-if="recoverablePrompt && activeProvider && bestFallbackName"
-        :provider-name="activeProvider.name"
-        :fallback-name="bestFallbackName"
-        @dismiss="recoverableDismissed = true"
-      />
+          <RecoverableModelBanner
+            v-if="recoverablePrompt && activeProvider && bestFallbackName"
+            :provider-name="activeProvider.name"
+            :fallback-name="bestFallbackName"
+            @dismiss="recoverableDismissed = true"
+          />
 
-      <!-- Cron job in-flight placeholder — visible while T2 hasn't committed
+          <!-- Cron job in-flight placeholder — visible while T2 hasn't committed
            the assistant message yet. Populated by pollActivity → /cron-jobs/active-runs. -->
-      <div v-if="activeCronRuns.length > 0" class="cron-running-bar">
-        <div v-for="run in activeCronRuns" :key="run.runId" class="cron-running-item">
-          <span class="cron-running-spinner">🌀</span>
-          <span class="cron-running-text">
-            <strong>{{ run.jobName || $t('chat.cronRunning.fallbackName') }}</strong>
-            <span class="cron-running-meta">
-              · {{ $t('chat.cronRunning.executing') }}
-              <template v-if="run.startedAt"> · {{ elapsedLabel(run.startedAt) }}</template>
-            </span>
-          </span>
-        </div>
-      </div>
+          <div
+            v-if="activeCronRuns.length > 0"
+            class="cron-running-bar"
+          >
+            <div
+              v-for="run in activeCronRuns"
+              :key="run.runId"
+              class="cron-running-item"
+            >
+              <span class="cron-running-spinner">🌀</span>
+              <span class="cron-running-text">
+                <strong>{{ run.jobName || $t('chat.cronRunning.fallbackName') }}</strong>
+                <span class="cron-running-meta">
+                  · {{ $t('chat.cronRunning.executing') }}
+                  <template v-if="run.startedAt"> · {{ elapsedLabel(run.startedAt) }}</template>
+                </span>
+              </span>
+            </div>
+          </div>
 
-      <!-- Terminal-state announcement after a goal completed or exhausted
+          <!-- Terminal-state announcement after a goal completed or exhausted
            in this conversation. Auto-dismisses when the user clicks × or
            starts a new goal. -->
-      <GoalSystemLine
-        v-if="goalTerminalForCurrent && currentConversationId"
-        :variant="goalTerminalForCurrent.status"
-        :title="goalSystemLineTitle"
-        :detail="goalSystemLineDetail"
-        class="goal-system-line-slot"
-        @click.stop="onGoalSystemLineDismiss"
-      />
+          <GoalSystemLine
+            v-if="goalTerminalForCurrent && currentConversationId"
+            :variant="goalTerminalForCurrent.status"
+            :title="goalSystemLineTitle"
+            :detail="goalSystemLineDetail"
+            class="goal-system-line-slot"
+            @click.stop="onGoalSystemLineDismiss"
+          />
 
-      <!-- Inline "set a goal?" invitation shown after the first assistant
+          <!-- Inline "set a goal?" invitation shown after the first assistant
            reply when the conversation has no active goal and the user
            hasn't dismissed it for this conv. -->
-      <GoalSetInlinePrompt
-        v-if="showGoalSetPrompt"
-        :conversation-id="currentConversationId"
-        :agent-id="String(selectedAgentId)"
-        :workspace-id="String(currentWorkspaceId || '1')"
-        :suggested-title="goalSuggestedTitle"
-        class="goal-set-prompt-slot"
-        @dismiss="onGoalPromptDismiss"
-      />
+          <GoalSetInlinePrompt
+            v-if="showGoalSetPrompt"
+            :conversation-id="currentConversationId"
+            :agent-id="String(selectedAgentId)"
+            :workspace-id="String(currentWorkspaceId || '1')"
+            :suggested-title="goalSuggestedTitle"
+            class="goal-set-prompt-slot"
+            @dismiss="onGoalPromptDismiss"
+          />
 
-      <!-- 流式处理 Loading 栏（消息和输入框之间） -->
-      <StreamLoadingBar
-        :is-loading="isGenerating && !blockingPrompt"
-        :tool-count="toolCallCount"
-        :completion-tokens="currentGeneratingTokens"
-        :prompt-tokens="currentPromptTokens"
-        :phase="streamPhase"
-        :phase-info="phaseInfo"
-        :running-tool-name="currentRunningToolName"
-        :has-queued="hasQueued"
-        :lifecycle-stage="lifecycleStage"
-        :compact-status="compactStatus"
-      />
+          <!-- 流式处理 Loading 栏（消息和输入框之间） -->
+          <StreamLoadingBar
+            :is-loading="isGenerating && !blockingPrompt"
+            :tool-count="toolCallCount"
+            :completion-tokens="currentGeneratingTokens"
+            :prompt-tokens="currentPromptTokens"
+            :phase="streamPhase"
+            :phase-info="phaseInfo"
+            :running-tool-name="currentRunningToolName"
+            :has-queued="hasQueued"
+            :lifecycle-stage="lifecycleStage"
+            :compact-status="compactStatus"
+          />
 
-      <!-- Multimodal routing hint: shown when pending attachments require a
+          <!-- Multimodal routing hint: shown when pending attachments require a
            modality the primary model lacks. -->
-      <MultimodalRoutingHint
-        :attachments="pendingAttachments"
-        :capabilities="agentCapabilities"
-      />
+          <MultimodalRoutingHint
+            :attachments="pendingAttachments"
+            :capabilities="agentCapabilities"
+          />
 
-      <!-- 上下文占用（估算）：点击展开分项面板 -->
-      <div v-if="contextUsage" class="ctx-usage-row">
-        <ContextUsagePanel :usage="contextUsage" />
-      </div>
+          <!-- 上下文占用（估算）：点击展开分项面板 -->
+          <div
+            v-if="contextUsage"
+            class="ctx-usage-row"
+          >
+            <ContextUsagePanel :usage="contextUsage" />
+          </div>
 
-      <!-- 使用组件化的 ChatInput -->
-      <ChatInput
-        ref="chatInputRef"
-        v-model="inputText"
-        :loading="isGenerating && !hasPendingApproval"
-        :disabled="blockingPrompt || !currentAgent || workerConversationReadOnly"
-        :skills-enabled="!!currentAgent && !currentAgent.skillsDisabled"
-        :placeholder="$t('chat.messagePlaceholder')"
-        :hint="currentRuntimeModel"
-        :attachments="pendingAttachments"
-        :uploading="uploadingAttachment"
-        :max-length="10240"
-        :pending-approval="activePendingApproval"
-        :stream-phase="streamPhase"
-        :queued-message="queuedMessage"
-        :queue-size="queueSize"
-        @submit="handleSendMessage"
-        @stop="handleStopStream"
-        @cancel-queued="handleCancelQueued"
-        @file-select="handleFileSelect"
-        @attachment-remove="removeAttachment"
-        @approve="handleApprove"
-        @approve-always="handleApproveAlways"
-        @deny="handleDeny"
-        :enable-talk-mode="!!selectedAgentId"
-        :thinking-enabled="thinkingEnabled"
-        :thinking-supported="currentModelSupportsThinking"
-        @toggle-thinking="thinkingEnabled = !thinkingEnabled"
-        @talk="showTalkMode = true"
-      />
-    </div>
+          <!-- 使用组件化的 ChatInput -->
+          <ChatInput
+            ref="chatInputRef"
+            v-model="inputText"
+            :loading="isGenerating && !hasPendingApproval"
+            :disabled="blockingPrompt || !currentAgent || workerConversationReadOnly"
+            :skills-enabled="!!currentAgent && !currentAgent.skillsDisabled"
+            :placeholder="$t('chat.messagePlaceholder')"
+            :hint="currentRuntimeModel"
+            :attachments="pendingAttachments"
+            :uploading="uploadingAttachment"
+            :max-length="10240"
+            :pending-approval="activePendingApproval"
+            :stream-phase="streamPhase"
+            :queued-message="queuedMessage"
+            :queue-size="queueSize"
+            @submit="handleSendMessage"
+            @stop="handleStopStream"
+            @cancel-queued="handleCancelQueued"
+            @file-select="handleFileSelect"
+            @attachment-remove="removeAttachment"
+            @approve="handleApprove"
+            @approve-always="handleApproveAlways"
+            @deny="handleDeny"
+            :enable-talk-mode="!!selectedAgentId"
+            :thinking-enabled="thinkingEnabled"
+            :thinking-supported="currentModelSupportsThinking"
+            @toggle-thinking="thinkingEnabled = !thinkingEnabled"
+            @talk="showTalkMode = true"
+          />
+        </div>
 
         <!-- 运行总览侧栏：计划进度 + 子 Agent 实时状态 -->
         <RunOverviewPanel
@@ -308,7 +392,16 @@ let cachedAgents: import('@/types').Agent[] = []
 <script setup lang="ts">
 import { ElMessage } from 'element-plus/es/components/message/index'
 import { ElMessageBox } from 'element-plus/es/components/message-box/index'
-import { ref, computed, onMounted, onBeforeUnmount, onActivated, onDeactivated, watch, nextTick } from 'vue'
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  onActivated,
+  onDeactivated,
+  watch,
+  nextTick,
+} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mcToast } from '@/composables/useMcToast'
@@ -333,7 +426,17 @@ import {
   resolveConversationAgentSelection,
   resolveRouteHydrationQuery,
 } from '@/utils/chatRouteHydration'
-import type { Conversation, Agent, ModelConfig, ProviderInfo, ActiveModelsInfo, ChatAttachment, MessageContentPart, Message, ToolCallMeta } from '@/types'
+import type {
+  Conversation,
+  Agent,
+  ModelConfig,
+  ProviderInfo,
+  ActiveModelsInfo,
+  ChatAttachment,
+  MessageContentPart,
+  Message,
+  ToolCallMeta,
+} from '@/types'
 
 // 导入组件化组件
 import MessageList from '@/components/chat/MessageList.vue'
@@ -376,9 +479,13 @@ watch(isMobile, (mobile) => {
 
 // Auto-collapse the conversation panel on narrow desktop unless the user
 // toggled it explicitly.
-watch(compactViewport, (compact) => {
-  if (!userExplicitConvCollapse.value) convPanelCollapsed.value = compact
-}, { immediate: true })
+watch(
+  compactViewport,
+  (compact) => {
+    if (!userExplicitConvCollapse.value) convPanelCollapsed.value = compact
+  },
+  { immediate: true },
+)
 
 function toggleConvPanel() {
   convPanelCollapsed.value = !convPanelCollapsed.value
@@ -422,9 +529,13 @@ const conversations = ref<Conversation[]>([])
 const selectedAgentId = ref<string | number>('')
 const currentConversationId = ref<string>('')
 const inputText = ref('')
-watch(() => route.query.modelingTaskId, value => {
-  if (typeof value === 'string' && !inputText.value) inputText.value = modelingTaskPrompt(value)
-}, { immediate: true })
+watch(
+  () => route.query.modelingTaskId,
+  (value) => {
+    if (typeof value === 'string' && !inputText.value) inputText.value = modelingTaskPrompt(value)
+  },
+  { immediate: true },
+)
 const modelSaving = ref(false)
 // Monotonic counter for in-flight setModel PUTs. The finally handler
 // only clears modelSaving when its captured seq is still the latest, so a
@@ -469,7 +580,7 @@ const agentCapabilities = ref<import('@/types').AgentCapabilities | null>(null)
 
 // 思考模式：只有两个状态 — 开或关
 const thinkingEnabled = ref(localStorage.getItem('mateclaw_thinking') !== 'off')
-const thinkingLevel = computed(() => thinkingEnabled.value ? 'high' : 'off')
+const thinkingLevel = computed(() => (thinkingEnabled.value ? 'high' : 'off'))
 watch(thinkingEnabled, (v) => localStorage.setItem('mateclaw_thinking', v ? 'on' : 'off'))
 
 // Dropdowns & menus
@@ -516,10 +627,11 @@ function selectModel(value: string) {
   // failed PUT can roll the UI back instead of stranding the user with a
   // model the backend isn't using.
   const prevLlm = activeModels.value?.activeLlm
-  const prevActive: ActiveModelsInfo | null = prevLlm?.providerId && prevLlm?.model
-    ? { activeLlm: { providerId: prevLlm.providerId, model: prevLlm.model } }
-    : null
-  const conv = conversations.value.find(c => c.conversationId === currentConversationId.value)
+  const prevActive: ActiveModelsInfo | null =
+    prevLlm?.providerId && prevLlm?.model
+      ? { activeLlm: { providerId: prevLlm.providerId, model: prevLlm.model } }
+      : null
+  const conv = conversations.value.find((c) => c.conversationId === currentConversationId.value)
   const prevConvProvider = conv?.modelProvider
   const prevConvModel = conv?.modelName
 
@@ -536,7 +648,8 @@ function selectModel(value: string) {
     const cid = currentConversationId.value
     const mySeq = ++modelSaveSeq
     modelSaving.value = true
-    conversationApi.setModel(cid, providerId, model)
+    conversationApi
+      .setModel(cid, providerId, model)
       .catch((e: any) => {
         console.warn('[ChatConsole] Failed to persist model pin:', e)
         mcToast.warning(t('chat.modelSaveFailed'))
@@ -545,15 +658,15 @@ function selectModel(value: string) {
         // it when the user is still on the same conversation AND hasn't
         // picked yet another model — otherwise we'd corrupt the more
         // recent state with this PUT's snapshot.
-        const liveConv = conversations.value.find(c => c.conversationId === cid)
+        const liveConv = conversations.value.find((c) => c.conversationId === cid)
         if (liveConv && liveConv.modelProvider === providerId && liveConv.modelName === model) {
           liveConv.modelProvider = prevConvProvider
           liveConv.modelName = prevConvModel
         }
         if (currentConversationId.value !== cid) return
         const stillShowingFailedPick =
-            activeModels.value?.activeLlm?.providerId === providerId
-            && activeModels.value?.activeLlm?.model === model
+          activeModels.value?.activeLlm?.providerId === providerId &&
+          activeModels.value?.activeLlm?.model === model
         if (!stillShowingFailedPick) return
         activeModels.value = prevActive
       })
@@ -597,7 +710,7 @@ function agentSeedModel(): { providerId: string; model: string } | null {
   }
   const name = currentAgent.value?.modelName
   if (name) {
-    const hit = enabledModels.value.find(m => m.modelName === name)
+    const hit = enabledModels.value.find((m) => m.modelName === name)
     if (hit?.provider) {
       return { providerId: hit.provider, model: hit.modelName }
     }
@@ -624,7 +737,9 @@ function applyConversationModel(conv?: Conversation | null) {
   }
   const agentModel = agentSeedModel()
   if (agentModel) {
-    activeModels.value = { activeLlm: { providerId: agentModel.providerId, model: agentModel.model } }
+    activeModels.value = {
+      activeLlm: { providerId: agentModel.providerId, model: agentModel.model },
+    }
     return
   }
   if (globalDefaultModel.value) {
@@ -649,7 +764,7 @@ function reconcileCurrentConversation() {
   // the PUT lands, in which case the server still reports the old pin and
   // we'd flicker the UI back. Wait for the next tick.
   if (modelSaving.value) return
-  const fresh = conversations.value.find(c => c.conversationId === currentConversationId.value)
+  const fresh = conversations.value.find((c) => c.conversationId === currentConversationId.value)
   if (!fresh) return
   if (fresh.agentId != null && String(fresh.agentId) !== String(selectedAgentId.value)) {
     selectedAgentId.value = fresh.agentId
@@ -659,7 +774,9 @@ function reconcileCurrentConversation() {
   const serverHasPin = !!(fresh.modelProvider && fresh.modelName)
   if (serverHasPin) {
     if (fresh.modelProvider !== pickedProvider || fresh.modelName !== pickedModel) {
-      activeModels.value = { activeLlm: { providerId: fresh.modelProvider!, model: fresh.modelName! } }
+      activeModels.value = {
+        activeLlm: { providerId: fresh.modelProvider!, model: fresh.modelName! },
+      }
     }
   } else if (pickedProvider || pickedModel) {
     // Server-side pin was cleared (admin reset, model deleted, …) but the
@@ -747,14 +864,14 @@ async function collectFilesFromEntries(dirEntries: FileSystemDirectoryEntry[]): 
       for (const entry of batch) {
         if (entry.isFile) {
           const file = await new Promise<File>((resolve, reject) => {
-            (entry as FileSystemFileEntry).file(resolve, reject)
+            ;(entry as FileSystemFileEntry).file(resolve, reject)
           })
           files.push(file)
         } else if (entry.isDirectory) {
           await readDir(entry as FileSystemDirectoryEntry)
         }
       }
-    } while (batch.length > 0)  // readEntries returns empty when done
+    } while (batch.length > 0) // readEntries returns empty when done
   }
 
   for (const dir of dirEntries) {
@@ -770,9 +887,11 @@ const chatInputRef = ref<InstanceType<typeof ChatInput> | null>(null)
 // MessageList container — placeholders emitted by useMarkdownRenderer get
 // upgraded in place after Vue paints the rendered Markdown HTML.
 const echartsContainerRef = computed(() => messageListRef.value?.$el as HTMLElement | null)
-const { startObserving: startECharts, dispose: disposeECharts } = useEChartsRenderer(echartsContainerRef)
+const { startObserving: startECharts, dispose: disposeECharts } =
+  useEChartsRenderer(echartsContainerRef)
 const { startObserving: startKatex, dispose: disposeKatex } = useKatexRenderer(echartsContainerRef)
-const { startObserving: startMermaid, dispose: disposeMermaid } = useMermaidRenderer(echartsContainerRef)
+const { startObserving: startMermaid, dispose: disposeMermaid } =
+  useMermaidRenderer(echartsContainerRef)
 
 // Last-attempt draft, restored into the input box when the SSE error event
 // arrives async (sendChatMessage resolves on connect, the error fires later,
@@ -821,9 +940,11 @@ const {
       //    was never persisted, so refreshing would wipe the user's just-sent
       //    bubble and the failed assistant placeholder, leaving no trace of
       //    the attempt in the chat window.
-      if (meta.reason !== 'awaiting_approval'
-          && meta.reason !== 'interrupted'
-          && meta.reason !== 'error') {
+      if (
+        meta.reason !== 'awaiting_approval' &&
+        meta.reason !== 'interrupted' &&
+        meta.reason !== 'error'
+      ) {
         await refreshCurrentConversationMessages(meta.conversationId)
       }
     }
@@ -838,22 +959,36 @@ const metadataWorkerRunId = computed(() => {
   }
   return undefined
 })
-const linkedTeamRunId = computed(() => teamRunRouteQuery.value.teamRunId ?? metadataWorkerRunId.value)
+const linkedTeamRunId = computed(
+  () => teamRunRouteQuery.value.teamRunId ?? metadataWorkerRunId.value,
+)
 const {
   runs: teamRuns,
   nextCursor: teamRunsNextCursor,
   loadingMore: teamRunsLoadingMore,
   loadMore: loadMoreTeamRuns,
 } = useTeamRuns(currentConversationId, { linkedRunId: linkedTeamRunId })
-const currentConversationKind = computed(() => conversations.value
-  .find(conversation => conversation.conversationId === currentConversationId.value)?.conversationKind)
-const workerRouteHint = computed(() => Boolean(
-  teamRunRouteQuery.value.teamRunId
-  || teamRunRouteQuery.value.taskId
-  || currentConversationKind.value === 'team_worker'))
+const currentConversationKind = computed(
+  () =>
+    conversations.value.find(
+      (conversation) => conversation.conversationId === currentConversationId.value,
+    )?.conversationKind,
+)
+const workerRouteHint = computed(() =>
+  Boolean(
+    teamRunRouteQuery.value.teamRunId ||
+      teamRunRouteQuery.value.taskId ||
+      currentConversationKind.value === 'team_worker',
+  ),
+)
 const workerGuard = useWorkerConversationGuard({
   conversationId: currentConversationId,
   workerHint: workerRouteHint,
+  loadReadOnly: async (conversationId) => {
+    // Deep links may not appear in the ordinary list; only the server knows their kind.
+    const response = await conversationApi.getStatus(conversationId)
+    return response.data?.readOnly === 'true'
+  },
   load: async (conversationId) => {
     if (isEphemeralConversation(conversationId)) return null
     const query = teamRunRouteQuery.value
@@ -864,8 +999,11 @@ const workerGuard = useWorkerConversationGuard({
     return response.data ?? null
   },
 })
-const workerRunContext = computed(() => workerGuard.context.value
-  ?? readLegacyWorkerRouteContext(currentConversationId.value, route.query))
+const workerRunContext = computed(
+  () =>
+    workerGuard.context.value ??
+    readLegacyWorkerRouteContext(currentConversationId.value, route.query),
+)
 const workerConversationReadOnly = computed(() => workerGuard.readOnly.value)
 
 function workerTranscriptMessageParams() {
@@ -889,7 +1027,9 @@ const connectionStatusLabel = computed(() => {
 })
 
 // ============ 计算属性 ============
-const currentAgent = computed(() => agents.value.find(a => String(a.id) === String(selectedAgentId.value)))
+const currentAgent = computed(() =>
+  agents.value.find((a) => String(a.id) === String(selectedAgentId.value)),
+)
 
 /** Human label for the agent's runtime mode — surfaces in the badge tooltip
  *  only, never in the visible header. */
@@ -899,8 +1039,12 @@ const currentAgentRuntimeMode = computed(() => {
   return a.agentType === 'react' ? t('agents.types.react') : t('agents.types.planExecute')
 })
 
-const currentAgentRuntimeType = computed(() => currentAgent.value?.runtimeType === 'dsh' ? 'dsh' : 'native')
-const currentAgentRuntimeLabel = computed(() => t(`agents.runtime.${currentAgentRuntimeType.value}`))
+const currentAgentRuntimeType = computed(() =>
+  currentAgent.value?.runtimeType === 'dsh' ? 'dsh' : 'native',
+)
+const currentAgentRuntimeLabel = computed(() =>
+  t(`agents.runtime.${currentAgentRuntimeType.value}`),
+)
 
 // Per-conversation last-viewed timestamp store (localStorage-backed, MVP).
 // Keyed by conversationId. Updated when the user opens a conversation; the
@@ -931,7 +1075,7 @@ const currentRuntimeModel = computed(() => {
     if (hit) return `${hit.name || hit.id} (${hit.id})`
     // During initial hydration the safe provider projection may not be ready yet.
     const em = enabledModels.value.find(
-      (m) => m.provider === providerId && (m.modelName === modelName || m.name === modelName)
+      (m) => m.provider === providerId && (m.modelName === modelName || m.name === modelName),
     )
     if (em) return em.name ? `${em.name} (${em.modelName})` : em.modelName
     return modelName
@@ -965,7 +1109,9 @@ const currentModelSupportsThinking = computed<boolean>(() => {
   return Boolean(hit?.supportsThinking)
 })
 
-const userInitial = computed(() => (localStorage.getItem('username') || 'U').charAt(0).toUpperCase())
+const userInitial = computed(() =>
+  (localStorage.getItem('username') || 'U').charAt(0).toUpperCase(),
+)
 
 const activeModelValue = computed(() => {
   const providerId = activeModels.value?.activeLlm?.providerId
@@ -975,7 +1121,7 @@ const activeModelValue = computed(() => {
 
 const activeModelLabel = computed(() => {
   if (!activeModelValue.value) return ''
-  const match = eligibleModels.value.find(m => m.value === activeModelValue.value)
+  const match = eligibleModels.value.find((m) => m.value === activeModelValue.value)
   if (match?.label) return match.label
   // Fall back to the viewer-readable /models/enabled list while the safe
   // provider projection is still hydrating, so the trigger never flashes the
@@ -983,8 +1129,9 @@ const activeModelLabel = computed(() => {
   const providerId = activeModels.value?.activeLlm?.providerId
   const modelName = activeModels.value?.activeLlm?.model
   if (!providerId || !modelName) return ''
-  const hit = enabledModels.value.find(m =>
-    m.provider === providerId && (m.modelName === modelName || m.name === modelName))
+  const hit = enabledModels.value.find(
+    (m) => m.provider === providerId && (m.modelName === modelName || m.name === modelName),
+  )
   if (hit) return hit.name ? `${hit.name} (${hit.modelName})` : hit.modelName
   return `${providerId} / ${modelName}`
 })
@@ -997,19 +1144,31 @@ const activeProvider = computed(() => {
 // Issue #81: liveness-aware popup state machine. modelPromptKind picks one of
 // six branches; modelPromptText derives title + desc; primaryActionLabel +
 // handlePrimaryAction map to the suggestedAction the backend computed.
-type ModelPromptKind = 'no-active' | 'unconfigured' | 'removed' | 'cooldown' | 'unprobed' | 'no-models'
+type ModelPromptKind =
+  | 'no-active'
+  | 'unconfigured'
+  | 'removed'
+  | 'cooldown'
+  | 'unprobed'
+  | 'no-models'
 
 const modelPromptKind = computed<ModelPromptKind>(() => {
   if (!activeModels.value?.activeLlm?.providerId) return 'no-active'
   const p = activeProvider.value
   if (!p) return 'no-active'
   switch (p.liveness) {
-    case 'UNCONFIGURED': return 'unconfigured'
-    case 'REMOVED':      return 'removed'
-    case 'COOLDOWN':     return 'cooldown'
-    case 'UNPROBED':     return 'unprobed'
-    case 'LIVE':         return 'no-models'
-    default:             return 'no-active'
+    case 'UNCONFIGURED':
+      return 'unconfigured'
+    case 'REMOVED':
+      return 'removed'
+    case 'COOLDOWN':
+      return 'cooldown'
+    case 'UNPROBED':
+      return 'unprobed'
+    case 'LIVE':
+      return 'no-models'
+    default:
+      return 'no-active'
   }
 })
 
@@ -1027,17 +1186,20 @@ const modelPromptText = computed<{ title: string; desc: string }>(() => {
     case 'unconfigured':
       return {
         title: t('chat.prompt.unconfigured.title', { name: p?.name || '' }),
-        desc:  t('chat.prompt.unconfigured.desc', { fields: p?.missingFields || '', hint: hintText.value }),
+        desc: t('chat.prompt.unconfigured.desc', {
+          fields: p?.missingFields || '',
+          hint: hintText.value,
+        }),
       }
     case 'removed':
       return {
         title: t('chat.prompt.removed.title', { name: p?.name || '' }),
-        desc:  p?.unavailableReason || t('chat.prompt.removed.descFallback'),
+        desc: p?.unavailableReason || t('chat.prompt.removed.descFallback'),
       }
     case 'cooldown':
       return {
         title: t('chat.prompt.cooldown.title', { name: p?.name || '' }),
-        desc:  t('chat.prompt.cooldown.desc', {
+        desc: t('chat.prompt.cooldown.desc', {
           seconds: Math.max(1, Math.ceil((p?.cooldownRemainingMs || 0) / 1000)),
         }),
       }
@@ -1047,7 +1209,7 @@ const modelPromptText = computed<{ title: string; desc: string }>(() => {
     default:
       return {
         title: t('chat.prompt.noModels.title', { name: p?.name || '' }),
-        desc:  t('chat.prompt.noModels.desc'),
+        desc: t('chat.prompt.noModels.desc'),
       }
   }
 })
@@ -1055,15 +1217,23 @@ const modelPromptText = computed<{ title: string; desc: string }>(() => {
 const primaryActionLabel = computed(() => {
   const action = activeProvider.value?.suggestedAction || 'configure_required_fields'
   switch (action) {
-    case 'fill_base_url':              return t('chat.promptAction.fillBaseUrl')
-    case 'fill_api_key':               return t('chat.promptAction.fillApiKey')
-    case 'start_oauth':                return t('chat.promptAction.startOAuth')
-    case 'test_connection':            return t('chat.promptAction.testConnection')
-    case 'pull_model':                 return t('chat.promptAction.pullModel')
-    case 'wait_cooldown':              return t('chat.promptAction.waitCooldown')
-    case 'reprobe':                    return t('chat.promptAction.reprobe')
+    case 'fill_base_url':
+      return t('chat.promptAction.fillBaseUrl')
+    case 'fill_api_key':
+      return t('chat.promptAction.fillApiKey')
+    case 'start_oauth':
+      return t('chat.promptAction.startOAuth')
+    case 'test_connection':
+      return t('chat.promptAction.testConnection')
+    case 'pull_model':
+      return t('chat.promptAction.pullModel')
+    case 'wait_cooldown':
+      return t('chat.promptAction.waitCooldown')
+    case 'reprobe':
+      return t('chat.promptAction.reprobe')
     case 'configure_required_fields':
-    default:                           return t('chat.goToModelSettings')
+    default:
+      return t('chat.goToModelSettings')
   }
 })
 
@@ -1084,7 +1254,7 @@ const bestFallbackName = computed<string>(() => {
   const target = bestSwitchTarget.value
   if (!target) return ''
   const [providerId] = target.value.split('::')
-  return providers.value.find(p => p.id === providerId)?.name || ''
+  return providers.value.find((p) => p.id === providerId)?.name || ''
 })
 
 function switchToBestTarget() {
@@ -1097,7 +1267,9 @@ function onModelSelectorFix(provider: { id: string }) {
 }
 
 const availableProviders = computed(() =>
-  providers.value.filter((p) => p.available && [...(p.models || []), ...(p.extraModels || [])].length > 0)
+  providers.value.filter(
+    (p) => p.available && [...(p.models || []), ...(p.extraModels || [])].length > 0,
+  ),
 )
 
 const eligibleModels = computed(() => {
@@ -1256,10 +1428,12 @@ async function pollActivity() {
     // 自己没在生成时才刷新当前选中会话的消息 + 探测是否该接入流。
     // 跳过尚未落库的临时会话(新建空会话、还没发消息):后端查不到会话行,
     // getStatus / listMessages 一律 403,4s 轮询会把 console 刷爆(见 issue #408)。
-    if (currentConversationId.value
-        && !isGenerating.value
-        && streamPhase.value !== 'awaiting_approval'
-        && !isEphemeralConversation(currentConversationId.value)) {
+    if (
+      currentConversationId.value &&
+      !isGenerating.value &&
+      streamPhase.value !== 'awaiting_approval' &&
+      !isEphemeralConversation(currentConversationId.value)
+    ) {
       const cid = currentConversationId.value
       try {
         const statusRes: any = await conversationApi.getStatus(cid)
@@ -1386,13 +1560,16 @@ onActivated(async () => {
   }
 })
 
-watch(() => route.query, () => {
-  // If a fresh action arrives (e.g. user re-fires Ctrl+K via the URL while
-  // the view is already alive), pick it up immediately.
-  captureRouteAction()
-  if (pendingRouteAction) applyPendingRouteAction()
-  void hydrateStateFromRoute()
-})
+watch(
+  () => route.query,
+  () => {
+    // If a fresh action arrives (e.g. user re-fires Ctrl+K via the URL while
+    // the view is already alive), pick it up immediately.
+    captureRouteAction()
+    if (pendingRouteAction) applyPendingRouteAction()
+    void hydrateStateFromRoute()
+  },
+)
 
 watch([selectedAgentId, currentConversationId], () => {
   syncRouteState()
@@ -1405,17 +1582,21 @@ const goalStore = useGoalStore()
 const workspaceStore = useWorkspaceStore()
 const currentWorkspaceId = computed(() => workspaceStore.currentWorkspaceId ?? '1')
 const canConfigureModels = computed(() => workspaceStore.isGlobalAdmin)
-const modelSelectorEmptyHint = computed(() => canConfigureModels.value
-  ? undefined
-  : t('chat.noModelsAvailableContactAdmin'))
-watch(currentConversationId, async (cid) => {
-  // Skip un-persisted conversations: a brand-new empty chat has no goal yet
-  // and the lookup would only 403 (Not the owner). The ring is hydrated by the
-  // goal_created SSE event once the first turn lands.
-  if (cid && !isEphemeralConversation(cid)) {
-    await goalStore.loadActiveForConversation(cid)
-  }
-}, { immediate: true })
+const modelSelectorEmptyHint = computed(() =>
+  canConfigureModels.value ? undefined : t('chat.noModelsAvailableContactAdmin'),
+)
+watch(
+  currentConversationId,
+  async (cid) => {
+    // Skip un-persisted conversations: a brand-new empty chat has no goal yet
+    // and the lookup would only 403 (Not the owner). The ring is hydrated by the
+    // goal_created SSE event once the first turn lands.
+    if (cid && !isEphemeralConversation(cid)) {
+      await goalStore.loadActiveForConversation(cid)
+    }
+  },
+  { immediate: true },
+)
 
 // Re-fetch the active goal when a turn finishes. A goal can be created or
 // mutated mid-conversation — e.g. auto-derived server-side from a Plan-Execute
@@ -1425,9 +1606,12 @@ watch(currentConversationId, async (cid) => {
 // this transition-to-idle refresh is what keeps the goal ring honest after
 // every turn against the persisted truth.
 watch(isGenerating, async (generating, wasGenerating) => {
-  if (wasGenerating && !generating
-      && currentConversationId.value
-      && !isEphemeralConversation(currentConversationId.value)) {
+  if (
+    wasGenerating &&
+    !generating &&
+    currentConversationId.value &&
+    !isEphemeralConversation(currentConversationId.value)
+  ) {
     await goalStore.loadActiveForConversation(currentConversationId.value)
   }
 })
@@ -1441,9 +1625,7 @@ watch(isGenerating, async (generating, wasGenerating) => {
 //   4) we're not mid-stream (don't pop suggestions while the agent
 //      is still typing).
 const goalTerminalForCurrent = computed(() =>
-  currentConversationId.value
-    ? goalStore.recentTerminal(currentConversationId.value)
-    : null,
+  currentConversationId.value ? goalStore.recentTerminal(currentConversationId.value) : null,
 )
 const goalSystemLineTitle = computed(() => {
   const t = goalTerminalForCurrent.value
@@ -1493,16 +1675,16 @@ const showGoalSetPrompt = computed(() => {
   if (goalStore.isPromptDismissed(currentConversationId.value)) return false
   // Need at least one user → assistant exchange so the prompt has
   // context to derive a suggested title from.
-  const hasAssistantReply = messages.value.some(m => m.role === 'assistant')
+  const hasAssistantReply = messages.value.some((m) => m.role === 'assistant')
   if (!hasAssistantReply) return false
   // Heuristic: don't claim "this looks multi-turn" without evidence. Fire
   // the prompt only when at least one signal of a real ongoing task is
   // present. Without these the prompt fires after one-shot Q&A like
   // "三句话告诉我 X" and the copy lies to the user.
-  const userTurns = messages.value.filter(m => m.role === 'user').length
+  const userTurns = messages.value.filter((m) => m.role === 'user').length
   if (userTurns >= 2) return true // multiple user messages = ongoing thread
   // Single-turn case: only suggest if the agent did non-trivial work.
-  return messages.value.some(m => {
+  return messages.value.some((m) => {
     if (m.role !== 'assistant') return false
     const md: any = (m as any).metadata
     if (!md) return false
@@ -1519,7 +1701,7 @@ const showGoalSetPrompt = computed(() => {
 // Build a sensible default title from the conversation's first user
 // message. The user can always edit later via the goal page.
 const goalSuggestedTitle = computed(() => {
-  const firstUser = messages.value.find(m => m.role === 'user')
+  const firstUser = messages.value.find((m) => m.role === 'user')
   const raw = (firstUser?.content || '').trim()
   if (!raw) return '新目标'
   // 80 char clip mirrors GoalController.create validation.
@@ -1541,26 +1723,33 @@ function onGoalSystemLineDismiss() {
 // Refetch agent capabilities (modalities + sidecar config) on agent change so
 // the multimodal routing hint above the input box can react synchronously when
 // the user attaches an image / video.
-watch(selectedAgentId, async (id) => {
-  if (!id) { agentCapabilities.value = null; return }
-  try {
-    const res: any = await agentApi.getCapabilities(id)
-    agentCapabilities.value = res.data || null
-    // The capability fetch is async and typically resolves AFTER the
-    // synchronous newConversation()/applyConversationModel() that ran on this
-    // same agent switch (which fell back to the global default because caps
-    // weren't loaded yet). Re-seed now that we know the agent's resolved model
-    // — but only for a conversation with no server-side pin and where the user
-    // hasn't manually picked a model, so we never clobber an explicit choice.
-    const conv = conversations.value.find(c => c.conversationId === currentConversationId.value)
-    const hasServerPin = !!(conv?.modelProvider && conv?.modelName)
-    if (!hasServerPin && !userPickedModel.value) {
-      applyConversationModel(conv)
+watch(
+  selectedAgentId,
+  async (id) => {
+    if (!id) {
+      agentCapabilities.value = null
+      return
     }
-  } catch {
-    agentCapabilities.value = null
-  }
-}, { immediate: true })
+    try {
+      const res: any = await agentApi.getCapabilities(id)
+      agentCapabilities.value = res.data || null
+      // The capability fetch is async and typically resolves AFTER the
+      // synchronous newConversation()/applyConversationModel() that ran on this
+      // same agent switch (which fell back to the global default because caps
+      // weren't loaded yet). Re-seed now that we know the agent's resolved model
+      // — but only for a conversation with no server-side pin and where the user
+      // hasn't manually picked a model, so we never clobber an explicit choice.
+      const conv = conversations.value.find((c) => c.conversationId === currentConversationId.value)
+      const hasServerPin = !!(conv?.modelProvider && conv?.modelName)
+      if (!hasServerPin && !userPickedModel.value) {
+        applyConversationModel(conv)
+      }
+    } catch {
+      agentCapabilities.value = null
+    }
+  },
+  { immediate: true },
+)
 
 // ============ 方法 ============
 async function loadAgents() {
@@ -1598,9 +1787,8 @@ async function loadModelState() {
     ])
     defaultModel.value = defaultRes.data || null
     const ga = activeRes.data?.activeLlm
-    globalDefaultModel.value = ga?.providerId && ga?.model
-      ? { providerId: ga.providerId, model: ga.model }
-      : null
+    globalDefaultModel.value =
+      ga?.providerId && ga?.model ? { providerId: ga.providerId, model: ga.model } : null
     // Seed the selector when no conversation has set it yet (fresh chat, or
     // before a conversation is selected). A conversation that already has a
     // model keeps it — selectConversation/applyConversationModel own that.
@@ -1667,10 +1855,8 @@ function recomputePromptFlags() {
     recoverableDismissed.value = false
     return
   }
-  const ap = providers.value.find(p => p.id === active.providerId) || null
-  const apHasModels = ap
-    ? ((ap.models?.length || 0) + (ap.extraModels?.length || 0)) > 0
-    : false
+  const ap = providers.value.find((p) => p.id === active.providerId) || null
+  const apHasModels = ap ? (ap.models?.length || 0) + (ap.extraModels?.length || 0) > 0 : false
   const activeUsable = ap?.liveness === 'LIVE' && apHasModels
   if (activeUsable) {
     blockingPrompt.value = false
@@ -1678,9 +1864,9 @@ function recomputePromptFlags() {
     recoverableDismissed.value = false
     return
   }
-  const anyUsable = providers.value.some(p =>
-    p.liveness === 'LIVE'
-    && ((p.models?.length || 0) + (p.extraModels?.length || 0)) > 0)
+  const anyUsable = providers.value.some(
+    (p) => p.liveness === 'LIVE' && (p.models?.length || 0) + (p.extraModels?.length || 0) > 0,
+  )
   blockingPrompt.value = !anyUsable
   recoverablePrompt.value = anyUsable && !recoverableDismissed.value
 }
@@ -1707,16 +1893,19 @@ async function refreshCurrentConversationMessages(
   if (isGenerating.value && !options.allowWhileGenerating) return
   if (streamPhase.value === 'awaiting_approval') return
   try {
-    const res: any = await conversationApi.listMessages(conversationId, workerTranscriptMessageParams())
+    const res: any = await conversationApi.listMessages(
+      conversationId,
+      workerTranscriptMessageParams(),
+    )
     // Stale guard：await 返回后确认仍是当前会话
     if (currentConversationId.value !== conversationId) return
     // 二次 isGenerating 检查：如果 await 期间用户已发新消息，不覆盖本地状态
     if (isGenerating.value && !options.allowWhileGenerating) return
-    const fetched = extractMessages(res).messages.map((msg: Message) => normalizeMessage(msg, options.preserveGeneratingStatus))
-    // 严格过滤：只保留 conversationId 完全匹配的本地消息，orphan（空 conversationId）直接丢弃
-    const currentMessages = messages.value.filter(
-      (m: any) => m.conversationId === conversationId
+    const fetched = extractMessages(res).messages.map((msg: Message) =>
+      normalizeMessage(msg, options.preserveGeneratingStatus),
     )
+    // 严格过滤：只保留 conversationId 完全匹配的本地消息，orphan（空 conversationId）直接丢弃
+    const currentMessages = messages.value.filter((m: any) => m.conversationId === conversationId)
     messages.value = reconcileMessages(currentMessages, fetched)
   } catch (e) {
     console.warn('[ChatConsole] Failed to refresh current conversation messages:', e)
@@ -1736,7 +1925,9 @@ async function hydrateStateFromRoute() {
   }
 
   if (conversationId && conversationId !== currentConversationId.value) {
-    const matchedConversation = conversations.value.find(conv => conv.conversationId === conversationId)
+    const matchedConversation = conversations.value.find(
+      (conv) => conv.conversationId === conversationId,
+    )
     if (matchedConversation) {
       await selectConversation(matchedConversation, agentId)
     } else {
@@ -1758,9 +1949,14 @@ async function hydrateStateFromRoute() {
       })
       try {
         if (currentConversationId.value !== conversationId) return
-        const res: any = await conversationApi.listMessages(conversationId, workerTranscriptMessageParams())
+        const res: any = await conversationApi.listMessages(
+          conversationId,
+          workerTranscriptMessageParams(),
+        )
         if (currentConversationId.value !== conversationId) return
-        messages.value = extractMessages(res).messages.map((msg: Message) => normalizeMessage(msg, resume.shouldReconnectStream))
+        messages.value = extractMessages(res).messages.map((msg: Message) =>
+          normalizeMessage(msg, resume.shouldReconnectStream),
+        )
       } catch {
         // 消息加载失败，保持空
       }
@@ -1844,13 +2040,18 @@ async function selectConversation(conv: Conversation, routeAgentId = '') {
       snapshotStreamStatus: conv.streamStatus,
       liveStreamStatus,
     })
-    const res: any = await conversationApi.listMessages(requestedConvId, workerTranscriptMessageParams())
+    const res: any = await conversationApi.listMessages(
+      requestedConvId,
+      workerTranscriptMessageParams(),
+    )
     // Stale guard：await 返回后确认仍是当前会话，否则丢弃
     if (currentConversationId.value !== requestedConvId) return
     // 点同一个会话且已有真实 SSE 在跑时，不用历史快照覆盖本地流式片段；
     // 若后端已 idle，则允许快照把 stale generating 历史恢复成终态。
     if (switchingAway || !isGenerating.value || !resume.shouldReconnectStream) {
-      messages.value = extractMessages(res).messages.map((msg: Message) => normalizeMessage(msg, resume.shouldReconnectStream))
+      messages.value = extractMessages(res).messages.map((msg: Message) =>
+        normalizeMessage(msg, resume.shouldReconnectStream),
+      )
     }
 
     // Hydrate pending approvals：恢复刷新后丢失的审批卡片（RFC-067 §4.9）
@@ -1892,7 +2093,7 @@ async function selectConversation(conv: Conversation, routeAgentId = '') {
         }
         const target = indexById.get(pa.pendingId)
         if (target) {
-          (target as any).metadata = {
+          ;(target as any).metadata = {
             ...(target as any).metadata,
             currentPhase: 'awaiting_approval',
             pendingApproval: enriched,
@@ -1903,10 +2104,13 @@ async function selectConversation(conv: Conversation, routeAgentId = '') {
           // e.g., approval fired before doOnComplete). Append to the last
           // assistant; same as pre-RFC behavior, but logged so a regression
           // where multiple unmatched pendings collide is observable.
-          const assistantMessages = messages.value.filter(m => m.role === 'assistant')
+          const assistantMessages = messages.value.filter((m) => m.role === 'assistant')
           const lastAssistant = assistantMessages[assistantMessages.length - 1]
           if (lastAssistant) {
-            console.warn('[hydrate] pendingId %s has no owning message — falling back to last assistant', pa.pendingId)
+            console.warn(
+              '[hydrate] pendingId %s has no owning message — falling back to last assistant',
+              pa.pendingId,
+            )
             ;(lastAssistant as any).metadata = {
               ...(lastAssistant as any).metadata,
               currentPhase: 'awaiting_approval',
@@ -1924,10 +2128,12 @@ async function selectConversation(conv: Conversation, routeAgentId = '') {
         if (m.role !== 'assistant') continue
         const meta = (m as any).metadata
         const local = meta?.pendingApproval
-        if (local?.status === 'pending_approval'
-            && local.pendingId
-            && !serverIds.has(local.pendingId)) {
-          (m as any).metadata = {
+        if (
+          local?.status === 'pending_approval' &&
+          local.pendingId &&
+          !serverIds.has(local.pendingId)
+        ) {
+          ;(m as any).metadata = {
             ...meta,
             pendingApproval: { ...local, status: 'expired' },
           }
@@ -1961,7 +2167,7 @@ function newConversation() {
 // Drop them from the local list and reset the chat area if the conversation
 // currently open was among those deleted.
 function onConversationsDeleted(ids: string[]) {
-  conversations.value = conversations.value.filter(c => !ids.includes(c.conversationId))
+  conversations.value = conversations.value.filter((c) => !ids.includes(c.conversationId))
   if (ids.includes(currentConversationId.value)) {
     resetStreamingState()
     messages.value = []
@@ -1998,28 +2204,30 @@ function goToModelSettings(providerId?: string) {
 // ============ 计算属性：是否有待审批 ============
 const hasPendingApproval = computed(() => {
   return messages.value.some(
-    m => m.role === 'assistant' && (m as any).metadata?.pendingApproval?.status === 'pending_approval'
+    (m) =>
+      m.role === 'assistant' && (m as any).metadata?.pendingApproval?.status === 'pending_approval',
   )
 })
 
 // 当前待审批的那条数据（传给 ChatInput 用于渲染审批栏）
 const activePendingApproval = computed(() => {
   const msg = messages.value.findLast(
-    m => m.role === 'assistant' && (m as any).metadata?.pendingApproval?.status === 'pending_approval'
+    (m) =>
+      m.role === 'assistant' && (m as any).metadata?.pendingApproval?.status === 'pending_approval',
   )
   return (msg as any)?.metadata?.pendingApproval ?? null
 })
 
 // 当前工具调用数
 const toolCallCount = computed(() => {
-  const lastMsg = messages.value.findLast(m => m.role === 'assistant')
+  const lastMsg = messages.value.findLast((m) => m.role === 'assistant')
   return lastMsg?.metadata?.toolCalls?.length ?? 0
 })
 
 // 当前正在执行的工具名称
 const currentRunningToolName = computed(() => {
   if (!isGenerating.value) return ''
-  const lastMsg = messages.value.findLast(m => m.role === 'assistant')
+  const lastMsg = messages.value.findLast((m) => m.role === 'assistant')
   const metadata = lastMsg?.metadata
   if (metadata?.runningToolName) return metadata.runningToolName
   const runningTool = metadata?.toolCalls?.findLast((tc: any) => tc.status === 'running')
@@ -2030,14 +2238,14 @@ const currentRunningToolName = computed(() => {
 const currentGeneratingTokens = computed(() => {
   if (!isGenerating.value) return 0
   // 找到最后一条 assistant 消息（可能仍在生成）
-  const lastMsg = messages.value.findLast(m => m.role === 'assistant')
+  const lastMsg = messages.value.findLast((m) => m.role === 'assistant')
   // 返回 completionTokens（从服务器响应中获取）
   return (lastMsg as any)?.completionTokens ?? 0
 })
 
 const currentPromptTokens = computed(() => {
   if (!isGenerating.value) return 0
-  const lastMsg = messages.value.findLast(m => m.role === 'assistant')
+  const lastMsg = messages.value.findLast((m) => m.role === 'assistant')
   return (lastMsg as any)?.promptTokens ?? 0
 })
 
@@ -2046,10 +2254,13 @@ async function handleSendMessage(content: string, pendingApprovalId?: string) {
   // 允许在等待审批时发送审批命令
   const isApprovalCommand = /^\/(approve|deny)$/i.test(content.trim())
 
-  if ((!content && pendingAttachments.value.length === 0)
-      || !selectedAgentId.value
-      || blockingPrompt.value
-      || workerConversationReadOnly.value) return
+  if (
+    (!content && pendingAttachments.value.length === 0) ||
+    !selectedAgentId.value ||
+    blockingPrompt.value ||
+    workerConversationReadOnly.value
+  )
+    return
   // 不再阻止运行中发送 — useChat 会自动走 interrupt/queue 路径
 
   // 拦截 /approve 和 /deny 命令 —— 通过 SSE 流发送（和普通消息相同通道）
@@ -2064,7 +2275,9 @@ async function handleSendMessage(content: string, pendingApprovalId?: string) {
 
     // 检查是否有 pending approval
     const pendingMsg = messages.value.findLast(
-      m => m.role === 'assistant' && (m as any).metadata?.pendingApproval?.status === 'pending_approval'
+      (m) =>
+        m.role === 'assistant' &&
+        (m as any).metadata?.pendingApproval?.status === 'pending_approval',
     )
     if (!pendingMsg) {
       mcToast.warning('No pending approval to process')
@@ -2133,7 +2346,7 @@ async function handleSendMessage(content: string, pendingApprovalId?: string) {
       thinkingLevel: thinkingLevel.value,
       modelProvider: activeModels.value?.activeLlm?.providerId,
       modelName: activeModels.value?.activeLlm?.model,
-      attachments: outgoingAttachments.map(a => ({
+      attachments: outgoingAttachments.map((a) => ({
         type: 'file' as const,
         fileUrl: a.url,
         fileName: a.name,
@@ -2158,8 +2371,13 @@ function handleStopStream() {
 }
 
 async function handleRegenerate(message: Message) {
-  if (workerConversationReadOnly.value
-    || isGenerating.value || !currentConversationId.value || !selectedAgentId.value) return
+  if (
+    workerConversationReadOnly.value ||
+    isGenerating.value ||
+    !currentConversationId.value ||
+    !selectedAgentId.value
+  )
+    return
   const idx = messages.value.indexOf(message)
   if (idx >= 0) {
     // The server drops the trailing assistant block and reuses the persisted
@@ -2188,23 +2406,20 @@ async function handleRewind(message: Message) {
   if (idx < 0) return
   const count = messages.value.length - idx
   try {
-    await ElMessageBox.confirm(
-      t('chat.rewindConfirm', { count }),
-      t('chat.rewindHere'),
-      { type: 'warning' }
-    )
+    await ElMessageBox.confirm(t('chat.rewindConfirm', { count }), t('chat.rewindHere'), {
+      type: 'warning',
+    })
   } catch {
     return // user cancelled
   }
   try {
-    const res = await conversationApi.rewindMessage(
-      currentConversationId.value,
-      String(message.id)
-    )
+    const res = await conversationApi.rewindMessage(currentConversationId.value, String(message.id))
     messages.value.splice(idx)
     // Sync the sidebar entry from the server-recomputed aggregates.
-    const data = res.data as { deletedCount: number; messageCount: number; lastMessage: string | null } | undefined
-    const conv = conversations.value.find(c => c.conversationId === currentConversationId.value)
+    const data = res.data as
+      | { deletedCount: number; messageCount: number; lastMessage: string | null }
+      | undefined
+    const conv = conversations.value.find((c) => c.conversationId === currentConversationId.value)
     if (conv && data) {
       conv.lastMessage = data.lastMessage ?? ''
       conv.messageCount = data.messageCount
@@ -2237,9 +2452,10 @@ async function handleDeny(pendingId: string) {
 // Always-approve: create the matching grant first, then send /approve as usual.
 // Failure to create the grant doesn't block the approval — we still forward
 // /approve so the user's click isn't lost, just toast the error.
-async function handleApproveAlways(
-  payload: { pendingId: string; scope: 'CONVERSATION' | 'AGENT' | 'USER' },
-) {
+async function handleApproveAlways(payload: {
+  pendingId: string
+  scope: 'CONVERSATION' | 'AGENT' | 'USER'
+}) {
   if (!currentConversationId.value) return
   const pa = activePendingApproval.value
   if (!pa) return
@@ -2267,8 +2483,8 @@ async function handleApproveAlways(
     const sev = pa.maxSeverity ?? 'LOW'
     // Severity ceiling = at-or-above the current finding's severity. CRITICAL
     // never enters this path (the backend rejects it), so HIGH covers the rest.
-    const ceiling = sev === 'HIGH' || sev === 'CRITICAL' ? 'HIGH'
-      : sev === 'MEDIUM' ? 'MEDIUM' : 'LOW'
+    const ceiling =
+      sev === 'HIGH' || sev === 'CRITICAL' ? 'HIGH' : sev === 'MEDIUM' ? 'MEDIUM' : 'LOW'
     const ruleId = pa.findings?.find((f: { ruleId?: string }) => !!f.ruleId)?.ruleId ?? null
     await approvalApi.createGrant({
       scopeType: payload.scope,
@@ -2279,9 +2495,7 @@ async function handleApproveAlways(
       grantKind: payload.scope === 'CONVERSATION' ? 'UNTIL_CONVERSATION_END' : 'ALWAYS',
       note: `created from approval banner (${pa.toolName})`,
     })
-    ElMessage.success(
-      t('chat.approveAlwaysCreated', { tool: pa.toolName }) as string,
-    )
+    ElMessage.success(t('chat.approveAlwaysCreated', { tool: pa.toolName }) as string)
   } catch (e: any) {
     ElMessage.error(e?.message || 'Failed to create auto-approve rule')
   }
@@ -2344,12 +2558,12 @@ async function handleFileSelect(files: File[]) {
 
 function removeAttachment(key: string) {
   // revoke 被移除附件的 ObjectURL，防止内存泄漏
-  const removed = pendingAttachments.value.find(a => a.storedName === key || a.path === key)
+  const removed = pendingAttachments.value.find((a) => a.storedName === key || a.path === key)
   if (removed?.previewUrl?.startsWith('blob:')) {
     URL.revokeObjectURL(removed.previewUrl)
   }
   pendingAttachments.value = pendingAttachments.value.filter(
-    a => a.storedName !== key && a.path !== key
+    (a) => a.storedName !== key && a.path !== key,
   )
 }
 
@@ -2367,9 +2581,11 @@ function buildOutgoingParts(text: string, attachments: ChatAttachment[]): Messag
   if (text) parts.push({ type: 'text', text })
   for (const attachment of attachments) {
     const ct = attachment.contentType || ''
-    const partType: MessageContentPart['type'] = ct.startsWith('video/') ? 'video'
-      : ct.startsWith('image/') ? 'image'
-      : 'file'
+    const partType: MessageContentPart['type'] = ct.startsWith('video/')
+      ? 'video'
+      : ct.startsWith('image/')
+        ? 'image'
+        : 'file'
     parts.push({
       type: partType,
       fileUrl: attachment.url,
@@ -2394,10 +2610,16 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
       let parsed = JSON.parse(msg.metadata)
       // 处理双重编码：parse 后仍然是字符串的情况
       if (typeof parsed === 'string') {
-        try { parsed = JSON.parse(parsed) } catch { /* ignore */ }
+        try {
+          parsed = JSON.parse(parsed)
+        } catch {
+          /* ignore */
+        }
       }
       msg.metadata = parsed
-    } catch { msg.metadata = {} as any }
+    } catch {
+      msg.metadata = {} as any
+    }
   }
 
   // 保留后端返回的 token 字段（MessageVO 新增）
@@ -2424,7 +2646,7 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
   }
 
   // 从 tool_call contentParts 还原 metadata.toolCalls
-  const toolCallParts = msg.contentParts.filter(p => p.type === 'tool_call')
+  const toolCallParts = msg.contentParts.filter((p) => p.type === 'tool_call')
   if (toolCallParts.length > 0) {
     const toolCalls: ToolCallMeta[] = []
     for (const part of toolCallParts) {
@@ -2445,14 +2667,14 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
     if (toolCalls.length > 0) {
       msg.metadata = { ...msg.metadata, toolCalls }
     }
-    msg.contentParts = msg.contentParts.filter(p => p.type !== 'tool_call')
+    msg.contentParts = msg.contentParts.filter((p) => p.type !== 'tool_call')
   }
 
   // 历史消息的 metadata.toolCalls 也需要清理 running 状态
   if (msg.metadata?.toolCalls) {
     const cleaned = msg.metadata.toolCalls.map((tc: ToolCallMeta) => ({
       ...tc,
-      status: tc.status === 'running' ? 'completed' as const : tc.status,
+      status: tc.status === 'running' ? ('completed' as const) : tc.status,
     }))
     msg.metadata = { ...msg.metadata, toolCalls: cleaned }
   }
@@ -2462,9 +2684,11 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
   if (!msg.status) msg.status = 'completed'
 
   // 从 file/image/video contentParts 恢复 attachments（历史消息 API 不返回单独的 attachments 字段）
-  const fileParts = msg.contentParts.filter(p => (p.type === 'file' || p.type === 'image' || p.type === 'video') && p.fileUrl)
+  const fileParts = msg.contentParts.filter(
+    (p) => (p.type === 'file' || p.type === 'image' || p.type === 'video') && p.fileUrl,
+  )
   if (fileParts.length > 0 && (!msg.attachments || msg.attachments.length === 0)) {
-    msg.attachments = fileParts.map(p => ({
+    msg.attachments = fileParts.map((p) => ({
       name: p.fileName || 'unknown',
       size: typeof p.fileSize === 'number' ? p.fileSize : Number(p.fileSize) || 0,
       url: p.fileUrl!,
@@ -2476,7 +2700,7 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
 
   // 从持久化的 [错误] 文本重建 errorInfo，使刷新后也能显示错误卡片
   if (msg.role === 'assistant' && !msg.errorInfo) {
-    const text = msg.content || msg.contentParts?.find(p => p.type === 'text')?.text || ''
+    const text = msg.content || msg.contentParts?.find((p) => p.type === 'text')?.text || ''
     const rebuilt = reconstructErrorInfo(text)
     if (rebuilt) {
       msg.errorInfo = rebuilt
@@ -2487,16 +2711,22 @@ function normalizeMessage(raw: Message, preserveGeneratingStatus?: boolean): Mes
   return msg
 }
 
-function parseThinkingContent(raw: string): { content: string; thinking: string; hasThinking: boolean } {
+function parseThinkingContent(raw: string): {
+  content: string
+  thinking: string
+  hasThinking: boolean
+} {
   if (!raw) return { content: '', thinking: '', hasThinking: false }
 
   const normalized = raw.replace(/<thinking>/gi, '<think>').replace(/<\/thinking>/gi, '</think>')
   const thinkingParts: string[] = []
-  const content = normalized.replace(/<think>([\s\S]*?)<\/think>/gi, (_, thinkingText: string) => {
-    const cleanText = thinkingText.trim()
-    if (cleanText) thinkingParts.push(cleanText)
-    return ''
-  }).trim()
+  const content = normalized
+    .replace(/<think>([\s\S]*?)<\/think>/gi, (_, thinkingText: string) => {
+      const cleanText = thinkingText.trim()
+      if (cleanText) thinkingParts.push(cleanText)
+      return ''
+    })
+    .trim()
 
   return {
     content,
@@ -2521,22 +2751,30 @@ function handleCodeCopy(e: MouseEvent) {
   const encoded = btn.getAttribute('data-code')
   if (!encoded) return
   const code = decodeURIComponent(encoded)
-  copyToClipboard(code).then(() => {
-    btn.classList.add('copied')
-    const textEl = btn.querySelector('.code-block__copy-text')
-    if (textEl) textEl.textContent = t('chat.copied')
-    setTimeout(() => {
-      btn.classList.remove('copied')
-      if (textEl) textEl.textContent = t('chat.copy')
-    }, 1500)
-  }).catch(() => {
-    mcToast.error(t('chat.copyFailed'))
-  })
+  copyToClipboard(code)
+    .then(() => {
+      btn.classList.add('copied')
+      const textEl = btn.querySelector('.code-block__copy-text')
+      if (textEl) textEl.textContent = t('chat.copied')
+      setTimeout(() => {
+        btn.classList.remove('copied')
+        if (textEl) textEl.textContent = t('chat.copy')
+      }, 1500)
+    })
+    .catch(() => {
+      mcToast.error(t('chat.copyFailed'))
+    })
 }
 </script>
 
 <style scoped>
-.modeling-chat-context { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 8px 16px; }
+.modeling-chat-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 16px;
+}
 .ctx-usage-row {
   display: flex;
   justify-content: flex-end;
@@ -2565,11 +2803,20 @@ function handleCodeCopy(e: MouseEvent) {
   animation: cron-spin 1.6s linear infinite;
 }
 @keyframes cron-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-.cron-running-text { line-height: 1.4; }
-.cron-running-meta { color: var(--mc-text-secondary); margin-left: 4px; }
+.cron-running-text {
+  line-height: 1.4;
+}
+.cron-running-meta {
+  color: var(--mc-text-secondary);
+  margin-left: 4px;
+}
 
 .chat-console-shell {
   background: transparent;
@@ -2619,10 +2866,10 @@ function handleCodeCopy(e: MouseEvent) {
   align-items: center;
   gap: 12px;
   padding: 40px 60px;
-  border: 2px dashed var(--mc-primary, #D97757);
+  border: 2px dashed var(--mc-primary, #d97757);
   border-radius: 16px;
   background: var(--mc-bg-elevated, #f8fafc);
-  color: var(--mc-primary, #D97757);
+  color: var(--mc-primary, #d97757);
   font-size: 16px;
   font-weight: 500;
 }
@@ -2731,15 +2978,36 @@ function handleCodeCopy(e: MouseEvent) {
   background: rgba(24, 126, 104, 0.08);
 }
 
-
 .status-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 2px;
   transition: background 0.3s;
 }
-.status-idle { background: #34d399; box-shadow: 0 0 4px rgba(52, 211, 153, 0.5); }
-.status-streaming { background: #fbbf24; box-shadow: 0 0 4px rgba(251, 191, 36, 0.5); animation: pulse-dot 1.2s infinite; }
-.status-error { background: #f87171; box-shadow: 0 0 4px rgba(248, 113, 113, 0.5); }
-@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.status-idle {
+  background: #34d399;
+  box-shadow: 0 0 4px rgba(52, 211, 153, 0.5);
+}
+.status-streaming {
+  background: #fbbf24;
+  box-shadow: 0 0 4px rgba(251, 191, 36, 0.5);
+  animation: pulse-dot 1.2s infinite;
+}
+.status-error {
+  background: #f87171;
+  box-shadow: 0 0 4px rgba(248, 113, 113, 0.5);
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
 
 .no-agent-hint {
   font-size: 13px;
@@ -2829,7 +3097,10 @@ function handleCodeCopy(e: MouseEvent) {
   border-radius: 12px;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .btn-secondary:hover {
@@ -2945,5 +3216,4 @@ function handleCodeCopy(e: MouseEvent) {
     height: 28px;
   }
 }
-
 </style>

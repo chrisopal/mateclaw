@@ -1,0 +1,7 @@
+src/features/presales/api/presalesApi.ts 43ms (unchanged)
+src/features/presales/shared/dashboard.ts 9ms (unchanged)
+src/features/presales/shared/messages.ts 23ms
+src/features/presales/components/PresalesDashboard.vue 59ms
+src/features/presales/pages/PresalesWorkbench.vue 134ms (unchanged)
+src/features/presales/__tests__/projectSummary.test.ts 6ms (unchanged)
+src/features/presales/__tests__/dashboardContract.test.ts 5ms

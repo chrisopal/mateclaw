@@ -1,0 +1,14 @@
+# AQ-07 Java migration guard plan (Proposed)
+
+Start: HEAD bf7a12f5406f46fcac1e3292a078f45414be3c6e, tree 07794bfb9d8c0c7e198af1747e2dfa8c9bfb7bd2; origin/dev ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93. Clean isolated worktree. Initial dev actual exit 0 / SCAN_PASS, report `_86mjmx_`. Preserve original checkout WIP.
+
+Problem: DB-001/002 recognize only SQL. Published Java Flyway entries and their shared V1 algorithm can change without a finding. SQL listing evidence already proves this gap; this slice strengthens checks, not runtime or database semantics.
+
+1. Before checker edits, add failing regression cases for Java entry edits/deletes/renames, missing dialects, and frozen helpers. Keep all existing assertions. Add positive cases for unchanged migrations, complete new dialect entries, and append-only new frozen versions.
+2. Extend the existing hard invariants to `.java` entries. Add `.quality/frozen-migrations.json`, version 1, with explicit repository-relative Java source paths and SHA-256 digests. Initially freeze all three V218 entries, the shared backfill (including nested Row), and the V1 projection factory (including nested Projection). No V217/V218 or V1 source changes.
+3. Require every Java entry to be declared; reject malformed/duplicate keys, invalid paths/digests, absent or mismatched sources. Compare both immutable base declarations and candidate declarations: base paths/digests cannot be removed or rewritten. A newly declared existing source must also match its base bytes. Deleting the manifest cannot disable protection. Snapshot worktree UTF-8 bytes consistently with Git blobs, including CRLF.
+4. No automatic dependency discovery is claimed. Reviewers must check closure completeness and newly added dependencies; JDK/compiler/Jackson upgrades still need compatibility/checksum evidence. The manifest is an append-only source freeze, not Flyway CRC enforcement. No waiver, baseline replacement, policy relaxation or production action.
+5. Run exact failing/positive tests and real disposable-Git CLI checks against a baseline containing V218, while retaining origin/dev for normal dev checks. Run dev after each coherent change. Obtain an independent read-only bypass review of the control-plane diff; maintainer approval/remote required CI remain separate.
+6. Synchronize CHECKS, RULES, REVIEW_CHECKLIST, Skill, PR template and evidence. Perform exact staged commit gate, normal hooks, Lore commit and full-range checked push. Keep PR draft and formal AC statuses unchanged pending their actual acceptance.
+
+Boundary: gate.py, a new guard test module, one manifest and related review/evidence documents. No new dependencies, application behavior, database writes, authority changes or old migration edits. Revert this guard installation commit if needed; never edit a frozen migration to work around a failing check. AQ-07 ArchUnit/zero-tolerance sealing remains outside this bounded slice.

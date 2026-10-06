@@ -1,0 +1,53 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (62 tests | 1 failed) 1008658ms
+     × ignores a cancelled same-project poll that resolves after a restricted reload 988914ms
+ ❯ src/features/bidding/__tests__/biddingWorkbench.test.ts (49 tests | 1 failed) 1010937ms
+   × dispatches preview export with pinned refs but keeps candidate disabled for preview-only format 989093ms
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:548:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at _destroy (node:_http_client:959:15)
+    at onSocketNT (node:_http_client:983:5)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/bidding/__tests__/biddingWorkbench.test.ts > dispatches preview export with pinned refs but keeps candidate disabled for preview-only format
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/bidding/__tests__/biddingWorkbench.test.ts:756:1
+    754| )
+    755|
+    756| it('dispatches preview export with pinned refs but keeps candidate dis…
+       | ^
+    757|   const { manuscriptRef, templateRef, formatRef } = installReviewScope…
+    758|   vi.mocked(biddingApi.templates).mockResolvedValue([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > ignores a cancelled same-project poll that resolves after a restricted reload
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:915:3
+    913|   })
+    914|
+    915|   it('ignores a cancelled same-project poll that resolves after a rest…
+       |   ^
+    916|     const active = {
+    917|       ...project,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 131 passed (133)
+      Tests  2 failed | 910 passed (912)
+   Start at  03:07:02
+   Duration  1039.65s (transform 2.95s, setup 0ms, import 19.26s, tests 2030.43s, environment 16.36s)

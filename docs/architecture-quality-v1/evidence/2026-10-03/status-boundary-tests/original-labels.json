@@ -1,0 +1,190 @@
+{
+  "DISCOVERY": {
+    "zh-CN": "项目理解",
+    "en-US": "Discovery"
+  },
+  "REQUIREMENTS": {
+    "zh-CN": "需求梳理",
+    "en-US": "Requirements"
+  },
+  "BASELINED": {
+    "zh-CN": "需求已基线",
+    "en-US": "Baselined"
+  },
+  "SOLUTION": {
+    "zh-CN": "方案设计",
+    "en-US": "Solution"
+  },
+  "RELEASE": {
+    "zh-CN": "成果发布",
+    "en-US": "Release"
+  },
+  "ARCHIVED": {
+    "zh-CN": "已归档",
+    "en-US": "Archived"
+  },
+  "ACTIVE": {
+    "zh-CN": "进行中",
+    "en-US": "Active"
+  },
+  "FULL": {
+    "zh-CN": "完整响应",
+    "en-US": "Full"
+  },
+  "PARTIAL": {
+    "zh-CN": "部分响应",
+    "en-US": "Partial"
+  },
+  "CONDITIONAL": {
+    "zh-CN": "条件响应",
+    "en-US": "Conditional"
+  },
+  "EXCLUDED": {
+    "zh-CN": "排除范围",
+    "en-US": "Excluded"
+  },
+  "UNHANDLED": {
+    "zh-CN": "未处理",
+    "en-US": "Unhandled"
+  },
+  "HIGH": {
+    "zh-CN": "高",
+    "en-US": "High"
+  },
+  "MEDIUM": {
+    "zh-CN": "中",
+    "en-US": "Medium"
+  },
+  "LOW": {
+    "zh-CN": "低",
+    "en-US": "Low"
+  },
+  "IN": {
+    "zh-CN": "范围内",
+    "en-US": "In scope"
+  },
+  "OUT": {
+    "zh-CN": "范围外",
+    "en-US": "Out of scope"
+  },
+  "UNKNOWN": {
+    "zh-CN": "待核实",
+    "en-US": "Unknown"
+  },
+  "UNCONFIRMED": {
+    "zh-CN": "未确认",
+    "en-US": "Unconfirmed"
+  },
+  "OPEN": {
+    "zh-CN": "待处理",
+    "en-US": "Open"
+  },
+  "ANSWERED": {
+    "zh-CN": "已答复",
+    "en-US": "Answered"
+  },
+  "RESOLVED": {
+    "zh-CN": "已解决",
+    "en-US": "Resolved"
+  },
+  "ACCEPTED": {
+    "zh-CN": "已接受",
+    "en-US": "Accepted"
+  },
+  "PENDING": {
+    "zh-CN": "待批准",
+    "en-US": "Awaiting approval"
+  },
+  "APPROVED": {
+    "zh-CN": "已批准",
+    "en-US": "Approved"
+  },
+  "PUBLISHED": {
+    "zh-CN": "已发布",
+    "en-US": "Published"
+  },
+  "DRAFT": {
+    "zh-CN": "草稿",
+    "en-US": "Draft"
+  },
+  "SUCCEEDED": {
+    "zh-CN": "已完成",
+    "en-US": "Succeeded"
+  },
+  "RUNNING": {
+    "zh-CN": "运行中",
+    "en-US": "Running"
+  },
+  "FAILED": {
+    "zh-CN": "失败",
+    "en-US": "Failed"
+  },
+  "CANCELLED": {
+    "zh-CN": "已停止接收",
+    "en-US": "Result discarded"
+  },
+  "PROJECT": {
+    "zh-CN": "项目资料",
+    "en-US": "Project material"
+  },
+  "PRODUCT": {
+    "zh-CN": "产品资料",
+    "en-US": "Product material"
+  },
+  "CASE": {
+    "zh-CN": "案例资料",
+    "en-US": "Case material"
+  },
+  "CUSTOMER_SOURCE": {
+    "zh-CN": "客户来源",
+    "en-US": "Customer source"
+  },
+  "PRODUCT_SOURCE": {
+    "zh-CN": "产品来源",
+    "en-US": "Product source"
+  },
+  "INTERNAL_JUDGMENT": {
+    "zh-CN": "内部判断",
+    "en-US": "Internal judgment"
+  },
+  "ASSUMPTION": {
+    "zh-CN": "假设",
+    "en-US": "Assumption"
+  },
+  "AI_SUGGESTION": {
+    "zh-CN": "AI 建议",
+    "en-US": "AI suggestion"
+  },
+  "FIT": {
+    "zh-CN": "直接满足",
+    "en-US": "Fit"
+  },
+  "CONFIG": {
+    "zh-CN": "配置后满足",
+    "en-US": "Configuration"
+  },
+  "EXTEND": {
+    "zh-CN": "需要开发",
+    "en-US": "Extension"
+  },
+  "PARTNER": {
+    "zh-CN": "依赖合作方",
+    "en-US": "Partner"
+  },
+  "GAP": {
+    "zh-CN": "暂不支持",
+    "en-US": "Gap"
+  },
+  "BLOCKER": {
+    "zh-CN": "阻断",
+    "en-US": "Blocker"
+  },
+  "WARNING": {
+    "zh-CN": "需关注",
+    "en-US": "Warning"
+  },
+  "INFO": {
+    "zh-CN": "提示",
+    "en-US": "Information"
+  }
+}

@@ -1,0 +1,15 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+HTTP_DIAGNOSTIC /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui/src/composables/chat/__tests__/useTeamRuns.test.ts http://localhost:3000/api/v1/teams/team-1/events ECONNRESET
+Error: socket hang up
+    at _destroy (node:_http_client:959:15)
+    at onSocketNT (node:_http_client:983:5)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+
+ Test Files  135 passed (135)
+      Tests  1020 passed (1020)
+   Start at  08:20:11
+   Duration  50.45s (transform 2.55s, setup 572ms, import 17.58s, tests 54.45s, environment 15.68s)

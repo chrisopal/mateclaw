@@ -146,6 +146,12 @@ JSON 返回 R<T> 的现有语义，Blob/ArrayBuffer 返回原字节；保持 sig
 | AQ-10 | 06/09 | 索引/性能/日志/依赖影响图 | 固定环境与数据量的前后指标 |
 | AQ-11 | 持续 | 新售前/投标/Delivery 消费已封口公共端口 | 每 PR 带 AQ/AC、基线与真实检查证据 |
 
+AQ-01b 的工程补充采用独立 READ_COMMITTED 短事务锁定项目行后，先核对候选终态与数据库中的 RUNNING 任务除终态字段外完全一致，再按持久快照锁定 actor、Workspace、成员、员工、模型、语义 graph、KB 和原始资料行。撤权先拿到锁时，结果接收在等待后复核新状态；结果先拿到锁时，撤权等结果事务结束。READ_COMMITTED 避免 MySQL 默认可重复读下，锁定读之后的普通复核仍看旧快照。数据库隔离不能消除 MyBatis SESSION 缓存：全部权威行锁成功后，清除当前事务共享 SqlSessionTemplate 的一级缓存，再做原有领域复核。graph 必须先于 KB/raw，与语义修订的父行锁顺序一致；KB 仍先于 raw。语义来源撤回原本就先锁 graph 行；员工 KB 绑定替换现改为事务内先锁员工行；KB 级联删除先锁 KB 再处理原始资料。H2 双事务/latch 覆盖用户、员工、原始资料、graph 修改。普通工具检查仍是短时复核，不持有模型调用期长事务。
+
+AQ-02 第一片让 Context 组装、结果复核和工具读取共用员工 KB 交集；有绑定行但均停用时，项目与通用 Wiki 可见性都不再退回全工作区，按 KB 名称查找也复核员工范围。以上只是工程行为证据，AC-06–08 的领域/QA 正式签收、其他授权路径、生产同构并发验证及 PostgreSQL 验证仍待完成（本机隔离 MySQL 8.0.46 的行锁/缓存切片已通过，见 2026-09-30 工程证据）；不能据此标记整个 AQ-01/02 已验收。
+
+2026-10-01 补充真实 runtime/代理事务切片：H2 与隔离 MySQL 8.0.46 全量 schema 的同一 15 项用例验证真实 PresalesEmployeeRuntime→宿主分派器→领域复核→service 代理路径。结果事务挂起调用者 SERIALIZABLE 事务并使用 READ_COMMITTED；调用者回滚不撤销已接纳结果。执行前及生成后的 actor/员工停用、模型 pin 变化、成员降权、取消/项目漂移拒收；Workspace/成员撤权在结果锁等待期间提交后仍拒收。AgentService 的员工读取替身转调真实 mapper，模型流/会话外发使用替身；该切片未验证 Agent 图执行器、异步协调器、历史/导出和真实模型质量，正式 AC 状态不自动升级。证据见 `evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md`。
+
 每个切片先刻画旧行为，再改最小职责，最后跑 dev 和适用测试。格式整理与业务修改拆开。共享 POM、权限接口、配置、Flyway 版本由一位整合者管理；并行只用于不争用文件的任务。
 
 ## 6. ADR 决策记录
@@ -172,6 +178,10 @@ JSON 返回 R<T> 的现有语义，Blob/ArrayBuffer 返回原字节；保持 sig
 
 背景：全局拦截器会重写 Workspace，现 helper 覆盖调用者 transform。决定：完整 config 组合并最终 pinWorkspace，JSON/二进制契约分离，页面丢弃过期响应。收益：工作区切换不串数据、上传下载兼容。代价：需转换顺序与多响应类型测试。排除：只改 headers（被拦截器覆盖）；每个 feature 复制 helper（持续漂移）。验证：AC-13–16。
 
+### ADR-AQ-006：结果接收与撤权共用权威行顺序
+
+背景：只锁售前项目行无法阻止身份、员工、模型和来源表在复核后并发变化。决定：结果接收使用独立 READ_COMMITTED 短事务，复用已有权威行的数据库锁；从持久活动任务读取锁定对象，宿主 `ProjectAuthorityFence` 按固定顺序锁行，再执行原有领域复核。新增来源治理状态由 graph 父行协调，员工 KB 绑定写入由员工父行协调。收益：无新表和方言专属触发器，模型调用不持锁。代价：短暂增加写入等待，所有新增的授权写入路径都必须沿用父行锁；大项目来源数量会影响锁数。排除：仅提高隔离级别（并发事务仍可能按相反于提交的顺序串行化）、仅重复读状态（无法封住提交窗口）、新增全局 epoch 表（迁移及所有写入接入成本过高）。验证：H2 双事务/latch 与员工 KB 交集回归；2026-09-30 增补真实 MyBatis 缓存复现与 graph→KB/raw 竞争回归，修复前失败，修复后在 H2/隔离 MySQL 8.0.46 通过。固定锁序为 actor→Workspace→成员→员工→模型→graph→KB→raw；全部锁成功后清除当前事务 MyBatis 一级缓存。新增测试仅验证行锁双顺序及 Workspace/成员撤权的 service 持久化路径，不代表完整 runtime、Spring 代理事务或生产同构验收。详见 `evidence/2026-09-30/AQ02_AUTHORITY_ACCEPTANCE.md`；独立 QA 与正式 AC 签收仍待执行。
+
 ## 7. 风险、失败模式与待评审输入
 
 | 风险/失败 | 处理 | 阶段门槛 |
@@ -187,3 +197,305 @@ JSON 返回 R<T> 的现有语义，Blob/ArrayBuffer 返回原字节；保持 sig
 | 现有未跟踪材料导致完整提交检查阻断 | 保留用户材料，未来在独立干净工作区组织提交；不 stash/reset/忽略源码凑通过 | 提交前 |
 
 评审需要明确：业务批准规则保持性；缺失正式规格和黄金样本；SLA/数据规模/恢复预算；独立审阅人和仓库管理启用安排。它们不阻碍本轮交付检查及可评审设计，但不能用文档自签替代 P0 完成。
+
+2026-10-02 AQ-02历史/成果切片复用宿主ProjectSourceAccess，当前材料和既有baseline/task来源受当前项目员工KB权限约束，实际raw归属不信任快照kbId。H2真实HTTP47项定向回归通过；无员工旧项目、批准政策和发布字节保持。冻结release独有来源/material解绑/员工重绑定及完整历史交集仍未验收，详见evidence/2026-10-02/AQ02_HISTORY_SOURCE_ACCEPTANCE.md。
+
+2026-10-02 冻结来源第二片：复核所有对象型release快照，包括候选；绑定员工项目保留当前KB绑定交集。命令/回放按当前employee授权响应副本，受限时返回已有summary+sourceAccessRestricted而不改回执；修复绑定后恢复完整响应。48项H2定向回归和限定独立审阅通过，受限UI/多方言/并发/原执行pin仍待验收；见evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md。
+
+2026-10-02 受限响应UI：明确sourceAccessRestricted提示并禁用生成，保留授权绑定修复，清理来源编辑/详情/预览及迟到下载；实际403轮询丢弃旧数据。27项售前组件/状态回归、SIMULATED真实组件浏览器绑定修复通过，浏览器台账INCOMPLETE。GET403后的授权元数据/修复读取契约、真实角色/QA继续待设计验收；见evidence/2026-10-02/AQ02_RESTRICTED_UI_ACCEPTANCE.md。
+
+2026-10-02 AQ-02 安全修复读取：member 专用 repair-context 采用显式元数据白名单、空来源集合与不透明绑定 ID；只允许严格绑定/解绑/agentId-only 替换绕过旧来源复核，新目标授权、CAS、归档、回执保持。UI 在真实403后验证最小契约并清除来源状态。H2定向26项与UI35项通过，独立安全审阅无阻断；SIMULATED浏览器台账INCOMPLETE，正式QA不升级。见 `evidence/2026-10-02/AQ02_REPAIR_CONTEXT_ACCEPTANCE.md`。
+
+### ADR-AQ-007：来源授权策略与领域只读事实端口（Proposed，已实施工程切片）
+
+2026-10-02：PresalesService保留用例事务与旧错误适配，PresalesSourceAuthorization负责材料/历史/冻结发布和digest复核；Wiki/Semantic公共只读服务封装自身repository，不再由售前直接查询外域表。读取事实不授予成员或员工权限，调用者先完成真实主体和范围授权。治理读端口不随semantic功能开关移除，保留关闭模块后的历史撤回拒绝。代价是两个明确读契约与既有异常兼容适配；拒绝捕获快照的提取端口、业务integration中藏SQL、基础权限服务承担内容读取或一次性整聚合迁移。H2原50/新21共71项及独立增量安全审核通过；正式QA/多方言仍待签收。见 `evidence/2026-10-02/AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md`。
+
+### ADR-AQ-008：宿主主体与无缓存 Workspace 基础入口（Proposed）
+
+2026-10-02：ActorResolver/WorkspaceAccessService复用AuthService与原Mapper；售前/投标/语义保留解析、错误和领域批准政策，不借用语义内部身份类，不使用60秒成员缓存或归一化capability等级。投标明确收紧anonymous哨兵和批准第二次actor/workspace失效拒绝，不增加允许角色。H2/MyBatis、真实JWT/HTTP/事务与工具身份85项工程回归通过；测试夹具只增加宿主Bean，原断言保留。代价是明确的host事实接口与业务错误适配；拒绝通用批准政策、缓存授权或一次性全聚合迁移。正式QA/多方言仍待签收。见evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md。
+
+### ADR-AQ-009：售前工作台单循环轮询生命周期（Proposed）
+
+2026-10-02：AQ-09 页面拆分先处理已复现的轮询竞态，关联 AQ-04/AC-13 及 AQ-01/AC-21 工程证据。域内组合函数管理单实例/项目串行 GET，读取前后校验循环身份、取消和范围，拒绝旧版本及受限循环内的来源恢复；页面保留严格授权/修复读取和命令策略。保留1秒/600次、按全项目运行任务继续，成功命令或重载替换循环，卸载释放资源。拒绝通用框架/全局store及每个operation重复全项目GET。三个组件红例变绿，新增合同后50项工程回归通过；真实浏览器、服务端重启、其余编辑/预览路径与正式QA未完成。见evidence/2026-10-02/AQ09_POLLING_LIFECYCLE_ACCEPTANCE.md。
+
+### ADR-AQ-010：来源查看选择与命令确认范围（Proposed）
+
+2026-10-02：来源查看交给域内组合函数，选择/关闭/限制/卸载固定结果生命周期及URL释放；页面同步scope generation与editor session隔离旧确认、命令及选项。归档/发布确认固定原项目与版本，旧mutation不关闭新编辑器、写旧错误或解除新busy；较旧version按原冲突流程保留草稿。当前来源修复政策、回执和409保持；拒绝只有ID比较、确认后重取目标或通用请求框架。代价是失效确认需重发、本地拒收不取消已发送服务端动作。真实RouterView/Workspace夹具与77项工程回归及限定独立审核通过，业务环境与正式QA仍待签收。见evidence/2026-10-02/AQ09_VIEW_CONFIRMATION_ACCEPTANCE.md。
+
+### ADR-AQ-011：公共 Workspace 请求完整配置边界（Proposed）
+
+2026-10-02：宿主workspaceRequest选择调用者transform（含空列表）或默认转换，最后固定捕获Workspace并保留config.signal/独立signal、参数、headers/this和响应契约；三域各自处理envelope/errors，不跨借语义私有helper。直接FormData上传，传输层生成boundary；拒绝只设headers、复制helper或全局拦截器改动。四个旧实现红例变绿，七文件26项与实际loopback multipart/binary/取消工程回归通过；独立增量审核无阻断，无新依赖/配置变化。代价是自定义transform的合法序列化由调用者负责，公共捕获范围不替代服务端授权，正式浏览器/真实409并发/QA未完成。AR-003封口另需控制面审查。见evidence/2026-10-02/AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md。
+
+### ADR-AQ-012：编辑业务规则与提交协调分离（Proposed）
+
+2026-10-02：域内纯editorSubmission拥有11类初始化、历史副本/基线响应、校验和精确action/payload，返回typed invalid/project/command；页面保留界面、翻译、授权、scope/session、CAS/receipt及异步执行。拒绝通用表单框架、整页store或mapper内调用API/授予权限。project receipt仍使用原完整data，metadata只维持原wire白名单；受限修复和ANSWERED来源规则保持。原49项刻画前后通过、最终119项与独立工程审核无阻断，页面减少129行但整体结构尚未完成。代价是业务规则与显示模板需合同协同，正式浏览器/角色/QA待签收。见evidence/2026-10-02/AQ09_EDITOR_RULES_ACCEPTANCE.md。
+
+### ADR-AQ-013：方案与成果展示组件发出意图，页面保留执行权（Proposed）
+
+背景：工作台方案/评审表格同时承载覆盖计算、比较和用例调用，父scoped样式在组件拆分后不能隐式视为跨多根继承。采用两个完整职责组件，typed intent连接原用例；比较值仍由页面持有，原状态重置不变。仅共享原展示样式源并以scoped src复用，专有方案CSS归属方案组件。不引入通用事件框架或新应用状态层。
+
+约束/权衡：减少页面466行，但完整用例协调和编辑生命周期仍未拆；组件可用状态只是展示，不扩大批准或来源权限。原98项CSS合同/三组件scoped编译、旧实现53项和迁移后123项回归、模型/语言交互及独立工程审阅证明该边界；浏览器/业务QA与维护人签收保持未完成。最终提交证据见AQ09_OUTPUT_VIEWS_ACCEPTANCE及PR5。
+
+### ADR-AQ-014：编辑会话封装代次，页面保持提交用例（Proposed）
+
+背景：编辑草稿、只读选项、discard与save共用裸generation，工作台无法单独说明选项/确认生命周期。选用本域usePresalesEditorSession封装draft/options/baseline watcher/关闭与卸载，提供captureSession有效性predicate，复用原页面scope。页面保留guard注册、确认文案和create/update/command/CAS/receipt/409，不把predicate升级为授权。
+
+取舍：新增typed组合函数194行、页面减111行，完整用例和编辑模板仍待分离；拒绝把整页移动成god composable或第二套scope框架。同步撤权和employee/material repair保持；disposed拒绝卸载后capture和选项。旧55项与最终142项工程回归/独立审阅证明该边界，真实角色/浏览器/并发/重启和正式签收不由本片替代。证据见AQ09_EDITOR_SESSION_ACCEPTANCE及PR5。
+
+### ADR-AQ-015：字段组件共享原编辑草稿，提交权保留页面（Proposed）
+
+背景：11类编辑字段仍与页面执行协调混合，project/employee重复员工选择模板。选用三个本域typed字段组Assignment/Discovery/Output，required named form model复用原session draft，来源/statement/管理导航仅发意图；页面保留原dialog/el-form、批准/授权、scope/session/CAS/receipt/409。共享原scoped字段CSS，不创建通用表单框架、第二套store或执行权限。
+
+取舍：页面减少430行，字段组104/242/161行，完整用例及项目/任务展示仍待拆。原55项字节保持，旧实现59项刻画、迁移后146项工程回归及98项CSS合同/六组件编译、独立审阅证明该边界；真实两主题/窄屏/角色/并发/重启与正式QA仍NOT_RUN。回退仅恢复字段接入，无数据库操作。证据见AQ09_EDITOR_FIELDS_ACCEPTANCE及PR5。
+
+### ADR-AQ-016：概览任务展示发出typed意图，保留宿主执行与样式归属（Proposed）
+
+背景：工作台概览混合context/baseline/任务结果展示与路由、取消、采纳、证据/预览执行，前序CSS提取未将baseline/revision规则绑定overview作用域。选用本域PresalesOverview消费原typed DTO/label事实，emit窄意图，页面沿用原执行与scope/授权/CAS/receipt守卫；任务样式归component，共享原common/solution样式并修复缺失scoped引用。
+
+取舍：页面减少186行、组件184行，不引入通用任务框架、store或新的执行权；article/table既有fallback差异保持。旧62项刻画/迁移149项工程回归、98源合同/七组件编译及实际概览规则归属证明该边界，不能据此声称像素不变或真实主题/角色/并发QA完成。回退无数据库操作但会恢复旧样式缺口；证据见AQ09_OVERVIEW_ACCEPTANCE及PR5。
+
+### ADR-AQ-017：项目持久化只返回SQL事实，事务与授权留在用例服务（Proposed）
+
+背景：PresalesService直接承载项目body、回执和修订SQL，锁/Workspace/CAS与授权/业务交错。选用本域PresalesProjectRepository封装七类原SQL，string ID/raw JSON及不可变row/receipt；Service保留成员/来源/修复政策、public事务、encoding、错误/版本判断、record/receipt时序和时间。没有DAO新事务/缓存/JSON策略或第二套批准权。
+
+取舍：服务减少31行、仓储111行，artifact SQL和查询摘要/命令业务仍待拆，不把全量读取当分页或V2迁移。旧53项/最终59项真实H2+HTTP+Spring/双连接锁/回滚证明本片；多方言/生产重启/独立对象并发/正式QA仍未完成。拒绝通用JSON仓库和把整聚合移动到DAO。回退无数据库操作；证据见AQ03_PROJECT_STORAGE_ACCEPTANCE及PR5。
+
+
+### ADR-AQ-018：成果表使用同一领域仓储，渲染与授权仍由调用方负责（Proposed）
+
+背景：项目service与PPT compiler重复成果表写入，读SQL夹在发布/来源政策中。决定：PresalesArtifactRepository接四类原SQL，使用string三key及raw digest/base64事实；两个服务不再注入JdbcTemplate。public service事务及PPT原TransactionTemplate不变，授权/摘要/404/409/cardinality/冻结manifest/handoff仍在原调用方。仓储无条件安装与原PresentationService一致，避免关闭售前功能时Bean装配失败。
+
+取舍：Service1431→1401、仓储58行；不把摘要校验或发布政策藏进通用blob工具，不渲染已发布字节，也不引入DAO独立事务。33项旧实现刻画、66项迁移后H2/HTTP合同、实际已安装compiler1项及限定独立审阅验证边界；查询摘要/命令、SQL分页、V2单写迁移/黄金样本、多方言/生产重启/正式QA仍未闭合。回退只恢复DI/原SQL，无数据库操作。证据见AQ03_ARTIFACT_STORAGE_ACCEPTANCE及PR5。
+
+### ADR-AQ-019：列表投影封装规则，服务保持惰性读取与授权（Proposed）
+
+背景：Service混合列表授权/校验与筛选/分页/摘要/stage。选用本域package-private PresalesProjectListing和内部Criteria，消费Stream解码结果及服务原来源inventory；服务保持viewer→pagination→Workspace查询→decode顺序。深副本/历史扩展/string IDs/原Page和阶段副作用保持，命令和受限视图复用同一stage。
+
+取舍：Service1401→1344、投影85行，不新增通用查询框架、DTO wire或SQL分页。拒绝eager toList：会改变早期stage错误与后续decode错误顺序，并保留全部完整body。旧15/最终58项HTTP/H2/事务与纯投影合同、限定独立审阅验证边界；完整DTO/命令、SQL分页、V2迁移、多方言/浏览器/正式QA待完成。回退无数据库操作；证据见AQ05_PROJECT_LISTING_ACCEPTANCE及PR5。
+
+### ADR-AQ-020：方案政策纯模块与项目项修订保持用例错误适配（Proposed）
+
+背景：Service同时拥有草稿验证/来源引用/精确基线/覆盖规则和用例事务/批准。选用本域纯PresalesSolutionPolicy.prepare/coverage供人工草稿、已复核员工结果、发布检查复用；PresalesProjectItems负责原JSON项find/save/text/enum及不可变修订。模块只消费已授权事实，不读取来源或获得持久化/批准权限；Service继续授权/锁/CAS/回执及releaseGate，公开find不变。
+
+取舍：Service1344→1248，policy140/items75行；新增内部Rejected由Service映射原SemanticApiException，避免新模块跨借语义私有异常并保持原Java捕获契约。拒绝整服务平移、通用命令框架或eager policy改变校验顺序。旧28/最终67项真实HTTP/H2/事务及纯规则合同、限定独立审阅验证兼容；错误拒绝不写库。原ObjectNode wire/未知字段保留，完整DTO/SQL分页/V2/多方言/浏览器/正式QA仍待完成。回退恢复内联规则无数据库操作；证据见AQ05_SOLUTION_POLICY_ACCEPTANCE及PR5。
+
+### ADR-AQ-021：派生断言签名使用排序不可变集合稳定回执wire（Proposed）
+
+完整门禁lojyxc1n复现旧SemanticM2IntegrationTest accepted与operation replay整JSON不相等，唯一差异为signatureIris数组顺序。AssertionPayload的Set.copyOf允许构造与wire.decode结果遍历不同；成员相等不能保证幂等响应表示稳定。复用既有OntologyAxiomDescriptor的unmodifiableSortedSet(TreeSet)惯例，只调整派生签名排序，不改functionalSyntax权威文本、Set成员/equality或授权/事务。
+
+影响/取舍：所有新构造/解码AssertionPayload的签名数组按IRI词法序输出；这是明确的wire确定性修复，不声称该数组原顺序保持。旧持久化回执/快照/批准成果字节不写回或重新渲染。拒绝删除旧整响应断言、只重跑随机绿灯或全局Jackson配置变更。新3项旧实现2红例，修复后核心12/OWL11/服务端74共97项通过，包含旧7项语义M2及售前67项；完整候选重新门禁。回退恢复已复现非确定性问题，正式幂等/迁移/多方言签收仍未完成。证据见AQ05_ASSERTION_SIGNATURE_PLAN和方案政策验收/manifest。
+
+### ADR-AQ-022：售前查询使用固定 DTO（Proposed）
+
+能力信息改为四个明确 boolean；来源使用知识库基础记录/启用图记录两种稳定形状，以保持缺省字段与显式 null 的差异；可信事实采用字符串 ID、int revision、原标签与证据列表快照。Controller 明确相同返回类型，应用服务仍先执行 Workspace/项目/来源权限检查，再调用现有公开语义端口。200/500 上限、图去重、顺序与原错误传播保持。
+
+拒绝开放 Map/ObjectNode 拼装及统一 NON_NULL：前者丢失类型边界，后者改变启用图的 null wire。证据列表复制保留 null 元素，避免序列化时看到上游后续修改。Java 返回类型改变但仓库消费者只有 Controller；HTTP形状由旧13/最终66项合同/事务回归保护。没有新增依赖、SQL、迁移或事务。完整项目/命令 DTO、SQL分页、V2、真实图/多方言/浏览器/正式 QA仍待完成。回退恢复三查询与DTO，无数据库操作。证据见 AQ05_QUERY_DTO_ACCEPTANCE。
+
+### ADR-AQ-023：命令分类类型化且保持原wire（Proposed）
+
+16个action建立内部CommandKind，CommandAction保留raw，未知为UNKNOWN+原文；null按原业务判断映射空字符串，HTTP字段仍保留null。Command四个record组件不变，package-private解析方法@JsonIgnore。Service批准角色分组、repair白名单、员工任务限定和业务switch共享kind；原raw用于错误/audit，原Command用于request hash/receipt。
+
+拒绝HTTP直接enum绑定或trim/uppercase：这些会提前改变授权、来源、重放/CAS和归档检查的错误顺序，也会改变operation同键请求。默认拒绝保留，将来有枚举但无handler也不能无操作地更新version成功。分类不授予权限，角色/来源/fence/事务仍在应用服务。旧12/最终72项真实HTTP/H2/事务与纯wire合同、限定独立审阅保护这一边界；无新依赖/SQL/迁移/Bean。完整payload/项目DTO、SQL分页、V2/多方言/浏览器/正式QA仍待完成。回退仅恢复字符串分类与DTO，证据见AQ05_COMMAND_KIND_ACCEPTANCE。
+
+### ADR-AQ-024：列表摘要与完整详情分离并接入宿主概览文案（Proposed）
+
+列表wire已删除12个业务集合，不能用完整PresalesProject声明掩盖未加载数据。Summary直接声明原共享元数据，Project继承并要求原集合；列表/portfolio/dashboard只依赖Summary，未知历史扩展和字符串ID保留。拒绝补空明细或保留多余Metadata空继承层：前者误导已加载，后者被lint拒绝且无独立职责。
+
+概览格式化触发原内联双语存量指纹变化，按现有规则将20对原文案接入presalesMessages/useI18n并跟随宿主locale，不改门禁或baseline。原7/最终155合同，完整UI852与两构建通过，独立限定审阅无问题；不改变来源授权/事务/发布或HTTP wire。回退只影响源码，无数据库操作。完整DTO/runtime unknown验证、SQL/V2及真实浏览器/业务QA仍待完成；证据见AQ05_PROJECT_SUMMARY_ACCEPTANCE。
+
+### ADR-AQ-025：前端变更请求使用固定意图契约（Proposed）
+
+object输入隐藏漏CAS/operation和动作拼写。五种变更采用明确VersionedMutation/ProjectWrite/Create/Command/Generate/Cancel，Create只允许0、取消按原Task接口仅operationId，ListQuery只声明原六个参数；16action与S1-S8同现有后端，编辑映射和工作台共享类型。部分metadata和unknown payload保留原语义，服务端领域校验/来源/事务/结果fence继续权威。
+
+拒绝运行时规范化/直接payload enum转换：会改变原wire、幂等输入及错误顺序。create显式0保持原分支属性顺序与receipt原输入，未动授权/请求helper或旧测试。旧24/最终178合同与完整UI工具链通过，限定独立审阅0缺陷；类型不是完整payload schema或授权。回退恢复类型/创建分支源码，无数据库操作；完整DTO/unknown校验、SQL/V2及真实浏览器/业务QA仍待完成，证据见AQ05_MUTATION_REQUEST_ACCEPTANCE。
+
+### ADR-AQ-026：项目响应在售前 API 边界运行时解码（Proposed）
+
+泛型声明不能证明响应身份或集合结构。详情/五类变更、列表及修复从 unknown 解码；复用 Workspace request，校验已有项目 ID 与捕获 Workspace。返回合法原对象，保留历史状态及 opaque context/sourceSnapshot/handoffSnapshot；nested record 不伪造实体 ID。修复依照后端16个 metadata、12个空集合和 id/role 白名单，不能成为授权凭据。分页保留真实 long 字符串，在安全整数验证后供工作台转换。
+
+拒绝归一化或补空集合：会隐藏畸形数据并改变历史 payload。已声明 optional 字段的错误类型/null 拒绝是明确新增准入限制，真实存量数据尚未抽样；独立 statements nullable evidence 契约未在本片冒充已完成。原26正例、新负例旧实现25失败、最终37响应/215售前/912全UI通过；独立限定审阅无剩余问题。完整检查因主机990秒维护休眠出现真实失败，保留日志并仅对检查进程临时保活后重跑成功，未弱化断言/超时/门禁。回退只涉及源码，无迁移。正式AC、完整DTO、SQL/V2、浏览器/live model和远端强制CI仍待完成；证据见AQ05_PROJECT_RESPONSE_ACCEPTANCE。
+
+### ADR-AQ-027：查询投影独立 DTO 并在用户选择时排除空证据（Proposed）
+
+成员/来源/可信事实/员工/能力从unknown按各自字段解码，复用已有售前校验原语与Workspace请求。查询不继承PresalesRecord：真实来源name/图修订与成员姓名可空，事实evidenceIds允许null列表/成员；元数据、缺省、字符串ID、扩展及原对象保持。成员Workspace比对只证明响应一致性，授权仍由服务器完成。来源label用既有Element Plus值回退，不新增业务占位数据。
+
+拒绝宽化所有项目记录或改写raw事实/快照。用户选择事实时只排除null证据项，保留有效ID顺序/重复和精确事实修订；全列表null仍沿用空草稿行为。这是显式修复旧UI把null复制为ID的行为，不在加载或历史回读时迁移数据。旧API27拒绝断言和旧编辑1条断言失败，最终42查询/19编辑/259售前/956全UI通过，独立限定复核无发现。来源/员工权限、事务/CAS/receipt、取消与迟到结果不变；Java按frontend-only规则不适用。完整领域DTO/UnknownStatus/SQL/V2、真实浏览器/存量/模型/正式QA与远端强制CI仍待完成，证据见AQ05_QUERY_RESPONSE_ACCEPTANCE。回退只影响本批查询类型/解码与选择投影，无数据库操作。
+
+### ADR-AQ-028：历史状态使用展示判别联合且不改领域权威（Proposed）
+
+工作台原Record<string,双语>在每次调用构造混合阶段/状态/来源/范围字典，未知raw无法单独识别，原型属性名还可能误判。采用本域纯KnownStatus/UnknownStatus{raw}/MissingStatus，finite KnownStatusValue从集中i18n原47标签key推导；Object.hasOwn分类，保留大小写/空格。页面所有原组件仍使用同一stateLabel回调，不建立新的执行/审批通道。
+
+取舍：原47对文案保持，接宿主locale；未知非空值显式标未知状态及原文，empty/undefined仍 —。这是明确展示行为变化，raw响应、冻结成果、request/receipt和已有批准/过滤/取消判断不改。词表混合原展示值，不作为任何业务对象的领域allowlist，完整领域DTO/对象状态仍须各自契约。拒绝Known|string、trim/uppercase/未知变DRAFT或将展示分类用于批准。旧62项/新增后旧实现2红例；59纯合同+3新增Vue/完整售前321及全UI1018、精确门禁和独立限定审阅验证本片。LSP不可用、日志socket诊断未定位；实际vue-tsc通过和门禁exit0不冒充这些问题已修复。没有依赖/SQL/迁移/事务变化，回退只恢复本批源码。真实浏览器/历史数据/模型/多方言/V2/独立维护者QA和远端requiredCI仍待完成；证据见AQ05_STATUS_BOUNDARY_ACCEPTANCE。
+
+
+## ADR-AQ-029（Proposed）：传输合同环境与分页订阅夹具
+
+非DOM真实HTTP合同使用原生Node网络及最小Axios browser FormData调用方事实；原multipart/binary/cancel断言保留并加入真实409/意外断连。拒绝消音、去掉取消或修改生产helper。完整进程stderr回归覆盖窄spy不能捕获的HappyDOM晚到reset。第一源码完整门禁仍有分页单测意外SSE，临时诊断定位后，文件局部订阅fixture保留默认分页API合同并断言无外发/释放，独立SSE协议合同继续保留。其余12项只固定格式，源后缀/独立AST验证保持。
+
+覆盖取舍：Node环境不证明浏览器CORS；分页fixture不证明真实SSE网络，HTTP409不证明真实并发CAS，取消断连不证明领域写入fence。第一boundary失败、子进程红例、TS2304、第二fetch红例全部保留；最终1020全UI/Node/两构建及限定独立复核通过且全日志socket诊断消失。无生产代码/runner配置/依赖/旧迁移变更；测试环境/fixture仍须维护者控制面批准，正式46AC不升级。见evidence/2026-10-03/AQ04_TRANSPORT_DIAGNOSTIC_ACCEPTANCE.md及两份manifest。回退恢复测试源码，不操作数据。
+
+
+## ADR-AQ-030（Proposed）：逐动作原始写载荷与编辑意图
+
+16命令通过域内公开Payloads映射生成Intent判别联合；VersionedMutation组合CAS/operationId，编辑command分支和页面接受同一完整intent，剥离UI元数据后发送。拒绝继续使用action与Record并列，也不引入通用schema框架/新依赖。已声明ID保持string，嵌套字段/引用数组/版本有类型，模型result/contextSnapshot/presentation保留unknown。写字段optional和扩展unknown保留原部分请求、原始状态文本及服务器授权→source→receipt→CAS→业务校验顺序；前端类型不授予权限或批准。
+
+原125回归保持、16动作JSON逐字节合同及真实编译红例→绿例，独立description字段遗漏发现已关闭。精确源码门禁完整1037/Node/两主题构建通过。这里只修复原始写契约及调用关系，不声明完整领域DTO/status/runtime schema、SQL分页、V2迁移或真实浏览器验收完成。正式46AC保持NOT_RUN，维护者控制面/业务QA仍待。证据见evidence/2026-10-03/AQ05_COMMAND_PAYLOAD_ACCEPTANCE.md与command-payload-test-results.json。回退恢复源码，无持久化操作。
+
+
+## ADR-AQ-031（Proposed）：领域原始响应DTO与handoff准入
+
+域内纯类型模块区分Requirement/Clarification/SolutionRevision/GenerationTask/Artifact/Handoff及相关嵌套形状，旧API名称再导出。当前wire保留稀疏历史optional、raw状态、字符串ID、nullable coverage/基线事实元数据和opaque模型/冻结快照；拒绝从写payload推断全历史必填或用asText式服务检查假称节点规范化。现有迭代decoder检查新增已声明字段及handoff v1 scope/项目/核心结构，reference语境两个WeakSet避免nullable例外泛化到普通记录。发布sourceRefs混合基线对象与澄清原节点，保留unknown[]；独立发现纯对象限制后真实红例→修复→关闭。无通用schema框架/新依赖/生产数据变化，不由类型/解析替代授权、checksum或AI审批。
+
+56新合同、394售前、精确1093全UI/Node/两构建与独立限定复核通过；旧取消/撤权断言保留，fixture只补真实信封，组件只删错误类型注解。完整领域状态/error/server schema、SQL/V2迁移、生产历史抽样、真实浏览器/业务QA/维护者/required远端CI仍待，正式46AC保持NOT_RUN。证据见evidence/2026-10-03/AQ05_DOMAIN_DTO_ACCEPTANCE.md及domain-dto-test-results.json。回退仅恢复客户端类型/准入，不重写持久化/冻结字节。
+
+
+## ADR-AQ-032 (Proposed): validate declared manual command fields after authority and replay
+
+Actual manual commands previously persisted coercive JSON nodes that client DTO admission cannot read. Choose a domain-local shape validator for the existing16 action branches; Service owns its placement after role/source/repair/replay/CAS/archive and before mutation, maps the existing Rejected error, and preserves its transaction. Missing fields and business policy remain in the current domain rules. No general schema framework/dependency, controller validation or database migration is introduced.
+
+New malformed field types receive400 INVALID_REQUEST and fixed field paths. Defaulted enum null, raw string revisions, extensions and original JSON order survive. Manual result/contextSnapshot top-level object admission is explicit, internals remain opaque; pinned employeeResult bypasses this manual schema. Solution presentation/sourceRefs retain policy422 and existing ordering. Old exact receipts replay before validation, persisted/frozen data is not rewritten. Other malformed multiple-field errors can become shape-first. Reject DTO-constructor validation because it changes authority/replay order; reject normalization because it changes hash/wire/history.
+
+64 new contracts and103 targeted regression tests, exact full Java reactor gates and bounded independent static review provide engineering evidence. This is declared write schema, not full server DTO/domain/model acceptance; all46 formal AC, maintainer/QA/required CI, SQL/V2/migration/browser/history remain pending. Source-only rollback has no database steps. See evidence/2026-10-03/AQ05_COMMAND_SCHEMA_ACCEPTANCE.md and command-schema-test-results.json.
+
+
+## ADR-AQ-033: Reject obsolete employee terminals and centralize coordinator SQL facts (Proposed)
+
+Context: actual H2 and Spring regressions show FAILED could overwrite completed/replaced runs, fallback CAS reread could resurrect old pins/snapshot, pending cancellation was ignored and obsolete RUNNING result retained. Success already had a strict transactional fence; weakening it to a shared permissive identity would be unsafe.
+
+Decision: coordinator checks full original accepted RUNNING task before execution, terminal submission and every fallback reread; cancellation reservations block observed failure writes. Employee service FAILED checks the durable RUNNING envelope while admitting only diagnostic output differences; SUCCEEDED preserves the original strict three-field comparison and fence order. Move scoped runtime row/recovery list/body-CAS facts to existing ProjectRow repository, retain JSON/policy/retries at coordinator.
+
+Rejected: taskId/project-version-only identity because it cannot distinguish replacement pins/snapshot/unknown envelope. A new generic runtime policy or repository-owned recovery transitions would duplicate domain responsibility. Weakening success comparison to failure diagnostics would widen accepted success input.
+
+Tradeoffs: no-actor matching-run failure remains an internal failure-only CAS; V1 project-version drift and all-row recovery scan persist pending independent V2 objects/dependencies/projection. Single-process reservations are not distributed attempt fencing or full cancellation/billing proof. No migration, authority expansion, dependencies or control-plane changes.
+
+Evidence: evidence/2026-10-03/AQ21_TERMINAL_RECEPTION_ACCEPTANCE.md and terminal-reception-test-results.json; actual red63/33 failures, guard63 and final119 pass, exact source full gates and independent technical COMMENT. Stakeholder/maintainer/QA approval remains pending. Rollback restores bounded source/tests; no database action.
+
+
+## ADR-AQ-034: Keep SQL listing facts rebuildable and tied to durable project writes (Proposed)
+
+Existing workspace lists materialized every JSON project/history before paging. Keep one authoritative project table and append derived contract/version, delimiter-bounded UTF-16 search/filter keys, exact summary JSON and safe fault facts. Repository takes typed facts, one statement binds count/first fault/page; Service keeps authorization, validation and existing wire. Fixed V1 policy is shared by all writers and discovered V218 Java migration with bytecode-closure checksum. No independent V2 object table is invented without its authoritative spec.
+
+Reject SQL collation/JSON normalization because it changes Java Locale.ROOT contains/equals and malformed-row order; reject full-body fallback because it hides missing projections and cost. Use LONGTEXT on MySQL for preserved unknown metadata and fivefold keys. Keep malformed decode global to scope, stage/summary faults eligible only at legacy filter points, outer and inner DB name/id ordering, long offset and non-null row sentinel.
+
+Real MySQL exposed isolated surrogate transport corruption. Escape only isolated UTF-16 units in new body/revision/receipt/summary JSON; preserve valid Unicode, normal bytes, old data and old request hashes. The pre-existing UTF-8 hash collision requires a separate versioned replay design. Backfill CAS is not distributed writer fencing, same-version unauthorized SQL cannot be detected, 100-row batches do not bound whole transaction locks, and validate=false profiles do not enforce checksum. Current DB-001/DB-002 identify only SQL; Java entries and the frozen closure need independently reviewed control-plane protection. Compiler/Jackson/JDK upgrades require new compatibility evidence and future policy changes a new version/migration.
+
+Evidence: evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md and listing-projection-test-results.json. H2 full gates, real MySQL29 regressions and mysqldump/restore205 rows are engineering evidence. Kingbase/production/V2/maintainer/stakeholder/QA/required CI remain pending; all46 formal AC NOT_RUN. No production deployment or reverse migration is authorized here; mixed legacy writers and direct rollback after new writes are blocked until separately verified.
+
+
+## ADR-AQ-035: Freeze published Java migration sources with base-owned declarations (Proposed)
+
+DB-001/002 previously protected SQL only. Extend their existing hard invariants to Java entries; require three same-name dialect entries. Freeze the three V218 wrappers and shared BackfillV1/ProjectionV1 source files (including nested records) in an explicit version-1 SHA-256 manifest. Compare both base and candidate declarations; deletion, rehashing changed sources and first-time freezing of simultaneously rewritten existing sources fail. Source snapshots preserve UTF-8 CRLF bytes consistently with Git blobs.
+
+Reject a target-only mutable digest list because it allows changing both algorithm and digest. Reject automatic regex dependency discovery as incomplete authority over a Java closure. No policy/baseline relaxation, automatic waiver, dependency addition or old migration change. New semantics require new source/migration versions; complete closure and JDK/compiler/Jackson compatibility remain independent-review obligations. This is source protection, not runtime Flyway validation or database acceptance.
+
+Evidence: evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md and java-migration-guard-results.json. Genuine red19/35 failures; green91; 18 published-source scenarios/36 actual CLI checks; independent technical COMMENT with ineffective LSP and missing ast-grep explicitly unrun. Full staged/hook/push evidence is recorded after execution. Maintainer approval, trusted-base installation, required CI, ArchUnit/zero-tolerance and all46 formal AC remain pending. Revert this installation only through reviewed control-plane change; never modify historical algorithms or digests to conceal a violation.
+
+## ADR-AQ-036：项目列表由独立查询应用服务负责（Proposed）
+
+大型PresalesService同时承载写事务和列表应用流程。将list完整移入本域PresalesProjectQueryService，Controller直接调用，写服务与查询服务无相互依赖。复用现有Access、ProjectRepository和ObjectMapper；授权、分页、故障映射属于用例，SQL属于仓储。原读取没有新增事务，保持单SQL一致性快照及writer原子投影更新。
+
+拒绝仅增加转发wrapper、Controller直接读取Repository或创建通用查询框架。列表投影有已验证的未知扩展/null/类型保留约束，且V218/ProjectionV1属于冻结迁移闭包，因此本片不强行改成固定字段DTO；完整读DTO需版本化兼容/历史迁移设计后继续实施。与已完成的Employee等固定查询DTO区别必须保留，不能用R<Page>声称域模型已强类型化。
+
+取舍：大型Service减少43行，新服务76行与一个bean，复制原小型解码异常包装以维持清晰依赖。旧104/104、新52类598项（597通过/1既有PPTskip）、原HTTP/H2与事务/SQL影子合同及独立技术审阅验证此切片。正式AC、MySQL/Kingbase本轮、全UI/真实环境、维护人批准与remote requiredCI仍开放。证据见evidence/2026-10-05/AQ05_LIST_QUERY_ACCEPTANCE.md；回退仅恢复源码接线，无数据操作。
+
+门禁实际捕获AR-004后，新查询服务不再导入语义私有异常；分页使用既有PresalesRejected，HTTP Advice新增同形状映射。原Access/旧Service的SemanticApiException兼容路径保留。直接Java非法分页类型变化已在合同中明确，HTTP状态/码/消息保持；7新HTTP合同从实际RED到GREEN。失败报告zs3tnns3保留，未改规则或基线。
+
+## ADR-AQ-037：工作台提交会话与成果下载拥有各自异步生命周期（Proposed）
+
+PresalesWorkbench同时处理路由/布局与写请求、确认对话框和下载。将command/save/approve/archive完整移入本域usePresalesMutationSession，将file/handoff移入usePresalesDownloads；页面不再保留原实现或请求转发wrapper。复用已有API、submission转换、错误归类，作用域代次/receipt/唯一saving锁/版本接纳仍来自页面；editor管理草稿身份，execution session管理员工执行。服务端仍是授权、事务、版本和发布权威。
+
+批准/归档的ElMessageBox继续直接由本域提交模块使用，避免仅为单个UI库加转发适配器；导航与重载以回调提供。下载模块合并DOM/URL释放代码，但JSON和二进制API保持各自契约。显式依赖比内联代码多，换取可单独验证的完整用例；拒绝整页god composable、全局store、第二份项目/权限缓存或跨feature文件服务。模块释放后拒绝保留回调再次发请求，晚到结果仍检查原scope/项目身份。
+
+页面1638→1461行；提交模块213行、下载模块86行，源码总行数增加122行（主要为显式依赖与生命周期保护），不能以页面行数下降宣称系统整体更短。模板/style原字节保持，无新依赖/后端/迁移/协议。两项独立审核发现已处理：测试DOM递归mock改为anchor点击观察；补create/update等待重载/导航期间已解锁合同。技术验证与限制见evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md。
+
+本决定实现已作工程验证，但正式业务/维护人签收仍未完成。回退只恢复本片before页面/测试并删除两个新增模块，保留原查询/编辑/执行拆分与摘要修复；无数据库操作。
+
+## ADR-AQ-038：发布前实时事实检查属于独立领域策略（Proposed）
+
+发布与fit-gap共享的模块/图谱/证据核验原在PresalesService，与事务和文件写入耦合。将其移入包内PresalesReleaseAuthorization，公开三个具体域操作并复用SolutionPolicy与SourceAuthorization。Service保留角色检查、幂等与CAS、事务、状态和旧异常适配；策略不依赖Service/Controller，不写库，不缓存授权结果。
+
+保持requireEnabled只检查semantic/graph/statement的既有契约及逐项短路顺序；query provider仍在实际证据访问时需要。拒绝额外可用性前置条件、回调式Service访问和通用规则引擎，以免改变旧错误优先级或增加隐式依赖。未新增bean/依赖/迁移；新模块94行，Service减少50行，总生产代码增加44行。工程证据见evidence/2026-10-06/AQ05_RELEASE_AUTHORIZATION_ACCEPTANCE.md；不把即时检查声称为跨实例原子锁或业务验收。
+
+原110合同前后通过、新8直接测试及最终721项（720通过/1既有环境skip）保护授权和异常兼容。正式维护人/QA签收仍待完成；回退仅恢复before Service并移除本片策略/测试，不改数据库。
+
+## ADR-AQ-039：售前发现阶段面板统一采用展示组件边界（Proposed）
+
+已有Overview/Solutions/Outputs采用组件，但材料、需求澄清与能力匹配仍内联于Workbench。将三个面板完整移入PresalesMaterials/PresalesRequirements/PresalesFitGap，以typed props/emits连接既有用例；页签及授权/当前项目/会话生命周期保留父级。明确材料、需求、澄清、能力事件的领域类型，不新建API、store或通用表格框架。
+
+clarificationFilter通过必需model受控，父级寿命不变，过滤派生归需求组件；拒绝子组件独立filter以免跨项目切换后意外重置。原样式/文案与shared workbenchSections.css保持。页面减少235行，新增组件318行，生产总代码增加83行；换取完整面板职责和与现有组件的一致性，而非声称整体更短。
+
+证据见evidence/2026-10-06/AQ09_DISCOVERY_PANELS_ACCEPTANCE.md。工程测试、隔离浏览器夹具、真实业务签收分别报告，正式维护人/QA仍待完成。回退恢复before页面并删除三个组件，保留既有会话重构，无数据迁移。
+
+
+## ADR-AQ-040：任务结果接收与事务持久化分离（Proposed）
+
+SAVE_AI_TASK内的完整身份、权限围栏及模型输出核验集中到包内PresalesTaskAcceptance.prepare。Service保留授权、幂等、项目锁、事务和全部持久化；prepare在现有事务中取得原围栏锁，不引入新事务、缓存或Service回调。继续复用ProjectItems、ProjectAuthorityFence和业务runtime/ModelAdapter。
+
+拒绝只把大型switch整体搬进新类或创建通用规则引擎。成功与失败分别保留原三个/五个可变输出字段，其余包括未知扩展继续精确匹配，且错误优先级不变。原94合同先通过，新17项与原合同111/111，最终56类738项（737通过/1既有PPT环境skip）。Service减少62行，新类93行，总生产增加31行，明确以职责隔离而非总行数减少为收益。
+
+工程证据见evidence/2026-10-06/AQ05_TASK_ACCEPTANCE_ACCEPTANCE.md；独立审阅新增测试与权限边界不替代维护人/QA签收。正式DTO/V2迁移和坏历史任务恢复继续开放。回退仅恢复before Service并移除本片新类/测试，无数据库操作。
+
+
+## ADR-AQ-041：新建生成任务在JSON持久化边界前使用固定DTO（Proposed）
+
+GenerationService不再按字符串键拼装18个任务字段，改用包内PresalesQueuedTask记录及初始状态枚举；在原SAVE_AI_TASK命令边界才转换为ObjectNode。保留明确的属性顺序、显式null和字符串ID，snapshot防御性深拷贝但不改其版本化JSON语义。原回执hash、授权、版本检查、pin、保存后排队不变。
+
+拒绝用新DTO重写历史任务、扩展另一个Task表，或把命名相近的字段当作完整V2迁移。它仅定义新任务写入边界，历史未知状态和旧序列化仍由原路径读取。增加65行生产声明换取类型与快照边界，不以减行数评价此决定。
+
+原Service先通过含4个独立wire刻画的62项合同；替换后64/64，扩展744项（743通过/1既有PPT环境skip）。默认/真实宿主/省略null/属性排序四种mapper下保持原wire；证据见evidence/2026-10-06/AQ05_QUEUED_TASK_DTO_ACCEPTANCE.md。正式QA/维护人仍待签收，回退只恢复before生成服务并移除本片DTO/测试，无数据库动作。
+
+## ADR-AQ-042：澄清保存使用类型化领域规则与旧JSON兼容codec（Proposed）
+
+SAVE_CLARIFICATION以Draft/Status/Decision明确输入和决定，领域顺序集中PresalesClarificationSave；PresalesClarificationCodec仅读写旧载荷。Service保留角色、来源、幂等、CAS、事务和item持久化。requirement查找及owner解析通过两个窄协作者复用原实现，无新bean/依赖/权限服务。
+
+不在解码时提前校验状态、回答或加载旧item；保留question/status/requirement/owner/answer/source/item version顺序。OPEN不清除原answer/source，ANSWERED覆盖客户端伪造回答人/时间。未知扩展、null/缺失及字段顺序保留，不用record序列化重建整份旧JSON。取舍是增加两个小类换取真正的类型业务边界；尚未消除ProjectItems内JSON聚合存储，不能等同完整领域DTO或V2数据迁移。
+
+证据见evidence/2026-10-06/AQ05_CLARIFICATION_DTO_ACCEPTANCE.md。旧行为刻画先通过，扩展753项中752通过/1既有环境skip，追加字段顺序后37合同通过。正式维护人/QA签收仍开放；回退仅恢复分支及删除两个新类，无数据库操作。
+
+## ADR-AQ-043：人工评审规则以类型值决定，JSON适配保留历史格式（Proposed）
+
+SAVE_REVIEW 的 solution/summary/issues 检查顺序与等级、处理状态收敛到 PresalesReviewSave；合法结果是不可变类型列表。PresalesReviewCodec 仅负责旧字段默认值和必要写回，保留未知扩展、null/缺失、字段顺序与原输入。Service 继续控制授权、来源、原请求回放、CAS、事务，最后复用 ProjectItems 的不可变修订保存。人工评审标记仍不等于发布批准。
+
+拒绝直接将整份 JSON 反序列化为固定 record 再重写，也不创建通用状态引擎或第二套版本/权限规则。新增 95 行包内代码而 Service 仅少 1 行，是类型和兼容边界的取舍，不能宣称总复杂度或全部领域 DTO 已完成。旧 Service 的 41 项合同先通过，迁移后 67/67；证据见 evidence/2026-10-06/AQ05_REVIEW_DTO_ACCEPTANCE.md。完整聚合 DTO、V2 迁移及正式验收继续开放。回退恢复原分支并移除两个包内类，无数据库变更。
+
+## ADR-AQ-044：台账展示与查询会话分离（Proposed）
+
+PresalesProjectLedger 只承担筛选表单、摘要列表、日期/阶段及分页展示；required model 保留父页 query/ownerFilter/statusFilter/page，search/reload/open 交回既有查询会话和路由。Workspace、权限、abort、版本接纳与 Dashboard 继续在父级，不复制缓存或新建 store/API。fragment 和原样式保持，导航链接规则复用既有同域 CSS。
+
+页面 1226→1062 行，新组件207行、共享CSS增加4行，总生产增加47行，是明确展示边界的取舍。原页面新增刻画89/89，最终售前500/500、类型/lint/格式通过；真实浏览器合成夹具的两主题×两视口布局及交互通过，细微文字色差在旧旧控制对比重现，不宣称像素一致或真实业务签收。证据见 evidence/2026-10-06/AQ09_PROJECT_LEDGER_ACCEPTANCE.md。独立COMMENT无发现；完整架构与正式验收继续开放。回退恢复旧页面台账并删除组件，无数据动作。
+
+### ADR-AQ-045：对象状态和错误的消费者投影（Proposed）
+
+全局状态翻译词表不能证明某个对象状态合法：澄清 RUNNING、任务 ANSWERED 均会被错误显示为已知。复用现有 status.ts，七组有限契约独立于词表，返回 known/unknown/missing；显示、筛选、轮询与操作入口使用对应对象投影，raw DTO/wire/历史字节不变。拒绝新增后端 wrapper 来代替实际消费者整改，也不将聚合 JSON 清零作为 AQ-05 的完成条件；单写对象迁移仍归 AQ-06。
+
+OPEN 只表示明确待处理；旧冻结 summary 的非 ANSWERED 数量保留，汇总和详情指标改称未答复并说明未知/缺失。取舍是未知记录不再出现在 OPEN，但 ALL 始终可查看和人工修订；不改冻结 V1 投影。错误投影在原函数内验证 unknown 对象及有效字符串，保留 code/message 优先级和合法业务409语义，不新增错误框架。
+
+页面 RED2、错误 RED9、跨页面计数 RED1 后，最终售前528/528、类型检查和四组实际组件浏览器检查通过；独立 P2 口径问题已关闭，技术COMMENT不是维护人批准。详见 evidence/2026-10-06/AQ05_DOMAIN_STATE_ACCEPTANCE.md。回退仅源码，不触及存储。solution/material/project 旧标签、本批外状态及正式 AC 不由本片宣称全部完成。
+
+### ADR-AQ-046：项目修订容量扩展保持整数 wire 与任务身份（Proposed）
+
+合法项目达到 int 上限后，原防溢出保护会使已有 RUNNING 任务无法恢复终态。项目修订专用边界采用 long/BIGINT，限制在 JavaScript 安全整数 2^53-1；请求、项目/列表/历史三列、生成 acceptedVersion、上下文及工具作用域同步扩大。条目和 semantic 修订仍维持原 int 契约，冻结迁移与投影不修改，V220 只扩三列。没有版本重置、回绕、同版本写入或新的数据权威。
+
+两个实测兼容陷阱决定实现：Jackson 的 LongNode/IntNode 读回差异会破坏完整任务信封 equals，故小值保持 IntNode；宿主 Long 默认转字符串会改变 DTO wire 和两类请求 hash，故仅 expectedVersion 显式数值序列化，全局 ID 规则不变。历史整数字符串通过精确解析捕获基线，不能用 TextNode.longValue() 得到 0。旧回执先回放、权限与事务/CAS顺序保持；原字节断言不放宽。
+
+拒绝全 long 范围（前端精度）、版本改字符串（wire/hash变化）、取消任务完整身份比较、扩大全部对象修订或重跑冻结回填。部署前需停止全部旧 writer 并完成隔离恢复；新范围写入后不能切回旧 int 二进制或缩列，需暂停写入并前向修复。新上限仍有限，坏/不一致历史记录缺修复权威时继续拒写。实际计划与验证见 evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md；技术证据不关闭 AQ06 对象迁移、真实 Kingbase、生产切换或正式 AC。
+
+### ADR-AQ-047：制品物化和冻结交付集中到包内模块（Proposed）
+
+Service同时知道应用命令与renderer/文件清单/存储/digest规则，造成重复Document构建和制品实现外泄。将既有Reader重命名扩展为PresalesArtifacts，集中候选生成/存储/清单、草稿格式选择、preview全文件校验、download单文件校验与handoff冻结复制。Service继续拥有全项目来源/角色、live gate、回放/CAS、事务和发布状态/快照，公共构造器/接口不改；模块不直接作为Controller入口。拒绝只抽Document helper和叠加Reader包装层，也拒绝本片同时迁移全部发布用例/新增Spring循环依赖。
+
+保持原渲染→存储→saveItem→重绑定→snapshot时序、字段顺序、presentation的textual/blank分支和全部旧读取算法。Service793→711行，Reader89→Artifacts179行，合计增加8行，是职责封装的取舍。同步render仍在command事务中，后续必须设计输入快照、授权/版本重验、制品清理协议，不能称长事务已解决。
+
+原实现101项、追加14次刻画后115项通过；提取后发现私有反射测试入口失效，保留全部断言并迁至公共draftArtifact路径，最终88类982项（981通过/1既有PPT环境skip）及dev通过。独立设计/实现/测试审核回读无新增阻断；技术证据不替代维护人、真实Office/方言及正式AC。见evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md。源码回退无数据动作，累计新写入迁移不得盲目回滚。
+
+### ADR-AQ-048：同步发布用持久化输入与两段短事务接纳（Proposed）
+
+CREATE_RELEASE 保持原同步成功响应，内部改为 READ_COMMITTED / REQUIRES_NEW 准备事务、NOT_SUPPORTED 转换区间及独立接纳事务。准备只提交 V221 render_task，不增加项目版本；固定项目/方案/请求/来源实际摘要/模板及实际 PPT 字节。转换、哈希与 Base64 编码在事务外；接纳锁定项目、主体和全部当前/历史来源依赖，重新检查角色、员工、语义事实、评审、项目版本和 PPT 后，一次提交制品、聚合、修订、回执及任务终态。普通命令继续 REQUIRED 加入调用方事务。
+
+所有命令在项目锁后使用相同 actor/workspace 围栏协调 operationId；创建新项目先取得围栏。现有 operation receipt 是唯一最终响应权威，新任务表不复制响应。普通调用方可能使用 REPEATABLE_READ，故锁后主体、成员、工作区和回执使用显式 FOR UPDATE 当前读取，不能只清 MyBatis 缓存。权限工具保持宿主公共接口，Controller 不增加数据访问。历史 fit 按其真实 evidenceId 解析来源，历史标量来源继承冻结材料 graph，材料、graph、KB/raw、员工和用户围栏覆盖实际重读路径。
+
+失败可用同键重试；仍在十分钟租约内的任务返回 RENDER_IN_PROGRESS。失败或到期任务通过旧 attemptId CAS 取得新 attempt，保留原输入；输入变化返回 RENDER_INPUT_CHANGED，不能静默替换。晚到 attempt 不能提交、清理或覆盖新 attempt；响应丢失按原最终回执和已保存字节回放。进程退出不自动发布，客户端以原 operationId 重试恢复；HTTP 断开也不等于取消。长于租约的转换会被拒收，当前没有后台排队、续租或自动重启调度。
+
+拒绝仅抽取 helper 后继续持有事务、使用进程 map 作为幂等权威、复用必须绑定 model/employee 且会增项目版本的 AI task、复制另一套最终回执，以及为了新流程修改历史 Flyway。代价是新的持久化任务、短事务期间共享主体/工作区锁和冻结输入的存储量；本片不宣称完整 Service 拆分或 V2 对象迁移完成。
+
+迁移仅新增 h2/mysql/kingbase V221。上线必须停止旧 writer；已存在活动任务时不能切回忽略任务占用的旧二进制。回退需先停止新任务、处理活动 attempt，并维持 operationId 占用协议；不自动删任务或缩表。工程证据见 evidence/2026-10-06/AQ05_RENDER_TRANSACTION_ACCEPTANCE.md；技术审阅、真实数据库验证和正式维护人/业务签收分别记录。

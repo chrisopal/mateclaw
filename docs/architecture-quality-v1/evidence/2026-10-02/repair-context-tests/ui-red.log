@@ -1,0 +1,53 @@
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > recovers a member repair view after full read denial and unbinds only the opaque binding
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+stderr | src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > saves a restricted employee assignment without unrelated project fields
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+[Vue Router warn]: No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside a component child of <router-view>. Maybe you called it inside of App.vue?
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts (20 tests | 2 failed) 7001ms
+     × recovers a member repair view after full read denial and unbinds only the opaque binding 41ms
+     × saves a restricted employee assignment without unrelated project fields 360ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > recovers a member repair view after full read denial and unbinds only the opaque binding
+AssertionError: expected "vi.fn()" to be called with arguments: [ '90071992547409999', …(2) ]
+
+Number of calls: 0
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:123:39
+    121|     vi.mocked(presalesApi.command).mockResolvedValue({ ...project, ver…
+    122|     await mount(`/presales/${project.id}`)
+    123|     expect(presalesApi.repairContext).toHaveBeenCalledWith(project.wor…
+       |                                       ^
+    124|     expect(document.body.textContent).toContain('Source access is rest…
+    125|     expect(button('Delegate to employee').disabled).toBe(true)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/presales/__tests__/presalesWorkbench.test.ts > presales workspace behavior > saves a restricted employee assignment without unrelated project fields
+AssertionError: expected "vi.fn()" to be called with arguments: [ '90071992547409999', …(2) ]
+
+Number of calls: 0
+
+ ❯ src/features/presales/__tests__/presalesWorkbench.test.ts:157:33
+    155|     button('Save').click()
+    156|     await settle()
+    157|     expect(presalesApi.command).toHaveBeenCalledWith(project.workspace…
+       |                                 ^
+    158|     expect(presalesApi.update).not.toHaveBeenCalled()
+    159|     expect(document.body.textContent).not.toContain('Source access is …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 18 passed (20)
+   Start at  09:13:58
+   Duration  7.81s (transform 307ms, setup 0ms, import 602ms, tests 7.00s, environment 115ms)
+

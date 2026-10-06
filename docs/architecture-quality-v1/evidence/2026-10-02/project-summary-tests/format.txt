@@ -1,0 +1,5 @@
+src/features/presales/api/presalesApi.ts 46ms
+src/features/presales/shared/dashboard.ts 8ms
+src/features/presales/components/PresalesDashboard.vue 64ms
+src/features/presales/pages/PresalesWorkbench.vue 140ms
+src/features/presales/__tests__/projectSummary.test.ts 5ms

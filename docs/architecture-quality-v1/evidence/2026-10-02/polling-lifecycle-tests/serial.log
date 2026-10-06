@@ -1,0 +1,13 @@
+
+> mateclaw-ui@2.3.0-SNAPSHOT test
+> vitest run --run src/features/presales
+
+
+ RUN  v4.1.7 /Users/guojiexie/.codex/worktrees/architecture-quality/mateclaw/mateclaw-ui
+
+
+ Test Files  3 passed (3)
+      Tests  38 passed (38)
+   Start at  12:20:57
+   Duration  13.89s (transform 345ms, setup 0ms, import 654ms, tests 13.09s, environment 368ms)
+

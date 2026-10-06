@@ -1,0 +1,25 @@
+# AQ-01 / AC-01 普通聊天完整链路验证计划
+
+基于实际HEAD 6ce0cd21592b661b6f79dd1726cf68a9b334e1e2，base ca0ffbf8b95c2aa8bdb2ba3a1b161b261f6e1f93，初始dev 0tc57m7a SCAN_PASS。保留累计WIP与主checkout，不提交/推送或修改生产数据。
+
+原AC-01要求普通聊天无项目选项时不查询售前/投标表，原工具策略保持。上一片真实应用八组合只覆盖启动/业务不可用；既有ProjectConversationToolBoundaryTest使用模拟回调，无法替代完整HTTP→真实Agent/runtime→模型HTTP→工具→持久化证据。
+
+复用ModuleStartupMatrixTest独立JVM/全新H2/临时目录/真实生产扫描，添加测试专用OrdinaryChatProbe。只在外部模型边界使用JDK HttpServer loopback合成OpenAI-compatible服务；应用内部不mock、不替换AgentService、权限、provider工厂、工具执行器或持久化。通过现有公开服务创建本地provider/model/agent及工具绑定，复用普通用户/owner工作区与HTTP登录。普通conversationId不得使用项目前缀，不携带ProjectExecutionOptions。
+
+先000验证真实聊天SSE和模型请求，再覆盖全部八组合。模型夹具必须捕获真实输入/模型/工具声明，发出安全现有getCurrentDateTime工具调用，确认下一轮收到对应tool结果后才返回唯一完成文本；HTTP事件无error、完成文本及用户/助手持久化回读均匹配。该模型是确定性本地协议夹具，不声称真实供应商质量/可用性验收。
+
+使用当前H2 2.3.232实际QUERY_STATISTICS遥测：已用独立内存库验证SET TRUE会记录SQL、FALSE→TRUE会清空。每次普通聊天前，以实际售前/投标表SELECT作为正例，确认观测器看见两者，然后清空并开启新窗口。聊天完成与回读后统计非空、包含真实会话写读、条目数远低于设置上限，售前/投标表命中必须0；记录SQL形状摘要与表名，不保存凭据或用户载荷。不得修改生产SQL或捕获错误伪造空统计。现有普通/项目工具政策回归并行覆盖原拒绝语义，不能把一个允许工具场景宣称全工具政策已验收。
+
+先归档上一片XML/源码（已有73份归档），所有新执行结果在下一次Maven前归档。独立审阅测试隔离、正负例、SQL观察范围及实际持久化证据，之后dev/Spotless/适用回归；不在运行检查期间修改源码。正式AC-01/05仍需领域QA签收；默认完整seed、数据库方言、多角色/历史/模型/浏览器仍开放。若发现真实生产缺陷，按根因补回归并最小修复，不降低断言。
+
+首轮000在工具绑定前失败：待初始化模式没有默认工具目录行，不能将运行时bean存在当作picker可绑定。夹具补用真实ToolService注册仅getCurrentDateTime的原子目录项，映射既有dateTimeTool bean，然后走原绑定校验；不直插绑定表、不改校验规则、不装载完整seed。失败XML/日志/原探针已归档。
+
+后续真实失败揭示探针调用SpringApplication而非main，遗漏生产入口的JDK HTTP初始化（Connection header被拒绝）。改由生产MateClawApplication.main启动，仅通过临时classpath的Spring ApplicationReadyEvent监听器捕获context用于断言/关闭；不复制初始化参数或修改生产入口。默认渐进式工具目录会收起时间工具schema，使用真实tool_call桥调用现有getCurrentDateTime，保留原预算/披露/guard规则；getCurrentDate和getCurrentTime属于原SYSTEM_LEVEL_TOOLS，不应错误禁止。收集实际广告工具集，并拒绝project_document_read/本体authoring工具。SQL观察表范围来自实际H2 schema，不仅硬编码两个表。
+
+实际provider注册/模型变更会启动/v1/models探测，夹具必须按真实协议返回目录，探测计数与两次chat/completions推理分开；未知请求仍失败，不以500 fail-open冒充模型可用。回读后检查两次间隔1秒的SQL形状/执行次数稳定（最多5秒），再次检查延迟模型错误；该有界窗口不保证未来延迟job，也不观察失败SQL或视图/触发器内部访问，正式AC继续开放。聊天body接收有30秒future截止并取消，入口失败显式退出1，避免静默等到120秒强杀。
+
+生产缺陷修复计划：真实无usage的两轮工具聊天成功，但消息runtimeModel/runtimeProvider为空。StateGraphReActAgent普通/审批回放流仅在token>0时发布_usage_final，身份因此丢失。保留真实HTTP失败断言；先新增两路径的零usage、有usage及零模型调用对照测试，再使“实际LLM_CALL_COUNT>0”也发布最终事件。无调用且无usage继续不伪造模型事件，已有token/委派用量行为保持，不编造token数、不修改模型夹具补造usage；只改该runtime事件条件，不引入业务域依赖/额外模型调用/新表。适用回归扩展普通/回放流、工具审批/取消及聊天累加器。
+
+独立复审后收紧：LLM_CALL_COUNT 是尝试次数，失败/上下文超限也递增，不能单独证明返回。先补普通/回放失败、停止、连续两轮测试，再只将 count>0 且正常答案或真实工具调用状态作为缺usage归属信号，逐流记录、不跨轮复用；有token原行为保留。实际入口每轮随机threadId，AgentGraphBuilder没有checkpointer；另显式初始化count=0保护未来维护。工具泄露检查覆盖messages中的渐进目录；类路径表述为生产class加测试依赖jar。H2 SELECT正例不宣称已验证所有DML/间接SQL。
+
+134项复查出现1个隔离失败：101聊天/工具/落库已成功，21:30:00启动事实投影后台重建，SQL五秒静默条件未满足。保留失败全日志/XML及所有变体结果；不删静默/项目表零访问断言。隔离profile通过现有配置关闭整点半小时触发的fact projection/wiki chunk token backfill两个cron（Spring禁用值“-”），不修改生产调度/bean。该夹具明确不验收后台cron；其他任务仍可能使静默检查fail-closed。加两例仅工具调用成功后停止，保护boolean锁存条件；然后重跑完整矩阵/相关回归与独立复核。

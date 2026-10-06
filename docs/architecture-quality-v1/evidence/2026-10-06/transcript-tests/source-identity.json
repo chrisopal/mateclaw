@@ -1,0 +1,26 @@
+{
+  "base_head": "5a02519f2d0cb8d208d0befaf973325f688259b8",
+  "candidate_tree": "e6f9fe69b2a5af6bf59177df1951973c8b018e4f",
+  "changed_sha256": {
+    "mateclaw-server/src/main/java/vip/mate/agent/controller/AgentController.java": "4ffc10fa03b027b461434fb18a38f99ea92bc10af45cf84140517ea7419b738b",
+    "mateclaw-server/src/main/java/vip/mate/channel/web/ChatController.java": "0b2d8bad83129dfe61335e55ac90751d067aae19106c1bc089d342e31350e05f",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeRuntime.java": "ee31693177d802c3bebd94d0898634d466c969ec9a738df7a18e19d1fe94a293",
+    "mateclaw-server/src/main/java/vip/mate/workspace/conversation/ConversationService.java": "2cdc4ea6b0814d354c989442e10b63cc3d5176d2bd0aa961c1da0601bc402418",
+    "mateclaw-server/src/main/java/vip/mate/workspace/conversation/controller/ConversationController.java": "861f7cc59200650e71cb25dfbffb36756fecc77b9d3e02f180988fa3e0fb0322",
+    "mateclaw-server/src/main/resources/messages.properties": "25f277f24afa1a28f0ce04be7c7c9194604c54d8cdd0e3cad0c62ccf41a1e326",
+    "mateclaw-server/src/main/resources/messages_en.properties": "c12bbcb1737c59f356c995e3278f5e48d4fdf76aba5511aa601edbb8773ce773",
+    "mateclaw-server/src/test/java/vip/mate/agent/controller/AgentControllerOriginTest.java": "bcc56bec72dc4f211d011e4677d65b48763c3118fb7a50d9d5e7a0ae10b8d061",
+    "mateclaw-server/src/test/java/vip/mate/channel/web/ChatControllerWorkerReadOnlyTest.java": "4700f8ec1046137667330aca5b8b1b92a15f2ab2baa474a68442bc336df24db9",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesEmployeeRuntimeTest.java": "e4ce7c97cf288ffcfba7f69525e2a25b6328794d098836bea6a091a367c85859",
+    "mateclaw-server/src/test/java/vip/mate/workspace/conversation/ConversationServiceWebchatVisibilityTest.java": "2b0ab75d17651fe6d3e851ff3adb8e4ee86af553a936e5bcdd2b3f380df105cc",
+    "mateclaw-server/src/test/java/vip/mate/workspace/conversation/controller/ConversationControllerTeamWorkerTranscriptTest.java": "ae1c3dc647651f2b023223922d340271daabcb96716e8820e870af2f16e77e8e",
+    "mateclaw-ui/src/composables/chat/__tests__/useWorkerConversationGuard.test.ts": "13cf8b697194fc4334cf398bd6f237d600bf3bc6e9afd6b24398cc70c0943627",
+    "mateclaw-ui/src/composables/chat/useWorkerConversationGuard.ts": "cc7015cfb8055faa462cad3f5c796ea232b44e220d2c9d2a96761637858e0804",
+    "mateclaw-ui/src/views/ChatConsole.vue": "19a8d7bf43f8684dda5c465352416d01535c76dd9a972b67558c8007cf72e9af",
+    "docs/architecture-quality-v1/evidence/2026-10-06/AC30_EXECUTION_TRANSCRIPT_PLAN.md": "28ee81e05dcc4aeceb2b34328a106dcbcefbb1dfecb30726def2b52cbf2dc28d",
+    "mateclaw-server/src/main/java/vip/mate/presales/PresalesTranscriptPolicy.java": "efee62a4ba46dbcfb471acf81111a83381c7cc333a1993b0109fdadcc2bbf9e2",
+    "mateclaw-server/src/main/java/vip/mate/workspace/conversation/ConversationTranscriptPolicy.java": "3a14e3c07c135cd3344b144667d52d0a51ad32278c74b25696ef0bb302746770",
+    "mateclaw-server/src/test/java/vip/mate/presales/PresalesTranscriptPolicyTest.java": "8433b5495327afd6e4a349ec02597ac9cb1644c218ce394878aef582ca61f854",
+    "mateclaw-server/src/test/java/vip/mate/workspace/conversation/ConversationTranscriptPolicyTest.java": "14481d40a23d40a376de0e6bd4417a4c3854a58f6a8060f48302a210e5eea3c0"
+  }
+}

@@ -15,7 +15,6 @@ jobs:
     timeout-minutes: 60
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
-      REPORT_DIR: ${{ runner.temp }}/mateclaw-engineering-report
     steps:
       - name: Checkout tested merge tree
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2, pinned
@@ -59,6 +58,8 @@ jobs:
           fi
       - name: Execute base-owned runner against candidate
         shell: bash
+        env:
+          REPORT_DIR: ${{ runner.temp }}/mateclaw-engineering-report
         run: |
           set -euo pipefail
           python3 trusted/scripts/quality/verify.py \
@@ -69,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: engineering-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.REPORT_DIR }}
+          path: ${{ runner.temp }}/mateclaw-engineering-report
           if-no-files-found: error
           retention-days: 7
   required:

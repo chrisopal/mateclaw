@@ -1,0 +1,20 @@
+{"status": "PASS", "report": "/private/var/folders/g5/5hvgpwrj70q5t5dvwrf1s3040000gn/T/mateclaw-quality-nfo0gka8/report.json", "submission_ready": true, "error": null}
+PASS: architecture-ratchet
+PASS: guard-self-tests
+PASS: java-format
+PASS: java-tests
+NOT_APPLICABLE: ui-format No changed frontend formatter-supported files
+NOT_APPLICABLE: ui-lint No changed frontend lint targets
+PASS: ui-typecheck
+PASS: id-precision
+PASS: ui-vitest
+PASS: ui-node-tests
+PASS: ui-build-enterprise
+PASS: ui-build-classic
+NOT_APPLICABLE: cost-tool No standalone cost tool change
+[codex/aq01b-execution 2604ef22] Prevent public presales commands from persisting unreadable field types
+ 5 files changed, 649 insertions(+)
+ create mode 100644 docs/architecture-quality-v1/evidence/2026-10-03/AQ05_COMMAND_SCHEMA_PLAN.md
+ create mode 100644 mateclaw-server/src/main/java/vip/mate/presales/PresalesCommandPayload.java
+ create mode 100644 mateclaw-server/src/test/java/vip/mate/presales/PresalesCommandPayloadContractTest.java
+ create mode 100644 mateclaw-server/src/test/java/vip/mate/presales/PresalesCommandPayloadTest.java
