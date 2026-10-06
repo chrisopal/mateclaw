@@ -1,7 +1,7 @@
 package vip.mate.presales;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,11 +9,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 import vip.mate.presales.repository.PresalesArtifactRepository;
 import vip.mate.presales.repository.PresalesProjectRepository;
@@ -32,6 +36,7 @@ class PresalesReleaseSnapshotContractTest {
     private final ObjectMapper json = new ObjectMapper();
     private final PresalesArtifactRepository artifacts = mock(PresalesArtifactRepository.class);
     private final PresalesArtifactRenderer renderer = mock(PresalesArtifactRenderer.class);
+    private final PresalesProjectRepository projects = mock(PresalesProjectRepository.class);
     private final GraphApplicationService graphService = mock(GraphApplicationService.class);
     private final StatementApplicationService statementService =
             mock(StatementApplicationService.class);
@@ -560,6 +565,230 @@ class PresalesReleaseSnapshotContractTest {
         reject(p, 404, "NOT_FOUND", "fitGaps item not found");
     }
 
+    @Test
+    void candidatePreservesRendererInputManifestOrderAndReleaseRebinding() throws Exception {
+        var p = project();
+        var files = new LinkedHashMap<String, byte[]>();
+        files.put("solution.docx", new byte[] {0, -1, 2});
+        files.put("solution.md", new byte[] {4, 5});
+        when(renderer.render(any())).thenReturn(files);
+        var release = create(p);
+        var document = ArgumentCaptor.forClass(PresalesArtifactRenderer.Document.class);
+        var provisionalId = ArgumentCaptor.forClass(String.class);
+        var order = inOrder(renderer, artifacts);
+        order.verify(renderer).render(document.capture());
+        assertEquals(
+                new PresalesArtifactRenderer.Document(
+                        "Plan",
+                        "solution",
+                        false,
+                        List.of(new PresalesArtifactRenderer.Section("Scope", "Frozen content")),
+                        ""),
+                document.getValue());
+        int index = 0;
+        for (var entry : files.entrySet()) {
+            String digest = PresalesArtifactRenderer.digest(entry.getValue());
+            order.verify(artifacts)
+                    .insert(
+                            eq(p.path("id").asText()),
+                            provisionalId.capture(),
+                            eq(entry.getKey()),
+                            eq(digest),
+                            eq(Base64.getEncoder().encodeToString(entry.getValue())));
+            var item = release.path("files").get(index++);
+            assertEquals(entry.getKey(), item.path("filename").asText());
+            assertEquals(digest, item.path("sha256").asText());
+            assertEquals(entry.getValue().length, item.path("size").asInt());
+        }
+        assertEquals(files.size(), release.path("files").size());
+        assertEquals(1, provisionalId.getAllValues().stream().distinct().count());
+        assertNotEquals(provisionalId.getValue(), release.path("id").asText());
+        order.verify(artifacts)
+                .reassignRelease(
+                        p.path("id").asText(),
+                        provisionalId.getValue(),
+                        release.path("id").asText());
+        order.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void candidateUsesStoredPresentationBeforeAnyInsert() throws Exception {
+        var p = project();
+        byte[] ppt = new byte[] {0, -1, 37};
+        String digest = PresalesArtifactRenderer.digest(ppt);
+        ((ObjectNode) p.path("solutions").get(0))
+                .putObject("presentation")
+                .put("artifactId", "stored-presentation")
+                .put("sha256", digest);
+        when(renderer.renderWithoutSlides(any())).thenReturn(Map.of("solution.md", new byte[] {8}));
+        when(artifacts.find(p.path("id").asText(), "stored-presentation", "solution.pptx"))
+                .thenReturn(
+                        List.of(
+                                new PresalesArtifactRepository.StoredArtifact(
+                                        digest, Base64.getEncoder().encodeToString(ppt))));
+        var release = create(p);
+        var order = inOrder(renderer, artifacts);
+        order.verify(renderer).renderWithoutSlides(any());
+        order.verify(artifacts).find(p.path("id").asText(), "stored-presentation", "solution.pptx");
+        order.verify(artifacts)
+                .insert(
+                        eq(p.path("id").asText()),
+                        anyString(),
+                        eq("solution.md"),
+                        anyString(),
+                        anyString());
+        order.verify(artifacts)
+                .insert(
+                        eq(p.path("id").asText()),
+                        anyString(),
+                        eq("solution.pptx"),
+                        eq(digest),
+                        eq(Base64.getEncoder().encodeToString(ppt)));
+        order.verify(artifacts)
+                .reassignRelease(
+                        eq(p.path("id").asText()), anyString(), eq(release.path("id").asText()));
+        order.verifyNoMoreInteractions();
+        verify(renderer, never()).render(any());
+        assertEquals(
+                List.of("solution.md", "solution.pptx"),
+                release.path("files").findValuesAsText("filename"));
+        assertEquals(digest, release.path("files").get(1).path("sha256").asText());
+        assertEquals(ppt.length, release.path("files").get(1).path("size").asInt());
+    }
+
+    @Test
+    void corruptPresentationFailsBeforeCandidateWrites() throws Exception {
+        var p = project();
+        ((ObjectNode) p.path("solutions").get(0))
+                .putObject("presentation")
+                .put("artifactId", "stored-presentation")
+                .put("sha256", "original-digest");
+        var before = p.deepCopy();
+        when(renderer.renderWithoutSlides(any())).thenReturn(Map.of("solution.md", new byte[] {8}));
+        when(artifacts.find(p.path("id").asText(), "stored-presentation", "solution.pptx"))
+                .thenReturn(
+                        List.of(new PresalesArtifactRepository.StoredArtifact("wrong", "AA==")));
+        var error = assertThrows(SemanticApiException.class, () -> create(p));
+        assertEquals(409, error.status());
+        assertEquals("ARTIFACT_DIGEST_MISMATCH", error.code());
+        assertEquals(before, p);
+        verify(artifacts, never())
+                .insert(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(artifacts, never()).reassignRelease(anyString(), anyString(), anyString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    void blankTextualPresentationIdKeepsExistingCandidateBranch(String artifactId)
+            throws Exception {
+        var p = project();
+        ((ObjectNode) p.path("solutions").get(0))
+                .putObject("presentation")
+                .put("artifactId", artifactId);
+        when(renderer.renderWithoutSlides(any())).thenReturn(Map.of("solution.md", new byte[] {8}));
+        var release = create(p);
+        assertEquals(List.of("solution.md"), release.path("files").findValuesAsText("filename"));
+        verify(renderer).renderWithoutSlides(any());
+        verify(renderer, never()).render(any());
+        verify(artifacts, never()).find(anyString(), anyString(), anyString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"solution.pptx", "slide-1.png", "quality-report.json"})
+    void draftPresentationRoutesStoredFormatsWithoutRendering(String filename) throws Exception {
+        var p = project();
+        byte[] bytes = new byte[] {-1, 0, 3, 9};
+        String digest = PresalesArtifactRenderer.digest(bytes);
+        var presentation =
+                ((ObjectNode) p.path("solutions").get(0))
+                        .putObject("presentation")
+                        .put("artifactId", "stored-presentation")
+                        .put("sha256", digest)
+                        .put("qualityReportSha256", digest);
+        presentation
+                .putArray("slides")
+                .addObject()
+                .put("filename", "slide-1.png")
+                .put("sha256", digest);
+        when(projects.findBody("scope", p.path("id").asText(), false))
+                .thenReturn(Optional.of(p.toString()));
+        when(artifacts.find(p.path("id").asText(), "stored-presentation", filename))
+                .thenReturn(
+                        List.of(
+                                new PresalesArtifactRepository.StoredArtifact(
+                                        digest, Base64.getEncoder().encodeToString(bytes))));
+        assertArrayEquals(
+                bytes, service.draftArtifact("scope", p.path("id").asText(), "solution", filename));
+        verifyNoInteractions(renderer);
+        verify(artifacts).find(p.path("id").asText(), "stored-presentation", filename);
+        verifyNoMoreInteractions(artifacts);
+    }
+
+    @Test
+    void draftOtherFormatsKeepDraftDocumentAndUnknownFormatError() throws Exception {
+        var p = project();
+        ((ObjectNode) p.path("solutions").get(0))
+                .putObject("presentation")
+                .put("artifactId", "stored-presentation");
+        when(projects.findBody("scope", p.path("id").asText(), false))
+                .thenReturn(Optional.of(p.toString()));
+        byte[] bytes = new byte[] {1, 2};
+        when(renderer.render(any())).thenReturn(Map.of("solution.md", bytes));
+        assertArrayEquals(
+                bytes,
+                service.draftArtifact("scope", p.path("id").asText(), "solution", "solution.md"));
+        var document = ArgumentCaptor.forClass(PresalesArtifactRenderer.Document.class);
+        verify(renderer).render(document.capture());
+        assertEquals(
+                new PresalesArtifactRenderer.Document(
+                        "Plan",
+                        "solution",
+                        true,
+                        List.of(new PresalesArtifactRenderer.Section("Scope", "Frozen content")),
+                        "UNAPPROVED DRAFT — internal review only"),
+                document.getValue());
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () ->
+                                service.draftArtifact(
+                                        "scope", p.path("id").asText(), "solution", "unknown.zip"));
+        assertEquals(404, error.status());
+        assertEquals("NOT_FOUND", error.code());
+        assertEquals("Unknown artifact format", error.getMessage());
+        verifyNoInteractions(artifacts);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"draft", "preview", "download", "handoff", "exact-handoff"})
+    void sourceDenialPrecedesAllArtifactWork(String action) throws Exception {
+        var p = project();
+        String id = p.path("id").asText();
+        when(projects.findBody("scope", id, false)).thenReturn(Optional.of(p.toString()));
+        doThrow(new PresalesSourceAuthorization.Denied(403, "SOURCE_UNAVAILABLE", "withdrawn"))
+                .when(sourceAuthorization)
+                .authorizeMaterials(eq("scope"), any());
+        var error =
+                assertThrows(
+                        SemanticApiException.class,
+                        () -> {
+                            switch (action) {
+                                case "draft" ->
+                                        service.draftArtifact(
+                                                "scope", id, "solution", "solution.md");
+                                case "preview" ->
+                                        service.preview("scope", id, "release", "solution.md");
+                                case "download" ->
+                                        service.artifact("scope", id, "release", "solution.md");
+                                case "handoff" -> service.handoff("scope", id);
+                                default -> service.handoff("scope", id, "release");
+                            }
+                        });
+        assertEquals(403, error.status());
+        assertEquals("SOURCE_UNAVAILABLE", error.code());
+        verifyNoInteractions(renderer, artifacts);
+    }
+
     private void reject(ObjectNode p, int status, String code, String message) throws Exception {
         var before = p.deepCopy();
         var error = assertThrows(SemanticApiException.class, () -> create(p));
@@ -637,7 +866,7 @@ class PresalesReleaseSnapshotContractTest {
                 .thenReturn(Map.of("solution.md", "frozen".getBytes(StandardCharsets.UTF_8)));
         return new PresalesService(
                 artifacts,
-                mock(PresalesProjectRepository.class),
+                projects,
                 json,
                 mock(PresalesAccess.class),
                 mock(WikiKnowledgeBaseService.class),

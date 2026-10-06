@@ -107,3 +107,5 @@ AQ07 字节码检查已落入实际测试目录，AR-001 宿主六个 main 路�
 项目修订容量扩展实施见 [计划](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md) 与 [工程记录](evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_ACCEPTANCE.md)：仅项目 long/BIGINT、安全整数上限和 V220 三列；保留原数值 wire、低位任务信封、历史回执及条目 int 规则。合法旧上限 RUNNING 可恢复，坏/不一致版本仍拒写；部署须停止旧 writer，出现新范围写入后不能回滚旧二进制。具体测试、方言和提交状态按工程记录/PR分别核对，不代表完整对象迁移或正式业务验收。
 
 委派事件测试夹具修复见 [工程记录](evidence/2026-10-06/AQ01_DELEGATION_EVENT_FIXTURE_ACCEPTANCE.md)：推送门禁暴露Mockito未注入超时配置造成0秒取消，补真实成功断言及显式测试预算，RED后55/55。保留严格校验和顺序断言；生产事件回调顺序风险独立登记，不能据此宣称并发治理全部完成。
+
+制品物化与冻结交付边界见 [AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md](evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md)：既有Reader扩展为包内Artifacts，Service793→711行，授权/事务/回放/状态保留；公共接口及旧读算法AST相同。原实现追加刻画115/115，最终售前/投标/架构88类982项（981通过/1既有PPT环境skip）。反射测试入口失败后迁至公共draftArtifact，全部旧断言保留。长事务、真实Office/方言、其余结构与正式AC继续开放，完整commit/push及远端CI按实际精确树记录。

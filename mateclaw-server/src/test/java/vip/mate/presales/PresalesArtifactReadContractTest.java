@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import vip.mate.presales.repository.PresalesArtifactRepository;
@@ -31,6 +32,7 @@ class PresalesArtifactReadContractTest {
     private final ObjectMapper json = new ObjectMapper();
     private final PresalesArtifactRepository repository = mock(PresalesArtifactRepository.class);
     private final PresalesArtifactRenderer renderer = mock(PresalesArtifactRenderer.class);
+    private final PresalesProjectRepository projects = mock(PresalesProjectRepository.class);
     private final PresalesService service = service();
 
     @Test
@@ -141,14 +143,16 @@ class PresalesArtifactReadContractTest {
     }
 
     private byte[] presentation(String expected) throws Exception {
-        return (byte[])
-                invoke(
-                        "storedPresentationArtifact",
-                        new Class<?>[] {String.class, String.class, String.class, String.class},
-                        PROJECT,
-                        RELEASE,
-                        FILE,
-                        expected);
+        var project = json.createObjectNode().put("id", PROJECT);
+        project.putArray("solutions")
+                .addObject()
+                .put("id", "solution")
+                .putObject("presentation")
+                .put("artifactId", RELEASE)
+                .put("sha256", expected);
+        when(projects.findBody("scope", PROJECT, false))
+                .thenReturn(Optional.of(project.toString()));
+        return service.draftArtifact("scope", PROJECT, "solution", FILE);
     }
 
     private Object invoke(String name, Class<?>[] signature, Object... args) throws Exception {
@@ -174,7 +178,7 @@ class PresalesArtifactReadContractTest {
     private PresalesService service() {
         return new PresalesService(
                 repository,
-                mock(PresalesProjectRepository.class),
+                projects,
                 json,
                 mock(PresalesAccess.class),
                 mock(WikiKnowledgeBaseService.class),

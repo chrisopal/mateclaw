@@ -479,3 +479,11 @@ OPEN 只表示明确待处理；旧冻结 summary 的非 ANSWERED 数量保留�
 两个实测兼容陷阱决定实现：Jackson 的 LongNode/IntNode 读回差异会破坏完整任务信封 equals，故小值保持 IntNode；宿主 Long 默认转字符串会改变 DTO wire 和两类请求 hash，故仅 expectedVersion 显式数值序列化，全局 ID 规则不变。历史整数字符串通过精确解析捕获基线，不能用 TextNode.longValue() 得到 0。旧回执先回放、权限与事务/CAS顺序保持；原字节断言不放宽。
 
 拒绝全 long 范围（前端精度）、版本改字符串（wire/hash变化）、取消任务完整身份比较、扩大全部对象修订或重跑冻结回填。部署前需停止全部旧 writer 并完成隔离恢复；新范围写入后不能切回旧 int 二进制或缩列，需暂停写入并前向修复。新上限仍有限，坏/不一致历史记录缺修复权威时继续拒写。实际计划与验证见 evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_PLAN.md；技术证据不关闭 AQ06 对象迁移、真实 Kingbase、生产切换或正式 AC。
+
+### ADR-AQ-047：制品物化和冻结交付集中到包内模块（Proposed）
+
+Service同时知道应用命令与renderer/文件清单/存储/digest规则，造成重复Document构建和制品实现外泄。将既有Reader重命名扩展为PresalesArtifacts，集中候选生成/存储/清单、草稿格式选择、preview全文件校验、download单文件校验与handoff冻结复制。Service继续拥有全项目来源/角色、live gate、回放/CAS、事务和发布状态/快照，公共构造器/接口不改；模块不直接作为Controller入口。拒绝只抽Document helper和叠加Reader包装层，也拒绝本片同时迁移全部发布用例/新增Spring循环依赖。
+
+保持原渲染→存储→saveItem→重绑定→snapshot时序、字段顺序、presentation的textual/blank分支和全部旧读取算法。Service793→711行，Reader89→Artifacts179行，合计增加8行，是职责封装的取舍。同步render仍在command事务中，后续必须设计输入快照、授权/版本重验、制品清理协议，不能称长事务已解决。
+
+原实现101项、追加14次刻画后115项通过；提取后发现私有反射测试入口失效，保留全部断言并迁至公共draftArtifact路径，最终88类982项（981通过/1既有PPT环境skip）及dev通过。独立设计/实现/测试审核回读无新增阻断；技术证据不替代维护人、真实Office/方言及正式AC。见evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md。源码回退无数据动作，累计新写入迁移不得盲目回滚。

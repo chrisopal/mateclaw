@@ -2,7 +2,6 @@ package vip.mate.presales;
 
 import static vip.mate.presales.PresalesDtos.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
 import java.time.LocalDateTime;
@@ -26,8 +25,7 @@ import vip.mate.workspace.core.service.ProjectAuthorityFence;
 @Service
 @ConditionalOnProperty(name = "mateclaw.presales.enabled", havingValue = "true")
 public class PresalesService {
-    private final PresalesArtifactRepository artifacts;
-    private final PresalesArtifactReader artifactReader;
+    private final PresalesArtifacts artifacts;
     private final PresalesProjectRepository projects;
     private final ObjectMapper json;
     private final PresalesSolutionPolicy solutionPolicy;
@@ -39,7 +37,6 @@ public class PresalesService {
     private final PresalesAccess access;
     private final WikiKnowledgeBaseService wiki;
     private final ObjectProvider<GraphApplicationService> graphs;
-    private final PresalesArtifactRenderer renderer;
     private final ObjectProvider<PresalesEmployeeRuntime> employees;
     private final PresalesTaskAcceptance taskAcceptance;
     private final PresalesSourceAuthorization sourceAuthorization;
@@ -61,8 +58,7 @@ public class PresalesService {
         this.sourceAuthorization = sourceAuthorization;
         this.employees = employees;
         this.taskAcceptance = new PresalesTaskAcceptance(employees, authorityFence);
-        this.artifacts = artifacts;
-        this.artifactReader = new PresalesArtifactReader(artifacts);
+        this.artifacts = new PresalesArtifacts(artifacts, renderer);
         this.projects = projects;
         this.json = json;
         this.solutionPolicy = new PresalesSolutionPolicy(json);
@@ -78,7 +74,6 @@ public class PresalesService {
         this.access = access;
         this.wiki = wiki;
         this.graphs = graphs;
-        this.renderer = renderer;
     }
 
     public ObjectNode get(String scope, String id) {
@@ -468,14 +463,11 @@ public class PresalesService {
     }
 
     private ObjectNode frozenHandoff(String projectId, String releaseId, ObjectNode release) {
-        verifyArtifacts(projectId, release);
-        JsonNode snapshot = release.path("handoffSnapshot");
-        if (!snapshot.isObject())
-            throw new SemanticApiException(
-                    409, "HISTORICAL_SNAPSHOT_UNAVAILABLE", "该历史发布缺少可验证的冻结快照");
-        ObjectNode result = ((ObjectNode) snapshot).deepCopy();
-        result.put("releaseId", releaseId);
-        return result;
+        try {
+            return artifacts.handoff(projectId, releaseId, release);
+        } catch (PresalesRejected rejection) {
+            throw legacyRejection(rejection);
+        }
     }
 
     private String releaseGate(String scope, ObjectNode p, ObjectNode solution) {
@@ -493,61 +485,16 @@ public class PresalesService {
         String reviewId = releaseGate(scope, p, solution);
         String releaseId = id();
         v.put("reviewId", reviewId);
-        List<PresalesArtifactRenderer.Section> sections = new ArrayList<>();
-        for (var section : solution.path("sections"))
-            sections.add(
-                    new PresalesArtifactRenderer.Section(
-                            section.path("title").asText(), section.path("text").asText()));
-        var files =
-                new LinkedHashMap<>(
-                        solution.path("presentation").path("artifactId").isTextual()
-                                ? renderer.renderWithoutSlides(
-                                        new PresalesArtifactRenderer.Document(
-                                                solution.path("title").asText(),
-                                                solution.path("id").asText(),
-                                                false,
-                                                sections,
-                                                ""))
-                                : renderer.render(
-                                        new PresalesArtifactRenderer.Document(
-                                                solution.path("title").asText(),
-                                                solution.path("id").asText(),
-                                                false,
-                                                sections,
-                                                "")));
-        String presentationArtifact = solution.path("presentation").path("artifactId").asText();
-        if (!presentationArtifact.isBlank()) {
-            byte[] ppt =
-                    storedPresentationArtifact(
-                            p.path("id").asText(),
-                            presentationArtifact,
-                            "solution.pptx",
-                            solution.path("presentation").path("sha256").asText());
-            files.put("solution.pptx", ppt);
-        }
-        ArrayNode manifest = v.putArray("files");
-        for (var entry : files.entrySet()) {
-            String digest = PresalesArtifactRenderer.digest(entry.getValue());
-            artifacts.insert(
-                    p.path("id").asText(),
-                    releaseId,
-                    entry.getKey(),
-                    digest,
-                    Base64.getEncoder().encodeToString(entry.getValue()));
-            manifest.addObject()
-                    .put("filename", entry.getKey())
-                    .put("sha256", digest)
-                    .put("size", entry.getValue().length);
+        try {
+            artifacts.materializeCandidate(p.path("id").asText(), releaseId, solution, v);
+        } catch (PresalesRejected rejection) {
+            throw legacyRejection(rejection);
         }
         v.put("status", "PENDING")
                 .put("baselineId", solution.path("baselineId").asText())
                 .put("templateVersion", PresalesArtifactRenderer.TEMPLATE_VERSION);
         saveItem(p, "releases", v, actor, true);
-        String storedReleaseId = v.path("id").asText();
-        if (!releaseId.equals(storedReleaseId)) {
-            artifacts.reassignRelease(p.path("id").asText(), releaseId, storedReleaseId);
-            releaseId = storedReleaseId;
-        }
+        artifacts.reassignCandidate(p.path("id").asText(), releaseId, v.path("id").asText());
         try {
             v.set("handoffSnapshot", releaseSnapshot.candidate(scope, p, solution, v));
         } catch (PresalesRejected rejection) {
@@ -585,7 +532,7 @@ public class PresalesService {
 
     private void verifyArtifacts(String projectId, ObjectNode release) {
         try {
-            artifactReader.verifyCandidate(projectId, release);
+            artifacts.verifyCandidate(projectId, release);
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
@@ -597,9 +544,8 @@ public class PresalesService {
         var release = find(p, "releases", releaseId);
         if (!PresalesSourceAuthorization.hasFrozenSourceSnapshot(scope, p, release))
             releaseGate(scope, p, find(p, "solutions", release.path("solutionId").asText()));
-        verifyArtifacts(projectId, release);
         try {
-            return artifactReader.releaseFile(projectId, release, filename);
+            return artifacts.preview(projectId, release, filename);
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
@@ -609,36 +555,8 @@ public class PresalesService {
             String scope, String projectId, String solutionId, String filename) {
         var p = get(scope, projectId);
         var solution = find(p, "solutions", solutionId);
-        String presentationArtifact = solution.path("presentation").path("artifactId").asText();
-        if (!presentationArtifact.isBlank() && artifactReader.presentationFile(solution, filename))
-            return storedPresentationArtifact(
-                    projectId,
-                    presentationArtifact,
-                    filename,
-                    artifactReader.presentationDigest(solution, filename));
-        List<PresalesArtifactRenderer.Section> sections = new ArrayList<>();
-        for (var section : solution.path("sections"))
-            sections.add(
-                    new PresalesArtifactRenderer.Section(
-                            section.path("title").asText(), section.path("text").asText()));
-        byte[] bytes =
-                renderer.render(
-                                new PresalesArtifactRenderer.Document(
-                                        solution.path("title").asText(),
-                                        solutionId,
-                                        true,
-                                        sections,
-                                        "UNAPPROVED DRAFT — internal review only"))
-                        .get(filename);
-        if (bytes == null)
-            throw new SemanticApiException(404, "NOT_FOUND", "Unknown artifact format");
-        return bytes;
-    }
-
-    private byte[] storedPresentationArtifact(
-            String projectId, String artifactId, String filename, String expectedDigest) {
         try {
-            return artifactReader.presentation(projectId, artifactId, filename, expectedDigest);
+            return artifacts.draft(projectId, solutionId, solution, filename);
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
@@ -653,7 +571,7 @@ public class PresalesService {
         if (!PresalesSourceAuthorization.hasFrozenSourceSnapshot(scope, p, release))
             releaseGate(scope, p, find(p, "solutions", release.path("solutionId").asText()));
         try {
-            return artifactReader.releaseFile(projectId, release, filename);
+            return artifacts.releaseFile(projectId, release, filename);
         } catch (PresalesRejected rejection) {
             throw legacyRejection(rejection);
         }
