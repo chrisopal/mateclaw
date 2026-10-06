@@ -1,0 +1,1251 @@
+{
+  "source_head": "4c6b8fcdd4b3d46daa3b376954f27f3368ac5d79",
+  "source_tree": "7e5243c40d7cb49113e6f137b40b6530ea7f5642",
+  "scope": "工程证据与后续动作分类，不修改正式AC签收。历史证据按原条款和当前门禁复核，不追加隐含验收要求。",
+  "counts": {
+    "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF": 28,
+    "INSUFFICIENT_PROOF": 4,
+    "IMPLEMENTATION_GAP": 10,
+    "ENVIRONMENT_GAP": 4
+  },
+  "items": [
+    {
+      "id": "AC-01",
+      "scenario": "普通聊天未带项目选项",
+      "assertion": "不查询售前/投标表；原工具策略不变",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "原文只要求普通聊天无项目选项时不读售前/投标表且旧工具政策不变。八组合真实 main+SSE+工具+H2正/负SQL观察，配合普通 executor 不调用项目 JDBC，足以支持有限可复现验收。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "ordinary",
+        "xml"
+      ],
+      "finite_evidence": [
+        "ModuleStartupMatrixTest9",
+        "ProjectConversationToolBoundaryTest4",
+        "AQ01_ORDINARY_CHAT_ACCEPTANCE.md:23-29"
+      ]
+    },
+    {
+      "id": "AC-02",
+      "scenario": "售前执行改为通用接口",
+      "assertion": "工具白名单、来源范围、授权和输出拒收保持",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "四个明示边界可组合证明：工具白名单/来源范围由 ToolExecutionExecutorPresalesScope4、SourceScope2/Authorization8；真实runtime/pin/角色由 RuntimeTransaction43；ModelAdapter9与TaskAcceptance17拒收不合格输出。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "runtime",
+        "xml",
+        "render"
+      ],
+      "finite_evidence": [
+        "ToolExecutionExecutorPresalesScopeTest4",
+        "PresalesSourceScopeTest2",
+        "PresalesSourceAuthorizationTest8",
+        "PresalesRuntimeTransactionIntegrationTest43",
+        "PresalesModelAdapterTest9",
+        "PresalesTaskAcceptanceTest17"
+      ]
+    },
+    {
+      "id": "AC-03",
+      "scenario": "指定项目执行却无策略",
+      "assertion": "fail-closed，不退化普通聊天",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "缺provider分派器明确抛错；执行器1636-1639在有projectOptions却无revalidator时抛错；普通执行和preapproved共同调用 failClosed，回放负例确认callback never。源码与负例共同证明不降为普通聊天。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "xml",
+        "gate_code"
+      ],
+      "finite_evidence": [
+        "ProjectExecutionRevalidatorDispatcherTest.rejectsMissingProvider",
+        "ProjectConversationToolBoundaryTest.preapprovedPresalesReplayFailsClosedWhenOptionalPolicyIsAbsent",
+        "ToolExecutionExecutor.java:743-748,1082-1087,1636-1639"
+      ]
+    },
+    {
+      "id": "AC-04",
+      "scenario": "同时注册多个 Revalidator",
+      "assertion": "唯一匹配；不选择错误策略、不静默随机注入",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "无匹配/唯一匹配/多匹配三断言及四种装配断言精确对应唯一匹配、不随机注入。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "xml"
+      ],
+      "finite_evidence": [
+        "ProjectExecutionRevalidatorDispatcherTest3",
+        "ProjectExecutionWiringTest4",
+        "focused source diff: agent/execution unchanged"
+      ]
+    },
+    {
+      "id": "AC-05",
+      "scenario": "模块开关组合",
+      "assertion": "禁用本体/售前/投标的各组合可启动；依赖业务明确unavailable",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "原文为八种开关可启动且依赖业务明确unavailable。ModuleStartupMatrix9在本次精确树执行，包括八组合及一次重启，实际生产main和HTTP unavailable合同已覆盖。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "startup",
+        "ordinary",
+        "render"
+      ],
+      "finite_evidence": [
+        "ModuleStartupMatrixTest9",
+        "AQ01_FULL_CONTEXT_ACCEPTANCE.md:9-24",
+        "AQ01_ORDINARY_CHAT_ACCEPTANCE.md:15-27"
+      ]
+    },
+    {
+      "id": "AC-06",
+      "scenario": "actor/employee执行前被停用",
+      "assertion": "无模型或工具外发；历史保留必要诊断",
+      "task": "AQ-01",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实H2 actor/employee停用在调用模型前返回明确诊断，noExternalCall断言模型流never+conversation无交互，工具不能越过模型入口；Coordinator/TerminalReception保留FAILED诊断且不写结果。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "runtime",
+        "principal"
+      ],
+      "finite_evidence": [
+        "PresalesRuntimeTransactionIntegrationTest.java:739-780",
+        "PresalesGenerationCoordinatorTest4",
+        "PresalesTerminalReceptionTest41"
+      ]
+    },
+    {
+      "id": "AC-07",
+      "scenario": "wiki_disabled/仅KB-A/项目KB-B",
+      "assertion": "prompt、工具、缓存、历史和导出一致拒绝未授权内容",
+      "task": "AQ-02",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "INSUFFICIENT_PROOF",
+      "scope_basis": "prompt、工具、历史、导出已有切实拒绝证据；但原文明确列出缓存，当前证据未把实际会复用来源内容的缓存/会话上下文入口对上撤权后重验。",
+      "remaining_action": "仅补一项有限事实：确定项目执行实际复用的缓存/会话上下文入口；若不存在可复用来源缓存，记录代码依据并由审阅人认可该子项不适用；若存在，证明KB-A/KB-B或wiki_disabled改变后不能复用未授权内容。",
+      "evidence_keys": [
+        "source",
+        "history",
+        "frozen",
+        "artifact_mysql"
+      ],
+      "finite_evidence": [
+        "PresalesSourceScopeTest2",
+        "PresalesSourceAuthorizationTest8",
+        "PresalesIntegrationTest8",
+        "AQ02_HISTORY_SOURCE_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-08",
+      "scenario": "执行中撤权/来源撤回",
+      "assertion": "活动任务拒收；来源支持状态与个人权限不混淆",
+      "task": "AQ-02",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "RuntimeTransaction43包含任务执行/接纳间撤权和锁等待拒收；来源授权/读取与render边界分开检查员工权限和来源WITHDRAWN，固定错误政策及只读授权查询没有把个人撤权升级成来源支持状态。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "runtime",
+        "source",
+        "render"
+      ],
+      "finite_evidence": [
+        "PresalesRuntimeTransactionIntegrationTest43",
+        "PresalesSourceAuthorizationTest8",
+        "PresalesRenderTransactionBoundaryTest9",
+        "AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-09",
+      "scenario": "viewer/member/admin/owner/system admin",
+      "assertion": "UI capability、API、后台任务的有效政策一致",
+      "task": "AQ-02",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "INSUFFICIENT_PROOF",
+      "scope_basis": "五个点名角色在基础授权层已有断言，UI也服从服务端capability；仍缺一份能逐格对应这五角色在capability、API和后台任务有效政策一致的证据。",
+      "remaining_action": "只形成5角色×3入口映射并核实缺格：viewer/member/admin/owner/system-admin的同一写/批准动作；能用现有断言填满则签核，不因矩阵格式新增功能。",
+      "evidence_keys": [
+        "principal",
+        "frozen",
+        "ui"
+      ],
+      "finite_evidence": [
+        "PresalesAccessPolicyTest5",
+        "BiddingAccessPolicyTest7",
+        "PresalesRuntimeTransactionIntegrationTest43",
+        "presalesWorkbench read-only capability tests"
+      ]
+    },
+    {
+      "id": "AC-10",
+      "scenario": "投标项目owner批准",
+      "assertion": "与改造前明确政策一致；没有借统一机制扩大角色",
+      "task": "AQ-02",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "投标owner批准单测逐一证明viewer拒绝、member/admin/owner的项目owner允许、非项目owner成员拒绝及跨Workspace拒绝；没有扩大角色。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "principal",
+        "xml"
+      ],
+      "finite_evidence": [
+        "BiddingAccessPolicyTest7 at current exact tree",
+        "BiddingAccessPolicyTest.java:134-166",
+        "focused diff BiddingAccess.java unchanged"
+      ]
+    },
+    {
+      "id": "AC-11",
+      "scenario": "Controller迁移",
+      "assertion": "编译依赖无JDBC/DAO；DTO包含原所需字段",
+      "task": "AQ-03",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实生产ArchUnit非空导入+Controller DAL负例12，迁移BiddingTaskQuery7及Presales Query DTO8、QueuedTask4、命令/响应解码与UI契约足以支撑已迁移Controller的旧字段兼容。独立结构审计已关闭两个具体出口。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "archunit",
+        "xml",
+        "structure",
+        "ui"
+      ],
+      "finite_evidence": [
+        "WorkbenchArchitectureTest12",
+        "BiddingTaskQueryServiceTest7",
+        "PresalesQueryDtoContractTest8",
+        "PresalesQueuedTaskContractTest4",
+        "aq05-aq09-structure-exit-audit.md",
+        "presales-ui-contract-exit-delivery.json"
+      ]
+    },
+    {
+      "id": "AC-12",
+      "scenario": "审核任务解绑后回读",
+      "assertion": "保留审核者读取规则；错误不泄露来源",
+      "task": "AQ-03",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "七项task-query测试直指历史reviewer回读、解绑/重绑不降为writer、异常先于来源读取；生产查询服务返回固定安全错误，缺项目或绑定时不返回details。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "xml"
+      ],
+      "finite_evidence": [
+        "BiddingTaskQueryServiceTest7",
+        "BiddingTaskQueryServiceTest.java:55-156",
+        "mateclaw-server/src/main/java/vip/mate/bidding/BiddingTaskQueryService.java"
+      ]
+    },
+    {
+      "id": "AC-13",
+      "scenario": "Workspace快速切换",
+      "assertion": "旧请求携带旧Workspace，响应不污染新页面",
+      "task": "AQ-04",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "捕获Workspace header的实际Axios测试与真实RouterView代次/旧响应隔离测试，分别证明请求仍属旧Workspace和新页不被污染。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "transport",
+        "query",
+        "mutations"
+      ],
+      "finite_evidence": [
+        "workspaceRequest transport tests",
+        "workbenchQuery20",
+        "presalesWorkbench117",
+        "mutationSession7"
+      ]
+    },
+    {
+      "id": "AC-14",
+      "scenario": "multipart/自定义transform",
+      "assertion": "FormData原样上传、边界正确、scope固定函数不覆盖调用方transform",
+      "task": "AQ-04",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "已执行的真实loopback multipart边界、FormData字段、function/array/empty transform和最终scope pin精确覆盖原文。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "transport"
+      ],
+      "finite_evidence": [
+        "src/features/bidding/__tests__/workspaceRequestTransport.test.ts5",
+        "src/api/__tests__/workspaceRequest.test.ts3",
+        "AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md:17-19"
+      ]
+    },
+    {
+      "id": "AC-15",
+      "scenario": "Blob/ArrayBuffer/下载",
+      "assertion": "内容字节一致；不套JSON envelope解包",
+      "task": "AQ-04",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实Axios fetch loopback的Blob/ArrayBuffer逐字节断言、全局实际拦截器不解JSON envelope，及下载模块27项保留原Blob与handoff满足条款。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "transport",
+        "mutations",
+        "artifact_mysql"
+      ],
+      "finite_evidence": [
+        "workspaceRequestTransport5",
+        "downloads27",
+        "AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md:17-19"
+      ]
+    },
+    {
+      "id": "AC-16",
+      "scenario": "409并发",
+      "assertion": "返回明确冲突、保留草稿、不覆盖他人修改",
+      "task": "AQ-04",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "后端真实H2并发MockMvc产生200/409且版本只加一次；组件在409保留草稿、禁止盲重提；receipt/writer合同防覆盖。组合证据覆盖完整条款。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "mutations",
+        "render",
+        "hash"
+      ],
+      "finite_evidence": [
+        "PresalesIntegrationTest.concurrentCommandsCannotLoseAnUpdate:1615",
+        "presalesWorkbench preserves user draft on version conflict",
+        "PresalesProjectPersistenceContractTest4"
+      ]
+    },
+    {
+      "id": "AC-17",
+      "scenario": "同对象并发修改",
+      "assertion": "CAS/版本冲突；不丢更新",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "同一个实际项目对象并发命令200/409和版本2，CAS持久化/回执回滚合同已经证明不丢更新。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "capacity",
+        "render",
+        "listing"
+      ],
+      "finite_evidence": [
+        "PresalesIntegrationTest.java:1615-1665",
+        "PresalesProjectPersistenceContractTest4",
+        "PresalesProjectRevisionMigrationTest2"
+      ]
+    },
+    {
+      "id": "AC-18",
+      "scenario": "无关联系人变化",
+      "assertion": "不使只依赖方案章节的运行失效",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "独立对象修订与输入依赖粒度待V2迁移，当前整项目版本仍可能误失效。",
+      "remaining_action": "独立对象修订与输入依赖粒度待V2迁移，当前整项目版本仍可能误失效。",
+      "evidence_keys": [
+        "context",
+        "revalidator",
+        "spec"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-19",
+      "scenario": "实际依赖版本变化",
+      "assertion": "输出明确stale；不得自动采用",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "已有整项目stale拒收；完整实际依赖版本与影响关系仍待V2设计。",
+      "remaining_action": "已有整项目stale拒收；完整实际依赖版本与影响关系仍待V2设计。",
+      "evidence_keys": [
+        "context",
+        "revalidator",
+        "render",
+        "spec"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-20",
+      "scenario": "operationId相同请求/异请求",
+      "assertion": "相同回放一次结果；异请求拒绝",
+      "task": "AQ-01/AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "V2相同请求回放、不同请求拒绝、历史歧义409，真实HTTP和MySQL跨命令同键并发结果证明一次回执；当前精确树HashReplay16/V218/迁移7/lifecycle14重跑。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "hash",
+        "render",
+        "render_delivery"
+      ],
+      "finite_evidence": [
+        "PresalesRequestHashReplayTest16",
+        "PresalesRequestHashV2Test18",
+        "PresalesRequestHashMigrationTest7",
+        "PresalesRenderLifecycleTest14",
+        "AQ06_REQUEST_HASH_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-21",
+      "scenario": "取消/重启/晚到结果",
+      "assertion": "无二次写入与模型自批准；未知计费状态如实显示",
+      "task": "AQ-01/AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "重启与合法旧上限已修复；坏历史记录及取消异常边界未闭合，不能重复立项旧问题。",
+      "remaining_action": "重启与合法旧上限已修复；坏历史记录及取消异常边界未闭合，不能重复立项旧问题。",
+      "evidence_keys": [
+        "restart",
+        "capacity",
+        "render",
+        "sse"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-22",
+      "scenario": "固定Skill被更新",
+      "assertion": "历史任务保持原包；新任务按新pin；不能伪造运行加载证据",
+      "task": "AQ-01/AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "当前pin变更会拒绝；历史任务原Skill包的不可变保留和实际加载证明未闭合。",
+      "remaining_action": "当前pin变更会拒绝；历史任务原Skill包的不可变保留和实际加载证明未闭合。",
+      "evidence_keys": [
+        "skill",
+        "xml"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-23",
+      "scenario": "迁移前后发布成果",
+      "assertion": "原DOCX/PPTX/旧handoff原表示与SHA-256完全一致",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENVIRONMENT_GAP",
+      "scope_basis": "缺真实历史Office/handoff样本的原字节、表示与SHA对账。",
+      "remaining_action": "缺真实历史Office/handoff样本的原字节、表示与SHA对账。",
+      "evidence_keys": [
+        "listing",
+        "artifact_mysql",
+        "handoff",
+        "capacity"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-24",
+      "scenario": "旧消费者",
+      "assertion": "Bidding现有接收路径与摘要验证通过；Delivery端精确引用不漂移",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "INSUFFICIENT_PROOF",
+      "scope_basis": "Bidding已有接收和摘要回放证据，但原文点名Delivery端精确引用不漂移；未定位到可执行的Delivery消费者与对应旧引用合同。",
+      "remaining_action": "只定位实际Delivery消费者/批准规格，提供一次固定旧handoff引用的读取/接收断言；若Delivery不在现有系统范围，由业务负责人明确此子项适用性，不能Agent自判通过。",
+      "evidence_keys": [
+        "xml",
+        "handoff",
+        "artifact"
+      ],
+      "finite_evidence": [
+        "BiddingHandoffTest3",
+        "BiddingHandoffReceiptTest1",
+        "PresalesHandoffReadContractTest8"
+      ]
+    },
+    {
+      "id": "AC-25",
+      "scenario": "旧迁移被编辑",
+      "assertion": "脚本非零；新增迁移不改旧字节",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "SQL旧迁移改删、Java入口/冻结闭包改删/重哈希均有实际非零/拒绝负例；新增版本保留旧字节。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "migration_guard",
+        "guard"
+      ],
+      "finite_evidence": [
+        "guard-self-tests93 current tree",
+        "test_existing_migration_edit_fails",
+        "test_real_cli_* in test_java_migrations.py"
+      ]
+    },
+    {
+      "id": "AC-26",
+      "scenario": "新迁移方言",
+      "assertion": "h2/mysql/kingbase分别运行，不能只用H2冒充",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENVIRONMENT_GAP",
+      "scope_basis": "H2及真实MySQL已执行；Kingbase仍缺实跑。",
+      "remaining_action": "H2及真实MySQL已执行；Kingbase仍缺实跑。",
+      "evidence_keys": [
+        "capacity",
+        "render",
+        "render_delivery"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-27",
+      "scenario": "售前单写切换",
+      "assertion": "回填幂等、对账可读、切换原子；无暗中双权威",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "正式V2规格及单写切换、回填对账、切换原子性待完成。",
+      "remaining_action": "正式V2规格及单写切换、回填对账、切换原子性待完成。",
+      "evidence_keys": [
+        "listing",
+        "render",
+        "spec"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-28",
+      "scenario": "新写入后的回退",
+      "assertion": "无反向迁移时明确阻断，不直接切回旧JSON",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "部分版本/渲染回退围栏已有证据；完整V2新写后的回退协议仍待完成。",
+      "remaining_action": "部分版本/渲染回退围栏已有证据；完整V2新写后的回退协议仍待完成。",
+      "evidence_keys": [
+        "hash",
+        "capacity",
+        "render",
+        "spec"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-29",
+      "scenario": "基线/客户确认",
+      "assertion": "事实核验、内部批准、客户确认不互相升级",
+      "task": "AQ-06",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "事实接受是内部基线批准前置；批准基线仍明确UNCONFIRMED，需求确认与基线/发布快照均有精确字段合同，模型不能把事实核验/内部批准自动变为客户确认。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "baseline",
+        "approval_source",
+        "xml"
+      ],
+      "finite_evidence": [
+        "PresalesIntegrationTest.g1RequiresAcceptedFactsAndReleasePublishesExactBytes",
+        "PresalesIntegrationTest.java:402",
+        "PresalesReleaseSnapshotContractTest.java:273,357",
+        "PresalesBaselineApproval.java:103"
+      ]
+    },
+    {
+      "id": "AC-30",
+      "scenario": "功能两主题/布局",
+      "assertion": "enterprise/classic、只读、空态、错误态、窄屏正常；真浏览器证据",
+      "task": "AQ-09",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENVIRONMENT_GAP",
+      "scope_basis": "已有两主题/窄屏的组件及部分Workbench真实浏览器证据；尚未逐格核对完整工作台只读、空态、错误态的覆盖。",
+      "remaining_action": "复用现有浏览器夹具，按两主题/窄屏及只读、空态、错误态逐格补齐缺失证据；不追加真实模型或生产数据条件。",
+      "evidence_keys": [
+        "ledger",
+        "ui",
+        "query"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-31",
+      "scenario": "格式化源码",
+      "assertion": "不修改OWL语料、客户原文、已批准文件/快照",
+      "task": "AQ-09",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "格式化包含规则仅源码；本次read-only git diff origin/dev..679092a8无OWL/TTL/RDF/DOCX/PPTX/SVG或corpus/golden资源修改，已有冻结字节/模板style/历史body合同在当前门禁重跑。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "structure",
+        "mutations",
+        "listing",
+        "full"
+      ],
+      "finite_evidence": [
+        "focused protected-resource diff:0",
+        "PresalesArtifactPersistenceContractTest15",
+        "PresalesReleaseSnapshotContractTest77",
+        "format includes + existing AST/text byte evidence"
+      ]
+    },
+    {
+      "id": "AC-32",
+      "scenario": "新增跨域/Controller SQL/any/内联文案",
+      "assertion": "已识别规则失败；清零路径不得回退",
+      "task": "AQ-07",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "实际compiled ArchUnit12与guard93包含已识别跨域、Controller SQL/DAO、any、inline i18n负例及sealed zero-tolerance/rename防回退，恰是条款要求。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "archunit",
+        "guard",
+        "xml"
+      ],
+      "finite_evidence": [
+        "WorkbenchArchitectureTest12",
+        "guard-self-tests93",
+        "test_sealed_scope_has_zero_tolerance",
+        "test_core_concrete_import_blocked/test_controller_jdbc_blocked/test_any_in_contract_blocked/test_inline_i18n_blocked"
+      ]
+    },
+    {
+      "id": "AC-33",
+      "scenario": "部分暂存",
+      "assertion": "gate读取index；完整检查阻断，不stash/不自动git add",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "实际临时git仓库里index坏/工作树好，分别读回不同结果并拒PARTIAL_STAGING；源码无stash或自动add；实际未跟踪阻断补充。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "guard",
+        "gate_tests",
+        "gate_code"
+      ],
+      "finite_evidence": [
+        "test_read_actual_index_not_worktree",
+        "test_untracked_input_blocks_full_check",
+        "scripts/quality/verify.py:54-64"
+      ]
+    },
+    {
+      "id": "AC-34",
+      "scenario": "中文/空格路径与重命名",
+      "assertion": "名称安全、无参数注入；搬运存量不能洗白",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "Chinese-space文件在真实index正确读取，ref参数注入被拒；rename不能洗白存量；subprocess argv和--终止参数共同支撑名称安全。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "guard",
+        "gate_tests"
+      ],
+      "finite_evidence": [
+        "test_unicode_space_filename",
+        "test_ref_option_injection_rejected",
+        "test_rename_cannot_launder_debt",
+        "scripts/quality/gate.py git argv/path handling"
+      ]
+    },
+    {
+      "id": "AC-35",
+      "scenario": "缺基线/缺工具/命令失败/超时",
+      "assertion": "BLOCKED/FAIL非零，不PASS",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "缺base/tool/命令失败既有负例，加新增真实子进程sleep超时触发未修改run_step和真实main状态聚合：COMMAND_TIMEOUT、exit2/BLOCKED/submission_ready=false。故障注入只替换夹具命令，不替换结果。原文四类失败已有有限证据。",
+      "remaining_action": "三个有限探针已补齐本条工程缺口；独立维护人/QA正式签核，正式状态仍NOT_RUN。",
+      "evidence_keys": [
+        "guard",
+        "gate_code"
+      ],
+      "finite_evidence": [
+        "test_missing_base_not_empty_success",
+        "test_missing_tool_not_green",
+        "test_failing_process_not_green",
+        "scripts/quality/verify.py:129-145",
+        "finite-gate-acceptance-probes.tar.gz/results.json",
+        "finite-gate-acceptance-probes.tar.gz/probe.py",
+        "FINITE_GATE_PROBES_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-36",
+      "scenario": "零测试/全跳过/缺结果文件",
+      "assertion": "明确失败；实际执行数可查",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "Java无结果文件/零测试/全跳过明确拒绝，实际执行数扣除skip有正例；实际gate各工具链报告非零；UI解析缺文件会FAIL，Node结果缺计数FAIL。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "guard",
+        "gate_tests",
+        "gate_code"
+      ],
+      "finite_evidence": [
+        "test_zero_java_tests_not_pass",
+        "test_all_skipped_java_tests_not_pass",
+        "test_executed_java_count",
+        "scripts/quality/verify.py:284-304",
+        "gateyei03eyr actual counts"
+      ]
+    },
+    {
+      "id": "AC-37",
+      "scenario": "检查后代码/index变化",
+      "assertion": "旧结果无效，重新执行",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实93项guard结束后在显式时序钩子改变临时index或磁盘；实际main最终重检分别返回INDEX_CHANGED_DURING_CHECK和PARTIAL_STAGING，exit2/submission_ready=false，另有未改动positive对照。无需在真实项目冻结tree做破坏实验。",
+      "remaining_action": "三个有限探针已补齐本条工程缺口；独立维护人/QA正式签核，正式状态仍NOT_RUN。",
+      "evidence_keys": [
+        "gate_code",
+        "guard"
+      ],
+      "finite_evidence": [
+        "scripts/quality/verify.py:331-333",
+        "current exact-tree report",
+        "finite-gate-acceptance-probes.tar.gz/results.json",
+        "finite-gate-acceptance-probes.tar.gz/probe.py",
+        "FINITE_GATE_PROBES_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-38",
+      "scenario": "已有Hooks/Husky/多worktree",
+      "assertion": "安装器拒绝盲覆盖/误影响其他工作树",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实两个临时worktree未启用worktreeConfig时拒装且shared config字节不变；只在临时fixture启用后，安装写--worktree，副树及shared hooksPath仍为空。结合既有Husky/活动hooks负例完整覆盖字面条款。",
+      "remaining_action": "三个有限探针已补齐本条工程缺口；独立维护人/QA正式签核，正式状态仍NOT_RUN。",
+      "evidence_keys": [
+        "install",
+        "gate_tests",
+        "guard"
+      ],
+      "finite_evidence": [
+        "test_existing_hook_manager_not_overwritten",
+        "test_other_active_hooks_not_disabled",
+        "scripts/quality/install_hooks.py:22-43",
+        "finite-gate-acceptance-probes.tar.gz/results.json",
+        "finite-gate-acceptance-probes.tar.gz/probe.py",
+        "FINITE_GATE_PROBES_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-39",
+      "scenario": "新增Guard规则/修改policy",
+      "assertion": "base runner仍约束candidate；独立控制面审查",
+      "task": "AQ-00",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实CI从trusted base执行；冻结迁移测试用base声明抵抗candidate改摘要/删规则；累计独立控制面技术审查已记录，正式维护人认可仍保留。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "migration_guard",
+        "workflow",
+        "remote"
+      ],
+      "finite_evidence": [
+        ".github/workflows/engineering-gate.yml:25-38,59-67",
+        "test_rehashing_changed_helper_does_not_bypass_base",
+        "test_removing_or_rewriting_base_declarations_blocked",
+        "independent-reviews.json",
+        "AQ08_REMOTE_CI_ACCEPTANCE.md"
+      ]
+    },
+    {
+      "id": "AC-40",
+      "scenario": "本地绕过pre-commit",
+      "assertion": "PR仍执行required CI；失败不得合并",
+      "task": "AQ-08",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "CI真实运行已通过；目标分支尚未强制required检查。",
+      "remaining_action": "CI真实运行已通过；目标分支尚未强制required检查。",
+      "evidence_keys": [
+        "remote",
+        "enforcement",
+        "workflow"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-41",
+      "scenario": "workflow job skipped/cancelled",
+      "assertion": "final required job必须失败，不把skip/neutral当PASS",
+      "task": "AQ-08",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENGINEERING_EVIDENCE_COMPLETE_PENDING_SIGNOFF",
+      "scope_basis": "真实cancelled verify已产生failed Required；always()+严格等于success的最终判断使skipped/neutral/cancelled/missing均不能绿，源码条件无需穷举排列。",
+      "remaining_action": "独立正式签核；不得由本复核自行标记正式 PASS。",
+      "evidence_keys": [
+        "remote",
+        "workflow"
+      ],
+      "finite_evidence": [
+        "AQ08_REMOTE_CI_ACCEPTANCE.md:15",
+        ".github/workflows/engineering-gate.yml:76-85"
+      ]
+    },
+    {
+      "id": "AC-42",
+      "scenario": "base变更/PR更新",
+      "assertion": "最新test merge tree与最新审批/检查要求生效",
+      "task": "AQ-08",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "合并树身份已有核验；最新检查与审批失效尚无保护策略强制。",
+      "remaining_action": "合并树身份已有核验；最新检查与审批失效尚无保护策略强制。",
+      "evidence_keys": [
+        "remote",
+        "render_delivery",
+        "enforcement"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-43",
+      "scenario": "直接push/强推dev/机器人绕过",
+      "assertion": "保护规则阻断；维护人审核可见的例外，无Agent绕过权限",
+      "task": "AQ-08",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "dev及PR实际base未受保护，直推/强推阻断未启用。",
+      "remaining_action": "dev及PR实际base未受保护，直推/强推阻断未启用。",
+      "evidence_keys": [
+        "enforcement"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-44",
+      "scenario": "改workflow/CODEOWNERS/测试配置削弱门禁",
+      "assertion": "触发代码所有者审查，未批准不可合入",
+      "task": "AQ-08",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "IMPLEMENTATION_GAP",
+      "scope_basis": "控制面文件保护规则有代码；Code Owner强制审批未启用。",
+      "remaining_action": "控制面文件保护规则有代码；Code Owner强制审批未启用。",
+      "evidence_keys": [
+        "codeowners",
+        "workflow",
+        "enforcement"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-45",
+      "scenario": "真实长文/模型质量",
+      "assertion": "经授权项目人工复核，不用FakeProvider证明业务质量",
+      "task": "AQ-08/AQ-11",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "ENVIRONMENT_GAP",
+      "scope_basis": "缺授权真实长文、模型输出和人工质量复核。",
+      "remaining_action": "缺授权真实长文、模型输出和人工质量复核。",
+      "evidence_keys": [
+        "ordinary",
+        "runtime"
+      ],
+      "finite_evidence": []
+    },
+    {
+      "id": "AC-46",
+      "scenario": "日志与测试环境",
+      "assertion": "不使用生产数据/密钥；公共CI产物无客户敏感原文",
+      "task": "AQ-08/AQ-11",
+      "formal_status": "NOT_RUN",
+      "engineering_classification": "INSUFFICIENT_PROOF",
+      "scope_basis": "隔离DB、合成数据和环境过滤均有证据；但本地脱敏后的副本不能单独证明当前原始公共CI上传内容无客户敏感原文。",
+      "remaining_action": "对当前一次原始CI上传日志/文件做来源核对+有限敏感内容检查，只输出脱敏发现/摘要；确认样本确为合成且没有生产配置来源，满足后转待签核。",
+      "evidence_keys": [
+        "startup",
+        "render",
+        "full",
+        "remote",
+        "gate_code"
+      ],
+      "finite_evidence": [
+        "scripts/quality/verify.py:67-75",
+        "AQ01_FULL_CONTEXT_ACCEPTANCE.md:24-33",
+        "AQ08_REMOTE_CI_ACCEPTANCE.md:19"
+      ]
+    }
+  ],
+  "evidence_catalog": {
+    "ordinary": {
+      "lines": [
+        7,
+        53
+      ],
+      "scope": "Actual main/login/SSE/tool/history in 8 module combinations, synthetic loopback model, finite H2 SQL observation; 136 tests. Not all delayed SQL, production model or default seed.",
+      "source_identity": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2 plus then-dirty source hashes in ordinary-chat-results.json",
+      "sha256": "91e5f5f561db2f9767685120059d61ad7e07861b36826c36b4a576fda7dce2b7",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_ORDINARY_CHAT_ACCEPTANCE.md"
+    },
+    "startup": {
+      "lines": [
+        5,
+        39
+      ],
+      "scope": "Eight actual application contexts; isolated uninitialized H2, owner HTTP unavailable contracts, Flyway V219. Default complete seed not exercised.",
+      "source_identity": "6ce0cd21592b661b6f79dd1726cf68a9b334e1e2 plus recorded WIP",
+      "sha256": "cd4deabf05661419c0ec26e869ce197ff15fc844b9eca385080b49e31f6ba613",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_FULL_CONTEXT_ACCEPTANCE.md"
+    },
+    "runtime": {
+      "lines": [
+        7,
+        46
+      ],
+      "scope": "15 runtime/proxied-transaction tests on H2 and real isolated MySQL: pre/post disabled actor/employee, pin/member/cancel/project changes and lock-wait revocation; Agent/model boundary mocked.",
+      "source_identity": "05bb9f5c646b5cea408c81cc045200c9f16f204e starting HEAD",
+      "sha256": "24e025b5df03ddf5c97357f3ef768feea65a5b79abe7350ae1b6f260201368c3",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-01/AQ01_RUNTIME_ACCEPTANCE.md"
+    },
+    "principal": {
+      "lines": [
+        7,
+        25
+      ],
+      "scope": "85 H2/MyBatis/JWT/HTTP/shared identity tests; preserves domain-specific owner approval and rejects disabled/anonymous actors. No complete browser-role matrix.",
+      "source_identity": "929dd467882bed172a436fcc6774afa1e4881f70 starting HEAD",
+      "sha256": "2d74a75926bfb19e9cb18db2468b8e8fbea8b6ec528586e665c8dee2e0e56b67",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-02/AQ02_PRINCIPAL_BOUNDARY_ACCEPTANCE.md"
+    },
+    "source": {
+      "lines": null,
+      "scope": "Source authorization/domain read port separation: 71 H2 engineering tests; cross-domain source policy contracts; not complete production route matrix.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "16a70bd74c0343b4be3cac3f96ab13a704463678e7a4a7d421984623353322ec",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-02/AQ02_SOURCE_BOUNDARY_ACCEPTANCE.md"
+    },
+    "history": {
+      "lines": null,
+      "scope": "Actual H2 HTTP historical/artifact access and employee source permission contracts; controlled surrounding services.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "bdb6a478114877f2b3b8d482c4948d8b0f4747626601f6e6b97be9e898a69163",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-02/AQ02_HISTORY_SOURCE_ACCEPTANCE.md"
+    },
+    "frozen": {
+      "lines": null,
+      "scope": "Frozen candidate/published sources and current employee authorization in command/replay responses; engineering slice.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "00a5e13df1feb7b74f01167cbb763d3c8c67f852c65c2d9d0d5061e99a028dc9",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-02/AQ02_FROZEN_SOURCE_ACCEPTANCE.md"
+    },
+    "transport": {
+      "lines": [
+        7,
+        29
+      ],
+      "scope": "26 tests including actual Axios fetch/loopback multipart boundary and Blob/ArrayBuffer bytes; caller transform/signal/scope retained.",
+      "source_identity": "5d56b1db0c41919279005edb7948b1ed3ec28e60 starting HEAD",
+      "sha256": "2c9abdf3738334e115259954b23df6b40a526cc3f17300556ef921ceeb26058a",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-02/AQ04_WORKSPACE_REQUEST_ACCEPTANCE.md"
+    },
+    "mutations": {
+      "lines": null,
+      "scope": "UI command/download lifecycle preserves old scope, drafts, 409, version acceptance and URL disposal. DOM/module tests; no real backend browser concurrency.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "7e47086b86b09e6581e9fe3b6c2ddfd47f8fe6255c1227cee471597582f9052c",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ09_WORKBENCH_MUTATIONS_ACCEPTANCE.md"
+    },
+    "query": {
+      "lines": null,
+      "scope": "Actual RouterView scope/generation/empty Workspace regressions, typed query lifetime; synthetic API.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "225f0aae779f19e0b220249226698ad6b20569f01ddc7553a5c477b0e2170073",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ09_WORKBENCH_QUERY_ACCEPTANCE.md"
+    },
+    "capacity": {
+      "lines": [
+        7,
+        33
+      ],
+      "scope": "V220 safe-integer project revision: 767 tests incl existing PPT skip; H2 full Flyway, old MAX RUNNING recovery; MySQL SQL-only 31 assertions and dump/restore. Later render evidence supersedes missing full MySQL Flyway.",
+      "source_identity": "source commits 6f85271c7ece1812800a4a14696b9c69788df757 / 42b18b8959d64cced5e59218b2d8a4d330e2506f; starting HEAD20e29f2e",
+      "sha256": "dacb691f736fc62202592d0f7dedbce31642e734b721c0c8d7395fbf01cd21e4",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_PROJECT_REVISION_CAPACITY_ACCEPTANCE.md"
+    },
+    "render": {
+      "lines": [
+        9,
+        46
+      ],
+      "scope": "H2/current-read differences explicit; real isolated MySQL full Flyway to V221, runtime43 and lifecycle14; same-key concurrency, leases, rollback, source authority. No production mixed-writer cutover.",
+      "source_identity": "fdd5d372e886d7fbbf7ab01c374fe952ea926ab3 tree29401839d1330cee291daf39d35c27af04b48f0f",
+      "sha256": "b09b4a8191b8eb5accda004c3c04dd78f6b9f5811d2baf3e107cc1ecdd0a709b",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_RENDER_TRANSACTION_ACCEPTANCE.md"
+    },
+    "render_delivery": {
+      "lines": null,
+      "scope": "Committed/pushed render source, exact gate and completed remote CI identities; runtime numbers are separate targeted evidence.",
+      "source_identity": "fdd5d372e886d7fbbf7ab01c374fe952ea926ab3",
+      "sha256": "c5b0cd8be18c735714b2a3fac22fa490d34a0e783ff93f6809cfc8cafc3fdbf9",
+      "local_artifact": "presales-render-transaction-delivery.json"
+    },
+    "hash": {
+      "lines": null,
+      "scope": "V2 write + strict legacy dual-read; ambiguous historical hash returns409; HTTP143/MySQL17/UI1151 and three actual process restart. Real archived legacy requests not available.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "f1d2c3cea88c2e3209ab963c8f4ae44bd0955d9f9635614cf6eaa535f1a708ac",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ06_REQUEST_HASH_ACCEPTANCE.md"
+    },
+    "restart": {
+      "lines": null,
+      "scope": "Three actual main JVMs on isolated H2 file DB: RUNNING2 -> FAILED3 -> unchanged repeated restart; synthetic model/single instance.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "f0c3a04f2f9c9827b785d06f9f111b3c92123707438e82c2850f8708303246f4",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ01_PROCESS_RESTART_ACCEPTANCE.md"
+    },
+    "sse": {
+      "lines": [
+        13,
+        33
+      ],
+      "scope": "143 targeted tests; true Tracker/relay latches, completed-future notification; seven staged files. Main-flow followup: staged gateyei03eyr PASS/submission_ready=true Java6780/UI1262; normal commit hook still running at last observation. Explicit remaining listener/lock/hook/flush limitations.",
+      "source_identity": "BASE 679092a86009681ea8d7ce02927370bc6a9bcfdf; staged tree7e5243c40d7cb49113e6f137b40b6530ea7f5642",
+      "sha256": "02ead629eeecb884679101cea9c797cf4086751d0c912f8dd7e808724dc6e529",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ01_SSE_CANCELLATION_ACCEPTANCE.md"
+    },
+    "listing": {
+      "lines": [
+        3,
+        24
+      ],
+      "scope": "SQL projection not independent-object migration. Real MySQL29, 205-row dump/restore, synthetic frozen bytes and old representation comparison.",
+      "source_identity": "b69e62fd4d03c3f6e1f5a880b6fcd323c8c94e63; treea9ccad01fa74eb437908bc68897735efbc8dcef8",
+      "sha256": "fd40960b1dc6bd64e48c0e5fbd8d9aa24311d2d0d6f88a2ef8a6c78a058dd691",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-03/AQ06_LISTING_PROJECTION_ACCEPTANCE.md"
+    },
+    "artifact": {
+      "lines": null,
+      "scope": "Frozen artifact/handoff boundary and unchanged public wire; 88 classes982 tests, one existing PPT environment skip.",
+      "source_identity": "e5ccc86c1c591104123ee9ee3a2809abf92f969d",
+      "sha256": "eacfec2a56ac5fa7029ed2f703604e456e613f902d00a14ea28a521db126b5e1",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ05_ARTIFACT_BOUNDARY_ACCEPTANCE.md"
+    },
+    "handoff": {
+      "lines": null,
+      "scope": "Same immutable frozen snapshot for latest and exact; missing legacy snapshot409; MySQL10 with genuine publish and synthetic historical reads.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "92f288213ffeec4e83e4b3206d8977c93a02e93d0b250c938af01449b0bc7d44",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-04/AQ05_HANDOFF_FREEZE_ACCEPTANCE.md"
+    },
+    "artifact_mysql": {
+      "lines": null,
+      "scope": "Real MySQL17 HTTP/source authorization and synthetic Office byte/limited structural readback; not historical customer Office delivery.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "aacf90f927bdd2fccedb862ce181b1a4fd9b696a014489ee161992a6a99e2409",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-04/AQ05_ARTIFACT_MYSQL_HTTP_ACCEPTANCE.md"
+    },
+    "baseline": {
+      "lines": [
+        5,
+        13
+      ],
+      "scope": "Internal approved baseline remains UNCONFIRMED; H2 HTTP permission/source failure writes stay unchanged; 567 tests, one PPT skip.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "86e1b5455a4134144c3d8409bd041ef6956b64548913683ff83f0d4228bec3d7",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-05/AQ05_BASELINE_APPROVAL_ACCEPTANCE.md"
+    },
+    "migration_guard": {
+      "lines": null,
+      "scope": "SQL/Java entrypoint and frozen closure guard negative cases; trusted-base compatibility/independent technical review; not maintainer approval.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "b381ab086f16ff35dddb83ce2c1f261d83bff9e937a6daaaf9f1566c65816229",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-03/AQ07_JAVA_MIGRATION_GUARD_ACCEPTANCE.md"
+    },
+    "archunit": {
+      "lines": null,
+      "scope": "Actual compiled production bytecode + nonempty imports + positive/negative canaries and sealed policy paths; not future package coverage.",
+      "source_identity": "Original runtime HEAD not established by this inventory; file read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "0a2ba70f7d36fa7fcffc0cb745ded739ce67155b9fc0e0b5c08d7b45639ad931",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-04/AQ07_ARCHUNIT_INSTALL_ACCEPTANCE.md"
+    },
+    "ledger": {
+      "lines": [
+        24,
+        30
+      ],
+      "scope": "Chromium old/new real components, classic/enterprise x desktop/narrow, real interaction/empty/error; synthetic API/event receiver.",
+      "source_identity": "starting HEAD08acb836ee6ad3ec2713410d90b4e23c52ea219c",
+      "sha256": "d86410e83401fd5df403e821edc0ab6bbcf4948c1dba42ad05edd26c33afe44a",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ09_PROJECT_LEDGER_ACCEPTANCE.md"
+    },
+    "ui": {
+      "lines": null,
+      "scope": "UI contract exit563 and full UI1262; real Chromium components with mocked API, enterprise desktop/classic narrow. Committed/pushed; remote CI37410067341 completed success, merge2367ef75/treebf38a8cf; Java6771/UI1262 and15 log hashes verified by main flow.",
+      "source_identity": "679092a86009681ea8d7ce02927370bc6a9bcfdf treebf38a8cf007176f6781d810705b0518b92a42272",
+      "sha256": "64e7a12b46a91c5acdafcc51d0b9827e4f5e4dbece9bfa6f0d28cd052cfd130e",
+      "local_artifact": "presales-ui-contract-exit-delivery.json"
+    },
+    "structure": {
+      "lines": null,
+      "scope": "Independent bounded structural exit audit; its two code exits subsequently implemented by UI HEAD679092a8. No generic line-count/whole-JSON-to-DTO debt.",
+      "source_identity": "audit HEADfdd5d372e886d7fbbf7ab01c374fe952ea926ab3",
+      "sha256": "3d8e727c5ba75b5528da90e1e80604264872de8cc5fcc108e1752766d3a91a67",
+      "local_artifact": "aq05-aq09-structure-exit-audit.md"
+    },
+    "remote": {
+      "lines": [
+        3,
+        23
+      ],
+      "scope": "Actual completed hosted CI, source/merge/tree/downloaded report; earlier cancelled verification led to failed required job. Historical target unprotected.",
+      "source_identity": "08acb836ee6ad3ec2713410d90b4e23c52ea219c; merge7d2ed26f0bc305563f981cdfb8295caa94f9b60a",
+      "sha256": "dff80094cfefa7c0eb3ee5aa8e545183915636eeaf504c7de611be61d87c965a",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ08_REMOTE_CI_ACCEPTANCE.md"
+    },
+    "enforcement": {
+      "lines": null,
+      "scope": "Fresh read-only GitHub: dev protection404 Branch not protected; rules/branches/dev=[]; actual absent enforcement, not mere unknown proof.",
+      "source_identity": "observed_at 2026-10-06T03:58:35.283941+00:00",
+      "sha256": "935fc4426149aa335b1654fd9903923cc6e56124e7ff32c3e6ceb84a2a942ea3",
+      "local_artifact": "remote-enforcement-current.json"
+    },
+    "full": {
+      "lines": [
+        3,
+        17
+      ],
+      "scope": "Exact staged cumulative tree gate; 6707 Java tests/6637 executed/70 skipped; UI1195. Strong historical run, not current new SSE tree.",
+      "source_identity": "35679f9620b67aeb18abbd2220cba5e3e3cd2e08 tree4ab411bd6a81a11eb9874320a5a3311d805bf473",
+      "sha256": "89a46650dd641580d1c95d39b96cb9db3fd24334345dde56ba5639a2f84540d1",
+      "repository_path": "docs/architecture-quality-v1/evidence/2026-10-06/AQ_CUMULATIVE_SUBMISSION_ACCEPTANCE.md"
+    },
+    "xml": {
+      "lines": null,
+      "scope": "915 archived entries; selected JUnit suites parsed directly in this inventory. Test methods and counts in acceptance-closure-evidence-readback.json.",
+      "source_identity": "35679f9620b67aeb18abbd2220cba5e3e3cd2e08 tree4ab411bd6a81a11eb9874320a5a3311d805bf473",
+      "sha256": "9542008300f777ce6d0a9b0854a64a940d861b8e6ebddb5b12dda77bb0d9e783",
+      "local_artifact": "full-commit-test-reports.tar.gz"
+    },
+    "guard": {
+      "lines": null,
+      "scope": "Verified archive/member hashes; guard-self-tests.log says Ran93 OK incl actual-temp-git index, missing-tool, hooks, Unicode and migration negatives.",
+      "source_identity": "HEAD679092a8 associated checked treebf38a8cf007176f6781d810705b0518b92a42272",
+      "sha256": "69b4a11b6ef120a8885a33956f9a67ab200e3457c1d85261c15943d71ed08ee8",
+      "archive_member": "guard-self-tests.log",
+      "local_artifact": "presales-ui-contract-exit-commit.tar.gz"
+    },
+    "context": {
+      "lines": [
+        30,
+        54
+      ],
+      "scope": "Current code stores projectVersion and revalidates whole project version; source digest/revocation guards. This positively identifies coarse dependency granularity.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "293ffc337947b4396a0ab98b6c3213fbc906f785736f8eea7b10843dd103ca1a",
+      "repository_path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesContextProvider.java"
+    },
+    "revalidator": {
+      "lines": [
+        35,
+        75
+      ],
+      "scope": "Current whole-project version and exact task/pin/source revalidation, not independent object dependency selection.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "bfd7ecf1ef2612fdf94d18debdb2fc7ae77d5c2c3dcecf29b6dfaf261195872d",
+      "repository_path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesExecutionRevalidationProvider.java"
+    },
+    "skill": {
+      "lines": [
+        85,
+        123
+      ],
+      "scope": "pin reads current classpath instructions; old digest mismatch rejects EXECUTION_PIN_CHANGED. Historical retrievable immutable package + proven loaded package not established.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "2600318c32cf5d43e8fcbd41e5f3dc03f991fd31ce618e293af9278b23eaba97",
+      "repository_path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesEmployeeRuntime.java"
+    },
+    "spec": {
+      "lines": [
+        131,
+        143
+      ],
+      "scope": "Independent object/revision/dependency model and backup->shadow->single-authority cutover required; rollback cannot merely switch old JSON.",
+      "source_identity": "requirement source read at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "23d183a56dc785e718062a9e1d3517c0fdc9137cfc8dbbb39020284557b4d81b",
+      "repository_path": "docs/architecture-quality-v1/ARCHITECTURE_SPEC.md"
+    },
+    "gate_tests": {
+      "lines": [
+        188,
+        299
+      ],
+      "scope": "Read test source: actual temporary git repo/index mismatch, filename/Husky and missing tool/zero tests negatives; not every timeout/race/multi-worktree scenario.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "60e90bbfd4cef967387da9b4640e6bd319f9b7d75d90c14bc90f606d35637a9d",
+      "repository_path": "scripts/quality/tests/test_gate.py"
+    },
+    "gate_code": {
+      "lines": [
+        54,
+        64
+      ],
+      "scope": "Read exact-worktree gate, timeout/error paths, required test-result counts, final index recheck. Static implementation evidence alone not executed failure proof.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "d81bb05eb5ece4b4974b5d6ccf7466945524c3d573682834dd4f76b6b69a89f0",
+      "repository_path": "scripts/quality/verify.py"
+    },
+    "install": {
+      "lines": [
+        22,
+        43
+      ],
+      "scope": "Multi-worktree requires worktreeConfig; --worktree installation; existing hooks/manager rejected; actual multi-worktree negative run not located.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "521f3262634835128e4ab0e3c631adba38cefdf99bf33c85cd85beaec4092390",
+      "repository_path": "scripts/quality/install_hooks.py"
+    },
+    "workflow": {
+      "lines": [
+        59,
+        85
+      ],
+      "scope": "trusted-base runner invoked; always() final required job asserts result exactly success. Repository settings separately required.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "683aa28850396145984e32cbfee486f80b6a3dc4d136f394e7386d0d01c558b0",
+      "repository_path": ".github/workflows/engineering-gate.yml"
+    },
+    "codeowners": {
+      "lines": null,
+      "scope": "Control-plane ownership file exists; mandatory approval cannot be inferred without remote enforcement.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "a722432f94ba29a41d6d252da55947f16067b6dbdeb68f653e23e8609c8c0670",
+      "repository_path": ".github/CODEOWNERS"
+    },
+    "approval_source": {
+      "lines": [
+        99,
+        103
+      ],
+      "scope": "Internal approval expressly writes customerConfirmationStatus UNCONFIRMED.",
+      "source_identity": "source at 679092a86009681ea8d7ce02927370bc6a9bcfdf",
+      "sha256": "6e7c771ed49aeb1290956cf205cd11b866adf2cd0b197d1c3344401c4de3733c",
+      "repository_path": "mateclaw-server/src/main/java/vip/mate/presales/PresalesBaselineApproval.java"
+    }
+  }
+}

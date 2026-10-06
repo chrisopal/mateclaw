@@ -2,6 +2,8 @@
 
 适用全部后续开发，检查项可按真实情况演进；调整规则本身需要证据和审核。此台账是评审入口，不是 PASS 清单。设计见 [IMPLEMENTATION_DESIGN](IMPLEMENTATION_DESIGN.md)，实测见 [SETUP_EVIDENCE](SETUP_EVIDENCE.md)。
 
+最新实施状态见[整改收口表](ACCEPTANCE_PROGRESS.md)和[46项工程分类](acceptance-progress.json)。分类依据实际证据，不替代[正式签收台账](acceptance-register.json)。后续历史切片段落保留当时状态，不能据此重复立项已修复问题。
+
 ## 每次变更默认审核
 
 1. **需求与范围**：任务/受影响用例明确，未夹带功能和用户 WIP；文档中的代理启动指令不自动扩大授权。
@@ -15,8 +17,8 @@
 
 | 检查 | 触发/命令 | 本轮接入 | 局限与整改任务 |
 |---|---|---|---|
-| AR-001 runtime 反向依赖 | gate.py / verify dev | 已安装 ratchet | AQ-01 后目标路径零容忍 |
-| AR-002 Controller DAL | 同上 | 已安装 ratchet | AQ-03/07 字节码补充 |
+| AR-001 runtime 反向依赖 | gate.py / verify dev | 已安装 ratchet；六个宿主 main 路径已封口 | 未来新增路径需审定映射；正式签收另验 |
+| AR-002 Controller DAL | 同上 | 已安装 ratchet；三个工作台 main 路径已封口 | 编译 ArchUnit 已执行；新路径需审定映射 |
 | AR-003 跨 feature 内部依赖 | 同上 | 已安装 ratchet | AQ-04 后封口，动态计算导入需补 AST/审核 |
 | AR-004 semantic 基础身份借用 | 同上 | 已安装 ratchet | AQ-02 |
 | AR-005 跨域直接 SQL | 同上 | 已安装 ratchet | AQ-02/03/06；不能代替权限行为测试 |
@@ -34,7 +36,7 @@
 | ArchUnit | mateclaw-server/src/test/java/vip/mate/architecture/WorkbenchArchitectureTest.java | LOCAL_COMPILED；生产字节码 + 非空聚合 + 正反例 | AQ07_ARCHUNIT_INSTALL_ACCEPTANCE；逐包完整性、维护人批准和远端强制另验 |
 | policy 封口 | .quality/policy.json | AR-001 六个宿主 main 路径、AR-002 三个工作台 main 路径零容忍 | 9 个源快照反例拒绝旧违规；未改 baseline，独立技术审核不是维护人批准 |
 | pre-commit / pre-push | 当前工作区 .githooks | 已安装 worktree-local | 可绕过；其他工作区需显式独立安装 |
-| 远端 CI | 所有 pull_request + merge_group | workflow 已写入 | 首次 trusted base bootstrap 未完成 |
+| 远端 CI | 所有 pull_request + merge_group | PR可信base实际runner与Required汇总已运行通过 | 最新候选仍须核验；目标分支强制保护未启用 |
 | 控制面审核 | CODEOWNERS + PR 模板 + 根 AGENTS/Skill | 文件已设置 | 账号候选 @chrisopal；独立审阅人可用性待维护人核实 |
 | 分支保护 | Engineering Gate Required + 过期审批失效 | NOT_CONFIGURED_BY_THIS_TASK | 不在本轮改仓库管理设置；AQ-08 实测 |
 
@@ -44,14 +46,18 @@ Vitest 原默认并发在共享开发机的完整提交门禁中出现 worker �
 
 | 任务 | 当前状态 | 下一道出口 |
 |---|---|---|
-| AQ-00 | LOCAL_CONFIGURED；工具链结果见实测；非 P0 签收 | 解决真实基线失败、独立 bootstrap 审核与提交检查 |
-| AQ-01 | IN_PROGRESS：项目会话工具边界第一片，完整 AC-01–06 仍为 NOT_RUN | 补齐执行选项、策略分派、模块组合与真实行为验收；本片 4 个既有 Java 文件被 Spotless 首次统一排版，审核时可用 `git diff -w` 聚焦行为差异 |
-| AQ-02–06 | AQ-02 第一片工程实现，正式 AC-07–10 仍为 NOT_RUN；其余按各任务证据推进 | 补齐角色/来源权限矩阵、生产数据库并发验证与独立 QA 签收 |
-| AQ-07 | IN_PROGRESS：Java 迁移/冻结源码及编译 ArchUnit/路径封口切片 | 独立维护人审批、远端强制；未来路径映射与全量正式验收 |
-| AQ-08 | DESIGNED / NOT_RUN | 全 P0 验收及远端强制回读 |
-| AQ-09 | IN_PROGRESS：工作台查询生命周期等结构切片与适用前端工具链已验证，见AQ09_WORKBENCH_QUERY_ACCEPTANCE与AQ09_EXECUTION_SESSION_ACCEPTANCE | 真实浏览器两主题/窄屏、命令职责后续拆分及正式QA；不能以构建代替AC-30 |
-| AQ-10 | DESIGNED / NOT_IMPLEMENTED | P0之后性能整改与真实负载测量 |
-| AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账 |
+| AQ-00 | LOCAL_CONFIGURED；PR可信base与真实CI已执行 | 独立维护人签收；dev保护与部署状态另验 |
+| AQ-01 | 公共策略/分派/模块组合已有工程证据；本批取消修复已提交 | 取消异常边界及正式验收；不重复已完成结构拆分 |
+| AQ-02 | 公共主体/来源/领域批准边界已实现 | AC07缓存来源及AC09五角色跨层补证、正式业务签收 |
+| AQ-03 | Controller依赖/任务查询已有编译与行为证据 | 原条款正式签收；新回归按源码变化触发 |
+| AQ-04 | scope/transform/二进制/冲突已有有限工程证据 | 正式签收；不把真实模型等无关条件追加到传输合同 |
+| AQ-05 | 本轮Service/DTO/错误/制品/渲染事务边界已收口 | 历史样本、正式验收；对象持久化迁移归AQ06 |
+| AQ-06 | 局部CAS/幂等/恢复/SQL投影已实现；完整V2迁移未完成 | 正式V2/Delivery规格、独立对象依赖、单写切换及回退 |
+| AQ-07 | Java迁移保护、编译ArchUnit与零容忍路径已安装执行 | 独立维护人审批、远端强制及未来路径映射 |
+| AQ-08 | 真实CI已通过，分支保护未启用 | required检查、审批失效/Code Owner及绕过策略实际强制与签收 |
+| AQ-09 | 本轮Workbench/组件/会话/状态/i18n结构已收口 | AC30完整浏览器状态覆盖与正式QA |
+| AQ-10 | DESIGNED / NOT_IMPLEMENTED | 真实数据规模、负载/索引/可观测性测量与整改；不报告未测提速 |
+| AQ-11 | DEFAULT_POLICY_CONFIGURED | 所有后续变更默认执行本台账；调整仍需证据和审核 |
 
 ## AC 全量追踪
 
